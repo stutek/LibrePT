@@ -1,7 +1,15 @@
+// src/modules/exercises/exercisesView.js - the exercise library view: its filters and its cards
+import {
+  ALL_SOURCES,
+  CATALOG_SOURCE,
+  OWN_SOURCE,
+  libraryExercises,
+  withSource,
+} from "../../data/exerciseLibrary.js";
 import { modalityOf } from "../../domain/exerciseModality.js";
-// src/views/exercisesView.js - Domain module for exercise catalog and filter logic
 import { renderMarkupOnce } from "../common/dom.js";
 import { escapeHTML } from "../common/utils.js";
+import { sourceBadge } from "./exercisePicker.js";
 
 export function renderExercisesViewShell() {
   renderMarkupOnce(
@@ -22,7 +30,14 @@ export function renderExercisesViewShell() {
         <input type="text" id="search-exercises" placeholder="Search exercises..." class="search-input">
       </div>
       
-      <div class="filter-chips">
+      <div class="filter-chips" data-axis="source">
+        <span class="filter-chips-label" id="exercises-source-label" data-i18n="source">Source</span>
+        <button class="chip active" data-filter="${ALL_SOURCES}" data-i18n="filter_all">All</button>
+        <button class="chip" data-filter="${CATALOG_SOURCE}" data-i18n="source_librept">LibrePT</button>
+        <button class="chip" data-filter="${OWN_SOURCE}" data-i18n="source_own">Mine</button>
+      </div>
+
+      <div class="filter-chips" data-axis="category">
         <span class="filter-chips-label" id="exercises-filter-label">Muscle</span>
         <button class="chip active" data-filter="All">All</button>
         <button class="chip" data-filter="Chest">Chest</button>
@@ -42,20 +57,30 @@ export function renderExercisesViewShell() {
   );
 }
 
-// The active filter has no copy in state — the search box and the chip ARE it. A caller that
+// The active filter has no copy in state — the search box and the chips ARE it. A caller that
 // re-renders for its own reason (an exercise added, the language switched, a backup restored)
 // passes no filter, and must get the list the visible controls describe rather than the whole
 // catalog under a chip that still says Chest.
+//
+// Each row is read by its own axis: `.filter-chips` is also the class of the sessions list's filter
+// row, so an unscoped `.chip.active` could answer with a chip from another screen or another row.
+function activeChipValue(axis, fallback) {
+  const chip = document.querySelector(
+    `#view-exercises .filter-chips[data-axis="${axis}"] .chip.active`,
+  );
+  return chip ? chip.getAttribute("data-filter") : fallback;
+}
+
 function visibleFilter() {
   const search = document.getElementById("search-exercises");
-  const activeChip = document.querySelector(".filter-chips .chip.active");
   return {
     filterQuery: search ? search.value : "",
-    categoryFilter: activeChip ? activeChip.getAttribute("data-filter") : "All",
+    categoryFilter: activeChipValue("category", "All"),
+    sourceFilter: activeChipValue("source", ALL_SOURCES),
   };
 }
 
-export function renderExercisesList({ state, t, filterQuery, categoryFilter }) {
+export function renderExercisesList({ state, t, filterQuery, categoryFilter, sourceFilter }) {
   const container = document.getElementById("exercises-list");
   if (!container) return;
   container.innerHTML = "";
@@ -63,8 +88,9 @@ export function renderExercisesList({ state, t, filterQuery, categoryFilter }) {
   const visible = visibleFilter();
   const query = filterQuery ?? visible.filterQuery;
   const category = categoryFilter ?? visible.categoryFilter;
+  const source = sourceFilter ?? visible.sourceFilter;
 
-  let filtered = state.exercises;
+  let filtered = withSource(libraryExercises(state), source);
 
   if (category !== "All") {
     filtered = filtered.filter((e) => e.category === category);
@@ -99,6 +125,7 @@ export function renderExercisesList({ state, t, filterQuery, categoryFilter }) {
         ? ""
         : `<span class="taxonomy-badge taxonomy-badge-modality">${escapeHTML(modality)}</span>`;
     const meta =
+      sourceBadge(ex, t("source_own_badge") || "Mine") +
       modalityBadge +
       [ex.equipment, ex.pattern]
         .filter(Boolean)

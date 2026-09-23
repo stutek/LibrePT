@@ -4,6 +4,7 @@
 // specifically — both just need "the current routines/exercises, alphabetised" kept in sync
 // whenever state changes (a new routine/exercise saved, a demo reset) — so this lives as a small
 // shared utility rather than being owned by one form controller and imported sideways by the other.
+import { libraryExercises } from "../../data/exerciseLibrary.js";
 export function populateDropdownSelectors({ state, t }) {
   const routineSelect = document.getElementById("setup-select-routine");
   if (routineSelect && state.routines) {
@@ -17,9 +18,11 @@ export function populateDropdownSelectors({ state, t }) {
   }
 
   const sessionExList = document.getElementById("session-ex-datalist");
-  if (sessionExList && state.exercises) {
+  if (sessionExList) {
     sessionExList.innerHTML = "";
-    for (const e of state.exercises.slice().sort((a, b) => a.name.localeCompare(b.name))) {
+    for (const e of libraryExercises(state)
+      .slice()
+      .sort((a, b) => a.name.localeCompare(b.name))) {
       const opt = document.createElement("option");
       opt.value = e.name;
       opt.label = e.category;

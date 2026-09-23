@@ -5,12 +5,13 @@
 // and `activeRouteIsDialog` arrive through activeSessionStore.js; the picker itself is
 // modules/exercises/exercisePicker.js.
 
+import { libraryExercises } from "../data/exerciseLibrary.js";
 import { newRecordId } from "../data/recordId.js";
 import { modalityOf, primaryMetricOf } from "../domain/exerciseModality.js";
 import { loadUnitForEquipment } from "../domain/repsAndLoad.js";
 import { renderActiveSessionBoard } from "../modules/clipboard/activeSessionBoard.js";
 import { markEditorRow } from "../modules/clipboard/editModeState.js";
-import { mountExercisePicker } from "../modules/exercises/exercisePicker.js";
+import { mountExercisePicker, sourceLabels } from "../modules/exercises/exercisePicker.js";
 import { saveActiveSessionToCache } from "./activeSessionCache.js";
 import { getActiveSession, getAppDeps } from "./activeSessionStore.js";
 
@@ -121,7 +122,7 @@ function catalogPickerTitle(slotId, t) {
 // `exerciseId` (routines, demo data) only know the movement by name, so fall back to that.
 function resolveCurrentMovementId(item, state) {
   if (!item) return null;
-  return item.exerciseId || state.exercises.find((e) => e.name === item.name)?.id || null;
+  return item.exerciseId || libraryExercises(state).find((e) => e.name === item.name)?.id || null;
 }
 
 export function openCatalogPicker({ slotId = null, query = "", category = "" } = {}) {
@@ -145,6 +146,7 @@ export function openCatalogPicker({ slotId = null, query = "", category = "" } =
     searchLabel: t("search_movements") || "Search movements",
     muscleLabel: t("muscle") || "Muscle",
     equipmentLabel: t("equipment") || "Equipment",
+    sources: sourceLabels(t),
     onSelect: (ex) => {
       if (slotId) swapPlanItemMovement(slotId, ex);
       else injectExerciseIntoActivePlan(ex, { sets: 3, reps: 10, weight: 0, rest: 60 });
@@ -164,7 +166,7 @@ function handleAddSessionExerciseSubmit(e, state, addExModal) {
 
   if (!getActiveSession() || !typed || isNaN(sets)) return;
 
-  let baseEx = state.exercises.find((ex) => ex.name.toLowerCase() === typed.toLowerCase());
+  let baseEx = libraryExercises(state).find((ex) => ex.name.toLowerCase() === typed.toLowerCase());
   if (!baseEx) {
     baseEx = { id: newRecordId(), name: typed, category: "Custom", instructions: "" };
   }

@@ -3,6 +3,14 @@
 // taxonomy badges). Powers the fast-selection flows called for in TODO §13.2: Scenario A
 // (routine builder — filter then drop standardized IDs into a template) and Scenario B (gym-floor
 // swap — pre-filtered to the same muscle group so the substitute inherits the correct volume bucket).
+import {
+  ALL_SOURCES,
+  CATALOG_SOURCE,
+  OWN_SOURCE,
+  exerciseSourceOf,
+  libraryExercises,
+  withSource,
+} from "../../data/exerciseLibrary.js";
 import { modalityOf } from "../../domain/exerciseModality.js";
 import { escapeHTML } from "../common/utils.js";
 
@@ -18,12 +26,34 @@ const MUSCLE_GROUPS = [
   "Cardio",
 ];
 const EQUIPMENT = ["All", "Barbell", "Dumbbell", "Cable", "Machine", "Band", "Bodyweight"];
+const SOURCES = [ALL_SOURCES, CATALOG_SOURCE, OWN_SOURCE];
+
+/** The words for the source filter, in the app's language — one place for every picker caller. */
+export function sourceLabels(t) {
+  return {
+    axis: t("source") || "Source",
+    [ALL_SOURCES]: t("filter_all") || "All",
+    [CATALOG_SOURCE]: t("source_librept") || "LibrePT",
+    [OWN_SOURCE]: t("source_own") || "Mine",
+    badge: t("source_own_badge") || "Mine",
+  };
+}
+
+/**
+ * The mark on an exercise the trainer brought in themselves (TODO §45.5): a pencil AND a word,
+ * because a glyph alone means nothing to a reader who has not been told, and a hover cannot tell
+ * them on a phone. LibrePT's own catalog carries no mark — it is the standard the others differ from.
+ */
+export function sourceBadge(exercise, ownWord) {
+  if (exerciseSourceOf(exercise) !== OWN_SOURCE) return "";
+  return `<span class="taxonomy-badge taxonomy-badge-source"><i class="fa-solid fa-pencil"></i> ${escapeHTML(ownWord)}</span>`;
+}
 
 /**
  * Mounts (or re-mounts) a filtered exercise picker into `container`.
  * @param {HTMLElement} container - Target element; its contents are replaced.
  * @param {Object}   opts
- * @param {Object}   opts.state            - App state (reads `state.exercises`).
+ * @param {Object}   opts.state            - App state (reads the library through `libraryExercises`).
  * @param {string}  [opts.excludeId]       - Exercise id to omit (e.g. the one being swapped).
  * @param {string}  [opts.defaultCategory] - Muscle-group chip to pre-select (default "All").
  * @param {boolean} [opts.autoSelectFirst] - Pre-select the first match and fire onSelect (swap mode).
@@ -33,6 +63,7 @@ const EQUIPMENT = ["All", "Barbell", "Dumbbell", "Cable", "Machine", "Band", "Bo
  * @param {string}  [opts.searchLabel]     - Translated placeholder/aria-label for the search box.
  * @param {string}  [opts.muscleLabel]     - Translated label for the muscle-group filter row.
  * @param {string}  [opts.equipmentLabel]  - Translated label for the equipment filter row.
+ * @param {Object}  [opts.sources]         - `sourceLabels(t)`: the source row's words and the mark.
  * @param {(exercise: Object) => void} opts.onSelect - Called with the chosen exercise on tap.
  */
 export function mountExercisePicker(
@@ -48,6 +79,7 @@ export function mountExercisePicker(
     searchLabel = "Search movements",
     muscleLabel = "Muscle",
     equipmentLabel = "Equipment",
+    sources = sourceLabels(() => ""),
     onSelect,
   },
 ) {
@@ -56,6 +88,7 @@ export function mountExercisePicker(
   const filters = {
     muscle: MUSCLE_GROUPS.includes(defaultCategory) ? defaultCategory : "All",
     equipment: "All",
+    source: ALL_SOURCES,
     // Typing steps scrolling a 100-movement list on a phone: the search narrows by name, pattern or
     // equipment, so "rom dead" or "band" lands on the target in one gesture.
     query: (initialQuery || "").trim(),
@@ -64,14 +97,14 @@ export function mountExercisePicker(
 
   // Each chip row is labelled with the axis it filters: two unlabelled rows of chips read as one
   // undifferentiated wall, and "All" appearing twice is only unambiguous once each row is named.
-  const chipRow = (name, values, active, label) =>
+  const chipRow = (name, values, active, label, words = {}) =>
     `<div class="picker-chips" data-axis="${name}">
       <span class="picker-chips-label">${escapeHTML(label)}</span>${values
         .map(
           (v) =>
             `<button type="button" class="chip chip-sm ${v === active ? "active" : ""}" data-value="${escapeHTML(
               v,
-            )}">${escapeHTML(v)}</button>`,
+            )}">${escapeHTML(words[v] ?? v)}</button>`,
         )
         .join("")}</div>`;
 
@@ -82,6 +115,7 @@ export function mountExercisePicker(
       <input type="search" class="picker-search" value="${escapeHTML(filters.query)}"
              placeholder="${escapeHTML(searchLabel)}" aria-label="${escapeHTML(searchLabel)}">
     </div>
+    ${chipRow("source", SOURCES, filters.source, sources.axis, sources)}
     ${chipRow("muscle", MUSCLE_GROUPS, filters.muscle, muscleLabel)}
     ${chipRow("equipment", EQUIPMENT, filters.equipment, equipmentLabel)}
     <div class="picker-count"></div>
@@ -101,7 +135,7 @@ export function mountExercisePicker(
   };
 
   const getMatches = () =>
-    state.exercises
+    withSource(libraryExercises(state), filters.source)
       .filter((e) => e.id !== excludeId)
       .filter((e) => filters.muscle === "All" || e.category === filters.muscle)
       .filter((e) => filters.equipment === "All" || e.equipment === filters.equipment)
@@ -127,6 +161,7 @@ export function mountExercisePicker(
             ? ""
             : `<span class="taxonomy-badge taxonomy-badge-modality">${escapeHTML(modality)}</span>`;
         const badges =
+          sourceBadge(ex, sources.badge) +
           modalityBadge +
           [ex.equipment, ex.pattern]
             .filter(Boolean)
@@ -172,7 +207,7 @@ export function mountExercisePicker(
   listEl.addEventListener("click", (e) => {
     const item = e.target.closest(".picker-item");
     if (!item) return;
-    const ex = state.exercises.find((x) => x.id === item.getAttribute("data-id"));
+    const ex = libraryExercises(state).find((x) => x.id === item.getAttribute("data-id"));
     if (!ex) return;
     selectedId = ex.id;
     if (keepSelection) {

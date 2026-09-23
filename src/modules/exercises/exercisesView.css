@@ -55,3 +55,11 @@
   color: var(--primary);
   border-color: var(--primary);
 }
+/* The trainer's own exercise (TODO §45.5). A dashed edge sets it apart from the solid taxonomy
+   badges, and the pencil and the word carry the meaning; colour is left to the theme. */
+.taxonomy-badge-source {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-style: dashed;
+}

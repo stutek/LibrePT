@@ -23,6 +23,7 @@
 //                           — deck card callbacks
 //   newRecordId()
 
+import { libraryExercises } from "../../data/exerciseLibrary.js";
 import { gymNotesForPlan } from "../../domain/gymNotes.js";
 import { renderActiveUsersList } from "../common/activeUsersList.js";
 import { openFeedbackModal } from "../common/feedbackModal.js";
@@ -278,7 +279,7 @@ function editorDepsFor(clientId, clientState, callout) {
     activeClientState: clientState,
     clientName: editClient ? editClient.name : "",
     slotLabel: deps.getActiveSession()?.sourceSession?.timeLabel || "",
-    allExerciseNames: (state.exercises || []).map((e) => e.name),
+    allExerciseNames: libraryExercises(state).map((e) => e.name),
     t,
     escapeHTML,
     save: persist,
@@ -321,7 +322,7 @@ function renderPlanColumnsIfWide(deckContainer, activeClientId, callout) {
   const { state } = deps.getAppDeps();
   return renderPlanColumns(deckContainer, {
     clientIds,
-    exerciseNames: (state.exercises || []).map((e) => e.name),
+    exerciseNames: libraryExercises(state).map((e) => e.name),
     escapeHTML,
     editorFor: (clientId) =>
       editorDepsFor(
@@ -348,7 +349,7 @@ function renderPlanEditor(deckContainer, activeClientId, activeClientState, call
     // The slot the plan has to fit in (TODO §35.3b). Read from the session the clipboard is running,
     // which is also the only place that knows whether there IS one — a planning programme has none.
     slotLabel: deps.getActiveSession()?.sourceSession?.timeLabel || "",
-    allExerciseNames: (state.exercises || []).map((e) => e.name),
+    allExerciseNames: libraryExercises(state).map((e) => e.name),
     t,
     escapeHTML,
     save: persist,

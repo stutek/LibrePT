@@ -26,6 +26,7 @@ import {
   readSuppressionList,
   writeSuppressionList,
 } from "../../data/erasureSuppression.js";
+import { libraryExercises } from "../../data/exerciseLibrary.js";
 import { DEFAULT_SESSIONS } from "../../data/index.js";
 import { bringsDataForward, describeMigration, migrateState } from "../../data/schemaMigrations.js";
 import { recordBackupTaken } from "../../data/stateStore.js";
@@ -418,7 +419,7 @@ export function setupBackupRestore() {
   const exportCatalogJsonBtn = document.getElementById("btn-export-catalog-json");
   if (exportCatalogJsonBtn) {
     exportCatalogJsonBtn.addEventListener("click", () => {
-      const exercises = deps.getState().exercises || [];
+      const exercises = libraryExercises(deps.getState());
       const payload = JSON.stringify(catalogToInterchange(exercises), null, 2);
       downloadFile(payload, catalogFilename("json"), "application/json");
     });
@@ -427,7 +428,7 @@ export function setupBackupRestore() {
   const exportCatalogCsvBtn = document.getElementById("btn-export-catalog-csv");
   if (exportCatalogCsvBtn) {
     exportCatalogCsvBtn.addEventListener("click", () => {
-      const exercises = deps.getState().exercises || [];
+      const exercises = libraryExercises(deps.getState());
       downloadFile(catalogToCsv(exercises), catalogFilename("csv"), "text/csv");
     });
   }

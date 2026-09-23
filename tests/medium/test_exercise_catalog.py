@@ -18,8 +18,10 @@ from tests.medium._harness import load_with_stub, view_stub
 
 pytestmark = pytest.mark.clean_start
 
-STUB = view_stub(
-    imports="""
+
+def _stub(exercises_js):
+    return view_stub(
+        imports="""
 import { renderExercisesViewShell, renderExercisesList } from './modules/exercises/exercisesView.js';
 import {
   setupExerciseForms,
@@ -27,11 +29,11 @@ import {
 } from './controllers/exerciseFormsController.js';
 import { DEFAULT_EXERCISES } from './data/index.js';
 """,
-    view_id="exercises",
-    body="""
+        view_id="exercises",
+        body="""
 const state = {
   lang: 'en',
-  exercises: structuredClone(DEFAULT_EXERCISES),
+  exercises: EXERCISES_JS,
   clients: [],
   routines: [],
   sessions: [],
@@ -60,8 +62,13 @@ setupExerciseForms({
   navigateToPath,
   urlFor: (name) => `/${name}`,
 });
-""",
-)
+""".replace("EXERCISES_JS", exercises_js),
+    )
+
+
+STUB = _stub("structuredClone(DEFAULT_EXERCISES)")
+# A working database as a trainer has it: no exercise stored at all (TODO §45.5).
+EMPTY_STUB = _stub("[]")
 
 
 def test_catalog_shows_taxonomy_badges_not_instructions(page, local_server):
@@ -158,7 +165,7 @@ def test_filter_survives_a_re_render_it_did_not_trigger(page, local_server):
     load_with_stub(page, local_server, STUB)
     page.wait_for_selector("#view-exercises.active")
 
-    page.click(".filter-chips .chip[data-filter='Chest']")
+    page.click(".filter-chips[data-axis='category'] .chip[data-filter='Chest']")
     page.wait_for_timeout(200)
     chest_only = page.locator("#view-exercises .exercise-item").count()
     assert chest_only > 0, (
@@ -176,9 +183,57 @@ def test_filter_survives_a_re_render_it_did_not_trigger(page, local_server):
     page.wait_for_timeout(200)
 
     assert (
-        page.locator(".filter-chips .chip.active").get_attribute("data-filter")
+        page.locator(".filter-chips[data-axis='category'] .chip.active").get_attribute(
+            "data-filter"
+        )
         == "Chest"
     )
     assert page.locator("#view-exercises .exercise-item").count() == chest_only, (
         "the list must still show what the visible chip says, not the whole catalog"
     )
+
+
+def _create_own_exercise(page, name):
+    page.click("#btn-add-exercise")
+    page.wait_for_selector("#dialog-exercise[open]")
+    page.fill("#exercise-name", name)
+    page.select_option("#exercise-category", "Shoulders")
+    page.select_option("#exercise-equipment", "Barbell")
+    page.select_option("#exercise-pattern", "Vertical Push")
+    page.locator("#form-exercise button[type='submit']").click()
+    page.wait_for_selector("#dialog-exercise", state="hidden")
+
+
+def test_an_empty_database_still_shows_the_librept_catalog(page, local_server):
+    """The catalog is read from code, so a trainer's own workspace — which stores no exercise until
+    they add one — still has a library to pick from. It used to be empty outside the sandbox."""
+    load_with_stub(page, local_server, EMPTY_STUB)
+    page.wait_for_selector("#view-exercises.active")
+
+    catalog_size = page.evaluate(
+        "async () => (await import('./data/index.js')).DEFAULT_EXERCISES.length"
+    )
+    assert page.locator("#view-exercises .exercise-item").count() == catalog_size
+
+
+def test_source_filter_separates_and_marks_the_trainers_own(page, local_server):
+    """Mine shows only what the trainer added, each with the pencil and the word; LibrePT shows the
+    catalog, unmarked. The mark is a word as well as a glyph because a phone has no hover."""
+    load_with_stub(page, local_server, EMPTY_STUB)
+    page.wait_for_selector("#view-exercises.active")
+    _create_own_exercise(page, "Landmine Press")
+
+    page.click(".filter-chips[data-axis='source'] .chip[data-filter='own']")
+    cards = page.locator("#view-exercises .exercise-item")
+    assert cards.count() == 1
+    assert cards.first.locator("h3").text_content() == "Landmine Press"
+    mark = cards.first.locator(".taxonomy-badge-source")
+    assert mark.locator("i.fa-pencil").count() == 1
+    assert mark.text_content().strip() == "Mine"
+
+    page.click(".filter-chips[data-axis='source'] .chip[data-filter='librept']")
+    catalog_size = page.evaluate(
+        "async () => (await import('./data/index.js')).DEFAULT_EXERCISES.length"
+    )
+    assert cards.count() == catalog_size
+    assert page.locator("#view-exercises .taxonomy-badge-source").count() == 0

@@ -214,26 +214,20 @@ export function setupExerciseForms({
 
   const searchExercisesEl = $id("search-exercises");
   if (searchExercisesEl) {
-    searchExercisesEl.addEventListener("input", (e) => {
-      const activeChip = document.querySelector(".filter-chips .chip.active");
-      renderExercisesList({
-        state: getState(),
-        t,
-        filterQuery: e.target.value,
-        categoryFilter: activeChip ? activeChip.getAttribute("data-filter") : "All",
-      });
+    // No filter passed: the list reads the search box and both chip rows itself.
+    searchExercisesEl.addEventListener("input", () => {
+      renderExercisesList({ state: getState(), t });
     });
   }
 
-  for (const chip of document.querySelectorAll(".filter-chips .chip")) {
-    chip.addEventListener("click", () => {
-      for (const c of document.querySelectorAll(".filter-chips .chip")) {
-        c.classList.remove("active");
-      }
-      chip.classList.add("active");
-      const cat = chip.getAttribute("data-filter");
-      const searchVal = $id("search-exercises").value;
-      renderExercisesList({ state: getState(), t, filterQuery: searchVal, categoryFilter: cat });
-    });
+  // A tap moves the active chip within ITS row only — source and muscle filter independently.
+  for (const row of document.querySelectorAll("#view-exercises .filter-chips")) {
+    for (const chip of row.querySelectorAll(".chip")) {
+      chip.addEventListener("click", () => {
+        for (const c of row.querySelectorAll(".chip")) c.classList.remove("active");
+        chip.classList.add("active");
+        renderExercisesList({ state: getState(), t });
+      });
+    }
   }
 }

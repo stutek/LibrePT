@@ -7,6 +7,7 @@
 // Everything here writes to the SAME single `activeSession` slot, which is why these transitions
 // belong together: opening one session is inseparable from discarding whatever occupied the slot.
 
+import { libraryExercises } from "../data/exerciseLibrary.js";
 import { newRecordId } from "../data/recordId.js";
 import { clearActiveSessionCache, readActiveSessionCache } from "../data/sessionCache.js";
 import { boundClientRoutines } from "../domain/participantBinding.js";
@@ -49,7 +50,7 @@ export function openSessionFromHistory(log) {
   if (!state || !t) return;
   clearAllTimers(); // fresh session — never inherit a previous session's timers
 
-  const clientState = buildClientStateFromHistoryLog(log, state.exercises);
+  const clientState = buildClientStateFromHistoryLog(log, libraryExercises(state));
 
   setActiveSession({
     id: log.id,
@@ -121,7 +122,7 @@ export function startWorkoutSession(clientRoutines, sessionMeta = null, deps = {
     session.clientRoutines[cr.clientId] = buildClientStateFromRoutine({
       routineId: cr.routineId,
       routines: state.routines,
-      exercises: state.exercises,
+      exercises: libraryExercises(state),
       emptyPlanName: t("custom_empty_plan") || "Custom / Empty Plan",
     });
     // An IMPORTED programme arrives as plan items rather than as a routine (TODO §29), so it

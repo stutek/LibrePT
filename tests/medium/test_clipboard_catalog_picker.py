@@ -106,7 +106,48 @@ def test_filter_rows_are_labelled_by_axis(page, local_server):
     page.wait_for_selector("#dialog-catalog-picker[open]")
 
     labels = page.locator("#catalog-picker-mount .picker-chips-label").all_inner_texts()
-    assert [label.strip().lower() for label in labels] == ["muscle", "equipment"]
+    assert [label.strip().lower() for label in labels] == [
+        "source",
+        "muscle",
+        "equipment",
+    ]
+
+
+def test_source_filter_limits_the_choice_to_the_trainers_own(page, local_server):
+    """TODO §45.5: the picker narrows by where a movement comes from, and marks the trainer's own
+    with the pencil and a word — the same mark as the library."""
+    load_with_stub(
+        page,
+        local_server,
+        clipboard_stub(
+            active_session_fixture(exercises=[exercise_item("exA", SEEDED_MOVEMENT)]),
+            extra_body="""
+state.exercises.push({ id: 'ownLandmine', name: 'Landmine Press', category: 'Chest',
+  equipment: 'Barbell', pattern: 'Vertical Push' });
+""",
+        ),
+    )
+    page.wait_for_selector("#active-session-overlay:not(.hidden)")
+    open_plan_editor(page)
+    page.wait_for_selector(".clipboard-editor")
+    page.locator(".editor-row .editor-row-catalog").first.click()
+    page.wait_for_selector("#dialog-catalog-picker[open]")
+
+    page.click(
+        "#catalog-picker-mount .picker-chips[data-axis=source] .chip[data-value=own]"
+    )
+    items = page.locator("#catalog-picker-mount .picker-item")
+    assert items.count() == 1
+    assert items.first.locator(".picker-item-name").text_content() == "Landmine Press"
+    mark = items.first.locator(".taxonomy-badge-source")
+    assert mark.locator("i.fa-pencil").count() == 1
+    assert mark.text_content().strip() == "Mine"
+
+    page.click(
+        "#catalog-picker-mount .picker-chips[data-axis=source] .chip[data-value=librept]"
+    )
+    assert items.count() > 0
+    assert page.locator("#catalog-picker-mount .taxonomy-badge-source").count() == 0
 
 
 def test_search_narrows_and_enter_takes_the_top_match(page, local_server):

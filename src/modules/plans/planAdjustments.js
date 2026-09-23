@@ -1,8 +1,9 @@
 // src/modules/plans/planAdjustments.js
 // Logic for displaying the pending plan adjustments widget on the dashboard,
 // as well as launching and submitting the interactive Apply Plan Adjustment Dialog wizard.
+import { libraryExercises } from "../../data/exerciseLibrary.js";
 import { renderMarkupOnce } from "../common/dom.js";
-import { mountExercisePicker } from "../exercises/exercisePicker.js";
+import { mountExercisePicker, sourceLabels } from "../exercises/exercisePicker.js";
 
 /**
  * Renders the pending plan adjustments alert cards.
@@ -102,7 +103,7 @@ function buildAdjustmentCard(u, ctx) {
   editBtn.setAttribute("aria-label", t("edit_plan"));
   editBtn.innerHTML = `<i class="fa-solid fa-pen-to-square"></i>`;
   editBtn.addEventListener("click", () => {
-    const exercise = state.exercises.find((e) => e.name === u.exerciseName);
+    const exercise = libraryExercises(state).find((e) => e.name === u.exerciseName);
     const routine = exercise
       ? state.routines.find((r) => r.exercises.some((ex) => ex.id === exercise.id))
       : null;
@@ -272,7 +273,7 @@ function wireVoiceNotePreview(update, voiceContainer) {
 
 // Find target exercise & routine database links.
 function resolveAdjustmentTargets(state, update) {
-  const exercise = state.exercises.find((e) => e.name === update.exerciseName);
+  const exercise = libraryExercises(state).find((e) => e.name === update.exerciseName);
   const exerciseId = exercise ? exercise.id : "";
   const routine = state.routines.find((r) => r.exercises.some((ex) => ex.id === exerciseId));
   const exMapping = routine ? routine.exercises.find((ex) => ex.id === exerciseId) : null;
@@ -389,6 +390,7 @@ export function openAdjustmentWizardComponent(updateId, ctx) {
     searchLabel: t("search_movements") || "Search movements",
     muscleLabel: t("muscle") || "Muscle",
     equipmentLabel: t("equipment") || "Equipment",
+    sources: sourceLabels(t),
     onSelect: (ex) => {
       swapSelect.value = ex ? ex.id : "";
     },

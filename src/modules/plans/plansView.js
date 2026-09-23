@@ -1,3 +1,4 @@
+import { libraryExercises } from "../../data/exerciseLibrary.js";
 import {
   formatMetricValue,
   metricLabelKey,
@@ -62,7 +63,7 @@ export function renderRoutinesList({ state, t, openWorkoutSetupModal }) {
     // so a routine missing its exercises renders empty rather than throwing mid-import.
     const tags = (routine.exercises || [])
       .map((item) => {
-        const ex = state.exercises.find((e) => e.id === item.id);
+        const ex = libraryExercises(state).find((e) => e.id === item.id);
         const name = escapeHTML(ex ? ex.name : "Unknown Exercise");
         // Strength "3×8 · 60kg", isometric "3×0:45 · 20kg" (load-bearing modalities show a load);
         // cardio/holds/agility "1×20 cal" / "3×500 m" / "1×0:30" — the metric, no load.
@@ -140,7 +141,7 @@ export function addRoutineExerciseRow({ preset = null, state, t }) {
   const row = document.createElement("div");
   row.className = "routine-builder-row";
 
-  const optionsHTML = state.exercises
+  const optionsHTML = libraryExercises(state)
     .slice()
     .sort((a, b) => a.name.localeCompare(b.name))
     .map(
@@ -149,7 +150,7 @@ export function addRoutineExerciseRow({ preset = null, state, t }) {
     )
     .join("");
 
-  const presetEx = preset ? state.exercises.find((e) => e.id === preset.id) : null;
+  const presetEx = preset ? libraryExercises(state).find((e) => e.id === preset.id) : null;
 
   row.innerHTML = `
     <select class="form-control select-ex" required>
@@ -202,7 +203,7 @@ export function addRoutineExerciseRow({ preset = null, state, t }) {
 
   const sel = row.querySelector(".select-ex");
   sel.addEventListener("change", () => {
-    const chosen = state.exercises.find((e) => e.id === sel.value);
+    const chosen = libraryExercises(state).find((e) => e.id === sel.value);
     renderLoad(loadUnitForEquipment(chosen?.equipment), "");
     applyModality(chosen);
   });

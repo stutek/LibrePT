@@ -26,6 +26,7 @@
 // clipboard slot, and a running session's logs would go with it. Uncovering still works — comparing
 // is the point of the gesture; leaving is not.
 
+import { libraryExercises } from "../data/exerciseLibrary.js";
 import { clientSessionNeighbours, clientSessionToday } from "../domain/clientSessionNeighbours.js";
 import {
   buildClientStateFromHistoryLog,
@@ -56,7 +57,7 @@ function planFor(entry, { state, t }) {
     const clientState = buildClientStateFromRoutine({
       routineId: entry.session.routineId,
       routines: state.routines || [],
-      exercises: state.exercises || [],
+      exercises: libraryExercises(state),
       emptyPlanName: t("custom_empty_plan") || "Custom / Empty Plan",
     });
     return {
@@ -67,7 +68,7 @@ function planFor(entry, { state, t }) {
     };
   }
   // "history" or "draft" — both are a stored history/planning snapshot.
-  const clientState = buildClientStateFromHistoryLog(entry.record, state.exercises || []);
+  const clientState = buildClientStateFromHistoryLog(entry.record, libraryExercises(state));
   return {
     items: clientState.exercises,
     feedback: entry.record.feedback || [],

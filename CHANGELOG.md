@@ -20,6 +20,23 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-09-23 — LibrePT's exercise catalog in the trainer's own workspace, and a filter by source
+
+### Added
+
+- **The exercise library shows LibrePT's catalog in every workspace** (§45.5). A trainer's own
+  database stores no exercise until they add one, and the catalog was written only into the sandbox,
+  so outside it the library, the picker and the plan editor's name list were empty. The catalog is
+  now read from the app's code and never stored.
+- **A Source filter — All, LibrePT, Mine — in the exercise library and in the exercise picker**, and
+  a mark on every exercise the trainer added: a pencil and the word *Mine*. LibrePT's catalog is
+  unmarked.
+
+### Fixed
+
+- **The exercise library's muscle filter read the first active chip anywhere on the page**, which
+  could be a chip of the sessions list's filter row. Each row is now read on its own.
+
 ## 2026-09-21 — The guided tour can be started at any of its chapters
 
 ### Changed

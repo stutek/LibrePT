@@ -1,3 +1,4 @@
+import { libraryExercises } from "../../data/exerciseLibrary.js";
 import { modalityOf, primaryMetricOf } from "../../domain/exerciseModality.js";
 import { loadUnitForEquipment } from "../../domain/repsAndLoad.js";
 import { filterSessions, hasAnyFilter } from "../../domain/sessionFilters.js";
@@ -73,7 +74,7 @@ function buildClientRoutineState(routine, state) {
     logs: {},
   };
   for (const item of routine.exercises || []) {
-    const ex = state.exercises.find((e) => e.id === item.id);
+    const ex = libraryExercises(state).find((e) => e.id === item.id);
     if (!ex) continue;
     clientState.exercises.push({
       id: item.id,

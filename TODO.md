@@ -3731,6 +3731,12 @@ the cutover here). Until then only what needs no schema is built: the catalog in
 database, reading an import file without writing it, and the filter *LibrePT / Mine* with its mark.
 **Blocked on schema 5:** writing an import, source names, circuits, and the export carrying both.
 
+**[x] Built 2026-09-23:** the catalog in every workspace, read from code
+([exerciseLibrary.js](src/data/exerciseLibrary.js)), and the Source filter *All / LibrePT / Mine*
+with the pencil mark, in the library and in the picker — see [UC6](use_cases/uc6_exercise_taxonomy_and_picker.md).
+**[ ] Next, needing no schema:** the pure reader of a library file (the app's own catalog export,
+a short list of exercises and circuits, a bare array), tested against a frozen corpus like §29's.
+
 ### 45.6 [ ] The session list needs filters: a date range, a client, a location
 
 **Reported:** on the home screen, the calendar should act as a from–to filter; a filter by client is

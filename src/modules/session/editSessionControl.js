@@ -3,6 +3,7 @@
 // allowing selection of participants, assigning routine plans, and configuring session details before launching the clipboard.
 // Auto-persists form drafts to localStorage so user data survives page reloads.
 
+import { libraryExercises } from "../../data/exerciseLibrary.js";
 import { newRecordId } from "../../data/recordId.js";
 import {
   readVersionScoped,
@@ -299,7 +300,7 @@ function notifyNewlyAssignedParticipants(
  */
 function sessionKindOf(state, session) {
   const routineIds = session?.routineId ? [session.routineId] : [];
-  return sessionModalityProfile(routineIds, state.routines || [], state.exercises || []);
+  return sessionModalityProfile(routineIds, state.routines || [], libraryExercises(state));
 }
 
 /**

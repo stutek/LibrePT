@@ -23,6 +23,7 @@
 //
 // Injected dependencies: `t`, `getState`, `onImport(plan)`, `readFileText(file)`.
 
+import { libraryExercises } from "../../data/exerciseLibrary.js";
 import { customCount, matchAgainstCatalog } from "../../domain/catalogMatch.js";
 import { PROGRAM_FORMAT, programTemplate, readProgram } from "../../domain/programImport.js";
 import { closeModal, openModal, renderMarkupOnce } from "../common/dom.js";
@@ -145,7 +146,7 @@ function readCurrent() {
   const state = deps.getState();
   const result = readProgram(document.getElementById("program-import-text").value);
   if (result.ok) {
-    result.items = matchAgainstCatalog(result.items, state.exercises || []);
+    result.items = matchAgainstCatalog(result.items, libraryExercises(state));
   }
   renderReport(result);
   document.getElementById("program-import-open").disabled = !result.ok;

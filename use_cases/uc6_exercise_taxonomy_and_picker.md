@@ -45,6 +45,23 @@ The exercises view is a **high-density taxonomy inspector**, not a beginner ency
 - Search matches across name, category, **equipment**, and **pattern**, so a trainer can find "all
   Cable Hinge movements" by typing a tag.
 
+### 2.1 Where an exercise comes from
+
+The library is **LibrePT's catalog plus the trainer's own exercises**
+([../src/data/exerciseLibrary.js](../src/data/exerciseLibrary.js), TODO §45.5):
+
+- **The catalog is read from code, in every workspace.** A trainer's own database stores no exercise
+  until they add one, so before this the library was empty everywhere except the sandbox. Nothing of
+  the catalog is written to storage, so a correction to it reaches every trainer with the next build.
+- **A Source filter row** — *All*, *LibrePT*, *Mine* — sits above the muscle row in the library and
+  in the picker, so the choice can be limited to one source in both places.
+- **The trainer's own exercise carries a mark**: a pencil and the word *Mine*, in a badge with a
+  dashed edge. A glyph alone would mean nothing to a reader who has not been told, and a phone has
+  no hover to tell them. LibrePT's catalog carries no mark — it is the standard the others differ
+  from.
+- **Not yet built, waiting for schema 5**: importing a library file, a source per imported file
+  (trainers exchange catalogs), and circuits kept for building plans. See TODO §45.5.
+
 ---
 
 ## 3. The Three Selection Scenarios
@@ -76,9 +93,9 @@ called out as **Swapped** (see [UC1](uc1_gym_floor_clipboard.md)).
 search box** that narrows by name, pattern, equipment or group as the PT types, and **Enter takes
 the top match** — a movement whose name is known costs a tap on 📖, a few letters, and Enter.
 
-Each filter row is **labelled by its axis** (*Muscle*, *Equipment*) — two unlabelled chip rows
-read as one wall of options, and the **All** chip appears in both, so only the label says which
-axis is being reset. The Exercise Library's own category filter is labelled the same way.
+Each filter row is **labelled by its axis** (*Source*, *Muscle*, *Equipment*) — unlabelled chip
+rows read as one wall of options, and the **All** chip appears in every row, so only the label says
+which axis is being reset. The Exercise Library's own category filter is labelled the same way.
 
 ### 3.3 Scenario C — Custom Exercise vs. Taxonomy Integrity
 
@@ -188,6 +205,10 @@ Delivers TODO §13.1's last bullet (adopt an open standard for interchangeable e
 | Filter chip rows are labelled by axis (Muscle / Equipment) | [../tests/medium/test_clipboard_catalog_picker.py](../tests/medium/test_clipboard_catalog_picker.py) · `test_filter_rows_are_labelled_by_axis` |
 | Every plan-editor row offers the catalog; picker opens pre-filtered + focused on search | [../tests/medium/test_clipboard_catalog_picker.py](../tests/medium/test_clipboard_catalog_picker.py) · `test_every_exercise_row_offers_the_catalog` |
 | Row swap retargets the movement in place — slot id, sets and logs preserved | [../tests/medium/test_clipboard_catalog_picker.py](../tests/medium/test_clipboard_catalog_picker.py) · `test_row_catalog_swaps_the_movement_in_place` |
+| The catalog is listed in a workspace that stores no exercise | [../tests/medium/test_exercise_catalog.py](../tests/medium/test_exercise_catalog.py) · `test_an_empty_database_still_shows_the_librept_catalog` |
+| Source filter separates the trainer's own from LibrePT's, and marks the own with pencil + word | [../tests/medium/test_exercise_catalog.py](../tests/medium/test_exercise_catalog.py) · `test_source_filter_separates_and_marks_the_trainers_own` |
+| The picker's Source row limits the choice, with the same mark | [../tests/medium/test_clipboard_catalog_picker.py](../tests/medium/test_clipboard_catalog_picker.py) · `test_source_filter_limits_the_choice_to_the_trainers_own` |
+| No screen reads the stored exercises past the library | [../tests/unit_js/data/exerciseLibrary.test.mjs](../tests/unit_js/data/exerciseLibrary.test.mjs) · `no screen reads the stored exercises past the library` |
 | Custom movement form enforces name + equipment + pattern | [../tests/medium/test_exercise_catalog.py](../tests/medium/test_exercise_catalog.py) · `test_custom_exercise_requires_taxonomy` |
 | Polymorphic reps/load parse, format & equipment-derived units | [../tests/e2e/test_reps_and_load.py](../tests/e2e/test_reps_and_load.py) · `test_reps_and_load_helpers` |
 | Exercise modality axis + per-metric target formatting | [../src/domain/exerciseModality.js](../src/domain/exerciseModality.js) · `modalityOf` / `primaryMetricOf` / `formatMetricValue` |

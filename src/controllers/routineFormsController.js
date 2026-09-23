@@ -8,7 +8,7 @@ import { newRecordId } from "../data/recordId.js";
 import { parseLoad, parseReps } from "../domain/repsAndLoad.js";
 import { $id, closeModal, openModal, renderMarkupOnce } from "../modules/common/dom.js";
 import { keepRecordLive } from "../modules/common/liveRecordForm.js";
-import { mountExercisePicker } from "../modules/exercises/exercisePicker.js";
+import { mountExercisePicker, sourceLabels } from "../modules/exercises/exercisePicker.js";
 import { addRoutineExerciseRow, renderRoutinesList } from "../modules/plans/plansView.js";
 
 // Filled in by setupRoutineForms, and called by the create-form ROUTE. The form fields, the
@@ -108,6 +108,7 @@ export function setupRoutineForms({
       searchLabel: t("search_movements") || "Search movements",
       muscleLabel: t("muscle") || "Muscle",
       equipmentLabel: t("equipment") || "Equipment",
+      sources: sourceLabels(t),
       onSelect: (ex) => {
         addRoutineExerciseRow({
           preset: { id: ex.id, sets: 3, reps: 10, weight: 0, rest: 60 },
