@@ -5162,3 +5162,131 @@ matters, but the rule about the app's own decision has to be rewritten rather th
 
 Open: which formats are offered, where the choice lives, and whether it covers times as well as
 dates. Entry stays as it is — `timeField.js` and `dateField.js` on `steppedField.js`.
+
+## 76. [ ] The trainer chooses which supported version of the app to run — designed, not ruled
+
+Asked 2026-09-23 (Simon): a setting that supports several versions of the app and of its schemas,
+switches between them quickly, and lets the trainer turn on any supported version. Ruled with it the
+same day (Simon):
+
+1. The star write exists precisely so that several versions can be live and used in turn.
+2. The trainer chooses how the app BEHAVES. The schema is a technical detail they never see.
+3. Older supported versions get security and critical fixes.
+
+**Read together with §18's standing decision, this is one build, not several.** Every supported
+version is code inside the same build, so a fix lands once and every supported version has it. That
+is how point 3 holds without release branches, per-version hosting or backports, all of which §16
+dropped. Designed below (Claude, 2026-09-23); nothing here is ruled yet.
+
+### 76.1 Three identities, kept apart
+
+- **App version** — what the trainer chooses. A name and a date, for example *2026-10*, with one
+  sentence on what it changes. New to this design.
+- **Schema** — the shape of the stored data. Each app version reads exactly ONE schema. Several app
+  versions may read the same schema, since a change of behaviour does not always change the data.
+- **Commit SHA** — which code is running, for support. Unchanged.
+
+### 76.2 One registry of app versions
+
+One file under `src/data/` lists every supported app version: its id, the schema it reads, its
+status, the text key of its one-sentence description, and the behaviours it turns on. The status is
+one of:
+
+- `default` — what a new install runs. Exactly one version has it.
+- `supported` — offered to the trainer, older or newer than the default. A newer one shows the
+  `BETA` tier of §18.12's ribbon, which that section already reserves for "an in-app behaviour
+  opt-in".
+- `preview` — CI and demonstrations only, never offered (§61's ruling). It reads PREVIEW.
+
+**`LIVE_SCHEMAS` is derived from the registry**, never written beside it: a schema is live exactly
+when a registered version reads it. Two lists that must agree would drift. Retiring a schema then
+stays a decision, as `docs/DATA_MODEL.md` requires, because it is the same edit as retiring the last
+version that reads it.
+
+**Feature code asks for a behaviour by name, never for a version number.** It asks, for example,
+whether circuits are offered when a plan is built, and never whether the version is at least
+2026-10. A comparison of versions spreads through every file that branches. A named behaviour lives
+in one registry entry, and a check fails the build when a behaviour named in the code is declared by
+no version, or is turned on in every supported version (its branch is then dead and must be removed).
+
+### 76.3 What the trainer sees, and what happens when they switch
+
+- In the ☰ menu ([applicationHeader.js](src/modules/common/applicationHeader.js)), beside *My
+  details*: **App version**, which opens a list of the supported versions with the running one
+  marked and each one's sentence.
+- **Before the switch, one sentence says what the chosen version cannot show, and how many records
+  that is** — for example, that it has no circuits, that the trainer has three, and that they are
+  kept but not shown while that version runs. This is the production check §71.2 already earned.
+  The sentence is shown only when the number is not zero.
+- **The switch is refused while a session is running**, with the reason on the screen. This follows
+  §18.12's rule that nothing blocks a trainer who has a client in front of them.
+- The switch is `setReadSchema` in [readSchema.js](src/data/readSchema.js) plus the stored choice of
+  version, followed by a **page reload**. The data held in memory is shaped by the schema that was
+  read, so a reload is the one way to guarantee nothing from the old shape remains. The build is
+  already in the service worker's cache, so the reload also works offline.
+- The choice belongs to the device, like the theme, and is kept in `localStorage` beside
+  `librept_read_schema`, for the reason given there: boot must know which store to read before it
+  can read anything.
+
+### 76.4 What the data layer must guarantee first
+
+**Switching back and forth must never destroy data** — no field and no record. Read from the code
+2026-09-23 (Claude), not yet measured:
+
+- **Today this holds between 4 and a schema 5 that only ADDS**, and only by accident:
+  `projectCollection` in [recordProjections.js](src/data/recordProjections.js) copies every field
+  whole, so a field schema 4 does not declare still lands in the schema-4 store and comes back from
+  it. `starWrite` in [stateStore.js](src/data/stateStore.js) deletes only ids missing from the store
+  being READ, so a collection the read schema does not declare is neither written nor deleted in the
+  wider store.
+- **It stops holding on the day §71's per-schema projector trims undeclared fields.** A trainer on
+  the older version edits an exercise; the record written to the newer store no longer carries
+  `source`; the field is gone.
+
+So, the rule, and the order it is built in:
+
+1. **§71 first: one projector and one reader per schema.** The projector writes only what its schema
+   declares and supplies what a newer schema requires but the domain object does not carry.
+2. **§70's field-wise write:** into a store whose schema is WIDER than the one being read, a save
+   replaces only the fields the reading schema declares, and keeps every other field of the stored
+   record.
+3. **One test per ordered pair of supported versions**, generated from the registry: switch, edit,
+   create, delete, switch back, and assert that nothing the trainer did not delete is missing. It is
+   generated so that a version added to the registry cannot go untested.
+
+**A backup is always taken from the newest numbered store**, whatever version is running. Otherwise a
+trainer on an older version backs up less data than they have. A restore already rebuilds every live
+store from the file.
+
+**Drive sync is the open gap.** Two devices of the same trainer may run different versions, and
+[driveSyncService.js](src/data/driveSyncService.js) merges a snapshot without checking any version
+(§63). A device on the older version would upload records without the newer fields, and the merge
+may read a missing field as a deletion. Proposed, not ruled: the sync file carries the newest
+numbered schema and is built from that store, as the backup is, never from the data held in memory.
+
+### 76.5 What each supported version costs
+
+- **One browser-test pass per supported version**, the way §62 adds one for PREVIEW. The last full
+  gate run took 341 seconds (`.build-reports/last-run.json`). How much of that the browser tests take
+  was not measured, so the cost of a second pass is not stated here.
+- **Every behaviour branch stays in the code** until the last version that needs it is retired.
+- **One more star-write store** for each new schema, as `docs/DATA_MODEL.md` already counts it.
+
+**Proposed: at most two numbered versions are supported at once**, plus PREVIEW — the default and
+one other. Two versions give the trainer both a way back and a way forward, while each further
+version adds a browser-test pass and one more branch in every feature that differs.
+
+### 76.6 The first use: schema 5 for §45.5
+
+§45.5, importing the trainer's own library, needs schema 5: `SCHEMA_4` plus an optional
+`exercises.source` (a string) and a new collection `circuits` `{id, name, series?, exercises,
+source?}`. Simon ruled 2026-09-23 that its cutover waits for this design. It is the first real test
+of §76.2's registry: version *2026-09* reads 4 and stays the default, and a new version reads 5 and
+turns on the library import and circuits in the plan builder.
+
+**Blocks:** the schema-5 cutover and with it §45.5's storage. **Blocked by:** §71's projector and
+reader, and §70's field-wise write.
+
+**Open for Simon:** whether a newer version starts as `supported` (opt-in, `BETA`) and becomes
+`default` later, or becomes the default on the day it ships; the cap of two numbered versions; and
+the Drive sync rule above.
