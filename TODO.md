@@ -3722,6 +3722,15 @@ it. Recommended for the trainer's own exercises too — a glyph and a word, and 
 most as an addition, because each theme restyles colour and a colour alone says nothing to a reader
 who cannot tell two tints apart.
 
+**Ruled the same day (Simon):** (1) yes — the catalog is shown in the working database; (2) sources
+are any number, because trainers exchange catalogs, so the stored `source` field and schema 5 stand;
+(3) yes, and an imported circuit is offered ONLY when building a plan — it is not a routine, which is
+why it gets its own `circuits` collection rather than a routine with one circuit in it. **Schema 5
+waits for the app-version and schema selection Simon has asked for separately** (ruled: do not build
+the cutover here). Until then only what needs no schema is built: the catalog in the working
+database, reading an import file without writing it, and the filter *LibrePT / Mine* with its mark.
+**Blocked on schema 5:** writing an import, source names, circuits, and the export carrying both.
+
 ### 45.6 [ ] The session list needs filters: a date range, a client, a location
 
 **Reported:** on the home screen, the calendar should act as a from–to filter; a filter by client is
