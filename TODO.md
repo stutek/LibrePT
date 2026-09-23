@@ -3737,6 +3737,13 @@ with the pencil mark, in the library and in the picker — see [UC6](use_cases/u
 **[ ] Next, needing no schema:** the pure reader of a library file (the app's own catalog export,
 a short list of exercises and circuits, a bare array), tested against a frozen corpus like §29's.
 
+**Ruled 2026-09-23 (Simon):** an imported circuit with no name gets a placeholder, so
+`circuits.name` is required in schema 5. The form chosen: the word for circuit and the names of its
+first two exercises, in the app's language at the moment of import ("Sklop — Počep, Izpadni
+korak"); the trainer can rename it. **Schema 5 shipped the same day** ([§76](TODO.md), 19ea11c) and
+every install reads it, so the import now writes. The screens will be gated on the behaviour
+`libraryImport` once §76's registry of app versions exists.
+
 ### 45.6 [ ] The session list needs filters: a date range, a client, a location
 
 **Reported:** on the home screen, the calendar should act as a from–to filter; a filter by client is
