@@ -1,15 +1,14 @@
 // src/modules/exercises/exercisesView.js - the exercise library view: its filters and its cards
 import {
   ALL_SOURCES,
-  CATALOG_SOURCE,
-  OWN_SOURCE,
   libraryExercises,
+  sourcesOf,
   withSource,
 } from "../../data/exerciseLibrary.js";
 import { modalityOf } from "../../domain/exerciseModality.js";
 import { renderMarkupOnce } from "../common/dom.js";
 import { escapeHTML } from "../common/utils.js";
-import { sourceBadge } from "./exercisePicker.js";
+import { sourceBadge, sourceLabels } from "./exercisePicker.js";
 
 export function renderExercisesViewShell() {
   renderMarkupOnce(
@@ -20,6 +19,9 @@ export function renderExercisesViewShell() {
       <div class="view-header view-titlebar">
         <button class="view-grabber" type="button" aria-label="Return to home"></button>
         <h2>Exercise Library</h2>
+        <button id="btn-import-library" type="button" class="btn secondary-btn btn-sm">
+          <i class="fa-solid fa-file-import"></i> <span data-i18n="library_import_button">Import</span>
+        </button>
         <button id="btn-add-exercise" class="btn primary-btn btn-sm">
           <i class="fa-solid fa-plus"></i> Add Exercise
         </button>
@@ -32,9 +34,7 @@ export function renderExercisesViewShell() {
       
       <div class="filter-chips" data-axis="source">
         <span class="filter-chips-label" id="exercises-source-label" data-i18n="source">Source</span>
-        <button class="chip active" data-filter="${ALL_SOURCES}" data-i18n="filter_all">All</button>
-        <button class="chip" data-filter="${CATALOG_SOURCE}" data-i18n="source_librept">LibrePT</button>
-        <button class="chip" data-filter="${OWN_SOURCE}" data-i18n="source_own">Mine</button>
+        <!-- Chips drawn by renderSourceChips: which sources exist depends on what was imported. -->
       </div>
 
       <div class="filter-chips" data-axis="category">
@@ -80,6 +80,26 @@ function visibleFilter() {
   };
 }
 
+// One chip per source the library holds, redrawn with the list: an import adds a source, and a
+// chip for a source nothing comes from any more would filter to an empty list. A chosen source
+// that has gone falls back to All.
+function renderSourceChips(row, library, t, chosen) {
+  if (!row) return ALL_SOURCES;
+  const { words } = sourceLabels(t);
+  const values = [ALL_SOURCES, ...sourcesOf(library)];
+  const active = values.includes(chosen) ? chosen : ALL_SOURCES;
+  for (const chip of row.querySelectorAll(".chip")) chip.remove();
+  for (const value of values) {
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = value === active ? "chip active" : "chip";
+    chip.setAttribute("data-filter", value);
+    chip.textContent = Object.hasOwn(words, value) ? words[value] : value;
+    row.appendChild(chip);
+  }
+  return active;
+}
+
 export function renderExercisesList({ state, t, filterQuery, categoryFilter, sourceFilter }) {
   const container = document.getElementById("exercises-list");
   if (!container) return;
@@ -88,9 +108,15 @@ export function renderExercisesList({ state, t, filterQuery, categoryFilter, sou
   const visible = visibleFilter();
   const query = filterQuery ?? visible.filterQuery;
   const category = categoryFilter ?? visible.categoryFilter;
-  const source = sourceFilter ?? visible.sourceFilter;
+  const library = libraryExercises(state);
+  const source = renderSourceChips(
+    document.querySelector('#view-exercises .filter-chips[data-axis="source"]'),
+    library,
+    t,
+    sourceFilter ?? visible.sourceFilter,
+  );
 
-  let filtered = withSource(libraryExercises(state), source);
+  let filtered = withSource(library, source);
 
   if (category !== "All") {
     filtered = filtered.filter((e) => e.category === category);
@@ -101,7 +127,7 @@ export function renderExercisesList({ state, t, filterQuery, categoryFilter, sou
     filtered = filtered.filter(
       (e) =>
         e.name.toLowerCase().includes(q) ||
-        e.category.toLowerCase().includes(q) ||
+        e.category?.toLowerCase().includes(q) ||
         e.equipment?.toLowerCase().includes(q) ||
         e.pattern?.toLowerCase().includes(q) ||
         e.instructions?.toLowerCase().includes(q),
@@ -131,10 +157,14 @@ export function renderExercisesList({ state, t, filterQuery, categoryFilter, sou
         .filter(Boolean)
         .map((v) => `<span class="taxonomy-badge">${escapeHTML(v)}</span>`)
         .join("");
+    // An imported exercise may carry no muscle group, and its words come from someone else's file.
+    const muscle = ex.category
+      ? `<span class="muscle-badge">${escapeHTML(ex.category)}</span>`
+      : "";
     card.innerHTML = `
       <div class="exercise-item-header">
         <h3>${escapeHTML(ex.name)}</h3>
-        <span class="muscle-badge">${ex.category}</span>
+        ${muscle}
       </div>
       <div class="exercise-item-meta">${meta}</div>
     `;

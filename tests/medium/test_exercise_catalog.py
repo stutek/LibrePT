@@ -237,3 +237,46 @@ def test_source_filter_separates_and_marks_the_trainers_own(page, local_server):
     )
     assert cards.count() == catalog_size
     assert page.locator("#view-exercises .taxonomy-badge-source").count() == 0
+
+
+LIBRARY_FILE = """{
+  "format": "librept.library/1",
+  "source": "Ana Novak",
+  "exercises": ["Sled Push", "Barbell Bench Press", {"muscle": "Legs"}],
+  "circuits": [{"rounds": 3, "exercises": [{"name": "Sled Push", "reps": 20}, "Push-Ups"]}]
+}"""
+
+
+def test_import_reviews_first_then_adds_under_its_source(page, local_server):
+    """TODO §45.5: the report comes before the write — what is new, what the library already has,
+    what could not be read — and the library then opens on the imported source, each exercise
+    marked with its name. A circuit with no name is given one from its first two exercises."""
+    load_with_stub(page, local_server, EMPTY_STUB)
+    page.wait_for_selector("#view-exercises.active")
+    page.click("#btn-import-library")
+    page.wait_for_selector("#dialog-library-import[open]")
+    page.fill("#library-import-text", LIBRARY_FILE)
+
+    report = page.locator("#library-import-report")
+    assert "New exercises: 1. New circuits: 1." in report.text_content()
+    assert "Barbell Bench Press" in report.text_content()
+    assert "Entries that could not be read: 1" in report.text_content()
+    assert page.locator("#library-import-source").input_value() == "Ana Novak"
+    assert page.evaluate("() => window.__state.exercises.length") == 0, (
+        "nothing may be written before Add to library"
+    )
+
+    page.click("#library-import-add")
+    page.wait_for_selector("#dialog-library-import", state="hidden")
+    active = page.locator(".filter-chips[data-axis='source'] .chip.active")
+    assert active.text_content() == "Ana Novak"
+    cards = page.locator("#view-exercises .exercise-item")
+    assert cards.count() == 1
+    mark = cards.first.locator(".taxonomy-badge-source")
+    assert mark.locator("i.fa-file-import").count() == 1
+    assert mark.text_content().strip() == "Ana Novak"
+
+    circuits = page.evaluate("() => window.__state.circuits")
+    assert [c["name"] for c in circuits] == ["Circuit — Sled Push, Push-Ups"]
+    assert circuits[0]["series"] == 3
+    assert circuits[0]["source"] == "Ana Novak"

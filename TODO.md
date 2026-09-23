@@ -3734,8 +3734,13 @@ database, reading an import file without writing it, and the filter *LibrePT / M
 **[x] Built 2026-09-23:** the catalog in every workspace, read from code
 ([exerciseLibrary.js](src/data/exerciseLibrary.js)), and the Source filter *All / LibrePT / Mine*
 with the pencil mark, in the library and in the picker — see [UC6](use_cases/uc6_exercise_taxonomy_and_picker.md).
-**[ ] Next, needing no schema:** the pure reader of a library file (the app's own catalog export,
-a short list of exercises and circuits, a bare array), tested against a frozen corpus like §29's.
+**[x] Built 2026-09-23, the import itself:** the reader ([libraryImport.js](src/domain/libraryImport.js))
+of the app's catalog export, `librept.library/1` and a bare list; the review before the write; a
+source per import, with one filter chip and one mark (import glyph + name) per source; circuits
+stored in `circuits`. See [UC6 §2.2](use_cases/uc6_exercise_taxonomy_and_picker.md).
+**[ ] Next:** "Add circuit from library" in the plan editor; the catalog export carrying sources and
+circuits, so an exchange goes both ways; a frozen corpus of real library files, as §29 has; gating
+the Import button on `libraryImport` once §76's registry exists.
 
 **Ruled 2026-09-23 (Simon):** an imported circuit with no name gets a placeholder, so
 `circuits.name` is required in schema 5. The form chosen: the word for circuit and the names of its
@@ -4772,7 +4777,6 @@ being read cannot see is carried over from the row a store already holds, so a s
 reading an older schema (the toggle §76 builds) cannot wipe it (`narrowToSchema`, `fieldsHiddenFrom`
 in [recordSchemas.js](src/data/recordSchemas.js)). A field no live schema declares is still written
 whole. **Still open:** renames and retypes — §71's per-schema projector.
-
 
 **By design a backup is made at schema 4, the newest numbered one, never at P** (Simon,
 2026-09-17), so a field that exists only in P is not in it. The preview database is used only for

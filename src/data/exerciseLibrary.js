@@ -21,7 +21,9 @@
 
 import { DEFAULT_EXERCISES } from "./exercises.js";
 
-/** Where an exercise comes from. The names are the filter's values, never shown to the trainer. */
+/** Where an exercise comes from. These two are the filter's values, never shown to the trainer; an
+ * imported exercise's source is the name it was imported under (TODO §45.5 — any number of them,
+ * because trainers exchange catalogs), and that name IS shown. */
 export const CATALOG_SOURCE = "librept";
 export const OWN_SOURCE = "own";
 export const ALL_SOURCES = "all";
@@ -38,14 +40,34 @@ export function libraryExercises(state) {
   return [...stored, ...CATALOG.filter((exercise) => !storedIds.has(exercise.id))];
 }
 
+/** Add imported exercises and circuits to the stored library (TODO §45.5). New arrays rather than a
+ * push, so a caller holding the previous list does not see it change underneath it. */
+export function addToLibrary(state, { exercises = [], circuits = [] }) {
+  state.exercises = [...(state.exercises || []), ...exercises];
+  state.circuits = [...(state.circuits || []), ...circuits];
+}
+
 /** The library entry with this id, or undefined. */
 export function libraryExerciseById(state, id) {
   return libraryExercises(state).find((exercise) => exercise.id === id);
 }
 
-/** `CATALOG_SOURCE` for an entry of LibrePT's catalog, stored copy or not; `OWN_SOURCE` otherwise. */
+/** `CATALOG_SOURCE` for an entry of LibrePT's catalog, stored copy or not; the name it was imported
+ * under; otherwise `OWN_SOURCE` — typed in the app, or imported with no name given. */
 export function exerciseSourceOf(exercise) {
-  return CATALOG_IDS.has(exercise?.id) ? CATALOG_SOURCE : OWN_SOURCE;
+  if (CATALOG_IDS.has(exercise?.id)) return CATALOG_SOURCE;
+  return exercise?.source || OWN_SOURCE;
+}
+
+/** Every source these exercises come from: LibrePT and the trainer's own first when present, then
+ * the imported ones alphabetically — the order the filter row shows them in. */
+export function sourcesOf(exercises) {
+  const found = new Set(exercises.map(exerciseSourceOf));
+  const named = [...found].filter((source) => source !== CATALOG_SOURCE && source !== OWN_SOURCE);
+  return [
+    ...[CATALOG_SOURCE, OWN_SOURCE].filter((source) => found.has(source)),
+    ...named.sort((a, b) => a.localeCompare(b)),
+  ];
 }
 
 /** The exercises from one source; `ALL_SOURCES` keeps every one. */

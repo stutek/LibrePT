@@ -9,6 +9,7 @@ import {
   OWN_SOURCE,
   exerciseSourceOf,
   libraryExercises,
+  sourcesOf,
   withSource,
 } from "../../data/exerciseLibrary.js";
 import { modalityOf } from "../../domain/exerciseModality.js";
@@ -26,27 +27,33 @@ const MUSCLE_GROUPS = [
   "Cardio",
 ];
 const EQUIPMENT = ["All", "Barbell", "Dumbbell", "Cable", "Machine", "Band", "Bodyweight"];
-const SOURCES = [ALL_SOURCES, CATALOG_SOURCE, OWN_SOURCE];
 
 /** The words for the source filter, in the app's language — one place for every picker caller. */
 export function sourceLabels(t) {
   return {
     axis: t("source") || "Source",
-    [ALL_SOURCES]: t("filter_all") || "All",
-    [CATALOG_SOURCE]: t("source_librept") || "LibrePT",
-    [OWN_SOURCE]: t("source_own") || "Mine",
     badge: t("source_own_badge") || "Mine",
+    // The chips' words, apart from the two above so that no imported source name can collide with
+    // them. A named source is its own word.
+    words: {
+      [ALL_SOURCES]: t("filter_all") || "All",
+      [CATALOG_SOURCE]: t("source_librept") || "LibrePT",
+      [OWN_SOURCE]: t("source_own") || "Mine",
+    },
   };
 }
 
 /**
- * The mark on an exercise the trainer brought in themselves (TODO §45.5): a pencil AND a word,
- * because a glyph alone means nothing to a reader who has not been told, and a hover cannot tell
- * them on a phone. LibrePT's own catalog carries no mark — it is the standard the others differ from.
+ * The mark on an exercise that is not LibrePT's (TODO §45.5): a glyph AND a word, because a glyph
+ * alone means nothing to a reader who has not been told, and a hover cannot tell them on a phone.
+ * The trainer's own gets a pencil and "Mine"; an imported one the import glyph and the name it came
+ * under. LibrePT's own catalog carries no mark — it is the standard the others differ from.
  */
 export function sourceBadge(exercise, ownWord) {
-  if (exerciseSourceOf(exercise) !== OWN_SOURCE) return "";
-  return `<span class="taxonomy-badge taxonomy-badge-source"><i class="fa-solid fa-pencil"></i> ${escapeHTML(ownWord)}</span>`;
+  const source = exerciseSourceOf(exercise);
+  if (source === CATALOG_SOURCE) return "";
+  const [glyph, word] = source === OWN_SOURCE ? ["fa-pencil", ownWord] : ["fa-file-import", source];
+  return `<span class="taxonomy-badge taxonomy-badge-source"><i class="fa-solid ${glyph}"></i> ${escapeHTML(word)}</span>`;
 }
 
 /**
@@ -104,7 +111,7 @@ export function mountExercisePicker(
           (v) =>
             `<button type="button" class="chip chip-sm ${v === active ? "active" : ""}" data-value="${escapeHTML(
               v,
-            )}">${escapeHTML(words[v] ?? v)}</button>`,
+            )}">${escapeHTML(Object.hasOwn(words, v) ? words[v] : v)}</button>`,
         )
         .join("")}</div>`;
 
@@ -115,7 +122,7 @@ export function mountExercisePicker(
       <input type="search" class="picker-search" value="${escapeHTML(filters.query)}"
              placeholder="${escapeHTML(searchLabel)}" aria-label="${escapeHTML(searchLabel)}">
     </div>
-    ${chipRow("source", SOURCES, filters.source, sources.axis, sources)}
+    ${chipRow("source", [ALL_SOURCES, ...sourcesOf(libraryExercises(state))], filters.source, sources.axis, sources.words)}
     ${chipRow("muscle", MUSCLE_GROUPS, filters.muscle, muscleLabel)}
     ${chipRow("equipment", EQUIPMENT, filters.equipment, equipmentLabel)}
     <div class="picker-count"></div>

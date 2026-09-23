@@ -50,7 +50,7 @@ function pick(raw, field) {
 /** A number from whatever arrived — numbers as strings are the commonest difference between two
  * assistants asked for the same thing. Returns undefined rather than NaN, so a caller can tell
  * "absent" from "zero". */
-function toNumber(value) {
+export function toNumber(value) {
   if (typeof value === "number" && Number.isFinite(value)) return value;
   if (typeof value !== "string") return undefined;
   const parsed = Number(value.trim());
@@ -59,7 +59,7 @@ function toNumber(value) {
 
 /** Strip what an assistant wraps around JSON when it is being helpful: a ```json fence, or a
  * sentence before and after. Falls back to the widest {...} or [...] span in the text. */
-function jsonSpan(text) {
+export function jsonSpan(text) {
   const fenced = text.match(/```(?:json)?\s*\n([\s\S]*?)```/i);
   const candidate = fenced ? fenced[1] : text;
   const start = candidate.search(/[[{]/);

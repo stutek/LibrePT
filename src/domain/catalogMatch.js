@@ -19,7 +19,7 @@
 
 /** Case- and spacing-insensitive, so "back squat" and "Back  Squat" are one movement. Nothing else
  * is folded: punctuation carries meaning in movement names ("Y-T-W", "Chin-Up"). */
-function normalise(name) {
+export function normalise(name) {
   return String(name || "")
     .trim()
     .replace(/\s+/g, " ")

@@ -53,14 +53,33 @@ The library is **LibrePT's catalog plus the trainer's own exercises**
 - **The catalog is read from code, in every workspace.** A trainer's own database stores no exercise
   until they add one, so before this the library was empty everywhere except the sandbox. Nothing of
   the catalog is written to storage, so a correction to it reaches every trainer with the next build.
-- **A Source filter row** — *All*, *LibrePT*, *Mine* — sits above the muscle row in the library and
-  in the picker, so the choice can be limited to one source in both places.
-- **The trainer's own exercise carries a mark**: a pencil and the word *Mine*, in a badge with a
-  dashed edge. A glyph alone would mean nothing to a reader who has not been told, and a phone has
-  no hover to tell them. LibrePT's catalog carries no mark — it is the standard the others differ
-  from.
-- **Not yet built, waiting for schema 5**: importing a library file, a source per imported file
-  (trainers exchange catalogs), and circuits kept for building plans. See TODO §45.5.
+- **A Source filter row** sits above the muscle row in the library and in the picker: *All*,
+  *LibrePT*, *Mine*, and one chip per imported source, so the choice can be limited to one source in
+  both places.
+- **Every exercise that is not LibrePT's carries a mark**, a glyph and a word in a badge with a
+  dashed edge: a pencil and *Mine* for one the trainer typed, the import glyph and the source's name
+  for an imported one. A glyph alone would mean nothing to a reader who has not been told, and a
+  phone has no hover to tell them. LibrePT's catalog carries no mark — it is the standard the others
+  differ from.
+
+### 2.2 Importing a library
+
+The library's **Import** button opens a paste box with a file button and an example
+([../src/modules/exercises/libraryImportDialog.js](../src/modules/exercises/libraryImportDialog.js),
+[../src/domain/libraryImport.js](../src/domain/libraryImport.js)). It reads the app's own catalog
+export — what a colleague sends when trainers exchange catalogs — the short `librept.library/1`
+shape, and a bare list of names.
+
+- **The review comes before the write**: how many exercises and circuits are new, which ones the
+  library already has (same id, or the same name with case and spacing folded — they are not added
+  twice), and every entry that could not be read, with its position.
+- **The source name** comes from the file (`source` or `author`), else from the file's name, and the
+  trainer can change it. Every exercise and circuit from the import carries it; left empty, they
+  count as the trainer's own. After the import the library opens filtered to that source.
+- **Circuits** are stored for building plans (schema 5's `circuits`), never as routines. A circuit
+  points at its exercises by id, and one with no name is given the word for circuit and its first
+  two exercises ("Circuit — Sled Push, Push-Ups"). Inserting a stored circuit into a plan is TODO
+  §45.5's next step.
 
 ---
 
@@ -208,6 +227,9 @@ Delivers TODO §13.1's last bullet (adopt an open standard for interchangeable e
 | The catalog is listed in a workspace that stores no exercise | [../tests/medium/test_exercise_catalog.py](../tests/medium/test_exercise_catalog.py) · `test_an_empty_database_still_shows_the_librept_catalog` |
 | Source filter separates the trainer's own from LibrePT's, and marks the own with pencil + word | [../tests/medium/test_exercise_catalog.py](../tests/medium/test_exercise_catalog.py) · `test_source_filter_separates_and_marks_the_trainers_own` |
 | The picker's Source row limits the choice, with the same mark | [../tests/medium/test_clipboard_catalog_picker.py](../tests/medium/test_clipboard_catalog_picker.py) · `test_source_filter_limits_the_choice_to_the_trainers_own` |
+| Import reviews first, then adds under its source; an unnamed circuit is named from its exercises | [../tests/medium/test_exercise_catalog.py](../tests/medium/test_exercise_catalog.py) · `test_import_reviews_first_then_adds_under_its_source` |
+| An imported library survives a reload | [../tests/e2e/test_library_import.py](../tests/e2e/test_library_import.py) · `test_an_imported_library_is_still_there_after_a_reload` |
+| Reading the three shapes, duplicates, circuit references, placeholder names | [../tests/unit_js/domain/libraryImport.test.mjs](../tests/unit_js/domain/libraryImport.test.mjs) |
 | No screen reads the stored exercises past the library | [../tests/unit_js/data/exerciseLibrary.test.mjs](../tests/unit_js/data/exerciseLibrary.test.mjs) · `no screen reads the stored exercises past the library` |
 | Custom movement form enforces name + equipment + pattern | [../tests/medium/test_exercise_catalog.py](../tests/medium/test_exercise_catalog.py) · `test_custom_exercise_requires_taxonomy` |
 | Polymorphic reps/load parse, format & equipment-derived units | [../tests/e2e/test_reps_and_load.py](../tests/e2e/test_reps_and_load.py) · `test_reps_and_load_helpers` |

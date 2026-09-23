@@ -10,6 +10,10 @@ import { metricOptionsFor } from "../domain/exerciseModality.js";
 import { $id, closeModal, openModal, renderMarkupOnce } from "../modules/common/dom.js";
 import { keepRecordLive } from "../modules/common/liveRecordForm.js";
 import { renderExercisesList } from "../modules/exercises/exercisesView.js";
+import {
+  initLibraryImportDialog,
+  openLibraryImportDialog,
+} from "../modules/exercises/libraryImportDialog.js";
 
 // Filled in by setupExerciseForms, and called by the create-form ROUTE — same seam pattern as
 // routineFormsController's openRoutineCreateForm.
@@ -135,6 +139,19 @@ export function setupExerciseForms({
     syncMetricField();
     live.openNew();
   };
+  initLibraryImportDialog({
+    t,
+    getState,
+    saveToLocalStorage,
+    newId: newRecordId,
+    readFileText: (file) => file.text(),
+    onImported: (source) => {
+      renderExercisesList({ state: getState(), t, sourceFilter: source });
+      populateDropdownSelectors();
+    },
+  });
+  $id("btn-import-library")?.addEventListener("click", openLibraryImportDialog);
+
   const btnAddExercise = $id("btn-add-exercise");
   if (btnAddExercise) {
     btnAddExercise.addEventListener("click", () => navigateToPath(urlFor("exercise.new")));
@@ -221,13 +238,14 @@ export function setupExerciseForms({
   }
 
   // A tap moves the active chip within ITS row only — source and muscle filter independently.
+  // Delegated to the row, because the source chips are redrawn with every list render.
   for (const row of document.querySelectorAll("#view-exercises .filter-chips")) {
-    for (const chip of row.querySelectorAll(".chip")) {
-      chip.addEventListener("click", () => {
-        for (const c of row.querySelectorAll(".chip")) c.classList.remove("active");
-        chip.classList.add("active");
-        renderExercisesList({ state: getState(), t });
-      });
-    }
+    row.addEventListener("click", (event) => {
+      const chip = event.target.closest(".chip");
+      if (!chip) return;
+      for (const c of row.querySelectorAll(".chip")) c.classList.remove("active");
+      chip.classList.add("active");
+      renderExercisesList({ state: getState(), t });
+    });
   }
 }

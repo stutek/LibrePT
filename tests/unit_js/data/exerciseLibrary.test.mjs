@@ -10,8 +10,10 @@ import { fileURLToPath } from "node:url";
 import {
   CATALOG_SOURCE,
   OWN_SOURCE,
+  addToLibrary,
   exerciseSourceOf,
   libraryExercises,
+  sourcesOf,
   withSource,
 } from "../../../src/data/exerciseLibrary.js";
 import { DEFAULT_EXERCISES } from "../../../src/data/index.js";
@@ -62,6 +64,29 @@ test("the source filter keeps only the exercises from the chosen source", () => 
   assert.deepEqual(withSource(library, OWN_SOURCE), [own]);
   assert.equal(withSource(library, CATALOG_SOURCE).length, DEFAULT_EXERCISES.length);
   assert.equal(withSource(library, "all").length, library.length);
+});
+
+test("an imported exercise's source is the name it was imported under", () => {
+  const imported = { id: "0000000000000000000anas", name: "Sled Push", source: "Ana Novak" };
+  assert.equal(exerciseSourceOf(imported), "Ana Novak");
+  const library = libraryExercises({ exercises: [own, imported] });
+  assert.deepEqual(sourcesOf(library), [CATALOG_SOURCE, OWN_SOURCE, "Ana Novak"]);
+  assert.deepEqual(withSource(library, "Ana Novak"), [imported]);
+});
+
+test("an import adds to the stored library without touching what was there", () => {
+  const before = [own];
+  const state = { exercises: before };
+  addToLibrary(state, {
+    exercises: [{ id: "x", name: "Sled Push" }],
+    circuits: [{ id: "c", name: "F" }],
+  });
+  assert.deepEqual(
+    state.exercises.map((exercise) => exercise.id),
+    [own.id, "x"],
+  );
+  assert.deepEqual(state.circuits, [{ id: "c", name: "F" }]);
+  assert.deepEqual(before, [own]);
 });
 
 // The catalog is not stored, so a screen that reads `state.exercises` directly shows a trainer an

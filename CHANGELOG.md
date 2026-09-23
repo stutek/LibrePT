@@ -43,6 +43,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   previous commit's code, is booted by `tests/e2e/test_device_database_corpus.py` to prove it; under the
   old rule that test finds no records at all.
 
+## 2026-09-23 — Importing a trainer's exercise library and circuits
+
+### Added
+
+- **Import in the exercise library** (§45.5). Paste a library or read it from a file — your own, or
+  one a colleague exported from LibrePT. Before anything is added, the app says how many exercises
+  and circuits are new, which ones the library already has (they are not added twice), and which
+  entries it could not read. Each import carries a source name, shown on every exercise from it and
+  offered as its own chip in the Source filter. A circuit with no name is given one from its first
+  two exercises.
+
 ## 2026-09-23 — LibrePT's exercise catalog in the trainer's own workspace, and a filter by source
 
 ### Added
