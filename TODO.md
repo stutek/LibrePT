@@ -3696,6 +3696,32 @@ go stale. Extending it to cover a bare movement list is small; replacing it with
 **Ruling (Simon, 2026-09-11):** *"todo je v redu"* — the TODO shape stands. Extend §29 rather than
 design a second route.
 
+**Picked up 2026-09-23 (Simon):** import the trainer's own library of exercises and circuits (*sklop*
+is the UI's word for a circuit), let the filters limit the choice by source, and mark the exercises.
+Three facts from the code decide the shape, and each blocks a part of it until ruled:
+
+1. **The trainer's own workspace has no LibrePT catalog.** `emptyState()` starts with
+   `exercises: []`, and `DEFAULT_EXERCISES` is written only by `seedMockData` — the sandbox and the
+   test switch `?init=`. Outside the sandbox every exercise is already the trainer's, so a filter by
+   source has one source to show. **Blocks: the source filter.** Recommended: show the catalog in the
+   working database too, as read-only entries read from code and merged with the stored ones when
+   read, so the source is known from where an entry comes from, with no stored field.
+2. **A stored `source` field mints schema 5.** `SCHEMA_4.exercises` is frozen (§60), so a field that
+   says "imported from this file" or "typed in the app" needs schema 5, a migration step and a
+   fixture, and every backup written afterwards is refused by older builds. Two sources — LibrePT's
+   catalog and the trainer's own — need no field: [seedProvenance.js](src/data/seedProvenance.js)
+   already holds the catalog's id set. **Blocks: telling imported exercises from hand-typed ones.**
+3. **A circuit has no record of its own.** It exists only as a `circuitId` on the items of a routine
+   or a session. An imported circuit can be stored as a routine whose items share one `circuitId`,
+   with no schema change, but nothing yet inserts a stored circuit into an existing plan, so until
+   that action exists a circuit library is usable only as the template for a whole session.
+   **Blocks: circuit import.**
+
+The mark: §29.1 already chose `fa-pencil` with the word CUSTOM for a movement with no catalog behind
+it. Recommended for the trainer's own exercises too — a glyph and a word, and a background colour at
+most as an addition, because each theme restyles colour and a colour alone says nothing to a reader
+who cannot tell two tints apart.
+
 ### 45.6 [ ] The session list needs filters: a date range, a client, a location
 
 **Reported:** on the home screen, the calendar should act as a from–to filter; a filter by client is
