@@ -181,8 +181,17 @@ def test_a_real_save_star_writes_into_every_live_schema_store_identically(
         }"""
     )
 
-    assert set(stores.keys()) == {"schema4", "schemaPREVIEW"}, (
-        "expected exactly the two live schema stores — update this test if a schema was added/retired"
+    # Derived from the app's own list of live schemas, so adding or retiring one needs no edit here.
+    live = page.evaluate(
+        """async () => {
+            const r = await import(new URL('data/readSchema.js', document.baseURI).href);
+            const i = await import(new URL('data/indexedDb.js', document.baseURI).href);
+            return r.liveSchemas().map((schema) => i.storeNameForSchema(schema));
+        }"""
+    )
+    assert len(live) >= 2, "a fan-out into one store proves nothing about a star write"
+    assert set(stores.keys()) == set(live), (
+        "a store for every live schema, and no other"
     )
     for schema_name, record in stores.items():
         assert record is not None, (

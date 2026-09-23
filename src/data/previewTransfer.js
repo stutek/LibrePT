@@ -35,15 +35,19 @@ import {
   schemaAcceptsCollection,
   toDomainObject,
 } from "./recordProjections.js";
-import { LIVE_SCHEMAS, STABLE_SCHEMA } from "./recordSchemas.js";
+import { LIVE_SCHEMAS } from "./recordSchemas.js";
 
 const LEGACY_PREVIEW = "P";
+// Schema 4 by name, not the stable schema: the P-only records belong in the store that was stable
+// when they were moved, and the boot backfill carries them up into every newer store from there
+// (readSchema.js fills each schema from the one below it).
+const TRANSFER_TARGET = 4;
 const TRANSFERRED_KEY = "transferredFromP";
 
 /** Copies what only the P store holds into the stable store, once. Returns how many records moved. */
 export async function transferRecordsOnlyInPreview(db) {
   const source = storeNameForSchema(LEGACY_PREVIEW);
-  const target = storeNameForSchema(STABLE_SCHEMA);
+  const target = storeNameForSchema(TRANSFER_TARGET);
   if (!db.objectStoreNames.contains(source) || !db.objectStoreNames.contains(target)) return 0;
 
   const done = await getMetaEntry(
@@ -58,7 +62,7 @@ export async function transferRecordsOnlyInPreview(db) {
       (record) => record.id,
     ),
   );
-  const stable = LIVE_SCHEMAS[STABLE_SCHEMA];
+  const stable = LIVE_SCHEMAS[TRANSFER_TARGET];
   const missing = inPreview.filter(
     (record) =>
       !inStable.has(record.id) &&

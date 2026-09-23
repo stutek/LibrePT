@@ -20,6 +20,29 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-09-23 — Schema 5: room for an exercise's source and for circuits
+
+### Added
+
+- **Schema 5** (§76, for §45.5): schema 4 plus an optional `source` on an exercise and a new
+  collection, `circuits`. Nothing on the screen changes yet. The import that writes them comes next.
+  Frozen in `tests/fixtures/schemas/schema_5.json`; the migration step 4 → 5 changes nothing, because
+  a schema-4 database is already a valid schema-5 one.
+
+### Changed
+
+- **Every install reads schema 5, and a backup is written at 5.** Schema 4 goes on being written on
+  every save, for a phone that still has the previous build cached. A build that knows only schema 4
+  refuses a schema-5 backup file.
+
+### Fixed
+
+- **The first boot of a build that reads a new schema would have opened the app empty** — found
+  before it shipped. The new store was filled from the store being read, which was the empty one.
+  It is now filled from the schema below it. A frozen snapshot of a schema-4 phone, made from the
+  previous commit's code, is booted by `tests/e2e/test_device_database_corpus.py` to prove it; under the
+  old rule that test finds no records at all.
+
 ## 2026-09-23 — LibrePT's exercise catalog in the trainer's own workspace, and a filter by source
 
 ### Added

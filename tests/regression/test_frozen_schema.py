@@ -15,7 +15,7 @@ from pathlib import Path
 SRC = Path(__file__).resolve().parents[2] / "src"
 
 # The released schema these tests describe. Raise it only after re-reading the suite (see above).
-FROZEN_SCHEMA = 4
+FROZEN_SCHEMA = 5
 
 
 def released_schema():

@@ -201,7 +201,8 @@ test("the v0 demo corpus has its stored language cleared so the PT is asked once
   const r = migrate("schema0_demo.json");
 
   assert.equal(r.state.lang, null);
-  const langStep = r.applied.at(-1);
+  // Found by where it lands, not by its place: later steps follow it in the chain.
+  const langStep = r.applied.find((step) => step.to === 4);
   assert.ok(
     langStep.notes.some((note) => note.includes("sl")),
     `expected a note naming the cleared language, got ${JSON.stringify(langStep.notes)}`,

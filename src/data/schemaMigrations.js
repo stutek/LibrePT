@@ -31,6 +31,7 @@ const ARRAY_COLLECTIONS = [
   "planUpdates",
   "sessions",
   "notifications",
+  "circuits",
 ];
 
 /**

@@ -1,0 +1,444 @@
+{
+  "clients": {
+    "id": {
+      "required": true,
+      "type": "string"
+    },
+    "name": {
+      "required": true,
+      "type": "string"
+    },
+    "alias": {
+      "required": false,
+      "type": "string"
+    },
+    "avatar": {
+      "required": false,
+      "type": "string"
+    },
+    "joinedDate": {
+      "required": false,
+      "type": "string"
+    },
+    "email": {
+      "required": false,
+      "type": "string"
+    },
+    "phone": {
+      "required": false,
+      "type": "string"
+    },
+    "goals": {
+      "required": false,
+      "type": "string"
+    },
+    "weightHistory": {
+      "required": false,
+      "type": "array"
+    },
+    "notes": {
+      "required": false,
+      "type": "string"
+    },
+    "hasInjury": {
+      "required": false,
+      "type": "boolean"
+    },
+    "injury": {
+      "required": false,
+      "type": "string"
+    },
+    "active": {
+      "required": true,
+      "type": "boolean"
+    },
+    "gdprConsent": {
+      "required": false,
+      "type": "object"
+    },
+    "erasure": {
+      "required": false,
+      "type": "object"
+    }
+  },
+  "exercises": {
+    "id": {
+      "required": true,
+      "type": "string"
+    },
+    "name": {
+      "required": true,
+      "type": "string"
+    },
+    "category": {
+      "required": false,
+      "type": "string"
+    },
+    "equipment": {
+      "required": false,
+      "type": "string"
+    },
+    "pattern": {
+      "required": false,
+      "type": "string"
+    },
+    "modality": {
+      "required": false,
+      "type": "string"
+    },
+    "metric": {
+      "required": false,
+      "type": "string"
+    },
+    "instructions": {
+      "required": false,
+      "type": "string"
+    },
+    "source": {
+      "required": false,
+      "type": "string"
+    }
+  },
+  "routines": {
+    "id": {
+      "required": true,
+      "type": "string"
+    },
+    "name": {
+      "required": true,
+      "type": "string"
+    },
+    "description": {
+      "required": false,
+      "type": "string"
+    },
+    "exercises": {
+      "required": true,
+      "type": "array"
+    }
+  },
+  "sessions": {
+    "id": {
+      "required": true,
+      "type": "string"
+    },
+    "time": {
+      "required": false,
+      "type": "string"
+    },
+    "title": {
+      "required": false,
+      "type": "string"
+    },
+    "location": {
+      "required": false,
+      "type": "string"
+    },
+    "participants": {
+      "required": true,
+      "type": "array"
+    },
+    "routineId": {
+      "required": false,
+      "type": "string"
+    },
+    "maxCapacity": {
+      "required": false,
+      "type": "number"
+    },
+    "day": {
+      "required": false,
+      "type": "string"
+    },
+    "titles": {
+      "required": false,
+      "type": "array"
+    },
+    "startDate": {
+      "required": false,
+      "type": "string"
+    },
+    "seriesId": {
+      "required": false,
+      "type": "string"
+    },
+    "occurrenceDate": {
+      "required": false,
+      "type": "string"
+    },
+    "cancelled": {
+      "required": false,
+      "type": "boolean"
+    },
+    "completed": {
+      "required": false,
+      "type": "boolean"
+    },
+    "duration": {
+      "required": false,
+      "type": "number"
+    }
+  },
+  "history": {
+    "id": {
+      "required": true,
+      "type": "string"
+    },
+    "clientId": {
+      "required": true,
+      "type": "string"
+    },
+    "clientName": {
+      "required": false,
+      "type": "string"
+    },
+    "routineId": {
+      "required": false,
+      "type": "string"
+    },
+    "routineName": {
+      "required": false,
+      "type": "string"
+    },
+    "date": {
+      "required": false,
+      "type": "string"
+    },
+    "duration": {
+      "required": false,
+      "type": "number"
+    },
+    "exercises": {
+      "required": true,
+      "type": "array",
+      "items": {
+        "id": {
+          "required": false,
+          "type": "string"
+        },
+        "type": {
+          "required": false,
+          "type": "string"
+        },
+        "position": {
+          "required": false,
+          "type": "number"
+        },
+        "circuitId": {
+          "required": false,
+          "type": "string"
+        },
+        "circuitTitle": {
+          "required": false,
+          "type": "string"
+        },
+        "circuitSeries": {
+          "required": false,
+          "type": "number"
+        },
+        "name": {
+          "required": false,
+          "type": "string"
+        },
+        "loadUnit": {
+          "required": false,
+          "type": "string"
+        },
+        "modality": {
+          "required": false,
+          "type": "string"
+        },
+        "metric": {
+          "required": false,
+          "type": "string"
+        },
+        "completed": {
+          "required": false,
+          "type": "boolean"
+        },
+        "sets": {
+          "required": false,
+          "type": "array"
+        },
+        "rest": {
+          "required": false,
+          "type": "number"
+        }
+      }
+    },
+    "feedback": {
+      "required": false,
+      "type": "array"
+    },
+    "isPlanning": {
+      "required": false,
+      "type": "boolean"
+    },
+    "title": {
+      "required": false,
+      "type": "string"
+    }
+  },
+  "planUpdates": {
+    "id": {
+      "required": true,
+      "type": "string"
+    },
+    "clientId": {
+      "required": true,
+      "type": "string"
+    },
+    "clientName": {
+      "required": false,
+      "type": "string"
+    },
+    "date": {
+      "required": false,
+      "type": "string"
+    },
+    "exerciseName": {
+      "required": false,
+      "type": "string"
+    },
+    "tag": {
+      "required": false,
+      "type": "string"
+    },
+    "hasVoiceNote": {
+      "required": false,
+      "type": "boolean"
+    },
+    "resolved": {
+      "required": true,
+      "type": "boolean"
+    }
+  },
+  "notifications": {
+    "id": {
+      "required": true,
+      "type": "string"
+    },
+    "type": {
+      "required": false,
+      "type": "string"
+    },
+    "titleKey": {
+      "required": false,
+      "type": "string"
+    },
+    "descKey": {
+      "required": false,
+      "type": "string"
+    },
+    "actions": {
+      "required": false,
+      "type": "array"
+    },
+    "icon": {
+      "required": false,
+      "type": "string"
+    }
+  },
+  "invites": {
+    "id": {
+      "required": true,
+      "type": "string"
+    },
+    "sessionId": {
+      "required": true,
+      "type": "string"
+    },
+    "clientId": {
+      "required": true,
+      "type": "string"
+    },
+    "channel": {
+      "required": false,
+      "type": "string"
+    },
+    "sentAt": {
+      "required": false,
+      "type": "string"
+    },
+    "status": {
+      "required": true,
+      "type": "string"
+    },
+    "answer": {
+      "required": false,
+      "type": "string"
+    },
+    "answeredAt": {
+      "required": false,
+      "type": "string"
+    }
+  },
+  "sessionSeries": {
+    "id": {
+      "required": true,
+      "type": "string"
+    },
+    "title": {
+      "required": false,
+      "type": "string"
+    },
+    "startDate": {
+      "required": true,
+      "type": "string"
+    },
+    "until": {
+      "required": false,
+      "type": "string"
+    },
+    "time": {
+      "required": true,
+      "type": "string"
+    },
+    "weekdays": {
+      "required": true,
+      "type": "array"
+    },
+    "interval": {
+      "required": false,
+      "type": "number"
+    },
+    "location": {
+      "required": false,
+      "type": "string"
+    },
+    "participants": {
+      "required": false,
+      "type": "array"
+    },
+    "routineId": {
+      "required": false,
+      "type": "string"
+    },
+    "maxCapacity": {
+      "required": false,
+      "type": "number"
+    }
+  },
+  "circuits": {
+    "id": {
+      "required": true,
+      "type": "string"
+    },
+    "name": {
+      "required": true,
+      "type": "string"
+    },
+    "series": {
+      "required": false,
+      "type": "number"
+    },
+    "exercises": {
+      "required": true,
+      "type": "array"
+    },
+    "source": {
+      "required": false,
+      "type": "string"
+    }
+  }
+}

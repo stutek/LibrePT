@@ -56,6 +56,9 @@ const SETTINGS_KEYS = ["lang"];
  * no-op 4→5 step in the migration chain, since the records will not have changed. */
 export const BACKUP_FORMATS = {
   4: { container: "json" },
+  // Schema 5 (TODO §76): the same plain-JSON container; the records gained `exercises.source` and
+  // the `circuits` collection. A build that knows only 4 refuses a file at 5 — the stated price.
+  5: { container: "json" },
 };
 
 /** The version written today. Tied to BACKUP_SCHEMA rather than restated, because they are one

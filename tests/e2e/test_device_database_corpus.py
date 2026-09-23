@@ -85,7 +85,7 @@ def _boot_snapshot(page, local_server, name, read_schema=None):
 
 def test_every_device_snapshot_is_booted_here():
     """A snapshot added to the folder but not booted below would stop being tested unnoticed."""
-    booted = {"p_era_install.json"}
+    booted = {"p_era_install.json", "schema4_era_install.json"}
     assert {path.name for path in DEVICES.glob("*.json")} == booted
 
 
@@ -116,3 +116,36 @@ def test_a_p_era_install_read_at_schema_4_keeps_them_too(page, local_server):
         "the sent invitation did not reach schema 4"
     )
     assert "snapCancelled01" in loaded["cancelled"]
+
+
+# Every collection the app holds in memory, counted — what a trainer would see, collection by collection.
+COUNTS = """async () => {
+    const s = await import(new URL('data/stateStore.js', document.baseURI).href);
+    const state = s.getState();
+    const counts = {};
+    for (const [key, value] of Object.entries(state)) {
+        if (Array.isArray(value) && value.length > 0) counts[key] = value.length;
+    }
+    return { counts };
+}"""
+
+
+def test_a_schema_4_install_reads_schema_5_with_everything_it_had(page, local_server):
+    """The first boot after schema 5 became the schema every install reads (TODO §76). The snapshot's
+    store 4 holds the data and carries no "filled" marker, because it was always the store read. The
+    schema 5 store does not exist yet. Filling 5 from the schema being read instead of from 4 opened
+    this install EMPTY: every collection below must arrive whole."""
+    snapshot = json.loads((DEVICES / "schema4_era_install.json").read_text())
+    store4 = next(
+        store for store in snapshot["database"]["stores"] if store["name"] == "schema4"
+    )
+    expected = {}
+    for record in store4["records"]:
+        expected[record["collection"]] = expected.get(record["collection"], 0) + 1
+
+    _boot_snapshot(page, local_server, "schema4_era_install.json")
+    loaded = page.evaluate(COUNTS)
+
+    # Whatever store this pass reads — 5 by default, PREVIEW in the gate's preview pass, which is
+    # filled from 5 — everything the phone held arrives.
+    assert loaded["counts"] == expected

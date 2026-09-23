@@ -35,6 +35,9 @@ export const projectInvite = (invite) => toRecord("invites", invite);
 // A repeating session (TODO §35.3a). Declared here for the same reason invitations are: COLLECTIONS
 // is derived from this table, and a collection missing from it does not persist at all.
 export const projectSessionSeries = (series) => toRecord("sessionSeries", series);
+// A reusable block of exercises for building a plan (TODO §45.5). Schema 5 declares it and schema 4
+// does not, so the fan-out writes it into store 5 alone.
+export const projectCircuit = (circuit) => toRecord("circuits", circuit);
 export const projectPreviewProbe = (probe) => toRecord("previewProbe", probe);
 
 const PROJECTORS = {
@@ -47,6 +50,7 @@ const PROJECTORS = {
   notifications: projectNotification,
   invites: projectInvite,
   sessionSeries: projectSessionSeries,
+  circuits: projectCircuit,
   previewProbe: projectPreviewProbe,
 };
 

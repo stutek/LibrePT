@@ -18,10 +18,11 @@
 // own small transform again, which is what lets the import banner tell a trainer what actually
 // moved rather than "upgraded from the floor".
 //
-// **Schema 4 is the active schema** (Simon, 2026-09-17, TODO §61): the shape this build reads,
-// writes and stamps. Until then the build read and stamped the preview schema "P". Everything P held
-// beyond 4 was moved into schema 4 that day, so a stored "P" means schema 4 and ranks as 4 — neither
-// refused as newer nor walked back through the chain from the floor.
+// **Schema 5 is the active schema** (TODO §76, 2026-09-23): the shape this build reads, writes and
+// stamps. Schema 4 was, from 2026-09-17 (Simon, TODO §61); before that the build read and stamped the
+// preview schema "P". Everything P held beyond 4 was moved into schema 4 that day, so a stored "P"
+// means schema 4 and ranks as 4 — neither refused as newer nor walked back through the chain from
+// the floor.
 //
 // A PREVIEW shape is a dead branch, never a step: newer than 4, but a chain 4 → PREVIEW → 5 must not
 // exist. A live build therefore refuses data stamped with a preview shape rather than migrating it.
@@ -31,7 +32,7 @@
 // The frozen corpus stamps 0 deliberately, so the chain's entry point is visible in the fixture.
 export const BASELINE_SCHEMA_VERSION = 1;
 
-export const CURRENT_SCHEMA_VERSION = 4;
+export const CURRENT_SCHEMA_VERSION = 5;
 
 // The preview schema installs were stamped with before schema 4 became active. Read, never written.
 export const LEGACY_PREVIEW_VERSION = "P";
@@ -48,7 +49,7 @@ export function isPreviewVersion(version) {
 
 // How a preview shape ORDERS against numbered versions — never stored, never shown. Above the active
 // schema, so a live build refuses preview data as newer instead of migrating it into the chain.
-export const PREVIEW_SCHEMA_RANK = 4.5;
+export const PREVIEW_SCHEMA_RANK = 5.5;
 
 /**
  * Comparable rank for a stored version: a number, the legacy "P", or null when it is unrecognisable.
@@ -154,6 +155,18 @@ export const MIGRATION_STEPS = [
       }
       state.lang = null;
       return { state, notes };
+    },
+  },
+  {
+    from: 4,
+    to: 5,
+    description: "Make room for an exercise's source and for circuits",
+    // A step that does nothing, and a real one (TODO §60): schema 5 only ADDS — `exercises.source`
+    // and the `circuits` collection, both for importing a trainer's own library (TODO §45.5) — so a
+    // schema-4 database is already a valid schema-5 one. The step is what gives 5 a place in the
+    // chain, so a schema-4 file is read as 4 and stamped 5 with its history complete.
+    apply(state) {
+      return { state, notes: [] };
     },
   },
 ];

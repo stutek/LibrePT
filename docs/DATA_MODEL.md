@@ -83,12 +83,12 @@ back through the chain, which would re-ask the language question.
 **A preview shape is a dead branch, never a step** (ruled 2026-09-17): a chain 4 → PREVIEW → 5 must
 not exist. `migrateState` refuses a preview version by WHAT IT IS — `isPreviewVersion`: the name
 PREVIEW, or any fractional number — before it compares ranks, because a rank would only refuse it
-while the active schema is lower. `PREVIEW_SCHEMA_RANK` (4.5) is left for ordering alone.
+while the active schema is lower. `PREVIEW_SCHEMA_RANK` (5.5) is left for ordering alone.
 
 **Preview data is dropped on every preview change** rather than migrated — that is what makes an
 unstable shape safe to iterate on, and why a preview shape needs no migration steps of its own.
 
-### Backups are written at 4, not at PREVIEW
+### Backups are written at the newest numbered schema, not at PREVIEW
 
 Because a preview shape can change on any commit, a backup written *at* PREVIEW is restorable only by
 the exact build that wrote it. Backups are therefore written at `BACKUP_SCHEMA` — the newest **numbered**
@@ -97,7 +97,7 @@ fan-out uses, so the file cannot drift from what the store would write for that 
 restore it through the chain.
 
 **One shape per file, not every live one.** Shapes only gain fields under expand-first
-(`SCHEMA_PREVIEW` is `SCHEMA_4` with a stricter `startDate` and one collection of its own), so the
+(`SCHEMA_PREVIEW` is `SCHEMA_5` with a stricter `startDate` and one collection of its own), so the
 newest is a strict superset of every older one and an older copy alongside it would store strictly
 less information at full size. Restore re-derives every live store from whatever it receives.
 
@@ -617,7 +617,7 @@ what this build reads and stamps, what a backup is written at, and the copy `sch
 FROM. `schemaPREVIEW` is for CI and for previewing an upcoming version, and is disposable: its fields
 can change on any commit, so it is never a source of truth for anything that has to outlive the build. On boot, if the recorded build SHA does not match the
 running one — **or is absent, which counts as not matching** — the preview store is emptied, and
-re-projected from `schema4` only for an install that READS it; otherwise it is filled at activation
+re-projected from the stable store only for an install that READS it; otherwise it is filled at activation
 (`refreshPreviewStoreIfBuildChanged` and `setReadSchema`, TODO §61). Emptying at every start was tried
 and reverted the same day: a preview session spans reloads, and CI's second pass reads the store on
 every navigation. There is no migration between preview shapes, and there does not need to be: the
@@ -625,26 +625,34 @@ durable copy makes PREVIEW rebuildable rather than something that must be preser
 cost the backup and sync surfaces warn about, applied at the same boundary.
 
 - **Reads come from one DECLARED schema**, never derived. `DEFAULT_READ_SCHEMA` in
-  [recordSchemas.js](../src/data/recordSchemas.js) is what a fresh install reads — schema 4 since
-  2026-09-17, P before; which schema a
-  given install *actually* reads is a trainer-owned setting ([readSchema.js](../src/data/readSchema.js)).
+  [recordSchemas.js](../src/data/recordSchemas.js) is what every install reads — schema 5 since
+  2026-09-23, 4 from 2026-09-17, P before. **It is the newest numbered schema, whatever app version the
+  trainer runs** (TODO §76): the app version decides behaviour, never what is read. Memory holds only
+  what the read brings in, and a save, a backup and a Drive sync are all built from memory — so
+  reading a narrower schema would drop from the next backup what only the wider one holds, and a
+  restore of that backup would delete it. `recordSchemas.test.mjs` fails the build when the read schema
+  stops declaring a field or collection some other live schema declares. A per-install choice
+  ([readSchema.js](../src/data/readSchema.js)) remains for the test passes that read PREVIEW or pin the
+  released shape; nothing offers it to a trainer.
   It used to be `Math.max(...Object.keys(LIVE_SCHEMAS))`, which made the read target a function of
   registry *membership*: registering a shape silently relocated every read in the app. "This build
   can write shape N" and "this build reads shape N" are independent facts, and conflating them let a
   cutover happen as a side effect of a one-line registry edit with nothing in the diff saying so.
 
-### Upgrading is a toggle, not a migration
+### A new schema is filled at boot, from the schema below it
 
-Because every live schema is written on every save, a newer schema's store is **continuously
-current** rather than something built at the moment of switching. So the trainer-facing upgrade is a
-read re-point: instantaneous, and **reversible**, because the schema being left goes on being
-written too. Nothing is deleted, nothing is transformed in place, and no record can be lost in
-either direction.
+Because every live schema is written on every save, every live store is **continuously current**
+once it has been filled. Moving the read to another store is therefore a read re-point, with nothing
+deleted and nothing transformed in place.
 
 The only real work is the **backfill**. A store a build has just provisioned starts empty and would
-otherwise only become current at the next save, so it is filled once from whichever schema the
-install reads today — **pre-emptively at boot, before the trainer opts into anything**, so an offer
-is never followed by a wait. It runs through the normal projection path (`read record →
+otherwise only become current at the next save, so it is filled once — **at boot, before anything
+reads** — from the numbered schema just below it. **Never from the schema being read**: on the first
+boot of a build that reads a new schema, the schema being read IS the empty one, and taking it as the
+source opened a real install empty (TODO §76; `tests/e2e/test_device_database_corpus.py` boots a
+schema-4 install to prove it). The schema below is complete on every install that ran the previous
+build, whose star write kept it current, and filling in ascending order carries an install across a
+jump of two numbers. It runs through the normal projection path (`read record →
 toDomainObject → projectCollection`) rather than copying rows, so a schema change needing a genuine
 transform has exactly one place to land and cannot drift from the write path.
 

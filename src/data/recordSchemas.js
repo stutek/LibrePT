@@ -81,7 +81,7 @@ export const SCHEMA_4 = {
     // Optional and free-form: gyms have two Jane Does, and every surface that must not confuse them
     // — the erasure confirmation, the data-export picker — needs something human to show alongside
     // an opaque id. Additive, so a record without it stays valid; declared here rather than only in
-    // P so it reaches a backup (BACKUP_SCHEMA is 4 — see backupFile.js).
+    // P so it reaches a backup (a backup is written at a numbered schema — see backupFile.js).
     alias: { required: false, type: "string" },
     avatar: { required: false, type: "string" },
     joinedDate: { required: false, type: "string" },
@@ -237,18 +237,47 @@ export const SCHEMA_4 = {
   },
 };
 
+// **FROZEN, like SCHEMA_4 above**, and held still by tests/fixtures/schemas/schema_5.json.
+//
+// Schema 4 plus what importing a trainer's own library needs (TODO §45.5, ruled 2026-09-23):
+//   - `exercises.source` — who the exercise came from, as the trainer names it ("Ana Novak").
+//     Trainers exchange catalogues, so any number of sources exist; absent on the trainer's own.
+//   - `circuits` — a block of exercises the trainer reuses when building a plan. Offered only there,
+//     never listed as a routine. `exercises` holds routine-style entries whose `id` is an exercise
+//     id (recordDependencies.js reads it that way). `name` is required: an imported circuit that
+//     arrives without a title is given one by the import (Simon, 2026-09-23).
+//
+// Declared as a spread of SCHEMA_4 on purpose: schema 5 only ADDS. Every field an older live schema
+// declares must stay declared in the newest one (recordSchemas.test.mjs), because every install
+// READS the newest numbered store (DEFAULT_READ_SCHEMA below) whatever app version it runs.
+export const SCHEMA_5 = {
+  ...SCHEMA_4,
+  exercises: {
+    ...SCHEMA_4.exercises,
+    source: { required: false, type: "string" },
+  },
+  circuits: {
+    id: { required: true, type: "string" },
+    name: { required: true, type: "string" },
+    series: { required: false, type: "number" },
+    exercises: { required: true, type: "array" },
+    source: { required: false, type: "string" },
+  },
+};
+
 // The PREVIEW shape (TODO §61): for CI and for previewing an upcoming version, never a step in the
 // migration chain. It is provisioned and written like any live schema — Simon, 2026-09-17: PREVIEW
-// uses the same mechanism as released schemas — and rebuilt from schema 4 when the build changes.
-// It replaced "P", whose fields and collections moved into schema 4 the same day.
+// uses the same mechanism as released schemas — and rebuilt from the stable schema when the build
+// changes. It replaced "P", whose fields and collections moved into schema 4 the same day. Built on
+// the NEWEST numbered shape, so reading it never narrows what an install holds.
 export const SCHEMA_PREVIEW = {
-  ...SCHEMA_4,
+  ...SCHEMA_5,
   sessions: {
-    ...SCHEMA_4.sessions,
+    ...SCHEMA_5.sessions,
     startDate: { required: true, type: "string" },
   },
   // A collection ONLY this shape declares, so staging is always exercised by the real schemas: a
-  // record of it goes into the PREVIEW store alone, a backup (written at 4) leaves it out, and a
+  // record of it goes into the PREVIEW store alone, a backup (written at a numbered schema) leaves it out, and a
   // restore names it as lost. Written by tests; no screen writes it, so an install never holds one.
   previewProbe: {
     id: { required: true, type: "string" },
@@ -263,17 +292,19 @@ export const SCHEMA_PREVIEW = {
 // cost real time in review before it was collapsed. `4` here is the SAME 4 the migration chain ends
 // at.
 //
-// Two shapes are live, and they do different jobs:
-//   - **4** is the active schema (TODO §61): what this build reads and stamps, what a backup is
-//     written at, and the copy P is rebuilt FROM when the build changes.
+// Three shapes are live, and they do different jobs:
+//   - **5** is the active schema (TODO §76): what this build reads and stamps, what a backup is
+//     written at, and the copy PREVIEW is rebuilt FROM when the build changes.
+//   - **4** stays written for the build a phone may still have cached, which reads only store 4
+//     (TODO §18's reason for the star write), and for the app version that behaves as 4 did.
 //   - **PREVIEW** is the preview shape for CI and previews, written like any live schema and rebuilt
-//     from 4 when the build changes. Disposable by design: never a source of truth for anything that
+//     from 5 when the build changes. Disposable by design: never a source of truth for anything that
 //     has to outlive the build, and never a step in the migration chain.
-export const LIVE_SCHEMAS = { 4: SCHEMA_4, PREVIEW: SCHEMA_PREVIEW };
+export const LIVE_SCHEMAS = { 4: SCHEMA_4, 5: SCHEMA_5, PREVIEW: SCHEMA_PREVIEW };
 
 // The durable shape, and the one PREVIEW is rebuilt from. Not derived from LIVE_SCHEMAS by taking a
 // max: PREVIEW is not a number, and the stable shape is a decision rather than an accident of ordering.
-export const STABLE_SCHEMA = 4;
+export const STABLE_SCHEMA = 5;
 
 /**
  * The newest NUMBERED shape, and what a backup file is written at.
@@ -283,7 +314,7 @@ export const STABLE_SCHEMA = 4;
  * numbered shape does not move, so any build can restore it.
  *
  * Only ONE shape goes into a file, not every live one. Shapes only gain fields under expand-first —
- * SCHEMA_PREVIEW is SCHEMA_4 plus whatever the preview adds — a superset of the stable shape,
+ * SCHEMA_PREVIEW is SCHEMA_5 plus whatever the preview adds — a superset of the stable shape,
  * and an older copy alongside it stores strictly less information at full size. Restore re-derives
  * every live store from whatever it receives, through the same fan-out that keeps them current.
  */
@@ -298,13 +329,15 @@ export const BACKUP_SCHEMA = STABLE_SCHEMA;
  * conflating them means a cutover can happen as a side effect of a one-line registry edit, with
  * nothing in the diff saying so.
  *
- * It is only the DEFAULT. Which schema a given install actually reads is a per-install choice the
- * trainer makes (data/readSchema.js): every live schema is written concurrently by the star-write
- * fan-out, so a newer one is already current and complete by the time it is offered, and moving
- * between them is a read re-point rather than a migration.
+ * **Every install reads the newest numbered schema, whatever app version the trainer runs**
+ * (TODO §76). The app version decides how the app BEHAVES; it never narrows what is read. Reading an
+ * older, narrower store would leave the data it cannot hold out of memory, and memory is what a save,
+ * a backup and a Drive sync are built from — so a backup would lose it and a restore would delete it.
+ * A per-install choice (data/readSchema.js) remains for the test passes that read PREVIEW or pin the
+ * released shape; nothing offers it to a trainer.
  */
-// Schema 4 since 2026-09-17: the active schema (TODO §61). It was "P", the preview shape.
-export const DEFAULT_READ_SCHEMA = 4;
+// Schema 5 since 2026-09-23 (TODO §76). Schema 4 from 2026-09-17 (TODO §61); before that "P".
+export const DEFAULT_READ_SCHEMA = 5;
 
 function typeOf(value) {
   if (Array.isArray(value)) return "array";

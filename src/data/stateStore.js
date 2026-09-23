@@ -86,6 +86,8 @@ export function emptyState() {
     // time (domain/sessionSeries.js), and an evening the trainer moved, cancelled or ran is a row in
     // `sessions` above that speaks for it.
     sessionSeries: [],
+    // Reusable blocks of exercises, offered when a plan is built (TODO §45.5). Schema 5 only.
+    circuits: [],
     notifications: [],
     // null, not "en": the language nobody has chosen yet must stay distinguishable from a chosen
     // English, or the splash cannot tell who to offer the choice to (see i18n/index.js).
@@ -102,6 +104,7 @@ export function stateHasData(s = state) {
     "planUpdates",
     "sessions",
     "sessionSeries",
+    "circuits",
   ].some((k) => Array.isArray(s[k]) && s[k].length > 0);
 }
 

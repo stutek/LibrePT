@@ -1,19 +1,17 @@
 // src/data/readSchema.js — which live schema THIS INSTALL reads from, and keeping every other one
 // ready to be read.
 //
-// The upgrade a trainer sees is a TOGGLE, not a wait. That is possible because the star-write
-// fan-out already writes every live schema on every save (stateStore.js), so a newer schema's store
-// is continuously current rather than something built at the moment of switching. Moving between
-// schemas is therefore a read re-point: instantaneous, reversible, and incapable of losing a record
-// because nothing is deleted and nothing is transformed in place.
+// Every install reads the newest numbered schema, whatever app version the trainer runs (TODO §76);
+// the per-install choice kept here is for the test passes that read PREVIEW or pin the released
+// shape, and nothing offers it to a trainer. Moving between stores is a read re-point: the star-write
+// fan-out writes every live schema on every save (stateStore.js), so every filled store is current.
 //
-// The one piece of real work is the BACKFILL. A store provisioned by an upgrade starts empty and
-// only becomes current at the next save, so a newly live schema is filled once from the schema this
-// install is reading today. That runs PRE-EMPTIVELY at boot — before the trainer opts into
-// anything, per docs/DATA_MODEL.md §4 — so by the time the offer is made there is nothing left to
-// do. It goes through the normal projection path (`read record → toDomainObject → projectCollection`)
-// rather than copying rows, so the day a schema change needs a genuine transform, there is one
-// place it lands and no second transform to drift from the write path.
+// The one piece of real work is the BACKFILL. A store a new build provisions starts empty and only
+// becomes current at the next save, so a newly live schema is filled once, at boot and before
+// anything reads, from the numbered schema just below it (`ensureLiveSchemasBackfilled`). It goes
+// through the normal projection path (`read record → toDomainObject → projectCollection`) rather
+// than copying rows, so the day a schema change needs a genuine transform, there is one place it
+// lands and no second transform to drift from the write path.
 //
 // ONE TRANSACTION, not a resumable cursor. §4 describes a resumable backfill with the meta store
 // holding a cursor; measured, this database does not need one — a full fan-out of the 90-record demo
@@ -123,22 +121,28 @@ async function backfillSchema(db, schema, sourceSchema) {
 }
 
 /**
- * Pre-emptively ready every NUMBERED live schema, so an upgrade offer is never followed by a wait.
- * Runs at boot; a no-op on every boot after the first for a given schema, costing one meta read each.
+ * Fill every NUMBERED live schema that this install has never filled, each from the numbered schema
+ * just below it, before anything reads. Runs at boot; a no-op on every boot after the first for a
+ * given schema, costing one meta read each.
  *
- * The schema currently being read is the source and is authoritative by definition — it is never
- * itself backfilled, which is what stops a newly provisioned empty store from overwriting the data.
+ * **The source is the schema BELOW, never the schema being read.** The two were the same thing while
+ * every install read the lowest schema. The day a build reads a NEW schema (TODO §76: every install
+ * reads the newest), the schema being read is the empty one — taking it as the source copied nothing
+ * into it, marked the older store as filled from it, and the trainer saw an empty app. The schema
+ * below is complete on every install that ran the build before this one, because that build's star
+ * write kept every live store current. Ascending order carries a jump of two numbers: 5 is filled
+ * from 4 before 6 is filled from 5. The lowest numbered schema is the one data has always been in,
+ * and is never a target.
  *
- * PREVIEW is left out: it is discarded at every start and filled only for an install that reads it
- * (`discardPreviewStoreAtBoot`), and filled at activation, so filling it here would be work undone.
+ * PREVIEW is left out: it is emptied when the build changes and filled only for an install that reads
+ * it (`refreshPreviewStoreIfBuildChanged`), or at activation, so filling it here would be work undone.
  */
 export async function ensureLiveSchemasBackfilled(db) {
-  const source = getReadSchema();
-  for (const schema of liveSchemas()) {
-    if (schema === source) continue;
-    if (String(schema) === String(PREVIEW_VERSION)) continue;
+  const numbered = liveSchemas().filter((schema) => String(schema) !== String(PREVIEW_VERSION));
+  for (let index = 1; index < numbered.length; index++) {
+    const schema = numbered[index];
     if (await isBackfilled(db, schema)) continue;
-    await backfillSchema(db, schema, source);
+    await backfillSchema(db, schema, numbered[index - 1]);
   }
 }
 

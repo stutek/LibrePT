@@ -191,16 +191,17 @@ test("the chain from 0 clears a non-English stored language too", async () => {
   assert.equal(migrated.state.lang, null);
 });
 
-test("schema 4 is active; a legacy P reads as 4 and a preview shape is refused", () => {
-  // Ruled 2026-09-17 (TODO §61): schema 4 is the active schema, and everything P held moved into it.
-  assert.equal(CURRENT_SCHEMA_VERSION, 4);
+test("schema 5 is active; a legacy P reads as 4 and a preview shape is refused", () => {
+  // Schema 5 is the active schema (TODO §76). Everything P held moved into schema 4 (TODO §61).
+  assert.equal(CURRENT_SCHEMA_VERSION, 5);
 
-  // A stored "P" is schema 4 now: accepted, not walked back through the chain. Walking it from the
-  // floor would run the 3 → 4 step again and ask a trainer who chose a language to choose again.
-  assert.equal(schemaRank("P"), schemaRank(CURRENT_SCHEMA_VERSION));
+  // A stored "P" is schema 4: accepted and brought forward from 4, not walked back through the chain.
+  // Walking it from the floor would run the 3 → 4 step again and ask a trainer who chose a language
+  // to choose again.
+  assert.equal(schemaRank("P"), 4);
   const legacy = m.migrateState({ schemaVersion: "P", lang: "sl", sessions: [] });
   assert.equal(legacy.ok, true);
-  assert.equal(legacy.state.schemaVersion, 4);
+  assert.equal(legacy.state.schemaVersion, CURRENT_SCHEMA_VERSION);
   assert.equal(legacy.state.lang, "sl", "a settled language question stays settled");
 
   assert.equal(schemaRank("nonsense"), null);

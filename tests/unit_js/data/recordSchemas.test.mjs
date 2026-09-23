@@ -208,15 +208,51 @@ function frozenShapeFor(schemaMajor) {
   return JSON.parse(readFileSync(`${FROZEN_SCHEMAS_DIR}schema_${schemaMajor}.json`, "utf-8"));
 }
 
-test("a numbered schema never moves: SCHEMA_4 still matches its frozen shape", () => {
+const numberedLiveSchemas = () => Object.keys(m.LIVE_SCHEMAS).filter((key) => /^\d+$/.test(key));
+
+test("a numbered schema never moves: every live one still matches its frozen shape", () => {
   // The whole shape, not only its field names: a field turned required, or retyped from string to
   // number, changes what a file at this number promises just as much as a new field does.
+  for (const schemaMajor of numberedLiveSchemas()) {
+    assert.deepEqual(
+      JSON.parse(JSON.stringify(m.LIVE_SCHEMAS[schemaMajor])),
+      frozenShapeFor(schemaMajor),
+      [
+        `SCHEMA_${schemaMajor} has changed shape. A numbered schema is frozen (TODO §60): mint the`,
+        "next number, declare the change there with a migration step that may do nothing, and",
+        `freeze that number in its own fixture. Do not edit tests/fixtures/schemas/schema_${schemaMajor}.json.`,
+      ].join(" "),
+    );
+  }
+});
+
+test("the schema every install reads declares everything any other live schema declares", () => {
+  // Every install reads DEFAULT_READ_SCHEMA whatever app version it runs (TODO §76), and memory —
+  // what a save, a backup and a sync are built from — holds only what that read brings in. A field
+  // or collection some live schema declares and the read schema does not would be dropped from
+  // memory at boot and from the next backup, and a restore of that backup would delete it.
+  const read = m.LIVE_SCHEMAS[m.DEFAULT_READ_SCHEMA];
+  const missing = [];
+  for (const schemaMajor of numberedLiveSchemas()) {
+    for (const [collection, shape] of Object.entries(m.LIVE_SCHEMAS[schemaMajor])) {
+      if (!read[collection]) {
+        missing.push(`${schemaMajor}: collection ${collection}`);
+        continue;
+      }
+      for (const field of Object.keys(shape)) {
+        if (!(field in read[collection])) missing.push(`${schemaMajor}: ${collection}.${field}`);
+      }
+    }
+  }
   assert.deepEqual(
-    JSON.parse(JSON.stringify(m.SCHEMA_4)),
-    frozenShapeFor(4),
-    "SCHEMA_4 has changed shape. A numbered schema is frozen (TODO §60): mint the next number, " +
-      "declare the change there with a migration step that may do nothing, and freeze that number " +
-      "in its own fixture. Do not edit tests/fixtures/schemas/schema_4.json.",
+    missing,
+    [],
+    "a field leaves the read schema only with the last app version that uses it",
+  );
+  assert.equal(
+    Math.max(...numberedLiveSchemas().map(Number)),
+    m.DEFAULT_READ_SCHEMA,
+    "the read schema is the newest numbered live schema",
   );
 });
 

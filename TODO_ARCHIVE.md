@@ -20,6 +20,75 @@ Read [CHANGELOG.md](CHANGELOG.md) for what shipped and when. This file is why.
 
 ---
 
+### 70. [x] Reading a narrower schema narrows the whole database on the next save — closed 2026-09-23
+
+Stated 2026-09-21 (Simon): the purpose of the star write is **instant rollback whenever the trainer
+asks for it**. Read from the code the same day (Claude): the design does not hold that promise the
+moment two live schemas are not supersets of each other — which is exactly the day schema 5 removes
+a field, or an older numbered schema is made live again.
+
+**The mechanism, from two places in [stateStore.js](src/data/stateStore.js):**
+
+- `readStateFromIndexedDb` loads records from `readStoreName()` **and from nowhere else**. The
+  in-memory state is therefore shaped by the schema this install READS.
+- `starWrite` then writes `currentState[collection]` into **every** live store.
+
+What that does to a trainer, step by step:
+
+1. They switch back to the older schema.
+2. Their repeating sessions disappear from the screen. **This part is expected** — the older schema
+   does not know that collection.
+3. They change something unrelated. Adding one client is enough.
+4. On save, the app writes what it holds in memory into EVERY live store. Memory no longer holds the
+   repeating sessions, because the older schema never read them.
+5. The newer store loses them too.
+
+Steps 2 and 5 are the whole point. That the trainer cannot SEE those sessions while on the older
+schema is what a rollback means. That they are DESTROYED is not, and the rollback is then not
+reversible: switching forward again returns to a store that has been stripped.
+
+**It does not bite today**, and that is why nobody has seen it: `SCHEMA_PREVIEW` is `SCHEMA_4` plus
+one collection, so every live shape is a superset, and the preview store is rebuilt from schema 4 on
+a build change anyway.
+
+**It contradicts what `docs/DATA_MODEL.md` promises.** *Upgrading is a toggle, not a migration* says
+the move is "instantaneous, and **reversible**, because the schema being left goes on being
+written". That holds only while shapes grow. Under §60's freeze, shapes will stop growing — a field
+change mints a number, and sooner or later one of those numbers drops a field.
+
+**Two honest limits to state before any of this is designed** (Claude, 2026-09-21):
+
+1. **Rollback can only be lossless for data both schemas can express.** If the older schema has no
+   `sessionSeries`, a trainer who rolls back stops seeing their repeating sessions. That is not a
+   defect to fix; it is what rollback means, and the app has to SAY it rather than let the trainer
+   discover it.
+2. **What must not happen is the silent part** — that the data is destroyed in the newer store
+   rather than merely hidden while the trainer is on the older one.
+
+**Proposed (Claude), not ruled:** the fan-out writes a store only from a state that store's schema
+can fully express; where the reading schema is narrower, the wider store's records are updated
+field-wise rather than replaced, so a field the trainer cannot currently see is preserved rather
+than overwritten. That needs the per-schema projector of §58 underneath it, and it needs a test that
+rolls back, edits, rolls forward and asserts nothing was lost.
+
+Blocks: any live schema that is not a superset of every other — so it blocks schema 5 if schema 5
+removes or renames anything, and it blocks reviving schema 3 as a live shape.
+
+**Closed 2026-09-23 (Claude, with §76): no install reads a narrower schema any more.** Every install
+reads the newest numbered schema, whatever app version the trainer runs; the version decides
+behaviour only. `recordSchemas.test.mjs` fails the build when the read schema stops declaring a
+field or collection that another live schema declares, so the situation above cannot arise on a
+trainer's phone. The per-install choice in `readSchema.js` remains for the test passes. A test that
+points it at schema 4 still reads the narrower store; nothing offers that to a trainer.
+
+Read from the code while closing it, not measured: step 5 as written — the newer store loses whole
+collections — does not match `starWrite`, which deletes only ids missing from the store being READ.
+A collection the read schema does not declare is therefore neither written nor deleted in the wider
+store. The field-level loss needs a projector that drops undeclared fields, which does not exist
+(§71).
+
+---
+
 ### 73.1 [x] A table of contents on both surfaces — shipped 2026-09-21
 
 Both places that offered the guided story offered one way in: its beginning. Four to six minutes, and

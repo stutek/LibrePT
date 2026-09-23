@@ -95,7 +95,7 @@ def test_a_backup_carries_every_collection_the_release_promises(page, local_serv
                 schemaVersion: file.schemaVersion,
                 collections: Object.fromEntries(
                     ['clients', 'exercises', 'routines', 'sessions', 'history', 'planUpdates',
-                     'invites', 'sessionSeries']
+                     'invites', 'sessionSeries', 'circuits']
                         .map((name) => [name, Array.isArray(file[name])]),
                 ),
                 clients: (file.clients || []).length,
@@ -103,7 +103,8 @@ def test_a_backup_carries_every_collection_the_release_promises(page, local_serv
         }"""
     )
 
-    assert payload["schemaVersion"] == 4, "the file says which shape it holds"
+    # Schema 5 since 2026-09-23 (TODO §76): the file carries `circuits` as well.
+    assert payload["schemaVersion"] == 5, "the file says which shape it holds"
     missing = [name for name, present in payload["collections"].items() if not present]
     assert missing == [], f"a backup written today cannot carry: {missing}"
     assert payload["clients"] > 0
