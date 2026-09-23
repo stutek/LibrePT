@@ -108,6 +108,22 @@ def test_the_guide_stays_inside_the_modal_it_had_to_move_into(page, local_server
         expect: { selector: '#never-happens', visible: true } }
     ]"""
     _start(page, local_server, _stub(steps, open_at_start="modal.showModal();"))
+    # Wait for the frame to reach the dialog's box, rather than measuring after _start's fixed pause:
+    # under a full parallel run the guide had moved into the modal but not yet sized its frame, and
+    # the measurement below caught it half-way (medium stage, 2026-09-23). A frame that never gets
+    # there still fails, on the timeout.
+    page.wait_for_function(
+        """() => {
+            const overlay = document.querySelector('.walkthrough');
+            const modal = document.getElementById('the-modal');
+            if (!overlay || overlay.parentElement !== modal) return false;
+            const frame = overlay.getBoundingClientRect();
+            const box = modal.getBoundingClientRect();
+            return frame.top >= box.top - 1 && frame.bottom <= box.bottom + 1
+                && frame.left >= box.left - 1 && frame.right <= box.right + 1;
+        }""",
+        timeout=5_000,
+    )
 
     seen = page.evaluate(
         """() => {
