@@ -277,3 +277,30 @@ test("every live numbered schema is frozen on disk", () => {
     `live numbered schemas with no frozen shape: ${unfrozen.join(", ")} — add tests/fixtures/schemas/schema_<N>.json the day the schema is cut`,
   );
 });
+
+// TODO §58's first step (§45.5 needed it): the store of an older live schema does not receive a field
+// that only a newer live schema declares — schema 4's store never gets `exercises.source`. Only that:
+// a field NO live schema declares is still written whole everywhere, because dropping unknown data
+// from every store would lose it for good.
+test("an older schema's store is written without the fields only a newer live schema declares", () => {
+  const exercise = { id: "x", name: "Sled Push", source: "Ana Novak", collection: "exercises" };
+  assert.deepEqual(m.narrowToSchema(exercise, "exercises", 4), {
+    id: "x",
+    name: "Sled Push",
+    collection: "exercises",
+  });
+  assert.deepEqual(m.narrowToSchema(exercise, "exercises", 5), exercise);
+});
+
+test("a field no live schema declares is kept in every store", () => {
+  const exercise = { id: "x", name: "Sled Push", futureField: 1, collection: "exercises" };
+  for (const schema of Object.keys(m.LIVE_SCHEMAS)) {
+    assert.deepEqual(m.narrowToSchema(exercise, "exercises", schema), exercise);
+  }
+});
+
+test("reading an older schema hides the newer fields; reading the newest hides nothing", () => {
+  assert.deepEqual(m.fieldsHiddenFrom(4, 5, "exercises"), ["source"]);
+  assert.deepEqual(m.fieldsHiddenFrom(5, 4, "exercises"), []);
+  assert.deepEqual(m.fieldsHiddenFrom(4, 5, "circuits"), [], "4 never holds circuits in memory");
+});

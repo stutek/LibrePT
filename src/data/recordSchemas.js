@@ -353,6 +353,50 @@ function typeOf(value) {
  * above belong to every shape, so neither counts as undeclared.
  */
 export function undeclaredFields(record, shape) {
+  return undeclaredFieldsOf(record, shape);
+}
+
+/**
+ * `record` as the store of live schema `schema` holds it: without the fields some OTHER live schema
+ * declares for `collection` and this one does not (TODO §58's first step, needed by §45.5).
+ *
+ * Without it every record went into every store whole, so schema 4's store received
+ * `exercises.source`, a field only schema 5 declares — a field staged in a newer shape leaked into
+ * the frozen one. Only a field KNOWN to a newer live schema is dropped: a field no live schema
+ * declares is still written whole, because dropping it from every store would lose it for good.
+ * §71's per-schema projector (renames, retypes) is the full version of this.
+ */
+export function narrowToSchema(record, collection, schema) {
+  const newer = fieldsOnlyOthersDeclare(collection, schema);
+  if (newer.size === 0) return record;
+  return Object.fromEntries(Object.entries(record).filter(([field]) => !newer.has(field)));
+}
+
+/**
+ * The fields `target`'s store holds for `collection` that the schema being READ does not declare —
+ * so memory, built from the read store, never has them (TODO §70). A save must carry them over from
+ * the row `target` already holds, or reading an older schema and saving once wipes them.
+ */
+export function fieldsHiddenFrom(readSchema, target, collection) {
+  const read = LIVE_SCHEMAS[readSchema]?.[collection];
+  // A collection the read schema does not declare is never in memory, so no save can overwrite it.
+  if (!read) return [];
+  return Object.keys(LIVE_SCHEMAS[target]?.[collection] || {}).filter((field) => !(field in read));
+}
+
+function fieldsOnlyOthersDeclare(collection, schema) {
+  const own = LIVE_SCHEMAS[schema]?.[collection] || {};
+  const others = new Set();
+  for (const [key, shapes] of Object.entries(LIVE_SCHEMAS)) {
+    if (String(key) === String(schema)) continue;
+    for (const field of Object.keys(shapes[collection] || {})) {
+      if (!(field in own)) others.add(field);
+    }
+  }
+  return others;
+}
+
+function undeclaredFieldsOf(record, shape) {
   if (!record || !shape) return [];
   return Object.keys(record).filter(
     (field) => field !== "collection" && !COMMON_RECORD_FIELDS.includes(field) && !(field in shape),

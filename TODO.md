@@ -4766,6 +4766,14 @@ what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ## 58. [ ] A record is written whole, so a field cannot be staged at all
 
+**[x] First step shipped 2026-09-23 (§45.5 needed it):** a store no longer receives a field only a
+newer live schema declares — schema 4's store never holds `exercises.source` — and a field the schema
+being read cannot see is carried over from the row a store already holds, so a save made while
+reading an older schema (the toggle §76 builds) cannot wipe it (`narrowToSchema`, `fieldsHiddenFrom`
+in [recordSchemas.js](src/data/recordSchemas.js)). A field no live schema declares is still written
+whole. **Still open:** renames and retypes — §71's per-schema projector.
+
+
 **By design a backup is made at schema 4, the newest numbered one, never at P** (Simon,
 2026-09-17), so a field that exists only in P is not in it. The preview database is used only for
 testing and demonstrations, never live for a client. [backupFile.js](src/data/backupFile.js) leaves out only the

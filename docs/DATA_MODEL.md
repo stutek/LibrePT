@@ -610,8 +610,14 @@ backward transforms to write** — a "downgrade" is just a projection that was a
 
 The two halves of the star are asymmetric on purpose, and the asymmetry is the invariant:
 
-- **Writes fan out and compare no versions.** Every live schema's store gets the same projected
-  record on every save, so no writer decides which schema is "current".
+- **Writes fan out and compare no versions.** Every live schema's store gets the projected record on
+  every save, so no writer decides which schema is "current". Two exceptions, both per field
+  (`narrowToSchema` and `fieldsHiddenFrom` in [recordSchemas.js](../src/data/recordSchemas.js),
+  TODO §58's first step): a store does not receive a field only a newer live schema declares —
+  schema 4's store never holds `exercises.source` — and a field the schema being READ does not
+  declare is carried over from the row the store already holds, so a save made while reading an
+  older schema cannot wipe it in a newer one (§70). A field no live schema declares is written
+  whole everywhere.
 **The two live shapes do different jobs, and only one is durable.** `schema4` is stable and active —
 what this build reads and stamps, what a backup is written at, and the copy `schemaPREVIEW` is rebuilt
 FROM. `schemaPREVIEW` is for CI and for previewing an upcoming version, and is disposable: its fields

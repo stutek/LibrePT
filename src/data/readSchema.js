@@ -31,7 +31,12 @@ import {
 } from "./indexedDb.js";
 import { PREVIEW_VERSION } from "./migrationSteps.js";
 import { COLLECTIONS, projectCollection, toDomainObject } from "./recordProjections.js";
-import { DEFAULT_READ_SCHEMA, LIVE_SCHEMAS, STABLE_SCHEMA } from "./recordSchemas.js";
+import {
+  DEFAULT_READ_SCHEMA,
+  LIVE_SCHEMAS,
+  STABLE_SCHEMA,
+  narrowToSchema,
+} from "./recordSchemas.js";
 
 // localStorage, not the database: boot has to know WHICH store to read before it can read anything,
 // so this cannot live in the thing it selects.
@@ -114,7 +119,9 @@ async function backfillSchema(db, schema, sourceSchema) {
       // never disagree about what a record of this schema looks like.
       const { collection } = record;
       if (!COLLECTIONS.includes(collection)) continue;
-      store(targetStore).put(projectCollection(collection, toDomainObject(record)));
+      store(targetStore).put(
+        narrowToSchema(projectCollection(collection, toDomainObject(record)), collection, schema),
+      );
     }
     store(META_STORE).put({ key: backfilledKey(schema), value: true });
   });

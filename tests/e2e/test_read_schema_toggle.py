@@ -200,3 +200,63 @@ def test_a_preview_only_record_is_written_to_the_preview_store_alone(
     assert backup_has_probe is False, (
         "a backup is written at schema 4, which has no such collection"
     )
+
+
+def _row(page, schema, record_id):
+    return _evaluate(
+        page,
+        _open_db(page)
+        + """
+        const name = indexedDb.storeNameForSchema(%s);
+        const row = await indexedDb.get(db.transaction([name], 'readonly').objectStore(name), %s);
+        db.close();
+        return row || null;
+        """
+        % (json.dumps(schema), json.dumps(record_id)),
+    )
+
+
+def test_saving_while_reading_an_older_schema_keeps_the_fields_it_cannot_see(
+    page, local_server
+):
+    """TODO §70, the case §45.5 made real: schema 4 does not declare `exercises.source`, so its store
+    does not hold it and an install reading 4 never loads it. A save made there must still leave the
+    source in the newer store, or switching back finds it gone."""
+    page.goto(local_server + "?init=demo_data_load")
+    page.wait_for_selector("#view-clients.active")
+    live = _evaluate(page, "return readSchema.liveSchemas();")
+    older = live[0]
+    newer = [schema for schema in live if isinstance(schema, int)][-1]
+    _evaluate(
+        page,
+        """
+        const state = store.getState();
+        state.exercises.push({ id: 'imported-sled', name: 'Sled Push', source: 'Ana Novak' });
+        store.setState(state);
+        store.saveToLocalStorage();
+        await queue.flushWrites();
+        """,
+    )
+    assert "source" not in _row(page, older, "imported-sled"), (
+        "the older store must not hold a field only a newer schema declares (TODO §62)"
+    )
+
+    _evaluate(
+        page,
+        _open_db(page) + "await readSchema.setReadSchema(db, %s); db.close();" % older,
+    )
+    page.goto(local_server)
+    page.wait_for_selector("#view-clients.active")
+    _evaluate(
+        page,
+        """
+        const state = store.getState();
+        state.clients.push({ id: 'saved-on-older', name: 'Saved On Older', active: true });
+        store.setState(state);
+        store.saveToLocalStorage();
+        await queue.flushWrites();
+        """,
+    )
+    assert _row(page, newer, "imported-sled")["source"] == "Ana Novak", (
+        "a save made while reading the older schema wiped a field that schema cannot see"
+    )

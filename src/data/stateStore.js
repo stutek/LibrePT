@@ -19,6 +19,7 @@ import {
   deleteDatabase,
   get,
   getAll,
+  getAllFromIndex,
   getAllKeysFromIndex,
   openDatabase,
   storeNameForSchema,
@@ -28,6 +29,7 @@ import { CURRENT_SCHEMA_VERSION } from "./migrationSteps.js";
 import { transferRecordsOnlyInPreview } from "./previewTransfer.js";
 import {
   ensureLiveSchemasBackfilled,
+  getReadSchema,
   liveSchemas,
   readStoreName,
   refreshPreviewStoreIfBuildChanged,
@@ -38,7 +40,7 @@ import {
   projectCollection,
   schemaAcceptsCollection,
 } from "./recordProjections.js";
-import { LIVE_SCHEMAS } from "./recordSchemas.js";
+import { LIVE_SCHEMAS, fieldsHiddenFrom, narrowToSchema } from "./recordSchemas.js";
 import { describeMigration, migrateState } from "./schemaMigrations.js";
 import { DEMO_ORIGIN, stampAsSeeded } from "./seedProvenance.js";
 import { clearWorkspaceKeys, readVersionScoped, writeVersionScoped } from "./storageNamespace.js";
@@ -244,6 +246,32 @@ async function readMeta(db, key) {
 // read suffices for all of them — then star-writes the fan-out (put every current record) and the
 // delete set (every id no longer present) into every live schema store plus meta bookkeeping, in
 // one transaction (TODO §18's fan-out).
+// What each store already holds that the schema being read cannot see, keyed `${schema}|${id}`
+// (TODO §70). Empty — and no read at all — while the install reads the newest shape, which is every
+// install today; it matters the moment one reads an older schema, where a save would otherwise put
+// a record into the newer store without the fields the older schema never loaded.
+async function fieldsTheReadSchemaCannotSee(db) {
+  const kept = new Map();
+  const readSchema = getReadSchema();
+  for (const schema of SCHEMAS) {
+    for (const collection of COLLECTIONS) {
+      const hidden = fieldsHiddenFrom(readSchema, schema, collection);
+      if (hidden.length === 0) continue;
+      const name = storeNameForSchema(schema);
+      const rows = await getAllFromIndex(
+        db.transaction([name], "readonly").objectStore(name),
+        COLLECTION_INDEX,
+        collection,
+      );
+      for (const row of rows) {
+        const fields = Object.fromEntries(hidden.filter((f) => f in row).map((f) => [f, row[f]]));
+        if (Object.keys(fields).length > 0) kept.set(`${schema}|${row.id}`, fields);
+      }
+    }
+  }
+  return kept;
+}
+
 async function starWrite(db, currentState) {
   // Outside the transaction on purpose: it is a synchronous localStorage write, and anything that
   // is not an IDB request inside an open transaction ends it (see indexedDb.js's header).
@@ -260,6 +288,8 @@ async function starWrite(db, currentState) {
     staleIdsByCollection[collection] = existingIds.filter((id) => !currentIds.has(id));
   }
 
+  const kept = await fieldsTheReadSchemaCannotSee(db);
+
   const storeNames = [...SCHEMAS.map(storeNameForSchema), META_STORE];
   await withTransaction(db, storeNames, "readwrite", ({ store }) => {
     for (const collection of COLLECTIONS) {
@@ -272,7 +302,9 @@ async function starWrite(db, currentState) {
       for (const record of currentState[collection] || []) {
         const projected = projectCollection(collection, record);
         for (const schema of targets) {
-          store(storeNameForSchema(schema)).put(projected);
+          const row = narrowToSchema(projected, collection, schema);
+          const hidden = kept.get(`${schema}|${record.id}`);
+          store(storeNameForSchema(schema)).put(hidden ? { ...row, ...hidden } : row);
         }
       }
       // Deletes follow the same set: a store that never held the record has nothing to reconcile,
