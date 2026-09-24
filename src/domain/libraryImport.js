@@ -45,7 +45,7 @@ const ALIASES = {
   rest: ["rest", "restSeconds", "pause"],
 };
 
-const EXERCISE_FIELDS = ["category", "equipment", "pattern", "modality", "metric"];
+const EXERCISE_FIELDS = ["category", "equipment", "pattern", "modality", "metric", "source"];
 const ITEM_NUMBERS = ["sets", "reps", "weight", "rest"];
 
 function pick(raw, field) {
@@ -172,6 +172,8 @@ function readCircuits(rawCircuits, unreadable) {
       return;
     }
     const circuit = { items };
+    const source = text(pick(raw, "source"));
+    if (source) circuit.source = source;
     const name = text(pick(raw, "name"));
     if (name) circuit.name = name;
     const series = toNumber(pick(raw, "series"));
@@ -191,7 +193,7 @@ export function planLibraryImport(parsed, library, { source, newId, circuitWord 
     (library || []).map((exercise) => [normalise(exercise.name), exercise.id]),
   );
   const ids = new Set((library || []).map((exercise) => exercise.id));
-  const withSource = (record) => (source ? { ...record, source } : record);
+  const withSource = (record) => (source && !record.source ? { ...record, source } : record);
   const exercises = [];
   const duplicates = [];
 
@@ -219,6 +221,7 @@ export function planLibraryImport(parsed, library, { source, newId, circuitWord 
     }));
     const record = {
       id: newId(),
+      ...(circuit.source ? { source: circuit.source } : {}),
       name:
         circuit.name ||
         `${circuitWord} — ${circuit.items

@@ -420,7 +420,11 @@ export function setupBackupRestore() {
   if (exportCatalogJsonBtn) {
     exportCatalogJsonBtn.addEventListener("click", () => {
       const exercises = libraryExercises(deps.getState());
-      const payload = JSON.stringify(catalogToInterchange(exercises), null, 2);
+      const payload = JSON.stringify(
+        catalogToInterchange(exercises, deps.getState().circuits || []),
+        null,
+        2,
+      );
       downloadFile(payload, catalogFilename("json"), "application/json");
     });
   }

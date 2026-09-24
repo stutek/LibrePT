@@ -18,6 +18,33 @@ const counter = () => {
   return () => `id${++n}`;
 };
 
+test("exchanging a library preserves multiple sources, circuits and their targets", () => {
+  const exercises = [
+    { id: "squat", name: "Squat", source: "Ana", equipment: "Barbell" },
+    { id: "lunge", name: "Lunge", source: "Boris" },
+  ];
+  const circuits = [
+    {
+      id: "legs",
+      name: "Legs",
+      source: "Cilka",
+      series: 4,
+      exercises: [
+        { id: "squat", reps: 8, weight: 20 },
+        { id: "lunge", reps: 12, rest: 60 },
+      ],
+    },
+  ];
+  const parsed = readLibrary(JSON.stringify(catalogToInterchange(exercises, circuits)));
+  assert.deepEqual(parsed.unreadable, []);
+  const plan = planLibraryImport(parsed, [], { source: "Exchange", newId: counter() });
+  assert.deepEqual(plan.exercises, exercises);
+  assert.deepEqual(
+    plan.circuits.map(({ id, ...record }) => record),
+    circuits.map(({ id, ...record }) => record),
+  );
+});
+
 test("the template the app offers reads back without a failure", () => {
   const result = readLibrary(libraryTemplate());
   assert.equal(result.ok, true);

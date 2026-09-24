@@ -3738,9 +3738,12 @@ with the pencil mark, in the library and in the picker — see [UC6](use_cases/u
 of the app's catalog export, `librept.library/1` and a bare list; the review before the write; a
 source per import, with one filter chip and one mark (import glyph + name) per source; circuits
 stored in `circuits`. See [UC6 §2.2](use_cases/uc6_exercise_taxonomy_and_picker.md).
-**[ ] Next:** "Add circuit from library" in the plan editor; the catalog export carrying sources and
-circuits, so an exchange goes both ways; a frozen corpus of real library files, as §29 has; gating
-the Import button on `libraryImport` once §76's registry exists.
+**In progress 2026-09-24:** completing the remaining work in verified increments.
+The JSON catalog export now carries circuits and per-record sources, and reimport preserves them.
+The Import button is gated on `libraryImport` by §76's version registry.
+**[ ] Next:** "Add circuit from library" in the plan editor; a frozen corpus of real library files,
+as §29 has. No real trainer-supplied library files have been identified yet; that blocks claiming
+the corpus represents real exchanges.
 
 **Ruled 2026-09-23 (Simon):** an imported circuit with no name gets a placeholder, so
 `circuits.name` is required in schema 5. The form chosen: the word for circuit and the names of its

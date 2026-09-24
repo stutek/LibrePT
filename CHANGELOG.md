@@ -20,6 +20,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-09-24 — Exchange complete exercise libraries
+
+### Fixed
+
+- The JSON catalog export includes circuits, their rounds and exercise targets, and the sources of
+  individual exercises and circuits. Importing it preserves those sources instead of replacing them
+  all with the import's source name (TODO §45.5).
+
 ## 2026-09-23 — The trainer chooses which app version runs
 
 ### Added

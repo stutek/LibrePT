@@ -108,6 +108,7 @@ export function toInterchangeExercise(ex) {
       pattern: ex.pattern ?? null,
       modality: ex.modality ?? "strength",
       metric: ex.metric ?? null,
+      ...(ex.source ? { source: ex.source } : {}),
     },
   };
 }
@@ -115,7 +116,7 @@ export function toInterchangeExercise(ex) {
 // The whole catalog wrapped in a self-describing interchange envelope. The envelope names the format
 // and version so an external importer can recognise it, and states plainly where LibrePT extends
 // beyond wger — no magic, the mapping is legible in the file itself.
-export function catalogToInterchange(exercises) {
+export function catalogToInterchange(exercises, circuits = []) {
   return {
     format: "wger-exercise-interchange",
     version: 1,
@@ -125,6 +126,14 @@ export function catalogToInterchange(exercises) {
       "has no equivalent. LibrePT's biomechanical pattern and modality axes are preserved under " +
       "x_librept (wger has no field for them).",
     exercises: exercises.map(toInterchangeExercise),
+    circuits: circuits.map(({ exercises: entries, ...circuit }) => ({
+      ...circuit,
+      exercises: entries.map(({ id, ...targets }) => {
+        const exercise = exercises.find((entry) => entry.id === id);
+        if (!exercise) throw new Error(`Circuit ${circuit.name} refers to missing exercise ${id}`);
+        return { name: exercise.name, ...targets };
+      }),
+    })),
   };
 }
 
