@@ -98,7 +98,7 @@ the thing that must happen first, not merely what it touches.
 | **Client self-service** | §26.7 phase 2 | The vendored QR encoder and the wall poster | Deferred on purpose until the messaging handover has been tried in a gym; the link route shipped 08-22 |
 | **Program import** | §29 | Nothing — shape decided 2026-08-18, and the editor-as-review answers the fragility question | The parser and its frozen corpus; the intake flow, media-type rule and catalog crosswalk already exist |
 | **Live clipboard taps — PRIORITY** | §48.2 | Tracking and notes after the session | §48.2's measuring exception waits on §45.11; §48.1 shipped 2026-09-13 |
-| **Trainer feedback 2026-09-11** | §45.1–§45.13 | §45.1's untranslatable first screen, then §45.2's trainer identity | Nothing for the three defects; §45.4 is ruled (2026-09-15) and waits to be built, §45.8 on looking at both screens together |
+| **Trainer feedback 2026-09-11** | §45.4–§45.13 | §45.4's failed share of a filled-in signup | Nothing for the three defects; §45.4 is ruled (2026-09-15) and waits to be built, §45.8 on looking at both screens together |
 
 ---
 
@@ -3449,69 +3449,20 @@ report could mean either surface, the app is the one meant.
 Ordered by cost, not by the order reported: the three defects first, then the new work, then the two
 that are still questions.
 
-### 45.1 [ ] The first screen is English whatever language was chosen — BUG
+### 45.1 [x] The first screen is English whatever language was chosen — fixed 2026-09-11
 
-**Reported:** first launch, choose Slovenian, and the invitation into the demo and the walkthrough is
-still in English.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#451-x-the-first-screen-is-english-whatever-language-was-chosen--fixed-2026-09-11);
+what shipped is in [CHANGELOG.md](CHANGELOG.md). The promotional page it left open is §45.15.
 
-**Cause, located.** The onboarding block in [index.html](src/index.html) — *Explore with demo data*,
-*Guided walkthrough*, *Start with an empty app* — is written as plain English text. It carries no
-translation key, has no entry in [domMappings.js](src/i18n/domMappings.js), and no `splash_*` key
-exists in either [sl.js](src/i18n/sl.js) or [en.js](src/i18n/en.js). The language buttons above it
-work; nothing below them can be reached by a language choice at all.
+### 45.2 [x] The trainer can enter their own name, phone and email — shipped 2026-09-11
 
-The language prompt itself is correct as it stands and must not be touched: each language names
-itself, in its own language, so the choice is legible to someone who cannot read the current one.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#452-x-the-trainer-can-enter-their-own-name-phone-and-email--shipped-2026-09-11);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-**Why it is a first-run defect specifically.** The block is shown only while the trainer has saved
-nothing of their own, so the one screen that is guaranteed to be English is the very first one a new
-trainer sees. It is also the screen that decides whether they go any further.
+### 45.3 [x] The signup form asks for first and last name — fixed 2026-09-11
 
-**Ruling (Simon, 2026-09-11):** *"popravi tako, da bo prav"* — fix it properly, without first
-establishing which surface the trainer saw.
-
-**The promotional page is a SEPARATE, still-open item.** [landing.html](src/landing.html) is
-English-only by construction: it is a built document with no translation mechanism of any kind, and
-its calls to action are the same demo and walkthrough links. Translating it means giving the built
-docs a language axis, which is a larger change than this section. Not part of this fix; recorded here
-so it is not lost.
-
-### 45.2 [ ] The trainer cannot enter their own name, phone or email
-
-**Reported:** there is nowhere to put the trainer's own details.
-
-**Confirmed, and worse than a missing field.** The app already *uses* the trainer's name — the
-invitation a client receives reads *"{trainer} invites you to fill in your details"*
-([sl.js](src/i18n/sl.js), `intake_invite_body`) — while offering no place to enter it. Every record
-in the app belongs to a client; the trainer is the one person the data model does not know.
-
-**What it is for, so the scope stays honest:** the invitation and consent wording that names the
-trainer, and the contact details a client needs in order to answer. Not an account, not a login,
-not a profile that syncs anywhere.
-
-**Ruling (Simon, 2026-09-11):** implement immediately, alongside §45.1 and §45.3.
-
-**Also on the cold-start splash** (Simon, same day): the same form is offered beside the three
-onboarding choices, not only in the ☰ menu. Built as ONE form — the fields, the labels and the single
-validation rule live in
-[trainerDetailsDialog.js](src/modules/common/trainerDetailsDialog.js) and are rendered into either
-host under different id prefixes, because two copies of a form is two places for the rule to drift
-and both can be in the document at once.
-
-**It is an offer there, never a gate, and that is a product constraint rather than a preference.**
-The app's first promise is that there is no account and no signup; a form on the first screen is
-exactly what a stranger reads as one. So every field is optional, the three choices work with
-nothing typed, saving does not choose for them or dismiss anything, and the form says in its own
-words that it can be done later from the menu. The form sits BELOW the three choices for the same
-reason — a form above the way in reads as the price of entry. If that ever tightens into a required
-step, the promise on [landing.html](src/landing.html) stops being true and has to change with it.
-
-### 45.3 [ ] The signup form asks for *"your name"* rather than first and last name
-
-`intake_name` reads *"Tvoje ime"* / *"Your name"* ([sl.js](src/i18n/sl.js),
-[en.js](src/i18n/en.js)). A trainer filing a client needs both names; *your name* invites one.
-
-**Ruling (Simon, 2026-09-11):** fix the label in both languages.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#453-x-the-signup-form-asks-for-first-and-last-name--fixed-2026-09-11);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ### 45.4 [ ] The share of a filled-in signup FAILED, and fell back to saving the file
 
@@ -4165,6 +4116,13 @@ way a trainer does.
 mid-operation is a sleep wearing a better name. `setActiveWorkspace()` is called before
 `loadSavedState()` and before a first sandbox is seeded, so the flag was true for the whole expensive
 part of the switch.
+
+### 45.15 [ ] The promotional page is English only
+
+Split out of §45.1 when that closed. [landing.html](src/landing.html) is English-only by
+construction: it is a built document with no translation mechanism of any kind, and its calls to
+action are the same demo and walkthrough links. Translating it means giving the built docs a language
+axis, which is a larger change than §45.1 was.
 
 ---
 

@@ -20,6 +20,64 @@ Read [CHANGELOG.md](CHANGELOG.md) for what shipped and when. This file is why.
 
 ---
 
+### 45.1 [x] The first screen is English whatever language was chosen — fixed 2026-09-11
+
+**Reported:** first launch, choose Slovenian, and the invitation into the demo and the walkthrough is
+still in English.
+
+**Cause, located.** The onboarding block in [index.html](src/index.html) — *Explore with demo data*,
+*Guided walkthrough*, *Start with an empty app* — is written as plain English text. It carries no
+translation key, has no entry in [domMappings.js](src/i18n/domMappings.js), and no `splash_*` key
+exists in either [sl.js](src/i18n/sl.js) or [en.js](src/i18n/en.js). The language buttons above it
+work; nothing below them can be reached by a language choice at all.
+
+The language prompt itself is correct as it stands and must not be touched: each language names
+itself, in its own language, so the choice is legible to someone who cannot read the current one.
+
+**Why it is a first-run defect specifically.** The block is shown only while the trainer has saved
+nothing of their own, so the one screen that is guaranteed to be English is the very first one a new
+trainer sees. It is also the screen that decides whether they go any further.
+
+**Ruling (Simon, 2026-09-11):** *"popravi tako, da bo prav"* — fix it properly, without first
+establishing which surface the trainer saw.
+
+### 45.2 [x] The trainer can enter their own name, phone and email — shipped 2026-09-11
+
+**Reported:** there is nowhere to put the trainer's own details.
+
+**Confirmed, and worse than a missing field.** The app already *uses* the trainer's name — the
+invitation a client receives reads *"{trainer} invites you to fill in your details"*
+([sl.js](src/i18n/sl.js), `intake_invite_body`) — while offering no place to enter it. Every record
+in the app belongs to a client; the trainer is the one person the data model does not know.
+
+**What it is for, so the scope stays honest:** the invitation and consent wording that names the
+trainer, and the contact details a client needs in order to answer. Not an account, not a login,
+not a profile that syncs anywhere.
+
+**Ruling (Simon, 2026-09-11):** implement immediately, alongside §45.1 and §45.3.
+
+**Also on the cold-start splash** (Simon, same day): the same form is offered beside the three
+onboarding choices, not only in the ☰ menu. Built as ONE form — the fields, the labels and the single
+validation rule live in
+[trainerDetailsDialog.js](src/modules/common/trainerDetailsDialog.js) and are rendered into either
+host under different id prefixes, because two copies of a form is two places for the rule to drift
+and both can be in the document at once.
+
+**It is an offer there, never a gate, and that is a product constraint rather than a preference.**
+The app's first promise is that there is no account and no signup; a form on the first screen is
+exactly what a stranger reads as one. So every field is optional, the three choices work with
+nothing typed, saving does not choose for them or dismiss anything, and the form says in its own
+words that it can be done later from the menu. The form sits BELOW the three choices for the same
+reason — a form above the way in reads as the price of entry. If that ever tightens into a required
+step, the promise on [landing.html](src/landing.html) stops being true and has to change with it.
+
+### 45.3 [x] The signup form asks for first and last name — fixed 2026-09-11
+
+`intake_name` reads *"Tvoje ime"* / *"Your name"* ([sl.js](src/i18n/sl.js),
+[en.js](src/i18n/en.js)). A trainer filing a client needs both names; *your name* invites one.
+
+**Ruling (Simon, 2026-09-11):** fix the label in both languages.
+
 ### 70. [x] Reading a narrower schema narrows the whole database on the next save — closed 2026-09-23
 
 Stated 2026-09-21 (Simon): the purpose of the star write is **instant rollback whenever the trainer
