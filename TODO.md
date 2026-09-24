@@ -4540,6 +4540,13 @@ finished settling, or the app itself lands in the wrong place when it is slow, w
 a gym would see too.
 
 The gate no longer runs on a saturated machine at all (§64, `build/quiet_machine.py`), so these two
+**[ ] That fix did not hold (Claude, 2026-09-24 22:21).** The gate run of 22:15 failed on the same
+test: after 5 s the address still named the open card, so the scroll never took effect at all. It was
+not slow; it did not happen. The 19:40 conclusion, that 600 ms was too short, was wrong. Two causes
+remain possible and the log cannot tell them apart: the wheel event arrives before the deck can
+scroll, or outside it (the test measures the deck's box before the wheel); or the app's scroll
+handler misses it. Next: run that one test with `--tracing=on` under load, and read where the wheel
+event landed.
 stop appearing in gate runs. That is not this section: a phone in a gym is slow and cannot be asked
 to wait, so the question below still stands on its own.
 
