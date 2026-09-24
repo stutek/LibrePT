@@ -250,6 +250,9 @@ export const sl = {
   routine_row_rest: "Premor",
   routine_row_rest_label: "Premor v sekundah",
   routine_row_remove: "Odstrani vajo iz rutine",
+  // The exercise picker (modules/exercises/exercisePicker.js), TODO §38.20.
+  picker_count: "Vaje: {count}",
+  picker_empty: "Temu filtru ne ustreza nobena vaja.",
   encrypted_title: "Odpri šifrirano datoteko",
   encrypted_lead: "Za izvoz osebnih podatkov, ki ti ga je poslal trener.",
   encrypted_local:

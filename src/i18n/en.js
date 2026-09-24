@@ -235,6 +235,9 @@ export const en = {
   routine_row_rest: "Rest",
   routine_row_rest_label: "Rest duration in seconds",
   routine_row_remove: "Remove exercise from routine",
+  // The exercise picker (modules/exercises/exercisePicker.js), TODO §38.20.
+  picker_count: "Movements: {count}",
+  picker_empty: "No movements match this filter.",
   encrypted_title: "Open an encrypted file",
   encrypted_lead: "For a personal-data export your trainer sent you.",
   encrypted_local:

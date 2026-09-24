@@ -3,7 +3,7 @@
 // as well as launching and submitting the interactive Apply Plan Adjustment Dialog wizard.
 import { libraryExercises } from "../../data/exerciseLibrary.js";
 import { renderMarkupOnce } from "../common/dom.js";
-import { mountExercisePicker, sourceLabels } from "../exercises/exercisePicker.js";
+import { mountExercisePicker, pickerLabels } from "../exercises/exercisePicker.js";
 
 /**
  * Renders the pending plan adjustments alert cards.
@@ -387,10 +387,7 @@ export function openAdjustmentWizardComponent(updateId, ctx) {
     defaultCategory: exercise ? exercise.category : "All",
     autoSelectFirst: true,
     keepSelection: true,
-    searchLabel: t("search_movements") || "Search movements",
-    muscleLabel: t("muscle") || "Muscle",
-    equipmentLabel: t("equipment") || "Equipment",
-    sources: sourceLabels(t),
+    ...pickerLabels(t),
     onSelect: (ex) => {
       swapSelect.value = ex ? ex.id : "";
     },

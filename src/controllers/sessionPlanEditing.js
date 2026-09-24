@@ -11,7 +11,7 @@ import { modalityOf, primaryMetricOf } from "../domain/exerciseModality.js";
 import { loadUnitForEquipment } from "../domain/repsAndLoad.js";
 import { renderActiveSessionBoard } from "../modules/clipboard/activeSessionBoard.js";
 import { markEditorRow } from "../modules/clipboard/editModeState.js";
-import { mountExercisePicker, sourceLabels } from "../modules/exercises/exercisePicker.js";
+import { mountExercisePicker, pickerLabels } from "../modules/exercises/exercisePicker.js";
 import { saveActiveSessionToCache } from "./activeSessionCache.js";
 import { getActiveSession, getAppDeps } from "./activeSessionStore.js";
 
@@ -143,10 +143,7 @@ export function openCatalogPicker({ slotId = null, query = "", category = "" } =
     defaultCategory: category || item?.category || "All",
     initialQuery: query,
     autoFocusSearch: true,
-    searchLabel: t("search_movements") || "Search movements",
-    muscleLabel: t("muscle") || "Muscle",
-    equipmentLabel: t("equipment") || "Equipment",
-    sources: sourceLabels(t),
+    ...pickerLabels(t),
     onSelect: (ex) => {
       if (slotId) swapPlanItemMovement(slotId, ex);
       else injectExerciseIntoActivePlan(ex, { sets: 3, reps: 10, weight: 0, rest: 60 });

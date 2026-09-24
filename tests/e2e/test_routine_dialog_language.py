@@ -30,3 +30,18 @@ def test_the_routine_dialog_is_in_slovenian_when_slovenian_is_chosen(
     expect(page.locator("#routine-exercises-list .input-rest").first).to_have_attribute(
         "placeholder", rest
     )
+
+
+def test_the_exercise_picker_counts_and_comes_up_empty_in_slovenian(page, local_server):
+    """The picker's count and its empty message were English in every language (TODO §38.20)."""
+    page.goto(local_server + "routines?lang=sl")
+    page.locator("#btn-add-routine").click()
+    page.wait_for_selector("#routine-ex-picker:not(.hidden)")
+    count_label, empty = _slovenian(page, ["picker_count", "picker_empty"])
+
+    shown = page.locator("#routine-ex-picker .picker-item").count()
+    expect(page.locator("#routine-ex-picker .picker-count")).to_have_text(
+        count_label.replace("{count}", str(shown))
+    )
+    page.locator("#routine-ex-picker .picker-search").fill("zzzz-no-such-movement")
+    expect(page.locator("#routine-ex-picker .picker-empty")).to_have_text(empty)

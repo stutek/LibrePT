@@ -43,6 +43,19 @@ export function sourceLabels(t) {
   };
 }
 
+/** Every word the picker shows, from the app's dictionary. One place, so the three screens that
+ *  mount the picker cannot drift apart (TODO §38.20). */
+export function pickerLabels(t) {
+  return {
+    searchLabel: t("search_movements") || "Search movements",
+    muscleLabel: t("muscle") || "Muscle",
+    equipmentLabel: t("equipment") || "Equipment",
+    sources: sourceLabels(t),
+    countLabel: t("picker_count") || "Movements: {count}",
+    emptyLabel: t("picker_empty") || "No movements match this filter.",
+  };
+}
+
 /**
  * The mark on an exercise that is not LibrePT's (TODO §45.5): a glyph AND a word, because a glyph
  * alone means nothing to a reader who has not been told, and a hover cannot tell them on a phone.
@@ -71,6 +84,9 @@ export function sourceBadge(exercise, ownWord) {
  * @param {string}  [opts.muscleLabel]     - Translated label for the muscle-group filter row.
  * @param {string}  [opts.equipmentLabel]  - Translated label for the equipment filter row.
  * @param {Object}  [opts.sources]         - `sourceLabels(t)`: the source row's words and the mark.
+ * @param {string}  [opts.countLabel]      - How many match, with `{count}` for the number.
+ * @param {string}  [opts.emptyLabel]      - What the list says when nothing matches.
+ * Callers pass `...pickerLabels(t)` for all the words at once.
  * @param {(exercise: Object) => void} opts.onSelect - Called with the chosen exercise on tap.
  */
 export function mountExercisePicker(
@@ -87,6 +103,8 @@ export function mountExercisePicker(
     muscleLabel = "Muscle",
     equipmentLabel = "Equipment",
     sources = sourceLabels(() => ""),
+    countLabel = "Movements: {count}",
+    emptyLabel = "No movements match this filter.",
     onSelect,
   },
 ) {
@@ -151,11 +169,14 @@ export function mountExercisePicker(
 
   const renderList = () => {
     const matches = getMatches();
+    // "Movements: 12" rather than "12 movements": Slovenian has four plural forms, and a label with
+    // the number after it needs none of them.
     countEl.textContent = matches.length
-      ? `${matches.length} movement${matches.length === 1 ? "" : "s"}`
+      ? countLabel.replace("{count}", String(matches.length))
       : "";
     if (matches.length === 0) {
-      listEl.innerHTML = `<div class="picker-empty text-muted">No movements match this filter.</div>`;
+      const safeEmpty = escapeHTML(emptyLabel);
+      listEl.innerHTML = `<div class="picker-empty text-muted">${safeEmpty}</div>`;
       return;
     }
     listEl.innerHTML = matches
