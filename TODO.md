@@ -2619,10 +2619,15 @@ one; the demo cleanup dialog ([demoCleanupDialog.js](src/modules/common/demoClea
 **142 → 139**) was another: `demo_cleanup_title` and `demo_cleanup_remove` existed in both languages
 and its title and Remove button stayed English. Both are now written on every open. A scan of `en.js`
 for keys that no file under `src/` names in quotes found **60**. Most are built from parts in code
-(`modality_*`, `rsvp_*`, `session_change_*`, `library_import_refused_*`) and are in use. **[ ] Still
-to read one by one:** `offline_cached_badge`, `offline_cached_status`, `err_select_client`,
-`err_assign_routine`, `voice_transcribing`, `up_next_label`, `next_session_label`, `last_exercise`,
-`from_date`, `no_weight_records`, `need_two_entries`, `no_instructions`, `no_weight_logged`.
+(`modality_*`, `rsvp_*`, `session_change_*`, `library_import_refused_*`) and are in use. Of the
+thirteen read one by one, two were the same defect: the setup form's refusals of a session with
+nobody in it, or with a participant and no programme, were English alerts beside
+`err_select_client` and `err_assign_routine` ([editSessionControl.js](src/modules/session/editSessionControl.js)),
+fixed the same day. **[ ] The other eleven are leftovers** that no code writes in any language:
+`offline_cached_badge`, `offline_cached_status`, `voice_transcribing`, `up_next_label`,
+`next_session_label`, `last_exercise`, `from_date`, `no_weight_records`, `need_two_entries`,
+`no_instructions`, `no_weight_logged`. Removing them is cheap; a check that fails the build on a key
+nothing names would need a list of the prefixes built in code, and is not built.
 
 **Measured the same day, and not converted:** `activeSessionOverlayView.js` (20),
 `applicationHeader.js` (16) and `clientConsentSection.js` (10) are mostly false counts. Their visible texts are translated already, by

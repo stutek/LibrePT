@@ -5,7 +5,8 @@
 # scrubbing prose needs the name, and after an erasure the name is gone (§65).
 #
 # Mounts ONE component (bootWorkoutSetup) against index.html's real markup: the subject is what the
-# form does with what was typed, not what saving one does.
+# form does with what was typed, not what saving one does — including the refusal of a session with
+# nobody in it, in the chosen language (TODO §38.20).
 
 import re
 
@@ -58,6 +59,34 @@ bootWorkoutSetup({
 openWorkoutSetupModal(null, null, null);
 """,
 )
+
+
+assert STUB.count("  t,\n") == 1
+SLOVENIAN_STUB = STUB.replace("  t,\n", "  t: (key) => TRANSLATIONS.sl[key] || key,\n")
+
+
+def test_a_session_with_nobody_in_it_is_refused_in_the_chosen_language(
+    page, local_server
+):
+    """The two refusals below the field checks were written in English beside keys that held the
+    same sentence in every language (TODO §38.20)."""
+    load_with_stub(page, local_server, SLOVENIAN_STUB)
+    messages = []
+    page.on(
+        "dialog", lambda dialog: (messages.append(dialog.message), dialog.dismiss())
+    )
+
+    _save(page)
+
+    expected = page.evaluate(
+        """async () => {
+            const { TRANSLATIONS } = await import(new URL('i18n/index.js', document.baseURI).href);
+            return TRANSLATIONS.sl.err_select_client;
+        }"""
+    )
+    expect(page.locator("#form-workout-setup")).to_be_visible()
+    assert messages == [expected]
+    assert page.evaluate("() => window.__started") is False
 
 
 def _save(page):

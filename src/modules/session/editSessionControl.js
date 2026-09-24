@@ -585,13 +585,13 @@ export function setupEditSessionControl() {
     const { t } = deps;
 
     if (clientRoutines.length === 0) {
-      alert("You must select at least one participant client.");
+      alert(t("err_select_client"));
       return;
     }
 
     const missingRoutine = clientRoutines.find((cr) => !cr.routineId);
     if (missingRoutine) {
-      alert("Please assign a routine template to all selected participants.");
+      alert(t("err_assign_routine"));
       return;
     }
 
