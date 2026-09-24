@@ -5285,3 +5285,150 @@ the `BETA` ribbon of §18.12; a second browser-test pass per version (§76.5).
 **Open for Simon:** whether the default stays 2026-10; the cap of two numbered versions; and the Drive
 sync rule — which §76.4's read-the-newest rule has made unnecessary, since sync is built from memory
 and memory holds everything.
+
+## 77. [ ] Odprte ugotovitve pregleda Claudovega dela v tednu 2026-09-21–2026-09-24
+
+**Pregled izveden (Codex, 2026-09-24).** Obseg je zgodovina od ponedeljka 2026-09-21 do
+commita `06b292b`: 58 commitov in 138 spremenjenih datotek. Avtorstvo se ugotavlja iz
+sporočil commitov; `389943e` je Codexov, `7316580` pa Codexovo delo, ki ga je prevzel in
+commital Claude. Nedokončani popravki v delovnem drevesu niso del tega prereza.
+Ob zaključku sta dodatno pregledana `fdc92b6` (oznake gumbov za bralnik zaslona) in
+`69b7a69` (diagnostika testa zapiranja kartice); spodnjih sedmih napak ne spreminjata.
+Pregled zajema shranjevanje, migracije, izbris strank, uvoz in izvoz knjižnice, izbiro
+različice, prevode, predstavitev po poglavjih, koledar, pisave in pripadajoče teste.
+
+Spodnje napake so ponovljene na izolirani kopiji `06b292b`, z začasnim profilom Chromiuma
+in njegovo pravo bazo IndexedDB, brez dostopa do uporabniških podatkov. P1 pomeni možnost
+izgube podatkov, P2 napačno delovanje, P3 manjšo napako prikaza ali filtriranja.
+Vsaka točka ostaja odprta do popravka in regresijskega testa. Že evidentirane omejitve
+prevodov (§38.20), nestabilen test zapiranja kartice (§53) in nedokončani deli izbire
+različice (§76.6) se ne podvajajo.
+
+### 77.1 [ ] P1 — Uvoženi ID vaje lahko prepiše stranko
+
+**Izvor:** `4faf64f`, [libraryImport.js](src/domain/libraryImport.js), funkciji
+`readExercise` in `planLibraryImport`; zapis v [stateStore.js](src/data/stateStore.js),
+`starWrite`. Uvoz ohrani `x_librept.id` in preverja trke samo med vajami. Vsi zapisi ene
+sheme pa imajo skupni ključ `id`, ne para zbirka + ID
+([indexedDb.js](src/data/indexedDb.js), `createSchemaStore`).
+
+**Ponovitev:** shrani stranko `{id: "same-record-id", name: "Existing client"}`. Uvozi
+`{"format":"wger-exercise-interchange","exercises":[{"name":"Injected exercise",
+"x_librept":{"id":"same-record-id"}}]}`. Po `flushWrites()` in ponovnem branju baze je
+`clients` prazen, pod istim ID je vaja. Uvoz ne opozori na prepis. Dokaz uporablja pravi
+uvozni načrt, `addToLibrary` in običajno shranjevanje, ne neposrednega prepisa vrstice baze.
+
+**Odprava:** preveriti identifikatorje proti vsem zbirkam pred zapisom; ob trku uvoz
+zavrniti ali varno preslikati ID in reference. Test mora dokazati, da uvoz s tujim ID
+ohrani stranko, zgodovino in druge zbirke tudi po ponovnem zagonu. Blokira varen uvoz
+izmenjanih katalogov (§45.5).
+
+### 77.2 [ ] P1 — Vrnitev iz dejanske stare izdaje izgubi njene spremembe
+
+**Izvor:** `19ea11c`, [readSchema.js](src/data/readSchema.js),
+`ensureLiveSchemasBackfilled`; [stateStore.js](src/data/stateStore.js), `SCHEMAS` in
+`starWrite`. Nova izdaja bere `schema5`, ki jo iz `schema4` napolni samo enkrat. Stara
+izdaja `fc172f9` pozna samo 4 in PREVIEW ter zato ne posodobi `schema5`.
+
+**Ponovitev:** z `06b292b` shrani stranko z imenom `Before downgrade`; z dejansko kodo
+`fc172f9` na isti bazi spremeni ime v `Edited in old build` in počakaj na zapis. Po
+ponovnem odprtju s kodo `06b292b` je ime spet `Before downgrade`. Sprememba je še v
+starejši shrambi, nova je ne prebere; naslednje shranjevanje nove izdaje lahko prepiše
+tudi starejšo shrambo. To ni menjava vedenja v meniju App version: tisti možnosti obe
+uporabljata novo kodo in zato tega primera ne preverita.
+
+**Odprava:** določiti in izvesti varen prehod med dejanskimi izdajami, vključno s staro
+predpomnjeno aplikacijo; ne razglašati stare shrambe za združljivo samo zato, ker jo nova
+koda še piše. Regresijski test mora naložiti obe izdaji in preveriti spremembo, dodajanje
+in brisanje ob povratku. Obstoječi
+[test_read_schema_toggle.py](tests/e2e/test_read_schema_toggle.py) uporablja samo novo
+kodo. Blokira zagotovilo varnega povratka oziroma dela stare predpomnjene izdaje (§76.4).
+
+### 77.3 [ ] P2 — Uvoz sklopa tiho zavrže nenumerične cilje vaj
+
+**Izvor:** `4faf64f`, [libraryImport.js](src/domain/libraryImport.js), `readItem`.
+Za `reps` in `weight` uporabi `toNumber`, čeprav aplikacija podpira besedilne cilje
+([repsAndLoad.js](src/domain/repsAndLoad.js), `parseReps` in `parseLoad`).
+
+**Ponovitev:** sklop z vajama `{name: "Squat", reps: "8-12", weight: "Medium", rest: 60}`
+in `{name: "Pull-up", reps: "max", weight: "BW"}`. `readLibrary` vrne `ok: true` in
+`unreadable: []`, vendar obdrži samo imeni in `rest: 60`. Enako se izgubi ob izvozu in
+ponovnem uvozu kataloga s takimi cilji. Vstavljanje nato uporabi privzete cilje.
+
+**Odprava:** ohraniti dovoljene besedilne cilje po skupnih pravilih aplikacije; nepodprte
+vrednosti jasno poročati pred potrditvijo. Testirati izvoz → uvoz za `max`, razpon `8-12`,
+časovni cilj in besedilno obremenitev. Blokira zanesljivo izmenjavo predpisov vadbe (§45.5).
+
+### 77.4 [ ] P2 — Vir iz imena datoteke izgine ob potrditvi uvoza
+
+**Izvor:** `4faf64f`, [libraryImportDialog.js](src/modules/exercises/libraryImportDialog.js),
+`readCurrent` in `addImported`.
+
+**Ponovitev v uporabniškem vmesniku:** izberi datoteko `Ana.json` z vsebino
+`["Imported Sled"]`. Polje za vir kaže `Ana`. Brez ročnega posega vanj pritisni Add to
+library. Shranjena vaja nima `source`. `addImported()` pokliče `readCurrent()` brez
+imena datoteke; ta izprazni vir, ker uporabnik polja ni tipkal. Vaja je označena kot lastna.
+
+**Odprava:** ob potrditvi ohraniti prikazani vir; privzeto ime datoteke določiti ob branju
+datoteke, ne znova ob vsakem pregledu. Test mora uporabiti dejanski izbor datoteke brez
+`source`, potrditi brez urejanja polja in preveriti vir po ponovnem zagonu. Sedanja
+[test_library_import.py](tests/e2e/test_library_import.py) preverja le lepljenje JSON z
+izrecnim `source`. Blokira pravilno označevanje uvoženih vaj (§45.5).
+
+### 77.5 [ ] P2 — Ponovni uvoz istega kataloga podvoji sklope
+
+**Izvor:** `4faf64f`, [libraryImport.js](src/domain/libraryImport.js), `planLibraryImport`.
+Obstoječe vaje se preverijo, obstoječi sklopi pa funkciji sploh niso predani; vsak dobi
+nov ID. Tudi ID sklopa iz lastnega izvoza se pri branju ne ohrani.
+
+**Ponovitev:** dvakrat uvozi `{"circuits":[{"name":"Legs","exercises":["Squat"]}]}`.
+Drugi načrt doda nič vaj in en nov sklop `Legs`, `duplicates` pa ostane prazen. Vsaka
+ponovitev iste datoteke podaljša seznam enakih sklopov v urejevalniku načrta.
+
+**Odprava:** določiti identiteto in preverjanje podvojitev tudi za sklope ter v pregledu
+ločiti nov sklop od že prisotnega; ne združevati različnih predpisov samo po naslovu.
+Test: dvakrat uvožen lasten izvoz ne podvoji sklopov, spremenjen predpis pa ni tiho
+izpuščen. Blokira ponovljivo izmenjavo katalogov (§45.5).
+
+### 77.6 [ ] P3 — Ime uvoznega vira se lahko zamenja z internim filtrom
+
+**Izvor:** `fc172f9` in `4faf64f`, [exerciseLibrary.js](src/data/exerciseLibrary.js),
+`exerciseSourceOf`, `sourcesOf`, `withSource`; besedila filtrov v
+[exercisePicker.js](src/modules/exercises/exercisePicker.js), `sourceLabels`.
+
+**Ponovitev:** vaji imata vira `all` in `Ana`. `withSource(vaje, "all")` vrne obe vaji;
+vira `all` zato ni mogoče izbrati samostojno. Vir `own` se predstavi kot lastne vaje,
+`librept` pa kot vgrajeni katalog in izgubi oznako uvoza. Polje sprejme vsa tri imena.
+
+**Odprava:** ločiti identifikatorje sistemskih filtrov od poljubnih imen virov. Testirati
+prikaz oznak in neodvisno filtriranje vseh treh imen v knjižnici in izbirniku vaj.
+Blokira pravilno filtriranje sicer veljavnih uvozov (§45.5).
+
+### 77.7 [ ] P2 — Danes ne prikaže današnjih vadb ob aktivnem datumskem filtru
+
+**Izvor:** `b7735d4`, [sessionFilterBar.js](src/modules/sessionList/sessionFilterBar.js),
+obravnava `data-today`; [sessionTimeline.js](src/modules/sessionList/sessionTimeline.js),
+`focusSessionsColumn`. Gumb spremeni prikazani mesec in poskusi pomakniti seznam, ne
+spremeni pa filtra `from` / `to`. Seznam je še vedno omejen na prej izbrani datum.
+
+**Ponovitev v Chromiumu:** v koledarju izberi 2026-09-07, nato Danes na dan 2026-09-24.
+Pred klikom in po njem `activeSessionFilters()` vrne `from: "2026-09-07"` in
+`to: "2026-09-07"`. V preizkušenem prikazu ni nobene skupine vadb; gumb ne vrne današnjih
+vadb. Uporabljen je obstoječi `SESSIONS_STUB` z resničnim ponovnim izrisom in priklopom
+`onToday` na `focusSessionsColumn("today")`, kot v produkciji.
+
+**Odprava:** ob kliku odstraniti oziroma nastaviti datumsko omejitev tako, da vključuje
+današnji dan, nato izrisati seznam in šele zatem pomakniti pogled. Ohraniti neodvisna
+filtra stranke in lokacije. Testirati en dan in razpon, ki izključujeta danes; obstoječi
+[test_sessions_dashboard.py](tests/e2e/test_sessions_dashboard.py) preverja klik brez
+aktivnega datumskega filtra. Blokira delovanje premaknjenega gumba Danes (§74.2).
+
+**Preverjanja:** vseh 146 obstoječih testov v desetih pregledanih datotekah za
+podatke, uvoz, načrte, predstavitev in začetni zaslon je uspešnih na izolirani kopiji.
+Uspešen je tudi obstoječi preskus prikaza znakov brez sistemskih pisav iz
+[test_text_glyphs_render.py](tests/e2e/test_text_glyphs_render.py), izveden v izoliranem
+Chromiumu. Zgoraj navedeni primeri razkrivajo manjkajočo pokritost, ne odpovedi teh testov.
+Za ta dokumentacijski zapis se preverita `agent_tools.doclinks` in
+`agent_tools.todo_hygiene`; celoten `build check` ni del tega pregleda. Claudov ločeni
+uspešni zagon za njegova zadnja commita ne dokazuje, da so zgornje napake odpravljene.
+Pregled ne spreminja programske kode.
