@@ -11,6 +11,8 @@
 
 import re
 
+from playwright.sync_api import TimeoutError as PlaywrightTimeout
+
 
 def _base(page):
     """The app's base path (e.g. '/LibrePT'), read from <base>."""
@@ -259,6 +261,29 @@ DECK_STATE = """() => {
 }"""
 
 
+# What happened between the wheel and the check, for a failure to report (TODO §53): every wheel
+# and scroll event with its time, so a failed run says whether the scroll came late, came short, or
+# never came.
+RECORD_SCROLL = """() => {
+  const t0 = performance.now();
+  window.__scrollLog = [];
+  const deck = document.getElementById('active-exercise-scroll-deck');
+  const log = (kind) => {
+    let el = deck.parentElement;
+    while (el && !/(auto|scroll)/.test(getComputedStyle(el).overflowY)) el = el.parentElement;
+    el = el || document.scrollingElement;
+    window.__scrollLog.push({
+      kind, ms: Math.round(performance.now() - t0), top: Math.round(el.scrollTop),
+      room: deck.style.getPropertyValue('--deck-scroll-room'),
+      canScroll: el.scrollHeight - el.clientHeight,
+    });
+  };
+  window.addEventListener('wheel', () => log('wheel'), { passive: true });
+  document.addEventListener('scroll', () => log('scroll'), { capture: true, passive: true });
+  log('start');
+}"""
+
+
 def _reload(page):
     page.reload()
     page.wait_for_selector("#active-session-overlay:not(.hidden)")
@@ -278,15 +303,23 @@ def test_a_reload_keeps_the_active_card_closed_when_it_was_closed(page, local_se
     page.wait_for_timeout(400)
     box = page.locator("#active-exercise-scroll-deck").bounding_box()
     page.mouse.move(box["x"] + box["width"] / 2, box["y"] + 150)
+    page.evaluate(RECORD_SCROLL)
     page.mouse.wheel(0, 400)
-    # Waited for, never slept on: the gate run of 2026-09-24 19:32, with eight browser workers,
-    # read the deck after a fixed 600 ms and found the card still open. The state this test is
-    # about is the end of the scroll, so it waits for exactly that, and fails if it never comes.
-    page.wait_for_function(
-        """() => location.pathname.endsWith('/closed')
-              && !document.querySelector('#active-exercise-scroll-deck .exercise-deck-card.in-focus')""",
-        timeout=5000,
-    )
+    # Waited for, never slept on: the state this test is about is the end of the scroll. It failed
+    # twice in full gate runs on 2026-09-24 and never alone (TODO §53); the timeline is what it
+    # reports when it fails.
+    try:
+        page.wait_for_function(
+            """() => location.pathname.endsWith('/closed')
+                  && !document.querySelector('#active-exercise-scroll-deck .exercise-deck-card.in-focus')""",
+            timeout=5000,
+        )
+    except PlaywrightTimeout:
+        raise AssertionError(
+            f"the scroll did not close the card: {page.evaluate(DECK_STATE)} "
+            f"at {page.evaluate('() => location.pathname')}; "
+            f"events: {page.evaluate('() => window.__scrollLog')}"
+        ) from None
 
     before = page.evaluate(DECK_STATE)
     assert len(before["active"]) == 1 and before["open"] == [], before
