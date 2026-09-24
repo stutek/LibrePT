@@ -20,6 +20,24 @@ Read [CHANGELOG.md](CHANGELOG.md) for what shipped and when. This file is why.
 
 ---
 
+### 57. [x] The demo story tests count steps — fixed 2026-09-24
+
+Raised 2026-09-17 (Simon): counting cards and steps is fragile. Two counts were removed with
+040bcb9. Still in [test_demo_story.py](tests/e2e/test_demo_story.py): walks that take a fixed
+number of steps from a named start step — "four steps on from `arrive-menu`", then three Backs —
+and one that takes two steps from the top and expects step 3. A step added inside such a stretch
+moves the test onto a different step, and the failure then names a screen, not the insertion. The
+design that cannot fail that way walks until a step with a given id is reached.
+
+**Fixed 2026-09-24.** The four counted walks in [test_demo_story.py](tests/e2e/test_demo_story.py) —
+the reload from step 3, the repeated Show me, and the two walks back and forth around the invite
+dialog — now walk until a named step is reached: `_walk_to` forward and `_back_to` with Back. Both
+read the step's id from the address, which the story writes in the same handler that moves the
+progress line. A step that is never reached fails with the id it was looking for.
+`test_the_trainer_reads_what_ana_sent_and_she_lands_in_the_register` still takes two steps from
+`review-message`; it asserts an outcome (Ana in the register), not a step, so an added step there
+fails on that outcome rather than on a wrong screen.
+
 ### 65. [x] The erasure sweep does not reach repeating sessions — closed 2026-09-24
 
 Asked 2026-09-18 (Simon): is the anonymisation complete now that the alias is cleared (§59)? Read from

@@ -55,17 +55,40 @@ def _step_numbers(page):
     return [int(n) for n in re.findall(r"\d+", page.locator(PROGRESS).inner_text())]
 
 
-def _expect_step(page, number):
-    """On step `number`, whatever language the panel is counting in.
+# Every step writes its own id into the address, in the same handler that moves the progress line
+# (appBoot.js's `onStep`), so once the line has moved the address names the new step.
+STEP_ID = "() => new URLSearchParams(location.search).get('step')"
 
-    Tests that mean "the step which opens the register" must ANCHOR on that step's id and count
-    from where they landed — never from the top of the story. A card added anywhere ahead of them
-    shifts every absolute number behind it, and the failure that produces is a screen assertion
-    three steps later with nothing pointing at the insertion (proved 2026-09-10 by the welcome card,
-    which broke three tests here and none of them said why)."""
-    expect(page.locator(PROGRESS)).to_have_text(
-        re.compile(rf"step\s+{number}\s+of", re.I)
-    )
+
+def _step_id(page):
+    return page.evaluate(STEP_ID)
+
+
+def _walk_to(page, step_id):
+    """Forward until the story stands on `step_id`. Found by id, never counted (TODO §57): a step
+    added inside the stretch would move a counted walk onto another screen, and the failure would
+    then name that screen instead of the insertion (the welcome card broke three tests that way on
+    2026-09-10, and none of them said why)."""
+    while _step_id(page) != step_id:
+        step, total = _step_numbers(page)
+        assert step < total, f"the story ended at {_step_id(page)!r} before {step_id!r}"
+        before = _progress_text(page)
+        _do_step(page)
+        # `_do_step` returns as soon as it has tapped Next; the id is read only once the card moved.
+        expect(page.locator(PROGRESS)).not_to_have_text(before)
+
+
+def _back_to(page, step_id, settle_ms=400):
+    """Back until the story stands on `step_id` — the same rule as `_walk_to`, walked with Back.
+    `settle_ms` is the time a step's rebuild gets after the card has moved."""
+    while _step_id(page) != step_id:
+        assert _step_numbers(page)[0] > 1, (
+            f"the story's first step came before {step_id!r}"
+        )
+        before = _progress_text(page)
+        page.locator(BACK).click()
+        expect(page.locator(PROGRESS)).not_to_have_text(before)
+        page.wait_for_timeout(settle_ms)
 
 
 # A card step has no control of its own: it is read, and the guide's own Next is the way on
@@ -281,16 +304,16 @@ def test_a_reload_comes_back_on_the_step_it_left(page, local_server):
     card. A demo is watched in interruptions — a phone that locks, a tab restored, a link forwarded
     to a colleague half way through — and starting again from the top is what a viewer will not sit
     through twice. The step names itself in the address, so the address is enough to come back to."""
-    _open_story(page, local_server)
-    for _ in range(2):
-        _do_step(page)
-    expect(page.locator(PROGRESS)).to_have_text(re.compile(r"step\s+3\s+of", re.I))
+    _open_story(page, local_server, "?init=demo_data_load&demo=story&step=arrive-menu")
+    _walk_to(page, "arrive-invite")
+    progress_before = _progress_text(page)
     caption_before = page.locator(CAPTION).inner_text()
 
     page.reload()
     page.locator(PANEL).wait_for(state="visible", timeout=30_000)
 
-    expect(page.locator(PROGRESS)).to_have_text(re.compile(r"step\s+3\s+of", re.I))
+    expect(page.locator(PROGRESS)).to_have_text(progress_before)
+    assert _step_id(page) == "arrive-invite"
     assert page.locator(CAPTION).inner_text() == caption_before
     # And it can be carried on from, rather than being a picture of where you were.
     expect(page.locator(BACK)).to_be_visible()
@@ -350,13 +373,9 @@ def test_asking_to_be_shown_again_rebuilds_what_the_first_time_used_up(
     Walked BACK into rather than repeated in place, because since 2026-08-26 a step done in front of
     the viewer carries the card on — so "asking again" is what you do after returning to it."""
     _open_story(page, local_server, "?init=demo_data_load&demo=story&step=arrive-menu")
-    opened_on = _step_numbers(page)[0]
-    _do_step(page)
-    _do_step(page)
-    _expect_step(page, opened_on + 2)
-
-    page.locator(BACK).click()
-    _expect_step(page, opened_on + 1)
+    _walk_to(page, "arrive-invite")
+    _back_to(page, "arrive-clients", settle_ms=0)
+    on_the_step = _progress_text(page)
 
     for _ in range(3):
         page.locator(SHOW_ME).click()
@@ -364,7 +383,7 @@ def test_asking_to_be_shown_again_rebuilds_what_the_first_time_used_up(
         assert page.locator(PROBLEM).is_hidden(), (
             f"the guide reported a failure on a repeat: {page.locator(PROBLEM).inner_text()}"
         )
-        _expect_step(page, opened_on + 1)
+        expect(page.locator(PROGRESS)).to_have_text(on_the_step)
 
     expect(page.locator("#btn-invite-client")).to_be_visible()
     assert page.locator("#app-menu.hidden").count() == 1, (
@@ -383,25 +402,21 @@ def test_walking_back_out_of_a_dialog_and_forward_again_reopens_it(page, local_s
     precondition, and a control inside a closed dialog is not something a selector complains about.
     Being READY now includes the step's own control being reachable."""
     _open_story(page, local_server, "?init=demo_data_load&demo=story&step=arrive-menu")
-    opened_on = _step_numbers(page)[0]
 
-    # Forward to the step that types a phone number into the invite dialog.
-    for _ in range(4):
-        _do_step(page)
-    _expect_step(page, opened_on + 4)
+    # Forward to the step that types an email address into the invite dialog.
+    _walk_to(page, "arrive-contact-email")
     expect(page.locator("#dialog-intake-invite")).to_be_visible()
 
-    for _ in range(3):
-        page.locator(BACK).click()
-        page.wait_for_timeout(400)
-    _expect_step(page, opened_on + 1)
+    _back_to(page, "arrive-clients")
     expect(page.locator("#dialog-intake-invite")).to_be_hidden()
 
-    for _ in range(2):
+    # Next alone, not Show me: the steps between were done on the first pass, so the guide lights
+    # Next on each — which is exactly where the closed dialog used to be walked through.
+    while _step_id(page) != "arrive-contact":
+        before = _progress_text(page)
         page.locator(NEXT).click()
+        expect(page.locator(PROGRESS)).not_to_have_text(before)
         page.wait_for_timeout(600)
-
-    _expect_step(page, opened_on + 3)
     # The step asks for a number to be typed into a field in that dialog, so the dialog is back.
     expect(page.locator("#dialog-intake-invite")).to_be_visible(timeout=15_000)
     assert page.locator(PROBLEM).is_hidden(), page.locator(PROBLEM).inner_text()
@@ -418,17 +433,10 @@ def test_walking_back_puts_the_screen_the_card_describes_back(page, local_server
     _open_story(
         page, local_server, "clients?init=demo_data_load&demo=story&step=arrive-invite"
     )
-    opened_on = _step_numbers(page)[0]
-    for _ in range(4):
-        _do_step(page)
-    _expect_step(page, opened_on + 4)
-
-    for _ in range(3):
-        page.locator(BACK).click()
-        page.wait_for_timeout(1500)
+    _walk_to(page, "arrive-add-manually")
+    _back_to(page, "arrive-contact", settle_ms=1500)
 
     # The step that typed the number, and it is back in the box the card is talking about.
-    _expect_step(page, opened_on + 1)
     expect(page.locator("#dialog-intake-invite")).to_be_visible()
     assert page.input_value("#intake-invite-contact") == "+386 41 234 567", (
         "the card asks for a number the app is not showing"

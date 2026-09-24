@@ -4773,14 +4773,10 @@ unrecognised version as below the floor and replays the chain from 1, which re-a
 question (step 3 → 4), so "PREVIEW" must be taught to rank exactly as "P". P also stops existing the
 day schema 5 is minted.
 
-## 57. [ ] The demo story tests count steps
+## 57. [x] The demo story tests count steps — fixed 2026-09-24
 
-Raised 2026-09-17 (Simon): counting cards and steps is fragile. Two counts were removed with
-040bcb9. Still in [test_demo_story.py](tests/e2e/test_demo_story.py): walks that take a fixed
-number of steps from a named start step — "four steps on from `arrive-menu`", then three Backs —
-and one that takes two steps from the top and expects step 3. A step added inside such a stretch
-moves the test onto a different step, and the failure then names a screen, not the insertion. The
-design that cannot fail that way walks until a step with a given id is reached.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#57-x-the-demo-story-tests-count-steps--fixed-2026-09-24);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ## 56. [ ] A commit is not tied to the tree its gate proved
 
