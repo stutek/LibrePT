@@ -224,6 +224,21 @@ export const en = {
   adjust_replacement: "Replacement Exercise",
   adjust_replacement_hint: "— same muscle group keeps volume tracking intact",
   adjust_apply: "Apply & Resolve",
+  // The encrypted-file reader a CLIENT opens (modules/common/encryptedFileReader.js), TODO §38.20.
+  encrypted_title: "Open an encrypted file",
+  encrypted_lead: "For a personal-data export your trainer sent you.",
+  encrypted_local:
+    "The file is opened on this device only. Nothing is uploaded, and LibrePT keeps no copy.",
+  encrypted_file_label: "The file",
+  encrypted_passphrase_label: "The passphrase your trainer sent separately",
+  encrypted_passphrase_placeholder: "e.g. tempo-hinge-sprint-…",
+  encrypted_open: "Open",
+  encrypted_choose_file: "Choose the file your trainer sent you first.",
+  encrypted_enter_passphrase: "Enter the passphrase your trainer sent separately.",
+  encrypted_unreadable: "That file cannot be read. Check that it is the right attachment.",
+  encrypted_not_export: "That is not a LibrePT encrypted export.",
+  encrypted_cannot_open:
+    "The file cannot be opened: the passphrase is wrong, or the file was changed on the way.",
   add_new_client: "Add New Client",
   edit_client_profile: "Edit Client Profile",
   client_name: "Client Name",

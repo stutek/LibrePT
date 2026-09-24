@@ -2597,6 +2597,11 @@ elsewhere are one decision.
 **182 → 169.** It had no key at all; every label, option and button now has one. The mock voice
 memo name ("voice_memo.wav (0:04)") stays: it stands in for a feature that does not record yet.
 
+**2026-09-24: the encrypted-file reader** ([encryptedFileReader.js](src/modules/common/encryptedFileReader.js)),
+**169 → 160.** The one screen a client uses, to open the export their trainer sent. Its markup and
+its five status messages now come from the dictionary; the module receives `t` at boot. A failed
+decryption now says so in the reader's language instead of showing the data layer's English error.
+
 **Measured the same day, and not converted:** `activeSessionOverlayView.js` (20),
 `applicationHeader.js` (16) and `clientConsentSection.js` (10) are mostly false counts. Their visible texts are translated already, by
 the selector table or by code that writes them from the dictionary; what the check counts is the

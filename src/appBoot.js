@@ -122,8 +122,8 @@ export function bootClientForms(deps) {
 // The two data-subject-request dialogs (export / erase). Separate from bootClientForms because they
 // need write access to the WHOLE state — an erasure fans out across four collections — where the
 // client form only ever edits one record.
-export function bootEncryptedFileReader() {
-  setupEncryptedFileReader();
+export function bootEncryptedFileReader(deps) {
+  setupEncryptedFileReader(deps);
 }
 
 // The review dialog for a submission a client sent in (TODO §26.5). Boots with the client feature

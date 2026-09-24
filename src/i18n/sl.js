@@ -239,6 +239,21 @@ export const sl = {
   adjust_replacement: "Nadomestna vaja",
   adjust_replacement_hint: "— ista mišična skupina ohrani sledenje obsegu",
   adjust_apply: "Uveljavi in razreši",
+  // The encrypted-file reader a CLIENT opens (modules/common/encryptedFileReader.js), TODO §38.20.
+  encrypted_title: "Odpri šifrirano datoteko",
+  encrypted_lead: "Za izvoz osebnih podatkov, ki ti ga je poslal trener.",
+  encrypted_local:
+    "Datoteka se odpre samo na tej napravi. Nič se ne naloži, LibrePT pa ne obdrži nobene kopije.",
+  encrypted_file_label: "Datoteka",
+  encrypted_passphrase_label: "Geslo, ki ti ga je trener poslal posebej",
+  encrypted_passphrase_placeholder: "npr. tempo-hinge-sprint-…",
+  encrypted_open: "Odpri",
+  encrypted_choose_file: "Najprej izberi datoteko, ki ti jo je poslal trener.",
+  encrypted_enter_passphrase: "Vpiši geslo, ki ti ga je trener poslal posebej.",
+  encrypted_unreadable: "Datoteke ni mogoče prebrati. Preveri, ali je to prava priloga.",
+  encrypted_not_export: "To ni šifriran izvoz LibrePT.",
+  encrypted_cannot_open:
+    "Datoteke ni mogoče odpreti: geslo je napačno ali pa je bila datoteka med prenosom spremenjena.",
   add_new_client: "Dodaj novo stranko",
   edit_client_profile: "Uredi profil stranke",
   client_name: "Ime stranke",

@@ -42,8 +42,8 @@ SRC = REPO_ROOT / "src"
 # button's words, which only the code sets now, then the Sync & Backup dialog (backupRestore.js),
 # then the Custom Exercise dialog's labels and logging options (exerciseFormsController.js), then
 # the clipboard's feedback dialog (feedbackModal.js), then the Apply Program Adjustment dialog
-# (planAdjustments.js).
-BASELINE = 169
+# (planAdjustments.js), then the encrypted-file reader a client opens (encryptedFileReader.js).
+BASELINE = 160
 
 # Upstream files and the dictionaries themselves: the first are not ours to translate, the second
 # ARE the translations.

@@ -502,7 +502,7 @@ async function init() {
   setupNavigation({ setupSessionsDayNav });
   setupClientForms();
   setupClientDataRights();
-  appBoot.bootEncryptedFileReader();
+  appBoot.bootEncryptedFileReader({ t });
   appBoot.bootPlansView({ navigateToPath, urlFor });
   setupRoutineForms();
   setupExerciseForms();
