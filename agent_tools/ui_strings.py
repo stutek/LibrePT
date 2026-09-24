@@ -36,8 +36,9 @@ SRC = REPO_ROOT / "src"
 # whose checkbox wall became a search field with two fewer hardcoded strings (TODO §46.2), then the
 # theme picker, whose options are built from theme.js's label table instead of the markup (§49.2),
 # then the board's Today button, which moved into the date filter's calendar and left its English
-# title and label behind with it (§74.2).
-BASELINE = 269
+# title and label behind with it (§74.2), then the two data-subject-request dialogs, whose markup now
+# carries a key on every text (clientDataRights.js).
+BASELINE = 249
 
 # Upstream files and the dictionaries themselves: the first are not ours to translate, the second
 # ARE the translations.

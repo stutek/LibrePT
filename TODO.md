@@ -2549,9 +2549,18 @@ in its own markup is an element two files disagree about, and the table won — 
 may not fall without the baseline following it. So the sweep can proceed a file at a time while no
 new dialog is written in English.
 
-The worst remaining, by count: `exerciseFormsController.js` (46), `activeSessionOverlayView.js` (23),
-`clientDataRights.js` (22), `applicationHeader.js` (20), `backupRestore.js` (19), `clientsView.js`
-(18).
+**2026-09-24: the two data-subject-request dialogs** ([clientDataRights.js](src/modules/clients/clientDataRights.js)),
+**269 → 249.** Every text in their markup has a key, and so do the three texts the code writes: the
+export's counts, the Compose button and the same-name warning. A sentence with a bold part became two
+whole sentences, each with its own key, because `data-i18n` replaces an element's whole content.
+**[ ] Still English in that file:** the erasure receipt (its two lines are the 2 the check still
+counts, plus the warnings built with counts beside them), the email text the Compose button writes to
+the client, and the confirmation word `ERASE`, which a Slovenian trainer must type in English. The
+email and the word are wording decisions, not only translations: the email goes to the client, and
+the word is what stops an erasure by reflex.
+
+The worst remaining, by count: `exerciseFormsController.js` (46), `activeSessionOverlayView.js` (20),
+`backupRestore.js` (19), `clientsView.js` (18), `applicationHeader.js` (16).
 
 **Re-check condition:** the ratchet becomes an ordinary gate when the count reaches the irreducible
 set — a licence name, a taxonomy value that is the same word in every language — and this section

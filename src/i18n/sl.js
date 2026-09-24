@@ -898,6 +898,37 @@ export const sl = {
   offline_cached_desc:
     "Strežnik HTTP ni dosegljiv. Zagon iz predpomnjene kode; preverjanje posodobitev ni mogoče.",
   offline_cached_status: "Strežnik HTTP trenutno ni dosegljiv. Delujete v predpomnjeni kodi.",
+  // The two data-subject-request dialogs (modules/clients/clientDataRights.js), TODO §38.20.
+  rights_export_title: "Izvozi podatke te stranke",
+  rights_export_scope:
+    "Opravljeni treningi: {logged}, termini: {sessions}, spremembe plana: {updates}. Podatki drugih strank niso nikoli vključeni: skupinski trening je naveden le s številom udeležencev.",
+  rights_export_notes_label: "Tvoji zapiski o tej stranki (razkriti)",
+  rights_export_notes_hint:
+    "Tvoji zapiski so osebni podatki stranke in jih moraš razkriti. Uredi jih samo zato, da odstraniš podatke o drugih ljudeh. V datoteki bo pisalo, da je bilo nekaj izpuščeno.",
+  rights_passphrase_label: "Geslo za šifrirano datoteko",
+  rights_copy: "Kopiraj",
+  rights_new_passphrase: "Novo",
+  rights_passphrase_send:
+    "Pošlji ga po SMS-u ali ga povej osebno. Nikoli ga ne pošlji v istem e-poštnem sporočilu kot datoteko.",
+  rights_passphrase_needed: "Brez njega datoteke ne more odpreti nihče, niti ti.",
+  rights_step_download: "Prenesi šifrirano datoteko.",
+  rights_step_compose: "Napiši e-poštno sporočilo stranki.",
+  rights_step_attach:
+    "Datoteko priloži ročno: aplikacija ne more priložiti datoteke tvojemu e-poštnemu sporočilu.",
+  rights_step_passphrase: "Geslo pošlji posebej.",
+  rights_readable_copy: "Berljiva kopija",
+  rights_download_encrypted: "Prenesi šifrirano",
+  rights_compose_email: "Napiši e-pošto",
+  rights_no_email: "E-pošta ni vpisana",
+  rights_erase_title: "Izbriši to stranko (zahteva po GDPR)",
+  rights_erase_namesakes:
+    "⚠ Druga stranka ima natanko enako ime: {others}. Preveri, ali imaš odprto pravo osebo. To izbriše samo zgornjo.",
+  rights_erase_what:
+    "Ime, kontaktni podatki, cilji, zapiski, poškodbe in zgodovina telesne teže se zamenjajo z anonimno oznako. Zapisi treningov ostanejo, povezani z ID-jem, ki ne vodi več do nobene osebe.",
+  rights_erase_final: "Tega ni mogoče razveljaviti. Ne ostane nič, s čimer bi to lahko povrnili.",
+  rights_erase_requested: "Datum zahteve",
+  rights_copy_receipt: "Kopiraj potrdilo",
+  rights_erase_confirm: "Izbriši dokončno",
   consent_legend: "Varstvo osebnih podatkov (GDPR)",
   consent_signed_label:
     "Stranka je podpisala privolitev (hramba podatkov in sinhronizacija v oblak)",

@@ -36,6 +36,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 - Every erasure runs again each time the app starts, and so also after a migration. An erasure an
   older version left incomplete is finished: the alias is cleared, and a repeating session for
   that client alone stops. The start saves only when this changed something (TODO §65).
+- The dialogs for exporting and erasing a client's data are in Slovenian when Slovenian is chosen.
+  The erasure receipt and the email to the client are still English (TODO §38.20).
 - The demo story tests walk to a named step instead of counting steps, so a step added to the story
   no longer moves a test onto a different screen (TODO §57).
 

@@ -960,6 +960,36 @@ export const en = {
   offline_cached_desc:
     "HTTP server unreachable. Running off cached code; unable to check for updates.",
   offline_cached_status: "HTTP server is currently unreachable. You are running off cached code.",
+  // The two data-subject-request dialogs (modules/clients/clientDataRights.js), TODO §38.20.
+  rights_export_title: "Export this client's data",
+  rights_export_scope:
+    "{logged} logged session(s), {sessions} booking(s), {updates} plan update(s). Other clients' data is never included: a group session appears only as its size.",
+  rights_export_notes_label: "Your notes about this client (disclosed)",
+  rights_export_notes_hint:
+    "Your notes are the client's personal data and must be disclosed. Edit them only to remove information about other people. The file will say that something was left out.",
+  rights_passphrase_label: "Passphrase for the encrypted file",
+  rights_copy: "Copy",
+  rights_new_passphrase: "New",
+  rights_passphrase_send:
+    "Send it by SMS or say it in person. Never send it in the same email as the file.",
+  rights_passphrase_needed: "Without it nobody can open the file, not even you.",
+  rights_step_download: "Download the encrypted file.",
+  rights_step_compose: "Write an email to the client.",
+  rights_step_attach: "Attach the file by hand: an app cannot attach a file to your email.",
+  rights_step_passphrase: "Send the passphrase separately.",
+  rights_readable_copy: "Readable copy",
+  rights_download_encrypted: "Download encrypted",
+  rights_compose_email: "Compose email",
+  rights_no_email: "No email on file",
+  rights_erase_title: "Erase this client (GDPR request)",
+  rights_erase_namesakes:
+    "⚠ Another client has this exact name: {others}. Check that you have the right person open. This erases only the one above.",
+  rights_erase_what:
+    "Their name, contact details, goals, notes, injuries and body-weight history are replaced with an anonymous label. The training records stay, linked to an ID that no longer leads to a person.",
+  rights_erase_final: "This cannot be undone. Nothing is kept that could reverse it.",
+  rights_erase_requested: "Date they asked",
+  rights_copy_receipt: "Copy receipt",
+  rights_erase_confirm: "Erase permanently",
   consent_legend: "Data Protection (GDPR)",
   consent_signed_label: "Client signed the consent form (data storage & cloud sync)",
   consent_date_label: "Date signed",

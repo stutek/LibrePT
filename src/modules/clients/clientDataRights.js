@@ -37,6 +37,11 @@ import { escapeHTML } from "../common/utils.js";
 const ERASE_CONFIRMATION_WORD = "ERASE";
 
 let deps = {};
+
+// The injected dictionary, falling back to the key so a missing entry is visible rather than blank.
+function tr(key) {
+  return deps?.t?.(key) || key;
+}
 let subjectId = null;
 
 export function initClientDataRights(injected) {
@@ -54,55 +59,56 @@ export function renderDataRightsDialogs() {
     `
 <dialog id="dialog-client-export" class="dialog-modal card glassmorphic">
     <div class="modal-header">
-      <h3 id="client-export-title">Export this client's data</h3>
-      <button class="modal-close-btn" aria-label="Close modal"><i class="fa-solid fa-xmark"></i></button>
+      <h3 id="client-export-title" data-i18n="rights_export_title">Export this client's data</h3>
+      <button class="modal-close-btn" data-i18n-label="modal_close" aria-label="Close modal"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div class="modal-body data-rights-body">
       <p class="data-rights-subject" id="client-export-subject"></p>
       <p class="data-rights-note" id="client-export-scope"></p>
 
       <div class="form-group">
-        <label for="client-export-notes">Your notes about this client (disclosed)</label>
+        <label for="client-export-notes" data-i18n="rights_export_notes_label">Your notes about this client (disclosed)</label>
         <textarea id="client-export-notes" rows="3" class="form-control"></textarea>
-        <p class="form-hint">Your notes are <strong>their</strong> personal data and must be disclosed. Edit only to remove information about <em>other</em> people — the file will say that something was withheld.</p>
+        <p class="form-hint" data-i18n="rights_export_notes_hint">Your notes are the client's personal data and must be disclosed. Edit them only to remove information about other people. The file will say that something was left out.</p>
       </div>
 
       <div class="form-group">
-        <label for="client-export-passphrase">Passphrase for the encrypted file</label>
+        <label for="client-export-passphrase" data-i18n="rights_passphrase_label">Passphrase for the encrypted file</label>
         <div class="data-rights-passphrase-row">
           <input type="text" id="client-export-passphrase" class="form-control" readonly>
-          <button type="button" id="btn-export-copy-passphrase" class="btn secondary-btn btn-sm">Copy</button>
-          <button type="button" id="btn-export-new-passphrase" class="btn secondary-btn btn-sm">New</button>
+          <button type="button" id="btn-export-copy-passphrase" class="btn secondary-btn btn-sm" data-i18n="rights_copy">Copy</button>
+          <button type="button" id="btn-export-new-passphrase" class="btn secondary-btn btn-sm" data-i18n="rights_new_passphrase">New</button>
         </div>
-        <p class="form-hint"><strong>Send this by SMS or say it in person — never in the same email as the file.</strong> Without it the file cannot be opened, by anyone, including you.</p>
+        <p class="form-hint"><strong data-i18n="rights_passphrase_send">Send it by SMS or say it in person. Never send it in the same email as the file.</strong> <span data-i18n="rights_passphrase_needed">Without it nobody can open the file, not even you.</span></p>
       </div>
 
       <ol class="data-rights-steps">
-        <li>Download the encrypted file.</li>
-        <li>Compose an email to the client and <strong>attach it yourself</strong> — an app cannot attach a file to your mail for you.</li>
-        <li>Send the passphrase separately.</li>
+        <li data-i18n="rights_step_download">Download the encrypted file.</li>
+        <li><span data-i18n="rights_step_compose">Write an email to the client.</span> <strong data-i18n="rights_step_attach">Attach the file by hand: an app cannot attach a file to your email.</strong></li>
+        <li data-i18n="rights_step_passphrase">Send the passphrase separately.</li>
       </ol>
     </div>
     <div class="modal-actions data-rights-actions">
-      <button type="button" class="btn secondary-btn modal-cancel">Close</button>
-      <button type="button" id="btn-export-download-plain" class="btn secondary-btn">Readable copy</button>
-      <button type="button" id="btn-export-download" class="btn primary-btn">Download encrypted</button>
-      <a id="btn-export-compose" class="btn primary-btn">Compose email</a>
+      <button type="button" class="btn secondary-btn modal-cancel" data-i18n="close">Close</button>
+      <button type="button" id="btn-export-download-plain" class="btn secondary-btn" data-i18n="rights_readable_copy">Readable copy</button>
+      <button type="button" id="btn-export-download" class="btn primary-btn" data-i18n="rights_download_encrypted">Download encrypted</button>
+      <!-- Its words are set on every open (updateComposeLink): they depend on whether there is an email. -->
+      <a id="btn-export-compose" class="btn primary-btn"></a>
     </div>
   </dialog>
 
 <dialog id="dialog-client-erase" class="dialog-modal card glassmorphic">
     <div class="modal-header">
-      <h3 id="client-erase-title">Erase this client (GDPR request)</h3>
-      <button class="modal-close-btn" aria-label="Close modal"><i class="fa-solid fa-xmark"></i></button>
+      <h3 id="client-erase-title" data-i18n="rights_erase_title">Erase this client (GDPR request)</h3>
+      <button class="modal-close-btn" data-i18n-label="modal_close" aria-label="Close modal"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div class="modal-body data-rights-body">
       <p class="data-rights-subject" id="client-erase-subject"></p>
       <p class="data-rights-warning" id="client-erase-namesakes" hidden></p>
-      <p class="data-rights-note">Their name, contact details, goals, notes, injuries and body-weight history are replaced with an anonymous label. The training records stay, keyed to an id that no longer resolves to a person. <strong>This cannot be undone</strong> — nothing is kept that could reverse it.</p>
+      <p class="data-rights-note"><span data-i18n="rights_erase_what">Their name, contact details, goals, notes, injuries and body-weight history are replaced with an anonymous label. The training records stay, linked to an ID that no longer leads to a person.</span> <strong data-i18n="rights_erase_final">This cannot be undone. Nothing is kept that could reverse it.</strong></p>
 
       <div class="form-group">
-        <label for="client-erase-requested">Date they asked</label>
+        <label for="client-erase-requested" data-i18n="rights_erase_requested">Date they asked</label>
         <input type="text" id="client-erase-requested" class="form-control">
       </div>
 
@@ -114,9 +120,9 @@ export function renderDataRightsDialogs() {
       <div id="client-erase-receipt" class="data-rights-receipt" hidden></div>
     </div>
     <div class="modal-actions data-rights-actions">
-      <button type="button" class="btn secondary-btn modal-cancel">Cancel</button>
-      <button type="button" id="btn-erase-copy-receipt" class="btn secondary-btn" hidden>Copy receipt</button>
-      <button type="button" id="btn-erase-confirm" class="btn danger-btn" disabled>Erase permanently</button>
+      <button type="button" class="btn secondary-btn modal-cancel" data-i18n="btn_cancel">Cancel</button>
+      <button type="button" id="btn-erase-copy-receipt" class="btn secondary-btn" data-i18n="rights_copy_receipt" hidden>Copy receipt</button>
+      <button type="button" id="btn-erase-confirm" class="btn danger-btn" data-i18n="rights_erase_confirm" disabled>Erase permanently</button>
     </div>
   </dialog>
 `,
@@ -140,8 +146,10 @@ export function openClientExportDialog(clientId) {
 
   const payload = buildClientExport(deps.getState(), clientId);
   $id("client-export-subject").textContent = `${client.name} — ${clientDisambiguator(client)}`;
-  $id("client-export-scope").textContent =
-    `${payload.counts.loggedSessions} logged session(s), ${payload.counts.sessions} booking(s), ${payload.counts.planUpdates} plan update(s). Other clients' data is never included — a group session appears only as its size.`;
+  $id("client-export-scope").textContent = tr("rights_export_scope")
+    .replace("{logged}", String(payload.counts.loggedSessions))
+    .replace("{sessions}", String(payload.counts.sessions))
+    .replace("{updates}", String(payload.counts.planUpdates));
   $id("client-export-notes").value = client.notes || "";
   $id("client-export-passphrase").value = generatePassphrase();
   updateComposeLink(client);
@@ -161,7 +169,7 @@ function updateComposeLink(client) {
   compose.classList.toggle("disabled", !href);
   if (href) compose.setAttribute("href", href);
   else compose.removeAttribute("href");
-  compose.textContent = href ? "Compose email" : "No email on file";
+  compose.textContent = tr(href ? "rights_compose_email" : "rights_no_email");
 }
 
 async function downloadEncryptedExport() {
@@ -210,9 +218,10 @@ export function openClientEraseDialog(clientId) {
   if (namesakes.length > 0) {
     // The trainer is about to erase one of two identically-named people. Naming the OTHER one, with
     // its distinguishing details, is what lets them notice they have the wrong record open.
-    namesakeEl.textContent = `⚠ Another client has this exact name: ${namesakes
-      .map((namesake) => clientDisambiguator(namesake))
-      .join("; ")}. Check you have the right person open — this erases only the one above.`;
+    namesakeEl.textContent = tr("rights_erase_namesakes").replace(
+      "{others}",
+      namesakes.map((namesake) => clientDisambiguator(namesake)).join("; "),
+    );
   }
 
   $id("client-erase-requested").value = new Date().toISOString().substring(0, 10);
@@ -294,7 +303,7 @@ export function setupClientDataRights() {
   // The app's own day control (modules/common/dateField.js): ISO in every language, and its marks
   // run backwards, because the day an erasure was ASKED FOR is one that has already happened.
   mountDateField($id("client-erase-requested"), {
-    t: (key) => deps?.t?.(key) || key,
+    t: tr,
     lang: deps?.getState?.()?.lang || "en",
     past: true,
   });
