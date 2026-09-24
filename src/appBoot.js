@@ -37,6 +37,7 @@ import {
   rebindTimersToWorkspace,
   setupRestTimer,
 } from "./modules/clipboard/exerciseAndRestTimer.js";
+import { initAppVersionDialog, openAppVersionDialog } from "./modules/common/appVersionDialog.js";
 import {
   initApplicationHeader,
   setupApplicationHeader,
@@ -210,12 +211,19 @@ export function bootHeader(deps) {
   // The trainer's own name, phone and address (TODO §45.2) — another menu item with no other
   // prerequisite, and its store is plain localStorage rather than anything that has to be booted.
   initTrainerDetailsDialog({ t: deps.t });
+  // Which app version runs (TODO §76). Needs to know whether a session is running, because it
+  // refuses to reload the app in front of a client.
+  initAppVersionDialog({
+    t: deps.t,
+    isSessionRunning: () => Boolean(deps.getActiveSession?.()),
+  });
 
   initApplicationHeader({
     ...deps,
     openFeedbackRoute: openFeedbackRouteDialog,
     openProgramImport: openProgramImportDialog,
     openTrainerDetails: openTrainerDetailsDialog,
+    openAppVersion: openAppVersionDialog,
   });
   setupApplicationHeader();
 }

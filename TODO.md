@@ -5176,10 +5176,10 @@ one of:
   opt-in".
 - `preview` — CI and demonstrations only, never offered (§61's ruling). It reads PREVIEW.
 
-**`LIVE_SCHEMAS` is derived from the registry**, never written beside it: a schema is live exactly
-when a registered version reads it. Two lists that must agree would drift. Retiring a schema then
-stays a decision, as `docs/DATA_MODEL.md` requires, because it is the same edit as retiring the last
-version that reads it.
+**`LIVE_SCHEMAS` is checked against the registry, not derived from it** (built 2026-09-23, Claude):
+`appVersions.test.mjs` fails the build when a numbered live schema is named by no version, or a
+version names a schema that is not live. Deriving it would have made recordSchemas.js import the
+registry for one line; the check gives the same guarantee without that dependency.
 
 **Feature code asks for a behaviour by name, never for a version number.** It asks, for example,
 whether circuits are offered when a plan is built, and never whether the version is at least
@@ -5250,10 +5250,18 @@ source?}`. `name` stays required (Simon, 2026-09-23): an imported circuit withou
 one by the import. Simon ruled the same day that the cutover waits for this design.
 
 **[x] Schema 5 shipped 2026-09-23** — declared, frozen, read by every install and written into
-backups; see [CHANGELOG.md](CHANGELOG.md). **[ ] Next:** the registry (§76.2), in which version
-*2026-09* names schema 4 and stays the default, and a new version names 5 and turns on the library
-import and circuits in the plan builder; then the menu item (§76.3).
+backups; see [CHANGELOG.md](CHANGELOG.md).
 
-**Open for Simon:** whether a newer version starts as `supported` (opt-in, `BETA`) and becomes
-`default` later, or becomes the default on the day it ships; the cap of two numbered versions; and
-the Drive sync rule above.
+**[x] The registry and the menu item shipped 2026-09-23** ([appVersions.js](src/data/appVersions.js),
+[appVersionDialog.js](src/modules/common/appVersionDialog.js)). Two versions: *2026-09* names schema 4;
+*2026-10* names 5 and turns on `libraryImport`, which shows the exercise library's Import button.
+**Chosen (Claude), not ruled: 2026-10 is the default**, because the library import had already shipped
+to every trainer that day; making 2026-09 the default would have taken it away. One field to change.
+
+**[ ] Not built:** the sentence before a switch naming what the chosen version will not show and how
+many records (§76.3's second point) — today 2026-09 only hides the Import button and hides no data;
+the `BETA` ribbon of §18.12; a second browser-test pass per version (§76.5).
+
+**Open for Simon:** whether the default stays 2026-10; the cap of two numbered versions; and the Drive
+sync rule — which §76.4's read-the-newest rule has made unnecessary, since sync is built from memory
+and memory holds everything.

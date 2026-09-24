@@ -20,6 +20,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-09-23 — The trainer chooses which app version runs
+
+### Added
+
+- **☰ menu → App version** (§76): the supported versions, the one in use marked, each with one
+  sentence. A tap stores the choice on this device and reloads the app. While a session is running
+  the choice is refused, and the dialog says why.
+- **Two versions.** *2026-10*, the default, imports an exercise library. *2026-09* is the app without
+  the import: the exercise library shows no Import button. No version deletes or hides stored data.
+
 ## 2026-09-23 — Schema 5: room for an exercise's source and for circuits
 
 ### Added

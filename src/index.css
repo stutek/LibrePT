@@ -783,6 +783,19 @@ textarea.form-control {
   margin-top: 10px;
   border-top: 1px solid var(--border-color);
   padding-top: 14px;
+} /* The app versions a trainer can choose (appVersionDialog.js): one full-width choice per line */
+.app-version-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.app-version-option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  width: 100%;
+  text-align: left;
 } /* Routine builder items */
 .hidden {
   display: none !important;

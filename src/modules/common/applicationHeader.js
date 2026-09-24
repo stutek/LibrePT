@@ -443,6 +443,11 @@ export function renderHeaderShell() {
               <button id="menu-trainer-details" class="session-menu-item" role="menuitem">
                 <i class="fa-solid fa-id-card"></i> <span data-i18n="menu_trainer_details">My details</span>
               </button>
+              <!-- Which supported version of the app this device runs (TODO §76). A setting, like the
+                   theme; choosing one reloads the app. -->
+              <button id="menu-app-version" class="session-menu-item" role="menuitem">
+                <i class="fa-solid fa-code-compare"></i> <span data-i18n="menu_app_version">App version</span>
+              </button>
               <div class="menu-divider" role="separator"></div>
               <button id="menu-clients-register" class="session-menu-item" role="menuitem">
                 <i class="fa-solid fa-users"></i> <span id="menu-clients-register-text" data-i18n="menu_clients_register">Clients Directory</span>
@@ -694,6 +699,10 @@ function setupAppMenu() {
   on("menu-trainer-details", () => {
     closeMenu();
     deps.openTrainerDetails?.();
+  });
+  on("menu-app-version", () => {
+    closeMenu();
+    deps.openAppVersion?.();
   });
   // For a CLIENT who was emailed their data export, not for the trainer — which is why it sits in
   // the app menu and not on a client record: the person opening it has no client record.

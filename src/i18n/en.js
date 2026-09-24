@@ -478,6 +478,17 @@ export const en = {
   // somebody else, and a form whose purpose is invisible gets filled in wrongly or not at all.
   menu_trainer_details: "My details",
   trainer_details_title: "Your details",
+  // The app version this device runs (TODO §76).
+  menu_app_version: "App version",
+  app_version_title: "App version",
+  app_version_lede:
+    "Choose how the app behaves on this device. The app reloads. No version deletes stored data.",
+  app_version_in_use: "In use",
+  app_version_refused_in_session:
+    "A session is running. Finish or cancel it first, then change the version.",
+  app_version_2026_09_desc:
+    "The app as it was in September 2026, without importing an exercise library.",
+  app_version_2026_10_desc: "Adds importing your own exercise library and circuits from a file.",
   trainer_details_lede:
     "These go on what you send a client: your name signs the invitation, and your phone and email are how they answer it. They stay on this device.",
   trainer_details_name: "First and last name",

@@ -1,4 +1,5 @@
 // src/modules/exercises/exercisesView.js - the exercise library view: its filters and its cards
+import { hasBehaviour } from "../../data/appVersions.js";
 import {
   ALL_SOURCES,
   libraryExercises,
@@ -10,6 +11,12 @@ import { renderMarkupOnce } from "../common/dom.js";
 import { escapeHTML } from "../common/utils.js";
 import { sourceBadge, sourceLabels } from "./exercisePicker.js";
 
+// Only in an app version that imports a library (TODO §76). Choosing a version reloads the page, so
+// deciding it once, when the shell is drawn, is enough.
+const IMPORT_BUTTON = `<button id="btn-import-library" type="button" class="btn secondary-btn btn-sm">
+          <i class="fa-solid fa-file-import"></i> <span data-i18n="library_import_button">Import</span>
+        </button>`;
+
 export function renderExercisesViewShell() {
   renderMarkupOnce(
     "main-content",
@@ -19,9 +26,7 @@ export function renderExercisesViewShell() {
       <div class="view-header view-titlebar">
         <button class="view-grabber" type="button" aria-label="Return to home"></button>
         <h2>Exercise Library</h2>
-        <button id="btn-import-library" type="button" class="btn secondary-btn btn-sm">
-          <i class="fa-solid fa-file-import"></i> <span data-i18n="library_import_button">Import</span>
-        </button>
+        ${hasBehaviour("libraryImport") ? IMPORT_BUTTON : ""}
         <button id="btn-add-exercise" class="btn primary-btn btn-sm">
           <i class="fa-solid fa-plus"></i> Add Exercise
         </button>

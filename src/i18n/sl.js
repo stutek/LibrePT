@@ -454,6 +454,16 @@ export const sl = {
   splash_start_empty: "Začni s prazno aplikacijo",
   menu_trainer_details: "Moji podatki",
   trainer_details_title: "Tvoji podatki",
+  // Verzija aplikacije na tej napravi (TODO §76).
+  menu_app_version: "Verzija aplikacije",
+  app_version_title: "Verzija aplikacije",
+  app_version_lede:
+    "Izberi, kako se aplikacija obnaša na tej napravi. Aplikacija se znova naloži. Nobena verzija ne izbriše shranjenih podatkov.",
+  app_version_in_use: "V uporabi",
+  app_version_refused_in_session:
+    "Trening teče. Najprej ga končaj ali prekliči, nato zamenjaj verzijo.",
+  app_version_2026_09_desc: "Aplikacija, kot je bila septembra 2026, brez uvoza knjižnice vaj.",
+  app_version_2026_10_desc: "Doda uvoz lastne knjižnice vaj in sklopov iz datoteke.",
   trainer_details_lede:
     "Ti podatki gredo na to, kar pošlješ stranki: tvoje ime podpiše povabilo, telefon in e-pošta pa sta pot, po kateri ti stranka odgovori. Ostanejo na tej napravi.",
   trainer_details_name: "Ime in priimek",
