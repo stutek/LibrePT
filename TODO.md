@@ -2609,6 +2609,11 @@ English over it. Both paths now write it from the dictionary, the markup carries
 exercise rows, built by code after the translation pass, take their words from `t`. The name label's
 key gained the required mark (*) it had lost.
 
+**2026-09-24: the invite dialog** ([sessionInviteDialog.js](src/modules/session/sessionInviteDialog.js)),
+**144 → 142.** A defect rather than a count: `session_invite_expiry` and its hint were in both
+dictionaries and nothing applied them, so the cutoff field's label was English in every language
+and the hint that explains what 0 means was never shown. The dialog now writes both on open.
+
 **Measured the same day, and not converted:** `activeSessionOverlayView.js` (20),
 `applicationHeader.js` (16) and `clientConsentSection.js` (10) are mostly false counts. Their visible texts are translated already, by
 the selector table or by code that writes them from the dictionary; what the check counts is the

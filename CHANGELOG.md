@@ -53,6 +53,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   its error messages included (TODO §38.20).
 - The Routine Template dialog is in Slovenian when Slovenian is chosen, its title and exercise rows
   included; the title was English on every open before (TODO §38.20).
+- The invite dialog's reply cutoff field shows its label in the chosen language, and the hint under
+  it now appears: "0 keeps replies open until the session starts" (TODO §38.20).
 - A clipboard reload test waits for the scroll to finish instead of sleeping a fixed 600 ms, which
   was not enough in a busy gate run (TODO §53).
 - The demo story tests walk to a named step instead of counting steps, so a step added to the story

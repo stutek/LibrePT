@@ -178,6 +178,22 @@ def test_the_trainers_phone_is_remembered_between_sessions(page, local_server):
     )
 
 
+def test_the_cutoff_field_says_what_zero_means(page, local_server):
+    """The label and hint for the cutoff had keys in every language and nothing applied them: the
+    label stayed English and the hint was always empty (TODO §38.20). Zero is the one value a
+    trainer cannot guess, so the hint is what has to arrive."""
+    load_with_stub(page, local_server, INVITE_STUB)
+
+    hint = page.evaluate(
+        """async () => {
+            const { TRANSLATIONS } = await import(new URL('i18n/index.js', document.baseURI).href);
+            return TRANSLATIONS.en.session_invite_expiry_hint;
+        }"""
+    )
+    assert hint
+    expect(page.locator("#session-invite-expiry-hint")).to_have_text(hint)
+
+
 def test_the_invite_carries_the_cutoff_the_trainer_set(page, local_server):
     """§1.6's expiry: the padding is the trainer's setting, and it has to travel as an absolute instant,
     because the client's device cannot compute a deadline it was never told about."""

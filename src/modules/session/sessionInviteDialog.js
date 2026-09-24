@@ -51,7 +51,7 @@ function renderInviteDialogShell() {
 <dialog id="dialog-session-invite" class="dialog-modal card glassmorphic">
     <div class="modal-header">
       <h3 id="session-invite-title">Send calendar invites</h3>
-      <button class="modal-close-btn" aria-label="Close invite dialog"><i class="fa-solid fa-xmark"></i></button>
+      <button class="modal-close-btn" data-i18n-label="modal_close" aria-label="Close invite dialog"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div class="modal-body-scroll">
       <p id="session-invite-desc" class="dialog-desc"></p>
@@ -73,7 +73,7 @@ function renderInviteDialogShell() {
       <div id="session-invite-list"></div>
     </div>
     <div class="modal-actions">
-      <button type="button" class="btn primary-btn modal-cancel">Done</button>
+      <button type="button" class="btn primary-btn modal-cancel" data-i18n="done">Done</button>
     </div>
   </dialog>
 `,
@@ -353,6 +353,13 @@ function renderDialogChrome(t) {
         "Newly assigned participants can be sent a calendar invite for this session.",
     ],
     ["session-invite-organizer-label", t("session_invite_organizer") || "Replies come back to"],
+    // Both keys existed in every language and nothing applied them, so the label stayed English
+    // and the hint under the field was always empty (TODO §38.20).
+    [
+      "session-invite-expiry-label",
+      t("session_invite_expiry") || "Close replies this many hours before",
+    ],
+    ["session-invite-expiry-hint", t("session_invite_expiry_hint") || ""],
     ["session-invite-phone-label", t("session_invite_phone") || "Your number, for replies by text"],
     [
       "session-invite-phone-hint",
