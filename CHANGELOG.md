@@ -22,8 +22,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ## 2026-09-24 — Exchange complete exercise libraries
 
+### Added
+
+- **Add circuit from library** in the plan editor inserts a separate copy at the chosen gap,
+  including rounds, targets and rests. Editing it leaves the library and other copies unchanged.
+
 ### Fixed
 
+- Imports containing several sources keep all newly added exercises visible.
 - The JSON catalog export includes circuits, their rounds and exercise targets, and the sources of
   individual exercises and circuits. Importing it preserves those sources instead of replacing them
   all with the import's source name (TODO §45.5).

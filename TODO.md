@@ -3741,8 +3741,10 @@ stored in `circuits`. See [UC6 §2.2](use_cases/uc6_exercise_taxonomy_and_picker
 **In progress 2026-09-24:** completing the remaining work in verified increments.
 The JSON catalog export now carries circuits and per-record sources, and reimport preserves them.
 The Import button is gated on `libraryImport` by §76's version registry.
-**[ ] Next:** "Add circuit from library" in the plan editor; a frozen corpus of real library files,
-as §29 has. No real trainer-supplied library files have been identified yet; that blocks claiming
+The plan editor now offers a library circuit at each top-level insertion gap, keeping independent
+slot ids, rounds and rest items. Multi-source imports show all newly added exercises.
+**[ ] Next:** a frozen corpus of real library files, as §29 has.
+No real trainer-supplied library files have been identified yet; that blocks claiming
 the corpus represents real exchanges.
 
 **Ruled 2026-09-23 (Simon):** an imported circuit with no name gets a placeholder, so

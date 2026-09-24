@@ -23,6 +23,7 @@
 //                           — deck card callbacks
 //   newRecordId()
 
+import { hasBehaviour } from "../../data/appVersions.js";
 import { libraryExercises } from "../../data/exerciseLibrary.js";
 import { gymNotesForPlan } from "../../domain/gymNotes.js";
 import { renderActiveUsersList } from "../common/activeUsersList.js";
@@ -277,6 +278,8 @@ function editorDepsFor(clientId, clientState, callout) {
   const editClient = state.clients.find((c) => c.id === clientId);
   return {
     activeClientState: clientState,
+    libraryExercises: libraryExercises(state),
+    libraryCircuits: hasBehaviour("libraryImport") ? state.circuits || [] : [],
     clientName: editClient ? editClient.name : "",
     slotLabel: deps.getActiveSession()?.sourceSession?.timeLabel || "",
     allExerciseNames: libraryExercises(state).map((e) => e.name),
@@ -345,6 +348,8 @@ function renderPlanEditor(deckContainer, activeClientId, activeClientState, call
   const editClient = state.clients.find((c) => c.id === activeClientId);
   return renderClipboardEditor(deckContainer, {
     activeClientState,
+    libraryExercises: libraryExercises(state),
+    libraryCircuits: hasBehaviour("libraryImport") ? state.circuits || [] : [],
     clientName: editClient ? editClient.name : "",
     // The slot the plan has to fit in (TODO §35.3b). Read from the session the clipboard is running,
     // which is also the only place that knows whether there IS one — a planning programme has none.

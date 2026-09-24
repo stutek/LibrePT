@@ -74,12 +74,14 @@ shape, and a bare list of names.
   library already has (same id, or the same name with case and spacing folded — they are not added
   twice), and every entry that could not be read, with its position.
 - **The source name** comes from the file (`source` or `author`), else from the file's name, and the
-  trainer can change it. Every exercise and circuit from the import carries it; left empty, they
-  count as the trainer's own. After the import the library opens filtered to that source.
+  trainer can change it. Entries that already name their source keep it; the field fills in missing
+  sources. Left empty, those entries count as the trainer's own. After import the library shows the
+  new exercises' source, or all sources when the file added several.
 - **Circuits** are stored for building plans (schema 5's `circuits`), never as routines. A circuit
   points at its exercises by id, and one with no name is given the word for circuit and its first
-  two exercises ("Circuit — Sled Push, Push-Ups"). Inserting a stored circuit into a plan is TODO
-  §45.5's next step.
+  two exercises ("Circuit — Sled Push, Push-Ups"). In the plan editor, **Add circuit from library**
+  in a gap inserts a separate copy there, with its rounds, targets and rests. Editing that copy
+  changes only this participant's plan. A circuit whose exercises are missing cannot be selected.
 
 ---
 
@@ -206,6 +208,8 @@ where ExRx is proprietary
   (custom movements included): a self-describing **interchange JSON** envelope
   (`catalogToInterchange`) naming its `format`/`version`, and an interchange **CSV** (`catalogToCsv`)
   that puts the wger-mapped and raw-LibrePT columns side by side for spreadsheet inspection.
+  The JSON also carries per-entry sources and reusable circuits, so another trainer can import the
+  whole library; CSV remains the movement table for spreadsheet inspection.
 
 Delivers TODO §13.1's last bullet (adopt an open standard for interchangeable exports).
 

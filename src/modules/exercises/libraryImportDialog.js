@@ -10,14 +10,19 @@
 // until they press Add to library.
 //
 // **The source name is theirs to set.** It is taken from the file when the file names one (its
-// `source` or `author`), else from the file's name, and it is what every exercise from this import
-// is marked and filtered by afterwards. Once the trainer types in the field, a later read leaves it
-// alone. Left empty, the exercises count as the trainer's own.
+// `source` or `author`), else from the file's name. It applies to entries that do not already name
+// their source; a colleague's export can carry several sources, which must survive another hop.
+// Once the trainer types in the field, a later read leaves it alone.
 //
 // Injected dependencies: `t`, `getState`, `saveToLocalStorage`, `newId`, `readFileText(file)`,
 // `onImported(source)`.
 
-import { OWN_SOURCE, addToLibrary, libraryExercises } from "../../data/exerciseLibrary.js";
+import {
+  ALL_SOURCES,
+  addToLibrary,
+  libraryExercises,
+  sourcesOf,
+} from "../../data/exerciseLibrary.js";
 import { libraryTemplate, planLibraryImport, readLibrary } from "../../domain/libraryImport.js";
 import { closeModal, openModal, renderMarkupOnce } from "../common/dom.js";
 
@@ -162,12 +167,13 @@ function readCurrent(fileName = "") {
 function addImported() {
   const current = readCurrent();
   if (!current) return;
-  const { plan, source } = current;
+  const { plan } = current;
   addToLibrary(deps.getState(), plan);
   deps.saveToLocalStorage();
   closeModal(DIALOG_ID);
-  // Show what came in: the library opens filtered to the source it was imported under.
-  deps.onImported(source || OWN_SOURCE);
+  // A file may carry several sources. Filtering it to the fallback field would hide what was added.
+  const sources = sourcesOf(plan.exercises);
+  deps.onImported(sources.length === 1 ? sources[0] : ALL_SOURCES);
 }
 
 function wire() {

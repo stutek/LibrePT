@@ -573,6 +573,16 @@
 .editor-insert:focus-within {
   opacity: 1;
 }
+.editor-insert:has(.editor-library-circuit) {
+  flex-wrap: wrap;
+  opacity: 1;
+}
+.editor-library-circuit {
+  flex: 1 1 100%;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 44px;
+}
 .editor-insert-line {
   flex: 1;
   height: 1px;

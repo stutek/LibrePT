@@ -40,9 +40,41 @@ import {
   repsPresetListId,
 } from "../../domain/repsAndLoad.js";
 import { isRestRecord as isRest } from "../../domain/sessionItemRecord.js";
+import { buildClientStateFromLibraryCircuit } from "../../domain/sessionPlanFactory.js";
 import { isGuideSurface } from "../common/dom.js";
 
 const DEFAULT_SERIES = 3;
+
+// Offered only in a top-level gap: circuits cannot contain another circuit. Option text is set
+// through the DOM because both the name and source can come from an imported file.
+function mountLibraryCircuitPicker(bar, deps, insert) {
+  if (bar.dataset.cid || !deps.libraryCircuits?.length) return;
+  const select = document.createElement("select");
+  select.className = "form-control editor-library-circuit";
+  select.setAttribute("aria-label", deps.t("add_library_circuit"));
+  const placeholder = document.createElement("option");
+  placeholder.value = "";
+  placeholder.textContent = deps.t("add_library_circuit");
+  select.append(placeholder);
+  for (const circuit of deps.libraryCircuits) {
+    const option = document.createElement("option");
+    option.value = circuit.id;
+    option.textContent = circuit.source ? `${circuit.name} · ${circuit.source}` : circuit.name;
+    option.disabled =
+      !circuit.exercises?.length ||
+      circuit.exercises.some(
+        (entry) => !deps.libraryExercises.some((exercise) => exercise.id === entry.id),
+      );
+    select.append(option);
+  }
+  select.addEventListener("click", (event) => event.stopPropagation());
+  select.addEventListener("change", () => {
+    const circuit = deps.libraryCircuits.find((entry) => entry.id === select.value);
+    const plan = buildClientStateFromLibraryCircuit(circuit, deps.libraryExercises);
+    if (plan) insert(plan);
+  });
+  bar.append(select);
+}
 
 /** How long this plan runs, against the slot it has to fit in (TODO §35.3b).
  *
@@ -663,6 +695,12 @@ export function renderClipboardEditor(container, deps) {
         markNewItem?.(item.id);
         commit();
       };
+      mountLibraryCircuitPicker(bar, deps, (plan) => {
+        items.splice(at, 0, ...plan.exercises);
+        Object.assign(activeClientState.logs, plan.logs);
+        markNewItem?.(plan.exercises[0].id);
+        commit();
+      });
       exBtn?.addEventListener("click", (e) => {
         e.stopPropagation();
         insertItem(makeExercise(cid));

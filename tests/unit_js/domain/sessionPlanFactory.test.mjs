@@ -15,6 +15,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   buildClientStateFromHistoryLog,
+  buildClientStateFromLibraryCircuit,
   buildClientStateFromRoutine,
   clampFocusIndex,
   ensureRestItems,
@@ -38,6 +39,50 @@ const CATALOG = [
     equipment: "barbell",
   },
 ];
+
+test("each library circuit insertion gets independent slots, rounds and rest items", () => {
+  const circuit = {
+    id: "library",
+    name: "Push and pull",
+    series: 4,
+    exercises: [
+      { id: "ex-bench", reps: 8, weight: 30, rest: 45 },
+      { id: "ex-bench", reps: 5, weight: 40 },
+      { id: "ex-row", reps: 12, weight: 20 },
+    ],
+  };
+  const before = structuredClone(circuit);
+  const first = buildClientStateFromLibraryCircuit(circuit, CATALOG);
+  const second = buildClientStateFromLibraryCircuit(circuit, CATALOG);
+  assert.deepEqual(
+    first.exercises.map((item) => item.name || item.type),
+    ["Bench Press", "rest", "Bench Press", "Barbell Row"],
+  );
+  const allIds = [...first.exercises, ...second.exercises].map((item) => item.id);
+  assert.equal(new Set(allIds).size, allIds.length);
+  assert.notEqual(first.exercises[0].circuitId, second.exercises[0].circuitId);
+  assert.equal(first.exercises[1].rest, 45);
+  assert.deepEqual(
+    first.logs[first.exercises[0].id],
+    Array.from({ length: 4 }, () => ({
+      reps: 8,
+      weight: 30,
+      completed: false,
+      note: "",
+    })),
+  );
+  first.exercises[0].repsTarget = 99;
+  assert.equal(second.exercises[0].repsTarget, 8);
+  assert.deepEqual(circuit, before);
+});
+
+test("an incomplete library circuit is refused rather than inserted partly", () => {
+  assert.equal(
+    buildClientStateFromLibraryCircuit({ exercises: [{ id: "missing" }] }, CATALOG),
+    null,
+  );
+  assert.equal(buildClientStateFromLibraryCircuit({ exercises: [] }, CATALOG), null);
+});
 
 test("a history snapshot is rebuilt in its own program order, not array order", () => {
   const log = {

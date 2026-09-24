@@ -42,6 +42,7 @@ export const en = {
   live_tracking_clipboard: "Live Tracking Clipboard",
   active_session: "Active session",
   add_from_catalog: "Add from catalog",
+  add_library_circuit: "Add circuit from library",
   catalog_picker_title: "Add from Exercise Catalog",
   integrity_error_title: "App verification failed",
   integrity_error_missing:
@@ -244,7 +245,7 @@ export const en = {
   library_import_text: "Paste the library here",
   library_import_file: "Read from file",
   library_import_template: "Show an example",
-  library_import_source: "Source name — shown on every exercise from this import",
+  library_import_source: "Source name — for entries without their own source",
   library_import_source_placeholder: "for example Ana Novak",
   library_import_read: "New exercises: {exercises}. New circuits: {circuits}.",
   library_import_duplicates: "Already in your library, so not added again: {count}",

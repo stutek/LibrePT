@@ -41,6 +41,35 @@ def _mount(page, local_server, plan, edit_mode=True, source_session=None):
 
 
 # --- insert bar: +Rest is the only conditional option -------------------------------------------
+
+
+def test_library_circuit_is_inserted_at_the_chosen_gap(page, local_server):
+    load_with_stub(
+        page,
+        local_server,
+        clipboard_stub(
+            active_session_fixture(
+                exercises=[exercise_item("existing", "Existing exercise")]
+            ),
+            extra_body="""
+state.circuits = [{id: 'saved-circuit', name: 'Library circuit', series: 3,
+  source: 'Ana', exercises: [{id: state.exercises[0].id, reps: 7, weight: 25, rest: 40}]}];
+renderActiveGroupBoard();
+""",
+        ),
+    )
+    open_plan_editor(page)
+    page.locator(".editor-library-circuit").first.select_option("saved-circuit")
+    names = page.locator(".editor-row-name").evaluate_all(
+        "(els) => els.map(el => el.value)"
+    )
+    assert names[-1] == "Existing exercise"
+    assert len(names) == 2
+    assert page.locator(".editor-circuit-title").input_value() == "Library circuit"
+    assert page.locator(".editor-circuit-series").input_value() == "3"
+    assert page.locator(".editor-rest-secs").input_value() == "40"
+
+
 # Back-to-back rests are two waits with nothing between them, never a real plan shape, so +Rest
 # hides in any gap where inserting one would land it next to an existing rest. +Exercise and
 # +Circuit never create that shape and so stay available everywhere.

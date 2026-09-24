@@ -57,6 +57,7 @@ export const sl = {
   live_tracking_clipboard: "Sledenje vadbi v živo",
   active_session: "Aktiven trening",
   add_from_catalog: "Dodaj iz kataloga",
+  add_library_circuit: "Dodaj sklop iz knjižnice",
   catalog_picker_title: "Dodaj iz kataloga vaj",
   integrity_error_title: "Preverjanje aplikacije ni uspelo",
   integrity_error_missing:
@@ -259,7 +260,7 @@ export const sl = {
   library_import_text: "Prilepi knjižnico sem",
   library_import_file: "Preberi iz datoteke",
   library_import_template: "Pokaži primer",
-  library_import_source: "Ime vira — pokaže se na vsaki vaji iz tega uvoza",
+  library_import_source: "Ime vira — za vnose brez lastnega vira",
   library_import_source_placeholder: "na primer Ana Novak",
   library_import_read: "Novih vaj: {exercises}. Novih sklopov: {circuits}.",
   library_import_duplicates: "Že v tvoji knjižnici, zato ne bodo dodane še enkrat: {count}",

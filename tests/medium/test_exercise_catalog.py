@@ -280,3 +280,26 @@ def test_import_reviews_first_then_adds_under_its_source(page, local_server):
     assert [c["name"] for c in circuits] == ["Circuit — Sled Push, Push-Ups"]
     assert circuits[0]["series"] == 3
     assert circuits[0]["source"] == "Ana Novak"
+
+
+def test_import_with_multiple_sources_keeps_all_new_exercises_visible(
+    page, local_server
+):
+    load_with_stub(page, local_server, _stub("[{id: 'mine', name: 'My movement'}]"))
+    page.click("#btn-import-library")
+    page.fill(
+        "#library-import-text",
+        """{
+      "exercises": [{"name": "Sled Push", "source": "Ana"},
+                    {"name": "Sandbag Carry", "source": "Boris"}]
+    }""",
+    )
+    page.click("#library-import-add")
+    page.wait_for_selector("#dialog-library-import", state="hidden")
+    names = page.locator("#view-exercises .exercise-item h3").all_text_contents()
+    assert "Sled Push" in names
+    assert "Sandbag Carry" in names
+    assert (
+        page.locator(".filter-chips[data-axis='source'] .chip.active").text_content()
+        == "All"
+    )

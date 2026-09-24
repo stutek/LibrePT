@@ -188,3 +188,42 @@ export function buildClientStateFromRoutine({ routineId, routines, exercises, em
   if (routine) populateClientStateExercisesFromRoutine(clientState, routine, exercises);
   return clientState;
 }
+
+// A library circuit is a reusable prescription, never a shared live log. Give every occurrence
+// its own slot, including when the same movement appears twice in one circuit (TODO §45.5).
+export function buildClientStateFromLibraryCircuit(circuit, exercises) {
+  const entries = circuit?.exercises || [];
+  const catalog = new Map(exercises.map((exercise) => [exercise.id, exercise]));
+  if (!entries.length || entries.some((entry) => !catalog.has(entry.id))) return null;
+  const circuitId = newRecordId();
+  const series = Math.max(1, Math.floor(circuit.series || 1));
+  const slotCatalog = [];
+  const routine = {
+    id: circuitId,
+    name: circuit.name,
+    exercises: entries.map((entry) => {
+      const id = newRecordId();
+      slotCatalog.push({ ...catalog.get(entry.id), id });
+      return {
+        id,
+        sets: series,
+        reps: entry.reps ?? 10,
+        weight: entry.weight ?? 0,
+        rest: entry.rest ?? 0,
+        circuitId,
+        circuitTitle: circuit.name,
+        circuitSeries: series,
+      };
+    }),
+  };
+  const plan = buildClientStateFromRoutine({
+    routineId: circuitId,
+    routines: [routine],
+    exercises: slotCatalog,
+  });
+  plan.exercises.forEach((item, index) => {
+    item.exerciseId = entries[index].id;
+  });
+  ensureRestItems(plan);
+  return plan;
+}
