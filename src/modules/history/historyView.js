@@ -17,7 +17,7 @@ export function renderHistoryViewShell() {
     `
 <section id="view-history" class="app-view">
       <div class="view-header view-titlebar">
-        <button class="view-grabber" type="button" aria-label="Return to home"></button>
+        <button class="view-grabber" type="button" data-i18n-label="view_grabber_home" aria-label="Return to home"></button>
         <h2>Global History</h2>
       </div>
       <p class="view-desc">Log of all completed sessions across all clients.</p>

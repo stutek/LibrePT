@@ -2639,7 +2639,8 @@ each caller had copied. The count now reads "Movements: 48" / "Vaje: 48": Sloven
 forms, and a number after a label needs none. The same search found the session form's two
 placeholders ([editSessionView.js](src/modules/session/editSessionView.js)) and the signup review
 dialog's title ([signupReviewDialog.js](src/modules/clients/signupReviewDialog.js)) English; both
-carry keys since the same evening (**138 → 133**).
+carry keys since the same evening (**138 → 133**). Then the screen-reader label on every view's
+grabber, the bar at the top of a view: all eight carry a key (**133 → 128**).
 
 **Measured the same day, and not converted:** `activeSessionOverlayView.js` (20),
 `applicationHeader.js` (16) and `clientConsentSection.js` (10) are mostly false counts. Their visible texts are translated already, by

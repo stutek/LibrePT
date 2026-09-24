@@ -1057,6 +1057,8 @@ export const en = {
   rights_erase_confirm: "Erase permanently",
   // The client detail view (modules/clients/clientsView.js), TODO §38.20.
   view_grabber_home: "Return to home",
+  view_grabber_clipboard: "Open session clipboard",
+  view_grabber_close_session: "Close session and return to home",
   profile_consent_label: "GDPR Cloud Sync Consent",
   profile_ai_safe_copy: "AI Safe Copy",
   profile_export_data: "Export data (GDPR)",

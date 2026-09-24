@@ -996,6 +996,8 @@ export const sl = {
   rights_erase_confirm: "Izbriši dokončno",
   // The client detail view (modules/clients/clientsView.js), TODO §38.20.
   view_grabber_home: "Nazaj na začetek",
+  view_grabber_clipboard: "Odpri podlogo treninga",
+  view_grabber_close_session: "Zapri trening in se vrni na začetek",
   profile_consent_label: "Privolitev GDPR za sinhronizacijo v oblak",
   profile_ai_safe_copy: "Anonimna kopija za AI",
   profile_export_data: "Izvozi podatke (GDPR)",

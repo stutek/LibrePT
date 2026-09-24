@@ -65,6 +65,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   now reads "Movements: 48" instead of "48 movements" (TODO §38.20).
 - The session form's name and place fields, and the title of the dialog for reviewing a client's own
   details, are in the chosen language (TODO §38.20).
+- A screen reader names the bar at the top of every view in the chosen language (TODO §38.20).
 - A clipboard reload test waits for the scroll to finish instead of sleeping a fixed 600 ms, which
   was not enough in a busy gate run (TODO §53).
 - The demo story tests walk to a named step instead of counting steps, so a step added to the story

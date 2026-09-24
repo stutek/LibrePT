@@ -33,7 +33,7 @@ export function renderRoutinesViewShell() {
     `
 <section id="view-routines" class="app-view">
       <div class="view-header view-titlebar">
-        <button class="view-grabber" type="button" aria-label="Return to home"></button>
+        <button class="view-grabber" type="button" data-i18n-label="view_grabber_home" aria-label="Return to home"></button>
         <h2>Routines Database</h2>
         <button id="btn-add-routine" class="btn primary-btn btn-sm">
           <i class="fa-solid fa-plus"></i> Create Template

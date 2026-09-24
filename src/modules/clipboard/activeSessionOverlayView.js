@@ -90,7 +90,7 @@ export function renderActiveSessionOverlayShell() {
          own id/classes (many tests and gestureController.js's swipe-down select them) stay put. -->
     <div id="active-session-blanket" class="plan-peek-blanket">
     <div class="session-title-bar view-titlebar">
-      <button class="view-grabber" type="button" aria-label="Close session and return to home"></button>
+      <button class="view-grabber" type="button" data-i18n-label="view_grabber_close_session" aria-label="Close session and return to home"></button>
       <!-- The title OPENS THE MENU too (asked 2026-08-31: "maybe make the ... menu open (edit,
            copy, delete) on session name click instead of separate button"). Added to the ⋯ rather
            than replacing it: that menu holds Delete Session, and a destructive action reachable

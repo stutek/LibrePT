@@ -24,7 +24,7 @@ export function renderExercisesViewShell() {
     `
 <section id="view-exercises" class="app-view">
       <div class="view-header view-titlebar">
-        <button class="view-grabber" type="button" aria-label="Return to home"></button>
+        <button class="view-grabber" type="button" data-i18n-label="view_grabber_home" aria-label="Return to home"></button>
         <h2>Exercise Library</h2>
         ${hasBehaviour("libraryImport") ? IMPORT_BUTTON : ""}
         <button id="btn-add-exercise" class="btn primary-btn btn-sm">

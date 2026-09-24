@@ -83,6 +83,23 @@ def test_the_client_detail_view_is_in_slovenian_when_slovenian_is_chosen(
     assert button in _slovenian(page, ["profile_send_consent", "consent_no_email"])
 
 
+def test_the_view_grabbers_are_labelled_in_slovenian(page, local_server):
+    """What a screen reader says for the bar at the top of a view (TODO §38.20)."""
+    page.goto(local_server + "history?lang=sl")
+    expect(page.locator("#view-history")).to_be_visible()
+    home, clipboard = _slovenian(page, ["view_grabber_home", "view_grabber_clipboard"])
+    expect(page.locator("#view-history .view-grabber")).to_have_attribute(
+        "aria-label", home
+    )
+
+    # The sessions list: its section still carries the older id `view-clients`.
+    page.goto(local_server + "?lang=sl")
+    expect(page.locator(".session-card").first).to_be_visible()
+    expect(page.locator("#view-clients .view-grabber")).to_have_attribute(
+        "aria-label", clipboard
+    )
+
+
 def test_the_signup_review_is_titled_in_slovenian(page, local_server):
     """The dialog a trainer reviews a client's own details in had an English title (TODO §38.20).
     Its markup exists from boot, so the title is read without a signup to open it with."""

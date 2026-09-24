@@ -32,7 +32,7 @@ export function renderClientsViewShell() {
            a second row, and the calendar opening inside it, are accounted for without a number
            being kept in step by hand. -->
       <div class="section-title sessions-title-bar view-titlebar">
-        <button class="view-grabber" type="button" aria-label="Open session clipboard"></button>
+        <button class="view-grabber" type="button" data-i18n-label="view_grabber_clipboard" aria-label="Open session clipboard"></button>
         <div class="sessions-title-row">
           <h2 class="view-title-label" id="sessions-view-title">Sessions</h2>
           <!-- Populated by sessionTimeline.js (renderSessionsDatePicker) — the Today and expand
