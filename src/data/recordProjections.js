@@ -73,6 +73,19 @@ export function projectionIssues(collection, domainObject, schema = SCHEMA_4) {
 // IndexedDB record list back into this shape, so it needs the same set PROJECTORS was built from.
 export const COLLECTIONS = Object.keys(PROJECTORS);
 
+/** Every id a record in `state` holds, across all the collections the store writes. One schema's
+ *  records share one key in IndexedDB, so a new record must not take an id from ANY collection —
+ *  an import checking only its own collection overwrote a client (TODO §77.1). */
+export function recordIdsInUse(state) {
+  const ids = new Set();
+  for (const collection of COLLECTIONS) {
+    for (const record of state?.[collection] || []) {
+      if (record?.id) ids.add(record.id);
+    }
+  }
+  return ids;
+}
+
 /**
  * Whether a schema declares this collection at all — the staging boundary, made checkable (§18.4).
  *

@@ -5377,24 +5377,10 @@ Vsaka točka ostaja odprta do popravka in regresijskega testa. Že evidentirane 
 prevodov (§38.20), nestabilen test zapiranja kartice (§53) in nedokončani deli izbire
 različice (§76.6) se ne podvajajo.
 
-### 77.1 [ ] P1 — Uvoženi ID vaje lahko prepiše stranko
+### 77.1 [x] P1 — Uvoženi ID vaje lahko prepiše stranko — popravljeno 2026-09-24
 
-**Izvor:** `4faf64f`, [libraryImport.js](src/domain/libraryImport.js), funkciji
-`readExercise` in `planLibraryImport`; zapis v [stateStore.js](src/data/stateStore.js),
-`starWrite`. Uvoz ohrani `x_librept.id` in preverja trke samo med vajami. Vsi zapisi ene
-sheme pa imajo skupni ključ `id`, ne para zbirka + ID
-([indexedDb.js](src/data/indexedDb.js), `createSchemaStore`).
-
-**Ponovitev:** shrani stranko `{id: "same-record-id", name: "Existing client"}`. Uvozi
-`{"format":"wger-exercise-interchange","exercises":[{"name":"Injected exercise",
-"x_librept":{"id":"same-record-id"}}]}`. Po `flushWrites()` in ponovnem branju baze je
-`clients` prazen, pod istim ID je vaja. Uvoz ne opozori na prepis. Dokaz uporablja pravi
-uvozni načrt, `addToLibrary` in običajno shranjevanje, ne neposrednega prepisa vrstice baze.
-
-**Odprava:** preveriti identifikatorje proti vsem zbirkam pred zapisom; ob trku uvoz
-zavrniti ali varno preslikati ID in reference. Test mora dokazati, da uvoz s tujim ID
-ohrani stranko, zgodovino in druge zbirke tudi po ponovnem zagonu. Blokira varen uvoz
-izmenjanih katalogov (§45.5).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#771-x-p1--uvoženi-id-vaje-lahko-prepiše-stranko--popravljeno-2026-09-24);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ### 77.2 [ ] P1 — Vrnitev iz dejanske stare izdaje izgubi njene spremembe
 

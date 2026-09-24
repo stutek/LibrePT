@@ -154,6 +154,28 @@ test("a circuit refers to its exercises by id, new or already in the library", (
   ]);
 });
 
+test("an imported id another record already holds is replaced, never reused (TODO §77.1)", () => {
+  // Every record of one schema shares one key in the store, so an exercise written under a
+  // client's id replaces that client. The file's id is a hint, not a right to a slot.
+  const parsed = readLibrary(
+    JSON.stringify({
+      format: LIBRARY_FORMAT,
+      exercises: [{ name: "Injected exercise", x_librept: { id: "same-record-id" } }],
+      circuits: [{ name: "Uses it", exercises: [{ name: "Injected exercise", reps: 8 }] }],
+    }),
+  );
+  const plan = planLibraryImport(parsed, [], {
+    source: "Ana",
+    newId: counter(),
+    takenIds: new Set(["same-record-id"]),
+  });
+  assert.deepEqual(
+    plan.exercises.map((exercise) => [exercise.id, exercise.name]),
+    [["id1", "Injected exercise"]],
+  );
+  assert.deepEqual(plan.circuits[0].exercises, [{ id: "id1", reps: 8 }]);
+});
+
 test("a circuit with no name is given one from its first two exercises", () => {
   const parsed = readLibrary(
     JSON.stringify({ circuits: [{ exercises: ["Squat", "Lunge", "Plank"] }] }),

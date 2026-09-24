@@ -187,8 +187,16 @@ function readCircuits(rawCircuits, unreadable) {
  * The new records a read library adds to `library` (the trainer's whole library, catalog included):
  * `{ exercises, circuits, duplicates }`. `source` is written on every new record, or left off when
  * empty — no source means the trainer's own. `newId` is injected so a test is deterministic.
+ *
+ * `takenIds` are the ids every other record already holds (recordProjections.js's
+ * `recordIdsInUse`). All records of one schema share one key in the store, so an exercise kept under
+ * a client's id would replace that client (TODO §77.1). A file's id is kept only when nothing holds it.
  */
-export function planLibraryImport(parsed, library, { source, newId, circuitWord = "Circuit" }) {
+export function planLibraryImport(
+  parsed,
+  library,
+  { source, newId, circuitWord = "Circuit", takenIds = new Set() },
+) {
   const byName = new Map(
     (library || []).map((exercise) => [normalise(exercise.name), exercise.id]),
   );
@@ -198,7 +206,8 @@ export function planLibraryImport(parsed, library, { source, newId, circuitWord 
   const duplicates = [];
 
   const add = (exercise) => {
-    const id = exercise.id && !ids.has(exercise.id) ? exercise.id : newId();
+    const free = exercise.id && !ids.has(exercise.id) && !takenIds.has(exercise.id);
+    const id = free ? exercise.id : newId();
     const record = withSource({ ...exercise, id });
     exercises.push(record);
     ids.add(id);

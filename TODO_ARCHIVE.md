@@ -20,6 +20,34 @@ Read [CHANGELOG.md](CHANGELOG.md) for what shipped and when. This file is why.
 
 ---
 
+### 77.1 [x] P1 — Uvoženi ID vaje lahko prepiše stranko — popravljeno 2026-09-24
+
+**Izvor:** `4faf64f`, [libraryImport.js](src/domain/libraryImport.js), funkciji
+`readExercise` in `planLibraryImport`; zapis v [stateStore.js](src/data/stateStore.js),
+`starWrite`. Uvoz ohrani `x_librept.id` in preverja trke samo med vajami. Vsi zapisi ene
+sheme pa imajo skupni ključ `id`, ne para zbirka + ID
+([indexedDb.js](src/data/indexedDb.js), `createSchemaStore`).
+
+**Ponovitev:** shrani stranko `{id: "same-record-id", name: "Existing client"}`. Uvozi
+`{"format":"wger-exercise-interchange","exercises":[{"name":"Injected exercise",
+"x_librept":{"id":"same-record-id"}}]}`. Po `flushWrites()` in ponovnem branju baze je
+`clients` prazen, pod istim ID je vaja. Uvoz ne opozori na prepis. Dokaz uporablja pravi
+uvozni načrt, `addToLibrary` in običajno shranjevanje, ne neposrednega prepisa vrstice baze.
+
+**Odprava:** preveriti identifikatorje proti vsem zbirkam pred zapisom; ob trku uvoz
+zavrniti ali varno preslikati ID in reference. Test mora dokazati, da uvoz s tujim ID
+ohrani stranko, zgodovino in druge zbirke tudi po ponovnem zagonu. Blokira varen uvoz
+izmenjanih katalogov (§45.5).
+
+**Popravljeno 2026-09-24 (Claude).** `planLibraryImport` sprejme `takenIds`, množico ID-jev, ki
+jih že ima katerikoli zapis v stanju (`recordIdsInUse` v
+[recordProjections.js](src/data/recordProjections.js), prek vseh zbirk iz `COLLECTIONS`).
+Uvožena vaja obdrži ID iz datoteke samo, če ga nima nihče; sicer dobi novega, in sklopi, ki jo
+uporabljajo, kažejo nanj. Enotski test v
+[libraryImport.test.mjs](tests/unit_js/domain/libraryImport.test.mjs) in e2e test v
+[test_library_import.py](tests/e2e/test_library_import.py) ponovita Codexov primer: stranka po
+uvozu, zapisu in ponovnem nalaganju ostane. Brez popravka e2e test pade (stranka izgine).
+
 ### 57. [x] The demo story tests count steps — fixed 2026-09-24
 
 Raised 2026-09-17 (Simon): counting cards and steps is fragile. Two counts were removed with

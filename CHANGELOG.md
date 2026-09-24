@@ -29,6 +29,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Fixed
 
+- An imported exercise no longer replaces a client, or any other record, that already holds the
+  same id: it gets a new one, and the circuits that use it follow (TODO §77.1).
 - Imports containing several sources keep all newly added exercises visible.
 - The JSON catalog export includes circuits, their rounds and exercise targets, and the sources of
   individual exercises and circuits. Importing it preserves those sources instead of replacing them

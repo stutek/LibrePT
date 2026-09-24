@@ -23,6 +23,7 @@ import {
   libraryExercises,
   sourcesOf,
 } from "../../data/exerciseLibrary.js";
+import { recordIdsInUse } from "../../data/recordProjections.js";
 import { libraryTemplate, planLibraryImport, readLibrary } from "../../domain/libraryImport.js";
 import { closeModal, openModal, renderMarkupOnce } from "../common/dom.js";
 
@@ -156,6 +157,7 @@ function readCurrent(fileName = "") {
         source,
         newId,
         circuitWord: t("circuit"),
+        takenIds: recordIdsInUse(getState()),
       })
     : null;
   renderReport(parsed, plan);
