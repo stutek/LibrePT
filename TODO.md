@@ -2593,8 +2593,8 @@ field now shows its example. **[ ] Decision, not work — Simon:** the five feed
 Translating only the choice would make the two screens disagree, so the choices and their display
 elsewhere are one decision.
 
-**Measured the same day, and not converted:** `activeSessionOverlayView.js` (20) and
-`applicationHeader.js` (16) are mostly false counts. Their visible texts are translated already, by
+**Measured the same day, and not converted:** `activeSessionOverlayView.js` (20),
+`applicationHeader.js` (16) and `clientConsentSection.js` (10) are mostly false counts. Their visible texts are translated already, by
 the selector table or by code that writes them from the dictionary; what the check counts is the
 English placeholder text in the markup. What is really English there is screen-reader text: the
 labels on the ☰ menu, the language and theme selects and the close buttons.
