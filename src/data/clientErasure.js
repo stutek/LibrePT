@@ -240,7 +240,9 @@ export function eraseClientInState(state, clientId, { requestedOn = "", now = ne
   const client = (state?.clients || []).find((candidate) => candidate.id === clientId);
   if (!client) return { state, summary: null };
 
-  const name = client.name || "";
+  // A record erased before holds only its pseudonym, and prose cannot be repaired without the real
+  // name. Scrubbing the pseudonym would rewrite text the trainer typed after the erasure.
+  const name = isErased(client) ? "" : client.name || "";
   const pseudonym = erasurePseudonym(clientId);
   const marker = textMarkerFor(clientId);
   const namesakes = clientsSharingName(state, client);
@@ -323,4 +325,25 @@ export function eraseClientInState(state, clientId, { requestedOn = "", now = ne
       ...counters,
     },
   };
+}
+
+// The collections an erasure rewrites. Compared after a repeat sweep, so the start saves only when
+// the sweep changed something: every save counts as a change not yet backed up.
+const SWEPT_COLLECTIONS = ["clients", "history", "planUpdates", "sessions", "sessionSeries"];
+
+/**
+ * Run every erasure again (TODO §65, ruled 2026-09-18 by Simon: after every migration and at every
+ * start). It finishes what an older build or an older sweep left behind — an alias, a repeating rule
+ * still scheduling the person — and needs no name to do it. Prose it cannot repair: the name is gone.
+ */
+export function resweepErasedClients(state) {
+  let next = state;
+  for (const client of state?.clients || []) {
+    if (!isErased(client)) continue;
+    next = eraseClientInState(next, client.id, { requestedOn: client.erasure.requestedOn }).state;
+  }
+  const changed = SWEPT_COLLECTIONS.some(
+    (key) => JSON.stringify(next?.[key]) !== JSON.stringify(state?.[key]),
+  );
+  return { state: next, changed };
 }

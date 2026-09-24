@@ -16,6 +16,7 @@ import {
   eraseClientInState,
   erasurePseudonym,
   isErased,
+  resweepErasedClients,
 } from "../../../src/data/clientErasure.js";
 
 function stateWithTwoJanes() {
@@ -269,4 +270,42 @@ test("erasing an unknown client changes nothing at all", () => {
   // deepEqual, not identity: "returned the same object" is an implementation choice, "nobody's
   // record was touched" is the promise.
   assert.deepEqual(state, before);
+});
+
+// The repeat sweep (TODO §65, ruled 2026-09-18 by Simon): every erasure runs again at start, so an
+// erasure an older build left half done is finished without anyone asking.
+test("the repeat sweep finishes an erasure an older build left half done", () => {
+  const { state: erased } = eraseClientInState(stateWithTwoJanes(), "c-jane-a", {});
+  // What a build before §59 and §65 left behind: the alias kept, the solo rule still scheduling her.
+  const older = structuredClone(erased);
+  older.clients.find((client) => client.id === "c-jane-a").alias = "morning";
+  older.sessionSeries.push({ id: "ser-solo", title: "Tuesdays", participants: ["c-jane-a"] });
+
+  const { state, changed } = resweepErasedClients(older);
+
+  assert.equal(changed, true);
+  assert.deepEqual(state, erased);
+});
+
+test("the repeat sweep reports no change on a finished erasure, so start does not save", () => {
+  const { state: erased } = eraseClientInState(stateWithTwoJanes(), "c-jane-a", {});
+  const before = structuredClone(erased);
+
+  const { state, changed } = resweepErasedClients(erased);
+
+  assert.equal(changed, false);
+  assert.deepEqual(state, before);
+});
+
+test("the repeat sweep does not treat the pseudonym as a name to scrub", () => {
+  // After an erasure the record's name IS the pseudonym. A title the trainer types later with that
+  // pseudonym in it is their own text, and the name the sweep would need is gone.
+  const { state: erased } = eraseClientInState(stateWithTwoJanes(), "c-jane-a", {});
+  const pseudonym = erasurePseudonym("c-jane-a");
+  erased.sessions.push({ id: "s-later", participants: ["c-jane-a"], title: `${pseudonym} review` });
+
+  const { state, changed } = resweepErasedClients(erased);
+
+  assert.equal(changed, false);
+  assert.equal(state.sessions.find((s) => s.id === "s-later").title, `${pseudonym} review`);
 });

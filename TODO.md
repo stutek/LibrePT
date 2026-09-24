@@ -4502,66 +4502,10 @@ on every screen the way a session's name is.
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#66-x-a-session-may-not-be-named-after-a-client--shipped-2026-09-18);
 what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-## 65. [ ] The erasure sweep does not reach repeating sessions
+## 65. [x] The erasure sweep does not reach repeating sessions — closed 2026-09-24
 
-Asked 2026-09-18 (Simon): is the anonymisation complete now that the alias is cleared (§59)? Read from
-the code the same day (Claude): **no.** `eraseClientInState` in
-[clientErasure.js](src/data/clientErasure.js) rebuilds four collections — clients, history,
-planUpdates, sessions — and returns everything else untouched. Two of the collections schema 4 now
-carries (§61) were added after the sweep was written:
-
-- **`sessionSeries` is not swept, and it has two problems.** Its `title` is trainer-typed and can name
-  the person, exactly as a session title can, and nothing rewrites or reports it. Worse, the erased
-  client stays in the rule's `participants`, so the board goes on producing their evenings — an erased
-  person still being scheduled.
-- **`invites` is by reference only** — two ids, a channel and two timestamps — so it names nobody.
-  It does keep the fact that this id was invited, which is execution data like a history record.
-
-- **A session's `location` is trainer-typed and is never swept.** Only `title` is checked for the
-  name, so "at Jane's flat" survives an erasure with nothing said about it. Confirmed 2026-09-18
-  (Simon asked, and it holds): a session stores its attendees as plain client ids and nothing else
-  about them, so `title` and `location` are the only places a name can sit.
-
-Also worth stating for the receipt: `joinedDate` and `gdprConsent` survive by design (evidence under
-Art. 7(1)), and `notifications` carry i18n keys rather than typed text.
-
-**Ruled 2026-09-18 (Simon): the erasure runs again** — after every migration, and, since walking the
-erased clients is cheap, at every start.
-
-**What that repairs, and what it cannot** (Claude, from the code):
-
-- **It repairs what needs no name:** the alias a build before 2026-09-18 left behind, and anything a
-  later sweep learns to clear. Cheap and idempotent — an erased record keeps its original dates
-  (`eraseClientRecord` returns early on `client.erasure`).
-- **It cannot repair prose.** Scrubbing a name out of a session title, a location or a feedback note
-  needs the name, and after the first erasure the name is gone. So a title that was left for the
-  trainer to review stays as typed, for ever, unless they fix it by hand.
-- **The import path is the exception, and it is the strong one.** A restored backup still carries the
-  name, and [erasureSuppression.js](src/data/erasureSuppression.js) already re-erases on the way in —
-  so there the full sweep, prose included, runs again.
-- **Who to walk.** The register stores a salted hash per id and nothing else, so it cannot be listed;
-  the erased clients are found on the records themselves (`isErased`), and the register stays what it
-  is for — recognising a record arriving from outside.
-
-**Ruled and shipped 2026-09-19 (Simon):**
-
-- **A repeating rule for this client alone is removed** — it exists only to keep producing their
-  evenings, and an erased person must not still be scheduled every week. Its trainer-typed title goes
-  with it. **A rule shared with other people stays**, minus this client, because it belongs to them.
-- **Ambiguity is judged on the record, not on the whole book.** A namesake who is not on this session
-  or rule cannot be who its text means, so the name is replaced there; only a record holding both
-  same-named clients is left as typed and reported. This replaced "any namesake anywhere blocks a
-  rewrite", which left names standing on records the namesake had nothing to do with.
-- **A session's location is swept like its title** — "at Jane's flat" names a person as much as a
-  title does.
-- **What stands in for the name in prose is the record's own id in brackets**, `[c1a9f0e2]`: already
-  in the record, says nothing about the person, and keeps two erased clients in one sentence apart.
-  The client record itself keeps the short pseudonym, which is what a trainer reads in a list.
-- The receipt counts the rules removed and kept, and names the ones left for a human to read.
-
-**Still open:** the repeat sweep itself — running the erasure again after a migration and at start
-(ruled 2026-09-18), and whether that runs every time or only when the sweep has changed (a marker,
-like the preview store's build stamp).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#65-x-the-erasure-sweep-does-not-reach-repeating-sessions--closed-2026-09-24);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ## 64. [x] The gate fails on a different test each run, and each one passes on its own — fixed 2026-09-19
 

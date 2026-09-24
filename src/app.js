@@ -50,6 +50,7 @@ import {
   openRoutineCreateDialog,
   setupRoutineForms as setupRoutineFormsController,
 } from "./controllers/routineFormsController.js";
+import { resweepErasedClients } from "./data/clientErasure.js";
 import { ISSUE_TRACKER_URL } from "./data/crashReport.js";
 import { driveSyncStatus, onSyncCountsChanged, primeAheadCache } from "./data/driveSyncService.js";
 import { clearDatabaseStores, listDatabaseStores } from "./data/indexedDb.js";
@@ -202,6 +203,15 @@ function applyTranslations(lang = resolveLang(getState().lang)) {
 
 function saveState() {
   saveToLocalStorage();
+}
+
+// Every erasure runs again at start, which also covers the start after a migration (TODO §65).
+// Saved only when it changed something, because every save counts as not yet backed up.
+function finishErasures(state) {
+  const swept = resweepErasedClients(state);
+  if (!swept.changed) return;
+  Object.assign(state, swept.state);
+  saveState();
 }
 
 // The header's ahead/behind badge re-renders itself off these TWO seams (TODO §3.9's actual fix —
@@ -390,6 +400,8 @@ async function init() {
   // fully populated once this resolves, exactly as when the call was synchronous.
   const state = await loadSavedState();
   if (isSupportedLang(shareLang)) state.lang = shareLang;
+
+  finishErasures(state);
 
   // First entry fills the sandbox. Before the `?init=` branch below, or an unseeded sandbox reads as
   // an empty app and has its open-session key cleared out from under it. `?init=` itself is left

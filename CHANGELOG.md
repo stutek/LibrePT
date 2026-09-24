@@ -33,6 +33,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 - The JSON catalog export includes circuits, their rounds and exercise targets, and the sources of
   individual exercises and circuits. Importing it preserves those sources instead of replacing them
   all with the import's source name (TODO §45.5).
+- Every erasure runs again each time the app starts, and so also after a migration. An erasure an
+  older version left incomplete is finished: the alias is cleared, and a repeating session for
+  that client alone stops. The start saves only when this changed something (TODO §65).
 
 ## 2026-09-23 — The trainer chooses which app version runs
 
