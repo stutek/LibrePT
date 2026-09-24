@@ -2623,11 +2623,10 @@ for keys that no file under `src/` names in quotes found **60**. Most are built 
 thirteen read one by one, two were the same defect: the setup form's refusals of a session with
 nobody in it, or with a participant and no programme, were English alerts beside
 `err_select_client` and `err_assign_routine` ([editSessionControl.js](src/modules/session/editSessionControl.js)),
-fixed the same day. **[ ] The other eleven are leftovers** that no code writes in any language:
-`offline_cached_badge`, `offline_cached_status`, `voice_transcribing`, `up_next_label`,
-`next_session_label`, `last_exercise`, `from_date`, `no_weight_records`, `need_two_entries`,
-`no_instructions`, `no_weight_logged`. Removing them is cheap; a check that fails the build on a key
-nothing names would need a list of the prefixes built in code, and is not built.
+fixed the same day. The other eleven were leftovers that no code wrote in any language
+(`offline_cached_badge`, `voice_transcribing`, `up_next_label`, `no_weight_records` and seven more),
+and were removed from both dictionaries the same day. A check that fails the build on a key nothing
+names would need a list of the prefixes built in code, and is not built.
 
 **The ratchet cannot see sentences written by code**, only markup. A search for English literals in
 `alert`, `confirm` and `textContent` found two more, fixed the same day: the question before taking
