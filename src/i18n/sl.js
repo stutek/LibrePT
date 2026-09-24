@@ -919,7 +919,6 @@ export const sl = {
   rights_readable_copy: "Berljiva kopija",
   rights_download_encrypted: "Prenesi šifrirano",
   rights_compose_email: "Napiši e-pošto",
-  rights_no_email: "E-pošta ni vpisana",
   rights_erase_title: "Izbriši to stranko (zahteva po GDPR)",
   rights_erase_namesakes:
     "⚠ Druga stranka ima natanko enako ime: {others}. Preveri, ali imaš odprto pravo osebo. To izbriše samo zgornjo.",
@@ -929,6 +928,12 @@ export const sl = {
   rights_erase_requested: "Datum zahteve",
   rights_copy_receipt: "Kopiraj potrdilo",
   rights_erase_confirm: "Izbriši dokončno",
+  // The client detail view (modules/clients/clientsView.js), TODO §38.20.
+  view_grabber_home: "Nazaj na začetek",
+  profile_consent_label: "Privolitev GDPR za sinhronizacijo v oblak",
+  profile_ai_safe_copy: "Anonimna kopija za AI",
+  profile_export_data: "Izvozi podatke (GDPR)",
+  profile_erase_client: "Izbriši stranko (GDPR)",
   consent_legend: "Varstvo osebnih podatkov (GDPR)",
   consent_signed_label:
     "Stranka je podpisala privolitev (hramba podatkov in sinhronizacija v oblak)",

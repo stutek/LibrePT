@@ -169,7 +169,7 @@ function updateComposeLink(client) {
   compose.classList.toggle("disabled", !href);
   if (href) compose.setAttribute("href", href);
   else compose.removeAttribute("href");
-  compose.textContent = tr(href ? "rights_compose_email" : "rights_no_email");
+  compose.textContent = tr(href ? "rights_compose_email" : "consent_no_email");
 }
 
 async function downloadEncryptedExport() {

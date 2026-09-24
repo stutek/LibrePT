@@ -2559,8 +2559,18 @@ the client, and the confirmation word `ERASE`, which a Slovenian trainer must ty
 email and the word are wording decisions, not only translations: the email goes to the client, and
 the word is what stops an erasure by reflex.
 
+**2026-09-24: the client directory and detail views** ([clientsView.js](src/modules/clients/clientsView.js)),
+**249 → 232.** Every label and button in their markup has a key; the placeholder texts the code
+always overwrote ("Jane Doe", "Goals details go here.") are gone. Twelve entries left the selector
+table in [domMappings.js](src/i18n/domMappings.js): eight named what the markup now names, and four
+named elements that no longer exist. The labels now show the words their keys held all along, so
+the English reads "Training Goals", "Pre-existing Injuries & Notes" and "Logged Session History"
+where it read "Current Goals", "Health & Injury Notes" and "Training History". **[ ] Still English in that file,
+all set by code:** the consent badges, the consent button's words, the erased banner and the AI Safe
+Copy alert.
+
 The worst remaining, by count: `exerciseFormsController.js` (46), `activeSessionOverlayView.js` (20),
-`backupRestore.js` (19), `clientsView.js` (18), `applicationHeader.js` (16).
+`backupRestore.js` (19), `applicationHeader.js` (16).
 
 **Re-check condition:** the ratchet becomes an ordinary gate when the count reaches the irreducible
 set — a licence name, a taxonomy value that is the same word in every language — and this section

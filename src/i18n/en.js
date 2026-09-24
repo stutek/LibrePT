@@ -980,7 +980,6 @@ export const en = {
   rights_readable_copy: "Readable copy",
   rights_download_encrypted: "Download encrypted",
   rights_compose_email: "Compose email",
-  rights_no_email: "No email on file",
   rights_erase_title: "Erase this client (GDPR request)",
   rights_erase_namesakes:
     "⚠ Another client has this exact name: {others}. Check that you have the right person open. This erases only the one above.",
@@ -990,6 +989,12 @@ export const en = {
   rights_erase_requested: "Date they asked",
   rights_copy_receipt: "Copy receipt",
   rights_erase_confirm: "Erase permanently",
+  // The client detail view (modules/clients/clientsView.js), TODO §38.20.
+  view_grabber_home: "Return to home",
+  profile_consent_label: "GDPR Cloud Sync Consent",
+  profile_ai_safe_copy: "AI Safe Copy",
+  profile_export_data: "Export data (GDPR)",
+  profile_erase_client: "Erase client (GDPR)",
   consent_legend: "Data Protection (GDPR)",
   consent_signed_label: "Client signed the consent form (data storage & cloud sync)",
   consent_date_label: "Date signed",

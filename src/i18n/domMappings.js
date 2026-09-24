@@ -85,18 +85,9 @@ export function applyStaticDOMMappings(tDict) {
     // Dashboard / Clients view
     "#sessions-view-title": "sessions_schedule",
     "#pending-adjustments-title": "pending_adjustments",
-    "#view-client-directory .view-header h2": "clients_title",
-    "#btn-add-client": "btn_add_client",
     "#btn-sync-data-text": "btn_sync_data",
 
-    // Client Detail view
-    "#view-client-detail .client-profile-card h4:nth-of-type(1)": "notes_injuries",
-    "#view-client-detail .client-profile-card h4:nth-of-type(2)": "goals",
-    "#view-client-detail .client-profile-card h4:nth-of-type(3)": "routine_plans",
-    "#btn-edit-client": "btn_edit_profile",
-    "#btn-plan-client-program": "btn_plan_program",
-    "#view-client-detail .history-section h5": "client_history_header",
-    "#btn-back-to-clients": "btn_back",
+    // The client directory and detail views carry their own keys in their markup (clientsView.js).
 
     // Routines View
     "#view-routines .view-header h2": "routines_title",
@@ -163,8 +154,6 @@ export function applyStaticDOMMappings(tDict) {
     // (data-i18n), and an element named in both places is an element two files disagree about —
     // this table said `client_name` where the label reads "Full Name *", and won, because it runs
     // second. One home each (§38.20).
-    "#label-profile-email": "client_email",
-    "#label-profile-phone": "client_phone",
 
     // GDPR consent block inside the client modal, and its archiving-reminder dialog. The two
     // delivery buttons are deliberately absent: their labels swap between "send" and "no address on
@@ -216,7 +205,6 @@ export function applyStaticDOMMappings(tDict) {
 
   // Update input placeholders
   const placeholderMappings = {
-    "#search-clients": "placeholder_search_clients",
     "#search-routines": "placeholder_search_routines",
     "#search-exercises": "placeholder_search_exercises",
     "#feedback-custom-note": "custom_details",

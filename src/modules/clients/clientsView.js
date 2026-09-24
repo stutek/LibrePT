@@ -34,8 +34,8 @@ export function renderClientDirectoryViewShell() {
     `
 <section id="view-client-directory" class="app-view">
       <div class="view-header view-titlebar">
-        <button class="view-grabber" type="button" aria-label="Return to home"></button>
-        <h2>Client Directory</h2>
+        <button class="view-grabber" type="button" data-i18n-label="view_grabber_home" aria-label="Return to home"></button>
+        <h2 data-i18n="clients_title">Client Directory</h2>
         <!-- Let the person fill their own details in (TODO §26.3). Beside Add Client rather than
              replacing it: a trainer standing with someone at the desk still types the two fields
              themselves, and a trainer who has just been asked about training sends a link. It opens
@@ -45,13 +45,13 @@ export function renderClientDirectoryViewShell() {
           <i class="fa-solid fa-share-nodes"></i> <span data-i18n="btn_invite_client">Invite a client</span>
         </button>
         <button id="btn-add-client" class="btn primary-btn btn-sm">
-          <i class="fa-solid fa-user-plus"></i> Add Client
+          <i class="fa-solid fa-user-plus"></i> <span data-i18n="btn_add_client">Add Client</span>
         </button>
       </div>
 
       <div class="search-bar-container">
         <i class="fa-solid fa-magnifying-glass search-icon"></i>
-        <input type="text" id="search-clients" placeholder="Search clients..." class="search-input">
+        <input type="text" id="search-clients" data-i18n-placeholder="placeholder_search_clients" placeholder="Search clients..." class="search-input">
       </div>
 
       <div id="clients-list" class="grid-list">
@@ -84,65 +84,67 @@ export function renderClientDetailViewShell() {
     `
 <section id="view-client-detail" class="app-view">
       <div class="view-header-back view-titlebar">
-        <button class="view-grabber" type="button" aria-label="Return to home"></button>
+        <button class="view-grabber" type="button" data-i18n-label="view_grabber_home" aria-label="Return to home"></button>
         <button id="btn-back-to-clients" class="btn secondary-btn btn-sm">
-          <i class="fa-solid fa-arrow-left"></i> Back
+          <i class="fa-solid fa-arrow-left"></i> <span data-i18n="btn_back">Back</span>
         </button>
-        <h2 id="detail-client-name">Client Details</h2>
+        <!-- The name, avatar and profile fields below are empty in the markup: showClientDetails
+             fills every one of them before the view is shown. -->
+        <h2 id="detail-client-name"></h2>
         <button id="btn-edit-client" class="btn secondary-btn btn-sm">
-          <i class="fa-solid fa-pen"></i> Edit
+          <i class="fa-solid fa-pen"></i> <span data-i18n="btn_edit_profile">Edit</span>
         </button>
       </div>
-      
+
       <div class="client-detail-card card glassmorphic">
         <div class="client-profile-header">
-          <div id="detail-client-avatar" class="avatar-large">JD</div>
+          <div id="detail-client-avatar" class="avatar-large"></div>
           <div class="profile-meta">
-            <h3 id="profile-name">Jane Doe</h3>
-            <p id="profile-joined-date">Joined March 15, 2026</p>
+            <h3 id="profile-name"></h3>
+            <p id="profile-joined-date"></p>
           </div>
         </div>
-        
+
         <p id="profile-erased" class="data-rights-warning" hidden></p>
 
         <div class="profile-info-grid">
           <div class="info-block">
-            <label>Current Goals</label>
-            <p id="profile-goals">Goals details go here.</p>
+            <label data-i18n="goals">Current Goals</label>
+            <p id="profile-goals"></p>
           </div>
           <div class="info-block">
-            <label>Health & Injury Notes</label>
-            <p id="profile-notes">Notes details go here.</p>
+            <label data-i18n="notes_injuries">Health & Injury Notes</label>
+            <p id="profile-notes"></p>
           </div>
           <div class="info-block">
-            <label id="label-profile-email">Email</label>
-            <p id="profile-email">Email goes here.</p>
+            <label id="label-profile-email" data-i18n="client_email">Email</label>
+            <p id="profile-email"></p>
           </div>
           <div class="info-block">
-            <label id="label-profile-phone">Phone Number</label>
-            <p id="profile-phone">Phone goes here.</p>
+            <label id="label-profile-phone" data-i18n="client_phone">Phone Number</label>
+            <p id="profile-phone"></p>
           </div>
           <div class="info-block">
-            <label>GDPR Cloud Sync Consent</label>
-            <p id="profile-gdpr-status"><span class="badge">Checking...</span></p>
+            <label data-i18n="profile_consent_label">GDPR Cloud Sync Consent</label>
+            <p id="profile-gdpr-status"></p>
           </div>
         </div>
 
         <div class="quick-workout-action">
           <button id="btn-plan-client-program" class="btn primary-btn">
-            <i class="fa-solid fa-calendar-plus"></i> Plan Program
+            <i class="fa-solid fa-calendar-plus"></i> <span data-i18n="btn_plan_program">Plan Program</span>
           </button>
           <a id="btn-send-consent-email" class="btn secondary-btn">
             <i class="fa-solid fa-envelope"></i> <span id="btn-send-consent-email-text">Send Consent Form</span>
           </a>
           <button id="btn-ai-safe-copy" class="btn secondary-btn">
-            <i class="fa-solid fa-user-shield"></i> AI Safe Copy
+            <i class="fa-solid fa-user-shield"></i> <span data-i18n="profile_ai_safe_copy">AI Safe Copy</span>
           </button>
           <button id="btn-client-export" class="btn secondary-btn">
-            <i class="fa-solid fa-file-export"></i> Export data (GDPR)
+            <i class="fa-solid fa-file-export"></i> <span data-i18n="profile_export_data">Export data (GDPR)</span>
           </button>
           <button id="btn-client-erase" class="btn secondary-btn">
-            <i class="fa-solid fa-user-slash"></i> Erase client (GDPR)
+            <i class="fa-solid fa-user-slash"></i> <span data-i18n="profile_erase_client">Erase client (GDPR)</span>
           </button>
         </div>
       </div>
@@ -150,7 +152,7 @@ export function renderClientDetailViewShell() {
 
 
       <div class="section-title">
-        <h3>Training History</h3>
+        <h3 data-i18n="client_history_header">Training History</h3>
       </div>
       <div class="history-list" id="client-history-list"></div>
     </section>
