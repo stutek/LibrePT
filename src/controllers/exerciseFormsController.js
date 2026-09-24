@@ -30,17 +30,17 @@ export function renderExerciseDialog() {
     `
 <dialog id="dialog-exercise" class="dialog-modal card glassmorphic">
     <div class="modal-header">
-      <h3>Create Custom Exercise</h3>
-      <button class="modal-close-btn" aria-label="Close exercise modal"><i class="fa-solid fa-xmark"></i></button>
+      <h3 data-i18n="create_exercise_title">Create Custom Exercise</h3>
+      <button class="modal-close-btn" data-i18n-label="modal_close" aria-label="Close exercise modal"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <form id="form-exercise" method="dialog" class="modal-form">
       <div class="form-group">
-        <label for="exercise-name">Exercise Name *</label>
-        <input type="text" id="exercise-name" required placeholder="e.g. Bulgarian Split Squat" class="form-control">
+        <label for="exercise-name" data-i18n="exercise_name_label">Exercise Name *</label>
+        <input type="text" id="exercise-name" required data-i18n-placeholder="exercise_name_placeholder" placeholder="e.g. Bulgarian Split Squat" class="form-control">
       </div>
 
       <div class="form-group">
-        <label for="exercise-category">Target Muscle Group *</label>
+        <label for="exercise-category" data-i18n="muscle_group_label">Target Muscle Group *</label>
         <select id="exercise-category" required class="form-control">
           <option value="Chest">Chest</option>
           <option value="Back">Back</option>
@@ -54,7 +54,7 @@ export function renderExerciseDialog() {
       </div>
 
       <div class="form-group">
-        <label for="exercise-equipment">Equipment *</label>
+        <label for="exercise-equipment" data-i18n="equipment_label">Equipment *</label>
         <select id="exercise-equipment" required class="form-control">
           <option value="Barbell">Barbell</option>
           <option value="Dumbbell">Dumbbell</option>
@@ -66,7 +66,7 @@ export function renderExerciseDialog() {
       </div>
 
       <div class="form-group">
-        <label for="exercise-pattern">Movement Pattern *</label>
+        <label for="exercise-pattern" data-i18n="movement_pattern_label">Movement Pattern *</label>
         <select id="exercise-pattern" required class="form-control">
           <option value="Horizontal Push">Horizontal Push</option>
           <option value="Horizontal Pull">Horizontal Pull</option>
@@ -85,31 +85,33 @@ export function renderExerciseDialog() {
       </div>
 
       <div class="form-group">
-        <label for="exercise-modality">How it's logged *</label>
+        <label for="exercise-modality" data-i18n="modality_label">How it's logged *</label>
+        <!-- How the app RECORDS the exercise, so these are translated. The muscle, equipment and
+             pattern options above are taxonomy values, shown as stored in every language. -->
         <select id="exercise-modality" required class="form-control">
-          <option value="strength">Strength — sets × reps × load</option>
-          <option value="isometric">Isometric — hold time + load</option>
-          <option value="cardio">Cardio — time / distance / calories / watts / pace / HR</option>
-          <option value="stretch">Stretch — hold time</option>
-          <option value="balance">Balance — hold time</option>
-          <option value="agility">Agility — time / distance / reps</option>
+          <option value="strength" data-i18n="modality_option_strength">Strength — sets × reps × load</option>
+          <option value="isometric" data-i18n="modality_option_isometric">Isometric — hold time + load</option>
+          <option value="cardio" data-i18n="modality_option_cardio">Cardio — time / distance / calories / watts / pace / HR</option>
+          <option value="stretch" data-i18n="modality_option_stretch">Stretch — hold time</option>
+          <option value="balance" data-i18n="modality_option_balance">Balance — hold time</option>
+          <option value="agility" data-i18n="modality_option_agility">Agility — time / distance / reps</option>
         </select>
       </div>
 
       <!-- Metric options are repopulated per modality by exerciseFormsController (cardio / agility only). -->
       <div class="form-group hidden" id="exercise-metric-group">
-        <label for="exercise-metric">Metric</label>
+        <label for="exercise-metric" data-i18n="metric_label">Metric</label>
         <select id="exercise-metric" class="form-control"></select>
       </div>
 
       <div class="form-group">
-        <label for="exercise-instructions">Instructions</label>
-        <textarea id="exercise-instructions" rows="2" placeholder="Form cues..." class="form-control"></textarea>
+        <label for="exercise-instructions" data-i18n="instructions_label">Instructions</label>
+        <textarea id="exercise-instructions" rows="2" data-i18n-placeholder="instructions_placeholder" placeholder="Form cues..." class="form-control"></textarea>
       </div>
 
       <div class="modal-actions">
-        <button type="button" class="btn secondary-btn modal-cancel">Cancel</button>
-        <button type="submit" formnovalidate class="btn primary-btn">Save</button>
+        <button type="button" class="btn secondary-btn modal-cancel" data-i18n="btn_cancel">Cancel</button>
+        <button type="submit" formnovalidate class="btn primary-btn" data-i18n="btn_save">Save</button>
       </div>
     </form>
   </dialog>

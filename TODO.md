@@ -2577,8 +2577,22 @@ card's description and two buttons are empty in the markup, because
 **[ ] Still English there:** the restore warning lists what would be lost by collection name
 ("3 clients"), straight from the code.
 
-The worst remaining, by count: `exerciseFormsController.js` (46), `activeSessionOverlayView.js` (20),
-`applicationHeader.js` (16), `planAdjustments.js` (13).
+**2026-09-24: the Custom Exercise dialog** ([exerciseFormsController.js](src/controllers/exerciseFormsController.js)),
+**212 → 193.** Its labels, buttons, placeholders and the six options for how an exercise is logged
+carry keys; seven entries left the selector table. **[ ] Decision, not work — Simon:** the muscle,
+equipment and pattern options (Chest, Barbell, Hinge; 27 of the 46 this file had) are taxonomy
+values, shown in English in every language here and on the library's filter chips alike. Translating
+them means a label per value, while the stored value stays the English one the wger crosswalk (§13.1)
+reads. Until that is decided they count as the irreducible set.
+
+**Measured the same day, and not converted:** `activeSessionOverlayView.js` (20) and
+`applicationHeader.js` (16) are mostly false counts. Their visible texts are translated already, by
+the selector table or by code that writes them from the dictionary; what the check counts is the
+English placeholder text in the markup. What is really English there is screen-reader text: the
+labels on the ☰ menu, the language and theme selects and the close buttons.
+
+The worst remaining, by count: `exerciseFormsController.js` (27, the taxonomy values above),
+`activeSessionOverlayView.js` (20), `applicationHeader.js` (16), `planAdjustments.js` (13).
 
 **Re-check condition:** the ratchet becomes an ordinary gate when the count reaches the irreducible
 set — a licence name, a taxonomy value that is the same word in every language — and this section

@@ -43,6 +43,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   (TODO §38.20).
 - The Sync & Backup dialog is in Slovenian when Slovenian is chosen, including the Google Drive card
   and the question before a restore replaces the data on this device (TODO §38.20).
+- The Custom Exercise dialog is in Slovenian when Slovenian is chosen, including how an exercise is
+  logged. The muscle, equipment and pattern choices stay as stored (TODO §38.20).
 - The demo story tests walk to a named step instead of counting steps, so a step added to the story
   no longer moves a test onto a different screen (TODO §57).
 
