@@ -4563,11 +4563,25 @@ what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ## 68. [ ] The paid tiers: what stays out of this app, and the tag that invites the upgrade
 
-Simon's tier idea, 2026-09-19: **Libre** (everything today, free), **PRO** (invoices and UPN payment
-orders), **ENTERPRISE** (a hosted service coordinating several trainers and gyms, plus AI when the
-trainer supplies their own API key). The reasoning, the prices and the open questions live in the
-separate private project `~/Projects/EnterprisePT` and in `.private/monetisation-tiers.md`; what is
-recorded here is only what touches THIS repository.
+Simon's tier idea, 2026-09-19, with the names and the price he set on 2026-09-24: **LibrePT**
+(everything today, free), **ProPT** (invoices with a payment QR code and self-service booking, 10 € a
+month or 60 € a year), **EnterprisePT** (a hosted service coordinating several trainers and gyms, plus
+AI when the trainer supplies their own API key). The reasoning, the prices and the open questions live
+in the separate private project `~/Projects/EnterprisePT` and in `.private/monetisation-tiers.md`;
+what is recorded here is only what touches THIS repository.
+
+**How ProPT would be built was worked out on 2026-09-24** in that project
+(`PROPT_IMPLEMENTATION.md`), and two of its findings bind THIS repository:
+
+- **Nothing of ProPT is built here, and nothing here changes shape for it.** ProPT is a file overlay
+  over a pinned checkout of this app: it may add files and register itself into existing registries
+  (`renderRegistry.js`, `eventTransports.js`), and it may not edit a file of this app. If it ever
+  must, that is a request for a seam here, discussed here — never a patch carried privately.
+- **The QR encoder needs no change.** `qrCodePath(text, encoder)` already takes the encoder as an
+  argument, so the payment codes come from an encoder ProPT vendors itself.
+
+The free app's own share of that work is §78 below: measurements and their progress over time, which
+need no server and are worth having whether or not a paid tier is ever sold.
 
 ### 68.1 [ ] UPN generation stays OUT of LibrePT — ruled 2026-09-19 (Simon); the privacy half is open
 
@@ -4605,6 +4619,65 @@ has to be ruled, not styled:
   not get to skip.
 - **Open:** does a free-tier tag belong in an app whose licence and pitch are "free and complete"?
   The honest version names the paid tier without implying the free one is crippled.
+
+## 78. [ ] Measurements, and a client's progress over time
+
+**Raised 2026-09-24**, out of planning the paid tiers: Simon wants ability measurements and a picture
+of a client's physical abilities over time, for coaches working with athletes. **This belongs in the
+free app.** A test, a result and a chart need no server, no account and no sync — so building it here
+costs nothing that a hosted tier would later have to undo, and it is the strongest thing on the whole
+paid-tier list for a coach.
+
+### 78.1 [ ] A measure is a definition plus a value, never a number on its own
+
+"Squat 100" says nothing. It has to say one repetition maximum, in kilograms, tested a stated way. So
+the record has two halves:
+
+- **The definition**: a name, the protocol (how it is tested), the unit, and whether higher or lower
+  is better. Definitions are shared between clients and reused, the way the exercise taxonomy of §13
+  already works — a coach who renames a test must not silently split a client's history in two.
+- **The value**: the number, its unit, the date, and who or what produced it.
+
+### 78.2 [ ] An estimate and a measurement must never share a line
+
+A field test that estimates a value is not the same fact as a measured one. The standard estimate of
+maximal oxygen uptake is reported to overestimate the directly measured value by about 20 % in men
+and 16 % in women ([validation study, NIH](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7356312/)).
+A chart that draws both as one line therefore shows a client improving when the coach only changed
+method.
+
+**So the value carries how it was obtained, and a chart separates the two** — different series, or a
+refusal to draw them together at all. This is a data-model decision, not a chart decision, which is
+why it is written before anything is built.
+
+### 78.3 [ ] What it must NOT do in the first version
+
+- **No norms and no percentiles.** "You are in the 60th percentile for your age" is a claim about a
+  population, from tables we would be copying without the right to and could not keep current.
+- **No score out of ten, no composite fitness number.** It reads as authoritative and is arbitrary.
+- **No health advice of any kind.** A measurement is a record; interpreting it is the coach's job and
+  their professional responsibility.
+
+### 78.4 [ ] This is health data, and it stays where the rest of it is
+
+A record describing a person's body is health data. The app already keeps every client record on the
+trainer's device and nowhere else, so this adds no new duty — provided it is stored the same way as
+everything else and does not arrive with an export, a share link or a sync of its own.
+
+### 78.5 [ ] Two things that cannot be retrofitted, so they are checked now
+
+Raised while planning the hosted tier, and true regardless of whether it is ever built:
+
+- **Every record needs an identifier that never changes and never collides between two devices.**
+  Two devices inventing the same id is a merge nobody can repair afterwards.
+- **Every record needs to say when it last changed, and on which device.** Without it, no later
+  merge can decide which copy wins or show the trainer why.
+
+**Open, and it is a reading job, not a design job**: does schema 5 already store both, for every
+collection? Check before designing anything new on top. §77.1 — an imported exercise id could
+overwrite a client, because every record of one schema shares a single key space — was found and
+fixed on 2026-09-24, and it is the warning this section starts from: the identifier half is less
+settled than it looks, so read what that fix changed before designing on top of it.
 
 ## 67. [ ] Free text elsewhere is not checked for a client's name
 
