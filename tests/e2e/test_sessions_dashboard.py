@@ -213,3 +213,31 @@ def test_the_filter_row_stays_on_screen_while_the_board_scrolls(page, local_serv
     assert abs(after["y"] - top_before) < 4, (
         f"the filter row scrolled with the list (y {top_before} → {after['y']}) instead of sticking"
     )
+
+
+def test_today_brings_today_back_when_a_date_filter_left_it_out(page, local_server):
+    """Found by Codex's review, TODO §77.7: with another day chosen in the calendar, Today moved the
+    grid and tried to scroll, but the board was still limited to that day, so today's sessions were
+    not there to reach."""
+    page.goto(local_server)
+    page.wait_for_selector(".sessions-day-group")
+    _wait_for_timeline_settled(page)
+    today_iso = frozen_today_iso()
+    today_group = page.locator(f'.sessions-day-group[data-date="{today_iso}"]')
+    assert today_group.count() == 1
+
+    page.locator("#filter-chip-dates").click()
+    page.locator(
+        f'#sessions-filter-calendar [data-day]:not([data-day="{today_iso}"])'
+    ).first.click()
+    assert today_group.count() == 0, (
+        "choosing another day should have left today off the board"
+    )
+
+    if page.locator(".filter-today-btn").count() == 0:
+        page.locator("#filter-chip-dates").click()
+    page.locator(".filter-today-btn").click()
+    page.wait_for_timeout(900)
+
+    assert today_group.count() == 1
+    assert _route_path(page).endswith(today_iso)

@@ -5377,6 +5377,16 @@ Vsaka točka ostaja odprta do popravka in regresijskega testa. Že evidentirane 
 prevodov (§38.20), nestabilen test zapiranja kartice (§53) in nedokončani deli izbire
 različice (§76.6) se ne podvajajo.
 
+**Preverjanja:** vseh 146 obstoječih testov v desetih pregledanih datotekah za
+podatke, uvoz, načrte, predstavitev in začetni zaslon je uspešnih na izolirani kopiji.
+Uspešen je tudi obstoječi preskus prikaza znakov brez sistemskih pisav iz
+[test_text_glyphs_render.py](tests/e2e/test_text_glyphs_render.py), izveden v izoliranem
+Chromiumu. Spodaj navedeni primeri razkrivajo manjkajočo pokritost, ne odpovedi teh testov.
+Za ta dokumentacijski zapis se preverita `agent_tools.doclinks` in
+`agent_tools.todo_hygiene`; celoten `build check` ni del tega pregleda. Claudov ločeni
+uspešni zagon za njegova zadnja commita ne dokazuje, da so zgornje napake odpravljene.
+Pregled ne spreminja programske kode.
+
 ### 77.1 [x] P1 — Uvoženi ID vaje lahko prepiše stranko — popravljeno 2026-09-24
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#771-x-p1--uvoženi-id-vaje-lahko-prepiše-stranko--popravljeno-2026-09-24);
@@ -5463,31 +5473,8 @@ vira `all` zato ni mogoče izbrati samostojno. Vir `own` se predstavi kot lastne
 prikaz oznak in neodvisno filtriranje vseh treh imen v knjižnici in izbirniku vaj.
 Blokira pravilno filtriranje sicer veljavnih uvozov (§45.5).
 
-### 77.7 [ ] P2 — Danes ne prikaže današnjih vadb ob aktivnem datumskem filtru
+### 77.7 [x] P2 — Danes ne prikaže današnjih vadb ob aktivnem datumskem filtru — popravljeno 2026-09-24
 
-**Izvor:** `b7735d4`, [sessionFilterBar.js](src/modules/sessionList/sessionFilterBar.js),
-obravnava `data-today`; [sessionTimeline.js](src/modules/sessionList/sessionTimeline.js),
-`focusSessionsColumn`. Gumb spremeni prikazani mesec in poskusi pomakniti seznam, ne
-spremeni pa filtra `from` / `to`. Seznam je še vedno omejen na prej izbrani datum.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#777-x-p2--danes-ne-prikaže-današnjih-vadb-ob-aktivnem-datumskem-filtru--popravljeno-2026-09-24);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-**Ponovitev v Chromiumu:** v koledarju izberi 2026-09-07, nato Danes na dan 2026-09-24.
-Pred klikom in po njem `activeSessionFilters()` vrne `from: "2026-09-07"` in
-`to: "2026-09-07"`. V preizkušenem prikazu ni nobene skupine vadb; gumb ne vrne današnjih
-vadb. Uporabljen je obstoječi `SESSIONS_STUB` z resničnim ponovnim izrisom in priklopom
-`onToday` na `focusSessionsColumn("today")`, kot v produkciji.
-
-**Odprava:** ob kliku odstraniti oziroma nastaviti datumsko omejitev tako, da vključuje
-današnji dan, nato izrisati seznam in šele zatem pomakniti pogled. Ohraniti neodvisna
-filtra stranke in lokacije. Testirati en dan in razpon, ki izključujeta danes; obstoječi
-[test_sessions_dashboard.py](tests/e2e/test_sessions_dashboard.py) preverja klik brez
-aktivnega datumskega filtra. Blokira delovanje premaknjenega gumba Danes (§74.2).
-
-**Preverjanja:** vseh 146 obstoječih testov v desetih pregledanih datotekah za
-podatke, uvoz, načrte, predstavitev in začetni zaslon je uspešnih na izolirani kopiji.
-Uspešen je tudi obstoječi preskus prikaza znakov brez sistemskih pisav iz
-[test_text_glyphs_render.py](tests/e2e/test_text_glyphs_render.py), izveden v izoliranem
-Chromiumu. Zgoraj navedeni primeri razkrivajo manjkajočo pokritost, ne odpovedi teh testov.
-Za ta dokumentacijski zapis se preverita `agent_tools.doclinks` in
-`agent_tools.todo_hygiene`; celoten `build check` ni del tega pregleda. Claudov ločeni
-uspešni zagon za njegova zadnja commita ne dokazuje, da so zgornje napake odpravljene.
-Pregled ne spreminja programske kode.

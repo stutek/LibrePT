@@ -36,6 +36,14 @@ export function hasDateFilter({ from, to } = {}) {
   return Boolean(from && to);
 }
 
+/** The filters Today leaves behind (TODO §77.7): a date range that does not hold `dayIso` is
+ *  dropped, because Today has to show today; a range that holds it, and the client and place
+ *  filters, are the trainer's choice and stay. ISO dates compare correctly as strings. */
+export function filtersIncludingDay(filters, dayIso) {
+  if (!hasDateFilter(filters) || (filters.from <= dayIso && dayIso <= filters.to)) return filters;
+  return { ...filters, from: "", to: "" };
+}
+
 export function isSingleDay({ from, to } = {}) {
   return Boolean(from) && from === to;
 }

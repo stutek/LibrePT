@@ -20,6 +20,35 @@ Read [CHANGELOG.md](CHANGELOG.md) for what shipped and when. This file is why.
 
 ---
 
+### 77.7 [x] P2 — Danes ne prikaže današnjih vadb ob aktivnem datumskem filtru — popravljeno 2026-09-24
+
+**Izvor:** `b7735d4`, [sessionFilterBar.js](src/modules/sessionList/sessionFilterBar.js),
+obravnava `data-today`; [sessionTimeline.js](src/modules/sessionList/sessionTimeline.js),
+`focusSessionsColumn`. Gumb spremeni prikazani mesec in poskusi pomakniti seznam, ne
+spremeni pa filtra `from` / `to`. Seznam je še vedno omejen na prej izbrani datum.
+
+**Ponovitev v Chromiumu:** v koledarju izberi 2026-09-07, nato Danes na dan 2026-09-24.
+Pred klikom in po njem `activeSessionFilters()` vrne `from: "2026-09-07"` in
+`to: "2026-09-07"`. V preizkušenem prikazu ni nobene skupine vadb; gumb ne vrne današnjih
+vadb. Uporabljen je obstoječi `SESSIONS_STUB` z resničnim ponovnim izrisom in priklopom
+`onToday` na `focusSessionsColumn("today")`, kot v produkciji.
+
+**Odprava:** ob kliku odstraniti oziroma nastaviti datumsko omejitev tako, da vključuje
+današnji dan, nato izrisati seznam in šele zatem pomakniti pogled. Ohraniti neodvisna
+filtra stranke in lokacije. Testirati en dan in razpon, ki izključujeta danes; obstoječi
+[test_sessions_dashboard.py](tests/e2e/test_sessions_dashboard.py) preverja klik brez
+aktivnega datumskega filtra. Blokira delovanje premaknjenega gumba Danes (§74.2).
+
+**Popravljeno 2026-09-24 (Claude).** `filtersIncludingDay` v
+[sessionFilters.js](src/domain/sessionFilters.js): Danes odstrani datumsko omejitev, ki današnjega
+dne ne vsebuje; razpon, ki ga vsebuje, ter filtra stranke in lokacije ostanejo. Gumb najprej
+spremeni filtre, nato premakne pogled na danes in šele potem znova izriše seznam. Codexov predlog,
+najprej izrisati in nato pomakniti, je podrl obstoječi test: ponovni izris postavi seznam na dan iz
+naslova, naslov pa premakne šele pomik na danes. Izbrano namesto nastavitve filtra na današnji dan: Danes
+brez filtra že pomeni celoten seznam, pomaknjen na danes, in tako ostane. Enotski test v
+[sessionFilters.test.mjs](tests/unit_js/domain/sessionFilters.test.mjs), e2e test v
+[test_sessions_dashboard.py](tests/e2e/test_sessions_dashboard.py), ki brez popravka pade.
+
 ### 77.1 [x] P1 — Uvoženi ID vaje lahko prepiše stranko — popravljeno 2026-09-24
 
 **Izvor:** `4faf64f`, [libraryImport.js](src/domain/libraryImport.js), funkciji

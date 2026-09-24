@@ -30,6 +30,7 @@
 
 import {
   NO_SESSION_FILTERS,
+  filtersIncludingDay,
   hasAnyFilter,
   hasDateFilter,
   isSingleDay,
@@ -329,7 +330,12 @@ function wire() {
   // over a board still showing March.
   for (const button of calendar.querySelectorAll("[data-today]")) {
     button.addEventListener("click", () => {
-      visibleMonth = monthStart(isoOf(new Date()));
+      const todayIso = isoOf(new Date());
+      visibleMonth = monthStart(todayIso);
+      // A date filter that leaves today out would keep today's sessions off the board (TODO §77.7),
+      // so the filters change first. Then the board moves to today BEFORE it is drawn again: the
+      // redraw settles the list on the day the address names, and onToday is what moves the address.
+      filters = filtersIncludingDay(filters, todayIso);
       deps.onToday?.();
       deps.onChange();
     });

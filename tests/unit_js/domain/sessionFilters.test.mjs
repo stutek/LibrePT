@@ -11,6 +11,7 @@ import { test } from "node:test";
 import {
   NO_SESSION_FILTERS,
   filterSessions,
+  filtersIncludingDay,
   hasAnyFilter,
   isSingleDay,
   locationsOf,
@@ -139,4 +140,19 @@ test("the controls offer only what is actually on the board", () => {
 
   assert.deepEqual(locationsOf(sessions), ["Gym One"]);
   assert.deepEqual(participantsOf(sessions, clients), [{ id: "c1", name: "Ana" }]);
+});
+
+test("Today drops a date filter that leaves today out, and keeps everything else (TODO §77.7)", () => {
+  const filtered = { from: "2026-09-07", to: "2026-09-07", clientId: "c1", location: "Gym One" };
+
+  assert.deepEqual(filtersIncludingDay(filtered, "2026-09-24"), {
+    from: "",
+    to: "",
+    clientId: "c1",
+    location: "Gym One",
+  });
+  // A range that already holds today is what the trainer chose, and stays.
+  const holdsToday = { ...NO_SESSION_FILTERS, from: "2026-09-20", to: "2026-09-30" };
+  assert.deepEqual(filtersIncludingDay(holdsToday, "2026-09-24"), holdsToday);
+  assert.deepEqual(filtersIncludingDay(NO_SESSION_FILTERS, "2026-09-24"), NO_SESSION_FILTERS);
 });

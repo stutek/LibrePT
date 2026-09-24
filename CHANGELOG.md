@@ -31,6 +31,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 - An imported exercise no longer replaces a client, or any other record, that already holds the
   same id: it gets a new one, and the circuits that use it follow (TODO §77.1).
+- Today in the session list's calendar shows today again when another day was chosen: a date filter
+  that leaves today out is dropped, and the client and place filters stay (TODO §77.7).
 - Imports containing several sources keep all newly added exercises visible.
 - The JSON catalog export includes circuits, their rounds and exercise targets, and the sources of
   individual exercises and circuits. Importing it preserves those sources instead of replacing them
