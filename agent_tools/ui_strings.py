@@ -44,8 +44,9 @@ SRC = REPO_ROOT / "src"
 # the clipboard's feedback dialog (feedbackModal.js), then the Apply Program Adjustment dialog
 # (planAdjustments.js), then the encrypted-file reader a client opens (encryptedFileReader.js), then
 # the Routine Template dialog and its rows (routineFormsController.js, plansView.js), then the invite
-# dialog's Done and close buttons (sessionInviteDialog.js).
-BASELINE = 142
+# dialog's Done and close buttons (sessionInviteDialog.js), then the demo cleanup dialog's title and
+# buttons (demoCleanupDialog.js).
+BASELINE = 139
 
 # Upstream files and the dictionaries themselves: the first are not ours to translate, the second
 # ARE the translations.

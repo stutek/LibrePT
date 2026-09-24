@@ -64,6 +64,28 @@ window.__open();
 """
 
 
+assert STUB.count("TRANSLATIONS.en[key]") == 1
+SLOVENIAN_STUB = STUB.replace("TRANSLATIONS.en[key]", "TRANSLATIONS.sl[key]")
+
+SLOVENIAN_WORDS = """async (keys) => {
+    const { TRANSLATIONS } = await import(new URL('i18n/index.js', document.baseURI).href);
+    return keys.map((key) => TRANSLATIONS.sl[key]);
+}"""
+
+
+def test_the_title_and_buttons_speak_the_chosen_language(page, local_server):
+    """The title and Remove had keys in every language and nothing applied them (TODO §38.20)."""
+    load_with_stub(page, local_server, SLOVENIAN_STUB)
+    page.wait_for_selector("#dialog-demo-cleanup[open]")
+
+    title, remove, cancel = page.evaluate(
+        SLOVENIAN_WORDS, ["demo_cleanup_title", "demo_cleanup_remove", "btn_cancel"]
+    )
+    assert page.locator("#demo-cleanup-title").inner_text() == title
+    assert page.locator("#btn-demo-cleanup-confirm").inner_text() == remove
+    assert page.locator("#btn-demo-cleanup-cancel").inner_text() == cancel
+
+
 def _counts(page):
     return page.locator("#demo-cleanup-counts li").all_inner_texts()
 

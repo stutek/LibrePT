@@ -59,8 +59,8 @@ export function renderDemoCleanupDialog() {
     `
 <dialog id="dialog-demo-cleanup" class="dialog-modal card glassmorphic">
     <div class="modal-header">
-      <h3 id="demo-cleanup-title">Clear demo data</h3>
-      <button class="modal-close-btn" data-demo-cleanup-close aria-label="Close clear demo data modal"><i class="fa-solid fa-xmark"></i></button>
+      <h3 id="demo-cleanup-title"></h3>
+      <button class="modal-close-btn" data-demo-cleanup-close aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div class="modal-body-scroll">
       <p class="dialog-desc" id="demo-cleanup-desc"></p>
@@ -69,8 +69,8 @@ export function renderDemoCleanupDialog() {
       <p class="status-msg" id="demo-cleanup-status"></p>
     </div>
     <div class="modal-footer">
-      <button type="button" class="btn-secondary" data-demo-cleanup-close>Cancel</button>
-      <button type="button" class="btn-danger" id="btn-demo-cleanup-confirm">Remove</button>
+      <button type="button" class="btn-secondary" data-demo-cleanup-close id="btn-demo-cleanup-cancel"></button>
+      <button type="button" class="btn-danger" id="btn-demo-cleanup-confirm"></button>
     </div>
 </dialog>`,
   );
@@ -131,8 +131,19 @@ function refresh() {
         : deps.t("demo_cleanup_desc") ||
           "Your own clients, sessions and logs are never touched. The movement catalog is kept so your programmes keep working.";
   }
+  // Written here with the description, on every open: the dialog is built after the boot
+  // translation pass. Both keys existed and nothing applied them (TODO §38.20).
+  const title = document.getElementById("demo-cleanup-title");
+  if (title) title.textContent = deps.t("demo_cleanup_title") || "Clear demo data";
+  const cancelBtn = document.getElementById("btn-demo-cleanup-cancel");
+  if (cancelBtn) cancelBtn.textContent = deps.t("btn_cancel") || "Cancel";
+  const closeBtn = document.querySelector("#dialog-demo-cleanup .modal-close-btn");
+  closeBtn?.setAttribute("aria-label", deps.t("modal_close") || "Close");
   const confirmBtn = document.getElementById("btn-demo-cleanup-confirm");
-  if (confirmBtn) confirmBtn.disabled = total === 0;
+  if (confirmBtn) {
+    confirmBtn.disabled = total === 0;
+    confirmBtn.textContent = deps.t("demo_cleanup_remove") || "Remove";
+  }
 
   renderCounts(plan);
   renderRetained(plan, state);

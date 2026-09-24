@@ -2614,6 +2614,16 @@ key gained the required mark (*) it had lost.
 dictionaries and nothing applied them, so the cutoff field's label was English in every language
 and the hint that explains what 0 means was never shown. The dialog now writes both on open.
 
+**2026-09-24: keys that nothing applies — a second kind of defect.** The invite dialog above was
+one; the demo cleanup dialog ([demoCleanupDialog.js](src/modules/common/demoCleanupDialog.js),
+**142 → 139**) was another: `demo_cleanup_title` and `demo_cleanup_remove` existed in both languages
+and its title and Remove button stayed English. Both are now written on every open. A scan of `en.js`
+for keys that no file under `src/` names in quotes found **60**. Most are built from parts in code
+(`modality_*`, `rsvp_*`, `session_change_*`, `library_import_refused_*`) and are in use. **[ ] Still
+to read one by one:** `offline_cached_badge`, `offline_cached_status`, `err_select_client`,
+`err_assign_routine`, `voice_transcribing`, `up_next_label`, `next_session_label`, `last_exercise`,
+`from_date`, `no_weight_records`, `need_two_entries`, `no_instructions`, `no_weight_logged`.
+
 **Measured the same day, and not converted:** `activeSessionOverlayView.js` (20),
 `applicationHeader.js` (16) and `clientConsentSection.js` (10) are mostly false counts. Their visible texts are translated already, by
 the selector table or by code that writes them from the dictionary; what the check counts is the
