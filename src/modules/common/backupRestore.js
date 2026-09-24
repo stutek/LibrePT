@@ -382,7 +382,7 @@ export function setupBackupRestore() {
       if (box) box.hidden = true;
       const status = document.getElementById("import-status");
       if (status) {
-        status.textContent = "Nothing was changed.";
+        status.textContent = deps.t("restore_nothing_changed") || "Nothing was changed.";
         status.className = "status-msg";
       }
     });

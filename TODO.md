@@ -2629,6 +2629,11 @@ fixed the same day. **[ ] The other eleven are leftovers** that no code writes i
 `no_instructions`, `no_weight_logged`. Removing them is cheap; a check that fails the build on a key
 nothing names would need a list of the prefixes built in code, and is not built.
 
+**The ratchet cannot see sentences written by code**, only markup. A search for English literals in
+`alert`, `confirm` and `textContent` found two more, fixed the same day: the question before taking
+a participant off a session with recorded feedback, reworded plainly with its meaning kept, and the
+"Nothing was changed." note after a declined restore.
+
 **Measured the same day, and not converted:** `activeSessionOverlayView.js` (20),
 `applicationHeader.js` (16) and `clientConsentSection.js` (10) are mostly false counts. Their visible texts are translated already, by
 the selector table or by code that writes them from the dictionary; what the check counts is the

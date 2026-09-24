@@ -927,6 +927,9 @@ export const en = {
   restore_you_would_lose: "You would lose:",
   restore_keep: "Keep what I have",
   restore_replace: "Replace it",
+  restore_nothing_changed: "Nothing was changed.",
+  confirm_remove_participant_with_feedback:
+    "This session has recorded feedback. If you take a client off it, the session changes, and the training history already recorded for that client stays in their record. Take them off?",
   drive_conflict_type_add_add: "Created on both devices",
   drive_conflict_type_edit_edit: "Edited on both devices",
   drive_conflict_type_delete_edit: "Deleted on this device, edited elsewhere",

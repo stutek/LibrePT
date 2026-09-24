@@ -251,9 +251,7 @@ function confirmParticipantRemovalIfNeeded(sessionId, deps, clientRoutines) {
       existingSession.loggedHistory ||
       existingSession.hasFeedback);
   if (!hasFeedbackRisk) return true;
-  return confirm(
-    "Warning: You are removing a participant from a session with recorded feedback data. Removing a client from the session will update session details, but all exercise history logs already recorded for this client will be preserved in their client history. Do you wish to proceed?",
-  );
+  return confirm(deps.t("confirm_remove_participant_with_feedback"));
 }
 
 // Diffs against the session's participants as they stood before this save, so re-saving an

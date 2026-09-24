@@ -331,3 +331,46 @@ def test_the_arrows_move_the_day_by_one(page, local_server):
     steps.nth(1).click()
     steps.nth(1).click()
     assert page.input_value("#setup-session-date") == "2026-09-14"
+
+
+SESSION_WITH_FEEDBACK = """[
+  {
+    id: 's-feedback',
+    title: 'Hypertrophy Upper',
+    startDate: new Date('2026-09-15T14:00:00').toISOString(),
+    time: '14:00 - 15:30',
+    location: 'Studio A',
+    participants: ['c1', 'c2'],
+    routineId: 'r1',
+    hasFeedback: true,
+  },
+]"""
+
+
+def test_taking_someone_off_a_session_with_feedback_asks_in_the_dictionary_s_words(
+    page, local_server
+):
+    """The question was an English sentence in code, in every language (TODO §38.20). Declining it
+    leaves the session as it was."""
+    load_with_stub(
+        page,
+        local_server,
+        setup_stub(SESSION_WITH_FEEDBACK, target_session="'s-feedback'"),
+    )
+    messages = []
+    page.on(
+        "dialog", lambda dialog: (messages.append(dialog.message), dialog.dismiss())
+    )
+
+    rows = "#setup-participants-assignment-list .participant-setup-row"
+    page.locator(f"{rows} .participant-remove").last.click()
+    page.locator("#form-workout-setup button[type=submit]").click()
+
+    expected = page.evaluate(
+        """async () => {
+            const { TRANSLATIONS } = await import(new URL('i18n/index.js', document.baseURI).href);
+            return TRANSLATIONS.en.confirm_remove_participant_with_feedback;
+        }"""
+    )
+    expect(page.locator("#form-workout-setup")).to_be_visible()
+    assert messages == [expected]

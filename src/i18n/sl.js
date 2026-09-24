@@ -865,6 +865,9 @@ export const sl = {
   restore_you_would_lose: "Izgubljeno bo:",
   restore_keep: "Obdrži, kar imam",
   restore_replace: "Zamenjaj",
+  restore_nothing_changed: "Nič ni bilo spremenjeno.",
+  confirm_remove_participant_with_feedback:
+    "Ta trening ima zabeležene povratne informacije. Če stranko odstraniš s treninga, se trening spremeni, zgodovina treningov, ki je zanjo že zabeležena, pa ostane v njeni kartoteki. Jo odstranim?",
   drive_conflict_type_add_add: "Ustvarjeno na obeh napravah",
   drive_conflict_type_edit_edit: "Urejeno na obeh napravah",
   drive_conflict_type_delete_edit: "Izbrisano na tej napravi, urejeno drugje",
