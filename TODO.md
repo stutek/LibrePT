@@ -2593,6 +2593,10 @@ field now shows its example. **[ ] Decision, not work — Simon:** the five feed
 Translating only the choice would make the two screens disagree, so the choices and their display
 elsewhere are one decision.
 
+**2026-09-24: the Apply Program Adjustment dialog** ([planAdjustments.js](src/modules/plans/planAdjustments.js)),
+**182 → 169.** It had no key at all; every label, option and button now has one. The mock voice
+memo name ("voice_memo.wav (0:04)") stays: it stands in for a feature that does not record yet.
+
 **Measured the same day, and not converted:** `activeSessionOverlayView.js` (20),
 `applicationHeader.js` (16) and `clientConsentSection.js` (10) are mostly false counts. Their visible texts are translated already, by
 the selector table or by code that writes them from the dictionary; what the check counts is the

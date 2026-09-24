@@ -18,7 +18,7 @@ export function renderAdjustmentsViewShell() {
     `
 <section id="view-adjustments" class="app-view">
       <div class="view-header view-titlebar">
-        <button class="view-grabber" type="button" aria-label="Return to home"></button>
+        <button class="view-grabber" type="button" data-i18n-label="view_grabber_home" aria-label="Return to home"></button>
         <h2 id="pending-adjustments-title"><i class="fa-solid fa-bell-concierge text-emerald mr-1"></i> Pending Review</h2>
         <span class="badge adjustment-count-badge" id="badge-adjustments-count">0</span>
       </div>
@@ -168,8 +168,8 @@ export function renderApplyAdjustmentDialog() {
     `
 <dialog id="dialog-apply-adjustment" class="dialog-modal card glassmorphic">
     <div class="modal-header">
-      <h3>Apply Program Adjustment</h3>
-      <button class="modal-close-btn" aria-label="Close adjustment modal"><i class="fa-solid fa-xmark"></i></button>
+      <h3 data-i18n="adjust_title">Apply Program Adjustment</h3>
+      <button class="modal-close-btn" data-i18n-label="modal_close" aria-label="Close adjustment modal"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <form id="form-apply-adjustment" method="dialog" class="modal-form">
       <input type="hidden" id="adjust-update-id">
@@ -179,27 +179,27 @@ export function renderApplyAdjustmentDialog() {
       
       <div class="form-group adjust-summary-panel">
         <div class="adjust-summary-row">
-          <strong class="adjust-summary-label">Client:</strong> <span id="adjust-client-name" class="font-semibold text-emerald"></span>
+          <strong class="adjust-summary-label" data-i18n="adjust_client">Client:</strong> <span id="adjust-client-name" class="font-semibold text-emerald"></span>
         </div>
         <div class="adjust-summary-row">
-          <strong class="adjust-summary-label">Feedback:</strong> <span id="adjust-feedback-tag" class="font-semibold text-primary"></span>
+          <strong class="adjust-summary-label" data-i18n="adjust_feedback">Feedback:</strong> <span id="adjust-feedback-tag" class="font-semibold text-primary"></span>
         </div>
         <div id="adjust-voice-player-container" class="hidden adjust-voice-row">
-          <strong class="adjust-voice-label">Voice:</strong>
+          <strong class="adjust-voice-label" data-i18n="adjust_voice">Voice:</strong>
           <button type="button" id="adjust-btn-play-voice" class="adjust-voice-play-btn"><i class="fa-solid fa-circle-play adjust-voice-play-icon"></i></button>
           <span class="adjust-voice-duration-label">voice_memo.wav (0:04)</span>
         </div>
         <div class="adjust-summary-row-last">
-          <strong class="adjust-summary-label">Details:</strong> <span id="adjust-details" class="italic text-color"></span>
+          <strong class="adjust-summary-label" data-i18n="adjust_details">Details:</strong> <span id="adjust-details" class="italic text-color"></span>
         </div>
       </div>
 
       <div class="form-group">
-        <label for="adjust-action-type">Adjustment Action</label>
+        <label for="adjust-action-type" data-i18n="adjust_action_label">Adjustment Action</label>
         <select id="adjust-action-type" class="form-control adjust-action-type-select">
-          <option value="modify">Modify Target Load & Reps</option>
-          <option value="swap">Swap Exercise (Regression/Progression)</option>
-          <option value="dismiss">Dismiss Alert Only (No Changes)</option>
+          <option value="modify" data-i18n="adjust_action_modify">Modify Target Load & Reps</option>
+          <option value="swap" data-i18n="adjust_action_swap">Swap Exercise (Regression/Progression)</option>
+          <option value="dismiss" data-i18n="adjust_action_dismiss">Dismiss Alert Only (No Changes)</option>
         </select>
       </div>
 
@@ -207,16 +207,16 @@ export function renderApplyAdjustmentDialog() {
       <div id="adjust-panel-modify" class="adjust-action-panel">
         <div class="adjust-modify-grid">
           <div class="form-group">
-            <label for="adjust-weight">Target Weight (kg)</label>
+            <label for="adjust-weight" data-i18n="adjust_target_weight">Target Weight (kg)</label>
             <input type="number" step="0.5" id="adjust-weight" class="form-control">
           </div>
           <div class="form-group">
-            <label for="adjust-reps">Target Reps</label>
+            <label for="adjust-reps" data-i18n="adjust_target_reps">Target Reps</label>
             <input type="text" id="adjust-reps" class="form-control">
           </div>
         </div>
         <div class="form-group">
-          <label for="adjust-sets">Target Sets Count</label>
+          <label for="adjust-sets" data-i18n="adjust_target_sets">Target Sets Count</label>
           <input type="number" id="adjust-sets" class="form-control">
         </div>
       </div>
@@ -224,15 +224,15 @@ export function renderApplyAdjustmentDialog() {
       <!-- PANEL: Swap exercise -->
       <div id="adjust-panel-swap" class="adjust-action-panel hidden">
         <div class="form-group">
-          <label>Replacement Exercise <span class="swap-hint text-muted">— same muscle group keeps volume tracking intact</span></label>
+          <label><span data-i18n="adjust_replacement">Replacement Exercise</span> <span class="swap-hint text-muted" data-i18n="adjust_replacement_hint">— same muscle group keeps volume tracking intact</span></label>
           <input type="hidden" id="adjust-exercise-swap">
           <div id="adjust-swap-picker" class="exercise-picker"></div>
         </div>
       </div>
 
       <div class="modal-actions adjust-modal-actions">
-        <button type="button" class="btn secondary-btn modal-cancel">Cancel</button>
-        <button type="submit" class="btn primary-btn">Apply & Resolve</button>
+        <button type="button" class="btn secondary-btn modal-cancel" data-i18n="btn_cancel">Cancel</button>
+        <button type="submit" class="btn primary-btn" data-i18n="adjust_apply">Apply & Resolve</button>
       </div>
     </form>
   </dialog>

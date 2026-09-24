@@ -47,6 +47,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   logged. The muscle, equipment and pattern choices stay as stored (TODO §38.20).
 - The feedback dialog on the clipboard is in Slovenian when Slovenian is chosen, apart from the five
   feedback choices. Its note field shows an example again instead of repeating its label (TODO §38.20).
+- The dialog for applying a plan change from Pending Review is in Slovenian when Slovenian is chosen
+  (TODO §38.20).
 - A clipboard reload test waits for the scroll to finish instead of sleeping a fixed 600 ms, which
   was not enough in a busy gate run (TODO §53).
 - The demo story tests walk to a named step instead of counting steps, so a step added to the story
