@@ -36,3 +36,20 @@ def test_workout_setup_draft_persists_across_reload(page, local_server):
     expect(page.locator("#setup-session-name")).to_have_value("Sunset Power Hour")
     expect(page.locator("#setup-start-time")).to_have_value("17:30")
     expect(page.locator("#setup-location")).to_have_value("City Park Outdoor Gym")
+
+
+def test_the_name_and_place_fields_prompt_in_slovenian(page, local_server):
+    """Both placeholders were English in every language (TODO §38.20)."""
+    page.goto(f"{local_server}session/new?lang=sl")
+    page.wait_for_selector("#view-workout-setup.active")
+    words = page.evaluate(
+        """async () => {
+            const { TRANSLATIONS } = await import(new URL('i18n/index.js', document.baseURI).href);
+            return [TRANSLATIONS.sl.session_name_placeholder, TRANSLATIONS.sl.location_placeholder];
+        }"""
+    )
+
+    expect(page.locator("#setup-session-name")).to_have_attribute(
+        "placeholder", words[0]
+    )
+    expect(page.locator("#setup-location")).to_have_attribute("placeholder", words[1])

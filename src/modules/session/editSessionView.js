@@ -17,7 +17,7 @@ export function renderEditSessionView(targetElement) {
 
   container.innerHTML = `
     <div class="view-header view-titlebar">
-      <button class="view-grabber" type="button" aria-label="Return to home"></button>
+      <button class="view-grabber" type="button" data-i18n-label="view_grabber_home" aria-label="Return to home"></button>
       <h2 id="workout-setup-view-title" data-i18n="workout_setup_title">Start Workout Session</h2>
     </div>
 
@@ -29,7 +29,7 @@ export function renderEditSessionView(targetElement) {
           <div class="grid grid-2-col gap-2 mb-3">
             <div>
               <label for="setup-session-name" data-i18n="label_session_name">Session Name</label>
-              <input type="text" id="setup-session-name" class="form-control" list="setup-session-name-list" placeholder="Select or type session name...">
+              <input type="text" id="setup-session-name" class="form-control" list="setup-session-name-list" data-i18n-placeholder="session_name_placeholder" placeholder="Select or type session name...">
               <datalist id="setup-session-name-list">
                 <option value="Morning Strength"></option>
                 <option value="Hypertrophy Upper"></option>
@@ -44,7 +44,7 @@ export function renderEditSessionView(targetElement) {
             </div>
             <div>
               <label for="setup-location" data-i18n="label_location">Location</label>
-              <input type="text" id="setup-location" class="form-control" list="setup-location-list" placeholder="Select or type location...">
+              <input type="text" id="setup-location" class="form-control" list="setup-location-list" data-i18n-placeholder="location_placeholder" placeholder="Select or type location...">
               <datalist id="setup-location-list">
                 <option value="Trib gym base"></option>
                 <option value="playground outside"></option>

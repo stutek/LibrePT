@@ -54,8 +54,8 @@ export function renderSignupReviewDialog() {
     `
 <dialog id="dialog-signup-review" class="dialog-modal card glassmorphic">
     <div class="modal-header">
-      <h3 id="signup-review-title">Review a client's details</h3>
-      <button class="modal-close-btn" aria-label="Close modal"><i class="fa-solid fa-xmark"></i></button>
+      <h3 id="signup-review-title" data-i18n="signup_review_title">Review a client's details</h3>
+      <button class="modal-close-btn" data-i18n-label="modal_close" aria-label="Close modal"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div class="modal-body">
       <p id="signup-review-lede" class="signup-review-lede"></p>

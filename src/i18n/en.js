@@ -238,6 +238,9 @@ export const en = {
   // The exercise picker (modules/exercises/exercisePicker.js), TODO §38.20.
   picker_count: "Movements: {count}",
   picker_empty: "No movements match this filter.",
+  // The session setup form (modules/session/editSessionView.js), TODO §38.20.
+  session_name_placeholder: "Select or type session name...",
+  location_placeholder: "Select or type location...",
   encrypted_title: "Open an encrypted file",
   encrypted_lead: "For a personal-data export your trainer sent you.",
   encrypted_local:
@@ -416,6 +419,7 @@ export const en = {
   // rows show the three things that make consent demonstrable under Art. 7(1) rather than a tick.
   signup_review_lede:
     "Open the file your client sent you. Nothing is added to your clients until you accept it — the file was written on their phone and anyone could send you one.",
+  signup_review_title: "Review a client's details",
   signup_review_file: "The file they sent",
   signup_review_name: "Name",
   signup_review_email: "Email",

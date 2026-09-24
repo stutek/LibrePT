@@ -83,6 +83,16 @@ def test_the_client_detail_view_is_in_slovenian_when_slovenian_is_chosen(
     assert button in _slovenian(page, ["profile_send_consent", "consent_no_email"])
 
 
+def test_the_signup_review_is_titled_in_slovenian(page, local_server):
+    """The dialog a trainer reviews a client's own details in had an English title (TODO §38.20).
+    Its markup exists from boot, so the title is read without a signup to open it with."""
+    page.goto(local_server + "clients?lang=sl")
+    expect(page.locator("#view-client-directory")).to_be_visible()
+
+    [title] = _slovenian(page, ["signup_review_title"])
+    expect(page.locator("#signup-review-title")).to_have_text(title)
+
+
 def test_the_erase_dialog_is_in_slovenian_when_slovenian_is_chosen(page, local_server):
     _open_first_client(page, local_server)
     page.locator("#btn-client-erase").click()

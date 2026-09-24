@@ -2636,10 +2636,10 @@ exercise picker's count ("48 movements") and its empty message, English on all t
 mount it. Both now come from the dictionary through one helper, `pickerLabels(t)` in
 [exercisePicker.js](src/modules/exercises/exercisePicker.js), which also replaced the four labels
 each caller had copied. The count now reads "Movements: 48" / "Vaje: 48": Slovenian has four plural
-forms, and a number after a label needs none. **[ ] Found by that search and still English:** the
-session form's two placeholders ("Select or type session name...", "Select or type location...") in
-[editSessionView.js](src/modules/session/editSessionView.js), and the title of the signup review
-dialog in [signupReviewDialog.js](src/modules/clients/signupReviewDialog.js).
+forms, and a number after a label needs none. The same search found the session form's two
+placeholders ([editSessionView.js](src/modules/session/editSessionView.js)) and the signup review
+dialog's title ([signupReviewDialog.js](src/modules/clients/signupReviewDialog.js)) English; both
+carry keys since the same evening (**138 → 133**).
 
 **Measured the same day, and not converted:** `activeSessionOverlayView.js` (20),
 `applicationHeader.js` (16) and `clientConsentSection.js` (10) are mostly false counts. Their visible texts are translated already, by

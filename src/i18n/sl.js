@@ -253,6 +253,9 @@ export const sl = {
   // The exercise picker (modules/exercises/exercisePicker.js), TODO §38.20.
   picker_count: "Vaje: {count}",
   picker_empty: "Temu filtru ne ustreza nobena vaja.",
+  // The session setup form (modules/session/editSessionView.js), TODO §38.20.
+  session_name_placeholder: "Izberi ali vpiši ime treninga ...",
+  location_placeholder: "Izberi ali vpiši lokacijo ...",
   encrypted_title: "Odpri šifrirano datoteko",
   encrypted_lead: "Za izvoz osebnih podatkov, ki ti ga je poslal trener.",
   encrypted_local:
@@ -403,6 +406,7 @@ export const sl = {
   intake_err_consent: "Prosim označi privolitev — brez nje trener ne sme hraniti tvojih podatkov.",
   signup_review_lede:
     "Odpri datoteko, ki ti jo je poslala stranka. Nič se ne doda med tvoje stranke, dokler tega ne potrdiš — datoteka je nastala na njenem telefonu in pošlje jo lahko kdorkoli.",
+  signup_review_title: "Preglej podatke stranke",
   signup_review_file: "Poslana datoteka",
   signup_review_name: "Ime",
   signup_review_email: "E-pošta",
