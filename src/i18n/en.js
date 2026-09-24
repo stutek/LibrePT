@@ -860,6 +860,19 @@ export const en = {
     "Google hasn't approved this account for sync yet. Your data is safe on this device.",
   drive_sync_status_declined: "Not connected — you can connect any time.",
   drive_sync_review_conflicts: "Review conflicts",
+  // The Sync & Backup dialog's own markup (modules/common/backupRestore.js), TODO §38.20.
+  drive_sync_title: "Cloud Backup (Google Drive)",
+  drive_sync_disconnect: "Disconnect",
+  drive_sync_interval_label: "Sync every",
+  drive_sync_interval_unit: "min",
+  drive_sync_preview_warning:
+    "Preview build: sync writes the last stable format, so anything this preview added is not mirrored.",
+  backup_preview_warning:
+    "This is a preview build. Backups and sync are written in the last stable format, so anything added by this preview is not included. Keep your own copy of anything you cannot lose.",
+  restore_replaces_all: "Restoring replaces everything on this device.",
+  restore_you_would_lose: "You would lose:",
+  restore_keep: "Keep what I have",
+  restore_replace: "Replace it",
   drive_conflict_type_add_add: "Created on both devices",
   drive_conflict_type_edit_edit: "Edited on both devices",
   drive_conflict_type_delete_edit: "Deleted on this device, edited elsewhere",

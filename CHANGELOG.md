@@ -41,6 +41,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 - The client directory and the client's profile are in Slovenian when Slovenian is chosen: the
   labels, the buttons, the history heading, the consent badges and the note on an erased client
   (TODO §38.20).
+- The Sync & Backup dialog is in Slovenian when Slovenian is chosen, including the Google Drive card
+  and the question before a restore replaces the data on this device (TODO §38.20).
 - The demo story tests walk to a named step instead of counting steps, so a step added to the story
   no longer moves a test onto a different screen (TODO §57).
 

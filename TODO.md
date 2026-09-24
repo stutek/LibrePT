@@ -2570,8 +2570,15 @@ texts its code writes followed (**232 → 231**): the consent badges, the consen
 banner and the AI Safe Copy alert. The AI summary itself stays English on purpose: it is data pasted
 into an AI tool, not text on screen.
 
+**2026-09-24: the Sync & Backup dialog** ([backupRestore.js](src/modules/common/backupRestore.js)),
+**231 → 212.** Its markup carries every key, and fifteen entries left the selector table. The Drive
+card's description and two buttons are empty in the markup, because
+[driveSyncUi.js](src/modules/common/driveSyncUi.js) writes them from the dictionary on every render.
+**[ ] Still English there:** the restore warning lists what would be lost by collection name
+("3 clients"), straight from the code.
+
 The worst remaining, by count: `exerciseFormsController.js` (46), `activeSessionOverlayView.js` (20),
-`backupRestore.js` (19), `applicationHeader.js` (16).
+`applicationHeader.js` (16), `planAdjustments.js` (13).
 
 **Re-check condition:** the ratchet becomes an ordinary gate when the count reaches the irreducible
 set — a licence name, a taxonomy value that is the same word in every language — and this section

@@ -85,7 +85,6 @@ export function applyStaticDOMMappings(tDict) {
     // Dashboard / Clients view
     "#sessions-view-title": "sessions_schedule",
     "#pending-adjustments-title": "pending_adjustments",
-    "#btn-sync-data-text": "btn_sync_data",
 
     // The client directory and detail views carry their own keys in their markup (clientsView.js).
 
@@ -129,20 +128,7 @@ export function applyStaticDOMMappings(tDict) {
     "#label-voice-note": "voice_note_label",
     "#voice-record-status": "voice_ready",
 
-    "#dialog-backup .modal-header h3": "backup_center",
-    "#dialog-backup .dialog-desc": "backup_desc",
-    "#sync-data-title": "sync_session_title",
-    "#sync-data-desc": "sync_session_desc",
-    "#backup-export-title": "backup_export_title",
-    "#backup-export-desc": "backup_export_desc",
-    "#btn-export-db": "btn_export_json",
-    "#catalog-export-title": "catalog_export_title",
-    "#catalog-export-desc": "catalog_export_desc",
-    "#btn-export-catalog-json": "btn_export_catalog_json",
-    "#btn-export-catalog-csv": "btn_export_catalog_csv",
-    "#backup-import-title": "backup_import_title",
-    "#backup-import-desc": "backup_import_desc",
-    "#btn-select-json": "btn_select_json",
+    // The Sync & Backup dialog carries its own keys in its markup (backupRestore.js).
 
     // Not-found (error) view
     "#error-view-title": "error_title",

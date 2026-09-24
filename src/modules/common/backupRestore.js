@@ -154,11 +154,11 @@ export function renderBackupDialog() {
     `
 <dialog id="dialog-backup" class="dialog-modal card glassmorphic">
     <div class="modal-header">
-      <h3>Sync &amp; Backup Center</h3>
-      <button class="modal-close-btn" aria-label="Close sync & backup modal"><i class="fa-solid fa-xmark"></i></button>
+      <h3 data-i18n="backup_center">Sync &amp; Backup Center</h3>
+      <button class="modal-close-btn" data-i18n-label="modal_close" aria-label="Close sync & backup modal"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div class="modal-body-scroll">
-      <p class="dialog-desc">LibrePT stores your logs directly on this device. Sync the latest session schedule, download a backup file to keep your history safe, or import it to move to another phone.</p>
+      <p class="dialog-desc" data-i18n="backup_desc">LibrePT stores your logs directly on this device. Sync the latest session schedule, download a backup file to keep your history safe, or import it to move to another phone.</p>
 
       <!-- Preview-build warning. A backup is written at the newest NUMBERED schema so any build can
            restore it, which means anything the preview shape added on top is NOT in the file. That
@@ -168,8 +168,8 @@ export function renderBackupDialog() {
            common case (restoring onto an empty device) stays one step. -->
       <div id="restore-confirm" class="restore-confirm" hidden>
         <p id="restore-confirm-replace"><i class="fa-solid fa-triangle-exclamation"></i>
-          <strong>Restoring replaces everything on this device.</strong>
-          You would lose: <span id="restore-confirm-detail"></span>.
+          <strong data-i18n="restore_replaces_all">Restoring replaces everything on this device.</strong>
+          <span data-i18n="restore_you_would_lose">You would lose:</span> <span id="restore-confirm-detail"></span>.
         </p>
         <!-- The other half of the consent (TODO §18.7): what the import does to the FILE. Bringing an
              older backup forward means it stops being openable by an older build the trainer may still
@@ -180,76 +180,78 @@ export function renderBackupDialog() {
           <span id="restore-confirm-forward-text"></span>
         </p>
         <div class="restore-confirm-actions">
-          <button type="button" class="btn-secondary" id="btn-restore-cancel">Keep what I have</button>
-          <button type="button" class="btn-danger" id="btn-restore-confirm">Replace it</button>
+          <button type="button" class="btn-secondary" id="btn-restore-cancel" data-i18n="restore_keep">Keep what I have</button>
+          <button type="button" class="btn-danger" id="btn-restore-confirm" data-i18n="restore_replace">Replace it</button>
         </div>
       </div>
 
       <p class="backup-preview-warning" id="backup-preview-warning">
         <i class="fa-solid fa-triangle-exclamation"></i>
-        <span id="backup-preview-warning-text">This is a preview build. Backups and sync are written in the last stable format, so anything added by this preview is not included. Keep your own copy of anything you cannot lose.</span>
+        <span id="backup-preview-warning-text" data-i18n="backup_preview_warning">This is a preview build. Backups and sync are written in the last stable format, so anything added by this preview is not included. Keep your own copy of anything you cannot lose.</span>
       </p>
 
       <div class="backup-actions">
         <div class="action-card card">
           <i class="fa-solid fa-arrows-rotate backup-icon-large text-primary"></i>
-          <h4 id="sync-data-title">Sync Session Data</h4>
-          <p id="sync-data-desc">Pull the latest bookings and session schedule from your connected calendar.</p>
+          <h4 id="sync-data-title" data-i18n="sync_session_title">Sync Session Data</h4>
+          <p id="sync-data-desc" data-i18n="sync_session_desc">Pull the latest bookings and session schedule from your connected calendar.</p>
           <button id="btn-sync-data" class="btn primary-btn w-full">
-            <i class="fa-solid fa-arrows-rotate"></i> <span id="btn-sync-data-text">Sync Data</span>
+            <i class="fa-solid fa-arrows-rotate"></i> <span id="btn-sync-data-text" data-i18n="btn_sync_data">Sync Data</span>
           </button>
           <p id="sync-status" class="status-msg"></p>
         </div>
 
+        <!-- The description, the connect button and the conflicts button are empty here: driveSyncUi.js
+             writes all three from the dictionary on every render, by connection state. -->
         <div class="action-card card" id="drive-sync-card">
           <i class="fa-brands fa-google-drive backup-icon-large text-primary"></i>
-          <h4 id="drive-sync-title">Cloud Backup (Google Drive)</h4>
-          <p id="drive-sync-desc">Keep your clients, routines and session history mirrored across your own devices, in a hidden app folder only LibrePT can see in your Google Drive.</p>
+          <h4 id="drive-sync-title" data-i18n="drive_sync_title">Cloud Backup (Google Drive)</h4>
+          <p id="drive-sync-desc"></p>
           <!-- Sync carries the SAME stable-format limitation as a downloaded backup, and needs the
                warning more: an export is something a trainer chooses in the moment, while sync runs
                unattended, so there is no point at which they would otherwise be told. -->
           <p class="backup-preview-warning" id="drive-sync-preview-warning">
             <i class="fa-solid fa-triangle-exclamation"></i>
-            <span id="drive-sync-preview-warning-text">Preview build: sync writes the last stable format, so anything this preview added is not mirrored.</span>
+            <span id="drive-sync-preview-warning-text" data-i18n="drive_sync_preview_warning">Preview build: sync writes the last stable format, so anything this preview added is not mirrored.</span>
           </p>
           <button id="btn-drive-connect" class="btn primary-btn w-full">
-            <i class="fa-brands fa-google-drive"></i> <span id="btn-drive-connect-text">Connect Google Drive</span>
+            <i class="fa-brands fa-google-drive"></i> <span id="btn-drive-connect-text"></span>
           </button>
-          <button id="btn-drive-disconnect" class="btn secondary-btn w-full hidden">Disconnect</button>
+          <button id="btn-drive-disconnect" class="btn secondary-btn w-full hidden" data-i18n="drive_sync_disconnect">Disconnect</button>
           <div id="drive-sync-interval-row" class="drive-sync-interval-row hidden">
-            <label for="drive-sync-interval" id="drive-sync-interval-label">Sync every</label>
+            <label for="drive-sync-interval" id="drive-sync-interval-label" data-i18n="drive_sync_interval_label">Sync every</label>
             <input type="number" id="drive-sync-interval" class="form-control drive-sync-interval-input" min="1" max="60" step="1">
-            <span id="drive-sync-interval-unit">min</span>
+            <span id="drive-sync-interval-unit" data-i18n="drive_sync_interval_unit">min</span>
           </div>
           <p id="drive-sync-status" class="status-msg"></p>
           <!-- TODO §40.6: syncing FROM the sandbox writes its own file in the same Drive
                folder and spends the same grant. Said here, or a trainer reads "synced" and
                believes their own work is safe. Hidden outside the sandbox. -->
           <p id="drive-sync-sandbox-note" class="status-msg" data-i18n="sync_sandbox_note" hidden></p>
-          <button id="btn-drive-review-conflicts" class="btn secondary-btn w-full hidden"><i class="fa-solid fa-code-compare"></i> <span id="btn-drive-review-conflicts-text">Review conflicts</span></button>
+          <button id="btn-drive-review-conflicts" class="btn secondary-btn w-full hidden"><i class="fa-solid fa-code-compare"></i> <span id="btn-drive-review-conflicts-text"></span></button>
         </div>
 
         <div class="action-card card">
           <i class="fa-solid fa-file-export backup-icon-large text-emerald"></i>
-          <h4 id="backup-export-title">Export Data Backup</h4>
-          <p id="backup-export-desc">Download your clients, routines, and workout logs as a single JSON file.</p>
-          <button id="btn-export-db" class="btn primary-btn w-full">Export JSON</button>
+          <h4 id="backup-export-title" data-i18n="backup_export_title">Export Data Backup</h4>
+          <p id="backup-export-desc" data-i18n="backup_export_desc">Download your clients, routines, and workout logs as a single JSON file.</p>
+          <button id="btn-export-db" class="btn primary-btn w-full" data-i18n="btn_export_json">Export JSON</button>
         </div>
 
         <div class="action-card card">
           <i class="fa-solid fa-arrow-right-arrow-left backup-icon-large text-cyan"></i>
-          <h4 id="catalog-export-title">Export Exercise Catalog</h4>
-          <p id="catalog-export-desc">Export your movement catalog mapped to the open wger taxonomy, so it stays interchangeable with external tools.</p>
-          <button id="btn-export-catalog-json" class="btn secondary-btn w-full">Export Catalog JSON</button>
-          <button id="btn-export-catalog-csv" class="btn secondary-btn w-full">Export Catalog CSV</button>
+          <h4 id="catalog-export-title" data-i18n="catalog_export_title">Export Exercise Catalog</h4>
+          <p id="catalog-export-desc" data-i18n="catalog_export_desc">Export your movement catalog mapped to the open wger taxonomy, so it stays interchangeable with external tools.</p>
+          <button id="btn-export-catalog-json" class="btn secondary-btn w-full" data-i18n="btn_export_catalog_json">Export Catalog JSON</button>
+          <button id="btn-export-catalog-csv" class="btn secondary-btn w-full" data-i18n="btn_export_catalog_csv">Export Catalog CSV</button>
         </div>
 
         <div class="action-card card">
           <i class="fa-solid fa-file-import backup-icon-large text-indigo"></i>
-          <h4 id="backup-import-title">Import Data Backup</h4>
-          <p id="backup-import-desc">Load an existing \`.json\` backup file. This will merge or overwrite your current database.</p>
+          <h4 id="backup-import-title" data-i18n="backup_import_title">Import Data Backup</h4>
+          <p id="backup-import-desc" data-i18n="backup_import_desc">Load an existing \`.json\` backup file. This will merge or overwrite your current database.</p>
           <div class="file-upload-wrapper">
-            <button type="button" id="btn-select-json" class="btn secondary-btn w-full file-trigger">Select JSON File</button>
+            <button type="button" id="btn-select-json" class="btn secondary-btn w-full file-trigger" data-i18n="btn_select_json">Select JSON File</button>
             <input type="file" id="import-db-file" accept=".json" class="file-input-hidden">
           </div>
           <p id="import-status" class="status-msg"></p>

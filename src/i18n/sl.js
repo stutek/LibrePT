@@ -798,6 +798,19 @@ export const sl = {
     "Google tega računa še ni odobril za sinhronizacijo. Tvoji podatki so varni na tej napravi.",
   drive_sync_status_declined: "Ni povezano — povežete se lahko kadar koli.",
   drive_sync_review_conflicts: "Preglej konflikte",
+  // The Sync & Backup dialog's own markup (modules/common/backupRestore.js), TODO §38.20.
+  drive_sync_title: "Varnostna kopija v oblaku (Google Drive)",
+  drive_sync_disconnect: "Prekini povezavo",
+  drive_sync_interval_label: "Sinhroniziraj vsakih",
+  drive_sync_interval_unit: "min",
+  drive_sync_preview_warning:
+    "Predogledna različica: sinhronizacija zapiše zadnjo stabilno obliko, zato vsebina, ki jo je dodal ta predogled, ni prenesena.",
+  backup_preview_warning:
+    "To je predogledna različica. Varnostne kopije in sinhronizacija se zapišejo v zadnji stabilni obliki, zato vsebina, ki jo je dodal ta predogled, ni vključena. Shrani si svojo kopijo vsega, česar ne smeš izgubiti.",
+  restore_replaces_all: "Obnovitev zamenja vse na tej napravi.",
+  restore_you_would_lose: "Izgubljeno bo:",
+  restore_keep: "Obdrži, kar imam",
+  restore_replace: "Zamenjaj",
   drive_conflict_type_add_add: "Ustvarjeno na obeh napravah",
   drive_conflict_type_edit_edit: "Urejeno na obeh napravah",
   drive_conflict_type_delete_edit: "Izbrisano na tej napravi, urejeno drugje",

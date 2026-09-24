@@ -39,8 +39,8 @@ SRC = REPO_ROOT / "src"
 # title and label behind with it (§74.2), then the two data-subject-request dialogs, whose markup now
 # carries a key on every text (clientDataRights.js), then the client directory and detail views,
 # whose placeholder texts went and whose labels carry their keys (clientsView.js), then the consent
-# button's words, which only the code sets now.
-BASELINE = 231
+# button's words, which only the code sets now, then the Sync & Backup dialog (backupRestore.js).
+BASELINE = 212
 
 # Upstream files and the dictionaries themselves: the first are not ours to translate, the second
 # ARE the translations.
