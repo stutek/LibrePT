@@ -995,6 +995,15 @@ export const en = {
   profile_ai_safe_copy: "AI Safe Copy",
   profile_export_data: "Export data (GDPR)",
   profile_erase_client: "Erase client (GDPR)",
+  profile_send_consent: "Send Consent Form",
+  profile_ai_copied:
+    "The anonymized client summary is copied. It is safe to use with AI assistants.",
+  profile_erased_banner:
+    "Erased on {date} at the client's request. The training records below are anonymous.",
+  consent_badge_withdrawn: "Consent Withdrawn ({dates})",
+  consent_badge_none: "Not Consented (Local Only)",
+  consent_badge_given: "Consented ({detail})",
+  consent_badge_verified: "Verified",
   consent_legend: "Data Protection (GDPR)",
   consent_signed_label: "Client signed the consent form (data storage & cloud sync)",
   consent_date_label: "Date signed",

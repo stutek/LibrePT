@@ -934,6 +934,15 @@ export const sl = {
   profile_ai_safe_copy: "Anonimna kopija za AI",
   profile_export_data: "Izvozi podatke (GDPR)",
   profile_erase_client: "Izbriši stranko (GDPR)",
+  profile_send_consent: "Pošlji obrazec za privolitev",
+  profile_ai_copied:
+    "Anonimni povzetek stranke je kopiran. Varno ga lahko uporabiš z AI-pomočniki.",
+  profile_erased_banner:
+    "Izbrisano {date} na zahtevo stranke. Spodnji zapisi treningov so anonimni.",
+  consent_badge_withdrawn: "Privolitev preklicana ({dates})",
+  consent_badge_none: "Brez privolitve (samo lokalno)",
+  consent_badge_given: "Privolitev dana ({detail})",
+  consent_badge_verified: "Preverjeno",
   consent_legend: "Varstvo osebnih podatkov (GDPR)",
   consent_signed_label:
     "Stranka je podpisala privolitev (hramba podatkov in sinhronizacija v oblak)",

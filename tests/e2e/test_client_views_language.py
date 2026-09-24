@@ -72,6 +72,15 @@ def test_the_client_detail_view_is_in_slovenian_when_slovenian_is_chosen(
     _open_first_client(page, local_server)
 
     _expect_slovenian(page, DETAIL)
+    # Set by code, and which one depends on the client: the badge's words up to its brackets, and
+    # the consent button's words with or without an email on file.
+    badges = _slovenian(
+        page, ["consent_badge_withdrawn", "consent_badge_none", "consent_badge_given"]
+    )
+    badge = page.locator("#profile-gdpr-status").inner_text().strip()
+    assert any(badge.startswith(words.split("(")[0]) for words in badges), badge
+    button = page.locator("#btn-send-consent-email-text").inner_text()
+    assert button in _slovenian(page, ["profile_send_consent", "consent_no_email"])
 
 
 def test_the_erase_dialog_is_in_slovenian_when_slovenian_is_chosen(page, local_server):

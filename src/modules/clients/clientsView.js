@@ -135,7 +135,7 @@ export function renderClientDetailViewShell() {
             <i class="fa-solid fa-calendar-plus"></i> <span data-i18n="btn_plan_program">Plan Program</span>
           </button>
           <a id="btn-send-consent-email" class="btn secondary-btn">
-            <i class="fa-solid fa-envelope"></i> <span id="btn-send-consent-email-text">Send Consent Form</span>
+            <i class="fa-solid fa-envelope"></i> <span id="btn-send-consent-email-text"></span>
           </a>
           <button id="btn-ai-safe-copy" class="btn secondary-btn">
             <i class="fa-solid fa-user-shield"></i> <span data-i18n="profile_ai_safe_copy">AI Safe Copy</span>
@@ -187,8 +187,8 @@ export function showClientDetails({
   document.getElementById("profile-email").textContent = client.email || t("not_specified");
   document.getElementById("profile-phone").textContent = client.phone || t("not_specified");
 
-  renderConsentStatus(client);
-  renderConsentDelivery(client, client.gdprConsent?.formLang || state.lang);
+  renderConsentStatus(client, t);
+  renderConsentDelivery(client, client.gdprConsent?.formLang || state.lang, t);
 
   const aiCopyBtn = document.getElementById("btn-ai-safe-copy");
   if (aiCopyBtn) {
@@ -224,8 +224,9 @@ export function showClientDetails({
 ## Recent Workout Logs
 ${historyText}`;
 
+      // The summary itself stays English: it is data pasted into an AI tool, not text on screen.
       navigator.clipboard.writeText(anonymizedSummary).then(() => {
-        alert("Anonymized client summary copied to clipboard! Safe to use with AI assistants.");
+        alert(t("profile_ai_copied"));
       });
     });
   }
@@ -249,7 +250,10 @@ ${historyText}`;
     // to show that it was), so it has to say what it is at a glance.
     erasedBanner.hidden = !isErased(client);
     if (isErased(client)) {
-      erasedBanner.textContent = `Erased on ${(client.erasure.erasedAt || "").substring(0, 10)} at the client's request. The training records below are anonymous.`;
+      erasedBanner.textContent = t("profile_erased_banner").replace(
+        "{date}",
+        (client.erasure.erasedAt || "").substring(0, 10),
+      );
     }
   }
 
@@ -268,7 +272,10 @@ ${historyText}`;
 // The badge answers the two questions a trainer is actually asked: did they consent, and to WHICH
 // wording. `consentDate` is the date on the signed paper; a record predating that field falls back
 // to the write timestamp's date (see clientConsentSection.js).
-function renderConsentStatus(client) {
+//
+// Every label below is a local const, escaped where it is built: the HTML-sink audit reads the
+// escaping at the interpolation site (build/frontend_audit.py).
+function renderConsentStatus(client, t) {
   const statusEl = document.getElementById("profile-gdpr-status");
   if (!statusEl) return;
 
@@ -277,12 +284,13 @@ function renderConsentStatus(client) {
     // Distinct from "never consented": processing must stop for both, but only one of them is a
     // client the trainer must still be able to prove once agreed (Art. 7(1)).
     const dates = [consentSignedDate(consent), consent.withdrawnDate].filter(Boolean).join(" → ");
-    const safeDates = escapeHTML(dates);
-    statusEl.innerHTML = `<span class="badge badge-warning"><i class="fa-solid fa-ban mr-1"></i> Consent Withdrawn (${safeDates})</span>`;
+    const safeLabel = escapeHTML(t("consent_badge_withdrawn").replace("{dates}", dates));
+    statusEl.innerHTML = `<span class="badge badge-warning"><i class="fa-solid fa-ban mr-1"></i> ${safeLabel}</span>`;
     return;
   }
   if (!isConsentActive(consent)) {
-    statusEl.innerHTML = `<span class="badge badge-warning"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Not Consented (Local Only)</span>`;
+    const safeLabel = escapeHTML(t("consent_badge_none"));
+    statusEl.innerHTML = `<span class="badge badge-warning"><i class="fa-solid fa-triangle-exclamation mr-1"></i> ${safeLabel}</span>`;
     return;
   }
 
@@ -290,15 +298,15 @@ function renderConsentStatus(client) {
   const detail = [signedOn, consent.formVersion && `v${consent.formVersion}`]
     .filter(Boolean)
     .join(" · ");
-  // A local const, not an inline expression: the HTML-sink audit reads the escaping at the
-  // interpolation site (build/frontend_audit.py).
-  const safeDetail = escapeHTML(detail || "Verified");
-  statusEl.innerHTML = `<span class="badge badge-success"><i class="fa-solid fa-check mr-1"></i> Consented (${safeDetail})</span>`;
+  const safeLabel = escapeHTML(
+    t("consent_badge_given").replace("{detail}", detail || t("consent_badge_verified")),
+  );
+  statusEl.innerHTML = `<span class="badge badge-success"><i class="fa-solid fa-check mr-1"></i> ${safeLabel}</span>`;
 }
 
 // The language the client was (or will be) sent the form in — their recorded one if there is one,
 // otherwise the trainer's UI language, same default the dialog's selector offers.
-function renderConsentDelivery(client, lang) {
+function renderConsentDelivery(client, lang, t) {
   const mailtoBtn = document.getElementById("btn-send-consent-email");
   if (!mailtoBtn) return;
 
@@ -307,7 +315,7 @@ function renderConsentDelivery(client, lang) {
   mailtoBtn.classList.toggle("disabled", !href);
   // The label carries the reason, not only the tooltip — a phone cannot hover.
   const label = mailtoBtn.querySelector("span");
-  if (label) label.textContent = href ? "Send Consent Form" : "No email on file";
+  if (label) label.textContent = t(href ? "profile_send_consent" : "consent_no_email");
 }
 
 export function renderClientWorkoutHistory({ client, state, t, openSessionFromHistory }) {

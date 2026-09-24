@@ -2565,9 +2565,10 @@ always overwrote ("Jane Doe", "Goals details go here.") are gone. Twelve entries
 table in [domMappings.js](src/i18n/domMappings.js): eight named what the markup now names, and four
 named elements that no longer exist. The labels now show the words their keys held all along, so
 the English reads "Training Goals", "Pre-existing Injuries & Notes" and "Logged Session History"
-where it read "Current Goals", "Health & Injury Notes" and "Training History". **[ ] Still English in that file,
-all set by code:** the consent badges, the consent button's words, the erased banner and the AI Safe
-Copy alert.
+where it read "Current Goals", "Health & Injury Notes" and "Training History". The same day the
+texts its code writes followed (**232 → 231**): the consent badges, the consent button, the erased
+banner and the AI Safe Copy alert. The AI summary itself stays English on purpose: it is data pasted
+into an AI tool, not text on screen.
 
 The worst remaining, by count: `exerciseFormsController.js` (46), `activeSessionOverlayView.js` (20),
 `backupRestore.js` (19), `applicationHeader.js` (16).

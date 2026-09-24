@@ -39,7 +39,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 - The dialogs for exporting and erasing a client's data are in Slovenian when Slovenian is chosen.
   The erasure receipt and the email to the client are still English (TODO §38.20).
 - The client directory and the client's profile are in Slovenian when Slovenian is chosen: the
-  labels, the buttons and the history heading. The consent badges are still English (TODO §38.20).
+  labels, the buttons, the history heading, the consent badges and the note on an erased client
+  (TODO §38.20).
 - The demo story tests walk to a named step instead of counting steps, so a step added to the story
   no longer moves a test onto a different screen (TODO §57).
 
