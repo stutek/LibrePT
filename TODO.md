@@ -4472,6 +4472,12 @@ full run under the same load passed.
   [test_walkthrough_panel.py](tests/medium/test_walkthrough_panel.py): the walkthrough panel covered
   the control it rings.
 
+**A third, found and fixed 2026-09-24:** `test_a_reload_keeps_the_active_card_closed_when_it_was_closed`
+in [test_session_deeplink.py](tests/e2e/test_session_deeplink.py) failed once in a full gate run and
+passed three times alone. It read the deck a fixed 600 ms after a scroll and found the first card
+still open. It now waits for the end state it is about (the address ends in `/closed` and no card is
+open), and fails if that state does not arrive within 5 s. The two above may have the same cause.
+
 **Open:** what in each test depends on timing. Either the test reads the screen before the app has
 finished settling, or the app itself lands in the wrong place when it is slow, which a busy phone in
 a gym would see too.

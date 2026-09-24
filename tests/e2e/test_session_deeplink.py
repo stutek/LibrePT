@@ -279,7 +279,14 @@ def test_a_reload_keeps_the_active_card_closed_when_it_was_closed(page, local_se
     box = page.locator("#active-exercise-scroll-deck").bounding_box()
     page.mouse.move(box["x"] + box["width"] / 2, box["y"] + 150)
     page.mouse.wheel(0, 400)
-    page.wait_for_timeout(600)
+    # Waited for, never slept on: the gate run of 2026-09-24 19:32, with eight browser workers,
+    # read the deck after a fixed 600 ms and found the card still open. The state this test is
+    # about is the end of the scroll, so it waits for exactly that, and fails if it never comes.
+    page.wait_for_function(
+        """() => location.pathname.endsWith('/closed')
+              && !document.querySelector('#active-exercise-scroll-deck .exercise-deck-card.in-focus')""",
+        timeout=5000,
+    )
 
     before = page.evaluate(DECK_STATE)
     assert len(before["active"]) == 1 and before["open"] == [], before
