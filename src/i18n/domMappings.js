@@ -122,11 +122,7 @@ export function applyStaticDOMMappings(tDict) {
     '#dialog-add-session-exercise button[type="submit"]': "btn_inject",
     "#catalog-picker-title": "catalog_picker_title",
 
-    "#dialog-feedback .modal-header h3": "log_client_feedback",
-    '#dialog-feedback label[for="feedback-custom-note"]': "custom_details",
-    '#dialog-feedback button[type="submit"]': "btn_log_alert",
-    "#label-voice-note": "voice_note_label",
-    "#voice-record-status": "voice_ready",
+    // The feedback dialog carries its own keys in its markup (feedbackModal.js).
 
     // The Sync & Backup dialog carries its own keys in its markup (backupRestore.js).
 
@@ -185,7 +181,6 @@ export function applyStaticDOMMappings(tDict) {
   const placeholderMappings = {
     "#search-routines": "placeholder_search_routines",
     "#search-exercises": "placeholder_search_exercises",
-    "#feedback-custom-note": "custom_details",
   };
 
   for (const selector in placeholderMappings) {

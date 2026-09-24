@@ -609,6 +609,8 @@ export const sl = {
     "To je en večer ponavljajočega se treninga. Kar spremeniš tukaj, velja samo za ta večer.",
   gym_note_in_this_plan: "v tem načrtu",
   feedback_keep_on_record: "Shrani to v kartoteko stranke",
+  feedback_local_only: "Samo na napravi",
+  feedback_note_placeholder: "npr. levo koleno klikne, manjše breme ...",
   // Vodeni ogled, ne demo — tako se ta tek imenuje v walkthrough_title.
   // Pozdrav v obeh oblikah, kot že walkthrough_off_track_title in intake_invite_message_unsigned:
   // aplikacija tika, tikanje pa je v slovenščini spolsko določeno, zato "(-la)" in ne množina.

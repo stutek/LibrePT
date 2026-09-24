@@ -45,6 +45,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   and the question before a restore replaces the data on this device (TODO §38.20).
 - The Custom Exercise dialog is in Slovenian when Slovenian is chosen, including how an exercise is
   logged. The muscle, equipment and pattern choices stay as stored (TODO §38.20).
+- The feedback dialog on the clipboard is in Slovenian when Slovenian is chosen, apart from the five
+  feedback choices. Its note field shows an example again instead of repeating its label (TODO §38.20).
 - A clipboard reload test waits for the scroll to finish instead of sleeping a fixed 600 ms, which
   was not enough in a busy gate run (TODO §53).
 - The demo story tests walk to a named step instead of counting steps, so a step added to the story

@@ -653,6 +653,8 @@ export const en = {
     "This is one evening of a repeating session. What you change here changes this evening only.",
   gym_note_in_this_plan: "in this plan",
   feedback_keep_on_record: "Keep this on the client's record",
+  feedback_local_only: "Local Only",
+  feedback_note_placeholder: "e.g. Left knee clicks, reduced load...",
   // The demo's front door, and the only card a stranger reads standing still rather than mid-tap:
   // it says what the app is, what this run is a story OF, and that none of it can reach their own
   // records. The sandbox line replaces the offer to delete the demo data afterwards — with a

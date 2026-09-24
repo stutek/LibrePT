@@ -40,8 +40,9 @@ SRC = REPO_ROOT / "src"
 # carries a key on every text (clientDataRights.js), then the client directory and detail views,
 # whose placeholder texts went and whose labels carry their keys (clientsView.js), then the consent
 # button's words, which only the code sets now, then the Sync & Backup dialog (backupRestore.js),
-# then the Custom Exercise dialog's labels and logging options (exerciseFormsController.js).
-BASELINE = 193
+# then the Custom Exercise dialog's labels and logging options (exerciseFormsController.js), then
+# the clipboard's feedback dialog (feedbackModal.js).
+BASELINE = 182
 
 # Upstream files and the dictionaries themselves: the first are not ours to translate, the second
 # ARE the translations.

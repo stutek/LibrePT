@@ -73,15 +73,17 @@ export function renderFeedbackDialog() {
     `
 <dialog id="dialog-feedback" class="dialog-modal card glassmorphic">
     <div class="modal-header">
-      <h3>Log Client Feedback</h3>
-      <button class="modal-close-btn" aria-label="Close feedback modal"><i class="fa-solid fa-xmark"></i></button>
+      <h3 data-i18n="log_client_feedback">Log Client Feedback</h3>
+      <button class="modal-close-btn" data-i18n-label="modal_close" aria-label="Close feedback modal"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <form id="form-feedback" method="dialog" class="modal-form">
       <input type="hidden" id="feedback-client-id">
       <input type="hidden" id="feedback-exercise-name">
       
       <div class="form-group">
-        <label>Feedback for <span id="feedback-client-display-name" class="text-emerald font-semibold">Jane Doe</span> on <span id="feedback-ex-display-name" class="text-emerald font-semibold">Bench Press</span></label>
+        <!-- The two names are filled on every open (openFeedbackModal). The feedback choices below
+             are stored in English and shown so on other screens; see TODO §38.20. -->
+        <label><span data-i18n="feedback_for">Feedback for</span> <span id="feedback-client-display-name" class="text-emerald font-semibold"></span> <span data-i18n="feedback_on">on</span> <span id="feedback-ex-display-name" class="text-emerald font-semibold"></span></label>
         
         <div class="feedback-chips-selector">
           <label class="feedback-chip-option">
@@ -111,7 +113,7 @@ export function renderFeedbackDialog() {
       <div class="form-group feedback-voice-group">
         <label class="feedback-voice-label">
           <span id="label-voice-note" data-i18n="voice_note_label">Privacy-First Voice Note</span>
-          <span class="badge badge-emerald feedback-local-badge">Local Only</span>
+          <span class="badge badge-emerald feedback-local-badge" data-i18n="feedback_local_only">Local Only</span>
         </label>
         <div class="voice-recorder-widget">
           <button type="button" id="btn-voice-record" class="btn secondary-btn voice-record-btn">
@@ -139,8 +141,8 @@ export function renderFeedbackDialog() {
       </div>
 
       <div class="form-group">
-        <label for="feedback-custom-note">Custom Details / Notes</label>
-        <input type="text" id="feedback-custom-note" placeholder="e.g. Left knee clicks, reduced load..." class="form-control">
+        <label for="feedback-custom-note" data-i18n="custom_details">Custom Details / Notes</label>
+        <input type="text" id="feedback-custom-note" data-i18n-placeholder="feedback_note_placeholder" placeholder="e.g. Left knee clicks, reduced load..." class="form-control">
       </div>
 
       <!-- Mid-session capture that OUTLIVES the session (TODO §35.3c). A twinge mentioned between
@@ -152,13 +154,13 @@ export function renderFeedbackDialog() {
       <div class="form-group">
         <label class="feedback-keep-row" for="feedback-keep-on-record">
           <input type="checkbox" id="feedback-keep-on-record">
-          <span id="feedback-keep-on-record-label">Keep this on the client's record</span>
+          <span id="feedback-keep-on-record-label" data-i18n="feedback_keep_on_record">Keep this on the client's record</span>
         </label>
       </div>
-      
+
       <div class="modal-actions">
-        <button type="button" class="btn secondary-btn modal-cancel">Cancel</button>
-        <button type="submit" class="btn primary-btn">Log Alert</button>
+        <button type="button" class="btn secondary-btn modal-cancel" data-i18n="btn_cancel">Cancel</button>
+        <button type="submit" class="btn primary-btn" data-i18n="btn_log_alert">Log Alert</button>
       </div>
     </form>
   </dialog>

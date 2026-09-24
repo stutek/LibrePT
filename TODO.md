@@ -2585,6 +2585,14 @@ values, shown in English in every language here and on the library's filter chip
 them means a label per value, while the stored value stays the English one the wger crosswalk (§13.1)
 reads. Until that is decided they count as the irreducible set.
 
+**2026-09-24: the clipboard's feedback dialog** ([feedbackModal.js](src/modules/common/feedbackModal.js)),
+**193 → 182.** Its markup carries every key, and six entries left the selector tables. One of them
+had set the note field's placeholder to the words of its own label, "Custom Details / Notes"; the
+field now shows its example. **[ ] Decision, not work — Simon:** the five feedback choices ("Too Easy
+- Increase Load" and the others) are stored in English and shown again on the review screen.
+Translating only the choice would make the two screens disagree, so the choices and their display
+elsewhere are one decision.
+
 **Measured the same day, and not converted:** `activeSessionOverlayView.js` (20) and
 `applicationHeader.js` (16) are mostly false counts. Their visible texts are translated already, by
 the selector table or by code that writes them from the dictionary; what the check counts is the
