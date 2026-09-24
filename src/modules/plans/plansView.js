@@ -118,7 +118,7 @@ export function openRoutineEditorModal({ routineId, state, t }) {
   const builderList = document.getElementById("routine-exercises-list");
   if (!dialog || !builderList) return;
 
-  document.getElementById("routine-modal-title").textContent = "Edit Routine Template";
+  document.getElementById("routine-modal-title").textContent = t("edit_routine_title");
   document.getElementById("routine-form-id").value = routine.id;
   document.getElementById("routine-name").value = routine.name;
   document.getElementById("routine-desc").value = routine.description || "";
@@ -152,22 +152,32 @@ export function addRoutineExerciseRow({ preset = null, state, t }) {
 
   const presetEx = preset ? libraryExercises(state).find((e) => e.id === preset.id) : null;
 
+  // Built on every open, after the markup's translation pass, so the words come from `t` here. Each
+  // is a local const, escaped where it is built, for the HTML-sink audit (build/frontend_audit.py).
+  const safeSelect = escapeHTML(t("select_exercise"));
+  const safeSets = escapeHTML(t("sets"));
+  const safeSetsLabel = escapeHTML(t("routine_row_sets_label"));
+  const safeReps = escapeHTML(t("reps"));
+  const safeRepsLabel = escapeHTML(t("routine_row_reps_label"));
+  const safeRest = escapeHTML(t("routine_row_rest"));
+  const safeRestLabel = escapeHTML(t("routine_row_rest_label"));
+  const safeRemove = escapeHTML(t("routine_row_remove"));
   row.innerHTML = `
     <select class="form-control select-ex" required>
-      <option value="" disabled ${!preset ? "selected" : ""}>Select Exercise</option>
+      <option value="" disabled ${!preset ? "selected" : ""}>${safeSelect}</option>
       ${optionsHTML}
     </select>
     <div class="form-group routine-builder-field">
-      <input type="number" min="1" placeholder="Sets" class="form-control input-sets" value="${preset ? preset.sets : "3"}" required aria-label="Sets quantity">
+      <input type="number" min="1" placeholder="${safeSets}" class="form-control input-sets" value="${preset ? preset.sets : "3"}" required aria-label="${safeSetsLabel}">
     </div>
     <div class="form-group routine-builder-field">
-      <input type="text" placeholder="Reps" class="form-control input-reps" list="reps-presets" value="${preset ? escapeHTML(String(preset.reps)) : "10"}" required aria-label="Primary target (reps, time, distance, or 'max' to failure — depends on the exercise's modality)">
+      <input type="text" placeholder="${safeReps}" class="form-control input-reps" list="reps-presets" value="${preset ? escapeHTML(String(preset.reps)) : "10"}" required aria-label="${safeRepsLabel}">
     </div>
     <div class="form-group load-cell routine-builder-field"></div>
     <div class="form-group routine-builder-field">
-      <input type="number" min="0" step="5" placeholder="Rest" class="form-control input-rest" value="${preset ? preset.rest : "60"}" required aria-label="Rest duration in seconds">
+      <input type="number" min="0" step="5" placeholder="${safeRest}" class="form-control input-rest" value="${preset ? preset.rest : "60"}" required aria-label="${safeRestLabel}">
     </div>
-    <button type="button" class="btn-remove-row" aria-label="Remove exercise from routine"><i class="fa-solid fa-trash-can"></i></button>
+    <button type="button" class="btn-remove-row" aria-label="${safeRemove}"><i class="fa-solid fa-trash-can"></i></button>
   `;
 
   // The load control adapts to the selected movement's equipment: kg for free weights/machines,

@@ -2602,6 +2602,13 @@ memo name ("voice_memo.wav (0:04)") stays: it stands in for a feature that does 
 its five status messages now come from the dictionary; the module receives `t` at boot. A failed
 decryption now says so in the reader's language instead of showing the data layer's English error.
 
+**2026-09-24: the Routine Template dialog and its rows** ([routineFormsController.js](src/controllers/routineFormsController.js),
+[plansView.js](src/modules/plans/plansView.js)), **160 → 144.** The title was English on every open in
+every language: the table translated it at boot, and both the create and the edit path then wrote
+English over it. Both paths now write it from the dictionary, the markup carries its keys, and the
+exercise rows, built by code after the translation pass, take their words from `t`. The name label's
+key gained the required mark (*) it had lost.
+
 **Measured the same day, and not converted:** `activeSessionOverlayView.js` (20),
 `applicationHeader.js` (16) and `clientConsentSection.js` (10) are mostly false counts. Their visible texts are translated already, by
 the selector table or by code that writes them from the dictionary; what the check counts is the

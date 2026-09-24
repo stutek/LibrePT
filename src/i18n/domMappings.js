@@ -150,11 +150,8 @@ export function applyStaticDOMMappings(tDict) {
     "#consent-info-body-text": "consent_info_body",
     "#btn-consent-info-close": "consent_info_ack",
 
-    // Routine Template modal
-    "#routine-modal-title": "create_routine_title",
-    '#dialog-routine label[for="routine-name"]': "routine_name",
-    '#dialog-routine label[for="routine-desc"]': "routine_desc",
-    '#dialog-routine button[type="submit"]': "btn_save",
+    // The Routine Template dialog carries its own keys in its markup (routineFormsController.js);
+    // its title is written by the create and edit paths.
 
     // The Custom Exercise dialog carries its own keys in its markup (exerciseFormsController.js).
   };

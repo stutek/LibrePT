@@ -34,27 +34,28 @@ export function renderRoutineDialog() {
     `
 <dialog id="dialog-routine" class="dialog-modal card glassmorphic wide-modal">
     <div class="modal-header">
-      <h3 id="routine-modal-title">Create Routine Template</h3>
-      <button class="modal-close-btn" aria-label="Close routine modal"><i class="fa-solid fa-xmark"></i></button>
+      <!-- Empty: the create and the edit path each write their own title on open. -->
+      <h3 id="routine-modal-title"></h3>
+      <button class="modal-close-btn" data-i18n-label="modal_close" aria-label="Close routine modal"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <form id="form-routine" method="dialog" class="modal-form">
       <input type="hidden" id="routine-form-id">
 
       <div class="form-group">
-        <label for="routine-name">Routine Name *</label>
-        <input type="text" id="routine-name" required placeholder="e.g. Upper Body A" class="form-control">
+        <label for="routine-name" data-i18n="routine_name">Routine Name *</label>
+        <input type="text" id="routine-name" required data-i18n-placeholder="routine_name_placeholder" placeholder="e.g. Upper Body A" class="form-control">
       </div>
 
       <div class="form-group">
-        <label for="routine-desc">Description</label>
-        <input type="text" id="routine-desc" placeholder="e.g. Strength compound focus" class="form-control">
+        <label for="routine-desc" data-i18n="routine_desc">Description</label>
+        <input type="text" id="routine-desc" data-i18n-placeholder="routine_desc_placeholder" placeholder="e.g. Strength compound focus" class="form-control">
       </div>
 
       <div class="routine-builder-section">
         <div class="section-sub-title">
-          <h4>Routine Exercises</h4>
+          <h4 data-i18n="routine_exercises_heading">Routine Exercises</h4>
           <button type="button" id="btn-routine-add-ex" class="btn secondary-btn btn-xs">
-            <i class="fa-solid fa-plus"></i> Add Exercise
+            <i class="fa-solid fa-plus"></i> <span data-i18n="btn_add_exercise">Add Exercise</span>
           </button>
         </div>
 
@@ -71,8 +72,8 @@ export function renderRoutineDialog() {
       </div>
 
       <div class="modal-actions">
-        <button type="button" class="btn secondary-btn modal-cancel">Cancel</button>
-        <button type="submit" formnovalidate class="btn primary-btn">Save</button>
+        <button type="button" class="btn secondary-btn modal-cancel" data-i18n="btn_cancel">Cancel</button>
+        <button type="submit" formnovalidate class="btn primary-btn" data-i18n="btn_save">Save</button>
       </div>
     </form>
   </dialog>
@@ -123,7 +124,7 @@ export function setupRoutineForms({
   // Populating the create form is the ROUTE's job now (`/routines/new`), so a reload reopens it on a
   // blank form rather than dropping the trainer on the list. The button only navigates.
   openRoutineCreateForm = () => {
-    $id("routine-modal-title").textContent = "Create Routine Template";
+    $id("routine-modal-title").textContent = t("create_routine_title");
     $id("routine-form-id").value = "";
     builderList.innerHTML = "";
     openModal("dialog-routine", { resetForm: true, formId: "form-routine" });

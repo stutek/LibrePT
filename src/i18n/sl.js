@@ -240,6 +240,16 @@ export const sl = {
   adjust_replacement_hint: "— ista mišična skupina ohrani sledenje obsegu",
   adjust_apply: "Uveljavi in razreši",
   // The encrypted-file reader a CLIENT opens (modules/common/encryptedFileReader.js), TODO §38.20.
+  // The Routine Template dialog and its rows (routineFormsController.js, plansView.js), TODO §38.20.
+  routine_name_placeholder: "npr. Zgornji del telesa A",
+  routine_desc_placeholder: "npr. poudarek na osnovnih vajah za moč",
+  routine_exercises_heading: "Vaje v rutini",
+  routine_row_sets_label: "Število serij",
+  routine_row_reps_label:
+    "Glavni cilj (ponovitve, čas, razdalja ali 'max' do odpovedi — odvisno od vrste vaje)",
+  routine_row_rest: "Premor",
+  routine_row_rest_label: "Premor v sekundah",
+  routine_row_remove: "Odstrani vajo iz rutine",
   encrypted_title: "Odpri šifrirano datoteko",
   encrypted_lead: "Za izvoz osebnih podatkov, ki ti ga je poslal trener.",
   encrypted_local:
@@ -268,7 +278,7 @@ export const sl = {
   goals_placeholder: "npr. Pridobivanje mišične mase, izguba maščobe...",
   create_routine_title: "Ustvari predlogo rutine",
   edit_routine_title: "Uredi predlogo rutine",
-  routine_name: "Ime rutine",
+  routine_name: "Ime rutine *",
   routine_desc: "Opis",
   joined: "Pridružil se",
   no_goals_specified: "Cilji niso določeni.",

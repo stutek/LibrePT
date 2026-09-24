@@ -225,6 +225,16 @@ export const en = {
   adjust_replacement_hint: "— same muscle group keeps volume tracking intact",
   adjust_apply: "Apply & Resolve",
   // The encrypted-file reader a CLIENT opens (modules/common/encryptedFileReader.js), TODO §38.20.
+  // The Routine Template dialog and its rows (routineFormsController.js, plansView.js), TODO §38.20.
+  routine_name_placeholder: "e.g. Upper Body A",
+  routine_desc_placeholder: "e.g. Strength compound focus",
+  routine_exercises_heading: "Routine Exercises",
+  routine_row_sets_label: "Sets quantity",
+  routine_row_reps_label:
+    "Primary target (reps, time, distance, or 'max' to failure — depends on the exercise's modality)",
+  routine_row_rest: "Rest",
+  routine_row_rest_label: "Rest duration in seconds",
+  routine_row_remove: "Remove exercise from routine",
   encrypted_title: "Open an encrypted file",
   encrypted_lead: "For a personal-data export your trainer sent you.",
   encrypted_local:
@@ -253,7 +263,7 @@ export const en = {
   goals_placeholder: "e.g. Muscle gain, fat loss...",
   create_routine_title: "Create Routine Template",
   edit_routine_title: "Edit Routine Template",
-  routine_name: "Routine Name",
+  routine_name: "Routine Name *",
   routine_desc: "Description",
   joined: "Joined",
   no_goals_specified: "No goals specified.",

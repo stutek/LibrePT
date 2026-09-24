@@ -51,6 +51,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   (TODO §38.20).
 - The screen a client uses to open an encrypted data export is in Slovenian when Slovenian is chosen,
   its error messages included (TODO §38.20).
+- The Routine Template dialog is in Slovenian when Slovenian is chosen, its title and exercise rows
+  included; the title was English on every open before (TODO §38.20).
 - A clipboard reload test waits for the scroll to finish instead of sleeping a fixed 600 ms, which
   was not enough in a busy gate run (TODO §53).
 - The demo story tests walk to a named step instead of counting steps, so a step added to the story
