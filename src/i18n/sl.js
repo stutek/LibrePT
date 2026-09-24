@@ -508,6 +508,7 @@ export const sl = {
   trainer_details_title: "Tvoji podatki",
   // Verzija aplikacije na tej napravi (TODO §76).
   menu_app_version: "Verzija aplikacije",
+  app_version_button_label: "Verzija aplikacije — tapni za podrobnosti",
   app_version_title: "Verzija aplikacije",
   app_version_lede:
     "Izberi, kako se aplikacija obnaša na tej napravi. Aplikacija se znova naloži. Nobena verzija ne izbriše shranjenih podatkov.",

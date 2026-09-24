@@ -533,6 +533,7 @@ export const en = {
   // The app version this device runs (TODO §76).
   menu_app_version: "App version",
   app_version_title: "App version",
+  app_version_button_label: "Build version — tap for details",
   app_version_lede:
     "Choose how the app behaves on this device. The app reloads. No version deletes stored data.",
   app_version_in_use: "In use",

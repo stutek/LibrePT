@@ -5,6 +5,8 @@
 # pass (i18n/domMappings.js), which a mounted view does not run.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
+import re
+
 from playwright.sync_api import expect
 
 WORDS = """async (keys) => {
@@ -97,6 +99,20 @@ def test_the_view_grabbers_are_labelled_in_slovenian(page, local_server):
     expect(page.locator(".session-card").first).to_be_visible()
     expect(page.locator("#view-clients .view-grabber")).to_have_attribute(
         "aria-label", clipboard
+    )
+
+
+def test_the_header_buttons_are_labelled_in_slovenian(page, local_server):
+    """The version and Sync & Backup buttons are icons; the label is all a screen reader has
+    (TODO §38.20). The menu and language labels stay bilingual on purpose."""
+    page.goto(local_server + "clients?lang=sl")
+    expect(page.locator("#view-client-directory")).to_be_visible()
+    version, backup = _slovenian(page, ["app_version_button_label", "backup_center"])
+
+    expect(page.locator("#app-version")).to_have_attribute("aria-label", version)
+    # Written by code with the sync state after it: "<base> — <state>".
+    expect(page.locator("#backup-btn")).to_have_attribute(
+        "aria-label", re.compile("^" + re.escape(backup) + " — ")
     )
 
 

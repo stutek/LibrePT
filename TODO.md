@@ -2640,7 +2640,13 @@ forms, and a number after a label needs none. The same search found the session 
 placeholders ([editSessionView.js](src/modules/session/editSessionView.js)) and the signup review
 dialog's title ([signupReviewDialog.js](src/modules/clients/signupReviewDialog.js)) English; both
 carry keys since the same evening (**138 → 133**). Then the screen-reader label on every view's
-grabber, the bar at the top of a view: all eight carry a key (**133 → 128**).
+grabber, the bar at the top of a view: all eight carry a key (**133 → 128**). Then the header
+([applicationHeader.js](src/modules/common/applicationHeader.js), **128 → 125**): the two close
+buttons, the version button, and the Sync & Backup button, whose label code writes as "base — sync
+state" with only the state half translated. **Left bilingual on purpose:** "Menu / Meni" and
+"Switch Language / Zamenjaj jezik", so that someone who cannot read the current language still finds
+the way to change it, the rule the language prompt follows. **[ ] Question for Simon:** "Theme /
+Tema" sits beside them in the same menu, and it is not clear whether it was meant the same way.
 
 **Measured the same day, and not converted:** `activeSessionOverlayView.js` (20),
 `applicationHeader.js` (16) and `clientConsentSection.js` (10) are mostly false counts. Their visible texts are translated already, by
@@ -4534,12 +4540,6 @@ in [test_session_deeplink.py](tests/e2e/test_session_deeplink.py) failed once in
 passed three times alone. It read the deck a fixed 600 ms after a scroll and found the first card
 still open. It now waits for the end state it is about (the address ends in `/closed` and no card is
 open), and fails if that state does not arrive within 5 s. The two above may have the same cause.
-
-**Open:** what in each test depends on timing. Either the test reads the screen before the app has
-finished settling, or the app itself lands in the wrong place when it is slow, which a busy phone in
-a gym would see too.
-
-The gate no longer runs on a saturated machine at all (§64, `build/quiet_machine.py`), so these two
 **[ ] That fix did not hold (Claude, 2026-09-24 22:21).** The gate run of 22:15 failed on the same
 test: after 5 s the address still named the open card, so the scroll never took effect at all. It was
 not slow; it did not happen. The 19:40 conclusion, that 600 ms was too short, was wrong. Two causes
@@ -4547,6 +4547,12 @@ remain possible and the log cannot tell them apart: the wheel event arrives befo
 scroll, or outside it (the test measures the deck's box before the wheel); or the app's scroll
 handler misses it. Next: run that one test with `--tracing=on` under load, and read where the wheel
 event landed.
+
+**Open:** what in each test depends on timing. Either the test reads the screen before the app has
+finished settling, or the app itself lands in the wrong place when it is slow, which a busy phone in
+a gym would see too.
+
+The gate no longer runs on a saturated machine at all (§64, `build/quiet_machine.py`), so these two
 stop appearing in gate runs. That is not this section: a phone in a gym is slow and cannot be asked
 to wait, so the question below still stands on its own.
 

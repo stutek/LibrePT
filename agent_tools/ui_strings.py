@@ -47,8 +47,9 @@ SRC = REPO_ROOT / "src"
 # dialog's Done and close buttons (sessionInviteDialog.js), then the demo cleanup dialog's title and
 # buttons (demoCleanupDialog.js), then the exercise picker's empty message (exercisePicker.js), then
 # the session form's placeholders and the signup review title (editSessionView.js,
-# signupReviewDialog.js), then every view's grabber label.
-BASELINE = 128
+# signupReviewDialog.js), then every view's grabber label, then the header's close and version
+# labels (applicationHeader.js).
+BASELINE = 125
 
 # Upstream files and the dictionaries themselves: the first are not ours to translate, the second
 # ARE the translations.

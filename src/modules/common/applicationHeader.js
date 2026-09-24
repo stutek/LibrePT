@@ -60,9 +60,9 @@ function renderSyncCloudIcon(status) {
   overlay.className = glyph.overlayIcon;
 
   const stateLabel = deps?.t ? deps.t(glyph.labelKey) || glyph.labelFallback : glyph.labelFallback;
-  document
-    .getElementById("backup-btn")
-    ?.setAttribute("aria-label", `${SYNC_BUTTON_BASE_LABEL} — ${stateLabel}`);
+  // The base in the chosen language too (TODO §38.20); only the state half was translated.
+  const baseLabel = deps?.t?.("backup_center") || SYNC_BUTTON_BASE_LABEL;
+  document.getElementById("backup-btn")?.setAttribute("aria-label", `${baseLabel} — ${stateLabel}`);
 }
 
 /** The unbacked-data warning (TODO §3.8), driven by backupHealthController's assessment.
@@ -278,7 +278,7 @@ export function renderAboutDialog() {
 <dialog id="dialog-about" class="dialog-modal card glassmorphic">
     <div class="modal-header">
       <h3 id="about-title">About LibrePT</h3>
-      <button class="modal-close-btn" aria-label="Close about modal"><i class="fa-solid fa-xmark"></i></button>
+      <button class="modal-close-btn" data-i18n-label="modal_close" aria-label="Close about modal"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div class="modal-body-scroll">
       <p id="about-body" class="dialog-desc">LibrePT is a free, open-source, offline-first clipboard for personal trainers — schedule sessions, run them on the gym floor, and track client progress. All data stays on your device.</p>
@@ -325,7 +325,7 @@ export function renderTermsDialog() {
 <dialog id="dialog-terms" class="dialog-modal card glassmorphic">
     <div class="modal-header">
       <h3 id="terms-title">Terms &amp; Disclaimer</h3>
-      <button class="modal-close-btn" aria-label="Close terms modal"><i class="fa-solid fa-xmark"></i></button>
+      <button class="modal-close-btn" data-i18n-label="modal_close" aria-label="Close terms modal"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div class="modal-body-scroll">
       <p id="terms-body" class="dialog-desc">LibrePT is provided "as is", without warranty of any kind. It is not medical, health, or professional training advice. Your data stays on your device and you are responsible for backing it up. Use at your own risk.</p>
@@ -380,7 +380,7 @@ export function renderHeaderShell() {
         <button type="button" id="unbacked-badge" class="unbacked-badge hidden" aria-haspopup="dialog"></button>
         <!-- Tappable: the long build identity used to live in a \`title\` tooltip, which a phone
              cannot reach. Opens #dialog-build-info instead. -->
-        <button type="button" id="app-version" class="app-version" aria-label="Build version — tap for details" aria-haspopup="dialog"></button>
+        <button type="button" id="app-version" class="app-version" data-i18n-label="app_version_button_label" aria-label="Build version — tap for details" aria-haspopup="dialog"></button>
       </div>
 
       <div class="header-actions">
