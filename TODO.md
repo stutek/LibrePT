@@ -2504,8 +2504,20 @@ ruling that the trainer does not play a role); the consent step says why it exis
 data); John mentions his knee during a rest, not mid-set; the plan's clock reads "45 minutes of
 exercises in a 60-minute session".
 
-Still open: the message card above. The chapter order (A1 and A2 in
-`.private/demo-card-review.md`) is not part of these rounds.
+**After the rounds, the same day (asked: "fix all card issues"):** the message on Ana's phone is
+now the invitation the app sends, built by `intakeInviteMessage` itself (A9); the welcome card is
+the story's first chapter (A1); Ana's file has its own chapter, not offered as a start, so the
+programme chapter now starts on its own card and IS offered (A2); the client list is *Imenik strank*
+in the menu and on every card, as rule 4 of the review set (A10); the English cards say *Clients
+Directory* as the screen does. Every step now fits a 390x844 phone without scrolling, in both
+languages — `test_every_card_fits_a_phone_without_scrolling` walks the whole story to prove it,
+and three chapter openings were cut to pass.
+
+**[ ] Decision, not work — Simon:** two of the chapter names he gave on 2026-09-21 (§73.8) now
+disagree with their cards. *Vnesi svoje podatke* orders the trainer to enter their details, while
+the card says they need not enter anything now; *Pregled zaznamkov in priprava treningov* promises
+a review of notes, while the chapter only switches the theme and moves Tuesday's session. The names
+were kept; the agent's rename was reverted the same day.
 
 **[ ] Decision, not work — Simon:** all three personas named the English note-type button
 (🔥 Joint Pain / Discomfort, §38.20) as the step where they would stop, and the third also the

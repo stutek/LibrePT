@@ -41,6 +41,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 - The message on Ana's phone is the invitation the app really sends, not a separate text.
 - The client list is called *Imenik strank* in the Slovenian menu, as on its own title, and the
   English cards call it *Clients Directory*, as the screen does.
+- Every card of the guided story fits a 390×844 phone without scrolling, in both languages.
 
 ### Fixed
 

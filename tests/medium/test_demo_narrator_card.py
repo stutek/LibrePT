@@ -117,7 +117,7 @@ def test_a_narrated_step_puts_its_words_on_screen(page, local_server):
     card = page.locator("#demo-narrator-card")
     expect(card).to_be_visible()
     expect(card).to_contain_text("Running the session")
-    expect(card).to_contain_text("Jane and John")
+    expect(card).to_contain_text("Jane, John and Sarah")
 
 
 def test_the_viewer_is_told_whose_phone_they_are_looking_at(page, local_server):

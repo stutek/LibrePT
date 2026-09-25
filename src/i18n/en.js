@@ -725,8 +725,7 @@ export const en = {
   story_handover_title: "The form Ana gets",
   story_back_to_your_phone: "Back to your own phone",
   story_open_client_phone: "Open Ana's form",
-  story_step_arrive_menu:
-    "Tap the ☰ button — three stacked lines, in the top right corner of the screen, in the dark bar with the app's name. It opens the menu, and the Clients Directory, the movements and the history all live in there.",
+  story_step_arrive_menu: "Tap ☰ in the top right. The menu opens.",
   story_step_arrive_clients:
     "In the menu that just dropped down, tap Clients Directory — the row with three little people next to it, at the top of the list. Eight people are already in that directory.",
   story_step_arrive_invite:
@@ -783,8 +782,7 @@ export const en = {
   story_chapter_programme: "Tuesday's plan",
   story_chapter_review: "Ana's file arrives",
   story_chapter_evening: "Reviewing the notes and preparing sessions",
-  story_step_programme_open_session:
-    "Tap Tuesday's session, Group Strength & Conditioning. It opens with all three in it.",
+  story_step_programme_open_session: "Tap the session Group Strength & Conditioning.",
   story_step_programme_editor:
     "Tap Edit plan — the row with the pencil in the menu. Jane's plan opens. Beside the title it says, for example, 45 / 60 min: 45 minutes of exercises in a 60-minute session.",
   story_step_programme_add_circuit:
@@ -797,8 +795,7 @@ export const en = {
   // The friends who arrive in chapter one are new; Tuesday's session is with Jane, John and Sarah,
   // who are already in the seeded register. Said out loud here, because a viewer who noticed the
   // different names and was told nothing would assume the demo had lost track of its own people.
-  story_programme_open_body:
-    "Sunday evening, at home. Tuesday's session belongs to Jane, John and Sarah, who have trained with you for a while. You prepare their hour now, not in the gym on Tuesday.",
+  story_programme_open_body: "Sunday evening. You prepare Tuesday's hour in advance.",
   story_programme_close_body:
     "Jane, John and Sarah share one plan. On Tuesday you open it and start.",
   story_programme_close_title: "The plan is ready",
@@ -816,8 +813,7 @@ export const en = {
   // The story's own voice. It names the people the seed puts on screen — Jane, John, Sarah — because
   // a demo that says "the client" is describing software, and one that says "John, whose knee was
   // rebuilt in 2024" is telling you what the evening was like.
-  story_step_open_session:
-    "Tap the session Group Strength & Conditioning. Jane and John share a slot, and Sarah works her own plan in the same hour; all three are on one clipboard.",
+  story_step_open_session: "Tap the session Group Strength & Conditioning.",
   story_step_focus_exercise: "Tap Jane's circuit. It opens with her exercises and numbers.",
   story_step_signal_too_easy:
     "Tap Too Easy (the feather) under the exercise. It is recorded on the exercise that it was too easy for her.",
@@ -844,8 +840,7 @@ export const en = {
     "Because of his knee, John does not do this exercise today. Tap the open-book icon in the exercise's row to open the exercise catalog.",
   story_step_swap_pick:
     "Tap Lat Pulldown: an exercise for the same muscles that puts no load on the knee. The exercise changes for John only; Jane and Sarah keep their plans.",
-  story_gym_open_body:
-    "Tuesday, 18:10. Jane and John are warming up together, and Sarah is in the corner working through her rehab plan. You run all three from one phone.",
+  story_gym_open_body: "Tuesday, 18:10. Jane, John and Sarah are here.",
   story_gym_close_body:
     "John's knee is on his record and in his plan, and Jane and Sarah kept training.",
   story_evening_close_body:

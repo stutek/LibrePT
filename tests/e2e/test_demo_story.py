@@ -175,7 +175,7 @@ def _card_moved_on(page, progress_before, timeout=8_000):
         return False
 
 
-def _walk_the_whole_story(page, limit=60):
+def _walk_the_whole_story(page, limit=60, on_step=None):
     """Walk every step the way a trainer would: ask to be shown where there is something to show,
     read the card where there is not, and tap Next where the card has not already moved on.
 
@@ -199,6 +199,8 @@ def _walk_the_whole_story(page, limit=60):
         step_now, _ = _step_numbers(page)
         caption = page.locator(CAPTION).inner_text()
         seen.append(caption)
+        if on_step:
+            on_step(page, step_now)
 
         if page.locator(SHOW_ME).is_visible():
             page.locator(SHOW_ME).click()
@@ -258,6 +260,44 @@ def test_the_whole_story_can_be_walked_in_slovenian(page, local_server):
 
     assert len(captions) == story_length, captions[-1]
     expect(page.locator(PANEL)).to_be_hidden()
+
+
+# How much of a phone the guide takes at one step, and whether its card has to scroll. Read after a
+# pause, because the card slides in and a box measured mid-slide is neither size.
+CARD_ROOM = """() => {
+  const panel = document.querySelector('#walkthrough-overlay .walkthrough-panel');
+  const card = document.getElementById('demo-narrator-card');
+  return {
+    card: card ? card.scrollHeight - card.clientHeight : 0,
+    panel: panel ? panel.scrollHeight - panel.clientHeight : 0,
+    share: panel ? Math.round((100 * panel.getBoundingClientRect().height) / innerHeight) : 0,
+  };
+}"""
+
+
+@pytest.mark.parametrize("lang", ["en", "sl"])
+def test_every_card_fits_a_phone_without_scrolling(page, local_server, lang):
+    """The opening card was made to fit a 390x844 phone without scrolling (2026-09-11), and only a
+    smaller phone may need the scrollbar. The rewritten cards of 2026-09-25 are longer, so the rule
+    is checked on every step of the story, in both languages, rather than on the opening card."""
+    page.set_viewport_size({"width": 390, "height": 844})
+    _open_story(page, local_server, f"?init=demo_data_load&lang={lang}&demo=story")
+    measured = {}
+
+    def measure(step_page, step):
+        step_page.wait_for_timeout(400)
+        measured[step] = step_page.evaluate(CARD_ROOM)
+
+    _walk_the_whole_story(page, on_step=measure)
+
+    scrolled = {
+        step: room
+        for step, room in measured.items()
+        if room["card"] > 1 or room["panel"] > 1
+    }
+    assert not scrolled, (
+        f"{lang}: these steps scroll inside the guide on a 390x844 phone: {scrolled}"
+    )
 
 
 def test_the_story_tells_a_story_rather_than_naming_features(page, local_server):

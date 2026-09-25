@@ -677,8 +677,7 @@ export const sl = {
   story_handover_title: "Obrazec, ki ga dobi Ana",
   story_back_to_your_phone: "Nazaj na tvoj telefon",
   story_open_client_phone: "Odpri Anin obrazec",
-  story_step_arrive_menu:
-    "Pritisni gumb ☰ — tri vodoravne črtice, zgoraj desno v temni vrstici z imenom aplikacije. Odpre meni, v katerem so imenik strank, vaje in zgodovina.",
+  story_step_arrive_menu: "Pritisni ☰ zgoraj desno. Odpre se meni.",
   story_step_arrive_clients:
     "V meniju, ki se je pravkar spustil, pritisni Imenik strank — vrstica z znakom treh ljudi, na vrhu seznama. V njem je že osem ljudi.",
   story_step_arrive_invite:
@@ -731,8 +730,7 @@ export const sl = {
   story_chapter_programme: "Načrt za torek",
   story_chapter_review: "Anina datoteka pride",
   story_chapter_evening: "Pregled zaznamkov in priprava treningov",
-  story_step_programme_open_session:
-    "Pritisni torkov trening Skupinska moč in kondicija. Odpre se z vsemi tremi.",
+  story_step_programme_open_session: "Pritisni trening Skupinska moč in kondicija.",
   story_step_programme_editor:
     "Pritisni Uredi načrt — vrstico s svinčnikom v meniju. Odpre se Janin načrt. Ob naslovu piše na primer 45 / 60 min: 45 minut vaj v 60-minutnem terminu.",
   story_step_programme_add_circuit:
@@ -742,8 +740,7 @@ export const sl = {
   story_step_programme_menu_again: "Znova pritisni ⋮ zgoraj desno.",
   story_step_programme_bind:
     "Pritisni Vsi na ta načrt — vrstico z ikono verige. Jane, John in Sarah delajo isti sklop, zato imajo en načrt in torkove serije zapišeš enkrat, ne trikrat.",
-  story_programme_open_body:
-    "Nedelja zvečer, doma. Torkov trening imajo Jane, John in Sarah, ki pri tebi vadijo že dlje. Njihovo uro pripraviš zdaj, ne šele v torek v telovadnici.",
+  story_programme_open_body: "Nedelja zvečer. Torkovo uro pripraviš vnaprej.",
   story_programme_close_body:
     "Jane, John in Sarah imajo en skupen načrt. V torek ga odpreš in začneš.",
   story_programme_close_title: "Načrt je pripravljen",
@@ -757,8 +754,7 @@ export const sl = {
     "Trening je končan in vsi so šli domov. Doma premakneš torkov termin, kot ste se dogovorili po vadbi.",
   story_thanks_title: "Konec ogleda",
   story_clear_demo_data: "Počisti demo podatke",
-  story_step_open_session:
-    "Pritisni trening Skupinska moč in kondicija. Jane in John imata skupen termin, Sarah v isti uri dela svoj načrt; vsi trije so v eni beležki.",
+  story_step_open_session: "Pritisni trening Skupinska moč in kondicija.",
   story_step_focus_exercise: "Pritisni Janin sklop. Odpre se z njenimi vajami in številkami.",
   story_step_signal_too_easy:
     "Pritisni Prelahko (pero) pod vajo. Pri vaji ostane zapisano, da ji je šlo prelahko.",
@@ -781,8 +777,7 @@ export const sl = {
     "Zaradi kolena John te vaje danes ne dela. Pritisni ikono odprte knjige v vrstici vaje, da odpreš katalog vaj.",
   story_step_swap_pick:
     "Pritisni Lat Pulldown: vaja za iste mišice, pri kateri koleno ni obremenjeno. Vaja se zamenja samo pri Johnu; Jane in Sarah obdržita svoj načrt.",
-  story_gym_open_body:
-    "Torek, 18:10. Jane in John se ogrevata skupaj, Sarah v kotu dela svoj rehabilitacijski načrt. Vse tri vodiš z enega telefona.",
+  story_gym_open_body: "Torek, 18:10. Jane, John in Sarah so tu.",
   story_gym_close_body:
     "Johnovo koleno je v njegovi kartoteki in v njegovem načrtu, Jane in Sarah pa sta vadili naprej.",
   story_evening_close_body:
