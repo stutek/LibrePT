@@ -239,7 +239,7 @@ def test_the_whole_story_can_be_walked_with_show_me(page, local_server):
     # are directly comparable: anything less means the walk stopped somewhere, and anything more
     # means it went round twice.
     assert len(captions) == story_length, len(captions)
-    assert any("Ana types her own name" in caption for caption in captions), (
+    assert any("Type Ana Novak" in caption for caption in captions), (
         "the walk never reached the client's own phone"
     )
     # ...and the guide closed on the last step rather than stalling halfway.

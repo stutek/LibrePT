@@ -2480,15 +2480,23 @@ Three defects in it are worth naming here, because they are facts rather than ta
 
 - the story's **last card is a copy-paste of the gym card** — `evening-close` reuses
   `story_gym_close_body`, so the demo ends by describing an hour that finished two chapters earlier,
-  and the "clear the demo data" offer appears twice;
+  and the "clear the demo data" offer appears twice; **fixed 2026-09-25**;
 - **four cards share a title with another card** ("On Ana's phone", "The programme", "In the gym"),
-  so a viewer cannot tell whether the story moved;
+  so a viewer cannot tell whether the story moved; **fixed 2026-09-25**;
 - the **message card shows an invitation the app no longer sends** — the text replaced on 2026-08-26
   precisely because it read like a phishing message.
 
 Separately, seven captions narrate instead of instructing ("Open the session menu.", "Joint pain, on
 this movement."), against the rule that a step asking for an action names the control, its glyph and
 where it is.
+
+**2026-09-25 — three rounds with a trainer persona (asked by Simon).** In each round a fresh
+subagent plays a trainer who distrusts apps and writes programmes on paper; it reads every card in
+order, then judges the rewrites. **Round 1 shipped:** every step that asks for an action names the
+control; the seven narrating captions are rewritten; the last card has its own text; the closing
+cards have their own titles; the word *naloga* is gone; the trainer-details cards no longer claim
+that nothing is saved. Still open: the message card above. The chapter order (A1 and A2 in
+`.private/demo-card-review.md`) is not part of these rounds.
 
 **Re-check condition:** whenever the maintainer has time for the copy pass.
 

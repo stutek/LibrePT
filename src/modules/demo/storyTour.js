@@ -295,7 +295,7 @@ const GYM_CHAPTER = {
     // Not the end any more — the evening chapter is — so this one just closes the session and hands
     // over to it. The way out (§30.2) belongs on the LAST card, or a viewer is offered the exit
     // twice and takes it before the story is done.
-    narration("gym-close", "chapter", "story_chapter_gym", "story_gym_close_body"),
+    narration("gym-close", "chapter", "story_gym_close_title", "story_gym_close_body"),
   ]),
 };
 
@@ -549,7 +549,7 @@ const INTAKE_CHAPTER = {
     // run is one numbered sequence, and returning to "chapter 3, step 1" would restart the count in
     // the middle of a story the viewer is four steps into. Resuming by step is what the address
     // already does after a reload.
-    narration("intake-close", "chapter", "story_chapter_intake", "story_intake_close_body", {
+    narration("intake-close", "chapter", "story_intake_close_title", "story_intake_close_body", {
       persona: CLIENT,
       advanceTo: "clients?demo=story&step=review-message",
       nextLabelKey: "story_back_to_your_phone",
@@ -685,7 +685,7 @@ const PROGRAMME_CHAPTER = {
     narration(
       "programme-close",
       "chapter",
-      "story_chapter_programme",
+      "story_programme_close_title",
       "story_programme_close_body",
     ),
   ]),
@@ -738,7 +738,7 @@ const EVENING_CHAPTER = {
       caption: "story_step_evening_move_time",
       expect: { selector: "#setup-start-time", hasValue: "20:00" },
     },
-    narration("evening-close", "chapter", "story_thanks_title", "story_gym_close_body", {
+    narration("evening-close", "chapter", "story_thanks_title", "story_evening_close_body", {
       onward: true,
       caption: "story_step_thanks",
     }),

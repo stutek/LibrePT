@@ -711,18 +711,18 @@ export const en = {
   story_persona_trainer: "Your phone",
   story_chapter_trainer_details: "Enter your own details",
   story_trainer_details_open_body:
-    "Before you invite a client, LibrePT lets you check the name, phone number and email address that appear on your invitations. This walkthrough only shows the form. It does not enter or save personal details.",
+    "The name, phone number and email in this form appear on the invitations you send to clients. What you enter and save here stays saved after the walkthrough, and outside the sandbox too.",
   story_step_trainer_details_menu:
     "Tap ☰ — the three horizontal lines in the top right of the dark bar. The menu opens.",
   story_step_trainer_details_show:
-    "Tap My details — the card icon row in the menu. The form shows the name, phone and email fields that sign client invitations. Leave them empty for this demo.",
+    "In the menu, tap My details — the row with the card icon. A form opens with fields for name, phone and email.",
   story_step_trainer_details_close:
-    "Tap Cancel at the bottom of the form. The form closes and nothing is saved.",
+    "Tap Cancel at the bottom of the form, or Save if you entered your details. Either one closes the form.",
   story_chapter_gym: "Running the session and adjusting it",
   story_persona_client: "Ana's phone",
   story_chapter_arrive: "Taking on three new clients",
   story_chapter_intake: "On Ana's phone",
-  story_handover_title: "Over to Ana",
+  story_handover_title: "The form Ana gets",
   story_back_to_your_phone: "Back to your own phone",
   story_open_client_phone: "Open Ana's phone",
   story_step_arrive_menu:
@@ -730,122 +730,128 @@ export const en = {
   story_step_arrive_clients:
     "In the menu that just dropped down, tap Clients Directory — the row with three little people next to it, at the top of the list. Eight people are already in that directory.",
   story_step_arrive_invite:
-    "Tap Invite a client — the button with the share arrows just under the Clients heading, at the top of the list of people. Ana asked about training after a class, and instead of taking her details standing in a corridor, the trainer sends her a link she fills in herself.",
+    "Tap Invite a client — the button with the share arrows just under the Clients heading. Ana gets a link and fills in her own details; you do not write them down in the corridor.",
   story_step_arrive_contact:
     "Type the number Ana just read out, into the one box that takes either a number or an email address. The app works out which it is: a number gets a text message, an address gets an email. Nothing is saved about her yet — she is not in your register until she has sent her own details back.",
   story_step_arrive_contact_email:
-    "Maja gives an email address instead. Type it over the number in the same box — the app reads what it is and swaps the button from a text message to an email. One box, because a trainer holding a phone should not have to pick which kind of contact they were given.",
+    "Maja gives an email address instead. Type it over the number in the same box. The app recognises the address and swaps the text-message button for an email one.",
   story_step_arrive_close_invite:
     "Close this with the ✕ in the top right corner of the box. Ana has her link and Maja has hers; Nik is still standing here.",
   story_step_arrive_add_manually:
-    "Nik is standing right here and reads his details out, so tap Add Client — the green button at the top of the list, next to the one you just used. The link is not the only way in.",
+    "Nik is standing in front of you and tells you his details, so tap Add Client — the green button at the top of the list, next to the one you just used.",
   story_step_arrive_type_name:
-    "His name, typed once. That is all a client needs to exist in the register; everything else can arrive later, from him or from you.",
-  story_step_arrive_save_client:
-    "Tap Save at the bottom of the form. He is in the register now — one of three friends in by three different routes, and you typed four words in total.",
+    "Type Nik Zupan in the Client Name box. A name is all a client needs; the rest can be added later, by you or by him.",
+  story_step_arrive_save_client: "Tap Save at the bottom of the form. Nik is in the register.",
   story_review_sender: "Ana Novak",
   story_step_review_attach:
-    "Tap the attachment — ana-novak.json.librept-signup, under her message. On a real phone that file IS in your messages, and tapping it opens LibrePT with her details in front of you. Nothing has been added to your register yet.",
+    "Tap the attachment ana-novak.json.librept-signup under her message. On a real phone that file is in your messages, and it opens LibrePT with her details. Nothing has been added to your register yet.",
   story_step_review_accept:
-    "Tap Add to my clients. Ana is in your register, and you typed none of it — first task done, one of three friends in without a word of retyping.",
-  story_step_read_on: "Read that, then tap Next to take on the task it sets.",
+    "Tap Add to my clients. Ana is in your register, and you typed nothing.",
+  story_step_read_on: "Read this, then tap Next.",
   story_step_handover:
-    "Tap Open Ana's phone — the guide's own button, bottom right. The browser leaves your app and goes to the page Ana really opens from the link in her message, and the story carries on over there, on her side.",
+    "Tap Open Ana's phone — the guide's button, bottom right. The browser opens the page Ana opens, and the walkthrough carries on there.",
   story_step_thanks:
-    "Every task is done, from a question after a class to next week already in the diary. Tap Done to put the guide away and keep exploring the app on your own, or Clear the demo data to empty it out and start with your own clients.",
+    "Tap Done and explore the app on your own, or Clear the demo data to empty it and start with your own clients.",
   story_message_title: "A message from your trainer",
   story_message_body:
     "Fill in your details for our training — it takes a minute and nothing stays on your phone: librept.app/intake — Sam, +386 40 111 222",
-  story_arrived_title: "It lands on the trainer's phone",
+  story_arrived_title: "It lands on your phone",
   story_arrived_body:
-    "The file Ana sent arrives in the trainer's own messages, like any other attachment. It travelled the way her message travelled, and no server of ours ever saw it: it left her phone and reached his, and he decides whether she joins the register.",
+    "The file Ana sent arrives in your messages like any other attachment. It went through no server. You decide whether she joins your clients.",
   story_step_intake_send:
-    "Tap Share with my trainer — the green button at the bottom. On a real phone this opens the share sheet, so Ana picks the same conversation the link arrived in. Nothing is uploaded anywhere; a file leaves her phone and that is all.",
-  story_step_message:
-    "This is what lands on Ana's phone: the trainer's own message, with the link in it. Read it, then tap Next — from here on you are on her side of the story.",
+    "Tap Share with my trainer — the green button at the bottom. On a real phone Ana sends the file to you in the same conversation the link came in.",
+  story_step_message: "This is the message Ana gets. Read it, then tap Next.",
   story_step_arrived: "Read what happened to the file, then tap Next.",
   story_step_back_to_your_phone:
     "Tap Back to your own phone — the browser leaves Ana's page and the story carries on where you left it, on your own.",
-  story_step_intake_name:
-    "Ana types her own name. It is her phone, and nothing here is stored on it.",
-  story_step_intake_email: "Somewhere to send the session times.",
+  story_step_intake_name: "Type Ana Novak in the First and last name box.",
+  story_step_intake_email:
+    "Type ana.novak@example.com in the Email box. That is where you send her the session times.",
   story_step_intake_injury:
-    "The shoulder she still feels sometimes — offered, never demanded, and the page says where the answer goes.",
+    "In the Injuries box, type what you should know about her body, for example: shoulder, two years ago. The box is optional.",
   story_step_intake_consent:
-    "Consent, given here rather than assumed: the wording and the language she read it in are recorded with it.",
+    "Tick the consent under the form. With it Ana allows you to keep her details. Without the tick she cannot send the form.",
   // Named, and new: Ana, Maja and Nik are not in the seeded register — the story is about getting
   // them into it. The people already there (Jane, John, Sarah) are the ones the gym chapter trains.
   story_arrive_open_body:
-    "Ana, Maja and Nik ask about training together after a class. They have chosen you to guide them through their strength journey. First task: get all three into your register — two by sending a link they fill in themselves, the third by typing his name.",
+    "Ana, Maja and Nik ask about training together after a class. You add all three to your register: two get a link and fill in their own details, and you type in the name of the third.",
   story_handover_body:
-    "Ana's link is on its way, and your own phone has done its part. Now you play Ana's side of it, on her phone, on the page she really opens from the message. The page is the real one; only her messages are drawn.",
+    "Ana has her link. Now you open the page she opens and fill in the form yourself, to see how much work it is for your client. The page is the real one; only her message is drawn.",
   story_intake_open_body:
-    "You are Ana now, standing outside the studio with a link in a message. There is no app to install and nothing is kept on this phone: fill it in, send it, and it is gone from here.",
+    "This is the page Ana opens when she taps the link. There is nothing to install.",
   story_intake_close_body:
-    "Ana's part is done, and the first task with it. Send hands her file to you, the trainer, and you are the one who reads it and decides — a stranger never writes themselves into your register. Back to your own phone.",
+    "Share with my trainer sends her file to you. You read it and decide; nobody writes themselves into your register.",
+  story_intake_close_title: "Ana's form is sent",
   story_chapter_programme: "The programme",
   story_chapter_evening: "Reviewing the notes and preparing sessions",
   story_step_programme_open_session:
-    "Sunday night. Tuesday's session is already on the board — the trainer opens it to build what they will actually run.",
+    "Tap Tuesday's session, Group Strength & Conditioning. It opens with all three in it.",
   story_step_programme_editor:
-    "Tap Edit plan — the ✎ row in the menu that just dropped down. Jane's plan opens with the number that decides it beside the title: how much of the hour they booked this actually fills.",
+    "Tap Edit plan — the row with the pencil in the menu. Jane's plan opens. Beside the title is a number: how much of the booked hour this plan fills.",
   story_step_programme_add_circuit:
-    "Add a finisher: tap + Circuit at the bottom of the plan, the button with the stacked-layers glyph. A new block goes in at the end, ready for the movements that go in it — this is the trainer building the hour on a sofa on Sunday, rather than finding out in the gym on Tuesday.",
+    "At the bottom of the plan, tap + Circuit — the button with the stacked-layers icon. An empty circuit for the finishing exercises goes in at the end of the plan.",
   story_step_programme_done:
-    "Tap Done, top right. The plan is saved and the session comes back with everybody in it — the plan editor shows one person at a time, and what happens next is about all three.",
-  story_step_programme_menu_again: "Open the session menu again — one more thing before Tuesday.",
+    "Tap ✓ at the top right, beside the title. The plan is saved and the session comes back with all three.",
+  story_step_programme_menu_again: "Tap ⋮ in the top right again.",
   story_step_programme_bind:
-    "Jane, John and Sarah are doing the same circuit, so they go on one plan — and Tuesday's sets get logged once instead of three times.",
+    "Tap Everyone on this plan — the row with the chain icon. Jane, John and Sarah do the same circuit, so they share one plan, and you log Tuesday's sets once instead of three times.",
   // The friends who arrive in chapter one are new; Tuesday's session is with Jane, John and Sarah,
   // who are already in the seeded register. Said out loud here, because a viewer who noticed the
   // different names and was told nothing would assume the demo had lost track of its own people.
   story_programme_open_body:
-    "Sunday, two days out, on the sofa. Ana's file has landed and her first session is still to come; Tuesday belongs to Jane, John and Sarah, who have been training with you a while. Next task: have their hour ready before anyone is standing in front of you.",
+    "Sunday evening, at home. Tuesday's session belongs to Jane, John and Sarah, who have trained with you for a while. You prepare their hour now, not in the gym on Tuesday.",
   story_programme_close_body:
-    "One plan, three people, and it fits the hour. Task done — Tuesday can be about the training instead of about the phone.",
-  story_step_evening_menu: "Home, later that night. Open the menu.",
+    "Jane, John and Sarah share one plan. On Tuesday you open it and start.",
+  story_programme_close_title: "The plan is ready",
+  story_step_evening_menu: "At home, later that evening. Tap ☰ in the top right.",
   story_step_evening_move:
-    "Tuesday moves two hours later — agreed with all three after the session. The form says it out loud: this evening only.",
+    "This week Tuesday moves two hours later, agreed with all three. Tap the pencil on the card Tuesday & Thursday Strength. The form asks whether you change only this session.",
   story_step_evening_move_time:
-    "Eight instead of six. Next Tuesday, and the one after, stay exactly where they were.",
-  story_step_evening_theme: "Dark, because it is half past ten and the trainer is on a sofa.",
+    "Type 20:00 in the start time box. The following Tuesdays stay at 18:00.",
+  story_step_evening_theme:
+    "Late in the evening, on the sofa. In the menu, under Theme, choose Dark Mode.",
   story_evening_open_body:
-    "The session is over, everyone has gone home, and you are back on the sofa. This is the half nobody films: what happens to the notes you took between sets. One last task, then the evening is yours.",
-  story_thanks_title: "The evening is won",
+    "The session is over and everyone has gone home. At home you move Tuesday's session, as you all agreed after the workout.",
+  story_thanks_title: "End of the walkthrough",
   story_clear_demo_data: "Clear the demo data",
   // The story's own voice. It names the people the seed puts on screen — Jane, John, Sarah — because
   // a demo that says "the client" is describing software, and one that says "John, whose knee was
   // rebuilt in 2024" is telling you what the evening was like.
   story_step_open_session:
-    "Tuesday, 18:00. Jane and John share a slot, Sarah works her rehab plan in the same hour. One tap, and all three are on one clipboard.",
-  story_step_focus_exercise:
-    "Jane's circuit comes up. Her round, her numbers, everything in thumb reach.",
+    "Tap the session Group Strength & Conditioning. Jane and John share a slot, and Sarah works her own plan in the same hour; all three are on one clipboard.",
+  story_step_focus_exercise: "Tap Jane's circuit. It opens with her exercises and numbers.",
   story_step_signal_too_easy:
-    "She flew through it. One tap says so — and tonight's plan will hear about it.",
-  story_step_next_participant: "John is next. Same session, his own plan, no going back to a desk.",
-  story_step_refocus: "Tap his circuit to bring it into focus.",
+    "Tap Too Easy (the feather) under the exercise. It is recorded on the exercise that it was too easy for her.",
+  story_step_next_participant:
+    "Tap John's name in the row of names at the top. Same session, his plan.",
+  story_step_refocus: "Tap his circuit to open it.",
   story_step_capture_open:
-    "Between rounds he mentions his knee — the one that was rebuilt in 2024. The clock keeps running; the note opens over the session.",
-  story_step_capture_tag: "Joint pain, on this movement.",
-  story_step_capture_note: "And what he actually said, typed with one thumb.",
+    "Between rounds John mentions his knee, which was operated on in 2024. Tap Notes (the sticky note) under the first exercise of the circuit. The note opens over the session, and the clock keeps running.",
+  story_step_capture_tag: "Tap 🔥 Joint Pain / Discomfort.",
+  story_step_capture_note: "In the note box, type what he said: left knee, third round.",
   // What the demo TYPES, not what it says about typing: a Slovenian viewer watched Ana write her
   // shoulder up in English (reported 2026-08-30, TODO §38.19). The words a person enters belong to
   // that person, so they are translated like everything else they read.
   story_typed_note: "left knee, third round",
   story_typed_injury: "shoulder, two years ago",
   story_step_capture_keep:
-    "Kept on John's record. This is not about tonight's load, it is about the next three months.",
-  story_step_capture_submit: "Saved — against John, and against this movement.",
-  story_step_session_menu: "Open the session menu.",
+    "Tick Keep this on the client's record. The note then stays with John for the next sessions too. It is not saved yet.",
+  story_step_capture_submit:
+    "Tap Log Alert at the bottom. Now the note is saved, against John and against this exercise.",
+  story_step_session_menu: "Tap ⋮ — the three dots in the top right. The session menu opens.",
   story_step_plan_editor:
-    "John's plan, and the note from a minute ago is already waiting in it. Nobody went looking for it.",
-  story_step_swap_open: "So that movement goes — for John only.",
+    "Tap Edit plan. John's plan opens; the note is in it, beside the exercise.",
+  story_step_swap_open:
+    "John does not do this exercise today. Tap the open-book icon in the exercise's row to open the exercise catalog.",
   story_step_swap_pick:
-    "Something gentler for the same muscles. Jane and Sarah keep the plans they were given.",
+    "Tap Lat Pulldown. The exercise changes for John only; Jane and Sarah keep their plans.",
   story_gym_open_body:
-    "Tuesday, ten past six. Jane and John are warming up together, Sarah is in the corner working through her rehab plan, and all three are yours to run from one phone. This is what the last two tasks were preparation for — and you do this one yourself, tap by tap, with the clock running.",
+    "Tuesday, 18:10. Jane and John are warming up together, and Sarah is in the corner working through her rehab plan. You run all three from one phone.",
   story_gym_close_body:
-    "The hour is done and nothing was written twice. John's knee is on his record, his plan already knows about it, and Jane and Sarah were never interrupted. Keep tapping around, or clear the demo data and start with your own clients.",
+    "Nothing was written twice. John's knee is on his record and in his plan, and Jane and Sarah kept training.",
+  story_evening_close_body:
+    "It is recorded that Jane found it too easy. John's knee is on his record and in his plan. Tuesday is at 20:00 this week. You wrote none of it twice.",
+  story_gym_close_title: "The session is over",
   today: "Today",
   tomorrow: "Tomorrow",
   yesterday: "Yesterday",

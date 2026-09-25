@@ -27,6 +27,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 - **Add circuit from library** in the plan editor inserts a separate copy at the chosen gap,
   including rounds, targets and rests. Editing it leaves the library and other copies unchanged.
 
+### Changed
+
+- Every step of the guided story that asks for an action names the control to press, and where it
+  is. The last card describes the evening instead of repeating the gym card, three closing cards
+  have their own titles, and no card promises what the story does not show (TODO §38.21).
+
 ### Fixed
 
 - The guided story can be walked to its end in Slovenian. Three steps found a session card by its
