@@ -34,6 +34,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   have their own titles, and no card promises what the story does not show (TODO §38.21).
 - The Slovenian story calls a circuit *sklop* on every card, as its button does, and explains the
   two numbers of the plan's clock (TODO §38.21).
+- The story's button to the client's page says *Open Ana's form*, not *Open Ana's phone*, and the
+  consent step says why the consent is asked for (TODO §38.21).
 
 ### Fixed
 

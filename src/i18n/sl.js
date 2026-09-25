@@ -657,7 +657,7 @@ export const sl = {
   // aplikacija tika, tikanje pa je v slovenščini spolsko določeno, zato "(-la)" in ne množina.
   story_welcome_title: "Dobrodošel(-la) v LibrePT",
   story_welcome_body:
-    "LibrePT je aplikacija za osebne trenerje: termini, načrti treningov in beležka med vadbo. Ogled sledi trem novim strankam, od prvega povabila do treninga, ki ga prilagajaš med vadbo. Vse se dogaja v peskovniku, ločeni kopiji z izmišljenimi strankami. Tvojih pravih strank, terminov in vadb ne spremeni.",
+    "LibrePT je aplikacija za osebne trenerje: termini, načrti treningov in beležka med vadbo. V tem ogledu povabiš tri nove stranke, pripraviš torkov trening in ga med vadbo prilagodiš. Vse se dogaja v peskovniku, ločeni kopiji z izmišljenimi strankami. Tvojih pravih strank, terminov in vadb ne spremeni.",
   story_step_welcome:
     "Z gumbom Pokaži mi ti vodnik pokaže troje: značko PESKOVNIK v zgornji vrstici ter v meniju ☰ vrstici Zapusti peskovnik in Ponastavi podatke peskovnika. Z gumbom Naprej začneš. Kartico lahko kadar koli pospraviš z ikono ▾ v njenem zgornjem desnem kotu in aplikacijo preizkušaš brez vodenja; na vrstici, ki ostane, je ✕, ki vodeni ogled konča.",
   story_persona_trainer: "Tvoj telefon",
@@ -676,7 +676,7 @@ export const sl = {
   story_chapter_intake: "Na Aninem telefonu",
   story_handover_title: "Obrazec, ki ga dobi Ana",
   story_back_to_your_phone: "Nazaj na tvoj telefon",
-  story_open_client_phone: "Odpri Anin telefon",
+  story_open_client_phone: "Odpri Anin obrazec",
   story_step_arrive_menu:
     "Pritisni gumb ☰ — tri vodoravne črtice, zgoraj desno v temni vrstici z imenom aplikacije. Odpre meni, v katerem so seznam strank, vaje in zgodovina.",
   story_step_arrive_clients:
@@ -701,7 +701,7 @@ export const sl = {
     "Pritisni Dodaj med moje stranke. Ana je v tvojem seznamu strank, ne da bi ti karkoli vpisal.",
   story_step_read_on: "Preberi to in pritisni Naprej.",
   story_step_handover:
-    "Pritisni Odpri Anin telefon — gumb vodnika spodaj desno. Brskalnik odpre stran, ki jo odpre Ana, in ogled se nadaljuje tam.",
+    "Pritisni Odpri Anin obrazec — gumb vodnika spodaj desno. Brskalnik odpre stran, ki jo dobi Ana, in ogled se nadaljuje tam.",
   story_step_thanks:
     "Pritisni Končaj in aplikacijo raziskuj sam, ali Počisti demo podatke, da jo izprazniš in začneš s svojimi strankami.",
   story_message_title: "Sporočilo od trenerja",
@@ -715,18 +715,18 @@ export const sl = {
   story_step_message: "Tako sporočilo dobi Ana. Preberi ga in pritisni Naprej.",
   story_step_arrived: "Preberi, kaj se je zgodilo z datoteko, in pritisni Naprej.",
   story_step_back_to_your_phone:
-    "Pritisni Nazaj na tvoj telefon — brskalnik zapusti Anino stran in zgodba se nadaljuje tam, kjer si ostal.",
+    "Pritisni Nazaj na tvoj telefon — gumb vodnika spodaj desno. Brskalnik zapusti Anino stran in ogled se nadaljuje v tvoji aplikaciji, kjer si ostal.",
   story_step_intake_name: "V polje Ime in priimek vpiši Ana Novak.",
   story_step_intake_email: "V polje E-pošta vpiši ana.novak@example.com. Nanj ji pošlješ termine.",
   story_step_intake_injury:
     "V polje Poškodbe vpiši, kaj naj veš o njenem telesu, na primer: rama, pred dvema letoma. Polje ni obvezno.",
   story_step_intake_consent:
-    "Obkljukaj privolitev pod obrazcem. Z njo Ana dovoli, da hraniš njene podatke. Brez kljukice obrazca ne more poslati.",
+    "Obkljukaj privolitev pod obrazcem. Obrazec vsebuje podatke o njenem zdravju, zato mora Ana izrecno dovoliti, da jih hraniš. Brez kljukice obrazca ne more poslati.",
   story_arrive_open_body:
     "Ana, Maja in Nik po vadbi vprašajo za skupen trening. Vse tri vpišeš v svoj seznam strank: dvema pošlješ povezavo, da podatke vpišeta sama, tretjemu ime vpišeš ti.",
   story_handover_body:
-    "Ana je dobila povezavo. Zdaj odpreš stran, ki jo odpre ona, in obrazec izpolniš sam, da vidiš, koliko dela ima z njim tvoja stranka. Stran je prava; narisano je samo njeno sporočilo.",
-  story_intake_open_body: "To stran Ana odpre, ko pritisne povezavo. Nič ni treba namestiti.",
+    "Ana je dobila povezavo. Ostaneš trener: odpreš stran, ki jo dobi Ana, in obrazec izpolniš sam, s podatki iz zgodbe. Tako vidiš, koliko dela ima z njim tvoja stranka.",
+  story_intake_open_body: "To stran Ana odpre, ko pritisne povezavo v sporočilu.",
   story_intake_close_body:
     "Gumb Deli s trenerjem ti pošlje njeno datoteko. Ti jo prebereš in se odločiš; nihče se sam ne vpiše v tvoj seznam strank.",
   story_intake_close_title: "Anin obrazec je poslan",
@@ -735,7 +735,7 @@ export const sl = {
   story_step_programme_open_session:
     "Pritisni torkov trening Skupinska moč in kondicija. Odpre se z vsemi tremi.",
   story_step_programme_editor:
-    "Pritisni Uredi načrt — vrstico s svinčnikom v meniju. Odpre se Janin načrt. Ob naslovu piše na primer 45 / 60 min: prvo število je čas vaj brez premorov, drugo trajanje termina.",
+    "Pritisni Uredi načrt — vrstico s svinčnikom v meniju. Odpre se Janin načrt. Ob naslovu piše na primer 45 / 60 min: 45 minut vaj v 60-minutnem terminu.",
   story_step_programme_add_circuit:
     "Na dnu načrta pritisni + Sklop — gumb z ikono naloženih slojev. Na konec načrta se doda prazen sklop, v katerega dodaš vaje.",
   story_step_programme_done:
@@ -767,13 +767,13 @@ export const sl = {
     "Pritisni Johnovo ime v vrstici z imeni na vrhu. Isti trening, njegov načrt.",
   story_step_refocus: "Pritisni njegov sklop, da se odpre.",
   story_step_capture_open:
-    "John med serijama omeni koleno, ki so mu ga operirali leta 2024. Pritisni Opombe (listek) pod prvo vajo sklopa. Opomba se odpre čez trening, ura teče naprej.",
+    "Med počitkom John omeni koleno, ki so mu ga operirali leta 2024. Pritisni Opombe (listek) pod prvo vajo sklopa. Opomba se odpre čez trening; ura teče naprej.",
   story_step_capture_tag: "Pritisni 🔥 Joint Pain / Discomfort — bolečina v sklepu.",
   story_step_capture_note: "V polje za opombo vpiši, kar je rekel: levo koleno, tretja runda.",
   story_typed_note: "levo koleno, tretja runda",
   story_typed_injury: "rama, pred dvema letoma",
   story_step_capture_keep:
-    "Obkljukaj Shrani to v kartoteko stranke. Tako opomba ostane pri Johnu tudi za naslednje treninge. Shranjena še ni.",
+    "Obkljukaj Shrani to v kartoteko stranke. S kljukico opomba ostane v Johnovi kartoteki tudi po tem treningu. Shranjena še ni: to naredi gumb v naslednjem koraku.",
   story_step_capture_submit:
     "Pritisni Zapiši opozorilo na dnu. Zdaj je opomba shranjena, pri Johnu in pri tej vaji.",
   story_step_session_menu: "Pritisni ⋮ — tri pike zgoraj desno. Odpre se meni treninga.",

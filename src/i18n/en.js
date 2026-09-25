@@ -702,7 +702,7 @@ export const en = {
   // separate database (TODO §40) there is nothing to clear, which is the stronger promise.
   story_welcome_title: "Welcome to LibrePT",
   story_welcome_body:
-    "LibrePT is an app for personal trainers: appointments, training plans, and a notebook during the workout. The walkthrough follows three new clients, from the first invitation to a session you adjust while it runs. It all happens in the sandbox, a separate copy with made-up clients. It does not change your real clients, appointments or workouts.",
+    "LibrePT is an app for personal trainers: appointments, training plans, and a notebook during the workout. In this walkthrough you invite three new clients, prepare Tuesday's session and adjust it while it runs. It all happens in the sandbox, a separate copy with made-up clients. It does not change your real clients, appointments or workouts.",
   // The way out is named because this is where somebody decides not to do this at all. ▾ parks the
   // card and ✕ ends the run, and the ✕ is only on the bar the parked card leaves behind
   // (modules/demo/walkthrough.css hides it while the card is open) — so the order matters.
@@ -724,7 +724,7 @@ export const en = {
   story_chapter_intake: "On Ana's phone",
   story_handover_title: "The form Ana gets",
   story_back_to_your_phone: "Back to your own phone",
-  story_open_client_phone: "Open Ana's phone",
+  story_open_client_phone: "Open Ana's form",
   story_step_arrive_menu:
     "Tap the ☰ button — three stacked lines, in the top right corner of the screen, in the dark bar with the app's name. It opens the menu, and the client register, the movements and the history all live in there.",
   story_step_arrive_clients:
@@ -749,7 +749,7 @@ export const en = {
     "Tap Add to my clients. Ana is in your register, and you typed nothing.",
   story_step_read_on: "Read this, then tap Next.",
   story_step_handover:
-    "Tap Open Ana's phone — the guide's button, bottom right. The browser opens the page Ana opens, and the walkthrough carries on there.",
+    "Tap Open Ana's form — the guide's button, bottom right. The browser opens the page Ana gets, and the walkthrough carries on there.",
   story_step_thanks:
     "Tap Done and explore the app on your own, or Clear the demo data to empty it and start with your own clients.",
   story_message_title: "A message from your trainer",
@@ -763,22 +763,21 @@ export const en = {
   story_step_message: "This is the message Ana gets. Read it, then tap Next.",
   story_step_arrived: "Read what happened to the file, then tap Next.",
   story_step_back_to_your_phone:
-    "Tap Back to your own phone — the browser leaves Ana's page and the story carries on where you left it, on your own.",
+    "Tap Back to your own phone — the guide's button, bottom right. The browser leaves Ana's page and the walkthrough carries on in your app, where you left it.",
   story_step_intake_name: "Type Ana Novak in the First and last name box.",
   story_step_intake_email:
     "Type ana.novak@example.com in the Email box. That is where you send her the session times.",
   story_step_intake_injury:
     "In the Injuries box, type what you should know about her body, for example: shoulder, two years ago. The box is optional.",
   story_step_intake_consent:
-    "Tick the consent under the form. With it Ana allows you to keep her details. Without the tick she cannot send the form.",
+    "Tick the consent under the form. The form holds details about her health, so Ana has to allow you, explicitly, to keep them. Without the tick she cannot send the form.",
   // Named, and new: Ana, Maja and Nik are not in the seeded register — the story is about getting
   // them into it. The people already there (Jane, John, Sarah) are the ones the gym chapter trains.
   story_arrive_open_body:
     "Ana, Maja and Nik ask about training together after a class. You add all three to your register: two get a link and fill in their own details, and you type in the name of the third.",
   story_handover_body:
-    "Ana has her link. Now you open the page she opens and fill in the form yourself, to see how much work it is for your client. The page is the real one; only her message is drawn.",
-  story_intake_open_body:
-    "This is the page Ana opens when she taps the link. There is nothing to install.",
+    "Ana has her link. You stay the trainer: you open the page Ana gets and fill in the form yourself, with the details from the story. That shows you how much work it is for your client.",
+  story_intake_open_body: "This is the page Ana opens when she taps the link in the message.",
   story_intake_close_body:
     "Share with my trainer sends her file to you. You read it and decide; nobody writes themselves into your register.",
   story_intake_close_title: "Ana's form is sent",
@@ -787,7 +786,7 @@ export const en = {
   story_step_programme_open_session:
     "Tap Tuesday's session, Group Strength & Conditioning. It opens with all three in it.",
   story_step_programme_editor:
-    "Tap Edit plan — the row with the pencil in the menu. Jane's plan opens. Beside the title it says, for example, 45 / 60 min: the first number is the exercise time without rests, the second the length of the session.",
+    "Tap Edit plan — the row with the pencil in the menu. Jane's plan opens. Beside the title it says, for example, 45 / 60 min: 45 minutes of exercises in a 60-minute session.",
   story_step_programme_add_circuit:
     "At the bottom of the plan, tap + Circuit — the button with the stacked-layers icon. An empty circuit goes in at the end of the plan, for you to add exercises to.",
   story_step_programme_done:
@@ -826,7 +825,7 @@ export const en = {
     "Tap John's name in the row of names at the top. Same session, his plan.",
   story_step_refocus: "Tap his circuit to open it.",
   story_step_capture_open:
-    "Between rounds John mentions his knee, which was operated on in 2024. Tap Notes (the sticky note) under the first exercise of the circuit. The note opens over the session, and the clock keeps running.",
+    "During a rest John mentions his knee, which was operated on in 2024. Tap Notes (the sticky note) under the first exercise of the circuit. The note opens over the session; the clock keeps running.",
   story_step_capture_tag: "Tap 🔥 Joint Pain / Discomfort.",
   story_step_capture_note: "In the note box, type what he said: left knee, third round.",
   // What the demo TYPES, not what it says about typing: a Slovenian viewer watched Ana write her
@@ -835,7 +834,7 @@ export const en = {
   story_typed_note: "left knee, third round",
   story_typed_injury: "shoulder, two years ago",
   story_step_capture_keep:
-    "Tick Keep this on the client's record. The note then stays with John for the next sessions too. It is not saved yet.",
+    "Tick Keep this on the client's record. With the tick, the note stays on John's record after this session too. It is not saved yet: the button in the next step does that.",
   story_step_capture_submit:
     "Tap Log Alert at the bottom. Now the note is saved, against John and against this exercise.",
   story_step_session_menu: "Tap ⋮ — the three dots in the top right. The session menu opens.",

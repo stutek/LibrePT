@@ -653,7 +653,7 @@ def test_crossing_to_the_client_phone_carries_the_language(page, local_server):
     English form and send back a consent recorded in a language she never chose."""
     _open_story(page, local_server, "?init=demo_data_load&lang=sl&demo=story")
 
-    while "Anin telefon" not in page.locator(NEXT).inner_text():
+    while "Anin obrazec" not in page.locator(NEXT).inner_text():
         _do_step(page)
     page.locator(NEXT).click()
 

@@ -2498,8 +2498,21 @@ cards have their own titles; the word *naloga* is gone; the trainer-details card
 that nothing is saved. **Round 2 shipped:** the circuit is *sklop* on every card, as on the + Sklop
 button (*krog* is one round of it); a file cannot go back by SMS, so Ana's send names e-mail or
 Viber; the plan's clock is explained as its two numbers; the welcome card is shorter; the closing
-slogan "nič ni bilo zapisano dvakrat" is gone. Still open: the message card above. The chapter order (A1 and A2 in
+slogan "nič ni bilo zapisano dvakrat" is gone. **Round 3 shipped:** the handover button says
+*Odpri Anin obrazec* instead of *Odpri Anin telefon*, which read as "become Ana" (against the
+ruling that the trainer does not play a role); the consent step says why it exists (her health
+data); John mentions his knee during a rest, not mid-set; the plan's clock reads "45 minutes of
+exercises in a 60-minute session".
+
+Still open: the message card above. The chapter order (A1 and A2 in
 `.private/demo-card-review.md`) is not part of these rounds.
+
+**[ ] Decision, not work — Simon:** all three personas named the English note-type button
+(🔥 Joint Pain / Discomfort, §38.20) as the step where they would stop, and the third also the
+English names of Tuesday's clients: *"Jane, John in Sarah … zveni, kot da je nekdo prekopiral
+ameriški demo"*. The names are kept on purpose ([demoText.js](src/data/demoText.js): "people's
+names are names"); Ana, Maja and Nik are Slovenian already. Whether a Slovenian demo gets Slovenian
+clients is the maintainer's call; it changes the seed and every test that names them.
 
 **Re-check condition:** whenever the maintainer has time for the copy pass.
 
