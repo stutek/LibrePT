@@ -657,13 +657,13 @@ export const sl = {
   // aplikacija tika, tikanje pa je v slovenščini spolsko določeno, zato "(-la)" in ne množina.
   story_welcome_title: "Dobrodošel(-la) v LibrePT",
   story_welcome_body:
-    "LibrePT je aplikacija za osebne trenerje. Z njo upravljaš termine in sestavljaš individualne in skupinske treninge, med vadbo pa ti služi kot digitalna beležnica. Ta vodeni ogled pelje skozi zgodbo treh novih strank: od odločitve za skupen trening in prvega povabila do treninga, ki ga prilagajaš med potekom. Ves ogled se dogaja v peskovniku: to je ločena kopija aplikacije, namenjena učenju in preizkušanju. Vse, kar narediš v njej, je ločeno od tvojih poslovnih podatkov o strankah, terminih in vadbah. Peskovnik lahko kadar koli zapustiš prek menija ali pa ponastaviš njegove podatke.",
+    "LibrePT je aplikacija za osebne trenerje: termini, načrti treningov in beležka med vadbo. Ogled sledi trem novim strankam, od prvega povabila do treninga, ki ga prilagajaš med vadbo. Vse se dogaja v peskovniku, ločeni kopiji z izmišljenimi strankami. Tvojih pravih strank, terminov in vadb ne spremeni.",
   story_step_welcome:
     "Z gumbom Pokaži mi ti vodnik pokaže troje: značko PESKOVNIK v zgornji vrstici ter v meniju ☰ vrstici Zapusti peskovnik in Ponastavi podatke peskovnika. Z gumbom Naprej začneš. Kartico lahko kadar koli pospraviš z ikono ▾ v njenem zgornjem desnem kotu in aplikacijo preizkušaš brez vodenja; na vrstici, ki ostane, je ✕, ki vodeni ogled konča.",
   story_persona_trainer: "Tvoj telefon",
   story_chapter_trainer_details: "Vnesi svoje podatke",
   story_trainer_details_open_body:
-    "Ime, telefon in e-pošta iz tega obrazca so na povabilih, ki jih pošlješ strankam. Kar tu vpišeš in shraniš, ostane shranjeno tudi po koncu ogleda in velja tudi zunaj peskovnika.",
+    "Preden povabiš prvo stranko, preveri, s čim se podpišeš na povabilih: ime, telefon in e-pošta. Zdaj ti tega ni treba vpisati. Kar shraniš, ostane tudi po koncu ogleda, ker so to tvoji podatki, ne podatki peskovnika.",
   story_step_trainer_details_menu:
     "Pritisni ☰ — tri vodoravne črtice zgoraj desno v temni vrstici. Odpre se meni.",
   story_step_trainer_details_show:
@@ -684,7 +684,7 @@ export const sl = {
   story_step_arrive_invite:
     "Pritisni Povabi stranko — gumb s puščicami deljenja tik pod naslovom Stranke. Ana dobi povezavo in podatke vpiše sama; ti ji jih ne zapisuješ na hodniku.",
   story_step_arrive_contact:
-    "Vpiši številko, ki jo je Ana pravkar povedala, v edino polje, ki sprejme številko ali e-naslov. Aplikacija sama ugotovi, kaj je: številka dobi SMS, naslov e-pošto. O njej se še nič ne shrani — v tvojem seznamu je šele, ko ti sama pošlje svoje podatke.",
+    "Ana ti pove svojo telefonsko številko. Vpiši jo v edino polje; sprejme številko ali e-naslov. Aplikacija sama prepozna, kaj je: številka dobi SMS, naslov e-pošto. O Ani se še nič ne shrani; v seznamu strank je šele, ko ti sama pošlje svoje podatke.",
   story_step_arrive_contact_email:
     "Maja da e-naslov namesto številke. Vpiši ga čez številko v isto polje. Aplikacija prepozna e-naslov in gumb za SMS zamenja z gumbom za e-pošto.",
   story_step_arrive_close_invite:
@@ -696,7 +696,7 @@ export const sl = {
   story_step_arrive_save_client: "Pritisni Shrani na dnu obrazca. Nik je v seznamu strank.",
   story_review_sender: "Ana Novak",
   story_step_review_attach:
-    "Pritisni priponko ana-novak.json.librept-signup pod njenim sporočilom. Na pravem telefonu je ta datoteka v tvojih sporočilih in odpre LibrePT z njenimi podatki. V seznam strank še ni dodano nič.",
+    "Pritisni priponko pod njenim sporočilom. Na pravem telefonu je ta datoteka v tvojih sporočilih in odpre LibrePT z njenimi podatki. V seznam strank še ni dodano nič.",
   story_step_review_accept:
     "Pritisni Dodaj med moje stranke. Ana je v tvojem seznamu strank, ne da bi ti karkoli vpisal.",
   story_step_read_on: "Preberi to in pritisni Naprej.",
@@ -711,7 +711,7 @@ export const sl = {
   story_arrived_body:
     "Datoteka, ki jo je Ana poslala, pride v tvoja sporočila kot vsaka druga priponka. Na noben strežnik ni šla. Ti se odločiš, ali jo sprejmeš med stranke.",
   story_step_intake_send:
-    "Pritisni Deli s trenerjem — zeleni gumb na dnu. Na pravem telefonu Ana datoteko pošlje tebi po istem pogovoru, po katerem je dobila povezavo.",
+    "Pritisni Deli s trenerjem — zeleni gumb na dnu. Na pravem telefonu se odpre izbira aplikacij, in Ana ti datoteko pošlje, na primer po e-pošti ali Vibru.",
   story_step_message: "Tako sporočilo dobi Ana. Preberi ga in pritisni Naprej.",
   story_step_arrived: "Preberi, kaj se je zgodilo z datoteko, in pritisni Naprej.",
   story_step_back_to_your_phone:
@@ -735,14 +735,14 @@ export const sl = {
   story_step_programme_open_session:
     "Pritisni torkov trening Skupinska moč in kondicija. Odpre se z vsemi tremi.",
   story_step_programme_editor:
-    "Pritisni Uredi načrt — vrstico s svinčnikom v meniju. Odpre se Janin načrt. Ob naslovu je številka: koliko rezervirane ure ta načrt zapolni.",
+    "Pritisni Uredi načrt — vrstico s svinčnikom v meniju. Odpre se Janin načrt. Ob naslovu piše na primer 45 / 60 min: prvo število je čas vaj brez premorov, drugo trajanje termina.",
   story_step_programme_add_circuit:
-    "Na dnu načrta pritisni + Sklop — gumb z ikono naloženih slojev. Na konec načrta se doda prazen sklop za zaključne vaje.",
+    "Na dnu načrta pritisni + Sklop — gumb z ikono naloženih slojev. Na konec načrta se doda prazen sklop, v katerega dodaš vaje.",
   story_step_programme_done:
     "Pritisni ✓ zgoraj desno, ob naslovu. Načrt se shrani in trening se vrne z vsemi tremi.",
   story_step_programme_menu_again: "Znova pritisni ⋮ zgoraj desno.",
   story_step_programme_bind:
-    "Pritisni Vsi na ta načrt — vrstico z ikono verige. Jane, John in Sarah delajo isti krog, zato imajo en načrt in torkove serije zapišeš enkrat, ne trikrat.",
+    "Pritisni Vsi na ta načrt — vrstico z ikono verige. Jane, John in Sarah delajo isti sklop, zato imajo en načrt in torkove serije zapišeš enkrat, ne trikrat.",
   story_programme_open_body:
     "Nedelja zvečer, doma. Torkov trening imajo Jane, John in Sarah, ki pri tebi vadijo že dlje. Njihovo uro pripraviš zdaj, ne šele v torek v telovadnici.",
   story_programme_close_body:
@@ -760,14 +760,14 @@ export const sl = {
   story_clear_demo_data: "Počisti demo podatke",
   story_step_open_session:
     "Pritisni trening Skupinska moč in kondicija. Jane in John imata skupen termin, Sarah v isti uri dela svoj načrt; vsi trije so v eni beležki.",
-  story_step_focus_exercise: "Pritisni Janin krog. Odpre se z njenimi vajami in številkami.",
+  story_step_focus_exercise: "Pritisni Janin sklop. Odpre se z njenimi vajami in številkami.",
   story_step_signal_too_easy:
     "Pritisni Prelahko (pero) pod vajo. Pri vaji ostane zapisano, da ji je šlo prelahko.",
   story_step_next_participant:
     "Pritisni Johnovo ime v vrstici z imeni na vrhu. Isti trening, njegov načrt.",
-  story_step_refocus: "Pritisni njegov krog, da se odpre.",
+  story_step_refocus: "Pritisni njegov sklop, da se odpre.",
   story_step_capture_open:
-    "John med serijama omeni koleno, ki so mu ga operirali leta 2024. Pritisni Opombe (listek) pod prvo vajo kroga. Opomba se odpre čez trening, ura teče naprej.",
+    "John med serijama omeni koleno, ki so mu ga operirali leta 2024. Pritisni Opombe (listek) pod prvo vajo sklopa. Opomba se odpre čez trening, ura teče naprej.",
   story_step_capture_tag: "Pritisni 🔥 Joint Pain / Discomfort — bolečina v sklepu.",
   story_step_capture_note: "V polje za opombo vpiši, kar je rekel: levo koleno, tretja runda.",
   story_typed_note: "levo koleno, tretja runda",
@@ -779,15 +779,15 @@ export const sl = {
   story_step_session_menu: "Pritisni ⋮ — tri pike zgoraj desno. Odpre se meni treninga.",
   story_step_plan_editor: "Pritisni Uredi načrt. Odpre se Johnov načrt; opomba je v njem, ob vaji.",
   story_step_swap_open:
-    "John te vaje danes ne dela. Pritisni ikono odprte knjige v vrstici vaje, da odpreš katalog vaj.",
+    "Zaradi kolena John te vaje danes ne dela. Pritisni ikono odprte knjige v vrstici vaje, da odpreš katalog vaj.",
   story_step_swap_pick:
-    "Pritisni Lat Pulldown. Vaja se zamenja samo pri Johnu; Jane in Sarah obdržita svoj načrt.",
+    "Pritisni Lat Pulldown: vaja za iste mišice, pri kateri koleno ni obremenjeno. Vaja se zamenja samo pri Johnu; Jane in Sarah obdržita svoj načrt.",
   story_gym_open_body:
     "Torek, 18:10. Jane in John se ogrevata skupaj, Sarah v kotu dela svoj rehabilitacijski načrt. Vse tri vodiš z enega telefona.",
   story_gym_close_body:
-    "Nič ni bilo zapisano dvakrat. Johnovo koleno je v njegovi kartoteki in v njegovem načrtu, Jane in Sarah pa sta vadili naprej.",
+    "Johnovo koleno je v njegovi kartoteki in v njegovem načrtu, Jane in Sarah pa sta vadili naprej.",
   story_evening_close_body:
-    "Pri Jane je zapisano, da ji je šlo prelahko. Johnovo koleno je v njegovi kartoteki in v načrtu. Torek je ta teden ob 20:00. Nič od tega nisi zapisal dvakrat.",
+    "Pri Jane je zapisano, da ji je šlo prelahko. Johnovo koleno je v njegovi kartoteki in v načrtu. Torek je ta teden ob 20:00.",
   story_gym_close_title: "Trening je končan",
   today: "Danes",
   tomorrow: "Jutri",

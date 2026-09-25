@@ -32,6 +32,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 - Every step of the guided story that asks for an action names the control to press, and where it
   is. The last card describes the evening instead of repeating the gym card, three closing cards
   have their own titles, and no card promises what the story does not show (TODO §38.21).
+- The Slovenian story calls a circuit *sklop* on every card, as its button does, and explains the
+  two numbers of the plan's clock (TODO §38.21).
 
 ### Fixed
 

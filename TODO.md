@@ -2495,7 +2495,10 @@ subagent plays a trainer who distrusts apps and writes programmes on paper; it r
 order, then judges the rewrites. **Round 1 shipped:** every step that asks for an action names the
 control; the seven narrating captions are rewritten; the last card has its own text; the closing
 cards have their own titles; the word *naloga* is gone; the trainer-details cards no longer claim
-that nothing is saved. Still open: the message card above. The chapter order (A1 and A2 in
+that nothing is saved. **Round 2 shipped:** the circuit is *sklop* on every card, as on the + Sklop
+button (*krog* is one round of it); a file cannot go back by SMS, so Ana's send names e-mail or
+Viber; the plan's clock is explained as its two numbers; the welcome card is shorter; the closing
+slogan "nič ni bilo zapisano dvakrat" is gone. Still open: the message card above. The chapter order (A1 and A2 in
 `.private/demo-card-review.md`) is not part of these rounds.
 
 **Re-check condition:** whenever the maintainer has time for the copy pass.

@@ -702,7 +702,7 @@ export const en = {
   // separate database (TODO §40) there is nothing to clear, which is the stronger promise.
   story_welcome_title: "Welcome to LibrePT",
   story_welcome_body:
-    "LibrePT is an app for personal trainers. You manage appointments with it and build individual and group sessions, and while a workout runs it is your notebook. This guided walkthrough follows the story of three new clients: from the decision to train together and the first invitation, to a session you adjust while it runs. The whole walkthrough happens in the sandbox: a separate copy of the app, kept for learning and trying things out. Everything you do in it is kept apart from your business data about clients, appointments and workouts. You can leave the sandbox at any time from the menu, or reset its data.",
+    "LibrePT is an app for personal trainers: appointments, training plans, and a notebook during the workout. The walkthrough follows three new clients, from the first invitation to a session you adjust while it runs. It all happens in the sandbox, a separate copy with made-up clients. It does not change your real clients, appointments or workouts.",
   // The way out is named because this is where somebody decides not to do this at all. ▾ parks the
   // card and ✕ ends the run, and the ✕ is only on the bar the parked card leaves behind
   // (modules/demo/walkthrough.css hides it while the card is open) — so the order matters.
@@ -711,7 +711,7 @@ export const en = {
   story_persona_trainer: "Your phone",
   story_chapter_trainer_details: "Enter your own details",
   story_trainer_details_open_body:
-    "The name, phone number and email in this form appear on the invitations you send to clients. What you enter and save here stays saved after the walkthrough, and outside the sandbox too.",
+    "Before you invite your first client, check what your invitations are signed with: name, phone and email. You do not have to enter them now. What you save stays after the walkthrough, because these are your details, not the sandbox's.",
   story_step_trainer_details_menu:
     "Tap ☰ — the three horizontal lines in the top right of the dark bar. The menu opens.",
   story_step_trainer_details_show:
@@ -732,7 +732,7 @@ export const en = {
   story_step_arrive_invite:
     "Tap Invite a client — the button with the share arrows just under the Clients heading. Ana gets a link and fills in her own details; you do not write them down in the corridor.",
   story_step_arrive_contact:
-    "Type the number Ana just read out, into the one box that takes either a number or an email address. The app works out which it is: a number gets a text message, an address gets an email. Nothing is saved about her yet — she is not in your register until she has sent her own details back.",
+    "Ana tells you her phone number. Type it into the one box; it takes a number or an email address. The app works out which it is: a number gets a text message, an address gets an email. Nothing is saved about Ana yet; she is in your register only once she has sent you her details herself.",
   story_step_arrive_contact_email:
     "Maja gives an email address instead. Type it over the number in the same box. The app recognises the address and swaps the text-message button for an email one.",
   story_step_arrive_close_invite:
@@ -744,7 +744,7 @@ export const en = {
   story_step_arrive_save_client: "Tap Save at the bottom of the form. Nik is in the register.",
   story_review_sender: "Ana Novak",
   story_step_review_attach:
-    "Tap the attachment ana-novak.json.librept-signup under her message. On a real phone that file is in your messages, and it opens LibrePT with her details. Nothing has been added to your register yet.",
+    "Tap the attachment under her message. On a real phone that file is in your messages, and it opens LibrePT with her details. Nothing has been added to your register yet.",
   story_step_review_accept:
     "Tap Add to my clients. Ana is in your register, and you typed nothing.",
   story_step_read_on: "Read this, then tap Next.",
@@ -759,7 +759,7 @@ export const en = {
   story_arrived_body:
     "The file Ana sent arrives in your messages like any other attachment. It went through no server. You decide whether she joins your clients.",
   story_step_intake_send:
-    "Tap Share with my trainer — the green button at the bottom. On a real phone Ana sends the file to you in the same conversation the link came in.",
+    "Tap Share with my trainer — the green button at the bottom. On a real phone a choice of apps opens, and Ana sends you the file, for example by email or Viber.",
   story_step_message: "This is the message Ana gets. Read it, then tap Next.",
   story_step_arrived: "Read what happened to the file, then tap Next.",
   story_step_back_to_your_phone:
@@ -787,9 +787,9 @@ export const en = {
   story_step_programme_open_session:
     "Tap Tuesday's session, Group Strength & Conditioning. It opens with all three in it.",
   story_step_programme_editor:
-    "Tap Edit plan — the row with the pencil in the menu. Jane's plan opens. Beside the title is a number: how much of the booked hour this plan fills.",
+    "Tap Edit plan — the row with the pencil in the menu. Jane's plan opens. Beside the title it says, for example, 45 / 60 min: the first number is the exercise time without rests, the second the length of the session.",
   story_step_programme_add_circuit:
-    "At the bottom of the plan, tap + Circuit — the button with the stacked-layers icon. An empty circuit for the finishing exercises goes in at the end of the plan.",
+    "At the bottom of the plan, tap + Circuit — the button with the stacked-layers icon. An empty circuit goes in at the end of the plan, for you to add exercises to.",
   story_step_programme_done:
     "Tap ✓ at the top right, beside the title. The plan is saved and the session comes back with all three.",
   story_step_programme_menu_again: "Tap ⋮ in the top right again.",
@@ -842,15 +842,15 @@ export const en = {
   story_step_plan_editor:
     "Tap Edit plan. John's plan opens; the note is in it, beside the exercise.",
   story_step_swap_open:
-    "John does not do this exercise today. Tap the open-book icon in the exercise's row to open the exercise catalog.",
+    "Because of his knee, John does not do this exercise today. Tap the open-book icon in the exercise's row to open the exercise catalog.",
   story_step_swap_pick:
-    "Tap Lat Pulldown. The exercise changes for John only; Jane and Sarah keep their plans.",
+    "Tap Lat Pulldown: an exercise for the same muscles that puts no load on the knee. The exercise changes for John only; Jane and Sarah keep their plans.",
   story_gym_open_body:
     "Tuesday, 18:10. Jane and John are warming up together, and Sarah is in the corner working through her rehab plan. You run all three from one phone.",
   story_gym_close_body:
-    "Nothing was written twice. John's knee is on his record and in his plan, and Jane and Sarah kept training.",
+    "John's knee is on his record and in his plan, and Jane and Sarah kept training.",
   story_evening_close_body:
-    "It is recorded that Jane found it too easy. John's knee is on his record and in his plan. Tuesday is at 20:00 this week. You wrote none of it twice.",
+    "It is recorded that Jane found it too easy. John's knee is on his record and in his plan. Tuesday is at 20:00 this week.",
   story_gym_close_title: "The session is over",
   today: "Today",
   tomorrow: "Tomorrow",
