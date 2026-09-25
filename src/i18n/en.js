@@ -721,7 +721,7 @@ export const en = {
   story_chapter_gym: "Running the session and adjusting it",
   story_persona_client: "Ana's phone",
   story_chapter_arrive: "Taking on three new clients",
-  story_chapter_intake: "On Ana's phone",
+  story_chapter_intake: "Ana's form",
   story_handover_title: "The form Ana gets",
   story_back_to_your_phone: "Back to your own phone",
   story_open_client_phone: "Open Ana's form",
@@ -780,7 +780,8 @@ export const en = {
   story_intake_close_body:
     "Share with my trainer sends her file to you. You read it and decide; nobody writes themselves into your Clients Directory.",
   story_intake_close_title: "Ana's form is sent",
-  story_chapter_programme: "The programme",
+  story_chapter_programme: "Tuesday's plan",
+  story_chapter_review: "Ana's file arrives",
   story_chapter_evening: "Reviewing the notes and preparing sessions",
   story_step_programme_open_session:
     "Tap Tuesday's session, Group Strength & Conditioning. It opens with all three in it.",

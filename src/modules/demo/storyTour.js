@@ -124,8 +124,56 @@ function foldCards(steps) {
   return folded;
 }
 
-// First chapter of the reworked demo. It makes the trainer's own details visible without asking a
-// viewer to enter invented personal information or changing the demo identity used by invitations.
+// The story's first chapter, and only this card (review point A1). It sat at the head of the arrive
+// chapter, which put it fourth, after a form asking for the trainer's own details before anything had
+// said what the app is.
+const WELCOME_CHAPTER = {
+  id: "welcome",
+  titleKey: "story_welcome_title",
+  steps: foldCards([
+    // The story's front door (TODO §38.21): what the app is, what this run is a story OF, and that
+    // it all happens in the sandbox — which is why it no longer has to offer to delete the demo data
+    // afterwards (TODO §40).
+    //
+    // It keeps its OWN step, and that is not a flag to work around the fold — its instruction is
+    // "press Next", so there is no tap for it to ride on.
+    narration("welcome", "chapter", "story_welcome_title", "story_welcome_body", {
+      route: "/",
+      keepOwnStep: true,
+      caption: "story_step_welcome",
+      // Show me here shows the three controls the card's own promise rests on (asked 2026-09-11):
+      // the SANDBOX badge in the header, and behind the ☰ menu the way out and the way to start
+      // over. A promise a reader has to take on faith is the one thing a demo can simply show, and
+      // the two menu rows are pointed at rather than tapped — tapping either would leave the
+      // sandbox or throw it away in the middle of the first card.
+      //
+      // It ends by closing the menu it opened. Two steps on, the story asks the trainer to open
+      // that same menu; left standing, that step reads as already done before they touch anything.
+      //
+      // The pauses are the difference between a tour and a flicker: a beat the viewer is meant to
+      // READ holds, and the two that only work the menu get out of the way. At the full-motion
+      // default of 1350ms each, five beats came to fifteen seconds of watching.
+      demonstrate: [
+        { target: "#preview-badge", point: true, settleMs: 900 },
+        {
+          target: "#btn-app-menu",
+          expect: { selector: "#menu-sandbox", visible: true },
+          settleMs: 400,
+        },
+        { target: "#menu-sandbox", point: true, settleMs: 900 },
+        { target: "#menu-sandbox-reset", point: true, settleMs: 900 },
+        {
+          target: "#btn-app-menu",
+          expect: { selector: "#app-menu", visible: false },
+          settleMs: 400,
+        },
+      ],
+    }),
+  ]),
+};
+
+// The chapter after the welcome. It makes the trainer's own details visible without asking a viewer
+// to enter invented personal information or changing the demo identity used by invitations.
 const TRAINER_DETAILS_CHAPTER = {
   id: "trainer-details",
   titleKey: "story_chapter_trainer_details",
@@ -312,46 +360,6 @@ const ARRIVE_CHAPTER = {
   id: "arrive",
   titleKey: "story_chapter_arrive",
   steps: foldCards([
-    // The story's front door (TODO §38.21): what the app is, what this run is a story OF, and that
-    // it all happens in the sandbox — which is why it no longer has to offer to delete the demo data
-    // afterwards (TODO §40).
-    //
-    // It keeps its OWN step, and that is not a flag to work around the fold — its instruction is
-    // "press Next", so there is no tap for it to ride on. It also has to: `foldCards` keeps the
-    // FIRST of two cards in a row, so a welcome card folded here would silently swallow the chapter
-    // card below it, with nothing failing — a dropped card carries no expectation that can.
-    narration("welcome", "chapter", "story_welcome_title", "story_welcome_body", {
-      route: "/",
-      keepOwnStep: true,
-      caption: "story_step_welcome",
-      // Show me here shows the three controls the card's own promise rests on (asked 2026-09-11):
-      // the SANDBOX badge in the header, and behind the ☰ menu the way out and the way to start
-      // over. A promise a reader has to take on faith is the one thing a demo can simply show, and
-      // the two menu rows are pointed at rather than tapped — tapping either would leave the
-      // sandbox or throw it away in the middle of the first card.
-      //
-      // It ends by closing the menu it opened. Two steps on, the story asks the trainer to open
-      // that same menu; left standing, that step reads as already done before they touch anything.
-      //
-      // The pauses are the difference between a tour and a flicker: a beat the viewer is meant to
-      // READ holds, and the two that only work the menu get out of the way. At the full-motion
-      // default of 1350ms each, five beats came to fifteen seconds of watching.
-      demonstrate: [
-        { target: "#preview-badge", point: true, settleMs: 900 },
-        {
-          target: "#btn-app-menu",
-          expect: { selector: "#menu-sandbox", visible: true },
-          settleMs: 400,
-        },
-        { target: "#menu-sandbox", point: true, settleMs: 900 },
-        { target: "#menu-sandbox-reset", point: true, settleMs: 900 },
-        {
-          target: "#btn-app-menu",
-          expect: { selector: "#app-menu", visible: false },
-          settleMs: 400,
-        },
-      ],
-    }),
     narration("arrive-open", "chapter", "story_chapter_arrive", "story_arrive_open_body", {
       route: "/",
     }),
@@ -596,25 +604,26 @@ const REVIEW_STEPS = [
   },
 ];
 
+// Ana's file arriving, and the trainer accepting it: its own chapter (review point A2). It used to
+// open the programme chapter, so choosing "the plan" from the chapter list started on Ana's file.
+const REVIEW_CHAPTER = {
+  id: "review",
+  titleKey: "story_chapter_review",
+  // NOT a place the story can be joined, so no table of contents offers it (§35, measured
+  // 2026-09-21). Ana's submission reaches the store from HER phone, in the client chapter's own
+  // boot. A trainer's sandbox that has played none of the earlier chapters holds nothing to review,
+  // and the crossing to her phone is not something this boot can perform.
+  needsEarlierChapters: true,
+  steps: foldCards(REVIEW_STEPS),
+};
+
 // Chapter B — the programme. It comes AFTER the gym chapter in the story's order of build (§35.3),
 // because it needed the two features the floor chapter did not: a plan that says whether it fits its
 // slot, and one plan bound to several people.
 const PROGRAMME_CHAPTER = {
   id: "programme",
   titleKey: "story_chapter_programme",
-  // NOT a place the story can be joined, so no table of contents offers it (§35, measured
-  // 2026-09-21). It opens on REVIEW_STEPS — the trainer reading what Ana sent — and Ana's
-  // submission reaches the store from HER phone, in the client chapter's own boot. A trainer's
-  // sandbox that has played none of the earlier chapters holds nothing to review, so the guide
-  // stops on "Tap Add to my clients" with nothing to add. Replaying the story's earlier steps does
-  // not help either: the crossing to her phone is not something this boot can perform.
-  //
-  // It plays as part of the whole story, which is where it belongs. To make it an entry point, the
-  // sandbox's seed would have to carry a submission from Ana already waiting — a change to what
-  // every trainer sees on entering the sandbox, and so a decision rather than a fix.
-  needsEarlierChapters: true,
   steps: foldCards([
-    ...REVIEW_STEPS,
     narration("programme-open", "chapter", "story_chapter_programme", "story_programme_open_body", {
       route: "/",
     }),
@@ -750,9 +759,11 @@ export const DEMO_STORY = {
   // In the order the evening happens, not the order they were built: a viewer watching the whole
   // story should meet the programme before the session it produced.
   chapters: [
+    WELCOME_CHAPTER,
     TRAINER_DETAILS_CHAPTER,
     ARRIVE_CHAPTER,
     INTAKE_CHAPTER,
+    REVIEW_CHAPTER,
     PROGRAMME_CHAPTER,
     GYM_CHAPTER,
     EVENING_CHAPTER,

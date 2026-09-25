@@ -36,6 +36,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   two numbers of the plan's clock (TODO §38.21).
 - The story's button to the client's page says *Open Ana's form*, not *Open Ana's phone*, and the
   consent step says why the consent is asked for (TODO §38.21).
+- The guided story opens with the welcome card, and *Tuesday's plan* can be chosen from the chapter
+  list: it starts on its own card instead of on Ana's file, which is now a chapter of its own.
 - The message on Ana's phone is the invitation the app really sends, not a separate text.
 - The client list is called *Imenik strank* in the Slovenian menu, as on its own title, and the
   English cards call it *Clients Directory*, as the screen does.

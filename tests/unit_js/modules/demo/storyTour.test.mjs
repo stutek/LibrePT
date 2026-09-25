@@ -16,7 +16,8 @@ import { DEMO_STORY } from "../../../../src/modules/demo/storyTour.js";
 test("the trainer-details chapter only shows the identity form", () => {
   const chapter = DEMO_STORY.chapters.find((item) => item.id === "trainer-details");
 
-  assert.equal(DEMO_STORY.chapters[0], chapter, "details come before client-facing chapters");
+  assert.equal(DEMO_STORY.chapters[0].id, "welcome", "the story opens by saying what the app is");
+  assert.equal(DEMO_STORY.chapters[1], chapter, "details come before client-facing chapters");
   assert.equal(chapter.titleKey, "story_chapter_trainer_details");
   // The chapter's opening card rides on its first tap, and that tap says where the chapter starts.
   assert.equal(chapter.steps[0].target, "#btn-app-menu");
@@ -68,8 +69,8 @@ test("a folded card hands its route to the step it rides on", () => {
 test("a step's own route wins over the card folded into it", () => {
   // The step is the more specific of the two: the card says where the chapter happens, the step says
   // where THIS tap happens, and a card must never move a step off its own screen.
-  const programme = DEMO_STORY.chapters.find((chapter) => chapter.id === "programme");
-  const [opening] = programme.steps;
+  const review = DEMO_STORY.chapters.find((chapter) => chapter.id === "review");
+  const [opening] = review.steps;
 
   assert.equal(opening.route, "/clients", "the step's own route, not the card's");
 });

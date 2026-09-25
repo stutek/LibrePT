@@ -673,7 +673,7 @@ export const sl = {
   story_chapter_gym: "Izvedba in prilagoditve treninga",
   story_persona_client: "Anin telefon",
   story_chapter_arrive: "Sprejem treh novih strank",
-  story_chapter_intake: "Na Aninem telefonu",
+  story_chapter_intake: "Anin obrazec",
   story_handover_title: "Obrazec, ki ga dobi Ana",
   story_back_to_your_phone: "Nazaj na tvoj telefon",
   story_open_client_phone: "Odpri Anin obrazec",
@@ -728,7 +728,8 @@ export const sl = {
   story_intake_close_body:
     "Gumb Deli s trenerjem ti pošlje njeno datoteko. Ti jo prebereš in se odločiš; nihče se sam ne vpiše v tvoj imenik strank.",
   story_intake_close_title: "Anin obrazec je poslan",
-  story_chapter_programme: "Program",
+  story_chapter_programme: "Načrt za torek",
+  story_chapter_review: "Anina datoteka pride",
   story_chapter_evening: "Pregled zaznamkov in priprava treningov",
   story_step_programme_open_session:
     "Pritisni torkov trening Skupinska moč in kondicija. Odpre se z vsemi tremi.",

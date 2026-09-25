@@ -5163,6 +5163,10 @@ demonstrates, since that chapter delivers the same submission again.
 **Simon's call**, not a fix: it trades one line of the table of contents against the state the
 sandbox opens in.
 
+**2026-09-25: the programme chapter is an entry point without a seed change.** Ana's file moved into
+a chapter of its own, `review`, which is the one left out of the index (§38.21). What remains of
+this question is only whether that short chapter should be offered too.
+
 ### 73.4 [x] The language choice is built from the shipped dictionaries — shipped 2026-09-21
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#734-x-the-language-choice-is-built-from-the-shipped-dictionaries--shipped-2026-09-21);
