@@ -36,6 +36,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   two numbers of the plan's clock (TODO §38.21).
 - The story's button to the client's page says *Open Ana's form*, not *Open Ana's phone*, and the
   consent step says why the consent is asked for (TODO §38.21).
+- The client list is called *Imenik strank* in the Slovenian menu, as on its own title, and the
+  English cards call it *Clients Directory*, as the screen does.
 
 ### Fixed
 

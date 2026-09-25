@@ -726,13 +726,13 @@ export const en = {
   story_back_to_your_phone: "Back to your own phone",
   story_open_client_phone: "Open Ana's form",
   story_step_arrive_menu:
-    "Tap the ☰ button — three stacked lines, in the top right corner of the screen, in the dark bar with the app's name. It opens the menu, and the client register, the movements and the history all live in there.",
+    "Tap the ☰ button — three stacked lines, in the top right corner of the screen, in the dark bar with the app's name. It opens the menu, and the Clients Directory, the movements and the history all live in there.",
   story_step_arrive_clients:
     "In the menu that just dropped down, tap Clients Directory — the row with three little people next to it, at the top of the list. Eight people are already in that directory.",
   story_step_arrive_invite:
     "Tap Invite a client — the button with the share arrows just under the Clients heading. Ana gets a link and fills in her own details; you do not write them down in the corridor.",
   story_step_arrive_contact:
-    "Ana tells you her phone number. Type it into the one box; it takes a number or an email address. The app works out which it is: a number gets a text message, an address gets an email. Nothing is saved about Ana yet; she is in your register only once she has sent you her details herself.",
+    "Ana tells you her phone number. Type it into the one box; it takes a number or an email address. The app works out which it is: a number gets a text message, an address gets an email. Nothing is saved about Ana yet; she is in your Clients Directory only once she has sent you her details herself.",
   story_step_arrive_contact_email:
     "Maja gives an email address instead. Type it over the number in the same box. The app recognises the address and swaps the text-message button for an email one.",
   story_step_arrive_close_invite:
@@ -741,12 +741,13 @@ export const en = {
     "Nik is standing in front of you and tells you his details, so tap Add Client — the green button at the top of the list, next to the one you just used.",
   story_step_arrive_type_name:
     "Type Nik Zupan in the Client Name box. A name is all a client needs; the rest can be added later, by you or by him.",
-  story_step_arrive_save_client: "Tap Save at the bottom of the form. Nik is in the register.",
+  story_step_arrive_save_client:
+    "Tap Save at the bottom of the form. Nik is in the Clients Directory.",
   story_review_sender: "Ana Novak",
   story_step_review_attach:
-    "Tap the attachment under her message. On a real phone that file is in your messages, and it opens LibrePT with her details. Nothing has been added to your register yet.",
+    "Tap the attachment under her message. On a real phone that file is in your messages, and it opens LibrePT with her details. Nothing has been added to your Clients Directory yet.",
   story_step_review_accept:
-    "Tap Add to my clients. Ana is in your register, and you typed nothing.",
+    "Tap Add to my clients. Ana is in your Clients Directory, and you typed nothing.",
   story_step_read_on: "Read this, then tap Next.",
   story_step_handover:
     "Tap Open Ana's form — the guide's button, bottom right. The browser opens the page Ana gets, and the walkthrough carries on there.",
@@ -774,12 +775,12 @@ export const en = {
   // Named, and new: Ana, Maja and Nik are not in the seeded register — the story is about getting
   // them into it. The people already there (Jane, John, Sarah) are the ones the gym chapter trains.
   story_arrive_open_body:
-    "Ana, Maja and Nik ask about training together after a class. You add all three to your register: two get a link and fill in their own details, and you type in the name of the third.",
+    "Ana, Maja and Nik ask about training together after a class. You add all three to your Clients Directory: two get a link and fill in their own details, and you type in the name of the third.",
   story_handover_body:
     "Ana has her link. You stay the trainer: you open the page Ana gets and fill in the form yourself, with the details from the story. That shows you how much work it is for your client.",
   story_intake_open_body: "This is the page Ana opens when she taps the link in the message.",
   story_intake_close_body:
-    "Share with my trainer sends her file to you. You read it and decide; nobody writes themselves into your register.",
+    "Share with my trainer sends her file to you. You read it and decide; nobody writes themselves into your Clients Directory.",
   story_intake_close_title: "Ana's form is sent",
   story_chapter_programme: "The programme",
   story_chapter_evening: "Reviewing the notes and preparing sessions",

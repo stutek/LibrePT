@@ -678,13 +678,13 @@ export const sl = {
   story_back_to_your_phone: "Nazaj na tvoj telefon",
   story_open_client_phone: "Odpri Anin obrazec",
   story_step_arrive_menu:
-    "Pritisni gumb ☰ — tri vodoravne črtice, zgoraj desno v temni vrstici z imenom aplikacije. Odpre meni, v katerem so seznam strank, vaje in zgodovina.",
+    "Pritisni gumb ☰ — tri vodoravne črtice, zgoraj desno v temni vrstici z imenom aplikacije. Odpre meni, v katerem so imenik strank, vaje in zgodovina.",
   story_step_arrive_clients:
-    "V meniju, ki se je pravkar spustil, pritisni Seznam strank (klientov) — vrstica z znakom treh ljudi, na vrhu seznama. V njem je že osem ljudi.",
+    "V meniju, ki se je pravkar spustil, pritisni Imenik strank — vrstica z znakom treh ljudi, na vrhu seznama. V njem je že osem ljudi.",
   story_step_arrive_invite:
     "Pritisni Povabi stranko — gumb s puščicami deljenja tik pod naslovom Stranke. Ana dobi povezavo in podatke vpiše sama; ti ji jih ne zapisuješ na hodniku.",
   story_step_arrive_contact:
-    "Ana ti pove svojo telefonsko številko. Vpiši jo v edino polje; sprejme številko ali e-naslov. Aplikacija sama prepozna, kaj je: številka dobi SMS, naslov e-pošto. O Ani se še nič ne shrani; v seznamu strank je šele, ko ti sama pošlje svoje podatke.",
+    "Ana ti pove svojo telefonsko številko. Vpiši jo v edino polje; sprejme številko ali e-naslov. Aplikacija sama prepozna, kaj je: številka dobi SMS, naslov e-pošto. O Ani se še nič ne shrani; v imeniku strank je šele, ko ti sama pošlje svoje podatke.",
   story_step_arrive_contact_email:
     "Maja da e-naslov namesto številke. Vpiši ga čez številko v isto polje. Aplikacija prepozna e-naslov in gumb za SMS zamenja z gumbom za e-pošto.",
   story_step_arrive_close_invite:
@@ -693,12 +693,12 @@ export const sl = {
     "Nik stoji pred tabo in ti pove svoje podatke, zato pritisni Dodaj stranko — zeleni gumb na vrhu seznama, ob gumbu, ki si ga pravkar uporabil.",
   story_step_arrive_type_name:
     "V polje Ime stranke vpiši Nik Zupan. Za stranko je dovolj ime; drugo lahko dopišeš pozneje ti ali on.",
-  story_step_arrive_save_client: "Pritisni Shrani na dnu obrazca. Nik je v seznamu strank.",
+  story_step_arrive_save_client: "Pritisni Shrani na dnu obrazca. Nik je v imeniku strank.",
   story_review_sender: "Ana Novak",
   story_step_review_attach:
-    "Pritisni priponko pod njenim sporočilom. Na pravem telefonu je ta datoteka v tvojih sporočilih in odpre LibrePT z njenimi podatki. V seznam strank še ni dodano nič.",
+    "Pritisni priponko pod njenim sporočilom. Na pravem telefonu je ta datoteka v tvojih sporočilih in odpre LibrePT z njenimi podatki. V imenik strank še ni dodano nič.",
   story_step_review_accept:
-    "Pritisni Dodaj med moje stranke. Ana je v tvojem seznamu strank, ne da bi ti karkoli vpisal.",
+    "Pritisni Dodaj med moje stranke. Ana je v tvojem imeniku strank, ne da bi ti karkoli vpisal.",
   story_step_read_on: "Preberi to in pritisni Naprej.",
   story_step_handover:
     "Pritisni Odpri Anin obrazec — gumb vodnika spodaj desno. Brskalnik odpre stran, ki jo dobi Ana, in ogled se nadaljuje tam.",
@@ -723,12 +723,12 @@ export const sl = {
   story_step_intake_consent:
     "Obkljukaj privolitev pod obrazcem. Obrazec vsebuje podatke o njenem zdravju, zato mora Ana izrecno dovoliti, da jih hraniš. Brez kljukice obrazca ne more poslati.",
   story_arrive_open_body:
-    "Ana, Maja in Nik po vadbi vprašajo za skupen trening. Vse tri vpišeš v svoj seznam strank: dvema pošlješ povezavo, da podatke vpišeta sama, tretjemu ime vpišeš ti.",
+    "Ana, Maja in Nik po vadbi vprašajo za skupen trening. Vse tri vpišeš v svoj imenik strank: dvema pošlješ povezavo, da podatke vpišeta sama, tretjemu ime vpišeš ti.",
   story_handover_body:
     "Ana je dobila povezavo. Ostaneš trener: odpreš stran, ki jo dobi Ana, in obrazec izpolniš sam, s podatki iz zgodbe. Tako vidiš, koliko dela ima z njim tvoja stranka.",
   story_intake_open_body: "To stran Ana odpre, ko pritisne povezavo v sporočilu.",
   story_intake_close_body:
-    "Gumb Deli s trenerjem ti pošlje njeno datoteko. Ti jo prebereš in se odločiš; nihče se sam ne vpiše v tvoj seznam strank.",
+    "Gumb Deli s trenerjem ti pošlje njeno datoteko. Ti jo prebereš in se odločiš; nihče se sam ne vpiše v tvoj imenik strank.",
   story_intake_close_title: "Anin obrazec je poslan",
   story_chapter_programme: "Program",
   story_chapter_evening: "Pregled zaznamkov in priprava treningov",
@@ -823,7 +823,7 @@ export const sl = {
   language_name: "Slovenščina",
   menu_language: "Jezik",
   menu_theme: "Tema",
-  menu_clients_register: "Seznam strank (klientov)",
+  menu_clients_register: "Imenik strank",
   menu_adjustments: "Čakajoče na pregled",
   menu_connect_cloud: "Poveži shrambo v oblaku",
   menu_export_data: "Izvozi podatke v datoteko",
