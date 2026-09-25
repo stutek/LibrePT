@@ -484,7 +484,7 @@ const INTAKE_CHAPTER = {
     // a card that could never be mistaken for one of its screens. A message is not our surface at
     // all, so nobody goes looking for it in the app; what matters is that the viewer sees the thing
     // Ana taps, rather than being teleported onto a form (asked for 2026-08-23).
-    narration("intake-message", "message", "story_message_title", "story_message_body", {
+    narration("intake-message", "invitation", "story_message_title", null, {
       persona: CLIENT,
       keepOwnStep: true,
       caption: "story_step_message",

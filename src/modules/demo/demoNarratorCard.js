@@ -60,6 +60,7 @@
 // second way onward; the button is left out entirely when no caller offers one, rather than
 // rendering a control that does nothing).
 
+import { intakeInviteMessage, intakeInviteUrl } from "../clients/intakeInvite.js";
 import { isGuideSurface } from "../common/dom.js";
 
 const CARD_ID = "demo-narrator-card";
@@ -141,6 +142,24 @@ export class MessageNarratorCard extends DemoNarratorCard {
   }
 }
 
+/** The invitation on the client's phone, in the words the app really sends (review point A9).
+ *
+ * The card used to carry its own text, and that text went stale: the app's invitation was rewritten
+ * on 2026-08-26 because a bare link from an unknown number reads as a scam, and the card went on
+ * showing the old one. So the body is not a dictionary entry but the message itself, built by the
+ * function that builds the real one, in the language the page is in. Unsigned, because the story
+ * sends Ana to her page without a sender, as the app does when the trainer has entered no details.
+ */
+export class InvitationNarratorCard extends MessageNarratorCard {
+  static kind = "invitation";
+
+  words(narration) {
+    const lang = globalThis.document?.documentElement?.lang || undefined;
+    const url = intakeInviteUrl({ lang });
+    return { ...super.words(narration), body: intakeInviteMessage({ url, t: this.t, lang }) };
+  }
+}
+
 /** A SCREENSHOT of the app the file arrived in — the trainer's messaging app, with Ana's message and
  * her attachment in it (TODO §38.22).
  *
@@ -213,6 +232,7 @@ const KINDS = new Map(
   [
     ChapterNarratorCard,
     MessageNarratorCard,
+    InvitationNarratorCard,
     ScreenshotNarratorCard,
     PaperNarratorCard,
     OffTrackNarratorCard,

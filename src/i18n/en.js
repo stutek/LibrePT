@@ -754,8 +754,6 @@ export const en = {
   story_step_thanks:
     "Tap Done and explore the app on your own, or Clear the demo data to empty it and start with your own clients.",
   story_message_title: "A message from your trainer",
-  story_message_body:
-    "Fill in your details for our training — it takes a minute and nothing stays on your phone: librept.app/intake — Sam, +386 40 111 222",
   story_arrived_title: "It lands on your phone",
   story_arrived_body:
     "The file Ana sent arrives in your messages like any other attachment. It went through no server. You decide whether she joins your clients.",

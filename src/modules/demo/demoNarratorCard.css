@@ -142,13 +142,15 @@
    the client's phone, and her file arriving on the trainer's. Drawn as a bubble because that is what
    the viewer is being told to picture, and because it could never be mistaken for a screen of this
    app, which is the whole rule the paper track exists for (§35.1). */
-.demo-narrator-card--message {
+.demo-narrator-card--message,
+.demo-narrator-card--invitation {
   background: color-mix(in srgb, #22c55e 12%, var(--card-bg));
   border-color: color-mix(in srgb, #22c55e 40%, transparent);
   border-left: 3px solid #22c55e;
 }
 
-.walkthrough-panel .demo-narrator-card--message {
+.walkthrough-panel .demo-narrator-card--message,
+.walkthrough-panel .demo-narrator-card--invitation {
   padding: 0.75rem 0.9rem;
   border-radius: var(--border-radius-md);
   border-left: 3px solid #22c55e;
@@ -157,9 +159,17 @@
 /* The message itself is somebody's words, so it is set apart from the story's narrating voice. It
    is a real `blockquote` since 2026-08-27 (§38.10) — the italics said "not our words" to a reader
    and nothing at all to a screen reader — which brings a browser indent this puts back. */
-.demo-narrator-card--message .demo-narrator-body {
+.demo-narrator-card--message .demo-narrator-body,
+.demo-narrator-card--invitation .demo-narrator-body {
   font-style: italic;
   margin-inline: 0;
+}
+
+/* The invitation is the real message, line breaks and full link included: the breaks are kept, and
+   the link may break anywhere, since a phone-wide card cannot hold it on one line. */
+.demo-narrator-card--invitation .demo-narrator-body {
+  white-space: pre-line;
+  overflow-wrap: anywhere;
 }
 
 /* Full strength on this card, not the muted grey the narrating voice uses. Two reasons, and the
@@ -170,6 +180,8 @@
    tints itself owns its own text colours. */
 .demo-narrator-card--message .demo-narrator-body,
 .demo-narrator-card--message .demo-narrator-kicker,
+.demo-narrator-card--invitation .demo-narrator-body,
+.demo-narrator-card--invitation .demo-narrator-kicker,
 .demo-narrator-card--screenshot .demo-narrator-body,
 .demo-narrator-card--screenshot .demo-narrator-kicker {
   color: var(--text-main);

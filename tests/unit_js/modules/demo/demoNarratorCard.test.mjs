@@ -98,3 +98,25 @@ test("every kind is a DemoNarratorCard, so the surface has one thing to draw", (
     assert.ok(demoNarratorCardFor(kind, t) instanceof DemoNarratorCard);
   }
 });
+
+test("the invitation on Ana's phone is the message the app sends", async () => {
+  // Review point A9: the card carried its own text, which went stale when the app's invitation was
+  // rewritten, so the demo showed a message the product no longer sends. The comparison is with what
+  // the real send path hands the share sheet, not with the function the card calls.
+  const { sendIntakeInvite } = await import("../../../../src/modules/clients/intakeInvite.js");
+  let shared = null;
+  const platform = {
+    canShare: () => true,
+    share: async (data) => {
+      shared = data.text;
+    },
+  };
+  await sendIntakeInvite({ platform, t });
+
+  const step = DEMO_STORY.chapters
+    .flatMap((chapter) => chapter.steps)
+    .find((each) => each.id === "intake-message");
+  const card = demoNarratorCardFor(step.narrate.kind, t);
+
+  assert.equal(card.words(step.narrate).body, shared);
+});

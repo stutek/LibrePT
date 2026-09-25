@@ -705,8 +705,6 @@ export const sl = {
   story_step_thanks:
     "Pritisni Končaj in aplikacijo raziskuj sam, ali Počisti demo podatke, da jo izprazniš in začneš s svojimi strankami.",
   story_message_title: "Sporočilo od trenerja",
-  story_message_body:
-    "Izpolni svoje podatke za najin trening — vzame minuto in na tvojem telefonu ne ostane nič: librept.app/intake — Sam, +386 40 111 222",
   story_arrived_title: "Prispe na tvoj telefon",
   story_arrived_body:
     "Datoteka, ki jo je Ana poslala, pride v tvoja sporočila kot vsaka druga priponka. Na noben strežnik ni šla. Ti se odločiš, ali jo sprejmeš med stranke.",
