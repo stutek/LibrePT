@@ -78,3 +78,38 @@ def test_an_imported_id_that_a_client_holds_does_not_replace_the_client(
         "the client was replaced by the imported exercise"
     )
     assert after["exercise"] and after["exercise"] != client["id"]
+
+
+def test_a_chosen_file_names_the_source_of_what_it_adds(page, local_server):
+    """Found by Codex's review, TODO §77.4: the field showed the file's name, but Add to library read
+    the box again without it and emptied the field. The exercise was saved as the trainer's own."""
+    page.goto(local_server + "exercises")
+    page.wait_for_selector("#view-exercises.active")
+    page.click("#btn-import-library")
+    page.wait_for_selector("#dialog-library-import[open]")
+    page.set_input_files(
+        "#library-import-file",
+        files=[
+            {
+                "name": "Ana.json",
+                "mimeType": "application/json",
+                "buffer": b'["Imported Sled"]',
+            }
+        ],
+    )
+    page.wait_for_function(
+        "document.getElementById('library-import-source').value === 'Ana'"
+    )
+    page.click("#library-import-add")
+    page.wait_for_selector("#dialog-library-import", state="hidden")
+    page.evaluate(f"async () => {{ {FLUSH}; }}")
+    page.reload()
+    page.wait_for_selector("#view-exercises.active")
+
+    source = page.evaluate(
+        f"""async () => ({STORE}.getState().exercises
+            .find((e) => e.name === 'Imported Sled') || {{}}).source || null"""
+    )
+    assert source == "Ana", (
+        "the exercise from Ana.json was saved without the file's name as source"
+    )

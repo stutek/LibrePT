@@ -29,6 +29,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Fixed
 
+- An exercise imported from a file keeps the file's name as its source when the trainer presses
+  Add to library without editing the source field. It was saved as the trainer's own (TODO §77.4).
 - An imported exercise no longer replaces a client, or any other record, that already holds the
   same id: it gets a new one, and the circuits that use it follow (TODO §77.1).
 - Today in the session list's calendar shows today again when another day was chosen: a date filter

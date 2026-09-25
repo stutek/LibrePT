@@ -12,7 +12,9 @@
 // **The source name is theirs to set.** It is taken from the file when the file names one (its
 // `source` or `author`), else from the file's name. It applies to entries that do not already name
 // their source; a colleague's export can carry several sources, which must survive another hop.
-// Once the trainer types in the field, a later read leaves it alone.
+// Once the trainer types in the field, a later read leaves it alone. The file's name is kept from
+// the moment the file is read, so every later read of the box — Add to library's too — still has it
+// (TODO §77.4).
 //
 // Injected dependencies: `t`, `getState`, `saveToLocalStorage`, `newId`, `readFileText(file)`,
 // `onImported(source)`.
@@ -30,6 +32,7 @@ import { closeModal, openModal, renderMarkupOnce } from "../common/dom.js";
 const DIALOG_ID = "dialog-library-import";
 let deps = null;
 let sourceTyped = false;
+let fileSource = "";
 
 export function initLibraryImportDialog(injected) {
   deps = injected;
@@ -144,12 +147,12 @@ function renderReport(parsed, plan) {
 
 /** Read the box, plan it against the library as it is now, and report. Returns the plan when there
  * is something to add, else null. */
-function readCurrent(fileName = "") {
+function readCurrent() {
   const { t, getState, newId } = deps;
   const parsed = readLibrary(byId("library-import-text").value);
   const sourceField = byId("library-import-source");
   if (parsed.ok && !sourceTyped) {
-    sourceField.value = parsed.source || fileName.replace(/\.[^.]+$/, "");
+    sourceField.value = parsed.source || fileSource;
   }
   const source = sourceField.value.trim();
   const plan = parsed.ok
@@ -192,10 +195,12 @@ function wire() {
     if (!file) return;
     // Into the same box a paste lands in, so a file and a paste are one path from here on.
     textArea.value = await deps.readFileText(file);
-    readCurrent(file.name || "");
+    fileSource = (file.name || "").replace(/\.[^.]+$/, "");
+    readCurrent();
   });
   byId("library-import-template").addEventListener("click", () => {
     textArea.value = libraryTemplate();
+    fileSource = "";
     readCurrent();
   });
   byId("library-import-add").addEventListener("click", addImported);
@@ -225,6 +230,7 @@ export function openLibraryImportDialog() {
   byId("library-import-text").value = "";
   byId("library-import-source").value = "";
   sourceTyped = false;
+  fileSource = "";
   byId("library-import-report").classList.add("hidden");
   byId("library-import-add").disabled = true;
   openModal(DIALOG_ID);

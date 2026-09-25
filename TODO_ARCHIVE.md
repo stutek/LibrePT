@@ -20,6 +20,30 @@ Read [CHANGELOG.md](CHANGELOG.md) for what shipped and when. This file is why.
 
 ---
 
+### 77.4 [x] P2 — Vir iz imena datoteke izgine ob potrditvi uvoza — popravljeno 2026-09-25
+
+**Izvor:** `4faf64f`, [libraryImportDialog.js](src/modules/exercises/libraryImportDialog.js),
+`readCurrent` in `addImported`.
+
+**Ponovitev v uporabniškem vmesniku:** izberi datoteko `Ana.json` z vsebino
+`["Imported Sled"]`. Polje za vir kaže `Ana`. Brez ročnega posega vanj pritisni Add to
+library. Shranjena vaja nima `source`. `addImported()` pokliče `readCurrent()` brez
+imena datoteke; ta izprazni vir, ker uporabnik polja ni tipkal. Vaja je označena kot lastna.
+
+**Odprava:** ob potrditvi ohraniti prikazani vir; privzeto ime datoteke določiti ob branju
+datoteke, ne znova ob vsakem pregledu. Test mora uporabiti dejanski izbor datoteke brez
+`source`, potrditi brez urejanja polja in preveriti vir po ponovnem zagonu. Sedanja
+[test_library_import.py](tests/e2e/test_library_import.py) preverja le lepljenje JSON z
+izrecnim `source`. Blokira pravilno označevanje uvoženih vaj (§45.5).
+
+**Popravljeno 2026-09-25 (Claude).** Dialog si ime datoteke brez končnice zapomni v trenutku, ko
+datoteko prebere (`fileSource`), in ga uporabi pri vsakem nadaljnjem branju polja, tudi ob
+Add to library. Ob odprtju dialoga in ob izbiri predloge se ime izbriše. Test
+`test_a_chosen_file_names_the_source_of_what_it_adds` v
+[test_library_import.py](tests/e2e/test_library_import.py) izbere datoteko `Ana.json` brez
+`source`, potrdi brez urejanja polja in po ponovnem zagonu preveri vir `Ana`. Brez popravka pade:
+vir je prazen.
+
 ### 77.7 [x] P2 — Danes ne prikaže današnjih vadb ob aktivnem datumskem filtru — popravljeno 2026-09-24
 
 **Izvor:** `b7735d4`, [sessionFilterBar.js](src/modules/sessionList/sessionFilterBar.js),

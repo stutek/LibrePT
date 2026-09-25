@@ -5428,21 +5428,10 @@ ponovnem uvozu kataloga s takimi cilji. Vstavljanje nato uporabi privzete cilje.
 vrednosti jasno poročati pred potrditvijo. Testirati izvoz → uvoz za `max`, razpon `8-12`,
 časovni cilj in besedilno obremenitev. Blokira zanesljivo izmenjavo predpisov vadbe (§45.5).
 
-### 77.4 [ ] P2 — Vir iz imena datoteke izgine ob potrditvi uvoza
+### 77.4 [x] P2 — Vir iz imena datoteke izgine ob potrditvi uvoza — popravljeno 2026-09-25
 
-**Izvor:** `4faf64f`, [libraryImportDialog.js](src/modules/exercises/libraryImportDialog.js),
-`readCurrent` in `addImported`.
-
-**Ponovitev v uporabniškem vmesniku:** izberi datoteko `Ana.json` z vsebino
-`["Imported Sled"]`. Polje za vir kaže `Ana`. Brez ročnega posega vanj pritisni Add to
-library. Shranjena vaja nima `source`. `addImported()` pokliče `readCurrent()` brez
-imena datoteke; ta izprazni vir, ker uporabnik polja ni tipkal. Vaja je označena kot lastna.
-
-**Odprava:** ob potrditvi ohraniti prikazani vir; privzeto ime datoteke določiti ob branju
-datoteke, ne znova ob vsakem pregledu. Test mora uporabiti dejanski izbor datoteke brez
-`source`, potrditi brez urejanja polja in preveriti vir po ponovnem zagonu. Sedanja
-[test_library_import.py](tests/e2e/test_library_import.py) preverja le lepljenje JSON z
-izrecnim `source`. Blokira pravilno označevanje uvoženih vaj (§45.5).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#774-x-p2--vir-iz-imena-datoteke-izgine-ob-potrditvi-uvoza--popravljeno-2026-09-25);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ### 77.5 [ ] P2 — Ponovni uvoz istega kataloga podvoji sklope
 
