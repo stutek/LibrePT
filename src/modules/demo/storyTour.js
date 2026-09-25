@@ -23,6 +23,7 @@
 //
 // Injected dependencies: none — a plain data module.
 
+import { SERIES_ID } from "../../data/sessionSeriesSeed.js";
 import { GYM_FLOOR_TOUR } from "./gymFloorTour.js";
 import {
   STORY_SIGNUP_FILENAME,
@@ -723,8 +724,8 @@ const EVENING_CHAPTER = {
       id: "evening-move",
       persona: TRAINER,
       route: "/",
-      targetWithin: ".session-card",
-      targetText: "Tuesday & Thursday",
+      // The series' card by its id: its title is in the language the demo was loaded in.
+      targetWithin: `.session-card[data-series-id="${SERIES_ID}"]`,
       target: ".btn-edit-session",
       caption: "story_step_evening_move",
       expect: { selector: "#setup-occurrence-scope", visible: true },

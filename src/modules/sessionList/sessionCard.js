@@ -319,6 +319,10 @@ export function renderSessionCard(b, colContainer, deps) {
   // unstarted session must not read as already in progress, so isLive only follows isLaunched.
   const isLive = isLaunched;
   if (isLive) card.classList.add("session-live");
+  // Which record this card is, in words that do not change with the language: the demo tours find
+  // their card by these, since a demo loaded in Slovenian titles its sessions in Slovenian.
+  card.dataset.sessionId = b.id;
+  if (b.seriesId) card.dataset.seriesId = b.seriesId;
 
   const info = document.createElement("div");
   info.className = "session-card-info";

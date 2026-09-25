@@ -19,16 +19,19 @@
 //
 // Injected dependencies: none — a plain data module.
 
+import { DEMO_GROUP_SESSION_ID } from "../../data/sessions.js";
+
 export const GYM_FLOOR_TOUR = {
   id: "gym-floor",
   steps: [
     {
       id: "open-session",
-      // The seeded GROUP session by name, not the first card on the board. The first attempt used
+      // The seeded GROUP session, not the first card on the board. The first attempt used
       // position and landed on a one-client session, so step 4 had no second participant to switch
       // to — a demo must not depend on the order a seeded list happens to render in.
-      target: ".session-card",
-      targetText: "Group Strength",
+      // By its id, never its title: the demo writes the title in the language it was loaded in, and
+      // the English one stopped every Slovenian walk here (found 2026-09-25).
+      target: `.session-card[data-session-id="${DEMO_GROUP_SESSION_ID}"]`,
       // What has to be TRUE before this step can be asked (TODO §30.3): the board, with cards on
       // it. A pasted or refreshed `?demo=` link can open the app anywhere, and a step asking the
       // trainer to open a session that is already open reads as a broken guide.

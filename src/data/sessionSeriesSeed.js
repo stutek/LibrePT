@@ -15,7 +15,7 @@
 // The rule, in the four values every seeded evening below has to agree with. Written once here
 // rather than twice, because a slot moved in the series and not in its past evenings would put the
 // same Tuesday on the board at two different hours.
-const SERIES_ID = "ser01f2e3";
+export const SERIES_ID = "ser01f2e3";
 const SERIES_TITLE = "Tuesday & Thursday Strength";
 const SLOT_TIME = "18:00 - 19:00";
 const SLOT_START_HOUR = 18;

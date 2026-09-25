@@ -246,6 +246,20 @@ def test_the_whole_story_can_be_walked_with_show_me(page, local_server):
     expect(page.locator(PANEL)).to_be_hidden()
 
 
+def test_the_whole_story_can_be_walked_in_slovenian(page, local_server):
+    """Found 2026-09-25 while the cards were rewritten: three steps found the session card by its
+    English name ("Group Strength", "Tuesday & Thursday"), but the demo data is written in the
+    language chosen when it loads, and in Slovenian those cards say "Skupinska moč in kondicija"
+    and "Moč ob torkih in četrtkih". The only Slovenian walk stopped at Ana's phone, before them."""
+    _open_story(page, local_server, "?init=demo_data_load&lang=sl&demo=story")
+
+    _, story_length = _step_numbers(page)
+    captions = _walk_the_whole_story(page)
+
+    assert len(captions) == story_length, captions[-1]
+    expect(page.locator(PANEL)).to_be_hidden()
+
+
 def test_the_story_tells_a_story_rather_than_naming_features(page, local_server):
     """Asked for 2026-08-22: this is storytelling, not a feature list. The proof a test can hold is
     that the people on screen are named in the words the viewer reads — a demo that says "the

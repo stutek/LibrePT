@@ -29,6 +29,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Fixed
 
+- The guided story can be walked to its end in Slovenian. Three steps found a session card by its
+  English title, but the Slovenian demo titles its sessions in Slovenian, so the guide stopped at
+  step 25.
 - An exercise imported from a file keeps the file's name as its source when the trainer presses
   Add to library without editing the source field. It was saved as the trainer's own (TODO §77.4).
 - An imported exercise no longer replaces a client, or any other record, that already holds the

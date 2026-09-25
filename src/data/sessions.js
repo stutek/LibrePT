@@ -2,6 +2,10 @@
 
 import { DEFAULT_SERIES_PAST_SESSIONS } from "./sessionSeriesSeed.js";
 
+// The group session the demo tours open. The tours find its card by this id, because the title is
+// written in the language the demo was loaded in (data/demoText.js).
+export const DEMO_GROUP_SESSION_ID = "s01f2e3d";
+
 // The three venues this trainer runs sessions at. Referenced by every session so the
 // session view can show a "date time location" context line (e.g. "2026-07-17 10:00 Trib gym base").
 export const LOCATIONS = {
@@ -82,7 +86,7 @@ export const DEFAULT_SESSIONS = (() => {
       completed: true,
     },
     {
-      id: "s01f2e3d",
+      id: DEMO_GROUP_SESSION_ID,
       ...slot(-1, +1),
       title: "Group Strength & Conditioning",
       location: LOCATIONS.GYM,
