@@ -26,9 +26,9 @@
   gap: 16px;
   padding: 24px 32px;
   text-align: center;
-  /* The onboarding offer now carries a form as well as three buttons (TODO §45.2), which on a short
-     phone is taller than the viewport. Without this the overflow is simply cut off — and what gets
-     cut is the bottom, where the save button is. Vertical padding replaces the old `0 32px` for the
+  /* The trainer's details step is a four-field form, which on a short phone is taller than the
+     viewport. Without this the overflow is simply cut off — and what gets cut is the bottom, where
+     the save button is. Vertical padding replaces the old `0 32px` for the
      same reason: centred content that overflows needs room at both ends, or the first line goes
      under the top edge. */
   overflow-y: auto;
@@ -166,7 +166,8 @@
 /* Language choice — the first thing shown when nobody has picked one, ahead of the hold and ahead
    of any onboarding. Shares .app-splash-action with the onboarding buttons so the two steps look
    like one flow rather than two designs. */
-.app-splash-language {
+.app-splash-language,
+.app-splash-step {
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -176,11 +177,13 @@
   animation: splash-rise 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.app-splash-language[hidden] {
+.app-splash-language[hidden],
+.app-splash-step[hidden] {
   display: none;
 }
 
-.app-splash-language-prompt {
+.app-splash-language-prompt,
+.app-splash-step-prompt {
   margin: 0;
   font-size: 14px;
   font-weight: 600;
@@ -191,7 +194,8 @@
    that scrolls inside the splash instead of pushing the prompt off the top of a phone. The minimum
    column is wide enough for the longest language name written in itself, and the maximum height
    leaves the prompt above it on screen at all times. */
-.app-splash-language-options {
+.app-splash-language-options,
+.app-splash-step-options {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 10px;
@@ -200,8 +204,21 @@
 }
 
 /* Each still gets a full-height target, whatever the column count is. */
-.app-splash-language-options .app-splash-action {
+.app-splash-language-options .app-splash-action,
+.app-splash-step-options .app-splash-action {
   width: 100%;
+}
+
+/* The theme the trainer tapped: the one they see around them, marked in words for a screen reader
+   (aria-pressed) and by the border for the eye. */
+.app-splash-action[aria-pressed="true"] {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary);
+}
+
+.app-splash-action:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 
 /* Onboarding entry point — replaces the progress sweep once the hold is over and the trainer has
@@ -221,35 +238,21 @@
   display: none;
 }
 
-/* The trainer's own details, under the three choices (TODO §45.2). Deliberately quieter than they
-   are — smaller labels, no primary colour, a save button that shares .app-splash-action but not its
-   emphasis — because it is an offer beside the way in, not the way in. Left-aligned against the
-   splash's centred text: a form whose labels are centred is a form nobody can scan. */
+/* The trainer's details, a first-run step of its own. Left-aligned against the splash's centred
+   text: a form whose labels are centred is a form nobody can scan. */
 .app-splash-details {
   display: flex;
   flex-direction: column;
   align-items: stretch;
   gap: 10px;
   width: 100%;
-  margin-top: 6px;
-  padding-top: 14px;
-  border-top: 1px solid var(--border-color);
   text-align: left;
 }
 
-.app-splash-details:empty {
-  display: none;
-}
-
-.app-splash-details-lede,
-.app-splash-details-saved {
+.app-splash-details-lede {
   margin: 0;
   font-size: 13px;
   color: var(--text-muted);
-}
-
-.app-splash-details-saved[hidden] {
-  display: none;
 }
 
 .app-splash-action {
@@ -358,6 +361,7 @@
   .app-splash-progress,
   .app-splash-progress::after,
   .app-splash-language,
+  .app-splash-step,
   .app-splash-onboarding {
     animation: none;
     transition: none;

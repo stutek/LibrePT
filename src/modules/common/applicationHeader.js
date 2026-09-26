@@ -5,18 +5,8 @@
 //   getState(),
 //   t,
 //   saveToLocalStorage(),
-//   applyTranslations(lang),
+//   changeLanguage(lang),
 //   navigateToPath(path),
-//   renderClientsList(),
-//   renderRoutinesList(),
-//   renderExercisesList(),
-//   renderGlobalHistory(),
-//   renderPendingPlanAdjustments(),
-//   renderSessions(),
-//   populateDropdownSelectors(),
-//   getActiveSession(),
-//   renderActiveGroupBoard(),
-//   renderClipboardBar()
 // }
 
 import { driveSyncStatus } from "../../data/driveSyncService.js";
@@ -591,27 +581,9 @@ export function setupApplicationHeader() {
     // resolveLang, not the raw value: an unchosen language is null, and assigning null to a
     // <select> leaves it showing nothing at all.
     langSwitcher.value = resolveLang(deps.getState().lang);
-    langSwitcher.addEventListener("change", (e) => {
-      const newLang = e.target.value;
-      deps.getState().lang = newLang;
-      deps.saveToLocalStorage();
-      deps.applyTranslations(newLang);
-
-      // Re-render views to apply translations
-      deps.renderClientsList();
-      deps.renderRoutinesList();
-      deps.renderExercisesList();
-      deps.renderGlobalHistory();
-      deps.renderPendingPlanAdjustments();
-      deps.renderSessions();
-      deps.populateDropdownSelectors();
-
-      const activeSession = deps.getActiveSession();
-      if (activeSession) {
-        deps.renderActiveGroupBoard();
-        deps.renderClipboardBar();
-      }
-    });
+    // The same function the welcome screen's language step calls: one list of views to re-draw, so
+    // neither path can leave text built in code in the language it had before.
+    langSwitcher.addEventListener("change", (e) => deps.changeLanguage(e.target.value));
   }
 
   // Theme switcher setup — owned by modules/common/theme.js, which is also what app.js boots the
@@ -621,7 +593,8 @@ export function setupApplicationHeader() {
   // Application overflow (☰) menu
   setupAppMenu();
 
-  // First-run disclaimer + user agreement
+  // The disclaimer's own controls. On a first run the welcome screen asks for it as a step, after the
+  // language — see askForTermsAgreement.
   setupFirstRunTerms();
 }
 
@@ -741,10 +714,14 @@ function setupAppMenu() {
 
 const TERMS_ACCEPTED_KEY = "librept_terms_accepted";
 
-// First-run no-liability disclaimer + agreement (10.2). Shown once when no acceptance is
-// stored; "I agree" persists it. On first run the modal is made mandatory — the ✕ is hidden
-// (via .first-run in CSS) and Escape is blocked — so the user must agree to dismiss it. When
-// later reopened from the ☰ menu it behaves as a normal, dismissable modal.
+// First-run no-liability disclaimer + agreement. "I agree" persists it. On the first run the modal is
+// mandatory — the ✕ is hidden (via .first-run in CSS) and Escape is blocked — so the trainer must agree
+// to dismiss it. Reopened later from the menu it behaves as a normal, dismissable modal.
+//
+// It does NOT open itself. It used to, during header wiring, which put it in the top layer above the
+// welcome screen's language step: a trainer on a cleared browser had to accept English terms before
+// "Slovenščina" could be tapped. The welcome screen now asks for it after the language, through
+// askForTermsAgreement, so it opens already translated.
 function setupFirstRunTerms() {
   const dlg = document.getElementById("dialog-terms");
   const agreeBtn = document.getElementById("btn-terms-agree");
@@ -759,26 +736,21 @@ function setupFirstRunTerms() {
   dlg.addEventListener("cancel", (e) => {
     if (dlg.classList.contains("first-run")) e.preventDefault();
   });
-
-  if (!localStorage.getItem(TERMS_ACCEPTED_KEY)) {
-    dlg.classList.add("first-run");
-    if (!dlg.open) dlg.showModal();
-  }
 }
 
-/** Resolves once the first-run agreement is out of the way — immediately when it was accepted on an
- * earlier visit.
- *
- * Exists because the demo may not play while a MANDATORY modal is on top of it (reported
- * 2026-08-21): on a cleared browser the tour used to run its whole script behind the agreement, and
- * the trainer tapped "I agree" onto an app that had already finished showing itself.
- */
-export function whenTermsAgreed() {
+export function needsTermsAgreement() {
+  return !localStorage.getItem(TERMS_ACCEPTED_KEY);
+}
+
+/** Opens the agreement as the mandatory first-run modal, and resolves when it closes. */
+export function askForTermsAgreement() {
   const dlg = document.getElementById("dialog-terms");
-  if (!dlg?.classList.contains("first-run")) return Promise.resolve();
+  if (!dlg) return Promise.resolve();
   return new Promise((resolve) => {
     // The `close` event, not the button: Agree is one way out and the only one today, but a modal
-    // that closes for any other reason must not leave the demo waiting forever.
+    // that closes for any other reason must not leave the welcome screen waiting forever.
     dlg.addEventListener("close", () => resolve(), { once: true });
+    dlg.classList.add("first-run");
+    if (!dlg.open) dlg.showModal();
   });
 }

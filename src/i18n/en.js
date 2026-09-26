@@ -543,16 +543,20 @@ export const en = {
   app_version_2026_10_desc: "Adds importing your own exercise library and circuits from a file.",
   trainer_details_lede:
     "These go on what you send a client: your name signs the invitation, and your phone and email are how they answer it. They stay on this device.",
-  trainer_details_name: "First and last name",
+  trainer_details_first_name: "First name",
+  trainer_details_last_name: "Last name",
   trainer_details_phone: "Phone",
   trainer_details_email: "Email",
-  trainer_details_email_invalid: "That is not an email address. Correct it, or leave it empty.",
+  trainer_details_email_invalid: "That is not an email address. Correct it.",
+  trainer_details_phone_invalid: "That is not a phone number. Write it with all its digits.",
+  trainer_details_required: "Fill in this field.",
   trainer_details_save: "Save my details",
-  trainer_details_saved: "Saved.",
-  // On the splash the same form has to say, in its own words, that it is optional — the first
-  // screen of an app whose pitch is "no signup" must not look like one (TODO §45.2).
+  trainer_details_save_continue: "Save and continue",
+  // The welcome screen's last step. It says why all four are asked for, since nothing can be skipped.
   trainer_details_splash_lede:
-    "Optional, and you can do it later from the menu. Your name signs the invitations you send clients; your phone and email are how they answer.",
+    "Your name signs the invitations you send clients, and your phone and email are how they answer. All four are required. They stay on this device, and you can change them later in the menu.",
+  splash_theme_prompt: "Choose a theme",
+  splash_continue: "Continue",
   // The guided walkthrough (TODO §9.5) and the captions of the script it shares with the automatic
   // demo (modules/demo/gymFloorTour.js). Each caption names the control by what it DOES, never by
   // where it is on screen — the panel is read on a phone whose layout is not the one this was

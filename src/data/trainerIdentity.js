@@ -2,9 +2,10 @@
 // being the ORGANIZER of a calendar invite so replies have somewhere to go (TODO §1.1/§1.6).
 //
 // **Not a profile, and deliberately not one.** LibrePT stores clients, not trainers — there is one
-// trainer per install and the app has never had to name them. This is two strings kept because an
-// `.ics` without an `ORGANIZER` is one no calendar client will reply to, not the start of an account
-// system. If a real trainer profile ever arrives, these move into it.
+// trainer per install. These are the strings that sign what a client receives: an `.ics` without an
+// `ORGANIZER` is one no calendar client will reply to, and an invitation has to say who sent it. The
+// welcome screen asks for all four on the first launch (first name, last name, phone, email); that
+// makes them required, not an account. If a real trainer profile ever arrives, these move into it.
 //
 // **A setting, not a record.** It belongs to the install the same way `lang` does, so it lives
 // beside the connection flag in plain `localStorage` rather than in the record store: it is not
@@ -15,7 +16,12 @@
 // Injected dependencies: `store` (defaults to `localStorage`) so tests need no browser.
 
 const EMAIL_KEY = "librept_trainer_email";
-const NAME_KEY = "librept_trainer_name";
+const FIRST_NAME_KEY = "librept_trainer_first_name";
+const LAST_NAME_KEY = "librept_trainer_last_name";
+// The single name an install stored before the first and last name were asked for separately. Read
+// as the full name while nothing replaces it, so invitations keep their signature; retired the first
+// time the trainer saves a first or last name.
+const LEGACY_NAME_KEY = "librept_trainer_name";
 // The trainer's phone, kept for one reason (TODO §1.6, SMS ruled in 2026-08-17): an invite has to
 // CARRY it, or the client's reply can only ever be an email — their device knows nothing about the
 // trainer beyond what the invite told it. Not validated: phone numbers are written a dozen ways and
@@ -44,8 +50,13 @@ export function looksLikeEmail(value) {
 }
 
 export function readTrainerIdentity(store = localStorage) {
+  const firstName = store.getItem(FIRST_NAME_KEY) || "";
+  const lastName = store.getItem(LAST_NAME_KEY) || "";
   return {
-    name: store.getItem(NAME_KEY) || "",
+    firstName,
+    lastName,
+    // What every invitation signs with: first name, then last name.
+    name: [firstName, lastName].filter(Boolean).join(" ") || store.getItem(LEGACY_NAME_KEY) || "",
     email: store.getItem(EMAIL_KEY) || "",
     phone: store.getItem(PHONE_KEY) || "",
     expiryPaddingHours: readExpiryPadding(store),
@@ -63,10 +74,13 @@ function readExpiryPadding(store) {
   return Number.isFinite(hours) && hours >= 0 ? hours : DEFAULT_EXPIRY_PADDING_HOURS;
 }
 
-/** Stores what was given, and only what was given: a blank field clears that key rather than
- * writing an empty string, so `readTrainerIdentity` never reports an address that is not one. */
+/** Stores what was given, and only what was given. A field the caller does not pass is left as it
+ * was — the invite dialog saves the email and phone alone, and reading its missing name as a blank
+ * one deleted the trainer's name on every invitation sent. A field passed blank clears its key
+ * rather than writing an empty string, so `readTrainerIdentity` never reports an address that is
+ * not one. */
 export function writeTrainerIdentity(
-  { name, email, phone, expiryPaddingHours } = {},
+  { firstName, lastName, email, phone, expiryPaddingHours } = {},
   store = localStorage,
 ) {
   // Written as its own step because 0 is meaningful here and would be cleared by the blank-clears rule
@@ -77,11 +91,15 @@ export function writeTrainerIdentity(
     else store.setItem(EXPIRY_PADDING_KEY, String(DEFAULT_EXPIRY_PADDING_HOURS));
   }
 
+  if (firstName !== undefined || lastName !== undefined) store.removeItem(LEGACY_NAME_KEY);
+
   for (const [key, value] of [
-    [NAME_KEY, name],
+    [FIRST_NAME_KEY, firstName],
+    [LAST_NAME_KEY, lastName],
     [EMAIL_KEY, email],
     [PHONE_KEY, phone],
   ]) {
+    if (value === undefined) continue;
     const trimmed = String(value || "").trim();
     if (trimmed) {
       store.setItem(key, trimmed);

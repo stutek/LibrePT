@@ -545,16 +545,19 @@ export const de = {
     "Mit Import deiner eigenen Übungsbibliothek und Zirkel aus einer Datei.",
   trainer_details_lede:
     "Diese Angaben stehen auf dem, was du einem Kunden schickst: Dein Name unterschreibt die Einladung, und über Telefon und E-Mail antwortet er dir. Sie bleiben auf diesem Gerät.",
-  trainer_details_name: "Vor- und Nachname",
+  trainer_details_first_name: "Vorname",
+  trainer_details_last_name: "Nachname",
   trainer_details_phone: "Telefon",
   trainer_details_email: "E-Mail",
-  trainer_details_email_invalid:
-    "Das ist keine E-Mail-Adresse. Korrigiere sie oder lass das Feld leer.",
+  trainer_details_email_invalid: "Das ist keine E-Mail-Adresse. Korrigiere sie.",
+  trainer_details_phone_invalid: "Das ist keine Telefonnummer. Schreib sie mit allen Ziffern.",
+  trainer_details_required: "Füll dieses Feld aus.",
   trainer_details_save: "Meine Angaben speichern",
-  trainer_details_saved: "Gespeichert.",
-  // On the splash the same form has to say that it is optional (TODO §45.2).
+  trainer_details_save_continue: "Speichern und weiter",
   trainer_details_splash_lede:
-    "Freiwillig, und du kannst es später im Menü erledigen. Dein Name unterschreibt die Einladungen an deine Kunden; über Telefon und E-Mail antworten sie dir.",
+    "Dein Name unterschreibt die Einladungen an deine Kunden, und über Telefon und E-Mail antworten sie dir. Alle vier Felder sind Pflicht. Die Angaben bleiben auf diesem Gerät, und du kannst sie später im Menü ändern.",
+  splash_theme_prompt: "Wähle ein Design",
+  splash_continue: "Weiter",
   // The guided walkthrough (TODO §9.5) and the captions of the automatic demo
   // (modules/demo/gymFloorTour.js). Each caption names the control by what it DOES.
   walkthrough_title: "Geführte Tour",

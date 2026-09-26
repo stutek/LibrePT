@@ -2,15 +2,23 @@
 // minimum time, then either fades out or, for a trainer with no data yet, turns into the
 // onboarding entry point.
 //
+// **The first launch asks four things, in this order, and none of them can be skipped**: the
+// language, the terms agreement, the theme and the trainer's details (first name, last name, phone,
+// email). Each is asked only while it is missing, on every path into the trainer's app — the
+// sandbox, the guided tour and a demo link included — and all of them before the sandbox is offered.
+// The X stays hidden until the last one is answered.
+//
 // Injected dependencies: `offerOnboarding` (whether the database is still empty — the caller owns
-// that question, see data/stateStore.js's stateHasData), `mountTrainerDetails(container)`, which
-// fills the details form beside the onboarding choices (TODO §45.2), `languages` (every dictionary
-// this build ships, each named in itself) and `chapters` + `t` (the demo story's table of contents,
-// and the words for it). Everything else it needs is its own markup and the URL, so it stays
-// mountable without the rest of the app — and that is why all four arrive as parameters rather than
-// imports: the details form reads and writes the identity store, the languages come from the i18n
-// registry and the chapters from a quarter of a megabyte of demo script, and the file that paints
-// before the app exists must reach into none of them.
+// that question, see data/stateStore.js's stateHasData); what is still missing (`needsLanguageChoice`,
+// `needsTerms`, `needsTheme`, `needsDetails`) and how to ask for each (`onChooseLanguage`,
+// `askForTerms`, `themeChoices` + `onChooseTheme`, `mountTrainerDetails(container, onComplete)`);
+// `languages` (every dictionary this build ships, each named in itself) and `chapters` + `t` (the demo
+// story's table of contents, and the words for it). Everything else it needs is its own markup and
+// the URL, so it stays mountable without the rest of the app — and that is why these arrive as
+// parameters rather than imports: the details form reads and writes the identity store, the terms
+// live in the header, the languages come from the i18n registry and the chapters from a quarter of a
+// megabyte of demo script, and the file that paints before the app exists must reach into none of
+// them.
 //
 // The splash is in the STATIC HTML and visible by default, not created here — it has to be on
 // screen from first paint, and a module that runs after app.js parses would appear too late to
@@ -37,6 +45,9 @@ const DISMISS_ID = "splash-dismiss";
 const PROGRESS_ID = "app-splash-progress";
 const ONBOARDING_ID = "app-splash-onboarding";
 const TRAINER_DETAILS_ID = "splash-trainer-details";
+const DETAILS_STEP_ID = "app-splash-details";
+const THEME_STEP_ID = "app-splash-theme";
+const THEME_CONTINUE_ID = "splash-theme-continue";
 const LANGUAGE_ID = "app-splash-language";
 const CHAPTERS_ID = "splash-chapters";
 const CHAPTER_LIST_ID = "splash-chapter-list";
@@ -72,18 +83,18 @@ export function isSplashDisabled(search = window.location.search) {
   return new URLSearchParams(search).get(SPLASH_PARAM) === SPLASH_OPT_OUT;
 }
 
-/** Whether `?splash=off` actually suppresses the splash here (TODO §28.11).
+/** Whether `?splash=off` actually suppresses the hold and the onboarding offer here. It never
+ * suppresses a first-run step: those are asked on every path.
  *
  * The parameter is honoured everywhere except one case: a FIRST RUN that the link brought nothing
  * to. Clearing browser data does not clear the address bar, so the reload arrives carrying whatever
  * URL was open — and `?splash=off` is set by every demo link and carried forward by every later
- * navigation, so a trainer who clears their data is dropped into an empty app having been asked no
- * language and offered no demo. There the parameter is a leftover, not a choice.
+ * navigation, so a trainer who clears their data would be dropped into an empty app offered no demo.
+ * There the parameter is a leftover, not a choice.
  *
- * `linkBringsContent` is the carve-out and it matters: `?init=` seeds the demo, `?demo=` runs the
- * walkthrough, `?evt=` carries an invitation a client is answering. Those links furnish the app, so
- * they get exactly what they asked for — stopping a client on a fresh phone to pick a language
- * before they can answer an invitation would be a worse bug than the one this fixes.
+ * `linkBringsContent` is the carve-out: `?init=` seeds the demo, `?demo=` runs the walkthrough, `?evt=`
+ * brings back a client's answer. Those links furnish the app, so they skip the onboarding offer they
+ * have already answered.
  */
 export function splashSuppressed({
   search = window.location.search,
@@ -199,20 +210,14 @@ function fadeOut(splash, resolve) {
 }
 
 /**
- * The language step: shown ahead of the hold and ahead of onboarding, with the X withdrawn.
- *
- * No exit on purpose, and this is the one screen where that is right — every other word the app
- * would show is in a language nobody has chosen, so there is nothing useful to dismiss TO. It is
- * also two taps at most, once ever.
+ * The language step: first of all, because every other word the app would show is in a language
+ * nobody has chosen. Two taps at most, once ever.
  */
-function revealLanguageChoice(splash, { onChooseLanguage, afterChoice, languages }) {
+function askLanguage({ onChooseLanguage, languages }, done) {
   const languageStep = document.getElementById(LANGUAGE_ID);
-  if (!languageStep) return afterChoice();
+  if (!languageStep) return done();
 
   fillLanguageChoices(languageStep, languages);
-
-  document.getElementById(PROGRESS_ID)?.setAttribute("hidden", "");
-  document.getElementById(DISMISS_ID)?.setAttribute("hidden", "");
   languageStep.hidden = false;
 
   for (const button of languageStep.querySelectorAll("[data-splash-lang]")) {
@@ -221,12 +226,97 @@ function revealLanguageChoice(splash, { onChooseLanguage, afterChoice, languages
       () => {
         onChooseLanguage(button.dataset.splashLang);
         languageStep.hidden = true;
-        document.getElementById(DISMISS_ID)?.removeAttribute("hidden");
-        afterChoice();
+        done();
       },
       { once: true },
     );
   }
+}
+
+/**
+ * The theme step. A tap shows that theme at once — the splash is drawn in the theme's own colours, so
+ * the trainer sees what they are choosing — and *Continue* works only after a tap: the default nobody
+ * looked at is not a choice.
+ */
+function askTheme({ themeChoices, onChooseTheme, t }, done) {
+  const step = document.getElementById(THEME_STEP_ID);
+  const options = step?.querySelector(".app-splash-step-options");
+  const next = document.getElementById(THEME_CONTINUE_ID);
+  if (!step || !options || !next) return done();
+
+  step.querySelector(".app-splash-step-prompt").textContent = t("splash_theme_prompt");
+  next.textContent = t("splash_continue");
+  next.disabled = true;
+
+  options.replaceChildren();
+  for (const { key, label } of themeChoices()) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "app-splash-action";
+    button.dataset.splashTheme = key;
+    button.setAttribute("aria-pressed", "false");
+    button.textContent = label;
+    button.addEventListener("click", () => {
+      onChooseTheme(key);
+      for (const other of options.children) other.setAttribute("aria-pressed", "false");
+      button.setAttribute("aria-pressed", "true");
+      next.disabled = false;
+    });
+    options.append(button);
+  }
+
+  step.hidden = false;
+  next.addEventListener(
+    "click",
+    () => {
+      step.hidden = true;
+      done();
+    },
+    { once: true },
+  );
+}
+
+/** The trainer's details: the form fills itself (trainerDetailsDialog.js) and says when it is done. */
+function askDetails({ mountTrainerDetails }, done) {
+  const step = document.getElementById(DETAILS_STEP_ID);
+  if (!step || !mountTrainerDetails) return done();
+  step.hidden = false;
+  mountTrainerDetails(document.getElementById(TRAINER_DETAILS_ID), () => {
+    step.hidden = true;
+    done();
+  });
+}
+
+/** The terms agreement: a modal owned by the header, opened over the splash once the language is
+ *  known, so it is read in that language. */
+function askTerms({ askForTerms }, done) {
+  if (!askForTerms) return done();
+  askForTerms().then(done);
+}
+
+/** The first-run steps still missing, in the order they are asked. */
+function firstRunSteps(options) {
+  return [
+    options.needsLanguageChoice && askLanguage,
+    options.needsTerms && askTerms,
+    options.needsTheme && askTheme,
+    options.needsDetails && askDetails,
+  ].filter(Boolean);
+}
+
+/** Ask each step in turn with the X and the progress sweep withdrawn, then give the X back. */
+function askFirstRunSteps(steps, options, afterAll) {
+  document.getElementById(PROGRESS_ID)?.setAttribute("hidden", "");
+  document.getElementById(DISMISS_ID)?.setAttribute("hidden", "");
+  const next = (index) => {
+    if (index === steps.length) {
+      document.getElementById(DISMISS_ID)?.removeAttribute("hidden");
+      afterAll();
+      return;
+    }
+    steps[index](options, () => next(index + 1));
+  };
+  next(0);
 }
 
 /**
@@ -292,16 +382,10 @@ function fillLanguageChoices(languageStep, languages) {
   }
 }
 
-function revealOnboarding(splash, resolve, mountTrainerDetails, chapters, t) {
+function revealOnboarding(splash, resolve, chapters, t) {
   const onboarding = document.getElementById(ONBOARDING_ID);
   // Never trap the trainer behind a panel that failed to render: fall back to just leaving.
   if (!onboarding) return fadeOut(splash, resolve);
-
-  // The trainer's own details, offered beside the three choices (TODO §45.2, asked 2026-09-11).
-  // INJECTED rather than imported: this module reaches for nothing but its own markup and the URL,
-  // which is what keeps it mountable — and a splash that pulled in the identity store would drag the
-  // data layer into the one file that has to paint before the app exists.
-  mountTrainerDetails?.(document.getElementById(TRAINER_DETAILS_ID));
 
   document.getElementById(PROGRESS_ID)?.setAttribute("hidden", "");
   // The X stays. The offer does not auto-close — there is a choice to make and nothing should make
@@ -321,16 +405,23 @@ function revealOnboarding(splash, resolve, mountTrainerDetails, chapters, t) {
 /**
  * Take the splash down, no earlier than `minimumVisibleMs` after navigation start.
  *
- * With `offerOnboarding`, the splash instead becomes the onboarding entry point and waits for the
- * trainer to choose — so the returned promise resolves on their action, not on a timer.
+ * First it asks whatever the first launch still lacks (see the header). With `offerOnboarding`, the
+ * splash then becomes the onboarding entry point and waits for the trainer to choose — so the
+ * returned promise resolves on their action, not on a timer.
  */
 export function dismissSplashWhenReady({
   alreadyHeld = hasHeldThisSession(),
   minimumVisibleMs = requestedMinimumVisibleMs(window.location.search, alreadyHeld),
   offerOnboarding = false,
   needsLanguageChoice = false,
+  needsTerms = false,
+  needsTheme = false,
+  needsDetails = false,
   linkBringsContent = false,
   onChooseLanguage = () => {},
+  askForTerms = null,
+  themeChoices = () => [],
+  onChooseTheme = () => {},
   mountTrainerDetails = null,
   // Which languages this build ships, and which chapters its demo story has. Both are handed in for
   // the same reason the trainer's details form is: this module paints before the app exists, so it
@@ -346,35 +437,33 @@ export function dismissSplashWhenReady({
   // way, so a load that skips the hold still waits for a fully wired app before it lifts.
   rememberHeldThisSession();
 
-  // Both first-run screens honour the same override: `?splash=off` cannot skip them on an arrival
-  // that brought nothing (TODO §28.11). The language step in particular has never had an exit —
-  // there is nothing to dismiss TO when every word on screen is in a language nobody chose — and a
-  // query parameter must not become the way around it that the dismiss X deliberately is not.
+  // Asked on EVERY path, whatever the link says: `?splash=off` and a furnishing link skip the hold
+  // and the onboarding offer, never a first-run step. `?lang=` and `?theme=` are different — they
+  // ANSWER their step, and the caller reports it as no longer needed.
+  const steps = firstRunSteps({ needsLanguageChoice, needsTerms, needsTheme, needsDetails });
   const suppressed = splashSuppressed({
-    firstRun: needsLanguageChoice || offerOnboarding,
+    firstRun: steps.length > 0 || offerOnboarding,
     linkBringsContent,
   });
-  const askForLanguage = needsLanguageChoice && !suppressed;
 
   // A tap on the X that landed while the app was still booting, captured by theme-boot.js because
   // this module was not loaded yet to hear it. Honouring it here is what makes that close DELAYED
   // rather than lost: the trainer asked to leave, and the first moment leaving is possible is now.
   //
-  // It cannot skip the language step, though. That step has no X precisely because there is
-  // nothing to dismiss to, and an early tap landing where the X will eventually be must not become
-  // a way around it — the app would come up in a language nobody picked.
-  if (window.librePtSplashCloseRequested && !askForLanguage) {
+  // It cannot skip a first-run step, though. Those have no X, and an early tap landing where the X
+  // will eventually be must not become a way around them.
+  if (window.librePtSplashCloseRequested && steps.length === 0) {
     return new Promise((resolve) => fadeOut(splash, resolve));
   }
 
   const onboarding = offerOnboarding && !suppressed;
   return new Promise((resolve) => {
-    const continueAfterLanguage = () => {
-      // The hold is measured from navigation start, so whatever the language step consumed already
-      // counts towards it — answering a prompt is not made to be followed by a wait.
+    const continueAfterSteps = () => {
+      // The hold is measured from navigation start, so whatever the steps consumed already counts
+      // towards it — answering a prompt is not made to be followed by a wait.
       const remaining = remainingHoldMs(minimumVisibleMs, performance.now());
       const holdTimer = window.setTimeout(() => {
-        if (onboarding) revealOnboarding(splash, resolve, mountTrainerDetails, chapters, t);
+        if (onboarding) revealOnboarding(splash, resolve, chapters, t);
         else fadeOut(splash, resolve);
       }, remaining);
 
@@ -390,14 +479,18 @@ export function dismissSplashWhenReady({
       );
     };
 
-    if (askForLanguage) {
-      revealLanguageChoice(splash, {
+    askFirstRunSteps(
+      steps,
+      {
         onChooseLanguage,
-        afterChoice: continueAfterLanguage,
         languages,
-      });
-    } else {
-      continueAfterLanguage();
-    }
+        askForTerms,
+        themeChoices,
+        onChooseTheme,
+        mountTrainerDetails,
+        t,
+      },
+      continueAfterSteps,
+    );
   });
 }

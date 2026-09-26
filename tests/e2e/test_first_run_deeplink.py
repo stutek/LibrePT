@@ -16,7 +16,7 @@
 
 import pytest
 
-from tests.conftest import NAVIGATION_TIMEOUT_MS
+from tests.conftest import NAVIGATION_TIMEOUT_MS, complete_first_run
 
 
 @pytest.fixture
@@ -31,39 +31,37 @@ def fresh(browser, local_server):
 
 def test_a_demo_link_still_asks_which_language_to_speak(fresh, local_server):
     """The link answers what it NAMES. `?init=` says load the demo; it says nothing about language,
-    and a narrated demo in a language the viewer does not read is the worst version of it."""
+    and a narrated demo in a language the viewer does not read is the worst version of it. The
+    language comes first — before the terms, which are then read in it."""
     fresh.goto(f"{local_server}?init=demo_data_load&demo=gym_floor")
-
-    fresh.locator("#btn-terms-agree").click()
 
     language = fresh.locator("#app-splash-language")
     language.wait_for(state="visible", timeout=10_000)
     assert language.locator("[data-splash-lang]").count() >= 2
+    assert fresh.locator("#dialog-terms").get_attribute("open") is None
 
 
 def test_a_link_that_names_a_language_is_not_asked_again(fresh, local_server):
-    """`?lang=sl` IS the answer — a share link naming a language must open in it."""
+    """`?lang=sl` IS the answer — a share link naming a language must open in it. The welcome screen
+    goes straight to the next step it lacks, the terms."""
     fresh.goto(f"{local_server}?init=demo_data_load&lang=sl")
 
-    fresh.locator("#btn-terms-agree").click()
-    fresh.wait_for_selector("#view-clients.active", timeout=15_000)
-
+    fresh.locator("#dialog-terms").wait_for(state="visible", timeout=15_000)
     assert fresh.locator("#app-splash-language").is_hidden()
 
 
-def test_the_demo_waits_until_someone_can_actually_watch_it(fresh, local_server):
-    """The whole point of the demo is being seen. Nothing may play while a mandatory modal is on
-    top of it — the trainer would agree to the terms and find the show already over."""
+def test_the_demo_waits_until_the_first_launch_is_answered(fresh, local_server):
+    """The whole point of the demo is being seen. Nothing may play while the welcome screen is still
+    asking — the trainer would finish it and find the show already over."""
     fresh.goto(f"{local_server}?init=demo_data_load&demo=gym_floor")
-    fresh.wait_for_selector("#dialog-terms[open]", timeout=15_000)
+    fresh.locator("#app-splash-language").wait_for(state="visible", timeout=15_000)
     fresh.wait_for_timeout(3_000)
 
     assert fresh.evaluate("() => window.__demoTourResults") is None, (
-        "the demo ran behind the terms modal, where nobody could see it"
+        "the demo ran behind the welcome screen, where nobody could see it"
     )
 
-    fresh.locator("#btn-terms-agree").click()
-    fresh.locator("#app-splash-language [data-splash-lang='en']").click()
+    complete_first_run(fresh)
 
     fresh.wait_for_function(
         "() => Array.isArray(window.__demoTourResults)", timeout=60_000

@@ -63,6 +63,8 @@ test("rebuilding the sandbox keeps the trainer's own details and their cloud con
   // the day one of these is added to VERSION_SCOPED_KEYS it starts being swept, silently.
   const survives = [
     "librept_trainer_name",
+    "librept_trainer_first_name",
+    "librept_trainer_last_name",
     "librept_trainer_email",
     "librept_trainer_phone",
     "librept_invite_expiry_hours",

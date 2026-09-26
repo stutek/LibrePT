@@ -1,35 +1,24 @@
-// src/modules/common/trainerDetailsDialog.js — where the trainer writes down who they are
-// (TODO §45.2).
+// src/modules/common/trainerDetailsDialog.js — where the trainer writes down who they are.
 //
-// Single responsibility: put a form in front of the three values data/trainerIdentity.js already
-// stores — name, phone, email — and hand what was typed back to it. It decides nothing about what
-// they are for; every reader of them (the calendar invite's ORGANIZER, the signature on a client
-// invitation) already exists and is unchanged by this file.
+// Single responsibility: put a form in front of the four values data/trainerIdentity.js stores —
+// first name, last name, phone, email — check them, and hand them back to it. It decides nothing
+// about what they are for; every reader of them (the calendar invite's ORGANIZER, the signature on a
+// client invitation) already exists and is unchanged by this file.
 //
-// **Why it had to exist.** The values were reachable from exactly one place, inside the session
-// invite dialog, and only two of them: the NAME had no input anywhere in the app while
-// intakeInvite.js was already putting it at the top of every invitation a client receives. So the
-// app knew how to sign a message with a name it gave the trainer no way to enter — reported by the
-// first trainer to use it as "there is nowhere to put my details".
+// **Two places, one form.** It opens from the app (☰) menu, and it is a step of the welcome screen on
+// the first launch. The fields, their labels, the saving and the rules are built here for both,
+// parameterised by an id prefix — two copies of a form is two places for a rule to drift, and the ids
+// have to differ because both can exist in the document at once.
 //
-// **Two places, one form.** It opens from the app (☰) menu, and it is also offered on the cold-start
-// splash beside the three onboarding choices (asked 2026-09-11). The fields, their labels, the
-// saving and the one validation rule are built here for both, parameterised by an id prefix — two
-// copies of a form is two places for the rule to drift, and the ids have to differ because both can
-// exist in the document at once.
+// **All four are required, in both places.** The welcome screen asks for them before the sandbox is
+// even offered, because everything the trainer sends a client is signed with them: an invitation
+// from nobody, with no number to answer, is one a client ignores. The menu's form holds the same rule
+// — a save there that blanked a field would undo the welcome screen's.
 //
-// **On the splash it is an OFFER, never a gate.** Every field is optional, the three choices beside
-// it work whether or not anything was typed, and the form says so in its own words. This app's first
-// promise is that there is no account and no signup, and a form on the first screen is exactly what a
-// stranger reads as one — so it must be visibly skippable or the promise is broken by the screen that
-// makes it.
-//
-// **An address that is not one is refused, and said so at the field.** This is the opposite of the
-// rule inside the invite dialog, which keeps the previously stored address when what was typed does
-// not parse — right there, where the trainer is trying to send an invitation and must not be blocked
-// by a typo, and wrong here, where silently discarding what somebody deliberately typed into their
-// own details would leave them believing it was saved. A blank email is always allowed: not every
-// trainer wants replies by mail.
+// **What is wrong is said at the field, and nothing is written until all four are right.** Silently
+// dropping what somebody deliberately typed would leave them believing it was saved. The phone is
+// checked the way the send control checks a contact (domain/contactChannel.js): enough digits to be
+// dialled, written any of the dozen ways people write a number.
 //
 // Injected dependencies: `t` (translate), and `read`/`write` over the identity store so a test needs
 // no browser storage.
@@ -39,11 +28,33 @@ import {
   readTrainerIdentity,
   writeTrainerIdentity,
 } from "../../data/trainerIdentity.js";
+import { contactChannelFor } from "../../domain/contactChannel.js";
 import { closeModal, openModal, renderMarkupOnce } from "./dom.js";
 
 const DIALOG_PREFIX = "trainer-details";
 const SPLASH_PREFIX = "splash-trainer";
-const FIELDS = ["name", "phone", "email"];
+const FIELDS = [
+  {
+    name: "firstName",
+    input: "text",
+    autocomplete: "given-name",
+    label: "trainer_details_first_name",
+  },
+  {
+    name: "lastName",
+    input: "text",
+    autocomplete: "family-name",
+    label: "trainer_details_last_name",
+  },
+  { name: "phone", input: "tel", autocomplete: "tel", label: "trainer_details_phone" },
+  { name: "email", input: "email", autocomplete: "email", label: "trainer_details_email" },
+];
+// What each problem says at its field.
+const PROBLEM_TEXT = {
+  required: "trainer_details_required",
+  phone: "trainer_details_phone_invalid",
+  email: "trainer_details_email_invalid",
+};
 
 let deps = null;
 
@@ -55,27 +66,37 @@ export function initTrainerDetailsDialog(injected) {
   };
 }
 
-/** The three fields, for either host.
+/** What is wrong with a set of details, field by field: `{ phone: "phone" }`, `{}` when nothing. */
+export function trainerDetailsProblems(values) {
+  const problems = {};
+  for (const { name } of FIELDS) {
+    if (!String(values[name] || "").trim()) problems[name] = "required";
+  }
+  if (!problems.phone && contactChannelFor(values.phone) !== "sms") problems.phone = "phone";
+  if (!problems.email && !looksLikeEmail(values.email)) problems.email = "email";
+  return problems;
+}
+
+/** Whether the stored details are complete — what decides that the welcome screen asks for them. */
+export function trainerDetailsComplete(identity = readTrainerIdentity()) {
+  return Object.keys(trainerDetailsProblems(identity)).length === 0;
+}
+
+/** The four fields, for either host.
  *
  * Nothing carries English text: every label is written from the dictionary by `applyFieldLabels`.
- * Markup that seeded its own English would be text no language choice can reach — the §45.1 defect
- * — and agent_tools/ui_strings.py counts it as one either way.
+ * Markup that seeded its own English would be text no language choice can reach, and
+ * agent_tools/ui_strings.py counts it as one either way.
  */
 function fieldsHtml(prefix) {
-  return `
+  return FIELDS.map(
+    ({ name, input, autocomplete }) => `
     <div class="form-group">
-      <label for="${prefix}-name" id="${prefix}-name-label"></label>
-      <input type="text" id="${prefix}-name" class="form-control" autocomplete="name">
-    </div>
-    <div class="form-group">
-      <label for="${prefix}-phone" id="${prefix}-phone-label"></label>
-      <input type="tel" id="${prefix}-phone" class="form-control" autocomplete="tel">
-    </div>
-    <div class="form-group">
-      <label for="${prefix}-email" id="${prefix}-email-label"></label>
-      <input type="email" id="${prefix}-email" class="form-control" autocomplete="email">
-      <p id="${prefix}-email-error" class="text-sm form-error" hidden></p>
-    </div>`;
+      <label for="${prefix}-${name}" id="${prefix}-${name}-label"></label>
+      <input type="${input}" id="${prefix}-${name}" class="form-control" autocomplete="${autocomplete}" required>
+      <p id="${prefix}-${name}-error" class="text-sm form-error" hidden></p>
+    </div>`,
+  ).join("");
 }
 
 function setText(id, text) {
@@ -84,51 +105,55 @@ function setText(id, text) {
 }
 
 function applyFieldLabels(prefix) {
-  const { t } = deps;
-  setText(`${prefix}-name-label`, t("trainer_details_name"));
-  setText(`${prefix}-phone-label`, t("trainer_details_phone"));
-  setText(`${prefix}-email-label`, t("trainer_details_email"));
-  setText(`${prefix}-email-error`, t("trainer_details_email_invalid"));
+  for (const { name, label } of FIELDS) setText(`${prefix}-${name}-label`, deps.t(label));
+}
+
+/** An install that stored one name before the first and last name were asked for separately gets it
+ *  back split at the first space, for the trainer to confirm or correct — never saved unseen. */
+function storedForForm() {
+  const stored = deps.read();
+  if (stored.firstName || stored.lastName || !stored.name) return stored;
+  const [first, ...rest] = stored.name.split(/\s+/);
+  return { ...stored, firstName: first, lastName: rest.join(" ") };
 }
 
 function prefillFields(prefix) {
-  const stored = deps.read();
-  for (const field of FIELDS) {
-    const input = document.getElementById(`${prefix}-${field}`);
-    if (input) input.value = stored[field] || "";
+  const stored = storedForForm();
+  for (const { name } of FIELDS) {
+    const input = document.getElementById(`${prefix}-${name}`);
+    if (input) input.value = stored[name] || "";
+    const error = document.getElementById(`${prefix}-${name}-error`);
+    if (error) error.hidden = true;
   }
-  document.getElementById(`${prefix}-email-error`).hidden = true;
 }
 
-function fieldValue(prefix, field) {
-  return document.getElementById(`${prefix}-${field}`)?.value.trim() || "";
+function formValues(prefix) {
+  const values = {};
+  for (const { name } of FIELDS) {
+    values[name] = document.getElementById(`${prefix}-${name}`)?.value.trim() || "";
+  }
+  return values;
 }
 
-/** What the form would store, and what is wrong with it — separated from the saving itself so the
- *  rule can be read, and tested, without a form on screen. */
-export function trainerDetailsFromForm(values) {
-  const email = values.email.trim();
-  return {
-    details: { name: values.name.trim(), phone: values.phone.trim(), email },
-    emailIsUnusable: email !== "" && !looksLikeEmail(email),
-  };
-}
-
-/** Stores what was typed, or refuses and says why. Returns whether it stored. */
+/** Stores what was typed, or says at each field what is wrong and stores nothing. Returns whether it
+ *  stored. */
 function saveFields(prefix) {
-  const { details, emailIsUnusable } = trainerDetailsFromForm({
-    name: fieldValue(prefix, "name"),
-    phone: fieldValue(prefix, "phone"),
-    email: fieldValue(prefix, "email"),
-  });
+  const values = formValues(prefix);
+  const problems = trainerDetailsProblems(values);
 
-  document.getElementById(`${prefix}-email-error`).hidden = !emailIsUnusable;
-  if (emailIsUnusable) {
-    document.getElementById(`${prefix}-email`).focus();
+  for (const { name } of FIELDS) {
+    const error = document.getElementById(`${prefix}-${name}-error`);
+    if (!error) continue;
+    error.hidden = !problems[name];
+    if (problems[name]) error.textContent = deps.t(PROBLEM_TEXT[problems[name]]);
+  }
+  const first = FIELDS.find(({ name }) => problems[name]);
+  if (first) {
+    document.getElementById(`${prefix}-${first.name}`)?.focus();
     return false;
   }
 
-  deps.write(details);
+  deps.write(values);
   return true;
 }
 
@@ -182,36 +207,26 @@ export function openTrainerDetailsDialog() {
   openModal("dialog-trainer-details");
 }
 
-/** The same form, on the cold-start splash, under the three onboarding choices.
- *
- * **Under them, not above.** The first thing a new trainer should be able to reach is the thing that
- * shows them the app working; a form placed ahead of that would be read as the price of entry.
- *
- * Saving does NOT dismiss the splash and does not choose for them: the three choices are still
- * there afterwards, so the only thing that happened is that the app now knows their name. The
- * confirmation line is what says so — a save with no visible result is one a trainer repeats.
+/** The same form as a step of the welcome screen, calling `onComplete` once all four are saved.
  *
  * Called by splashScreen.js through an injected `mountTrainerDetails`, so the splash keeps importing
  * nothing but its own markup and the URL.
  */
-export function mountTrainerDetailsOnSplash(container) {
+export function mountTrainerDetailsOnSplash(container, onComplete = () => {}) {
   if (!container || !deps) return;
   const { t } = deps;
 
   container.innerHTML = `
     <p id="${SPLASH_PREFIX}-lede" class="app-splash-details-lede"></p>
     ${fieldsHtml(SPLASH_PREFIX)}
-    <button type="button" id="${SPLASH_PREFIX}-save" class="app-splash-action"></button>
-    <p id="${SPLASH_PREFIX}-saved" class="app-splash-details-saved" role="status" hidden></p>`;
+    <button type="button" id="${SPLASH_PREFIX}-save" class="app-splash-action app-splash-action-primary"></button>`;
 
   setText(`${SPLASH_PREFIX}-lede`, t("trainer_details_splash_lede"));
-  setText(`${SPLASH_PREFIX}-save`, t("trainer_details_save"));
-  setText(`${SPLASH_PREFIX}-saved`, t("trainer_details_saved"));
+  setText(`${SPLASH_PREFIX}-save`, t("trainer_details_save_continue"));
   applyFieldLabels(SPLASH_PREFIX);
   prefillFields(SPLASH_PREFIX);
 
-  const saved = document.getElementById(`${SPLASH_PREFIX}-saved`);
   document.getElementById(`${SPLASH_PREFIX}-save`).onclick = () => {
-    saved.hidden = !saveFields(SPLASH_PREFIX);
+    if (saveFields(SPLASH_PREFIX)) onComplete();
   };
 }

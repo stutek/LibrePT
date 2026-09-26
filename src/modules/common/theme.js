@@ -79,11 +79,30 @@ export function resolveTheme(requestedTheme) {
   return THEME_BODY_CLASS[mapped] ? mapped : DEFAULT_THEME;
 }
 
+const THEME_KEY = "librept-theme";
+
+/** Whether anybody has chosen a theme on this device, or the link names one. The welcome screen asks
+ *  until one of the two is true. Readable only because nothing but a CHOICE writes the key: boot puts
+ *  the resolved theme on screen with `persist: false`. */
+export function hasChosenTheme() {
+  try {
+    return Boolean(getShareParams().theme || localStorage.getItem(THEME_KEY));
+  } catch {
+    return false;
+  }
+}
+
+/** Every theme as `{ key, label }`, in the switcher's order, named in `lang`. */
+export function themeChoices(lang = "en") {
+  const labels = THEME_SWITCHER_LABELS[lang] || THEME_SWITCHER_LABELS.en;
+  return Object.keys(THEME_SWITCHER_LABELS.en).map((key) => ({ key, label: labels[key] }));
+}
+
 // A share link's ?theme= wins over the saved preference for this visit, so a recipient sees the app
 // exactly as it was shared without that choice being written over their own.
 export function getInitialTheme() {
   try {
-    return resolveTheme(getShareParams().theme || localStorage.getItem("librept-theme"));
+    return resolveTheme(getShareParams().theme || localStorage.getItem(THEME_KEY));
   } catch (err) {
     console.warn("Failed to retrieve initial theme from localStorage or query params:", err);
     return DEFAULT_THEME;
@@ -121,7 +140,7 @@ export function applyTheme(themeKey, { persist = true } = {}) {
 
   if (persist) {
     try {
-      localStorage.setItem("librept-theme", resolved);
+      localStorage.setItem(THEME_KEY, resolved);
     } catch (err) {
       console.warn("Failed to persist theme choice to localStorage:", err);
     }
@@ -148,12 +167,14 @@ export function setupThemeSwitcher(lang = "en") {
     for (const key of Object.keys(THEME_SWITCHER_LABELS.en))
       themeSwitcher.add(new Option(key, key));
   }
-  applyTheme(getInitialTheme());
+  // Shown, not stored: only a choice writes the key, which is how `hasChosenTheme` can tell.
+  applyTheme(getInitialTheme(), { persist: false });
   themeSwitcher?.addEventListener("change", () => applyTheme(themeSwitcher.value));
   applyThemeSwitcherLabels(lang);
 }
 
-// Applies the theme before the first render, so nothing paints in the wrong one.
+// Applies the theme before the first render, so nothing paints in the wrong one. Not stored — see
+// `hasChosenTheme`.
 export function initTheme() {
-  return applyTheme(getInitialTheme());
+  return applyTheme(getInitialTheme(), { persist: false });
 }

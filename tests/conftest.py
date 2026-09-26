@@ -65,6 +65,40 @@ def src_dir():
 # a fresh document via add_init_script, i.e. before app.js reads the flag.
 ACCEPT_TERMS_SCRIPT = "window.localStorage.setItem('librept_terms_accepted', '1');"
 
+# The rest of the first launch, answered the same way: a chosen theme and the trainer's four details.
+# Without them every boot of the real app stops on the welcome screen's theme and details steps, which
+# have no X. Only for tests that boot the real app (tests/medium/ replaces app.js with a stub and has
+# no welcome screen, and some of its tests check what the identity store holds). Tests that exercise
+# these steps build their own context, or use `complete_first_run` below.
+TRAINER_DETAILS = {
+    "librept_trainer_first_name": "Test",
+    "librept_trainer_last_name": "Trainer",
+    "librept_trainer_phone": "+386 40 000 000",
+    "librept_trainer_email": "trainer@librept.test",
+}
+ANSWER_FIRST_RUN_SCRIPT = (
+    "window.localStorage.setItem('librept-theme', 'daylight');"
+    + "".join(
+        f"window.localStorage.setItem('{key}', '{value}');"
+        for key, value in TRAINER_DETAILS.items()
+    )
+)
+
+
+def complete_first_run(page, lang="en", theme="daylight"):
+    """Answer the welcome screen's first-run steps through the real controls, in their order:
+    language, terms, theme, details. For tests whose context stored none of them."""
+    page.locator(f"#app-splash-language [data-splash-lang='{lang}']").click()
+    page.locator("#btn-terms-agree").click()
+    page.locator(f"#app-splash-theme [data-splash-theme='{theme}']").click()
+    page.locator("#splash-theme-continue").click()
+    page.locator("#splash-trainer-firstName").fill("Ana")
+    page.locator("#splash-trainer-lastName").fill("Kovač")
+    page.locator("#splash-trainer-phone").fill("+386 40 123 456")
+    page.locator("#splash-trainer-email").fill("ana@librept.test")
+    page.locator("#splash-trainer-save").click()
+
+
 # Generous, because this runs on the very first interaction after a cold navigation, when parallel
 # xdist workers are all compiling the app's ~89 ES modules at once — the same contention the
 # `page.goto` budget below is raised for.
@@ -116,7 +150,10 @@ def accept_first_run_terms(request):
     `browser` fixture) and deliberately skip this so the modal appears. Unit tests never request
     `page`, so this never starts a browser for them."""
     if "page" in request.fixturenames:
-        request.getfixturevalue("page").add_init_script(ACCEPT_TERMS_SCRIPT)
+        page = request.getfixturevalue("page")
+        page.add_init_script(ACCEPT_TERMS_SCRIPT)
+        if "medium" not in request.path.parts:
+            page.add_init_script(ANSWER_FIRST_RUN_SCRIPT)
     yield
 
 
@@ -464,10 +501,16 @@ def stored_records_match_their_schema(request):
 
 
 # What the SUITE itself plants in localStorage, which no assertion about "the app wrote nothing"
-# should count: the terms auto-accept that skips a modal, and the schema a second pass reads
-# (--read-schema, TODO §62). Named once here because three tests assert on the client-facing pages,
-# which must leave nothing behind — and each had its own hand-written exception before.
-HARNESS_LOCAL_STORAGE_KEYS = ("librept_terms_accepted", "librept_read_schema")
+# should count: the terms auto-accept that skips a modal, the answered theme and trainer details
+# (ANSWER_FIRST_RUN_SCRIPT), and the schema a second pass reads (--read-schema). Named once here
+# because three tests assert on the client-facing pages, which must leave nothing behind — and each
+# had its own hand-written exception before.
+HARNESS_LOCAL_STORAGE_KEYS = (
+    "librept_terms_accepted",
+    "librept-theme",
+    *TRAINER_DETAILS,
+    "librept_read_schema",
+)
 
 
 def pytest_addoption(parser):

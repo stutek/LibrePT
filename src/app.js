@@ -98,6 +98,8 @@ import {
 } from "./modules/clients/clientsView.js";
 import { openSignupReview } from "./modules/clients/signupReviewDialog.js";
 import {
+  askForTermsAgreement,
+  needsTermsAgreement,
   renderBuildStateBadge,
   renderHeaderShell,
   renderSyncBadge,
@@ -125,9 +127,14 @@ import {
   applyTheme,
   applyThemeSwitcherLabels,
   getInitialTheme,
+  hasChosenTheme,
   initTheme,
+  themeChoices,
 } from "./modules/common/theme.js";
-import { mountTrainerDetailsOnSplash } from "./modules/common/trainerDetailsDialog.js";
+import {
+  mountTrainerDetailsOnSplash,
+  trainerDetailsComplete,
+} from "./modules/common/trainerDetailsDialog.js";
 import {
   escapeHTML,
   formatClockFromMinutes,
@@ -308,9 +315,8 @@ async function init() {
   // trainer's boot happens (TODO §1.7/§26.1). No state load, no seed, no service worker, no terms
   // modal, no splash hold — and crucially NO WRITE: a prospective client who fills this in and walks
   // away leaves nothing on their own phone (their half-typed form lives in sessionStorage until the
-  // tab closes — §38.12). `initTheme` is skipped for exactly that reason (it
-  // persists the resolved theme); theme-boot.js has already put the right class on <html> before
-  // paint, and it writes nothing.
+  // tab closes — §38.12). The theme is put on screen with `persist: false` for the same reason;
+  // theme-boot.js has already put the right class on <html> before paint, and it writes nothing.
   // An invite link is the app's own root with `?evt=` (eventTransports.buildEventLink), so WHO is
   // holding the phone is decided by what the payload turns out to be — not by a path. An INVITE means
   // the client is answering one; an RSVP means the trainer is collecting an answer, and that falls
@@ -524,14 +530,7 @@ async function init() {
     rerenderSessions: renderSessions,
     openSessionInviteDialog,
   });
-  // The splash's first-run decisions ride along from here because they are facts about THIS
-  // arrival — what the link carried, and what language was stored before it was applied — and
-  // setupActiveSession is where the splash is taken down (TODO §28.11). Its promise is handed back
-  // rather than awaited: the splash may sit on screen until someone answers a question, and the
-  // rest of the boot must finish either way — the demo is what waits for it.
-  const splashDown = setupActiveSession({
-    linkBringsContent: linkFurnishesTheApp({ shareInit, shareDemo, inboundEvent }),
-  });
+  setupActiveSession();
 
   initDataWipeDialog({
     t,
@@ -611,19 +610,10 @@ async function init() {
     // persistence to keep correct.
     onProgramImported: openImportedProgramme,
     saveToLocalStorage: saveState,
-    applyTranslations,
+    changeLanguage,
     navigateToPath,
     urlFor,
-    renderClientsList,
-    renderRoutinesList,
-    renderExercisesList,
-    renderGlobalHistory,
-    renderPendingPlanAdjustments,
-    renderSessions,
-    populateDropdownSelectors,
     getActiveSession: () => getActiveSession(),
-    renderActiveGroupBoard,
-    renderClipboardBar,
     openEncryptedFileReader,
     openSignupReview,
   });
@@ -695,6 +685,16 @@ async function init() {
     formatDurationHourMin,
     navigateToPath,
     clipboardPath: () => sessionFocusPath(),
+  });
+
+  // Every component is wired, the header's terms dialog included, so the splash may ask its
+  // first-run steps now — and BEFORE the first draw below: a draw that throws on odd data must not
+  // keep the trainer behind the splash. The facts it needs are about THIS arrival — what the link
+  // carried. Its promise is handed back rather than awaited: the splash may sit on screen until
+  // someone answers a question, and the rest of the boot must finish either way — the demo is what
+  // waits for it.
+  const splashDown = startSplash({
+    linkBringsContent: linkFurnishesTheApp({ shareInit, shareDemo, inboundEvent }),
   });
 
   const repsPresetHost = document.getElementById("reps-preset-datalists");
@@ -846,6 +846,21 @@ function renderEverything() {
   populateDropdownSelectors();
   renderBuildStateBadge(getState());
   renderWorkspaceChrome();
+}
+
+/**
+ * Switch the app's language, from the ☰ menu or the welcome screen's first step. One function for
+ * both: the welcome screen used to translate only the static labels, so every view built in code —
+ * the session list's filters, its empty message — stayed in the language the app booted in.
+ */
+function changeLanguage(lang) {
+  applyTranslations(lang);
+  saveState();
+  renderEverything();
+  if (getActiveSession()) {
+    renderActiveGroupBoard();
+    renderClipboardBar();
+  }
 }
 
 /**
@@ -1023,10 +1038,19 @@ function setupActiveSession({ linkBringsContent } = {}) {
     saveToLocalStorage: saveState,
     openPlanningForClient,
   });
+}
 
-  // Deliberately last: the splash comes down only once every component above is wired. It may not
-  // come down on its own at all — first it asks for a language if none has been chosen, then, with
-  // an empty database, it becomes the onboarding entry point and waits for a choice.
+/**
+ * Hand the splash its first-run steps and let it come down. Called once the whole app is wired, and
+ * not a moment before: a step can open the terms dialog (built by the header) or switch
+ * the language (which redraws every view). It was started from setupActiveSession, ahead of the
+ * header, which went unnoticed while the language step waited for a tap — until a link that answers
+ * the language (`?lang=`) sent the splash straight to the terms, and the dialog did not exist yet.
+ *
+ * It may not come down on its own at all: it asks what the first launch still lacks, then, with an
+ * empty database, it becomes the onboarding entry point and waits for a choice.
+ */
+function startSplash({ linkBringsContent } = {}) {
   return (
     appBoot
       .bootSplashScreen({
@@ -1038,17 +1062,23 @@ function setupActiveSession({ linkBringsContent } = {}) {
         // says nothing about language or onboarding, so on a first run it is a leftover rather than an
         // answer.
         needsLanguageChoice: !hasChosenLanguage(getState().lang),
-        // Whether this arrival was FURNISHED by its link — the demo seed, the walkthrough, an
-        // invitation being answered. Those get exactly the boot they asked for; a bare `?splash=off`
-        // left in the address bar after a trainer cleared their browser does not (TODO §28.11).
+        // The rest of the first launch, asked after the language and before the sandbox is offered,
+        // each only while it is missing. `?theme=` answers the theme step as `?lang=` answers the
+        // language one. The details step also appears on an install already in use whose details are
+        // incomplete, so it is asked once there too.
+        needsTerms: needsTermsAgreement(),
+        needsTheme: !hasChosenTheme(),
+        needsDetails: !trainerDetailsComplete(),
+        // Whether this arrival was FURNISHED by its link — the demo seed, the walkthrough, a client's
+        // answer. Those skip the onboarding offer they have already answered; a bare `?splash=off`
+        // left in the address bar after a trainer cleared their browser does not.
         linkBringsContent,
-        onChooseLanguage: (lang) => {
-          applyTranslations(lang);
-          saveState();
-        },
-        // The trainer's own details, offered beside the three onboarding choices (TODO §45.2). Passed
-        // in rather than imported by the splash, which owns nothing but its markup and the URL — and
-        // it is the same module the ☰ menu opens, so there is one form and one validation rule.
+        onChooseLanguage: changeLanguage,
+        askForTerms: askForTermsAgreement,
+        themeChoices: () => themeChoices(resolveLang(getState().lang)),
+        onChooseTheme: (key) => applyTheme(key),
+        // Passed in rather than imported by the splash, which owns nothing but its markup and the URL
+        // — and it is the same module the ☰ menu opens, so there is one form and one set of rules.
         mountTrainerDetails: mountTrainerDetailsOnSplash,
         // The languages this build actually ships, each named in itself, and the demo story's
         // chapters. Both handed in for the reason the details form is: the splash paints before the

@@ -128,6 +128,8 @@ def test_first_run_terms_is_not_routed(browser, local_server):
     page.set_default_navigation_timeout(NAVIGATION_TIMEOUT_MS)
     try:
         page.goto(local_server)
+        # The agreement is the welcome screen's second step, after the language.
+        page.locator("#app-splash-language [data-splash-lang='en']").click()
         page.wait_for_selector("#dialog-terms[open]")
 
         assert not _path(page).endswith("/terms"), (

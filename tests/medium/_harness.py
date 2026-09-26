@@ -147,19 +147,14 @@ bootHeader({
   getState: () => state,
   t,
   saveToLocalStorage: noop,
-  applyTranslations,
+  // The real changeLanguage (app.js) also re-draws every view; there are no views here to re-draw.
+  changeLanguage: (lang) => {
+    state.lang = lang;
+    applyTranslations(lang);
+  },
   navigateToPath,
   urlFor,
-  renderClientsList: noop,
-  renderRoutinesList: noop,
-  renderExercisesList: noop,
-  renderGlobalHistory: noop,
-  renderPendingPlanAdjustments: noop,
-  renderSessions: noop,
-  populateDropdownSelectors: noop,
   getActiveSession: () => null,
-  renderActiveGroupBoard: noop,
-  renderClipboardBar: noop,
 });
 """
 

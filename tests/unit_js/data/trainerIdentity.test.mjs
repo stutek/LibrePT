@@ -27,14 +27,42 @@ function fakeStore(initial = {}) {
 
 test("what was stored is what comes back", () => {
   const store = fakeStore();
-  writeTrainerIdentity({ name: "Sam Ray", email: "pt@librept.test" }, store);
+  writeTrainerIdentity({ firstName: "Sam", lastName: "Ray", email: "pt@librept.test" }, store);
 
   // Field by field, not deepEqual against the whole object: the shape is not the contract, the
   // round trip is. Pinning the shape meant that adding `phone` — a real field
   // with its own tests, breaking nothing a caller can observe — failed three tests here.
   const identity = readTrainerIdentity(store);
-  assert.equal(identity.name, "Sam Ray");
+  assert.equal(identity.firstName, "Sam");
+  assert.equal(identity.lastName, "Ray");
   assert.equal(identity.email, "pt@librept.test");
+});
+
+test("the name an invitation carries is the first name, then the last name", () => {
+  const store = fakeStore();
+  writeTrainerIdentity({ firstName: "Sam", lastName: "Ray" }, store);
+  assert.equal(readTrainerIdentity(store).name, "Sam Ray");
+});
+
+test("a field the caller does not pass is left as it was", () => {
+  // The invite dialog saves the email and the phone and nothing else. Treating the missing name as a
+  // blank one deleted the trainer's name every time an invitation was sent.
+  const store = fakeStore();
+  writeTrainerIdentity({ firstName: "Sam", lastName: "Ray", phone: "040 111 222" }, store);
+  writeTrainerIdentity({ email: "pt@librept.test", phone: "040 111 222" }, store);
+  assert.equal(readTrainerIdentity(store).name, "Sam Ray");
+});
+
+test("an install that stored one name still signs with it, until the trainer splits it", () => {
+  const store = fakeStore({ librept_trainer_name: "Sam Ray" });
+  const identity = readTrainerIdentity(store);
+  assert.equal(identity.name, "Sam Ray");
+  assert.equal(identity.firstName, "");
+  assert.equal(identity.lastName, "");
+
+  writeTrainerIdentity({ firstName: "Sam", lastName: "Ray-Kos" }, store);
+  assert.equal(readTrainerIdentity(store).name, "Sam Ray-Kos");
+  assert.equal(store.getItem("librept_trainer_name"), null, "the single name is retired");
 });
 
 test("an install that has never been told reports empty strings, not null", () => {

@@ -20,6 +20,30 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-09-26 — The welcome screen asks for everything once
+
+### Changed
+
+- **The first launch asks four things, in this order, and none can be skipped:** the language, the
+  terms agreement, a theme, and the trainer's first name, last name, phone and email. All of them come
+  before the sandbox is offered, on every path into the app, a demo link included. A link that names
+  a language or a theme (`?lang=`, `?theme=`) answers that step. A client opening an invitation is
+  never asked.
+- **A theme is chosen by a tap.** It shows at once, and *Continue* works only after a tap.
+- **The trainer's name is two fields, first name and last name**, in the menu's *My details* as well.
+  All four details are required there too. An install that stored one name is asked once to split
+  it, and an install without a phone is asked once for it.
+
+### Fixed
+
+- **The terms agreement covered the language choice.** On a cleared browser the trainer had to accept
+  English terms before *Slovenščina* could be tapped. The terms now come after the language, in it.
+- **Choosing a language on the welcome screen left part of the app in English.** The session list's
+  filters and its empty message kept the boot language. The welcome screen and the menu now switch
+  the language through the same function, which re-draws every view.
+- **Sending an invitation deleted the trainer's name.** The invite dialog saved the email and phone
+  alone, and the missing name was stored as blank.
+
 ## 2026-09-26 — German
 
 ### Added

@@ -1,10 +1,11 @@
 # tests/e2e/test_first_run_terms.py
-# End-to-end coverage of the first-run Terms & disclaimer agreement (TODO 10.2): on a fresh
-# install the mandatory Terms modal is shown (no ✕, Escape blocked), "I agree" persists the
-# acceptance to localStorage and dismisses it, and a returning (accepted) user never sees it.
+# End-to-end coverage of the first-run Terms & disclaimer agreement: on a fresh install it is asked
+# AFTER the language, as the welcome screen's second step, and is mandatory there (no ✕, Escape
+# blocked); "I agree" persists the acceptance and dismisses it, and a returning (accepted) trainer
+# never sees it.
 #
 # These tests build their OWN browser context so the conftest auto-accept fixture (which only
-# covers the shared `page` fixture) does not suppress the modal.
+# covers the shared `page` fixture) does not suppress the agreement.
 
 from tests.conftest import NAVIGATION_TIMEOUT_MS
 
@@ -19,20 +20,36 @@ def _fresh_page(browser, local_server, accepted=False):
     # Own context, so the conftest fixture that does this for the shared `page` cannot reach us.
     page.set_default_navigation_timeout(NAVIGATION_TIMEOUT_MS)
     page.goto(local_server)
-    page.wait_for_selector("#view-clients.active")
+    page.locator("#app-splash-language").wait_for(state="visible")
     return context, page
 
 
-def test_terms_shown_and_mandatory_on_first_run(browser, local_server):
+def test_the_language_is_asked_before_the_terms(browser, local_server):
+    """A trainer on a cleared browser used to meet English terms on top of the language step, and
+    had to agree before *Slovenščina* could be tapped."""
     context, page = _fresh_page(browser, local_server)
     try:
+        assert page.locator("#dialog-terms").get_attribute("open") is None
+
+        page.locator("[data-splash-lang='sl']").click()
+
         terms = page.locator("#dialog-terms")
-        assert terms.get_attribute("open") is not None
+        terms.wait_for(state="visible")
+        assert page.locator("#btn-terms-agree").inner_text() != "I agree"
+    finally:
+        context.close()
+
+
+def test_terms_are_mandatory_on_first_run(browser, local_server):
+    context, page = _fresh_page(browser, local_server)
+    try:
+        page.locator("[data-splash-lang='en']").click()
+        terms = page.locator("#dialog-terms")
+        terms.wait_for(state="visible")
         assert "first-run" in (terms.get_attribute("class") or "")
 
         # Mandatory: the ✕ dismiss is hidden and Escape does not close it.
         assert page.locator("#dialog-terms .modal-close-btn").is_hidden()
-        assert page.locator("#btn-terms-agree").is_visible()
 
         page.keyboard.press("Escape")
         page.wait_for_timeout(150)
@@ -40,7 +57,7 @@ def test_terms_shown_and_mandatory_on_first_run(browser, local_server):
             "Escape must not dismiss the first-run terms"
         )
 
-        # Not accepted until the user agrees.
+        # Not accepted until the trainer agrees.
         assert (
             page.evaluate("() => localStorage.getItem('librept_terms_accepted')")
             is None
@@ -52,6 +69,7 @@ def test_terms_shown_and_mandatory_on_first_run(browser, local_server):
 def test_agree_persists_and_survives_reload(browser, local_server):
     context, page = _fresh_page(browser, local_server)
     try:
+        page.locator("[data-splash-lang='en']").click()
         page.locator("#btn-terms-agree").click()
 
         terms = page.locator("#dialog-terms")
@@ -61,17 +79,19 @@ def test_agree_persists_and_survives_reload(browser, local_server):
             page.evaluate("() => localStorage.getItem('librept_terms_accepted')") == "1"
         )
 
-        # A returning load does not re-show the modal.
+        # A returning load does not ask again: the next step it stops at is the theme.
         page.reload()
-        page.wait_for_selector("#view-clients.active")
+        page.locator("#app-splash-theme").wait_for(state="visible")
         assert page.locator("#dialog-terms").get_attribute("open") is None
     finally:
         context.close()
 
 
-def test_accepted_user_never_sees_terms(browser, local_server):
+def test_accepted_trainer_never_sees_terms(browser, local_server):
     context, page = _fresh_page(browser, local_server, accepted=True)
     try:
+        page.locator("[data-splash-lang='en']").click()
+        page.locator("#app-splash-theme").wait_for(state="visible")
         assert page.locator("#dialog-terms").get_attribute("open") is None
     finally:
         context.close()

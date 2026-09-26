@@ -301,17 +301,15 @@ export async function bootDemoTour({ shareDemo, hasData, onResults } = {}) {
   return results;
 }
 
-// Everything a demo has to wait for before it may start: the splash gone, and the first-run
-// agreement out of the way (reported 2026-08-21). A demo nobody can see is not a demo — on a
-// cleared browser the tour used to play its whole script behind the mandatory terms modal, and the
-// trainer agreed onto an app that had already finished showing itself.
+// Everything a demo has to wait for before it may start: the splash gone. A demo nobody can see is
+// not a demo — on a cleared browser the tour used to play its whole script behind the mandatory
+// terms modal, and the trainer agreed onto an app that had already finished showing itself.
 //
 // Takes the splash's own promise rather than polling for its absence: that promise is what already
-// means "the app is on screen", including the language step it may have stopped to ask.
+// means "the app is on screen", including every first-run step it stopped to ask — the language, the
+// terms agreement, the theme and the trainer's details.
 export async function whenDemoCanBeWatched(splashDown) {
   await splashDown;
-  const { whenTermsAgreed } = await import("./modules/common/applicationHeader.js");
-  await whenTermsAgreed();
 }
 
 // The long demo (TODO §35) — the chaptered story, DRIVEN BY THE TRAINER with narration cards

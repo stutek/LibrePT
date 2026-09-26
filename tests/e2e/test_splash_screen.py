@@ -160,45 +160,113 @@ def test_choosing_slovenian_translates_the_offer_it_leads_to(page, local_server)
     )
 
 
-@pytest.mark.clean_start
-@pytest.mark.keep_splash
-def test_the_offer_carries_the_trainers_own_details_without_demanding_them(
-    page, local_server
-):
-    """The details form is offered beside the three choices (TODO §45.2), and is an OFFER.
+# The suite answers the theme and details steps for every test (tests/conftest.py). These tests are
+# ABOUT those steps, so they take the answers back before the page loads.
+FORGET_THEME_AND_DETAILS = (
+    "['librept-theme', 'librept_trainer_first_name', 'librept_trainer_last_name',"
+    " 'librept_trainer_phone', 'librept_trainer_email']"
+    ".forEach((key) => window.localStorage.removeItem(key));"
+)
 
-    Two things are asserted together because together they are the promise: the fields are there and
-    they save, AND the three choices still work with nothing typed. This app's pitch is that there is
-    no signup — a form on the first screen that had to be filled in would make that false, and it is
-    the kind of thing that gets tightened by accident later."""
-    page.goto(local_server)
-    _answer_language_step(page)
-    page.locator("#app-splash-onboarding").wait_for(state="visible", timeout=15000)
 
-    for field in ["name", "phone", "email"]:
-        assert page.locator(f"#splash-trainer-{field}").is_visible()
-
-    # Nothing typed, and the way in still works — this is the half that keeps "no signup" true.
-    assert page.locator("#splash-start-empty").is_enabled()
-
-    page.locator("#splash-trainer-name").fill("Ana Kovač")
-    page.locator("#splash-trainer-email").fill("ana@example.com")
-    page.locator("#splash-trainer-save").click()
-    page.locator("#splash-trainer-saved").wait_for(state="visible", timeout=5000)
-
-    stored = page.evaluate(
+def _stored_identity(page):
+    return page.evaluate(
         """async () => {
             const identity = await import(
                 new URL('data/trainerIdentity.js', document.baseURI).href
             );
-            const { name, email } = identity.readTrainerIdentity();
-            return { name, email };
+            const { firstName, lastName, phone, email } = identity.readTrainerIdentity();
+            return { firstName, lastName, phone, email };
         }"""
     )
-    assert stored == {"name": "Ana Kovač", "email": "ana@example.com"}
 
-    # Saving is not a choice: the offer is still there afterwards, waiting for one.
-    assert page.locator("#app-splash-onboarding").is_visible()
+
+@pytest.mark.clean_start
+@pytest.mark.keep_splash
+def test_the_theme_is_chosen_by_a_tap_and_shown_at_once(page, local_server):
+    """After the language comes the theme. Continue waits for a tap, because the default nobody
+    looked at is not a choice, and the tap shows the theme around the trainer before they go on."""
+    page.add_init_script(FORGET_THEME_AND_DETAILS)
+    page.goto(local_server)
+    _answer_language_step(page)
+
+    step = page.locator("#app-splash-theme")
+    step.wait_for(state="visible", timeout=5000)
+    assert page.locator("#splash-dismiss").is_hidden(), "a first-run step has no X"
+    assert page.locator("#splash-theme-continue").is_disabled()
+
+    page.locator("[data-splash-theme='midnight']").click()
+    assert "midnight-theme" in (page.locator("body").get_attribute("class") or "")
+    assert (
+        page.locator("[data-splash-theme='midnight']").get_attribute("aria-pressed")
+        == "true"
+    )
+
+    page.locator("#splash-theme-continue").click()
+    step.wait_for(state="hidden", timeout=5000)
+    assert page.evaluate("() => localStorage.getItem('librept-theme')") == "midnight"
+
+
+@pytest.mark.clean_start
+@pytest.mark.keep_splash
+def test_the_sandbox_is_offered_only_after_all_four_details(page, local_server):
+    """First name, last name, phone and email sign what a client receives, so the welcome screen asks
+    for all four before it offers the sandbox — and says at the field what is wrong."""
+    page.add_init_script(FORGET_THEME_AND_DETAILS)
+    page.goto(local_server)
+    _answer_language_step(page)
+    page.locator("[data-splash-theme='daylight']").click()
+    page.locator("#splash-theme-continue").click()
+
+    page.locator("#app-splash-details").wait_for(state="visible", timeout=5000)
+    assert page.locator("#app-splash-onboarding").is_hidden()
+
+    page.locator("#splash-trainer-firstName").fill("Ana")
+    page.locator("#splash-trainer-phone").fill("040")
+    page.locator("#splash-trainer-save").click()
+    assert page.locator("#splash-trainer-lastName-error").is_visible()
+    assert page.locator("#splash-trainer-phone-error").is_visible()
+    assert page.locator("#splash-trainer-email-error").is_visible()
+    assert page.locator("#app-splash-onboarding").is_hidden(), (
+        "nothing is offered until all four"
+    )
+
+    page.locator("#splash-trainer-lastName").fill("Kovač")
+    page.locator("#splash-trainer-phone").fill("+386 40 123 456")
+    page.locator("#splash-trainer-email").fill("ana@example.com")
+    page.locator("#splash-trainer-save").click()
+
+    page.locator("#app-splash-onboarding").wait_for(state="visible", timeout=15000)
+    assert _stored_identity(page) == {
+        "firstName": "Ana",
+        "lastName": "Kovač",
+        "phone": "+386 40 123 456",
+        "email": "ana@example.com",
+    }
+
+
+@pytest.mark.keep_splash
+def test_an_install_in_use_without_a_phone_is_asked_once(page, local_server):
+    """The details step is not only for an empty database: a trainer who has been working without a
+    phone number is asked for it on the next launch, and then never again."""
+    # Once per tab: an init script runs on every load, and the reload below must see what was saved.
+    page.add_init_script(
+        "if (!sessionStorage.getItem('phone-forgotten')) {"
+        " localStorage.removeItem('librept_trainer_phone');"
+        " sessionStorage.setItem('phone-forgotten', '1'); }"
+    )
+    page.goto(local_server)
+
+    page.locator("#app-splash-details").wait_for(state="visible", timeout=20000)
+    assert page.locator("#splash-trainer-firstName").input_value() == "Test"
+    page.locator("#splash-trainer-phone").fill("+386 40 123 456")
+    page.locator("#splash-trainer-save").click()
+    page.locator("#app-splash-details").wait_for(state="hidden", timeout=5000)
+
+    # The X is withdrawn during every first-run step, so an X on screen means none is being asked.
+    page.reload()
+    page.locator("#splash-dismiss").wait_for(state="visible", timeout=20000)
+    assert page.locator("#app-splash-details").is_hidden()
 
 
 @pytest.mark.clean_start
