@@ -4304,3 +4304,77 @@ plan (`planPeek.js` + `planPeekController.js`, shipped 2026-09-14); 4) opening a
 targets, so a reference into them from another file must still name a live section. The rule that a
 bare § inside the backlog means the backlog was removed with it. `find_unresolved()` is the one loop
 the tool and the repository test both run. Commit 964539d; `build check` green, 10:54 to 11:03.
+
+### 80.2 [x] P2 — Pogoji uporabe prekrijejo izbiro jezika ob prvem obisku — popravljeno 2026-09-26
+
+**Scenarij in koraki:** slovenski trener prvič odpre objavljeno aplikacijo v praznem
+profilu Chrome. Pred izbiro jezika ga pričaka modal »Terms & Disclaimer« z edinim
+vidnim gumbom »I agree«. Želi najprej izbrati slovenščino in razumeti pogoje.
+
+**Opaženo:** izbira »Slovenščina« je za modalom; preverba elementa pod središčem
+gumba vrne dialog s pogoji. Posnetek zaslona potrjuje, da je preostanek zaslona
+zatemnjen in zamegljen. Po »I agree« izbira jezika postane dosegljiva.
+
+**Težava in vpliv:** trener mora sprejeti angleško besedilo, preden lahko izbere jezik.
+Blokira razumljivo prvo uporabo v slovenščini; to ni presoja pravne veljavnosti pogojev.
+
+**Predlog in preverjanje:** najprej omogočiti izbiro jezika, nato prikazati pogoje v
+izbranem jeziku. V praznem profilu mora biti mogoče izbrati slovenščino brez predhodne
+potrditve angleških pogojev. Preverjeno na objavljeni različici `0625bd6`.
+
+**Verdikt 2026-09-26 (Claude): potrjeno na `main`, in koda si sama nasprotuje. Popravek je v
+§81.1.** `setupFirstRunTerms()` v
+[applicationHeader.js](src/modules/common/applicationHeader.js) se izvede med sestavljanjem
+glave in pokliče `dlg.showModal()`. Modalni `<dialog>` gre v vrhnjo plast brskalnika, torej nad
+`#app-splash-language`, in nobena vrednost `z-index` tega ne spremeni. Dva zaslona sta oba
+obvezna in oba brez izhoda, modal pa je drugi na vrsti in vseeno zmaga.
+
+Nasprotje je zapisano v kodi: komentar v [index.html](src/index.html) pravi, da je jezikovna
+izbira »Shown ahead of everything else and with no way out«, komentar v
+[splashScreen.js](src/modules/splash/splashScreen.js) pa, da ta korak izhoda nikoli ni imel in
+da ga tudi `?splash=off` ne sme preskočiti — »the app would come up in a language nobody
+picked«. Natanko to se zgodi.
+
+Besedilo pogojev se prevede samo po sebi, brž ko je jezik izbran prej: `#terms-title`,
+`#terms-body` in `#btn-terms-agree` so že v tabeli v
+[domMappings.js](src/i18n/domMappings.js).
+
+**Popravljeno 2026-09-26 (Claude), commit `f847eb4` (§81.1):** pogoji se ne odprejo več sami ob sestavljanju glave; pozdravni zaslon jih zahteva kot drugi korak, za jezikom, zato so že prevedeni. Pripeto v `tests/e2e/test_first_run_terms.py`.
+
+### 81.1 [x] Language, theme and the trainer's details are mandatory on the welcome screen — done 2026-09-26
+
+- **Order:** language, then the terms agreement, then theme, then details, then — on an empty
+  database — the demo, the chapters and *Start with an empty app*. A first launch from a demo link
+  (`?init=`, `?demo=`) goes through the same steps before the demo starts.
+- **Fixes §80.2 here:** today `setupFirstRunTerms()` (applicationHeader.js) opens the terms dialog
+  as a modal during header wiring, so it covers the language step, and a trainer must accept English
+  terms before *Slovenščina* can be tapped. The terms become the step after the language, and come
+  out translated, since `domMappings.js` already maps their three elements.
+- **Fixes the splash half of §80.4 here:** the splash's language choice (`onChooseLanguage` in
+  app.js) translates the static labels but re-draws none of the views built in code, so "Dates",
+  "Client", "Location" stay English under a Slovenian choice. One language-change function, called
+  by the splash and by the ☰ switcher, holds the one list of views to re-draw.
+- **One set of details for both workspaces.** `trainerIdentity.js` keeps them under fixed
+  `localStorage` keys, outside the sandbox's and the working database's own storage, so what is
+  written on the first launch is what the sandbox and the trainer's own work both show.
+- **Theme:** one button per theme, named in the chosen language. A tap shows that theme at once;
+  *Continue* works after a tap. A share link naming a theme (`?theme=`) answers this step, as `?lang=`
+  already answers the language step.
+- **Theme choice cannot be read from storage today.** `setupThemeSwitcher` (theme.js) writes
+  `librept-theme` on every boot, so the key exists whether or not anybody chose. Boot must stop
+  writing it; only a choice writes it.
+- **First and last name, separately.** `trainerIdentity.js` stores one `name` today. Invitations keep
+  carrying the full name, first then last. An install that stored one name is asked to split it.
+- **BUG found while reading, fixed here: sending an invitation deletes the trainer's name.**
+  `rememberOrganizer` (sessionInviteDialog.js) calls `writeTrainerIdentity` with email and phone
+  only, and that function clears every key it is not given. A key the caller does not pass must stay
+  as it is; only an empty string clears.
+- **Checked at the field:** email by `looksLikeEmail`, phone by `domain/contactChannel.js`.
+- **The X is gone while anything is missing**, and the step appears whenever something is missing,
+  not only on an empty database — so an install in use without a phone is asked once.
+- **Cost:** this ends the "no signup" promise that the comments in `trainerDetailsDialog.js` and the
+  form's own lede make. Both are rewritten.
+- **Tests:** `tests/conftest.py` writes the theme and the details before the page loads, as it
+  already does for the accepted terms.
+
+**Done 2026-09-26 (Claude), commit `f847eb4`; `build check` green 11:46–11:56.** Built as planned, with one finding: the splash had been started from `setupActiveSession`, ahead of the header, so a `?lang=` link reached the terms step before the dialog existed. It now starts once every component is wired and before the first draw — after the draw, a legacy database whose session card throws (§84) kept the trainer behind the splash.
