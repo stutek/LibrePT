@@ -96,6 +96,7 @@ the thing that must happen first, not merely what it touches.
 | **Data-subject rights** | §27.4 | One-tap withdrawal in the consent letter | Nothing; the other four shipped 2026-08-11 |
 | **Reported 2026-08-18** | §28.2 | Which contributor-facing docs get BUILT, so their addresses are injected rather than written out | Everything else in §28 shipped the same day |
 | **Client self-service** | §26.7 phase 2 | The vendored QR encoder and the wall poster | Deferred on purpose until the messaging handover has been tried in a gym; the link route shipped 08-22 |
+| **Welcome screen & menu** | §81.1–§81.6 | The mandatory welcome screen (§81.1) | Nothing for §81.1–§81.4; §81.5 and §81.6 on Simon's answer |
 | **Program import** | §29 | Nothing — shape decided 2026-08-18, and the editor-as-review answers the fragility question | The parser and its frozen corpus; the intake flow, media-type rule and catalog crosswalk already exist |
 | **Live clipboard taps — PRIORITY** | §48.2 | Tracking and notes after the session | §48.2's measuring exception waits on §45.11; §48.1 shipped 2026-09-13 |
 | **Trainer feedback 2026-09-11** | §45.4–§45.13 | §45.4's failed share of a filled-in signup | Nothing for the three defects; §45.4 is ruled (2026-09-15) and waits to be built, §45.8 on looking at both screens together |
@@ -730,6 +731,9 @@ header is omnipresent and sits above it, the fixed-overlay special-casing is red
 simplifies the deck/tabs/title-bar wiring and unifies router handling.
 
 ### 11.3 [ ] The ☰ menu is where everything without a home ended up
+
+**Superseded 2026-09-26 by §81** — Simon set the menu at five entries; the plan below is kept for its
+counts and reasoning, not as the plan.
 
 **Reported 2026-09-11 (Simon):** *"☰ je natlačen morala bova zgostiti in prioritizirati, morda celo
 narediti podskupine"*. **Raised again 2026-09-21 (Simon): the menu is too long and too complex, and
@@ -5627,3 +5631,102 @@ angleško ime meseca in drugačen vrstni red. Oteži razumevanje brez dokumentac
 menijske možnosti; datum prikazati v obliki ISO. Preveriti začetni prehod iz angleščine
 v slovenščino ter ponovni obisk posebej. Ponovni obisk še ni preizkušen.
 Preverjeno na objavljeni različici `0625bd6`.
+
+## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
+
+**Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
+first name, last name, phone and email mandatory. The ☰ menu keeps five entries: *Training
+sessions* (the home page), *Client directory*, *Exercises and routines*, *Data management* and
+*Settings*. *Leave the sandbox* is a top-level row only while the sandbox is open. This replaces
+§11.3's plan to fold the menu from 21 rows to 14.
+
+**Ruled the same day (Simon):**
+
+- the details are mandatory on every path, the sandbox and the guided tour included, and they are
+  written on the first launch, BEFORE the offer to enter the sandbox appears;
+- *Pending review* leaves the menu and stays only as a status message in the notification area;
+- the history of all clients leaves the menu; a client's history is shown only on that client's
+  page;
+- everything asked is built, one feature per commit, recorded here first.
+
+**Not changed by "every path":** a client who opens an invitation link (`?evt=`) on their own phone
+is not the trainer, and is never shown the trainer's form.
+
+Order of work: §81.1, §81.2, §81.3, §81.4, then §81.5 and §81.6 once they are no longer blocked.
+
+### 81.1 [ ] Language, theme and the trainer's details are mandatory on the welcome screen
+
+- **Order:** language, then theme, then details, then — on an empty database — the demo, the
+  chapters and *Start with an empty app*. A first launch from a demo link (`?init=`, `?demo=`) goes
+  through the same three steps before the demo starts.
+- **One set of details for both workspaces.** `trainerIdentity.js` keeps them under fixed
+  `localStorage` keys, outside the sandbox's and the working database's own storage, so what is
+  written on the first launch is what the sandbox and the trainer's own work both show.
+- **Theme:** one button per theme, named in the chosen language. A tap shows that theme at once;
+  *Continue* works after a tap. A share link naming a theme (`?theme=`) answers this step, as `?lang=`
+  already answers the language step.
+- **Theme choice cannot be read from storage today.** `setupThemeSwitcher` (theme.js) writes
+  `librept-theme` on every boot, so the key exists whether or not anybody chose. Boot must stop
+  writing it; only a choice writes it.
+- **First and last name, separately.** `trainerIdentity.js` stores one `name` today. Invitations keep
+  carrying the full name, first then last. An install that stored one name is asked to split it.
+- **BUG found while reading, fixed here: sending an invitation deletes the trainer's name.**
+  `rememberOrganizer` (sessionInviteDialog.js) calls `writeTrainerIdentity` with email and phone
+  only, and that function clears every key it is not given. A key the caller does not pass must stay
+  as it is; only an empty string clears.
+- **Checked at the field:** email by `looksLikeEmail`, phone by `domain/contactChannel.js`.
+- **The X is gone while anything is missing**, and the step appears whenever something is missing,
+  not only on an empty database — so an install in use without a phone is asked once.
+- **Cost:** this ends the "no signup" promise that the comments in `trainerDetailsDialog.js` and the
+  form's own lede make. Both are rewritten.
+- **Tests:** `tests/conftest.py` writes the theme and the details before the page loads, as it
+  already does for the accepted terms.
+
+### 81.2 [ ] The menu in five entries
+
+Where each row of today's menu goes. The last row is not in the request; the choice is Claude's.
+
+| Today                                                       | Goes to                                       |
+|-------------------------------------------------------------|-----------------------------------------------|
+| Language, Theme, My details, App version                    | Settings                                      |
+| Enter the sandbox / Leave the sandbox                       | Settings; Leave also top-level in the sandbox |
+| Reset sandbox data                                          | Settings, only in the sandbox                 |
+| Clients Directory                                           | Client directory                              |
+| Add a client from their own details                         | Client directory, a button in the view        |
+| Routines, Exercises, Import a programme                     | Exercises and routines                        |
+| Connect cloud storage, Export data as a file                | Data management (both opened the same dialog) |
+| Open an encrypted file                                      | Data management                               |
+| Pending Review                                              | removed, see §81.3                            |
+| History                                                     | removed; the client's page keeps its history  |
+| GitHub, Send feedback, Bug Reporting, About, Terms, Privacy | Settings, a section *Help and legal*          |
+
+**The demo story points at four of these rows** (`#menu-clients-register`, `#menu-sandbox`,
+`#menu-sandbox-reset`, `#menu-trainer-details`), and its step texts name them. They move with the
+rows, and the texts name the new path — *Settings*, then the row.
+
+### 81.3 [ ] Pending review only in the notification area
+
+The feed already carries it: `buildPendingSessionsItem` in `domain/notificationItems.js` counts the
+same unresolved `planUpdates` the menu badge counts, and links to `/adjustments`. What is left: remove
+the menu row and its badge (`app.js` updates the badge), and keep the route as the message's target.
+
+### 81.4 [ ] Import and export of exercises, routines and circuits in one place
+
+- Exercises and circuits: import is built (§45.5, in the exercise library view); the export
+  (`catalogToInterchange`, `catalogToCsv`) sits in the Sync & Backup dialog and moves beside the
+  import.
+- **Routines have no import and no export.** New work: carried in the same file as the library, so
+  one file moves a trainer's whole library.
+
+### 81.5 [ ] API keys in Settings — blocked
+
+LibrePT has no API key anywhere. The only mention is EnterprisePT's AI, used with the trainer's own
+key (§68). **Blocks the Settings row:** which service a key is for, and what the app does with it.
+
+### 81.6 [ ] Encryption keys and passwords in Data management — blocked
+
+Today every encrypted export asks for a one-time passphrase and stores nothing
+(`data/encryptedExport.js`); backups are not encrypted, which §18.8 decided to change and parked.
+**Blocks the Data management section:** what is stored — a passphrase for backups, one for client
+exports, a key — and where. A passphrase stored on the phone next to the data protects nothing from
+someone holding the phone; it protects only a file that leaves it.
