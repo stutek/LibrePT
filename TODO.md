@@ -5916,3 +5916,19 @@ that only tags a comment (`(TODO §45.2)`) is deleted. A reference that carries 
 §29 for why") is replaced by the reason, written where it is needed. The check that fails the build
 on a reference into TODO.md lands in the commit that removes the last one; before that it would fail
 every run.
+
+## 84. [ ] BUG — a session from an old database stops the boot at the first draw
+
+**Found 2026-09-26 (Claude) while building §81.1**, by
+`tests/e2e/test_schema_migrations.py::test_a_stored_legacy_database_is_migrated_on_boot`.
+
+A database from before the `bookings` → `sessions` rename carries sessions with no `participants`.
+`renderSessionCard` (`src/modules/sessionList/sessionCard.js`) calls `b.participants.map(...)` and
+throws. The throw is inside `renderEverything()`, the first draw in `init()` (app.js), so everything
+after it never runs: the recovery of a running session, the Back-button handler, the sync badge, the
+demo. The test passed only because the splash used to start earlier in `init()`; §81.1 now starts it
+before the first draw for the same reason, so the trainer is no longer kept behind the splash.
+
+**What is left:** the migration (or the card) must give a session with no participants an empty
+list, and a test must pin that the boot reaches its end on that database. Not built in §81.1: it is
+a separate defect with its own test.
