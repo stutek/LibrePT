@@ -215,9 +215,13 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
 - One home each: architecture [README.md](README.md), workflows [use_cases/](use_cases/), open work
   and decisions [TODO.md](TODO.md), what shipped [CHANGELOG.md](CHANGELOG.md). **TODO.md is written
   as the work moves** — started, decided, blocked, closed — in that same turn, never saved up for
-  the end of a session; with several agents running it is how they see each other's plans. **A TODO.md
-write is atomic and holds up nobody**: read the section, edit it, and commit that edit alone in the
-same step, staged by hunk. It needs no turn at the tree, and no note claims TODO.md. **A section leaves
+  the end of a session; with several agents running it is how they see each other's plans. **A
+  TODO.md write is atomic and holds up nobody**: read the section, edit it, and commit that edit
+  alone in the same step, staged by hunk. It needs no turn at the tree, and no note claims TODO.md.
+  **Links run one way, out of TODO.md.** TODO.md and its archive may point at any file, and nothing
+  checks those pointers. No other file points at a section or an anchor in them — code, test, tool
+  or document — because a section closes and its text moves; what a file needs to explain itself is
+  written in that file. Naming TODO.md as the home of open work is allowed. **A section leaves
   TODO.md the day it closes** — heading and pointer stay, the reasoning moves whole to
   [TODO_ARCHIVE.md](TODO_ARCHIVE.md), and open subsections stay behind. Every Markdown file
   carries frontmatter, every knowledge directory an `INDEX.md`, and concepts link to each other.
@@ -234,5 +238,6 @@ same step, staged by hunk. It needs no turn at the tree, and no note claims TODO
 - Keep `build check` and the GitHub pipeline in step: a check added to one is added to the other,
   and the deploy waits for every job. The security jobs run bare system Python, so a locally
   installed dependency is not there.
-- Cross-references must stay alive; a dead link, anchor or section reference fails the build.
+- Cross-references outside TODO.md and its archive must stay alive; a dead link, anchor or section
+  reference fails the build.
 - Cite these rules nowhere but the loaders, the maps and [CONTRIBUTING.md](CONTRIBUTING.md).
