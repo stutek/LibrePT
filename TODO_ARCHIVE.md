@@ -4297,3 +4297,10 @@ scrolling, so a sideways drag must not count as a scroll.
 function (`clientSessionNeighbours.js`, shipped 2026-09-14); 2) the plan drawn under the blanket
 (`planSheet.js`, with the live card's target wording moved to one shared helper, shipped 2026-09-14); 3) the drag, with title bar and tabs moving with the
 plan (`planPeek.js` + `planPeekController.js`, shipped 2026-09-14); 4) opening a neighbour, Today, and the create-a-plan card (shipped 2026-09-14).
+
+### 82.1 [x] The link check stops scanning TODO.md and its archive — done 2026-09-26
+
+`agent_tools/doclinks.py` skips TODO.md and TODO_ARCHIVE.md as sources and still resolves them as
+targets, so a reference into them from another file must still name a live section. The rule that a
+bare § inside the backlog means the backlog was removed with it. `find_unresolved()` is the one loop
+the tool and the repository test both run. Commit 964539d; `build check` green, 10:54 to 11:03.

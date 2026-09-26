@@ -5861,10 +5861,9 @@ stays allowed.
 | `use_cases/`                       | 4     | 14         |
 | root `.md` files, CHANGELOG.md too | 7     | 205        |
 
-### 82.1 [ ] The link check stops scanning TODO.md and its archive
+### 82.1 [x] The link check stops scanning TODO.md and its archive — done 2026-09-26
 
-`agent_tools/doclinks.py` skips both files as sources and still resolves them as targets. Waits for
-librept-72's ISO-date window to end.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#821-x-the-link-check-stops-scanning-todomd-and-its-archive--done-2026-09-26).
 
 ### 82.2 [ ] Remove every reference into TODO.md, then make one fail the build
 
