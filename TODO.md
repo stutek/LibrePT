@@ -5656,9 +5656,17 @@ Order of work: §81.1, §81.2, §81.3, §81.4, then §81.5 and §81.6 once they 
 
 ### 81.1 [ ] Language, theme and the trainer's details are mandatory on the welcome screen
 
-- **Order:** language, then theme, then details, then — on an empty database — the demo, the
-  chapters and *Start with an empty app*. A first launch from a demo link (`?init=`, `?demo=`) goes
-  through the same three steps before the demo starts.
+- **Order:** language, then the terms agreement, then theme, then details, then — on an empty
+  database — the demo, the chapters and *Start with an empty app*. A first launch from a demo link
+  (`?init=`, `?demo=`) goes through the same steps before the demo starts.
+- **Fixes §80.2 here:** today `setupFirstRunTerms()` (applicationHeader.js) opens the terms dialog
+  as a modal during header wiring, so it covers the language step, and a trainer must accept English
+  terms before *Slovenščina* can be tapped. The terms become the step after the language, and come
+  out translated, since `domMappings.js` already maps their three elements.
+- **Fixes the splash half of §80.4 here:** the splash's language choice (`onChooseLanguage` in
+  app.js) translates the static labels but re-draws none of the views built in code, so "Dates",
+  "Client", "Location" stay English under a Slovenian choice. One language-change function, called
+  by the splash and by the ☰ switcher, holds the one list of views to re-draw.
 - **One set of details for both workspaces.** `trainerIdentity.js` keeps them under fixed
   `localStorage` keys, outside the sandbox's and the working database's own storage, so what is
   written on the first launch is what the sandbox and the trainer's own work both show.
@@ -5703,6 +5711,10 @@ Where each row of today's menu goes. The last row is not in the request; the cho
 **The demo story points at four of these rows** (`#menu-clients-register`, `#menu-sandbox`,
 `#menu-sandbox-reset`, `#menu-trainer-details`), and its step texts name them. They move with the
 rows, and the texts name the new path — *Settings*, then the row.
+
+**Fixes the menu half of §80.4 here:** *Add a client from their own details* and *Open an encrypted
+file* have no translation key (neither `data-i18n` nor an entry in `domMappings.js`), so they stay
+English in every language. Both get a key in en, sl and de in their new place.
 
 ### 81.3 [ ] Pending review only in the notification area
 
