@@ -9,7 +9,12 @@
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { buildSessionMeta, escapeHTML, getInitials } from "../../../../src/modules/common/utils.js";
+import {
+  buildSessionMeta,
+  escapeHTML,
+  formatDateStr,
+  getInitials,
+} from "../../../../src/modules/common/utils.js";
 
 test("initials from a hostile name stay alphanumeric", () => {
   const derived = {
@@ -127,4 +132,39 @@ test("a slot spanning several sessions reports the outer range as its schedule",
   assert.equal(meta.timeLabel, "09:00 - 11:30");
   assert.equal((meta.endDate.getTime() - meta.startDate.getTime()) / 60000, 150);
   assert.deepEqual(meta.ids, ["s1", "s2"]);
+});
+
+// The app writes a date as ISO, in every language (TODO §54). `formatDateStr` is what the client
+// profile's "Joined" line and every row of the history view write their date with, and it used to
+// build "Sep 26, 2026" from a hardcoded list of English month abbreviations — the month in English
+// and the day before the year in US order, whatever language the trainer had chosen (TODO §80.4).
+//
+// Pinned here rather than through the two screens: it is a pure function, and a screen test would
+// prove the same thing while booting an app to reach it.
+test("a date for the screen is written as ISO, never as an English month name", () => {
+  assert.equal(formatDateStr("2026-09-26"), "2026-09-26");
+  // A single digit day and month keep their leading zero, so the column does not change width.
+  assert.equal(formatDateStr("2026-01-05"), "2026-01-05");
+  // A full timestamp is read for its date and nothing else.
+  assert.equal(formatDateStr("2026-07-18T19:30:00.000Z").slice(0, 4), "2026");
+  assert.equal(formatDateStr("2026-07-18T12:00:00.000Z"), "2026-07-18");
+
+  for (const written of [formatDateStr("2026-09-26"), formatDateStr("2026-01-05")]) {
+    for (const month of ["Jan", "Sep", "jan", "sep"]) {
+      assert.equal(
+        written.includes(month),
+        false,
+        `an English month name reached the screen: ${written}`,
+      );
+    }
+  }
+});
+
+test("a missing or unreadable date is written as nothing, not as a broken one", () => {
+  // The guard lives in this function rather than in getISODateString, whose nineteen callers hand it
+  // a date they already hold. Without it the screen would read "NaN-NaN-NaN".
+  assert.equal(formatDateStr(""), "");
+  assert.equal(formatDateStr(null), "");
+  assert.equal(formatDateStr(undefined), "");
+  assert.equal(formatDateStr("not a date"), "");
 });

@@ -33,26 +33,22 @@ export function truncateString(str, num) {
   return `${str.slice(0, num)}...`;
 }
 
-// Format ISO date strings into readable layout strings (e.g. "Jul 18, 2026")
+/** A date for the screen, as ISO — "2026-07-18". Empty for a missing or unparseable date.
+ *
+ * ISO because that is the app's own written form of a date, in every language (TODO §54). This
+ * function used to build "Jul 18, 2026" from a hardcoded list of English month abbreviations, so the
+ * client profile's "Joined" line and every row of the history view read the month in English and the
+ * day before the year in US order, whatever language the trainer had chosen. §54 fixed the clipboard's
+ * past cards and left this one, which is the other two screens (reported 2026-09-26, TODO §80.4).
+ *
+ * The guard for an empty or unparseable date stays HERE rather than moving into `getISODateString`:
+ * nineteen call sites pass that one a date they already have, and a guard added there would quietly
+ * change what they return.
+ */
 export function formatDateStr(dateStr) {
   if (!dateStr) return "";
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return "";
-  const months = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
-  return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+  if (isNaN(new Date(dateStr).getTime())) return "";
+  return getISODateString(dateStr);
 }
 
 // Format duration from seconds to timer layout (e.g. "59:02"). Minutes are PADDED: this drives live

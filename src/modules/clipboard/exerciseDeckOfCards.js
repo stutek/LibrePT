@@ -21,7 +21,7 @@ import { newRecordId } from "../../data/recordId.js";
 import { formatMetricValue, usesLoad } from "../../domain/exerciseModality.js";
 import { formatLoad, formatReps } from "../../domain/repsAndLoad.js";
 import { exerciseRecordsOf, isRestRecord } from "../../domain/sessionItemRecord.js";
-import { getISODateString } from "../common/utils.js";
+import { formatDateStr } from "../common/utils.js";
 import { CircuitDeckCard } from "./circuitCard.js";
 import { trackDeckScroll } from "./deckScrollFocus.js";
 import { ExerciseDeckCard } from "./exerciseCard.js";
@@ -270,7 +270,9 @@ export function renderExerciseDeck(deckContainer, deps) {
   // `toLocaleDateString(..., { month: "short", day: "numeric" })`, which asked the DEVICE how to
   // write it and dropped the year: a Slovenian screen read "20. jul." and an English one "Jul 20",
   // neither of them saying which year the set was lifted in.
-  const formatDateStr = (dateIso) => (dateIso ? getISODateString(dateIso) : "");
+  //
+  // §54 wrote that guard here because `utils.js`'s shared `formatDateStr` was still building
+  // "Jul 20, 2026" and could not be called. It is ISO now (TODO §80.4), so this file uses it.
 
   // Past session exercises. Excludes isPlanning drafts (syncPlanningSnapshotToHistory writes them
   // with an ever-fresh `date` on every save) — a drafted-but-unrun plan is not a performed session,
