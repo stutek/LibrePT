@@ -5544,3 +5544,29 @@ what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#794-x-the-client-documents-declare-langen-whatever-their-language--popravljeno-2026-09-26);
 what shipped is in [CHANGELOG.md](CHANGELOG.md).
+
+## 80. [ ] Preizkus prve uporabe v vlogi osebnega trenerja
+
+**Naročilo:** do pet ur raziskovalnega preizkušanja v brskalniku, brez branja
+uporabniške dokumentacije. Simulirati izmišljene stranke, podatke in treninge;
+po vsakem scenariju tukaj shraniti korake, opaženi rezultat, težavo, vpliv na delo
+trenerja in predlog izboljšave. Nove scenarije izbirati glede na opaženo v aplikaciji.
+
+**Stanje:** aplikacija še ni bila odprta in noben scenarij še ni izveden. Nameščena
+veščina brskalnika zahteva `node_repl js`, ki ga ta seja ne izpostavlja; manjka tudi
+orodje za odkrivanje dodatnih orodij. To je omejitev preizkusnega okolja, ne dokazana
+napaka LibrePT. Blokira oceno aplikacije in preverjanje predlogov iz dejanske uporabe.
+Nadaljevanje zahteva sejo z delujočim orodjem brskalnika. Pet ur preizkušanja ni bilo
+opravljenih; poraba zakupljenih žetonov računa ni dostopna.
+
+### 80.1 [ ] Prva stranka in prvi individualni trening — še neizvedeno
+
+**Scenarij:** trener prvič odpre aplikacijo in brez navodil poskuša dodati izmišljeno
+stranko »TEST Ana Novak«, njen cilj »redno trenirati dvakrat tedensko« ter pripraviti
+45-minutni trening s tremi vajami. Nato želi trening začeti, zapisati dejanske serije,
+ponovitve in obremenitve, popraviti napačen vnos ter trening zaključiti. Imena gumbov
+in poti se določijo šele iz vidnega vmesnika. Uporabiti ločene testne podatke.
+
+**Težava in predlog:** še nista ugotovljena; po izvedbi zapisati konkretne korake,
+pričakovani in dejanski rezultat ter preverljiv predlog za vsako opaženo oviro.
+Naslednji scenarij izbrati po tem preizkusu, ne iz obstoječih opisov funkcij.
