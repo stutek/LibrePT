@@ -5842,6 +5842,50 @@ Today every encrypted export asks for a one-time passphrase and stores nothing
 exports, a key — and where. A passphrase stored on the phone next to the data protects nothing from
 someone holding the phone; it protects only a file that leaves it.
 
+## 83. [ ] §66 gleda samo naprej: stranka, ki pride za besedilom
+
+**Vprašal 2026-09-26 (Simon):** kaj pa, če stranka Novak pride naknadno, ko lokacija »Telovadnica
+Novak« že obstaja? Preverjeno isti dan (Claude): **ni v redu niti logika niti GDPR.**
+
+Pravilo §66 ima **eno samo klicno mesto** — `sessionTextNamesNobody` ob oddaji obrazca termina
+([editSessionControl.js](src/modules/session/editSessionControl.js)). Nič v aplikaciji ga ne vpraša,
+ko se doda ali preimenuje stranka. Obstoječa besedila se nikoli ne preverijo znova.
+
+**Logična napaka: star termin se ne da več shraniti.** Preverba bere trenutno vrednost polja, ne
+tega, kar je trener spremenil, in se izvede kot prva v `submit`, pred vsem drugim. Trener odpre
+marčevski termin, da ga premakne za pol ure, pritisne *Shrani* in dobi »Kraj ne sme vsebovati imena
+stranke, **Novak** pa je ime stranke« na polju, ki se ga ni dotaknil. Termina ne more premakniti,
+dokler ne preimenuje kraja, ki s stranko Novak ni imel nikoli nič. Ponavljajoči se termini gredo
+skozi isti obrazec, torej velja isto za vso serijo.
+
+**Aplikacija ponuja, kar nato zavrne.** `populateLocationSuggestions` zbira predloge iz
+`state.sessions`, zato »Telovadnica Novak« ostane v spustnem seznamu za vedno. Trener jo izbere iz
+ponujenega seznama in shranjevanje jo zavrne.
+
+**Tudi GDPR ni v redu, in to je resnejše.** §66 obstaja zato, da nobeno besedilo termina ne imenuje
+stranke, ki jo je pozneje treba izbrisati. Ker preverba gleda samo naprej, je obhod običajen
+delovni vrstni red: trener napiše »Novak« v ime termina za uvodno vadbo, **preden** je Novak v
+imeniku, in ga doda za tem. Besedilo se nikoli več ne preveri in nobeno pometanje ga ne doseže. Ko
+je Novak pozneje izbrisan, ta zapis ostane — natanko ostanek, ki naj bi ga §66 preprečil.
+
+**Četrta stvar, ki jo je pokazalo isto vprašanje: pravilo ne pozna naključja.** Priimek je lahko
+pravo ime telovadnice. Danes ni nobene poti, da bi trener povedal »to je fitnes, ne stranka«;
+zavrnitev je absolutna. Aplikacija tega ne more vedeti sama — ve samo trener.
+
+**Pokritost:** [clientNameWords.test.mjs](tests/unit_js/domain/clientNameWords.test.mjs) preizkuša
+samo čisto funkcijo. Vrstni red »besedilo prej, stranka pozneje« ni pokrit z nobenim testom.
+
+**Predlog, čaka na Simonovo odločitev, ker spreminja obliko §66:** dvoje, ki nista isto.
+
+- **Obrazec zavrne le to, kar trener dodaja.** Primerjaj z shranjeno vrednostjo polja: če je beseda
+  tam bila že prej, shranjevanje ne pade. To odpravi nezmožnost urejanja, GDPR luknje pa ne.
+- **Dodana ali preimenovana stranka pregleda obstoječe termine** in trenerju pokaže, katera besedila
+  jo zdaj imenujejo, da jih popravi ali potrdi kot naključje. To zapre GDPR luknjo in je hkrati
+  edini kraj, kjer naključje sploh lahko potrdi. Kot opravilo v obvestilih, ne kot modal — odloča se
+  lahko pozneje, ne sredi dodajanja stranke.
+
+Predlogi kraja ne smejo ponujati vrednosti, ki jo bi shranjevanje zavrnilo.
+
 ## 82. [ ] Links run one way, out of TODO.md
 
 **Ruled 2026-09-26 (Simon):** a TODO.md write is atomic and holds up nobody; TODO.md holds only soft
