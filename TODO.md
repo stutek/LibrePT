@@ -5552,12 +5552,11 @@ uporabniške dokumentacije. Simulirati izmišljene stranke, podatke in treninge;
 po vsakem scenariju tukaj shraniti korake, opaženi rezultat, težavo, vpliv na delo
 trenerja in predlog izboljšave. Nove scenarije izbirati glede na opaženo v aplikaciji.
 
-**Stanje:** aplikacija še ni bila odprta in noben scenarij še ni izveden. Nameščena
-veščina brskalnika zahteva `node_repl js`, ki ga ta seja ne izpostavlja; manjka tudi
-orodje za odkrivanje dodatnih orodij. To je omejitev preizkusnega okolja, ne dokazana
-napaka LibrePT. Blokira oceno aplikacije in preverjanje predlogov iz dejanske uporabe.
-Nadaljevanje zahteva sejo z delujočim orodjem brskalnika. Pet ur preizkušanja ni bilo
-opravljenih; poraba zakupljenih žetonov računa ni dostopna.
+**Stanje:** preizkus poteka prek Chrome CDP v ločenem začasnem profilu brez obstoječih
+podatkov. Po navodilu uporabnika preizkušamo objavljeni
+[LibrePT](https://stutek.github.io/LibrePT/), različico `0625bd6`, ne lokalnega razvoja.
+Začetna omejitev manjkajočega orodja Browser je odpravljena z uporabo Chrome CDP.
+Pet ur preizkušanja še ni opravljenih; poraba zakupljenih žetonov računa ni dostopna.
 
 ### 80.1 [ ] Prva stranka in prvi individualni trening — še neizvedeno
 
@@ -5570,3 +5569,20 @@ in poti se določijo šele iz vidnega vmesnika. Uporabiti ločene testne podatke
 **Težava in predlog:** še nista ugotovljena; po izvedbi zapisati konkretne korake,
 pričakovani in dejanski rezultat ter preverljiv predlog za vsako opaženo oviro.
 Naslednji scenarij izbrati po tem preizkusu, ne iz obstoječih opisov funkcij.
+
+### 80.2 [ ] P2 — Pogoji uporabe prekrijejo izbiro jezika ob prvem obisku
+
+**Scenarij in koraki:** slovenski trener prvič odpre objavljeno aplikacijo v praznem
+profilu Chrome. Pred izbiro jezika ga pričaka modal »Terms & Disclaimer« z edinim
+vidnim gumbom »I agree«. Želi najprej izbrati slovenščino in razumeti pogoje.
+
+**Opaženo:** izbira »Slovenščina« je za modalom; preverba elementa pod središčem
+gumba vrne dialog s pogoji. Posnetek zaslona potrjuje, da je preostanek zaslona
+zatemnjen in zamegljen. Po »I agree« izbira jezika postane dosegljiva.
+
+**Težava in vpliv:** trener mora sprejeti angleško besedilo, preden lahko izbere jezik.
+Blokira razumljivo prvo uporabo v slovenščini; to ni presoja pravne veljavnosti pogojev.
+
+**Predlog in preverjanje:** najprej omogočiti izbiro jezika, nato prikazati pogoje v
+izbranem jeziku. V praznem profilu mora biti mogoče izbrati slovenščino brez predhodne
+potrditve angleških pogojev. Preverjeno na objavljeni različici `0625bd6`.
