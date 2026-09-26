@@ -5727,7 +5727,28 @@ Order of work: §81.1, §81.2, §81.3, §81.4, then §81.5 and §81.6 once they 
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#811-x-language-theme-and-the-trainers-details-are-mandatory-on-the-welcome-screen--done-2026-09-26); what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-### 81.2 [ ] The menu in five entries
+### 81.2 [~] The menu in five entries
+
+**Stopped 2026-09-26 at Simon's request, half built and NOT verified. The work is in a local git
+stash**, not on `main`: `git stash list` shows it as *claude-opus §81.2 WIP: five-entry menu,
+settings dialog, library tabs*. `git stash pop` puts it back. Nothing else is in the tree.
+
+- **In the stash:** the menu's five rows plus *Leave the sandbox* shown only in the sandbox; a
+  *Settings* dialog routed at `/settings` holding language, theme, *My details*, *App version*, the
+  sandbox toggle and reset, and *Help and legal*; a tab row between the exercise library and the
+  routines (`modules/common/libraryTabs.js` and `.css`, in the offline cache, `CACHE_NAME` v137);
+  *Import a programme* in the routines header; *Add a client from their own details* under the client
+  directory's title; *Open an encrypted file* as a card in the Sync & Backup dialog; the §81.3 menu
+  row and its badge removed; the old menu keys deleted and the new ones added in en, sl and de,
+  including the keys §80.4 asked for; the demo story's texts rewritten for the new path.
+- **Checked on the stash:** `build lint`, i18n parity, project layout, CSS tokens, import layering.
+  Nothing else — no test run, no gate.
+- **Not done:** the demo story's STEPS in `storyTour.js` (the welcome's Show me still points at rows
+  now inside Settings; the details and evening chapters need a step that opens Settings and one that
+  closes it — their three caption keys already exist); the tests that name the moved rows
+  (`tests/medium/test_header_menu.py` and others); the overflow walk's new `/settings` route;
+  `docs/SRC_MODULES.md` for `libraryTabs.js`/`.css`; the `/settings` row in UC5's route table; the
+  CHANGELOG entry; removing the global History view (ruled: history only on the client's page).
 
 Where each row of today's menu goes. The last row is not in the request; the choice is Claude's.
 
