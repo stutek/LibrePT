@@ -5562,6 +5562,12 @@ podatkov. Po navodilu uporabnika preizkušamo objavljeni
 Začetna omejitev manjkajočega orodja Browser je odpravljena z uporabo Chrome CDP.
 Pet ur preizkušanja še ni opravljenih; poraba zakupljenih žetonov računa ni dostopna.
 
+**Vsaka ugotovitev je 2026-09-26 ponovno preverjena v kodi na `main`** (Claude, librept-72).
+Objavljena različica `0625bd6` je 14 commitov za `main` in dva od teh sta i18n commita
+(nemščina §79, `<html lang>` §79.4), zato poročilo o objavljeni aplikaciji samo po sebi ne
+pove, kaj je še narobe. Verdikt stoji pod vsako točko. Trije potrjeni popravki sodijo v kodo,
+ki jo §81 na novo zgradi, in so zato zapisani tam; en je bil popravljen tu; eden je zavrnjen.
+
 ### 80.1 [~] Prva stranka in prvi individualni trening — v teku
 
 **Scenarij:** trener prvič odpre aplikacijo in brez navodil poskuša dodati izmišljeno
@@ -5582,6 +5588,24 @@ Termin »Uvodna vadba«, kraj »Telovadnica Center«, 10:00–10:45; iz kataloga
 na zgornji nevtralni imeni shranjevanje uspe. Preveriti še običajno ime kraja, ki se
 naključno ujema z imenom stranke; umetni testni prefiks sam ne dokazuje te napake.
 
+**Verdikt 2026-09-26 (Claude): opažanje zavrnjeno — to ni napaka, ampak §66, ki deluje, kot je
+bilo odločeno.** §66 (odločeno 2026-09-18) prepoveduje ime stranke v imenu ali kraju treninga,
+ker se besedila po izbrisu stranke ne da več očistiti: takrat ime ni več znano (§65). Zavrnjeno
+je ob shranjevanju in ne pobrisano pozneje, prav zato.
+[clientNameWords.js](src/domain/clientNameWords.js) razbije ime vsake stranke na besede in
+blokira vsako, dolgo `SHORTEST_BLOCKED_WORD` = 3 znake ali več. Stranka »TEST Ana Novak« torej
+prepove besedo »TEST« v imenu termina in v kraju. Sporočilo napake besedo krepko citira nazaj,
+da trener vidi, kateri del svojega naslova je sporen, in obroba pokaže, katero polje.
+
+**Ostanek, ki je resničen in ni sprememba:** pravi priimek je lahko tudi ime telovadnice.
+Stranka »Ana Novak« naredi besedo »Novak« neuporabno v kraju, torej trener ne more vpisati
+»Telovadnica Novak«. To je cena, ki jo §66 zavestno plača, in sprememba tega je Simonova
+odločitev, ne popravek. Zapisano tu, ker ga je Codexov preizkus pokazal, čeprav z umetnim
+imenom.
+
+**Scenarij sam ostaja nedokončan:** izvedba treninga, vpis serij in ponovitev, popravek
+napačnega vnosa in zaključek niso bili preizkušeni.
+
 ### 80.2 [ ] P2 — Pogoji uporabe prekrijejo izbiro jezika ob prvem obisku
 
 **Scenarij in koraki:** slovenski trener prvič odpre objavljeno aplikacijo v praznem
@@ -5599,6 +5623,23 @@ Blokira razumljivo prvo uporabo v slovenščini; to ni presoja pravne veljavnost
 izbranem jeziku. V praznem profilu mora biti mogoče izbrati slovenščino brez predhodne
 potrditve angleških pogojev. Preverjeno na objavljeni različici `0625bd6`.
 
+**Verdikt 2026-09-26 (Claude): potrjeno na `main`, in koda si sama nasprotuje. Popravek je v
+§81.1.** `setupFirstRunTerms()` v
+[applicationHeader.js](src/modules/common/applicationHeader.js) se izvede med sestavljanjem
+glave in pokliče `dlg.showModal()`. Modalni `<dialog>` gre v vrhnjo plast brskalnika, torej nad
+`#app-splash-language`, in nobena vrednost `z-index` tega ne spremeni. Dva zaslona sta oba
+obvezna in oba brez izhoda, modal pa je drugi na vrsti in vseeno zmaga.
+
+Nasprotje je zapisano v kodi: komentar v [index.html](src/index.html) pravi, da je jezikovna
+izbira »Shown ahead of everything else and with no way out«, komentar v
+[splashScreen.js](src/modules/splash/splashScreen.js) pa, da ta korak izhoda nikoli ni imel in
+da ga tudi `?splash=off` ne sme preskočiti — »the app would come up in a language nobody
+picked«. Natanko to se zgodi.
+
+Besedilo pogojev se prevede samo po sebi, brž ko je jezik izbran prej: `#terms-title`,
+`#terms-body` in `#btn-terms-agree` so že v tabeli v
+[domMappings.js](src/i18n/domMappings.js).
+
 ### 80.3 [ ] P2 — Slovensko iskanje ne najde obstoječega počepa
 
 **Scenarij in koraki:** trener v slovenskem vmesniku pripravi prvi načrt, izbere
@@ -5614,6 +5655,28 @@ lahko napačno sklepa, da običajne vaje ni. Blokira hitro sestavljanje prvega n
 **Predlog in preverjanje:** lokalizirana imena in iskalne sopomenke ob ohranjeni
 identiteti vaje; »počep« mora najti ustrezne različice, angleško iskanje pa ostati
 uporabno. Prevesti tudi filtre. Preverjeno na objavljeni različici `0625bd6`.
+
+**Verdikt 2026-09-26 (Claude): težava potrjena, prva polovica predloga zavrnjena.**
+[exercises.js](src/data/exercises.js) ima 48 vaj s trdo vpisanimi angleškimi imeni in nobenih
+sopomenk, zato »počep« ne more zadeti ničesar.
+
+»Lokalizirana imena« pa nasprotujejo zapisani odločitvi §46.4: *»Not translated, deliberately:
+exercise names (the movement catalog's own vocabulary, used in English on a Slovenian gym
+floor)«*. Ostane torej **druga polovica predloga — iskalne sopomenke**: prikazano ime vaje
+ostane angleško, iskanje »počep« pa najde `Dumbbell Goblet Squat`. Filtri (`Chest`, `Legs`,
+`Dumbbell`, `All`) niso imena vaj in se prevedejo ločeno; v tabeli v
+[domMappings.js](src/i18n/domMappings.js) je danes preslikan samo gumb `All`.
+
+**Kaj to blokira:** sopomenke so vsebina, ne mehanizem. Za 48 vaj krat dva jezika je treba
+zapisati slovenske in nemške iskalne izraze, ki jih trener res vtipka. Tega si agent ne sme
+izmisliti s prevajanjem angleškega imena — pravila to izrecno prepovedujejo. **Čaka na Simonov
+nabor izrazov**, ker je on trener in vir tega besedišča. Mehanizem in prevod filtrov sta lahko
+zgrajena prej.
+
+**Ločena, manjša napaka v isti točki:** ko iskalno besedilo ne zadene ničesar, prikaz reče
+»Temu filtru ne ustreza nobena vaja.« Krivi filtre, čeprav so filtri v redu — in prav to je
+trenerja pripeljalo do napačnega sklepa, da vaje ni. Prazno stanje mora povedati, da nič ne
+ustreza *iskanemu besedilu*.
 
 ### 80.4 [ ] P3 — Po izbiri slovenščine del osnovnega vmesnika ostane angleški
 
@@ -5631,6 +5694,42 @@ angleško ime meseca in drugačen vrstni red. Oteži razumevanje brez dokumentac
 menijske možnosti; datum prikazati v obliki ISO. Preveriti začetni prehod iz angleščine
 v slovenščino ter ponovni obisk posebej. Ponovni obisk še ni preizkušen.
 Preverjeno na objavljeni različici `0625bd6`.
+
+**Verdikt 2026-09-26 (Claude): potrjeno na `main`, in to niso ena, ampak tri ločene napake.**
+Codexova diagnoza »osvežiti že izrisane« je pravilna; oznaka P3 je prenizka, ker gre pri datumu
+za kršitev pravila projekta.
+
+- **Koren: jezikovna menjava je napisana dvakrat, en izvod je nepopoln.** `onChooseLanguage` na
+  pozdravnem zaslonu ([app.js](src/app.js)) pokliče `applyTranslations(lang)` in `saveState()`
+  in nič več. Stikalo v meniju ☰ ([applicationHeader.js](src/modules/common/applicationHeader.js))
+  pa poleg tega ponovno izriše sedem pogledov —
+  `renderClientsList`, `renderRoutinesList`, `renderExercisesList`, `renderGlobalHistory`,
+  `renderPendingPlanAdjustments`, `renderSessions`, `populateDropdownSelectors`.
+  `applyTranslations` prepiše le označeno besedilo v postavitvi; vse, kar JavaScript sestavi s
+  `t(...)`, ostane v jeziku zagona. Zato »Dates«, »Client«, »Location« in »No sessions
+  scheduled.« — ključi `filter_dates`, `filter_client`, `filter_location` in
+  `no_sessions_scheduled` so v [sl.js](src/i18n/sl.js) vsi prevedeni, nihče jih ni vprašal.
+  Popravek je **ena** funkcija, ki jo kličeta obe poti, ne drugi izvod seznama. **V §81.1**, ki na
+  to isto pot dodaja še korak teme in korak podatkov.
+- **Dve vrstici menija nimata prevoda nikjer.** `#menu-review-signup` in `#menu-open-encrypted`
+  nista niti v tabeli `staticMappings` v [domMappings.js](src/i18n/domMappings.js) niti nosita
+  atributa `data-i18n`; vse sosednje vrstice so v tabeli. Ostaneta angleški v slovenščini in
+  nemščini. **V §81.2**, ki obe vrstici prestavi — prvo med gumbe imenika strank, drugo v
+  *Data management* — in kjer morata dobiti ključa v `en`, `sl` in `de`.
+- **[x] Datum: popravljeno 2026-09-26 (Claude), commit `3461d92`.** To ni bila nova odločitev,
+  ampak nedokončan §54, ki je že zahteval ISO datum v vsakem jeziku. `formatDateStr` v
+  [utils.js](src/modules/common/utils.js) je sestavljal »Sep 26, 2026« iz trdo vpisanega
+  seznama angleških okrajšav mesecev, v ameriškem vrstnem redu. §54 je popravil pretekle kartice
+  deka in si je v [exerciseDeckOfCards.js](src/modules/clipboard/exerciseDeckOfCards.js)
+  napisal lokalni ovoj prav zato, ker skupne funkcije ni mogel poklicati — te pa ni popravil.
+  Codex je videl profil stranke; ista funkcija je pisala tudi vsako vrstico zgodovine
+  ([historyView.js](src/modules/history/historyView.js)). Zdaj kliče `getISODateString`, ki je v
+  isti datoteki, dek pa je svoj lokalni izvod opustil, tako da je oblikovalec datuma spet en.
+  Varovalka za manjkajoč ali neberljiv datum ostaja v `formatDateStr` in ne gre v
+  `getISODateString`, ki mu devetnajst klicnih mest izroči datum, ki ga že ima. Pripeto v
+  [utils.test.mjs](tests/unit_js/modules/common/utils.test.mjs).
+
+**Še ni preizkušeno:** ponovni obisk po izbiri jezika.
 
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
