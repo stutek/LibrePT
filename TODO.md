@@ -5742,3 +5742,35 @@ Today every encrypted export asks for a one-time passphrase and stores nothing
 **Blocks the Data management section:** what is stored — a passphrase for backups, one for client
 exports, a key — and where. A passphrase stored on the phone next to the data protects nothing from
 someone holding the phone; it protects only a file that leaves it.
+
+## 82. [ ] Links run one way, out of TODO.md
+
+**Ruled 2026-09-26 (Simon):** a TODO.md write is atomic and holds up nobody; TODO.md holds only soft
+links to other files, which nothing checks; no other file may point at a section of TODO.md, because
+its content is not stable. Naming the file as the home of open work
+stays allowed.
+
+**Measured 2026-09-26** with `git grep` over tracked files, counting `TODO §`, `TODO.md §` and
+`TODO.md`: about 1,550 references in about 460 files.
+
+| Directory                          | Files | References |
+|------------------------------------|-------|------------|
+| `src/`                             | 216   | 677        |
+| `tests/`                           | 211   | 411        |
+| `agent_tools/`                     | 16    | 68         |
+| `docs/`                            | 6     | 171        |
+| `use_cases/`                       | 4     | 14         |
+| root `.md` files, CHANGELOG.md too | 7     | 205        |
+
+### 82.1 [ ] The link check stops scanning TODO.md and its archive
+
+`agent_tools/doclinks.py` skips both files as sources and still resolves them as targets. Waits for
+librept-72's ISO-date window to end.
+
+### 82.2 [ ] Remove every reference into TODO.md, then make one fail the build
+
+One directory per commit, after §81, which rewrites many of the same files in `src/`. A reference
+that only tags a comment (`(TODO §45.2)`) is deleted. A reference that carries the reason ("see TODO
+§29 for why") is replaced by the reason, written where it is needed. The check that fails the build
+on a reference into TODO.md lands in the commit that removes the last one; before that it would fail
+every run.
