@@ -5558,7 +5558,7 @@ podatkov. Po navodilu uporabnika preizkušamo objavljeni
 Začetna omejitev manjkajočega orodja Browser je odpravljena z uporabo Chrome CDP.
 Pet ur preizkušanja še ni opravljenih; poraba zakupljenih žetonov računa ni dostopna.
 
-### 80.1 [ ] Prva stranka in prvi individualni trening — še neizvedeno
+### 80.1 [~] Prva stranka in prvi individualni trening — v teku
 
 **Scenarij:** trener prvič odpre aplikacijo in brez navodil poskuša dodati izmišljeno
 stranko »TEST Ana Novak«, njen cilj »redno trenirati dvakrat tedensko« ter pripraviti
@@ -5566,9 +5566,17 @@ stranko »TEST Ana Novak«, njen cilj »redno trenirati dvakrat tedensko« ter p
 ponovitve in obremenitve, popraviti napačen vnos ter trening zaključiti. Imena gumbov
 in poti se določijo šele iz vidnega vmesnika. Uporabiti ločene testne podatke.
 
-**Težava in predlog:** še nista ugotovljena; po izvedbi zapisati konkretne korake,
-pričakovani in dejanski rezultat ter preverljiv predlog za vsako opaženo oviro.
-Naslednji scenarij izbrati po tem preizkusu, ne iz obstoječih opisov funkcij.
+**Preverjeno doslej:** shranjen trener »TEST Trener« z naslovom
+`trener@example.invalid`; prek menija in imenika dodana »TEST Ana Novak« z naslovom
+`ana@example.invalid`, ciljem in opombo. Brez označene privolitve profil jasno pove
+»Brez privolitve (samo lokalno)«. »Načrtuj program« ohrani izbrano stranko.
+Termin »Uvodna vadba«, kraj »Telovadnica Center«, 10:00–10:45; iz kataloga dodan
+»Dumbbell Goblet Squat«. Izvedba, zaključek in ponovni pregled treninga še čakajo.
+
+**Opažanje za nadaljnji preizkus:** ime »TEST Ana — prvi trening« in kraj
+»TEST Telovadnica« sta zavrnjena zaradi besede »TEST« v imenu stranke. Po popravku
+na zgornji nevtralni imeni shranjevanje uspe. Preveriti še običajno ime kraja, ki se
+naključno ujema z imenom stranke; umetni testni prefiks sam ne dokazuje te napake.
 
 ### 80.2 [ ] P2 — Pogoji uporabe prekrijejo izbiro jezika ob prvem obisku
 
@@ -5586,3 +5594,36 @@ Blokira razumljivo prvo uporabo v slovenščini; to ni presoja pravne veljavnost
 **Predlog in preverjanje:** najprej omogočiti izbiro jezika, nato prikazati pogoje v
 izbranem jeziku. V praznem profilu mora biti mogoče izbrati slovenščino brez predhodne
 potrditve angleških pogojev. Preverjeno na objavljeni različici `0625bd6`.
+
+### 80.3 [ ] P2 — Slovensko iskanje ne najde obstoječega počepa
+
+**Scenarij in koraki:** trener v slovenskem vmesniku pripravi prvi načrt, izbere
+»Dodaj iz kataloga« in v »Išči vaje« vpiše »počep«.
+
+**Opaženo:** prikaz »Temu filtru ne ustreza nobena vaja.« Pri nespremenjenih filtrih
+iskanje »goblet« najde »Dumbbell Goblet Squat« in omogoči dodajanje. Katalog vsebuje
+48 vaj; tudi filtri mišic in opreme ostanejo »Chest«, »Legs«, »Dumbbell« in »All«.
+
+**Težava in vpliv:** slovenski trener mora poznati angleško poimenovanje, sicer
+lahko napačno sklepa, da običajne vaje ni. Blokira hitro sestavljanje prvega načrta.
+
+**Predlog in preverjanje:** lokalizirana imena in iskalne sopomenke ob ohranjeni
+identiteti vaje; »počep« mora najti ustrezne različice, angleško iskanje pa ostati
+uporabno. Prevesti tudi filtre. Preverjeno na objavljeni različici `0625bd6`.
+
+### 80.4 [ ] P3 — Po izbiri slovenščine del osnovnega vmesnika ostane angleški
+
+**Scenarij in koraki:** ob prvem obisku izbrati »Slovenščina«, začeti s prazno
+aplikacijo, odpreti meni, dodati stranko in odpreti njen profil.
+
+**Opaženo:** seznam treningov kaže »Dates«, »Client«, »Location« in »No sessions
+scheduled.« Meni vsebuje »Add a client from their own details« in »Open an encrypted
+file«. Profil kaže »Pridružil se Sep 26, 2026«.
+
+**Težava in vpliv:** jezik ni dosleden prav pri začetnih opravilih; datum uporablja
+angleško ime meseca in drugačen vrstni red. Oteži razumevanje brez dokumentacije.
+
+**Predlog in preverjanje:** ob menjavi jezika osvežiti tudi že izrisane filtre in
+menijske možnosti; datum prikazati v obliki ISO. Preveriti začetni prehod iz angleščine
+v slovenščino ter ponovni obisk posebej. Ponovni obisk še ni preizkušen.
+Preverjeno na objavljeni različici `0625bd6`.
