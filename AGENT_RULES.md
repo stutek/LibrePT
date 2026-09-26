@@ -98,7 +98,7 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
 - **Another agent may be working in the same tree.** Before the first edit, read
   `git status --short` and `.private/AGENT_SYNC/`; never start a second `build check` or commit on
   top of one in flight. Claim your work in `.private/AGENT_SYNC/<model>-<topic>.md`: what is in
-  progress, and every file you take exclusively. A file another note claims is not yours — take
+  progress, and every file you take exclusively, TODO.md never among them. A file another note claims is not yours — take
   other work or ask. **Delete the note in the same turn as the commit**; a stale note locks files
   nobody holds.
 - **A gate needs a QUIET TREE for its whole run, not merely a free slot.** The dev server computes
@@ -215,7 +215,9 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
 - One home each: architecture [README.md](README.md), workflows [use_cases/](use_cases/), open work
   and decisions [TODO.md](TODO.md), what shipped [CHANGELOG.md](CHANGELOG.md). **TODO.md is written
   as the work moves** — started, decided, blocked, closed — in that same turn, never saved up for
-  the end of a session; with several agents running it is how they see each other's plans. **A section leaves
+  the end of a session; with several agents running it is how they see each other's plans. **A TODO.md
+write is atomic and holds up nobody**: read the section, edit it, and commit that edit alone in the
+same step, staged by hunk. It needs no turn at the tree, and no note claims TODO.md. **A section leaves
   TODO.md the day it closes** — heading and pointer stay, the reasoning moves whole to
   [TODO_ARCHIVE.md](TODO_ARCHIVE.md), and open subsections stay behind. Every Markdown file
   carries frontmatter, every knowledge directory an `INDEX.md`, and concepts link to each other.
