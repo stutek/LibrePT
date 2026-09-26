@@ -255,6 +255,18 @@ def test_no_component_overflows_in_slovenian(page, local_server):
     assert not findings, f"Slovenian at {profile['width']}px\n{_report(findings)}"
 
 
+def test_no_component_overflows_in_german(page, local_server):
+    """The same walk in `de`. German words are long and compound — "Übungsbibliothek",
+    "Sandbox-Daten zurücksetzen" — so a label that fits in `sl` is not evidence it fits here."""
+    profile = overflow_scan.device_profile("iphone-14")
+    page.set_viewport_size({"width": profile["width"], "height": profile["height"]})
+
+    findings = []
+    _walk_the_app(page, local_server, findings, query="?lang=de")
+
+    assert not findings, f"German at {profile['width']}px\n{_report(findings)}"
+
+
 def test_the_walk_still_covers_every_route():
     """No browser: a static check that the walk above has not fallen behind routeTable.js.
 

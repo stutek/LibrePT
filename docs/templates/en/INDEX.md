@@ -30,3 +30,4 @@ that is recorded.
 
 - [../INDEX.md](../INDEX.md) — every language these documents exist in
 - [../sl/INDEX.md](../sl/INDEX.md) — the Slovenian edition
+- [../de/INDEX.md](../de/INDEX.md) — the German edition (machine translation, not yet reviewed)

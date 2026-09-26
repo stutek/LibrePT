@@ -20,6 +20,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-09-26 — German
+
+### Added
+
+- **German** (*Deutsch*) in the language menu, on the first-run splash and on the client's intake
+  page: every screen, the guided story, the demo data, and the consent letter, consent form and
+  privacy notice a client receives. It is a machine translation that a German speaker has not yet
+  reviewed (TODO §79.1).
+
 ## 2026-09-24 — Exchange complete exercise libraries
 
 ### Added

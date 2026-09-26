@@ -231,6 +231,8 @@ export function setupFeedbackForms() {
           let generatedTranscript = "";
           if (state.lang === "sl") {
             generatedTranscript = `Glasovna opomba (lokalno): ${clientName} poroča o dobrem počutju pri vaji ${exName}.`;
+          } else if (state.lang === "de") {
+            generatedTranscript = `Sprachnotiz (lokal): ${clientName} berichtet von sauberer Technik und gutem Tempo bei ${exName}.`;
           } else {
             generatedTranscript = `Voice note (local): ${clientName} reported good form and speed on ${exName}.`;
           }

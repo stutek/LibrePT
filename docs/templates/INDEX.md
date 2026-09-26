@@ -27,11 +27,14 @@ delivery buttons link to the folder matching that choice, so this tree's shape i
 | [en/Client_Privacy_Notice.md](en/Client_Privacy_Notice.md) | English | `template` | Art. 13 notice — what the client must be told *before* consenting |
 | [sl/Client_Consent_Form.md](sl/Client_Consent_Form.md) | Slovenščina | `template` | Obrazec soglasja — the same letter, as sent in Slovenian |
 | [sl/Client_Privacy_Notice.md](sl/Client_Privacy_Notice.md) | Slovenščina | `template` | Obvestilo o zasebnosti — the Art. 13 notice in Slovenian |
+| [de/Client_Consent_Form.md](de/Client_Consent_Form.md) | Deutsch | `template` | Einwilligungsformular — the same letter, as sent in German |
+| [de/Client_Privacy_Notice.md](de/Client_Privacy_Notice.md) | Deutsch | `template` | Datenschutzhinweise — the Art. 13 notice in German |
 
 **English is the source edition.** Translations state the same promises and carry the same
 `consent_form_version`; where a translation and the English text disagree, the English text is what
-was intended, and the difference is a bug in the translation. Translations are maintainer-made and
-not legally reviewed — each says so at the top.
+was intended, and the difference is a bug in the translation. No translation is legally reviewed —
+each says so at the top. The Slovenian one is maintainer-made; the German one is a machine
+translation that a German speaker has not yet reviewed.
 
 ## Adding a language
 

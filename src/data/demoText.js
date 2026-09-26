@@ -151,6 +151,136 @@ export const DEMO_TEXT = {
     "Too Easy - Increase Load": "Prelahko – povečaj težo",
     "Form Break - Depth Alert": "Tehnika popušča – pozor na globino",
   },
+
+  // German. Machine translation, not yet reviewed by a German speaker (see src/i18n/de.js). Two of
+  // these are named on the story's cards in de.js — "Kraft & Kondition (Gruppe)" and "Kraft
+  // dienstags und donnerstags" — so a change here is a change there. The group session's name is
+  // kept as short as the Slovenian one: the guide shrinks to keep that session's card visible, and
+  // "Gruppentraining Kraft & Kondition" made the card tall enough that the guide had to scroll.
+  de: {
+    // ── Sessions (data/sessions.js) ───────────────────────────────────────────────────────────
+    "1:1 Personal Training": "Einzeltraining",
+    "Core & Stability": "Rumpf und Stabilität",
+    "Early Bird Strength": "Kraft am frühen Morgen",
+    "Express Core HIIT": "Kurzes HIIT für den Rumpf",
+    "Group Strength & Conditioning": "Kraft & Kondition (Gruppe)",
+    "HIIT Conditioning": "HIIT-Kondition",
+    "Lower Body Strength": "Kraft Beine",
+    "Lunch Express HIIT": "Kurzes HIIT am Mittag",
+    "Mobility Flow": "Beweglichkeit",
+    "Mobility & Recovery": "Beweglichkeit und Regeneration",
+    "Morning Conditioning": "Morgendliche Kondition",
+    "Open Slot (Drop-in)": "Freier Termin (ohne Anmeldung)",
+    "Post-Work Cardio": "Ausdauer nach der Arbeit",
+    "Return-to-Play Rehab": "Rückkehr nach Verletzung",
+    "Strength & Longevity Focus": "Kraft und Langlebigkeit",
+    "Upper Body Strength": "Kraft Oberkörper",
+
+    // Places. The gym's own name stays as it is; the two outdoor ones are descriptions.
+    "city park": "Stadtpark",
+    "playground outside": "Spielplatz draußen",
+
+    // ── Routines (data/routines.js) ───────────────────────────────────────────────────────────
+    "Upper Body A": "Oberkörper A",
+    "Legs & Core B": "Beine und Rumpf B",
+    "Tri-Set Metabolic Conditioning": "Metabolische Kondition in Dreiersätzen",
+    "Postpartum Core & Mobility": "Rumpf und Beweglichkeit nach der Geburt",
+
+    // A repeating slot's name (data/sessionSeriesSeed.js).
+    "Tuesday & Thursday Strength": "Kraft dienstags und donnerstags",
+
+    // ── Circuits, inside routines and history ─────────────────────────────────────────────────
+    "Arm Finisher Circuit": "Abschlusszirkel Arme",
+    "Chest & Back Strength Complex": "Kraftkomplex Brust und Rücken",
+    "Core & Ankle Alignment": "Rumpf und Ausrichtung der Sprunggelenke",
+    "Core Finish Burner": "Abschlusszirkel Rumpf",
+    "Dynamic Warmup": "Dynamisches Aufwärmen",
+    "Hypertrophy & Core Trio": "Dreier für Hypertrophie und Rumpf",
+    "Leg & Hinge Circuit": "Zirkel Beine und Hüftbeugung",
+    "Longevity Cooldown & Stretching": "Abwärmen und Dehnen",
+    "Lower Body Strength Circuit": "Kraftzirkel Beine",
+    "Posture & Core Stability Circuit": "Zirkel Haltung und Rumpfstabilität",
+    "Posture & Leg Strength Circuit": "Zirkel Haltung und Beinkraft",
+    "Press & Hinge Longevity Circuit": "Zirkel Drücken und Hüftbeugung",
+    "Shoulder & Lat Density Circuit": "Zirkel Schultern und breiter Rückenmuskel",
+    "Tri-Set Metabolic Circuit": "Metabolischer Zirkel in Dreiersätzen",
+
+    // ── Clients: what they are training for (data/clients.js) ─────────────────────────────────
+    "Strength gain, building shoulder mobility, and improving squat form.":
+      "Kraft aufbauen, Beweglichkeit der Schultern und Technik der Kniebeuge verbessern.",
+    "Fat loss, cardiovascular endurance, and recovering functional knee strength.":
+      "Fett abbauen, Ausdauer von Herz und Kreislauf verbessern und die Kraft im Knie zurückgewinnen.",
+    "General conditioning, consistency, and core activation.":
+      "Allgemeine Kondition, Regelmäßigkeit und Aktivierung des Rumpfs.",
+    "Hypertrophy, upper body definition, and consistent training frequency.":
+      "Hypertrophie, definierter Oberkörper und regelmäßiges Training.",
+    "Marathon prep, aerobic base building, and injury-free mileage progression.":
+      "Vorbereitung auf einen Marathon, aerobe Grundlage und mehr Kilometer ohne Verletzung.",
+    "General strength maintenance and mobility as a masters athlete.":
+      "Kraft und Beweglichkeit als Seniorensportler erhalten.",
+    "Postpartum strength rebuild and core recovery.":
+      "Kraft und Rumpf nach der Geburt wieder aufbauen.",
+    "Reduce body fat from 17% to below 15% (but not below 10%), build strength, and optimize for health and longevity.":
+      "Körperfett von 17 % auf unter 15 % senken (aber nicht unter 10 %), Kraft aufbauen und auf Gesundheit und Langlebigkeit achten.",
+
+    // ── Clients: the trainer's notes and injuries ─────────────────────────────────────────────
+    "Slight left shoulder tightness during overhead movements. Keep warmups thorough. Enjoys tracking RPE (Rate of Perceived Exertion).":
+      "Leichte Verspannung in der linken Schulter bei Bewegungen über Kopf. Gründlich aufwärmen. Verfolgt gern die RPE (empfundene Anstrengung).",
+    "Knee reconstruction surgery in 2024. Keep back squats at moderate load and monitor depth. Avoid high-impact jumping.":
+      "Knierekonstruktion 2024. Kniebeugen mit mäßiger Last, auf die Tiefe achten. Keine Sprünge mit harter Landung.",
+    "Prefers high-intensity interval formats. Enjoys kettlebell workouts. Heart rate spikes quickly; monitor recovery times.":
+      "Mag am liebsten hochintensive Intervalle und Training mit Kettlebells. Der Puls steigt schnell; auf die Erholungszeit achten.",
+    "No current injuries. Very consistent with sleep and nutrition tracking.":
+      "Derzeit keine Verletzungen. Zeichnet Schlaf und Ernährung sehr regelmäßig auf.",
+    "Mild lower back stiffness after long runs. Prioritize core stability work.":
+      "Leichte Steifheit im unteren Rücken nach langen Läufen. Rumpfstabilität hat Vorrang.",
+    "No injuries reported. Prefers morning sessions and steady progression.":
+      "Keine Verletzungen gemeldet. Trainiert am liebsten morgens und steigert sich gleichmäßig.",
+    "Cleared for training by physician. Avoid heavy overhead loading until week 12.":
+      "Ärztlich für das Training freigegeben. Bis Woche 12 keine schweren Lasten über Kopf.",
+    "Focus on clean compound movements (squat, hinge, press) and metabolic conditioning to improve body composition. Focus on longevity and joint health; monitor RPE and prioritize recovery.":
+      "Schwerpunkt auf sauberen Grundübungen (Kniebeuge, Hüftbeugung, Drücken) und metabolischer Kondition für eine bessere Körperzusammensetzung. Schwerpunkt auf Langlebigkeit und gesunden Gelenken; RPE verfolgen, Regeneration hat Vorrang.",
+    "Knee reconstruction surgery in 2024": "Knierekonstruktion 2024",
+    "Mild lower back stiffness after long runs":
+      "Leichte Steifheit im unteren Rücken nach langen Läufen",
+    "Postpartum recovery — avoid heavy overhead loading until week 12":
+      "Erholung nach der Geburt — bis Woche 12 keine schweren Lasten über Kopf",
+    "Slight left shoulder tightness during overhead movements":
+      "Leichte Verspannung in der linken Schulter bei Bewegungen über Kopf",
+
+    // ── What was written down during a set (data/history.js) ──────────────────────────────────
+    "Completed all 4 sets with high speed. Recommend adding 2.5kg next session.":
+      "Alle 4 Sätze schnell und sauber. Nächstes Mal 2,5 kg mehr.",
+    "Failed 6th rep": "6. Wiederholung nicht geschafft",
+    "Felt form breaking on last 2 reps. Keep weight at 50kg.":
+      "Bei den letzten 2 Wiederholungen ließ die Technik nach. Gewicht bleibt bei 50 kg.",
+    "Felt slight pinching in right shoulder. Ceased after 2 sets.":
+      "Leichtes Zwicken in der rechten Schulter. Nach 2 Sätzen abgebrochen.",
+    "Gassed by 15 cal — drop the target to 15 next session.":
+      "Bei 15 kcal war die Kraft weg — nächstes Mal Ziel 15.",
+    "Great mind-muscle connection. Strong back activation.":
+      "Sehr gute Verbindung zum Muskel. Starke Aktivierung des Rückens.",
+    "Grip fatigue": "Griff ermüdet",
+    "Left arm weaker on last set": "Linker Arm im letzten Satz schwächer",
+    "Left side fatigued": "Linke Seite ermüdet",
+    "Moved 24kg easily on the final set. Increase starting weight next session.":
+      "24 kg im letzten Satz mühelos. Nächstes Mal höheres Startgewicht.",
+    "Pushed the weight easily. Ready for 65kg next week.":
+      "Das Gewicht ging mühelos. Nächste Woche 65 kg.",
+    "RPE 9, last rep grind": "RPE 9, letzte Wiederholung mühsam",
+    "Shoulders shrugging too early. Keep elbows in.":
+      "Schultern ziehen zu früh hoch. Ellbogen am Körper lassen.",
+    "Sprinted the last 5 cal": "Die letzten 5 kcal im Sprint",
+    "Steadier on the left": "Links stabiler",
+    "Strict form": "Saubere Technik",
+    "Strict, paused": "Sauber, mit Pause",
+    "Strong hinge focus": "Schwerpunkt auf der Hüftbeugung",
+    "To failure": "Bis zum Muskelversagen",
+
+    // ── Plan adjustments the demo already carries (data/planUpdates.js) ───────────────────────
+    "Too Easy - Increase Load": "Zu leicht – Last erhöhen",
+    "Form Break - Depth Alert": "Technik lässt nach – auf die Tiefe achten",
+  },
 };
 
 /** `text` in `lang`, or `text` itself when there is nothing better. Never returns empty for a

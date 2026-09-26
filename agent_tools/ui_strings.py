@@ -48,8 +48,9 @@ SRC = REPO_ROOT / "src"
 # buttons (demoCleanupDialog.js), then the exercise picker's empty message (exercisePicker.js), then
 # the session form's placeholders and the signup review title (editSessionView.js,
 # signupReviewDialog.js), then every view's grabber label, then the header's close and version
-# labels (applicationHeader.js).
-BASELINE = 125
+# labels (applicationHeader.js), then the intake page's language buttons, now built from the
+# registry's own language names (intakeView.js).
+BASELINE = 123
 
 # Upstream files and the dictionaries themselves: the first are not ours to translate, the second
 # ARE the translations.

@@ -91,6 +91,16 @@ DOCUMENTS = (
         "src/privacy-notice-sl.html",
         "Obvestilo o zasebnosti",
     ),
+    (
+        "docs/templates/de/Client_Consent_Form.md",
+        "src/consent-form-de.html",
+        "Einwilligungsformular",
+    ),
+    (
+        "docs/templates/de/Client_Privacy_Notice.md",
+        "src/privacy-notice-de.html",
+        "Datenschutzhinweise",
+    ),
 )
 
 # The values a document may ask for by name instead of writing out (TODO §28.1/§28.2). Each is read

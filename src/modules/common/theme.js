@@ -65,6 +65,13 @@ export const THEME_SWITCHER_LABELS = {
     blossom: "Cvet",
     nebula: "Nebula",
   },
+  de: {
+    daylight: "Tageslicht",
+    midnight: "Mitternacht",
+    spreadsheet: "Tabelle",
+    blossom: "Blüte",
+    nebula: "Nebula",
+  },
 };
 
 export function resolveTheme(requestedTheme) {

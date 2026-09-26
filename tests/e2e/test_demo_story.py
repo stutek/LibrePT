@@ -275,11 +275,12 @@ CARD_ROOM = """() => {
 }"""
 
 
-@pytest.mark.parametrize("lang", ["en", "sl"])
+@pytest.mark.parametrize("lang", ["en", "sl", "de"])
 def test_every_card_fits_a_phone_without_scrolling(page, local_server, lang):
     """The opening card was made to fit a 390x844 phone without scrolling (2026-09-11), and only a
     smaller phone may need the scrollbar. The rewritten cards of 2026-09-25 are longer, so the rule
-    is checked on every step of the story, in both languages, rather than on the opening card."""
+    is checked on every step of the story, in every language, rather than on the opening card.
+    German runs longest of the three."""
     page.set_viewport_size({"width": 390, "height": 844})
     _open_story(page, local_server, f"?init=demo_data_load&lang={lang}&demo=story")
     measured = {}

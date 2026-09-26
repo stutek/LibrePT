@@ -59,7 +59,7 @@ test("every UI language can send the consent letter in that language", () => {
 
 test("an unknown or missing language falls back to the default, never to nothing", () => {
   // Reachable from a share link (?lang=…) and from a record imported with a since-removed locale.
-  for (const lang of [undefined, null, "de", "__proto__", "constructor", 7]) {
+  for (const lang of [undefined, null, "fr", "__proto__", "constructor", 7]) {
     assert.equal(consentEmailSubject(lang), consentEmailSubject(DEFAULT_CONSENT_LANG));
     assert.ok(consentEmailBody("Jane", lang).length > 200);
   }
@@ -113,7 +113,11 @@ test("withdrawing is offered by the same route as consenting (Art. 7(3))", () =>
   // only route that meets the standard is replying with a word, in the same message, to the same
   // person. Anything requiring a form, an account or a different channel is a harder path back out
   // than in, which is the failure Art. 7(3) names.
-  const keywords = { en: ["I CONSENT", "WITHDRAW"], sl: ["PRIVOLIM", "PREKLICUJEM"] };
+  const keywords = {
+    en: ["I CONSENT", "WITHDRAW"],
+    sl: ["PRIVOLIM", "PREKLICUJEM"],
+    de: ["ICH WILLIGE EIN", "WIDERRUF"],
+  };
 
   for (const lang of LANGS) {
     const [consentWord, withdrawWord] = keywords[lang];
@@ -134,7 +138,7 @@ test("withdrawing is offered by the same route as consenting (Art. 7(3))", () =>
 test("the SMS variant offers withdrawal too, since some clients only ever get that one", () => {
   // A client sent the link by SMS never receives the email letter, so a withdrawal route that lives
   // only in the email is absent for exactly the clients reached by the shorter channel.
-  const keywords = { en: "WITHDRAW", sl: "PREKLICUJEM" };
+  const keywords = { en: "WITHDRAW", sl: "PREKLICUJEM", de: "WIDERRUF" };
   for (const lang of LANGS) {
     assert.ok(
       consentShareText("Jane Doe", lang).includes(keywords[lang]),
@@ -183,8 +187,14 @@ test("every shipped letter is verbatim its printable template", () => {
 
     // The subject line is part of the printable form, and part of what the mail client sends.
     const subjectLabel = fenced[1].split("\n")[0].split(":")[0];
+    const clientNamePlaceholder = {
+      en: "[Client Name]",
+      sl: "[Ime stranke]",
+      de: "[Name des Kunden]",
+    }[lang];
+    assert.ok(clientNamePlaceholder, `${lang}: add the template's client-name placeholder here`);
     const expected = `${subjectLabel}: ${consentEmailSubject(lang)}\n\n${consentEmailBody(
-      lang === "sl" ? "[Ime stranke]" : "[Client Name]",
+      clientNamePlaceholder,
       lang,
     )}\n`;
     assert.equal(

@@ -69,7 +69,7 @@ Or run the test suite directly:
 | Suite | Covers |
 | :--- | :--- |
 | [tests/test_app.py](tests/test_app.py) | Static integrity: file structure, manifest icons, `staticMappings` selectors resolving against `index.html`, and seed data structure. |
-| [tests/unit/](tests/unit/) | Non-browser structural checks: EN/SL translation key parity (`test_i18n_parity.py`), DOM id/selector mappings (`test_dom_mappings.py`), and project layout (`test_project_layout.py`). |
+| [tests/unit/](tests/unit/) | Non-browser structural checks: translation key parity across every locale (`test_i18n_parity.py`), DOM id/selector mappings (`test_dom_mappings.py`), and project layout (`test_project_layout.py`). |
 | [tests/e2e/](tests/e2e/) | Playwright end-to-end suites in real Chromium: the sessions dashboard, clipboard launch, session deep-link routing, the gym-floor smoke flow, and the not-found/error view. |
 
 The verify → build → deploy chain lives in the `build/` and `deploy/` packages, each runnable on its own and debuggable:
@@ -105,7 +105,7 @@ This is covered automatically by `test_scrolling_the_timeline_updates_the_focuse
 - **Vanilla only**: No frameworks, no bundlers, no CDN runtime dependencies on the critical path.
 - **State**: [`data/stateStore.js`](src/data/stateStore.js) is the single source of truth — read it with `getState()`, replace it with `setState()`, and persist with `saveToLocalStorage()`. Route all mutations through it. Despite its name, `saveToLocalStorage()` writes to **IndexedDB** (star-writing the state into every live schema store in one transaction) and only falls back to a plain `librept_db` `localStorage` key when IndexedDB is unavailable.
 - **Styling**: Use the CSS custom properties defined at the top of `index.css` (`--text-main`, `--text-muted`, `--border-color`, `--accent-cyan`, …). Do not hard-code theme colors — all five themes (Midnight, Daylight, Red, Blossom, Nebula) must work from the same properties.
-- **Internationalization**: Every user-facing string goes in both the `en` and `sl` dictionaries under `src/i18n/` (`en.js` / `sl.js`, registered in `src/i18n/index.js`) and is read via `t('key')`. Key parity is enforced by the test suite (`tests/unit/test_i18n_parity.py`). Prefer `Intl` / `toLocaleDateString` for dates rather than hand-written month or weekday names.
+- **Internationalization**: Every user-facing string goes in every dictionary under `src/i18n/` (`en.js`, `sl.js`, `de.js`, registered in `src/i18n/index.js`) and is read via `t('key')`. Key parity is enforced by the test suite (`tests/unit/test_i18n_parity.py`). Prefer `Intl` / `toLocaleDateString` for dates rather than hand-written month or weekday names.
 - **Static translations**: Selectors in `staticMappings` overwrite an element's text content. Give a translated element its own `id` rather than relying on a positional selector — a positional selector will silently retarget when markup is reordered, and the tests only verify that the selector's root exists.
 
 ---

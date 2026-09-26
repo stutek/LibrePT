@@ -161,7 +161,7 @@ The service worker is split into single-responsibility modules so each concern c
 *   **Single-Column Session Day Deck**: The dashboard schedule is a horizontally swipeable deck of day columns (`Yesterday → Today → Tomorrow → Upcoming`), showing exactly one day at a time at every viewport so the gym-floor phone view and the desk view stay identical. The deck is driven three ways, all kept in sync:
     *   **Swipe**: Scroll-snapped left/right swiping between days, which retitles the bar to whichever day it lands on.
     *   **Title Arrows**: `[ ‹ ]` / `[ › ]` in the title bar step to the previous/next day and disable at the ends of the deck. They are sized as wide tap targets for sweaty, one-handed use.
-    *   **Day Title Bar**: Always names the day currently in focus by ISO date and weekday — `2026-07-15 Wednesday (Today)` — flagging the current day with a `(Today)` tag. The weekday is locale-aware (EN/SL) and abbreviates on narrow screens so the date and tag always stay readable on one line; the open-ended `Upcoming` bucket reads `Upcoming From 2026-07-17` instead of naming a weekday.
+    *   **Day Title Bar**: Always names the day currently in focus by ISO date and weekday — `2026-07-15 Wednesday (Today)` — flagging the current day with a `(Today)` tag. The weekday is locale-aware (EN/SL/DE) and abbreviates on narrow screens so the date and tag always stay readable on one line; the open-ended `Upcoming` bucket reads `Upcoming From 2026-07-17` instead of naming a weekday.
 *   **Home Returns to Today**: Navigating home (LibrePT logo or the Clients tab) always pulls the deck back into focus on today, so the trainer never lands on a stale day left over from earlier browsing.
 *   **Sub-Second Participant Switching**: Tapping participant tabs swaps views in under 50ms.
 *   **Primary Focus Card with Foreshadowing**: Centers the current active exercise (directions, target load/reps, and action buttons) while offering a compact "Up Next" foreshadowing card (visible on larger screens or via a quick scroll) so the PT can prep equipment for smooth transitions.
@@ -222,7 +222,7 @@ LibrePT/
 │   ├── sw/             # Service Worker modules: cacheManifest, integrity, precache, runtimeFetch (see Architecture)
 │   ├── manifest.json   # Web App Manifest for mobile PWA standalone styling
 │   ├── data/           # Default database, split per entity (exercises, clients, routines, history, planUpdates, sessions)
-│   ├── i18n/           # EN/SL translation dictionaries (key parity enforced by the test suite)
+│   ├── i18n/           # EN/SL/DE translation dictionaries (key parity enforced by the test suite)
 │   ├── modules/        # Feature modules & UI components (session, clipboard, plans, clients, exercises, common, themes)
 │   ├── controllers/    # SPA router, theme, and PWA lifecycle controllers
 │   ├── fonts/          # Locally-vendored webfonts (no third-party font origin)
@@ -248,7 +248,7 @@ LibrePT/
 ## ⚡ Technical Stack
 
 *   **Core**: HTML5, Vanilla JavaScript (ES6+ ES modules), and Vanilla CSS custom properties driving a 5-theme system (Midnight, Daylight, Red, Blossom, Nebula) — no hard-coded theme colours.
-*   **Internationalization**: Built-in EN/SL dictionaries with locale-aware date formatting via `Intl`.
+*   **Internationalization**: Built-in English, Slovenian and German dictionaries with locale-aware weekday names via `Intl`; dates stay ISO and times 24-hour in every language. The German one is a machine translation that a German speaker has not yet reviewed.
 *   **Data Sync**: No backend of our own — Google Calendar is the planned source of truth for bookings/RSVP (not yet built, [TODO §1.5](TODO.md#15--brainstorm-google-calendar-integration--source-of-truth-occupancy-and-data-processor-exposure)), and Google Drive's `appDataFolder` covers optional cross-device sync of app-only data — **built**, see [TODO §3.3](TODO.md#33-x-google-drive-periodic-sync). A Firestore/Firebase relay was considered and set aside as the default: it would make the operator a GDPR data processor for PT/client data, which this design avoids.
 *   **Third-Party APIs**: Google Drive API (OAuth 2.0, `drive.appdata` scope) — the only third-party API the app calls today. The Google Calendar API is planned, not integrated.
 *   **Native Wrap**: **Capacitor** to wrap the HTML/CSS/JS code into native Android (.apk) and iOS (.ipa) app packages.

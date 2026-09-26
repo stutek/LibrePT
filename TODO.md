@@ -5507,3 +5507,45 @@ Blokira pravilno filtriranje sicer veljavnih uvozov (§45.5).
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#777-x-p2--danes-ne-prikaže-današnjih-vadb-ob-aktivnem-datumskem-filtru--popravljeno-2026-09-24);
 what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
+## 79. [~] German (de) — the second market, Germany and Austria
+
+**Asked 2026-09-26.** German-speaking trainers are the plan's second market. The app now ships a
+German dictionary ([src/i18n/de.js](src/i18n/de.js)), a German consent letter
+([src/i18n/consent/de.js](src/i18n/consent/de.js)) and the German consent form and privacy notice
+([docs/templates/de/](docs/templates/de/INDEX.md)). All of it is a **machine translation**. It uses
+the familiar "du", as the Slovenian uses "ti", and the DSGVO's own words for consent (Einwilligung)
+and withdrawal (Widerruf).
+
+German is selectable from the language menu, the splash and the client's intake page as soon as
+this is deployed. Nothing stops a trainer from sending the German consent letter before §79.1 is done.
+
+### 79.1 [ ] A German speaker reviews the German text — *Blocks:* inviting German-speaking trainers
+
+Read `de.js`, `consent/de.js`, both documents in `docs/templates/de/` and the German part of
+[src/data/demoText.js](src/data/demoText.js). The terms least certain: *Klemmbrett* for the
+clipboard, *Sandbox*, *Zirkel* for a circuit, *Kunde* (generic masculine) for a client, *Routine*,
+*Wdh.* for reps, the reply words *ICH WILLIGE EIN* / *WIDERRUF*, and *Speicherdauer*. Before real
+use with clients, the consent letter and the notice also need someone who knows German
+data-protection law.
+
+### 79.2 [ ] Which supervisory authority the German notice names — *Blocks:* §79.1's legal review
+
+The English notice, and so the German one, names the Slovenian Information Commissioner and the
+European Data Protection Board's list. A client in Germany or Austria would look for their own
+authority (in Germany one per federal state; in Austria the Datenschutzbehörde). Naming them changes
+the notice's substance in one language only, so it is a decision, not a translation fix.
+
+### 79.3 [ ] The evening theme card names an option the menu does not have
+
+`story_step_evening_theme` tells the viewer to choose *Dark Mode* (en) and *Temna tema* (sl), but
+the step selects the theme `midnight`, whose label in the menu is *Midnight* / *Polnoč*
+([theme.js](src/modules/common/theme.js)). The German card names *Mitternacht*, the real label. The
+English and Slovenian cards are left for the card review of §38.21.
+
+### 79.4 [ ] The client documents declare `lang="en"` whatever their language
+
+[agent_tools/render_docs.py](agent_tools/render_docs.py) writes `<html lang="en">` on every page, so
+the Slovenian and German privacy notices and consent forms are announced to a screen reader, and
+offered for translation by the browser, as English. The page's language should come from the
+document's folder.
+

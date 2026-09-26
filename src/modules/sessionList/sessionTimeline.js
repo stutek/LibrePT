@@ -70,7 +70,7 @@ export function getSessionDayDate(day) {
 }
 
 function getSessionDayLocale() {
-  return (deps.getState().lang || "en") === "sl" ? "sl-SI" : "en-US";
+  return { sl: "sl-SI", de: "de-DE" }[deps.getState().lang] || "en-US";
 }
 
 function todayISODate() {

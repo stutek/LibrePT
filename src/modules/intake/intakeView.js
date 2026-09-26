@@ -39,6 +39,7 @@ import {
 } from "../../data/trainerVcard.js";
 import { dialledForm } from "../../domain/contactChannel.js";
 import { senderFromFragment } from "../../domain/intakeSender.js";
+import { TRANSLATIONS } from "../../i18n/index.js";
 import { $id, renderMarkupOnce } from "../common/dom.js";
 import { downloadFile } from "../common/download.js";
 import { keepFormDraft } from "../common/formDraft.js";
@@ -49,6 +50,18 @@ import {
   sendSignupFile,
 } from "./signupDelivery.js";
 
+/** One button per shipped language, each named in ITSELF (`language_name`), in the registry's order.
+ * Built from i18n/index.js, as the splash and the ☰ menu are, so adding a language needs no edit
+ * here. The names are the dictionaries' own constants, not user input, so they are safe markup. */
+function languageButtons() {
+  return Object.entries(TRANSLATIONS)
+    .map(
+      ([code, dict]) =>
+        `<button type="button" class="intake-lang" data-intake-lang="${code}" lang="${code}">${dict.language_name}</button>`,
+    )
+    .join("\n          ");
+}
+
 export function renderIntakeViewShell() {
   renderMarkupOnce(
     "main-content",
@@ -58,8 +71,7 @@ export function renderIntakeViewShell() {
       <header class="intake-header">
         <p class="intake-brand">Libre<span class="intake-brand-accent">PT</span></p>
         <div class="intake-langs" id="intake-langs">
-          <button type="button" class="intake-lang" data-intake-lang="en" lang="en">English</button>
-          <button type="button" class="intake-lang" data-intake-lang="sl" lang="sl">Slovenščina</button>
+          ${languageButtons()}
         </div>
       </header>
 

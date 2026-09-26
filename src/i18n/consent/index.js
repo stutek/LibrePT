@@ -9,17 +9,18 @@
 //
 // deps: none.
 
+import { consentDe } from "./de.js";
 import { consentEn } from "./en.js";
 import { consentSl } from "./sl.js";
 
-export const CONSENT_LETTERS = { en: consentEn, sl: consentSl };
+export const CONSENT_LETTERS = { en: consentEn, sl: consentSl, de: consentDe };
 
 export const DEFAULT_CONSENT_LANG = "en";
 
 // Endonyms, not the header switcher's "EN"/"SL" codes: this dropdown picks the language a CLIENT
 // will read, and it is chosen by a trainer who may be looking at a name they do not speak. "EN" is
 // only obvious to someone who already knows the answer.
-export const CONSENT_LANG_LABELS = { en: "English", sl: "Slovenščina" };
+export const CONSENT_LANG_LABELS = { en: "English", sl: "Slovenščina", de: "Deutsch" };
 
 // `Object.hasOwn`, for the same reason ../index.js's isSupportedLang uses it: a truthiness check
 // answers yes for every inherited Object.prototype member, so `?lang=__proto__` from a share link

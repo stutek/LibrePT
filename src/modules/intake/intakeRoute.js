@@ -10,7 +10,9 @@
 // signing up. A `?intake=1` on the app's root would be neither, and would also boot the trainer's app
 // first and the form second.
 //
-// deps: none — pure string functions.
+// deps: i18n/index.js for the list of shipped languages; otherwise pure string functions.
+
+import { TRANSLATIONS } from "../../i18n/index.js";
 
 const INTAKE_SEGMENT = "/intake";
 
@@ -31,8 +33,15 @@ export function isIntakeLocation(pathname = "") {
  *
  * The client can still change it on the page, because the guess decides what wording their consent is
  * stamped with and only they can say whether they can read it.
+ *
+ * `supported` defaults to the registry's own list, English first, so a language added to
+ * i18n/index.js is offered here without this file changing.
  */
-export function resolveIntakeLang(requested, deviceLanguages = [], supported = ["en", "sl"]) {
+export function resolveIntakeLang(
+  requested,
+  deviceLanguages = [],
+  supported = Object.keys(TRANSLATIONS),
+) {
   const wanted = typeof requested === "string" ? requested.toLowerCase() : "";
   if (supported.includes(wanted)) return wanted;
 

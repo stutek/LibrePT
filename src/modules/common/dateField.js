@@ -160,7 +160,7 @@ class DateField extends SteppedField {
   // carry the weekday and the day number, which is how the next week is spoken about on a gym floor.
   marks() {
     if (!this.showMarks) return [];
-    const locale = this.lang === "sl" ? "sl-SI" : "en-GB";
+    const locale = { sl: "sl-SI", de: "de-DE" }[this.lang] || "en-GB";
     const nextKey = this.past ? "date_field_yesterday" : "date_field_tomorrow";
     return dayMarks(this.today(), MARK_COUNT, this.past ? -1 : 1).map((value, index) => {
       if (index === 0) return { value, label: this.label("date_field_today") };

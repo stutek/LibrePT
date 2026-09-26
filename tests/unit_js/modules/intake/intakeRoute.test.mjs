@@ -41,11 +41,14 @@ test("otherwise the client's own phone decides, since they never chose a languag
   // A region subtag never changes which dictionary applies.
   assert.equal(resolveIntakeLang(null, ["sl-SI"]), "sl");
   // First supported preference wins, not first preference overall.
-  assert.equal(resolveIntakeLang(null, ["de-DE", "sl-SI"]), "sl");
+  assert.equal(resolveIntakeLang(null, ["fr-FR", "sl-SI"]), "sl");
+  // Every language the registry ships is offered, with no list kept here: an Austrian phone gets
+  // the German form.
+  assert.equal(resolveIntakeLang(null, ["de-AT", "en-GB"]), "de");
 });
 
 test("an unreadable answer falls back to English rather than to i18n keys on screen", () => {
-  assert.equal(resolveIntakeLang("klingon", ["de-DE"]), "en");
+  assert.equal(resolveIntakeLang("klingon", ["fr-FR"]), "en");
   assert.equal(resolveIntakeLang(null, []), "en");
   assert.equal(resolveIntakeLang(null, null), "en");
   assert.equal(resolveIntakeLang({ toString: () => "sl" }, []), "en", "not a string");

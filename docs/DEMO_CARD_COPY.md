@@ -19,7 +19,8 @@ tags:
 > proposals still stand.
 >
 > The English goes into [src/i18n/en.js](../src/i18n/en.js) and the Slovenian into
-> [src/i18n/sl.js](../src/i18n/sl.js). Those two are the only supported languages.
+> [src/i18n/sl.js](../src/i18n/sl.js). The German cards in [src/i18n/de.js](../src/i18n/de.js)
+> are a machine translation of the English and are not reviewed in this file.
 >
 > The defects listed below were found by walking the demo; the fixes that were made without waiting
 > are in [TODO.md](../TODO.md) §38.13 to §38.19.
