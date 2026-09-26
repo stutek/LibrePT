@@ -69,10 +69,21 @@ def test_dead_anchor_is_reported_with_a_suggestion(docs):
     assert dead and "did you mean #133-x-conditioning-metrics" in dead[0]
 
 
-def test_dangling_section_reference_inside_todo_is_reported(docs):
-    """The exact failure that motivated the tool: a §-reference outliving its section."""
-    todo = docs("TODO.md", "# T\n\n## 16. Storage\n\nSee §16.2 for hosting.\n")
-    assert any("dangling ref" in f and "16.2" in f for f in findings_for(todo, [todo]))
+def test_the_backlog_is_not_scanned_for_its_own_links(docs):
+    """A TODO.md write is one edit committed at once, by any session, with no turn at the tree. A
+    dead link written in the backlog or its archive must not fail a gate someone else is running."""
+    todo = docs(
+        "TODO.md", "# T\n\n## 16. Storage\n\nSee §16.2 and [gone](nowhere.md).\n"
+    )
+    archive = docs("TODO_ARCHIVE.md", "# A\n\n## 3. Old\n\n[gone](#no-such-heading)\n")
+    assert doclinks.find_unresolved([todo, archive]) == []
+
+
+def test_a_reference_into_the_backlog_is_still_resolved(docs):
+    todo = docs("TODO.md", "# T\n\n## 16. Storage\n")
+    other = docs("PRIVACY.md", "# P\n\nSee TODO §16.9.\n")
+    found = doclinks.find_unresolved([todo, other])
+    assert any("dangling ref" in message for _, _, message in found)
 
 
 def test_qualified_reference_into_another_document_is_checked(docs):
@@ -136,11 +147,7 @@ def test_repository_documentation_graph_is_intact():
     is a display setting, not a guarantee. A gate failure has to name what broke without anyone
     re-running the tool by hand.
     """
-    files = doclinks.tracked_markdown_files()
-    cache = {}
-    findings = []
-    for path in files:
-        findings.extend(doclinks.check_file(path, cache, files))
+    findings = doclinks.find_unresolved(doclinks.tracked_markdown_files())
 
     detail = "\n".join(
         f"  {rel}:{line}  {message}"

@@ -13,8 +13,13 @@ Three checks, all pure file analysis (no network, no browser):
      using GitHub's slug rules.
   3. **Section references** — every `§N.M` resolves to a numbered heading. Only references whose
      document is actually named are checked (`TODO §16.3`, `[PRIVACY.md](PRIVACY.md) §3.2`,
-     `[… §18.6](../TODO.md)`), plus every `§` inside TODO.md, which means TODO.md. Unqualified
-     prose elsewhere is ambiguous and deliberately left alone — guessing there produced only noise.
+     `[… §18.6](../TODO.md)`). Unqualified prose is ambiguous and deliberately left alone —
+     guessing there produced only noise.
+
+TODO.md and TODO_ARCHIVE.md are TARGETS only, never scanned for their own links. A backlog write is
+one edit committed at once by whichever session needs it, with no turn at the tree, so a dead link
+written there must not fail a gate another session is running. Their links are pointers for a
+reader, and nothing checks them.
 
 Exit code is 1 when anything is unresolved, so it can gate a commit.
 """
@@ -149,8 +154,7 @@ def qualifier_for(line, ref_start, links, path, all_files):
     A §-reference is only resolvable when the prose actually names its document. Three ways it can:
     the § sits inside a link label pointing at a .md file (`[§16 in TODO.md](../TODO.md)`), a link to
     a .md file ends just before it (`[PRIVACY.md](PRIVACY.md) §3.2`), or a bare document name
-    precedes it (`TODO §16.3`). Inside TODO.md an unqualified § means TODO.md — that file is the one
-    whose renumbering strands references, and the reason this check exists.
+    precedes it (`TODO §16.3`).
     """
     for start, end, label_end, target in links:
         md_target = (path.parent / target.partition("#")[0]).resolve()
@@ -167,9 +171,7 @@ def qualifier_for(line, ref_start, links, path, all_files):
         if resolved is not None:
             return resolved
 
-    # Inside the archive an unqualified § means the backlog too — the archive is TODO.md's own
-    # closed half, and its prose is full of references written while it lived there.
-    return path if path.name in ("TODO.md", "TODO_ARCHIVE.md") else None
+    return None
 
 
 def nearest(fragment, anchors):
@@ -352,12 +354,23 @@ def check_file(path, cache, all_files):
     return findings
 
 
-def main():
-    files = tracked_markdown_files()
+# Resolved as targets, never scanned as sources — see the module docstring.
+UNSCANNED_SOURCES = ("TODO.md", "TODO_ARCHIVE.md")
+
+
+def find_unresolved(files):
+    """Every unresolved reference written in `files`, which also serve as the targets."""
     cache = {}
     findings = []
     for path in files:
-        findings.extend(check_file(path, cache, files))
+        if path.name not in UNSCANNED_SOURCES:
+            findings.extend(check_file(path, cache, files))
+    return findings
+
+
+def main():
+    files = tracked_markdown_files()
+    findings = find_unresolved(files)
 
     if findings:
         print(f"\n  ✗ Doc graph: {len(findings)} unresolved reference(s)\n")
@@ -370,7 +383,8 @@ def main():
         return 1
 
     print(
-        f"  ✓ Doc graph: {len(files)} markdown files, every link and §-reference resolves."
+        f"  ✓ Doc graph: {len(files)} markdown files, every link and §-reference outside"
+        " TODO.md and its archive resolves."
     )
     return 0
 
