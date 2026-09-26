@@ -121,7 +121,6 @@ export const en = {
   custom_details: "Custom Details / Notes",
   btn_log_alert: "Log Alert",
   theme_light: "Light Mode",
-  theme_dark: "Dark Mode",
   backup_center: "Sync & Backup Center",
   backup_desc:
     "LibrePT stores your logs directly on this device. Sync the latest session schedule, download a backup file to keep your history safe, or import it to move to another phone.",
@@ -805,7 +804,7 @@ export const en = {
   story_step_evening_move_time:
     "Type 20:00 in the start time box. The following Tuesdays stay at 18:00.",
   story_step_evening_theme:
-    "Late in the evening, on the sofa. In the menu, under Theme, choose Dark Mode.",
+    "Late in the evening, on the sofa. In the menu, under Theme, choose Midnight.",
   story_evening_open_body:
     "The session is over and everyone has gone home. At home you move Tuesday's session, as you all agreed after the workout.",
   story_thanks_title: "End of the walkthrough",

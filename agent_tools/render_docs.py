@@ -251,8 +251,33 @@ def rewrite_links(rendered_html, source_name):
     )
 
 
+# A page declares the language it is written in, and its way back to the app is in that language
+# too. Every page used to say <html lang="en"> and "Back to LibrePT", so a screen reader read the
+# Slovenian and German client documents with English pronunciation. The language is the source's
+# folder under docs/templates/ — the one place a document's language is already decided — and every
+# other document is English.
+BACK_LINK_TEXT = {
+    "en": "Back to LibrePT",
+    "sl": "Nazaj v LibrePT",
+    "de": "Zurück zu LibrePT",
+}
+
+
+def document_language(source_name):
+    """The language a source document is written in: its docs/templates/<lang>/ folder, else English."""
+    parts = pathlib.PurePosixPath(source_name).parts
+    if (
+        len(parts) >= 3
+        and parts[:2] == ("docs", "templates")
+        and parts[2] in BACK_LINK_TEXT
+    ):
+        return parts[2]
+    return "en"
+
+
 def render_page(markdown_text, title, source_name="PRIVACY.md"):
     """The complete HTML document for one source file, as bytes-identical output every run."""
+    lang = document_language(source_name)
     body, metadata = strip_frontmatter(markdown_text)
     page_title = metadata.get("title") or title
     # No "unrewritten link" guard here, deliberately. rewrite_link's two destinations are exhaustive
@@ -264,7 +289,7 @@ def render_page(markdown_text, title, source_name="PRIVACY.md"):
     content = rewrite_links(build_renderer().render(body), source_name)
     return (
         "<!doctype html>\n"
-        '<html lang="en">\n'
+        f'<html lang="{lang}">\n'
         "<head>\n"
         '<meta charset="utf-8">\n'
         '<meta name="viewport" content="width=device-width, initial-scale=1">\n'
@@ -276,7 +301,7 @@ def render_page(markdown_text, title, source_name="PRIVACY.md"):
         '<main class="doc">\n'
         f"{content}"
         "</main>\n"
-        '<p class="doc-back"><a href="./index.html">Back to LibrePT</a></p>\n'
+        f'<p class="doc-back"><a href="./index.html">{BACK_LINK_TEXT[lang]}</a></p>\n'
         "</body>\n"
         "</html>\n"
     )

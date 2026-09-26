@@ -190,7 +190,11 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
 ## Product constraints that outlive a feature
 
 - A step that asks for an action says the action, naming the control, its glyph and where it is;
-  never shortened to save room.
+  never shortened to save room. **It names the control by the label the control shows in that
+  language.** Renaming a control means searching every text that names it, in every language, and
+  deleting the old label's key.
+- **A page declares the language it is written in** (`<html lang>`), and its own words — a way back,
+  a button — are in that language, not in the language of the code that built it.
 - **User-visible text is read in a second language.** Plain verbs, no idiom: *this deletes
   everything in the sandbox*, never *everything in the sandbox goes* — which asks the reader who is
   going where. A destructive act says which word it means.

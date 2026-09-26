@@ -136,7 +136,6 @@ export const de = {
   custom_details: "Eigene Angaben / Notizen",
   btn_log_alert: "Hinweis speichern",
   theme_light: "Helles Design",
-  theme_dark: "Dunkles Design",
   backup_center: "Synchronisierung und Sicherung",
   backup_desc:
     "LibrePT speichert deine Aufzeichnungen direkt auf diesem Gerät. Synchronisiere den neuesten Trainingsplan, lade eine Sicherungsdatei herunter, damit dein Verlauf sicher ist, oder importiere sie, um auf ein anderes Telefon umzuziehen.",

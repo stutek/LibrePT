@@ -198,3 +198,19 @@ def test_the_landing_page_demo_links_reach_the_app_not_a_code_host():
     for link in demo_links:
         assert link.startswith("https://"), f"{link} will be rewritten to a blob URL"
         assert "github.com" not in link
+
+
+def test_a_page_declares_the_language_it_is_written_in():
+    """A client document in Slovenian or German is read aloud in that language, not in English.
+
+    Every page used to carry <html lang="en"> and an English way back to the app, whatever its text.
+    """
+    for lang, back in (("sl", "Nazaj v LibrePT"), ("de", "Zurück zu LibrePT")):
+        page = render_docs.render_page(
+            "# T\n", "T", f"docs/templates/{lang}/Client_Privacy_Notice.md"
+        )
+        assert f'<html lang="{lang}">' in page
+        assert back in page
+    english = render_docs.render_page("# T\n", "T", "docs/PREVIEW.md")
+    assert '<html lang="en">' in english
+    assert "Back to LibrePT" in english

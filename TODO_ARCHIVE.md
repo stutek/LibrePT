@@ -20,6 +20,31 @@ Read [CHANGELOG.md](CHANGELOG.md) for what shipped and when. This file is why.
 
 ---
 
+### 79.3 [x] The evening theme card names an option the menu does not have — popravljeno 2026-09-26
+
+`story_step_evening_theme` told the viewer to choose *Dark Mode* (en) and *Temna tema* (sl), but
+the step selects the theme `midnight`, whose label in the menu is *Midnight* / *Polnoč*
+([theme.js](src/modules/common/theme.js)). The German card already named *Mitternacht*. The theme
+was renamed, the caption kept the old name retyped from memory, and the old label's key
+`theme_dark` stayed in all three dictionaries with nothing reading it.
+
+**Fixed 2026-09-26 (Claude).** The English and Slovenian cards name *Midnight* / *Polnoč*, and
+`theme_dark` is deleted from en, sl and de. A text names a control by the label the control shows
+in that language, and renaming a control searches every text that names it and deletes the old
+label's key.
+
+### 79.4 [x] The client documents declare `lang="en"` whatever their language — popravljeno 2026-09-26
+
+[render_docs.py](agent_tools/render_docs.py) wrote `<html lang="en">` and an English link back to
+the app on every page, so the Slovenian and German privacy notices and consent forms were announced
+to a screen reader, and offered for translation by the browser, as English.
+
+**Fixed 2026-09-26 (Claude).** `document_language` reads the language from the source's
+`docs/templates/<lang>/` folder, every other page is English, and the link back is in the page's
+language. `test_a_page_declares_the_language_it_is_written_in` in
+[test_render_docs.py](tests/unit/test_render_docs.py) renders a Slovenian and a German page and an
+English one.
+
 ### 77.4 [x] P2 — Vir iz imena datoteke izgine ob potrditvi uvoza — popravljeno 2026-09-25
 
 **Izvor:** `4faf64f`, [libraryImportDialog.js](src/modules/exercises/libraryImportDialog.js),

@@ -136,7 +136,6 @@ export const sl = {
   custom_details: "Opombe po meri",
   btn_log_alert: "Zapiši opozorilo",
   theme_light: "Svetla tema",
-  theme_dark: "Temna tema",
   backup_center: "Središče za sinhronizacijo in varnostne kopije",
   backup_desc:
     "LibrePT hrani tvoje podatke neposredno v tej napravi. Sinhroniziraj najnovejši urnik treningov, prenesi varnostno kopijo ali jo uvozi za prenos na drug telefon.",
@@ -749,7 +748,7 @@ export const sl = {
     "Torek se ta teden premakne za dve uri, dogovorjeno z vsemi tremi. Pritisni svinčnik na kartici Moč ob torkih in četrtkih. Obrazec vpraša, ali spremeniš samo ta termin.",
   story_step_evening_move_time:
     "V polje za začetek vpiši 20:00. Naslednji torki ostanejo ob 18:00.",
-  story_step_evening_theme: "Pozno zvečer, na kavču. V meniju pri Tema izberi Temna tema.",
+  story_step_evening_theme: "Pozno zvečer, na kavču. V meniju pri Tema izberi Polnoč.",
   story_evening_open_body:
     "Trening je končan in vsi so šli domov. Doma premakneš torkov termin, kot ste se dogovorili po vadbi.",
   story_thanks_title: "Konec ogleda",

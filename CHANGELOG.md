@@ -29,6 +29,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   privacy notice a client receives. It is a machine translation that a German speaker has not yet
   reviewed (TODO §79.1).
 
+### Fixed
+
+- The evening card of the guided story tells the viewer to choose *Midnight* / *Polnoč*, the option
+  the Theme menu actually has, instead of *Dark Mode* / *Temna tema*, which it no longer has. The
+  unused `theme_dark` label is gone from every language (TODO §79.3).
+- The client documents declare the language they are written in: the Slovenian and German privacy
+  notices and consent forms are no longer announced to a screen reader as English, and their link
+  back to the app is in their own language (TODO §79.4).
+
 ## 2026-09-24 — Exchange complete exercise libraries
 
 ### Added

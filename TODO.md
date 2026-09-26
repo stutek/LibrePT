@@ -5535,17 +5535,12 @@ European Data Protection Board's list. A client in Germany or Austria would look
 authority (in Germany one per federal state; in Austria the Datenschutzbehörde). Naming them changes
 the notice's substance in one language only, so it is a decision, not a translation fix.
 
-### 79.3 [ ] The evening theme card names an option the menu does not have
+### 79.3 [x] The evening theme card names an option the menu does not have — popravljeno 2026-09-26
 
-`story_step_evening_theme` tells the viewer to choose *Dark Mode* (en) and *Temna tema* (sl), but
-the step selects the theme `midnight`, whose label in the menu is *Midnight* / *Polnoč*
-([theme.js](src/modules/common/theme.js)). The German card names *Mitternacht*, the real label. The
-English and Slovenian cards are left for the card review of §38.21.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#793-x-the-evening-theme-card-names-an-option-the-menu-does-not-have--popravljeno-2026-09-26);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-### 79.4 [ ] The client documents declare `lang="en"` whatever their language
+### 79.4 [x] The client documents declare `lang="en"` whatever their language — popravljeno 2026-09-26
 
-[agent_tools/render_docs.py](agent_tools/render_docs.py) writes `<html lang="en">` on every page, so
-the Slovenian and German privacy notices and consent forms are announced to a screen reader, and
-offered for translation by the browser, as English. The page's language should come from the
-document's folder.
-
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#794-x-the-client-documents-declare-langen-whatever-their-language--popravljeno-2026-09-26);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
