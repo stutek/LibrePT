@@ -5075,3 +5075,84 @@ znova. Popravek naj po izbrisu izriše profil (ali se vrne v imenik) iz novega s
 številke ni več na zaslonu. Opaženo na objavljeni različici `0625bd6`.
 
 **Fixed 2026-09-27 (Claude Opus 5.5), commit `0abf5e4`.** The erasure's `onErased` re-enters the current route, so the profile behind the receipt is drawn from the erased record.
+
+### 80.18 [x] P2 — Prvi trening: iskanje udeleženca je slepa ulica, ko strank še ni — popravljeno 2026-09-27
+
+**Scenarij in koraki:** trener z novo, prazno aplikacijo pritisne »Ustvari trening«, vpiše ime
+»Jutranja vadba« in kraj »Telovadnica Center«, nato v polju »Poišči stranko po imenu...«
+vpiše »Ana«.
+
+**Opaženo:** pod poljem se izpiše »Stranke s tem imenom ni«, spodaj pa stoji »Na tem treningu
+še ni nikogar. Stranko poišči v polju zgoraj.« Aplikacija ima takrat nič strank, torej to
+polje ne more uspeti — pa tega ne pove in ne ponudi nobene poti do vpisa nove stranke.
+
+**Kaj se zgodi ob shranjevanju:** pritisk na »Odpri v beležki« odpre okno brskalnika z
+besedilom »Izbrati moraš vsaj eno stranko.« Trening torej brez stranke ne nastane, poti do
+stranke pa na tem zaslonu ni.
+
+**Težava in vpliv:** prvo opravilo novega trenerja je prvi trening s prvo stranko. Tu obstane:
+mora sam uganiti, da gre najprej v meni ☰ in »Seznam strank (klientov)«, se vrniti in začeti
+znova. Navodilo na zaslonu ga pošilja nazaj v polje, ki ne more delovati.
+
+**Vzrok, potrjen v kodi na `main`:** [editSessionControl.js](src/modules/session/editSessionControl.js),
+`renderParticipantMatches` pozna en sam odgovor za nič zadetkov — napis »Stranke s tem imenom
+ni«. Prazen imenik in »to ime ni med osmimi strankami« sta zanj isto stanje.
+
+**Predlog in preverjanje:** ko je imenik prazen, naj napis to pove in ponudi gumb, ki odpre
+vpis nove stranke, po vpisu pa se vrne v ta obrazec z izbrano stranko. Ko imenik ni prazen,
+naj pod »Stranke s tem imenom ni« stoji ponudba, da se stranka s tem imenom doda. Preizkus naj
+gre pot od prazne aplikacije do shranjenega prvega treninga z eno stranko, brez obiska menija.
+Opaženo na objavljeni različici `0625bd6`; koda na `main` je ista.
+
+**Fixed 2026-09-27 (Claude Opus 5.5), commit `98f11c3`.** A search with no match says whether the directory is empty and offers »Dodaj »Ana« kot novo stranko«; the client dialog opens with the name filled in, and the client saved comes back onto the session.
+
+### 80.21 [x] P2 — Ista stvar se na enem zaslonu imenuje vaja, program, rutina in načrt — popravljeno 2026-09-27
+
+**Scenarij in koraki:** trener v obrazcu novega treninga doda stranko »Ana Kovač«. Ob njenem
+imenu se pojavi spustni seznam.
+
+**Opaženo:** seznam se odpre z besedilom »Izberi vajo«, v njem pa ni vaj, temveč programi
+vadbe in možnost »Poljuben / Prazen načrt«. Če trener ne izbere ničesar in shrani, okno pravi
+»Dodeli predlogo rutine vsem izbranim strankam.« Bralnik zaslona prebere »Program za to
+stranko«.
+
+**Težava in vpliv:** za eno stvar štirje izrazi — vaja, program, predloga rutine, načrt — na
+enem samem zaslonu. Trener, ki se aplikacije šele uči, mora ugibati, ali gre za štiri različne
+reči. Povsem napačna je prva: »vaja« je v tej aplikaciji posamezen gib iz kataloga.
+
+**Vzrok, potrjen v kodi na `main`:** [editSessionControl.js](src/modules/session/editSessionControl.js)
+napolni prvo možnost s ključem `select_exercise` (»Izberi vajo«, »Select Exercise«,
+»Übung auswählen«), čeprav seznam gradi iz `state.routines`. Sporočilo napake uporablja
+`err_assign_routine`, bralnikov opis pa `select_routine_for`.
+
+**Imen je v resnici pet.** Vrstica v meniju ☰ se glasi »Rutine«, naslov strani, ki jo odpre,
+pa »Predloge rutine« z gumbom »Ustvari rutino«. Skupaj z izrazi na zaslonu za nov trening je to
+pet imen za eno stvar: vaja, program, rutina, predloga rutine, načrt.
+
+**Predlog in preverjanje:** izbrati eno ime za to stvar v vsakem jeziku in ga uporabiti v vseh
+zapisih; prva možnost dobi svoj ključ, ne ključa za vaje. Preveriti tudi, da se ime ujema
+z imenom vrstice v meniju in z naslovom strani. Preizkus naj zahteva, da se v tem obrazcu ne pojavi ključ
+`select_exercise`. Opaženo na objavljeni različici `0625bd6`; koda na `main` je ista.
+
+**Fixed 2026-09-27 (Claude Opus 5.5), commit `f5a485d`.** One name, »rutina«: the dropdown opens on »Izberi rutino« (its own key, `select_routine`), the screen reader reads »Rutina za to stranko«, the page is titled »Rutine« like the menu; »načrt« stays for a session's own plan.
+
+### 80.32 [x] P3 — Skupinski trening, začet iz rutine, nima svojega naslova; osvežitev ga izbriše — popravljeno 2026-09-27
+
+**Scenarij in koraki:** trener odpre »Rutine«, pri rutini »Ponedeljek moč« pritisne »Začni
+skupinski trening«, vpiše ime »Skupina ponedeljek« in ga telefon zmoti — stran se osveži.
+
+**Opaženo:** naslov v brskalniku ves čas ostane `/routines`. Po osvežitvi je na zaslonu spet
+seznam rutin, obrazca ni več in vpisano ime je izgubljeno. Če trener namesto tega pritisne
+gumb za nazaj, ne pride na seznam rutin, od koder je prišel, ampak na ploščo treningov.
+
+**Primerjava:** isti obrazec, odprt z gumbom »Ustvari trening«, ima svoj naslov
+`/session/new`, zato ga osvežitev ohrani in gumb za nazaj deluje pričakovano.
+
+**Težava in vpliv:** na telefonu se strani osvežujejo same — klic, preklop med aplikacijami,
+brskalnik, ki sprosti pomnilnik. Delo, vpisano v ta obrazec, takrat izgine brez besede.
+
+**Predlog in preverjanje:** to pot peljati na isti naslov kot »Ustvari trening«, z rutino kot
+parametrom. Preizkus naj obrazec odpre iz rutine, osveži stran in zahteva, da je obrazec še
+odprt z vpisanim imenom. Opaženo na objavljeni različici `0625bd6`.
+
+**Fixed 2026-09-27 (Claude Opus 5.5), commit `06197b2`.** The button navigates to `/session/new?routine=<id>`; a reload keeps the form and what was typed, Back returns to the routines.
