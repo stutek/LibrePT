@@ -784,6 +784,10 @@ function renderPendingPlanAdjustments() {
     navigateToPath,
     urlFor,
   });
+  // The drawer's "awaiting review" item is built from the same unresolved signals, and every path
+  // that changes them calls this function. Without it the drawer kept saying a signal was waiting
+  // after it was resolved, until the page was reloaded.
+  renderNotificationArea();
 }
 
 function openAdjustmentWizard(updateId) {
@@ -939,6 +943,10 @@ function setupClientDataRights() {
       renderEverything();
     },
     isDriveConfigured: () => driveSyncStatus().configured,
+    // renderEverything draws the lists, not the open profile, so the erased client's name and
+    // phone number stayed on screen behind the receipt until a reload. Re-entering the current
+    // route draws the profile from the erased record.
+    onErased: () => handlePathChange(),
     t,
   });
 }
