@@ -5778,6 +5778,15 @@ lahko napačno sklepa, da običajne vaje ni. Blokira hitro sestavljanje prvega n
 identiteti vaje; »počep« mora najti ustrezne različice, angleško iskanje pa ostati
 uporabno. Prevesti tudi filtre. Preverjeno na objavljeni različici `0625bd6`.
 
+**Dopolnilo 2026-09-27 (Claude), izmerjeno v brskalniku:** polovica tega je že narejena, in prav
+to pokaže, kje je šiv. V oknu »Dodaj vajo« so možnosti izbirnika »Način« slovenske (»Moč —
+serije × ponovitve × breme«, ključ `modality_option_strength` v [sl.js](src/i18n/sl.js)),
+sosednji trije izbirniki v istem oknu pa so angleški, ker so vrednosti vpisane naravnost v
+oznake `<option>` v [exerciseFormsController.js](src/controllers/exerciseFormsController.js):
+»Chest«, »Barbell«, »Horizontal Push«. Iz istega razloga se prva možnost filtra po mišicah na
+zaslonu »Knjižnica vaj« glasi »Vse«, v oknu za izbiro vaje iz kataloga pa »All«. Vrednost naj
+ostane ključ zapisa, napis pa naj gre skozi slovar — tako kot pri načinu.
+
 **Verdikt 2026-09-26 (Claude): težava potrjena, prva polovica predloga zavrnjena.**
 [exercises.js](src/data/exercises.js) ima 48 vaj s trdo vpisanimi angleškimi imeni in nobenih
 sopomenk, zato »počep« ne more zadeti ničesar.
