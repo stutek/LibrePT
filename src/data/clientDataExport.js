@@ -17,8 +17,9 @@
 // sessions are included with the OTHER participants' ids and names removed — that a session
 // happened is this client's data; who else was in the room is not theirs to receive.
 //
-// Injected dependencies: none.
+// Injected dependencies: none. The readable copy's words come from the dictionary of `payload.lang`.
 
+import { dictionaryFor } from "../i18n/index.js";
 import { consentSignedDate, isConsentActive, isConsentWithdrawn } from "./clientConsent.js";
 import { clientDisambiguator } from "./clientErasure.js";
 
@@ -51,7 +52,7 @@ function sessionsAttendedBy(state, clientId) {
 export function buildClientExport(
   state,
   clientId,
-  { now = new Date(), trainer = {}, redactions = {} } = {},
+  { now = new Date(), trainer = {}, redactions = {}, lang = "en" } = {},
 ) {
   const client = (state?.clients || []).find((candidate) => candidate.id === clientId);
   if (!client) return null;
@@ -63,10 +64,12 @@ export function buildClientExport(
   return {
     exportFormat: EXPORT_FORMAT_VERSION,
     exportedAt: now.toISOString(),
+    // The language the readable copy is written in; the reader on the client's device renders it so.
+    lang,
     subject: subjectBlock(client, redactions),
     controller: {
-      name: trainer.name || "[trainer name]",
-      contact: trainer.contact || "[trainer contact]",
+      name: trainer.name || "",
+      contact: trainer.contact || "",
     },
     // Named, not silent. Art. 15(4) permits withholding another person's data; it does not permit
     // pretending the file is complete when it is not.
@@ -108,111 +111,133 @@ function subjectBlock(client, redactions) {
   };
 }
 
-function renderSets(sets) {
+// The words of the readable document, in the language it is written in (`payload.lang`: the one the
+// client's consent form recorded, else the app's). It was English from the first line to the last,
+// although it is the one document written FOR the client. A key a dictionary lacks falls back to
+// English rather than to the key itself.
+function wordsFor(lang) {
+  const words = dictionaryFor(lang);
+  const english = dictionaryFor("en");
+  return (key, params = {}) => {
+    let text = words[key] ?? english[key] ?? key;
+    for (const [name, value] of Object.entries(params)) text = text.replaceAll(`{${name}}`, value);
+    return text;
+  };
+}
+
+function renderSets(sets, w) {
   return (sets || [])
     .map((set, index) => {
-      const load = set.weight ? `${set.weight}kg` : "bodyweight";
+      const load = set.weight ? `${set.weight}kg` : w("export_doc_bodyweight");
       const note = set.note ? ` — ${set.note}` : "";
-      return `  ${index + 1}. ${set.reps ?? "?"} reps @ ${load}${note}`;
+      return `  ${index + 1}. ${set.reps ?? "?"} ${w("export_doc_reps")} @ ${load}${note}`;
     })
     .join("\n");
 }
 
-function aboutYouLines(subject) {
+function aboutYouLines(subject, w) {
   return [
-    "## About you",
+    w("export_doc_about"),
     "",
-    `- Name: ${subject.name}${subject.alias ? ` (${subject.alias})` : ""}`,
-    `- Email: ${subject.email || "—"}`,
-    `- Phone: ${subject.phone || "—"}`,
-    `- Client since: ${subject.joinedDate || "—"}`,
-    `- Training goals: ${subject.goals || "—"}`,
-    `- Notes kept by your trainer: ${subject.trainerNotes || "—"}`,
-    `- Injury / mobility notes: ${subject.injuryNotes || "—"}`,
-    consentLine(subject.consent),
+    `- ${w("export_doc_name")}: ${subject.name}${subject.alias ? ` (${subject.alias})` : ""}`,
+    `- ${w("export_doc_email")}: ${subject.email || "—"}`,
+    `- ${w("export_doc_phone")}: ${subject.phone || "—"}`,
+    `- ${w("export_doc_since")}: ${subject.joinedDate || "—"}`,
+    `- ${w("export_doc_goals")}: ${subject.goals || "—"}`,
+    `- ${w("export_doc_notes")}: ${subject.trainerNotes || "—"}`,
+    `- ${w("export_doc_injury")}: ${subject.injuryNotes || "—"}`,
+    consentLine(subject.consent, w),
   ];
 }
 
 // Three outcomes, because "none on file" would misreport a client who consented and withdrew as one
 // who never agreed — and the subject reading their own export is the person most entitled to see
 // that their withdrawal was acted on.
-function consentLine(consent) {
+function consentLine(consent, w) {
   const signed = consentSignedDate(consent) || "—";
   const version = consent?.formVersion || "—";
   if (isConsentWithdrawn(consent)) {
-    return `- Consent recorded: signed ${signed} (form version ${version}), withdrawn ${consent.withdrawnDate}`;
+    return `- ${w("export_doc_consent_withdrawn", { signed, version, withdrawn: consent.withdrawnDate })}`;
   }
   if (isConsentActive(consent)) {
-    return `- Consent recorded: signed ${signed}, form version ${version}`;
+    return `- ${w("export_doc_consent_active", { signed, version })}`;
   }
-  return "- Consent recorded: none on file";
+  return `- ${w("export_doc_consent_none")}`;
 }
 
-function sessionLines(sessions) {
+function sessionLines(sessions, w) {
   return sessions.map((session) => {
     const when = session.startDate ? session.startDate.substring(0, 10) : session.day || "—";
-    const group = session.groupSize > 1 ? ` · group of ${session.groupSize}` : "";
+    const group =
+      session.groupSize > 1 ? ` · ${w("export_doc_group", { count: session.groupSize })}` : "";
     return `- ${when} ${session.time || ""} ${session.title || ""}${group}`.trimEnd();
   });
 }
 
-function trainingLines(history) {
+function trainingLines(history, w) {
   const lines = [];
   for (const record of history.filter((entry) => !entry.isPlanning)) {
-    lines.push(`### ${(record.date || "").substring(0, 10)} — ${record.routineName || "Session"}`);
+    const title = record.routineName || w("export_doc_session");
+    lines.push(`### ${(record.date || "").substring(0, 10)} — ${title}`);
     for (const exercise of record.exercises || []) {
       lines.push(`- **${exercise.name || exercise.type || "item"}**`);
-      const sets = renderSets(exercise.sets);
+      const sets = renderSets(exercise.sets, w);
       if (sets) lines.push(sets);
     }
     for (const item of record.feedback || []) {
-      lines.push(`- Feedback (${item.tag || "note"}): ${item.note || ""}`);
+      lines.push(`- ${w("export_doc_feedback")} (${item.tag || "note"}): ${item.note || ""}`);
     }
     lines.push("");
   }
   return lines;
 }
 
-function withheldLines(redactedFields) {
+function withheldLines(redactedFields, w) {
   if (redactedFields.length === 0) return [];
   return [
-    "## What was withheld",
+    w("export_doc_withheld_title"),
     "",
-    "Part of the following was removed because it named someone else, whose own data protection",
-    `rights limit what can be disclosed to you (Art. 15(4)): ${redactedFields.join(", ")}.`,
-    "Ask your trainer if you believe something about YOU was withheld.",
+    w("export_doc_withheld_body", { fields: redactedFields.join(", ") }),
+    w("export_doc_withheld_ask"),
     "",
   ];
+}
+
+// Named when the trainer's details are known; otherwise the document says "your trainer" rather
+// than printing a placeholder in brackets where a legal role is named.
+function preparedLine(payload, w) {
+  const { controller } = payload;
+  const date = payload.exportedAt.substring(0, 10);
+  if (!controller?.name) return w("export_doc_prepared_unnamed", { date });
+  const contact = controller.contact ? ` (${controller.contact})` : "";
+  return w("export_doc_prepared", { date, controller: `${controller.name}${contact}` });
 }
 
 /** The same payload as prose, for the copy the client actually reads. */
 export function renderClientExportMarkdown(payload) {
   if (!payload) return "";
-  const { subject, counts, controller } = payload;
+  const w = wordsFor(payload.lang);
+  const { subject, counts } = payload;
   const lines = [
-    `# Your training data — ${subject.name}`,
+    w("export_doc_title", { name: subject.name }),
     "",
-    `Prepared ${payload.exportedAt.substring(0, 10)} by ${controller.name} (${controller.contact}),`,
-    "the data controller for these records.",
+    preparedLine(payload, w),
     "",
-    ...aboutYouLines(subject),
+    ...aboutYouLines(subject, w),
     "",
-    `## Sessions (${counts.sessions})`,
+    w("export_doc_sessions", { count: counts.sessions }),
     "",
-    ...sessionLines(payload.sessions),
+    ...sessionLines(payload.sessions, w),
     "",
-    `## Logged training (${counts.loggedSessions})`,
+    w("export_doc_logged", { count: counts.loggedSessions }),
     "",
-    ...trainingLines(payload.history),
-    ...withheldLines(payload.redactedFields),
-    "## Your rights",
+    ...trainingLines(payload.history, w),
+    ...withheldLines(payload.redactedFields, w),
+    w("export_doc_rights_title"),
     "",
-    "You can ask your trainer to correct anything inaccurate (Art. 16), to delete your records",
-    "(Art. 17), to restrict processing (Art. 18), or to withdraw your consent (Art. 7(3)) — the",
-    "latter stops further processing without affecting what was lawfully done before it. If you",
-    "believe your data has been mishandled you may complain to your national supervisory authority.",
+    w("export_doc_rights_body"),
     "",
-    "This file was produced by LibrePT, which its makers never receive a copy of.",
+    w("export_doc_produced"),
   ];
   return lines.join("\n");
 }

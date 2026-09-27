@@ -1154,6 +1154,43 @@ export const en = {
   rights_export_title: "Export this client's data",
   rights_export_scope:
     "{logged} logged session(s), {sessions} booking(s), {updates} plan update(s). Other clients' data is never included: a group session appears only as its size.",
+  export_doc_title: "# Your training data — {name}",
+  export_doc_prepared: "Prepared {date} by {controller}, the data controller for these records.",
+  export_doc_prepared_unnamed:
+    "Prepared {date} by your trainer, the data controller for these records.",
+  export_doc_about: "## About you",
+  export_doc_name: "Name",
+  export_doc_email: "Email",
+  export_doc_phone: "Phone",
+  export_doc_since: "Client since",
+  export_doc_goals: "Training goals",
+  export_doc_notes: "Notes kept by your trainer",
+  export_doc_injury: "Injury / mobility notes",
+  export_doc_consent_withdrawn:
+    "Consent recorded: signed {signed} (form version {version}), withdrawn {withdrawn}",
+  export_doc_consent_active: "Consent recorded: signed {signed}, form version {version}",
+  export_doc_consent_none: "Consent recorded: none on file",
+  export_doc_sessions: "## Sessions ({count})",
+  export_doc_group: "group of {count}",
+  export_doc_logged: "## Logged training ({count})",
+  export_doc_session: "Session",
+  export_doc_feedback: "Feedback",
+  export_doc_bodyweight: "bodyweight",
+  export_doc_reps: "reps",
+  export_doc_withheld_title: "## What was withheld",
+  export_doc_withheld_body:
+    "Part of the following was removed because it named someone else, whose own data protection rights limit what can be disclosed to you (Art. 15(4)): {fields}.",
+  export_doc_withheld_ask: "Ask your trainer if you believe something about YOU was withheld.",
+  export_doc_rights_title: "## Your rights",
+  export_doc_rights_body:
+    "You can ask your trainer to correct anything inaccurate (Art. 16), to delete your records (Art. 17), to restrict processing (Art. 18), or to withdraw your consent (Art. 7(3)) — the latter stops further processing without affecting what was lawfully done before it. If you believe your data has been mishandled you may complain to your national supervisory authority.",
+  export_doc_produced:
+    "This file was produced by LibrePT, which its makers never receive a copy of.",
+  rights_export_needs_trainer:
+    "Enter your name and a phone number or email under Settings → My details first. The document names you as the one who holds this client's data.",
+  rights_email_subject: "Your personal data — as you requested",
+  rights_email_body:
+    "Hi {name},\n\nAttached is the copy of the personal data I hold about you, as you asked.\n\nThe file is encrypted. I will send you the passphrase separately — by text message, not in this email — because an email carrying both would protect nothing.\n\nTo open it: go to {link}, open {path}, pick the attachment and enter the passphrase. Nothing is uploaded anywhere; it opens on your own device.\n\nIf anything in it is wrong, tell me and I will correct it.\n",
   rights_export_notes_label: "Your notes about this client (disclosed)",
   rights_export_notes_hint:
     "Your notes are the client's personal data and must be disclosed. Edit them only to remove information about other people. The file will say that something was left out.",

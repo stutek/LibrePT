@@ -11,6 +11,7 @@
 import pytest
 from playwright.sync_api import expect
 
+from tests.conftest import answer_app_questions, app_question_messages
 from tests.medium._harness import load_with_stub, view_stub
 
 pytestmark = pytest.mark.clean_start
@@ -156,7 +157,30 @@ def test_the_erased_record_says_so_on_the_profile(page, local_server):
     expect(page.locator("#profile-erased")).to_contain_text("at the client's request")
 
 
+def _with_trainer_details(page):
+    """The document names the trainer as the data controller, so the export needs their details."""
+    page.add_init_script(
+        "localStorage.setItem('librept_trainer_first_name', 'Ana');"
+        "localStorage.setItem('librept_trainer_last_name', 'Kovač');"
+        "localStorage.setItem('librept_trainer_phone', '+386 40 123 456');"
+    )
+
+
+def test_an_export_without_the_trainer_s_details_says_what_to_enter(page, local_server):
+    """It printed "[trainer name]" where the document names the data controller, a legal role."""
+    answer_app_questions(page)
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#view-client-detail.active")
+
+    page.locator("#btn-client-export").click()
+
+    page.wait_for_function("() => (window.__appQuestionMessages || []).length > 0")
+    assert "My details" in app_question_messages(page)[0]
+    expect(page.locator("#dialog-client-export")).not_to_be_visible()
+
+
 def test_export_dialog_shows_scope_notes_and_a_passphrase(page, local_server):
+    _with_trainer_details(page)
     load_with_stub(page, local_server, STUB)
     page.wait_for_selector("#view-client-detail.active")
 
@@ -176,6 +200,7 @@ def test_export_dialog_shows_scope_notes_and_a_passphrase(page, local_server):
 
 
 def test_the_compose_link_never_carries_the_passphrase(page, local_server):
+    _with_trainer_details(page)
     load_with_stub(page, local_server, STUB)
     page.wait_for_selector("#view-client-detail.active")
     page.locator("#btn-client-export").click()

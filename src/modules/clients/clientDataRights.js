@@ -29,6 +29,9 @@ import {
   withSuppressedClient,
   writeSuppressionList,
 } from "../../data/erasureSuppression.js";
+import { readTrainerIdentity } from "../../data/trainerIdentity.js";
+import { dictionaryFor } from "../../i18n/index.js";
+import { tellInApp } from "../common/appQuestion.js";
 import { mountDateField } from "../common/dateField.js";
 import { $id, closeModal, openModal, renderMarkupOnce } from "../common/dom.js";
 import { downloadFile } from "../common/download.js";
@@ -129,18 +132,41 @@ export function renderDataRightsDialogs() {
 
 // ---------------------------------------------------------------- export ----
 
+// The language the client reads: the one their consent form was filled in, else the app's. The
+// document and the email are written FOR the client, and both were English whatever they spoke.
+function clientLanguage(client) {
+  return client.gdprConsent?.formLang || deps.getState().lang || "en";
+}
+
+// The data controller the document names. Every path through the welcome screen writes these, so a
+// missing one is an install from before that; the export stops and says what to enter rather than
+// printing a placeholder where a legal role is named.
+function trainerAsController() {
+  const identity = readTrainerIdentity();
+  const contact = identity.phone || identity.email;
+  return identity.name && contact ? { name: identity.name, contact } : null;
+}
+
 function currentExportPayload() {
   const client = subject();
   if (!client) return null;
   const notes = $id("client-export-notes")?.value ?? "";
   const redactions = notes === (client.notes || "") ? {} : { trainerNotes: notes };
-  return buildClientExport(deps.getState(), client.id, { redactions });
+  return buildClientExport(deps.getState(), client.id, {
+    redactions,
+    trainer: trainerAsController() || {},
+    lang: clientLanguage(client),
+  });
 }
 
 export function openClientExportDialog(clientId) {
   subjectId = clientId;
   const client = subject();
   if (!client) return;
+  if (!trainerAsController()) {
+    tellInApp({ t: tr, message: tr("rights_export_needs_trainer") });
+    return;
+  }
 
   const payload = buildClientExport(deps.getState(), clientId);
   $id("client-export-subject").textContent =
@@ -158,9 +184,16 @@ export function openClientExportDialog(clientId) {
 function updateComposeLink(client) {
   const compose = $id("btn-export-compose");
   if (!compose) return;
-  const subjectLine = encodeURIComponent("Your personal data — as you requested");
+  // In the client's language, and naming the way to the reader by the labels the client will see.
+  const words = dictionaryFor(clientLanguage(client));
+  const say = (key) => words[key] ?? tr(key);
+  const path = `☰ → ${say("menu_data")} → ${say("encrypted_title")}`;
+  const subjectLine = encodeURIComponent(say("rights_email_subject"));
   const body = encodeURIComponent(
-    `Hi ${client.name},\n\nAttached is the copy of the personal data I hold about you, as you asked.\n\nThe file is encrypted. I will send you the passphrase separately — by text message, not in this email — because an email carrying both would protect nothing.\n\nTo open it: go to ${location.origin}${location.pathname}, choose "Open an encrypted file" from the menu, pick the attachment and enter the passphrase. Nothing is uploaded anywhere; it opens on your own device.\n\nIf anything in it is wrong, tell me and I will correct it.\n`,
+    say("rights_email_body")
+      .replace("{name}", client.name)
+      .replace("{link}", `${location.origin}${location.pathname}`)
+      .replace("{path}", path),
   );
   const href = client.email
     ? `mailto:${encodeURIComponent(client.email)}?subject=${subjectLine}&body=${body}`

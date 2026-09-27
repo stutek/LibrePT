@@ -1086,6 +1086,41 @@ export const sl = {
   rights_export_title: "Izvozi podatke te stranke",
   rights_export_scope:
     "Opravljeni treningi: {logged}, termini: {sessions}, spremembe plana: {updates}. Podatki drugih strank niso nikoli vključeni: skupinski trening je naveden le s številom udeležencev.",
+  export_doc_title: "# Tvoji podatki o treningih — {name}",
+  export_doc_prepared: "Pripravljeno {date}. Upravljavec teh podatkov: {controller}.",
+  export_doc_prepared_unnamed: "Pripravljeno {date}. Upravljavec teh podatkov je tvoj trener.",
+  export_doc_about: "## O tebi",
+  export_doc_name: "Ime",
+  export_doc_email: "E-pošta",
+  export_doc_phone: "Telefon",
+  export_doc_since: "Stranka od",
+  export_doc_goals: "Cilji treninga",
+  export_doc_notes: "Opombe tvojega trenerja",
+  export_doc_injury: "Opombe o poškodbah in gibljivosti",
+  export_doc_consent_withdrawn:
+    "Privolitev: podpisana {signed} (različica obrazca {version}), preklicana {withdrawn}",
+  export_doc_consent_active: "Privolitev: podpisana {signed}, različica obrazca {version}",
+  export_doc_consent_none: "Privolitev: ni zapisana",
+  export_doc_sessions: "## Treningi ({count})",
+  export_doc_group: "skupina {count} oseb",
+  export_doc_logged: "## Zapisani treningi ({count})",
+  export_doc_session: "Trening",
+  export_doc_feedback: "Povratna informacija",
+  export_doc_bodyweight: "lastna teža",
+  export_doc_reps: "ponovitev",
+  export_doc_withheld_title: "## Kaj je izpuščeno",
+  export_doc_withheld_body:
+    "Del naslednjega je odstranjen, ker omenja drugo osebo, katere pravice do varstva podatkov omejujejo, kaj ti smemo razkriti (člen 15(4)): {fields}.",
+  export_doc_withheld_ask: "Vprašaj trenerja, če meniš, da je bilo izpuščeno kaj o TEBI.",
+  export_doc_rights_title: "## Tvoje pravice",
+  export_doc_rights_body:
+    "Trenerja lahko prosiš, da popravi kar koli netočnega (člen 16), izbriše tvoje zapise (člen 17) ali omeji obdelavo (člen 18), lahko pa tudi prekličeš privolitev (člen 7(3)). Preklic ustavi nadaljnjo obdelavo, ne vpliva pa na to, kar je bilo zakonito opravljeno pred njim. Če meniš, da so bili tvoji podatki obdelani nepravilno, se lahko pritožiš pri nacionalnem nadzornem organu.",
+  export_doc_produced: "To datoteko je izdelal LibrePT; njegovi avtorji nikoli ne prejmejo kopije.",
+  rights_export_needs_trainer:
+    "Najprej v Nastavitve → Moji podatki vpiši svoje ime ter telefon ali e-naslov. Dokument te navaja kot tistega, ki hrani podatke te stranke.",
+  rights_email_subject: "Tvoji osebni podatki — na tvojo zahtevo",
+  rights_email_body:
+    "Živijo, {name},\n\nv prilogi je kopija osebnih podatkov, ki jih hranim o tebi, na tvojo zahtevo.\n\nDatoteka je šifrirana. Geslo ti pošljem posebej — s kratkim sporočilom, ne v tem e-sporočilu —, ker e-sporočilo z obojim ne bi ničesar varovalo.\n\nKako jo odpreš: pojdi na {link}, odpri {path}, izberi prilogo in vpiši geslo. Nič se ne naloži nikamor; odpre se na tvoji napravi.\n\nČe je v njej kaj narobe, mi povej in popravim.\n",
   rights_export_notes_label: "Tvoji zapiski o tej stranki (razkriti)",
   rights_export_notes_hint:
     "Tvoji zapiski so osebni podatki stranke in jih moraš razkriti. Uredi jih samo zato, da odstraniš podatke o drugih ljudeh. V datoteki bo pisalo, da je bilo nekaj izpuščeno.",

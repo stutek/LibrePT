@@ -114,6 +114,30 @@ test("the readable rendering answers the question the client actually asked", ()
   assert.match(markdown, /supervisory authority/);
 });
 
+test("the document is written in the client's language", () => {
+  // The one document written FOR the client was English from the first line to the last, although
+  // the client's consent form records the language they read.
+  const payload = buildClientExport(gymState(), "c-jane", { lang: "sl" });
+  const markdown = renderClientExportMarkdown(payload);
+
+  assert.equal(payload.lang, "sl");
+  assert.match(markdown, /# Tvoji podatki o treningih — Jane Doe/);
+  assert.match(markdown, /## Tvoje pravice/);
+  assert.doesNotMatch(markdown, /Your training data|Your rights|supervisory authority/);
+});
+
+test("the trainer is named as the controller, never as a placeholder in brackets", () => {
+  const trainer = { name: "Ana Kovač", contact: "+386 40 123 456" };
+  const markdown = renderClientExportMarkdown(buildClientExport(gymState(), "c-jane", { trainer }));
+
+  assert.match(markdown, /by Ana Kovač \(\+386 40 123 456\)/);
+  assert.doesNotMatch(markdown, /\[trainer/);
+  assert.doesNotMatch(
+    renderClientExportMarkdown(buildClientExport(gymState(), "c-jane")),
+    /\[trainer/,
+  );
+});
+
 test("the filename disambiguates two clients with the same name", () => {
   const now = new Date("2026-08-11T10:00:00.000Z");
   const janeA = clientExportFilename({ id: "c-jane-a", name: "Jane Doe" }, { now });

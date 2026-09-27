@@ -1137,6 +1137,44 @@ export const de = {
   rights_export_title: "Daten dieses Kunden exportieren",
   rights_export_scope:
     "Aufgezeichnete Trainings: {logged}, Buchungen: {sessions}, Planänderungen: {updates}. Daten anderer Kunden sind nie enthalten: Ein Gruppentraining erscheint nur mit seiner Größe.",
+  export_doc_title: "# Deine Trainingsdaten — {name}",
+  export_doc_prepared: "Erstellt am {date} von {controller}, dem Verantwortlichen für diese Daten.",
+  export_doc_prepared_unnamed:
+    "Erstellt am {date} von deinem Trainer, dem Verantwortlichen für diese Daten.",
+  export_doc_about: "## Über dich",
+  export_doc_name: "Name",
+  export_doc_email: "E-Mail",
+  export_doc_phone: "Telefon",
+  export_doc_since: "Kunde seit",
+  export_doc_goals: "Trainingsziele",
+  export_doc_notes: "Notizen deines Trainers",
+  export_doc_injury: "Notizen zu Verletzungen und Beweglichkeit",
+  export_doc_consent_withdrawn:
+    "Einwilligung: unterschrieben {signed} (Formularversion {version}), widerrufen {withdrawn}",
+  export_doc_consent_active: "Einwilligung: unterschrieben {signed}, Formularversion {version}",
+  export_doc_consent_none: "Einwilligung: keine erfasst",
+  export_doc_sessions: "## Termine ({count})",
+  export_doc_group: "Gruppe von {count}",
+  export_doc_logged: "## Erfasstes Training ({count})",
+  export_doc_session: "Termin",
+  export_doc_feedback: "Rückmeldung",
+  export_doc_bodyweight: "Körpergewicht",
+  export_doc_reps: "Wdh.",
+  export_doc_withheld_title: "## Was zurückgehalten wurde",
+  export_doc_withheld_body:
+    "Ein Teil des Folgenden wurde entfernt, weil er eine andere Person nennt, deren eigene Datenschutzrechte begrenzen, was dir offengelegt werden darf (Art. 15 Abs. 4): {fields}.",
+  export_doc_withheld_ask:
+    "Frag deinen Trainer, wenn du glaubst, dass etwas über DICH zurückgehalten wurde.",
+  export_doc_rights_title: "## Deine Rechte",
+  export_doc_rights_body:
+    "Du kannst deinen Trainer bitten, Unrichtiges zu berichtigen (Art. 16), deine Daten zu löschen (Art. 17) oder die Verarbeitung einzuschränken (Art. 18), und du kannst deine Einwilligung widerrufen (Art. 7 Abs. 3). Der Widerruf beendet die weitere Verarbeitung, berührt aber nicht, was vorher rechtmäßig geschehen ist. Wenn du glaubst, dass mit deinen Daten falsch umgegangen wurde, kannst du dich bei deiner nationalen Aufsichtsbehörde beschweren.",
+  export_doc_produced:
+    "Diese Datei wurde mit LibrePT erstellt; seine Entwickler erhalten nie eine Kopie.",
+  rights_export_needs_trainer:
+    "Trage zuerst unter Einstellungen → Meine Daten deinen Namen und eine Telefonnummer oder E-Mail ein. Das Dokument nennt dich als die Person, die die Daten dieses Kunden aufbewahrt.",
+  rights_email_subject: "Deine personenbezogenen Daten — wie gewünscht",
+  rights_email_body:
+    "Hallo {name},\n\nim Anhang ist die Kopie der personenbezogenen Daten, die ich über dich aufbewahre, wie gewünscht.\n\nDie Datei ist verschlüsselt. Das Passwort schicke ich dir getrennt — per SMS, nicht in dieser E-Mail —, denn eine E-Mail mit beidem würde nichts schützen.\n\nSo öffnest du sie: Geh auf {link}, öffne {path}, wähle den Anhang und gib das Passwort ein. Nichts wird hochgeladen; sie öffnet sich auf deinem eigenen Gerät.\n\nWenn etwas darin falsch ist, sag es mir, dann korrigiere ich es.\n",
   rights_export_notes_label: "Deine Notizen zu diesem Kunden (werden offengelegt)",
   rights_export_notes_hint:
     "Deine Notizen sind personenbezogene Daten des Kunden und müssen offengelegt werden. Bearbeite sie nur, um Angaben über andere Personen zu entfernen. Die Datei vermerkt, dass etwas weggelassen wurde.",
