@@ -7,7 +7,7 @@
 
 from playwright.sync_api import expect
 
-from tests.conftest import frozen_today_iso
+from tests.conftest import answer_app_questions, app_question_messages, frozen_today_iso
 from tests.medium._harness import load_with_stub, view_stub
 
 # A fixed local datetime rather than an offset from today: the expected strings then have no
@@ -357,14 +357,13 @@ def test_taking_someone_off_a_session_with_feedback_asks_in_the_dictionary_s_wor
         local_server,
         setup_stub(SESSION_WITH_FEEDBACK, target_session="'s-feedback'"),
     )
-    messages = []
-    page.on(
-        "dialog", lambda dialog: (messages.append(dialog.message), dialog.dismiss())
-    )
+    answer_app_questions(page, accept=False)
 
     rows = "#setup-participants-assignment-list .participant-setup-row"
     page.locator(f"{rows} .participant-remove").last.click()
     page.locator("#form-workout-setup button[type=submit]").click()
+    page.wait_for_function("() => (window.__appQuestionMessages || []).length > 0")
+    messages = app_question_messages(page)
 
     expected = page.evaluate(
         """async () => {

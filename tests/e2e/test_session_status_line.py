@@ -9,6 +9,7 @@
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
 import re
+from tests.conftest import answer_app_questions
 
 HHMM = re.compile(r"^-?\d{2}:\d\d$")
 HOUR_MIN = re.compile(r"^-?\d{2}h \d{2}m$")
@@ -69,7 +70,7 @@ def test_past_card_shows_editable_elapsed_time(page, local_server):
 def test_finishing_a_session_stamps_completed_and_duration_on_the_session(
     page, local_server
 ):
-    page.on("dialog", lambda d: d.accept())
+    answer_app_questions(page)
 
     page.goto(local_server)
     page.wait_for_selector("#view-clients.active")

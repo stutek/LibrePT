@@ -12,6 +12,7 @@ import re
 
 from playwright.sync_api import expect
 
+from tests.conftest import answer_app_questions, app_question_messages
 from tests.medium._harness import load_with_stub, view_stub
 
 STUB = view_stub(
@@ -71,12 +72,11 @@ def test_a_session_with_nobody_in_it_is_refused_in_the_chosen_language(
     """The two refusals below the field checks were written in English beside keys that held the
     same sentence in every language."""
     load_with_stub(page, local_server, SLOVENIAN_STUB)
-    messages = []
-    page.on(
-        "dialog", lambda dialog: (messages.append(dialog.message), dialog.dismiss())
-    )
+    answer_app_questions(page, accept=False)
 
     _save(page)
+    page.wait_for_function("() => (window.__appQuestionMessages || []).length > 0")
+    messages = app_question_messages(page)
 
     expected = page.evaluate(
         """async () => {

@@ -9,6 +9,7 @@
 # reload), which needs a real router to write one.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
+from tests.conftest import answer_app_questions
 from tests.medium._harness import (
     open_plan_editor,
     active_session_fixture,
@@ -148,7 +149,7 @@ def test_delete_plan_clears_exercises_but_keeps_the_session(page, local_server):
     _enter_edit_mode(page)
     assert page.locator(".editor-row").count() > 0, "editor should start with exercises"
 
-    page.on("dialog", lambda dialog: dialog.accept())
+    answer_app_questions(page)
     page.click("#btn-session-menu")
     page.click("#btn-delete-session")
     page.wait_for_function(

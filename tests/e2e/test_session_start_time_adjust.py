@@ -24,6 +24,7 @@
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
 import re
+from tests.conftest import answer_app_questions
 
 HOUR_MIN = re.compile(r"^-?\d{2}h \d{2}m$")
 DIALOG = "#dialog-session-start-time"
@@ -74,8 +75,8 @@ def test_starting_late_offers_the_schedule_and_never_a_negative_clock(
     # to the minute, so a few seconds of it are already spent).
     assert _overlay_timer(page) in ("02h 00m", "01h 59m")
 
-    # Finishing asks twice over native confirms (early finish, and no sets logged).
-    page.on("dialog", lambda d: d.accept())
+    # Finishing asks twice in the app's own dialog (early finish, and no sets logged).
+    answer_app_questions(page)
     page.click("#btn-finish-session")
     # Finishing lands on the sessions list, where the finished session's card is.
     page.wait_for_selector("#view-clients.active")
@@ -152,7 +153,7 @@ def test_deleting_an_off_schedule_session_keeps_its_plans_unscheduled(
     _launch_and_start(page, local_server)
     planned_before = _unscheduled_plan_count(page)
 
-    page.on("dialog", lambda d: d.accept())
+    answer_app_questions(page)
     page.click("#btn-session-start-time-delete")
     page.wait_for_selector("#view-clients.active")
 

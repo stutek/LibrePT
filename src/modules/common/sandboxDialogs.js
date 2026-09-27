@@ -11,12 +11,9 @@
 // cooldown, while the menu one was asked for and its "no" means nothing at all. One dialog wearing
 // both would have to explain a staleness the trainer did not raise.
 //
-// **A dialog and not a `confirm()`.** The precedent in this codebase is that a plain yes/no about
-// one thing may use `confirm()` (editSessionControl.js), and a decision with consequences a trainer
-// must be able to READ may not (demoCleanupDialog.js). Both of these are the second kind: one throws
-// away everything they did in the sandbox, and the other has to name whose rest is over. A
-// `confirm()` also cannot label its own buttons, and a step that asks for an action has to say the
-// action rather than "OK".
+// **Their own dialogs, not the shared question.** The app never uses the browser's `confirm()` (a
+// plain yes/no goes through appQuestion.js). These two need more than one sentence and two buttons:
+// one throws away everything done in the sandbox, and the other has to name whose rest is over.
 //
 // **Neither dialog ever touches storage.** The caller performs the reset, the navigation and the
 // discard; this module asks and reports the answer. That is what lets the whole rebuild-timing flow

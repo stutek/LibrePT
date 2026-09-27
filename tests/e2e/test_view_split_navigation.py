@@ -5,6 +5,8 @@
 # Pending Review has none — it is reached from its status message in the notification area.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
+from tests.conftest import answer_app_questions
+
 PENDING_MESSAGE = '[data-notification-id="synthetic-pending-sessions"]'
 
 EXPAND_MESSAGES = """async () => {
@@ -102,7 +104,7 @@ def test_leaving_the_clipboard_via_grab_handle_goes_home_not_client_directory(
 
 
 def test_deleting_a_session_goes_home_not_client_directory(page, local_server):
-    page.on("dialog", lambda d: d.accept())
+    answer_app_questions(page)
 
     page.goto(local_server)
     page.wait_for_selector("#view-clients.active")

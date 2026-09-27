@@ -60,6 +60,11 @@ export const en = {
   btn_add_set: "Add Set",
   btn_inject_exercise: "Inject Exercise",
   btn_cancel: "Cancel",
+  dialog_ok: "OK",
+  dialog_finish_now: "Finish now",
+  dialog_save_anyway: "Schedule anyway",
+  dialog_take_off: "Take them off",
+  dialog_send_again: "Send the new details",
   btn_discard_changes: "Discard Changes",
   btn_save: "Save",
   session_name_has_client_name:

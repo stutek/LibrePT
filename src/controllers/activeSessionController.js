@@ -36,6 +36,7 @@ import {
   setClipboardEditModeFlag,
 } from "../modules/clipboard/editModeState.js";
 import { updateClientTabsFadeState } from "../modules/common/activeUsersList.js";
+import { askInApp } from "../modules/common/appQuestion.js";
 import { isGuideSurface } from "../modules/common/dom.js";
 import { saveActiveSessionToCache } from "./activeSessionCache.js";
 import {
@@ -401,21 +402,24 @@ function wireSessionMenuAndActions(t) {
     toggleParticipantBinding();
   });
 
-  document.getElementById("btn-delete-session")?.addEventListener("click", () => {
+  document.getElementById("btn-delete-session")?.addEventListener("click", async () => {
     closeSessionMenu();
     // While editing, this button deletes the PLAN (clears its exercises) and stays in the session;
     // otherwise it cancels the whole session. The label is swapped to match in renderActiveGroupBoard.
     if (isClipboardEditMode()) {
-      if (confirm(t("confirm_delete_plan"))) clearActivePlan();
+      const message = t("confirm_delete_plan");
+      if (await askInApp({ t, message, confirmKey: "btn_delete_plan", danger: true })) {
+        clearActivePlan();
+      }
       return;
     }
     // A planning draft has no scheduled slot to take off the board, so deleting one IS just
     // discarding the clipboard; a real session's delete has to remove the row behind it too.
-    if (getActiveSession()?.sourceSession?.isPlanning) {
-      if (confirm(t("confirm_cancel"))) cancelWorkoutSession();
-    } else if (confirm(t("confirm_delete_session"))) {
-      deleteScheduledSession();
-    }
+    const isPlanning = getActiveSession()?.sourceSession?.isPlanning;
+    const message = t(isPlanning ? "confirm_cancel" : "confirm_delete_session");
+    if (!(await askInApp({ t, message, confirmKey: "btn_delete_session", danger: true }))) return;
+    if (isPlanning) cancelWorkoutSession();
+    else deleteScheduledSession();
   });
 
   document

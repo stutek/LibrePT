@@ -7,10 +7,12 @@
 # edit, saved through the real form, reaches the prompt — and that the prompt never sends anything by
 # itself, because a trainer who says no has decided to tell the client another way.
 #
-# The prompt is a `confirm()`, answered here through a dialog handler.
+# The prompt is the app's own question dialog, answered here through answer_app_questions.
 
 import pytest
 from playwright.sync_api import expect
+
+from tests.conftest import answer_app_questions, app_question_messages
 
 # Planted through the app's own store rather than into a named IndexedDB store: which store the app
 # reads is not this test's business, and a test that wrote into `schemaP` broke the day schema 4
@@ -45,9 +47,10 @@ def _a_scheduled_session(page):
 
 
 def _answer_prompts(page, accept_resend=False):
-    """Record every confirm() the app raises, answering each according to what it asks.
+    """Answer every question the app raises according to what it asks; the texts are read back
+    with app_question_messages.
 
-    Answering them all the same way was wrong and CI proved it: the SAVE PATH has its own confirm — the
+    Answering them all the same way was wrong and CI proved it: the SAVE PATH has its own question — the
     schedule-conflict warning — and dismissing that one aborts the submit entirely
     (`confirmScheduleConflictIfNeeded`), so the resend prompt is never reached and the failure reads as
     "the feature does not work".
@@ -57,17 +60,9 @@ def _answer_prompts(page, accept_resend=False):
     happens to run. Anything that is not the resend prompt is therefore accepted — the test is about what
     happens AFTER a successful save.
     """
-    seen = []
-
-    def handle(dialog):
-        seen.append(dialog.message)
-        if "invited" in dialog.message.lower():
-            dialog.accept() if accept_resend else dialog.dismiss()
-        else:
-            dialog.accept()
-
-    page.on("dialog", handle)
-    return seen
+    answer_app_questions(
+        page, accept=True, decline_if_contains=None if accept_resend else "invited"
+    )
 
 
 def _edit_the_time(page, local_server, session):
@@ -90,9 +85,10 @@ def test_moving_a_session_asks_whether_the_invited_clients_should_be_told(
     )
     page.evaluate(INVITED_SESSION, [session["id"], session["clientId"]])
 
-    prompts = _answer_prompts(page)
+    _answer_prompts(page)
     _edit_the_time(page, local_server, session)
     page.wait_for_timeout(1_500)
+    prompts = app_question_messages(page)
 
     resend = [message for message in prompts if "invited" in message.lower()]
     assert resend, f"no resend prompt was raised; prompts seen: {prompts}"
@@ -122,7 +118,7 @@ def test_a_session_nobody_was_invited_to_never_raises_the_prompt(page, local_ser
     invitations that do not exist is how a prompt teaches people to dismiss it."""
     page.goto(f"{local_server}session/new")
     page.wait_for_selector("#view-workout-setup.active", timeout=15_000)
-    prompts = _answer_prompts(page)
+    _answer_prompts(page)
 
     page.fill("#setup-session-name", "No invites here")
     page.fill("#setup-session-date", "2026-09-15")
@@ -131,4 +127,5 @@ def test_a_session_nobody_was_invited_to_never_raises_the_prompt(page, local_ser
     page.locator("#view-workout-setup button[type=submit]").click()
     page.wait_for_timeout(1_000)
 
+    prompts = app_question_messages(page)
     assert [message for message in prompts if "invited" in message.lower()] == []

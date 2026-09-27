@@ -76,6 +76,11 @@ export const sl = {
   btn_add_set: "Dodaj serijo",
   btn_inject_exercise: "Vstavi vajo",
   btn_cancel: "Prekliči",
+  dialog_ok: "V redu",
+  dialog_finish_now: "Zaključi zdaj",
+  dialog_save_anyway: "Vseeno razporedi",
+  dialog_take_off: "Odstrani s treninga",
+  dialog_send_again: "Pošlji nove podatke",
   btn_discard_changes: "Zavrzi spremembe",
   btn_save: "Shrani",
   session_name_has_client_name:

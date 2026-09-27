@@ -142,6 +142,7 @@ self.swCacheManifest = (() => {
     "./modules/common/libraryTabs.js",
     "./modules/common/activeUsersList.js",
     "./modules/common/applicationHeader.js",
+    "./modules/common/appQuestion.js",
     "./modules/common/backupRestore.js",
     "./modules/common/demoCleanupDialog.js",
     "./modules/common/dataWipeDialog.js",

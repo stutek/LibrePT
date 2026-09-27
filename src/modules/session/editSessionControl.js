@@ -34,6 +34,7 @@ import {
 } from "../../domain/sessionRecord.js";
 import { seriesWithEdit, validateSeries } from "../../domain/sessionSeries.js";
 import { clockToMinutes, parseTimeRange, timePlusMinutes } from "../../domain/timeRange.js";
+import { askInApp, tellInApp } from "../common/appQuestion.js";
 import { mountDateField } from "../common/dateField.js";
 import { mountTimeField } from "../common/timeField.js";
 import { formatClockFromEpoch } from "../common/utils.js";
@@ -229,14 +230,14 @@ export function refreshScheduleConflictNotice() {
 // A clash is a warning, never a block: a trainer moving a session on the gym floor knows things the
 // app does not (the other booking was cancelled, someone is covering). Confirming is the trainer
 // saying so — silently refusing the save would be the app overruling the person in the room.
-function confirmScheduleConflictIfNeeded(t) {
+async function confirmScheduleConflictIfNeeded(t) {
   if (!hasBlockingConflict(currentScheduleConflicts())) return true;
-  return confirm(t("schedule_conflict_confirm"));
+  return askInApp({ t, message: t("schedule_conflict_confirm"), confirmKey: "dialog_save_anyway" });
 }
 
 // Confirms removing a participant who already has recorded feedback data on this session — returns
 // false only if the trainer explicitly cancels the confirm dialog (submit should then abort).
-function confirmParticipantRemovalIfNeeded(sessionId, deps, clientRoutines) {
+async function confirmParticipantRemovalIfNeeded(sessionId, deps, clientRoutines) {
   if (!sessionId) return true;
   const state = deps.getState();
   const existingSession = (state.sessions || []).find((b) => b.id === sessionId);
@@ -251,7 +252,9 @@ function confirmParticipantRemovalIfNeeded(sessionId, deps, clientRoutines) {
       existingSession.loggedHistory ||
       existingSession.hasFeedback);
   if (!hasFeedbackRisk) return true;
-  return confirm(deps.t("confirm_remove_participant_with_feedback"));
+  const { t } = deps;
+  const message = t("confirm_remove_participant_with_feedback");
+  return askInApp({ t, message, confirmKey: "dialog_take_off", danger: true });
 }
 
 // Diffs against the session's participants as they stood before this save, so re-saving an
@@ -320,7 +323,7 @@ function sessionKindOf(state, session) {
  * refreshes `sentAt` on their existing invitation while keeping the answer they had already given —
  * which, because both are UTC instants, is legible afterwards as "answered before this went out".
  */
-function offerResendAfterChange(deps, { asTold, now, identity, startTime, t }) {
+async function offerResendAfterChange(deps, { asTold, now, identity, startTime, t }) {
   if (!deps.openSessionInviteDialog || !now) return;
   const changes = materialSessionChanges(asTold, now);
   if (changes.length === 0) return;
@@ -329,11 +332,10 @@ function offerResendAfterChange(deps, { asTold, now, identity, startTime, t }) {
   if (invited.length === 0) return;
 
   const what = changes.map((change) => t(`session_change_${change}`) || change).join(", ");
-  // A confirm() is the right weight here, unlike per-record cleanup elsewhere: this is one yes/no
-  // about one session, and the alternative is a dialog stacked on top of the dialog the trainer
-  // just submitted.
-  if (!window.confirm(`${t("session_changed_resend") || "This session changed"} (${what}).`))
-    return;
+  // Asked without holding up the save: the clipboard opens behind the question, and a yes opens the
+  // invite dialog on top of it, the same order as before the question was the app's own dialog.
+  const message = `${t("session_changed_resend")} (${what}).`;
+  if (!(await askInApp({ t, message, confirmKey: "dialog_send_again" }))) return;
 
   const slot = slotFromForm({ date: identity.sessionDate, startTime, endTime: "" });
   deps.openSessionInviteDialog({
@@ -573,7 +575,7 @@ export function setupEditSessionControl() {
 
   setupRepeatControls({ lang: deps.getState?.().lang || "en" });
 
-  form.addEventListener("submit", (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     // Before the participant checks: a field problem is shown ON the field, and a trainer should see
@@ -584,18 +586,18 @@ export function setupEditSessionControl() {
     const { t } = deps;
 
     if (clientRoutines.length === 0) {
-      alert(t("err_select_client"));
+      await tellInApp({ t, message: t("err_select_client") });
       return;
     }
 
     const missingRoutine = clientRoutines.find((cr) => !cr.routineId);
     if (missingRoutine) {
-      alert(t("err_assign_routine"));
+      await tellInApp({ t, message: t("err_assign_routine") });
       return;
     }
 
-    if (!confirmParticipantRemovalIfNeeded(editingSessionId, deps, clientRoutines)) return;
-    if (!confirmScheduleConflictIfNeeded(t)) return;
+    if (!(await confirmParticipantRemovalIfNeeded(editingSessionId, deps, clientRoutines))) return;
+    if (!(await confirmScheduleConflictIfNeeded(t))) return;
 
     const { sessionName, sessionDate, startTime, endTime, location, timeLabel } =
       readSessionFormFields(t);

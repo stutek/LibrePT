@@ -76,6 +76,11 @@ export const de = {
   btn_add_set: "Satz hinzufügen",
   btn_inject_exercise: "Übung einfügen",
   btn_cancel: "Abbrechen",
+  dialog_ok: "OK",
+  dialog_finish_now: "Jetzt beenden",
+  dialog_save_anyway: "Trotzdem einplanen",
+  dialog_take_off: "Vom Termin nehmen",
+  dialog_send_again: "Neue Angaben senden",
   btn_discard_changes: "Änderungen verwerfen",
   btn_save: "Speichern",
   session_name_has_client_name:

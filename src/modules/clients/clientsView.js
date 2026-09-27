@@ -5,6 +5,7 @@ import {
 } from "../../data/clientConsent.js";
 import { isErased } from "../../data/clientErasure.js";
 import { aiClientSummary } from "../../domain/aiClientSummary.js";
+import { tellInApp } from "../common/appQuestion.js";
 import { consentEmailHref } from "../common/consentForm.js";
 import { renderMarkupOnce } from "../common/dom.js";
 import {
@@ -216,7 +217,7 @@ export function showClientDetails({
       // What goes in, and what is left out, is domain/aiClientSummary.js's decision.
       const anonymizedSummary = aiClientSummary(client, state.history);
       navigator.clipboard.writeText(anonymizedSummary).then(() => {
-        alert(t("profile_ai_copied"));
+        tellInApp({ t, message: t("profile_ai_copied") });
       });
     });
   }

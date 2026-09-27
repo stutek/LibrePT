@@ -12,6 +12,7 @@ import {
   resolveScheduleFromClockValues,
 } from "../domain/sessionClock.js";
 import { sessionBelongsToSlot } from "../domain/sessionRecord.js";
+import { askInApp } from "../modules/common/appQuestion.js";
 import { formatClockFromMinutes } from "../modules/common/utils.js";
 import { renderClipboardBar, updateSessionBarTimer } from "../modules/session/sessionBar.js";
 import { openSessionStartTimeDialog } from "../modules/session/sessionStartTimeDialog.js";
@@ -86,8 +87,12 @@ export function offerScheduleAdjustment({ onDeleteSession }) {
       });
       if (schedule) applyAdjustedSchedule(schedule);
     },
-    onDelete: () => {
-      if (confirm(appDeps.t("confirm_delete_session"))) onDeleteSession();
+    onDelete: async () => {
+      const { t } = appDeps;
+      const message = t("confirm_delete_session");
+      if (await askInApp({ t, message, confirmKey: "btn_delete_session", danger: true })) {
+        onDeleteSession();
+      }
     },
   });
 }

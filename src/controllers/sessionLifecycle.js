@@ -23,6 +23,7 @@ import { renderClientsList } from "../modules/clients/clientsView.js";
 import { renderActiveSessionBoard } from "../modules/clipboard/activeSessionBoard.js";
 import { markEditorRow, setClipboardEditModeFlag } from "../modules/clipboard/editModeState.js";
 import { clearAllTimers, restoreSessionTimers } from "../modules/clipboard/exerciseAndRestTimer.js";
+import { askInApp } from "../modules/common/appQuestion.js";
 import { renderNotificationArea } from "../modules/common/notificationArea.js";
 import {
   releaseScreenWakeLock,
@@ -255,13 +256,13 @@ export function deleteScheduledSession() {
 // Confirm only when finishing meaningfully early — more than 10 minutes still on the countdown.
 // Near the scheduled end or in overrun (<=10 min or negative), complete silently. Returns whether
 // the trainer wants to proceed (always true when there's nothing to confirm).
-function confirmEarlyFinish(activeSession, t) {
+async function confirmEarlyFinish(activeSession, t) {
   const endDate = activeSession.sourceSession?.endDate;
   if (!endDate || activeSession.sourceSession?.isPlanning) return true;
   const remainingMin = (new Date(endDate).getTime() - Date.now()) / 60000;
   if (remainingMin <= 10) return true;
-  const msg = t("confirm_finish_early").replace("{min}", String(Math.round(remainingMin)));
-  return confirm(msg);
+  const message = t("confirm_finish_early").replace("{min}", String(Math.round(remainingMin)));
+  return askInApp({ t, message, confirmKey: "dialog_finish_now" });
 }
 
 function countCompletedSets(activeSession) {
@@ -314,22 +315,24 @@ function appendHistoryRecordsForParticipants(
   }
 }
 
-export function finishWorkoutSession() {
+export async function finishWorkoutSession() {
   const activeSession = getActiveSession();
   if (!activeSession) return;
   const { state, t, saveToLocalStorage, navigateToPath } = getAppDeps();
   if (!state || !t) return;
 
-  if (!confirmEarlyFinish(activeSession, t)) return;
+  if (!(await confirmEarlyFinish(activeSession, t))) return;
 
   const completedSets = countCompletedSets(activeSession);
   if (
     completedSets === 0 &&
     !activeSession.sourceSession?.isPlanning &&
-    !confirm(t("alert_no_sets"))
+    !(await askInApp({ t, message: t("alert_no_sets"), confirmKey: "dialog_finish_now" }))
   ) {
     return;
   }
+  // The questions above wait for an answer; the session may have been closed meanwhile.
+  if (getActiveSession() !== activeSession) return;
 
   const sessionDateISO = new Date(activeSession.startTime).toISOString();
   const sessionDuration = activeSession.duration;

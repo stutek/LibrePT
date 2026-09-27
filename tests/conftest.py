@@ -99,6 +99,49 @@ def complete_first_run(page, lang="en", theme="daylight"):
     page.locator("#splash-trainer-save").click()
 
 
+# The app asks through its own dialog (src/modules/common/appQuestion.js), not the browser's
+# confirm(), so Playwright's `page.on("dialog")` no longer sees the question. This answers it the
+# way that handler did: every question, as soon as it opens, and it records the text asked.
+ANSWER_APP_QUESTIONS_SCRIPT = """([accept, declineIfContains]) => {
+    window.__appQuestionAccept = accept;
+    window.__appQuestionDecline = declineIfContains;
+    window.__appQuestionMessages = window.__appQuestionMessages || [];
+    if (window.__appQuestionObserver) return;
+    const answer = () => {
+        const dialog = document.getElementById('dialog-app-question');
+        if (!dialog || !dialog.open || dialog.dataset.testAnswered === '1') return;
+        dialog.dataset.testAnswered = '1';
+        const text = document.getElementById('app-question-text').textContent;
+        window.__appQuestionMessages.push(text);
+        const decline = window.__appQuestionDecline
+            && text.toLowerCase().includes(window.__appQuestionDecline.toLowerCase());
+        const yes = decline ? !window.__appQuestionAccept : window.__appQuestionAccept;
+        const id = yes ? 'app-question-confirm' : 'app-question-cancel';
+        setTimeout(() => {
+            delete dialog.dataset.testAnswered;
+            document.getElementById(id).click();
+        }, 0);
+    };
+    window.__appQuestionObserver = new MutationObserver(answer);
+    window.__appQuestionObserver.observe(document, {
+        subtree: true, childList: true, attributes: true, attributeFilter: ['open'],
+    });
+}"""
+
+
+def answer_app_questions(page, accept=True, decline_if_contains=None):
+    """Answer every app question on this page, now and after any navigation: yes when `accept`,
+    and the opposite for a question whose text contains `decline_if_contains`."""
+    args = json.dumps([accept, decline_if_contains])
+    page.add_init_script(f"({ANSWER_APP_QUESTIONS_SCRIPT})({args})")
+    page.evaluate(ANSWER_APP_QUESTIONS_SCRIPT, [accept, decline_if_contains])
+
+
+def app_question_messages(page):
+    """The texts of the app questions answered so far, in order."""
+    return page.evaluate("() => window.__appQuestionMessages || []")
+
+
 # Generous, because this runs on the very first interaction after a cold navigation, when parallel
 # xdist workers are all compiling the app's ~89 ES modules at once — the same contention the
 # `page.goto` budget below is raised for.
