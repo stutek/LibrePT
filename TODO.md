@@ -6027,8 +6027,15 @@ Vrstica z zamudo nosi oba razreda, `upcoming` in `overtime`, zato jo zadene tudi
 selektor — skrita sta oba napisa. Prvi selektor mora zamudo izvzeti
 (`.upcoming:not(.overtime) .when-overdue`).
 
+**Ista tišina na drugem koncu treninga:** ko trening teče čez napovedani konec, vrstica nad dnom
+zaslona pokaže »-00:51« in šteje naprej v minus. Minus je edini znak, da je ura potekla; besede
+za to ni. To je zavestna izbira v [sessionBar.js](src/modules/session/sessionBar.js) (odštevanje
+do konca, s predznakom), vendar pade v isto vrzel: aplikacija pove s številko, kar bi morala
+povedati z besedo.
+
 **Predlog in preverjanje:** popraviti selektor in pripeti besedo v test plošče: kartica pred
-začetkom kaže »Se začne čez«, kartica po zapadlem začetku »Zamuja«. Danes tega ne preverja
+začetkom kaže »Se začne čez«, kartica po zapadlem začetku »Zamuja«, vrstica v podaljšku pa
+besedo za podaljšek ob času. Danes tega ne preverja
 noben test — iskanje po `tests/` ne najde ne razreda `when-overdue` ne besede »Zamuja«.
 Opaženo na objavljeni različici `0625bd6`; pravilo na `main` je nespremenjeno.
 
