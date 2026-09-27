@@ -56,6 +56,7 @@ import {
   beginWorkoutSession,
   cancelWorkoutSession,
   deleteScheduledSession,
+  deleteSessionQuestion,
   finishWorkoutSession,
 } from "./sessionLifecycle.js";
 import {
@@ -416,7 +417,7 @@ function wireSessionMenuAndActions(t) {
     // A planning draft has no scheduled slot to take off the board, so deleting one IS just
     // discarding the clipboard; a real session's delete has to remove the row behind it too.
     const isPlanning = getActiveSession()?.sourceSession?.isPlanning;
-    const message = t(isPlanning ? "confirm_cancel" : "confirm_delete_session");
+    const message = isPlanning ? t("confirm_cancel") : deleteSessionQuestion(t);
     if (!(await askInApp({ t, message, confirmKey: "btn_delete_session", danger: true }))) return;
     if (isPlanning) cancelWorkoutSession();
     else deleteScheduledSession();

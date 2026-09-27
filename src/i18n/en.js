@@ -90,6 +90,8 @@ export const en = {
     "Delete this session? Its logged progress and feedback will be permanently discarded.",
   confirm_delete_session:
     "Delete this session? It comes off the schedule and its logged progress and feedback are discarded — each participant's plan is kept under Unscheduled plans.",
+  delete_one_evening:
+    "This is one evening of a repeating session. Only this evening is deleted; the others stay.",
   confirm_delete_plan:
     "Delete every exercise from this plan? You can rebuild it from scratch or exit editing.",
   warning_banner_title: "Client Safety Advisory",

@@ -106,6 +106,8 @@ export const sl = {
     "Izbriši ta trening? Zabeležen napredek in povratne informacije bodo trajno izgubljeni.",
   confirm_delete_session:
     "Izbriši ta trening? Odstranjen bo z urnika, zabeležen napredek in povratne informacije pa bodo izgubljeni — program vsakega udeleženca se ohrani med nenačrtovanimi programi.",
+  delete_one_evening:
+    "To je en večer ponavljajočega se treninga. Izbriše se samo ta večer, ostali ostanejo.",
   confirm_delete_plan:
     "Izbrišem vse vaje iz tega plana? Lahko ga sestaviš znova ali zapustiš urejanje.",
   warning_banner_title: "Varnostno opozorilo za stranko",

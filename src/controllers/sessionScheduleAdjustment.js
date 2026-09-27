@@ -65,7 +65,7 @@ function applyAdjustedSchedule({ startMs, endMs }) {
 // A session started well outside its slot means the SCHEDULE is wrong, not the trainer — gyms run
 // late. Offer to move the slot onto the session (sessionStartTimeDialog.js). Deliberately raised
 // after the session is already running, so nothing on the gym floor waits behind a modal.
-export function offerScheduleAdjustment({ onDeleteSession }) {
+export function offerScheduleAdjustment({ onDeleteSession, deleteQuestion }) {
   const activeSession = getActiveSession();
   const sourceSession = activeSession?.sourceSession;
   const startedAt = activeSession?.startTime;
@@ -89,7 +89,7 @@ export function offerScheduleAdjustment({ onDeleteSession }) {
     },
     onDelete: async () => {
       const { t } = appDeps;
-      const message = t("confirm_delete_session");
+      const message = deleteQuestion(t);
       if (await askInApp({ t, message, confirmKey: "btn_delete_session", danger: true })) {
         onDeleteSession();
       }

@@ -106,6 +106,8 @@ export const de = {
     "Dieses Training löschen? Der aufgezeichnete Fortschritt und die Rückmeldungen werden endgültig gelöscht.",
   confirm_delete_session:
     "Dieses Training löschen? Es wird aus dem Terminplan entfernt, und der aufgezeichnete Fortschritt und die Rückmeldungen werden gelöscht — der Plan jedes Teilnehmers bleibt unter „Pläne ohne Termin“ erhalten.",
+  delete_one_evening:
+    "Das ist ein Abend eines wiederkehrenden Termins. Nur dieser Abend wird gelöscht, die anderen bleiben.",
   confirm_delete_plan:
     "Alle Übungen aus diesem Plan löschen? Danach kannst du ihn neu aufbauen oder die Bearbeitung beenden.",
   warning_banner_title: "Sicherheitshinweis zum Kunden",

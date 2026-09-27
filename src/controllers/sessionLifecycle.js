@@ -162,7 +162,10 @@ export function beginWorkoutSession() {
   // The homepage's "Active session" badge is stamped at renderSessions() time, not derived live —
   // without this, a card only picks up the started session on the NEXT unrelated re-render.
   getAppDeps().renderSessions?.();
-  offerScheduleAdjustment({ onDeleteSession: deleteScheduledSession });
+  offerScheduleAdjustment({
+    onDeleteSession: deleteScheduledSession,
+    deleteQuestion: deleteSessionQuestion,
+  });
 }
 
 export function cancelWorkoutSession() {
@@ -208,6 +211,19 @@ export function cancelWorkoutSession() {
 // exactly the one that gets re-run on another day; the feed's "unscheduled plans" item is then the
 // route back to it. Logged sets and feedback ARE discarded, which is what the confirm says — a
 // session worth deleting is a session that did not happen.
+/** The question asked before deleting the session on the clipboard. An evening of a repeating
+ *  session is deleted alone, and the question says so: without it a trainer could fear that every
+ *  evening of the series had gone. */
+export function deleteSessionQuestion(t) {
+  const { state } = getAppDeps();
+  const sourceSession = getActiveSession()?.sourceSession;
+  const oneOfASeries = (state?.sessions || []).some(
+    (session) => session.seriesId && sessionBelongsToSlot(session, sourceSession),
+  );
+  const question = t("confirm_delete_session");
+  return oneOfASeries ? `${t("delete_one_evening")} ${question}` : question;
+}
+
 export function deleteScheduledSession() {
   const activeSession = getActiveSession();
   const appDeps = getAppDeps();
