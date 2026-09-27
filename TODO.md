@@ -6957,6 +6957,37 @@ torke do konca leta.
 in naj po možnosti ponudi tudi »izbriši vse prihodnje večere«. Preizkus naj pri večeru serije
 zahteva, da je v vprašanju beseda o enem večeru. Opaženo na objavljeni različici `0625bd6`.
 
+### 80.50 [ ] P2 — Stran, na kateri stranka odgovori na vabilo, kaže »12:00 PM« in »Thursday, October 8«
+
+**Scenarij in koraki:** trener v slovenski aplikaciji naredi trening za 2026-10-08 ob 12:00 in
+stranki pošlje vabilo. V vabilu (slovenskem) je povezava »Sporoči mi, ali lahko prideš«.
+Stranka jo odpre.
+
+**Opaženo:** stran je v angleščini (`<html lang="en">`): »WHEN | Thursday, October 8 at 12:00 PM
+(60 min) | You can answer here for another 260 h 28 min | Can you make it? | Yes, I'll be there
+| Not sure yet | No, I can't«.
+
+**Dve različni napaki:**
+1. **Ura in datum.** »12:00 PM« je dvanajsturni zapis, »Thursday, October 8« pa ni ISO. Projektno
+   pravilo zahteva 24-urni čas in ISO datum **povsod in v vsakem jeziku**, in prav zato, ker
+   `toLocale…` vpraša napravo. [rsvpView.js](src/modules/rsvp/rsvpView.js), `formatWhen`, kliče
+   `start.toLocaleString(lang, {weekday, day, month, hour, minute})` — torej napravo vpraša za
+   obliko. To drži tudi, če je jezik strani pravi.
+2. **Jezik.** Stran izbere jezik iz `?lang=` v povezavi ali iz jezikov brskalnika
+   ([app.js](src/app.js), `resolveIntakeLang`). Povezava, ki jo trener pošlje, jezika ne nosi —
+   torej slovenska stranka z angleško nastavljenim telefonom dobi angleško stran, čeprav je bilo
+   vabilo slovensko in aplikacija jezik stranke pozna (`formLang` iz obrazca ob včlanitvi).
+
+**Težava in vpliv:** to je prvo, kar stranka od LibrePT sploh vidi, in edini zaslon, kjer sama
+nekaj odgovori. Ura v tuji obliki je poleg tega natanko tista napaka, zaradi katere se pride ob
+napačnem času.
+
+**Predlog in preverjanje:** `formatWhen` naj sestavi zapis iz aplikacijinih pripomočkov
+(`formatClockFromEpoch`, ISO datum), ne iz `toLocaleString`. V povezavo vabila dodati `lang`, ki
+ga aplikacija pozna. Preizkus naj odpre povezavo vabila v brskalniku, nastavljenem na `en-US`, in
+zahteva 24-urni zapis ure ter ISO datum. Opaženo na objavljeni različici `0625bd6`; koda na
+`main` je ista.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
