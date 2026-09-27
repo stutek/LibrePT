@@ -13,6 +13,8 @@
 // Pure: dates and labels in, records out. Writing them anywhere, prompting the
 // trainer, and firing invites stay with the form controller.
 
+import { parseTimeRange } from "./timeRange.js";
+
 // The label a session shows wherever its slot is named. An end with no start is not a range, and a
 // session with neither is honestly undated rather than shown as an empty gap.
 export function computeTimeLabel(startTime, endTime, unknownLabel) {
@@ -116,11 +118,28 @@ export function buildPlanningSessionMeta({
   };
 }
 
-export function buildRealSessionMeta({ sessionId, sessionName, sessionDate, timeLabel, location }) {
+//
+// It carries the same `day`, `startDate` and `endDate` as a slot launched from the dashboard
+// (modules/common/utils.js's `buildSessionMeta`). With only `date`, the clipboard header found no
+// day and no start, read `new Date(null)`, and printed 1970-01-01 right after the save.
+export function buildRealSessionMeta({
+  sessionId,
+  sessionName,
+  sessionDate,
+  startTime,
+  timeLabel,
+  location,
+}) {
+  const startDate = new Date(`${sessionDate}T${startTime || "00:00"}`);
+  const range = parseTimeRange(timeLabel);
+  const endDate = range ? new Date(startDate.getTime() + (range.end - range.start) * 60000) : null;
   return {
     id: sessionId,
     titles: [sessionName],
     date: sessionDate,
+    day: computeSessionDayBucket(startDate),
+    startDate,
+    endDate,
     timeLabel,
     location,
   };

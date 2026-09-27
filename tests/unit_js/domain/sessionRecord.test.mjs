@@ -152,6 +152,23 @@ test("a planning session is flagged as having no slot; a real one is not", () =>
   assert.deepEqual(real.titles, ["Winter block"]);
 });
 
+test("a session opened right after saving carries its day, start and end", () => {
+  // The clipboard header read `startDate` and `day`, found neither, and printed 1970-01-01: the
+  // meta carried only `date`. It must carry what a session opened from the dashboard carries.
+  const real = buildRealSessionMeta({
+    sessionId: "s1",
+    sessionName: "Individualna vadba",
+    sessionDate: isoDate(0),
+    startTime: "10:00",
+    timeLabel: "10:00 - 10:45",
+    location: "Telovadnica Center",
+  });
+  assert.equal(real.day, "today");
+  assert.equal(real.startDate.getHours(), 10);
+  assert.equal(real.startDate.getMinutes(), 0);
+  assert.equal((real.endDate - real.startDate) / 60000, 45);
+});
+
 test("a slot claims every stored row it was merged from", () => {
   // The day timeline merges sessions sharing a time and place into one card, so the meta the
   // clipboard runs can stand for several rows (`ids`). Everything that writes back onto "the

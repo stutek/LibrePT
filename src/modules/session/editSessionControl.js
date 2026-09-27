@@ -458,7 +458,7 @@ function commitRealSession(
     t,
   });
 
-  return buildRealSessionMeta(identity);
+  return buildRealSessionMeta({ ...identity, startTime });
 }
 
 // Every field the setup form holds, read once. The `|| ""` fallbacks are about a field being
