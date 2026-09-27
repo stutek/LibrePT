@@ -19,7 +19,9 @@ def test_a_stored_legacy_database_is_migrated_on_boot(page, local_server):
             exercises: [],
             routines: [],
             history: [],
-            bookings: [{ id: 'b1', day: 'today', titles: ['Legacy Session'] }],
+            // A legacy booking has the shape a session has, participants included: the rename
+            // carried the same records over. A row without them is not one any install wrote.
+            bookings: [{ id: 'b1', day: 'today', titles: ['Legacy Session'], participants: [] }],
         }));"""
     )
     page.goto(local_server)
