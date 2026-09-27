@@ -6988,6 +6988,33 @@ ga aplikacija pozna. Preizkus naj odpre povezavo vabila v brskalniku, nastavljen
 zahteva 24-urni zapis ure ter ISO datum. Opaženo na objavljeni različici `0625bd6`; koda na
 `main` je ista.
 
+### 80.51 [ ] P1 — Stranka izbere odgovor na vabilo, poslati pa ga nima s čim
+
+**Scenarij in koraki:** trener svojih podatkov ni vpisal — pozdravni zaslon pravi, da so
+neobvezni — in pošlje vabilo. Stranka odpre povezavo in pritisne »Yes, I'll be there«.
+
+**Opaženo:** stran odgovori »You're saying yes. Send it so your trainer knows.« in »This opens
+your own messaging app with the reply ready — nothing is sent until you send it.« **Gumba za
+pošiljanje ni.** V HTML sta (»Send as a text«, »Send as an email«), oba skrita.
+
+**Vzrok, potrjen v kodi na `main`:** [rsvpView.js](src/modules/rsvp/rsvpView.js) prikaže gumb za
+SMS samo, če vabilo nosi trenerjevo telefonsko številko, in gumb za e-pošto samo, če nosi
+e-naslov. Brez trenerjevih podatkov vabilo ne nosi ne enega ne drugega, zato ostaneta oba skrita
+— navodilo nad njima pa vseeno govori o pošiljanju.
+
+**Težava in vpliv:** zanka vabila se tiho pretrga na zadnjem koraku, in to pri stranki, ne pri
+trenerju. Trener čaka odgovor, ki ne more priti, in ne izve, da se je to zgodilo. Podatki
+trenerja so povsod predstavljeni kot neobvezni, tu (in pri izvozu po GDPR, §80.43) pa so pogoj.
+
+**Predlog:** vabila brez trenerjevega stika sploh ne ponuditi — ob pošiljanju vprašati za
+številko ali e-naslov in to shraniti. Če vabilo vseeno pride brez stika, naj stran stranki pove,
+kaj naj stori (»odgovori svojemu trenerju po poti, po kateri sta v stiku«), namesto navodila o
+gumbu, ki ga ni.
+
+**Preverjanje:** preizkus naj z izpraznjenimi trenerjevimi podatki odpre povezavo vabila, izbere
+odgovor in zahteva, da je na zaslonu pot naprej. Opaženo na objavljeni različici `0625bd6`; koda
+na `main` je ista.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
