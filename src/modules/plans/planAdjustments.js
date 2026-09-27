@@ -2,6 +2,7 @@
 // Logic for displaying the pending plan adjustments widget on the dashboard,
 // as well as launching and submitting the interactive Apply Plan Adjustment Dialog wizard.
 import { libraryExercises } from "../../data/exerciseLibrary.js";
+import { performedTarget, suggestedTarget } from "../../domain/adjustmentSuggestion.js";
 import { feedbackTagText, readFeedbackTag } from "../../domain/feedbackTags.js";
 import { renderMarkupOnce } from "../common/dom.js";
 import { mountExercisePicker, pickerLabels } from "../exercises/exercisePicker.js";
@@ -101,19 +102,25 @@ function buildAdjustmentCard(u, ctx) {
   const actions = document.createElement("div");
   actions.className = "adjustment-card-actions";
 
-  const editBtn = document.createElement("button");
-  editBtn.type = "button";
-  editBtn.className = "icon-btn btn-edit-plan-alert";
-  editBtn.title = t("edit_plan");
-  editBtn.setAttribute("aria-label", t("edit_plan"));
-  editBtn.innerHTML = `<i class="fa-solid fa-pen-to-square"></i>`;
-  editBtn.addEventListener("click", () => {
-    const exercise = libraryExercises(state).find((e) => e.name === u.exerciseName);
-    const routine = exercise
-      ? state.routines.find((r) => r.exercises.some((ex) => ex.id === exercise.id))
-      : null;
-    if (routine) navigateToPath(urlFor("routine.edit", { routineId: routine.id }));
-  });
+  // The pencil opens the routine that holds this exercise, so it is shown only when one does. A
+  // session built on the floor from an empty plan belongs to no routine, and the pencil then did
+  // nothing when pressed.
+  const exercise = libraryExercises(state).find((e) => e.name === u.exerciseName);
+  const routine = exercise
+    ? state.routines.find((r) => r.exercises.some((ex) => ex.id === exercise.id))
+    : null;
+  if (routine) {
+    const editBtn = document.createElement("button");
+    editBtn.type = "button";
+    editBtn.className = "icon-btn btn-edit-plan-alert";
+    editBtn.title = t("edit_plan");
+    editBtn.setAttribute("aria-label", t("edit_plan"));
+    editBtn.innerHTML = `<i class="fa-solid fa-pen-to-square"></i>`;
+    editBtn.addEventListener("click", () => {
+      navigateToPath(urlFor("routine.edit", { routineId: routine.id }));
+    });
+    actions.appendChild(editBtn);
+  }
 
   const resolveBtn = document.createElement("button");
   resolveBtn.type = "button";
@@ -127,7 +134,6 @@ function buildAdjustmentCard(u, ctx) {
     navigateToPath(urlFor("adjustment.apply", { updateId: u.id }));
   });
 
-  actions.appendChild(editBtn);
   actions.appendChild(resolveBtn);
 
   card.appendChild(info);
@@ -277,21 +283,16 @@ function resolveAdjustmentTargets(state, update) {
   return { exercise, exerciseId, routine, exMapping };
 }
 
-// Pre-fill parameters, with a smart load offset recommendation: +2.5kg if the tag is "Too Easy",
-// -2.5kg (floored at 0) if "Too Hard" — a starting suggestion the trainer can still override.
-function prefillAdjustmentFields(exMapping, tag) {
-  document.getElementById("adjust-weight").value = exMapping ? exMapping.weight : 0;
-  document.getElementById("adjust-reps").value = exMapping ? exMapping.reps : 10;
-  document.getElementById("adjust-sets").value = exMapping ? exMapping.sets : 3;
-
-  const tagId = readFeedbackTag(tag).known?.id;
-  if (tagId === "too_easy") {
-    document.getElementById("adjust-weight").value = exMapping ? exMapping.weight + 2.5 : 2.5;
-  } else if (tagId === "too_hard") {
-    document.getElementById("adjust-weight").value = exMapping
-      ? Math.max(0, exMapping.weight - 2.5)
-      : 0;
-  }
+// Pre-fill the target the trainer can still override (domain/adjustmentSuggestion.js decides it).
+function prefillAdjustmentFields(exMapping, update, state) {
+  const target = suggestedTarget({
+    routineEntry: exMapping,
+    performed: performedTarget(state.history, update),
+    tagId: readFeedbackTag(update.tag).known?.id,
+  });
+  document.getElementById("adjust-weight").value = target.weight;
+  document.getElementById("adjust-reps").value = target.reps;
+  document.getElementById("adjust-sets").value = target.sets;
 }
 
 // Cancel / close buttons (close-btn sits outside the form, so clone it to avoid stacking
@@ -348,7 +349,7 @@ export function openAdjustmentWizardComponent(updateId, ctx) {
   document.getElementById("adjust-panel-modify").classList.remove("hidden");
   document.getElementById("adjust-panel-swap").classList.add("hidden");
 
-  prefillAdjustmentFields(exMapping, update.tag);
+  prefillAdjustmentFields(exMapping, update, state);
 
   // Reset all stale listeners in one shot by cloning the form, THEN wire every interactive
   // element against the fresh DOM. (The action select, cancel button, and swap picker all live

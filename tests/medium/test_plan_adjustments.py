@@ -135,6 +135,41 @@ def test_apply_adjustment_resolves_and_drops_the_count(page, local_server):
     assert _cards(page).count() == 2
 
 
+# A floor-built session: its exercise is in no routine, and the history holds the session the
+# signal was given in, under the same id as the review entry.
+NO_ROUTINE_STUB = STUB.replace(
+    "  planUpdates: structuredClone(DEFAULT_PLAN_UPDATES),\n  exercises: [],\n  sessions: [],\n  history: [],",
+    """  planUpdates: [{ id: 'u9', clientId: 'c1a9f0e2', clientName: 'Jane Doe',
+    date: '2026-09-27T08:00:00.000Z', exerciseName: 'Floor Squat',
+    tag: 'Too Easy - Increase Load', resolved: false }],
+  exercises: [],
+  sessions: [],
+  history: [{ id: 'h9', clientId: 'c1a9f0e2', date: '2026-09-27T08:00:00.000Z',
+    exercises: [{ id: 'exF', name: 'Floor Squat', sets: [
+      { reps: 10, weight: 40, completed: true }, { reps: 10, weight: 40, completed: true },
+      { reps: 10, weight: 40, completed: true }] }],
+    feedback: [{ id: 'u9', exerciseName: 'Floor Squat', tag: 'Too Easy - Increase Load' }] }],""",
+)
+
+
+def test_a_signal_from_a_session_without_a_routine(page, local_server):
+    """The pencil did nothing for an exercise no routine holds, and the dialog proposed 2.5 kg for a
+    squat done at 40 kg, because it added the step to nothing."""
+    assert "Floor Squat" in NO_ROUTINE_STUB
+    load_with_stub(page, local_server, NO_ROUTINE_STUB)
+    page.wait_for_selector("#view-adjustments.active")
+
+    card = _cards(page).first
+    assert card.locator(".btn-edit-plan-alert").count() == 0, (
+        "a pencil that opens nothing"
+    )
+
+    card.locator(".btn-resolve-alert").click()
+    assert page.locator("#adjust-weight").input_value() == "42.5"
+    assert page.locator("#adjust-reps").input_value() == "10"
+    assert page.locator("#adjust-sets").input_value() == "3"
+
+
 def test_a_slovenian_trainer_reads_the_tag_in_slovenian(page, local_server):
     """The review list printed the stored English key: a trainer who pressed »Prelahko« read
     »Too Easy - Increase Load«. The key stays in the record; only its words are shown."""
