@@ -6498,6 +6498,25 @@ znova. Popravek naj po izbrisu izriše profil (ali se vrne v imenik) iz novega s
 **Preverjanje:** preizkus naj po izbrisu, brez osvežitve, zahteva, da imena in telefonske
 številke ni več na zaslonu. Opaženo na objavljeni različici `0625bd6`.
 
+### 80.32 [ ] P3 — Skupinski trening, začet iz rutine, nima svojega naslova; osvežitev ga izbriše
+
+**Scenarij in koraki:** trener odpre »Rutine«, pri rutini »Ponedeljek moč« pritisne »Začni
+skupinski trening«, vpiše ime »Skupina ponedeljek« in ga telefon zmoti — stran se osveži.
+
+**Opaženo:** naslov v brskalniku ves čas ostane `/routines`. Po osvežitvi je na zaslonu spet
+seznam rutin, obrazca ni več in vpisano ime je izgubljeno. Če trener namesto tega pritisne
+gumb za nazaj, ne pride na seznam rutin, od koder je prišel, ampak na ploščo treningov.
+
+**Primerjava:** isti obrazec, odprt z gumbom »Ustvari trening«, ima svoj naslov
+`/session/new`, zato ga osvežitev ohrani in gumb za nazaj deluje pričakovano.
+
+**Težava in vpliv:** na telefonu se strani osvežujejo same — klic, preklop med aplikacijami,
+brskalnik, ki sprosti pomnilnik. Delo, vpisano v ta obrazec, takrat izgine brez besede.
+
+**Predlog in preverjanje:** to pot peljati na isti naslov kot »Ustvari trening«, z rutino kot
+parametrom. Preizkus naj obrazec odpre iz rutine, osveži stran in zahteva, da je obrazec še
+odprt z vpisanim imenom. Opaženo na objavljeni različici `0625bd6`.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
