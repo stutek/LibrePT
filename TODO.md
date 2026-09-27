@@ -6375,6 +6375,30 @@ nova ključa v `en`, `sl` in `de`. Paziti na
 vmesniku pritisne »Prelahko« in zahteva, da v pregledu ni angleškega niza. Opaženo na objavljeni
 različici `0625bd6`; koda na `main` je ista.
 
+### 80.27 [ ] P2 — Svinčnik pri čakajočem signalu ne naredi nič, če vaja ni iz programa
+
+**Scenarij in koraki:** trener izvede trening, sestavljen s »Poljuben / Prazen načrt«, z vajo,
+dodano iz kataloga. Med vadbo pritisne »Prelahko«. Po zaključku odpre »Čakajoče na pregled« in
+pri vrstici pritisne svinčnik (»Uredi načrt«).
+
+**Opaženo:** nič. Naslov strani se ne spremeni, okno se ne odpre, sporočila ni, v dnevniku
+brskalnika ni napake. Gumb je viden in ni onemogočen. Preizkušeno z dotikom in s programskim
+klikom, oba brez učinka. Drugi gumb v isti vrstici (kljukica, »Razreši«) deluje.
+
+**Vzrok, potrjen v kodi na `main`:** [planAdjustments.js](src/modules/plans/planAdjustments.js)
+ob pritisku poišče vajo v knjižnici in nato program, ki to vajo vsebuje, ter se premakne
+**samo, če program obstaja** (`if (routine)`). Trening iz praznega načrta ne pripada nobenemu
+programu, zato pogoj ne drži in funkcija se tiho konča.
+
+**Težava in vpliv:** prav trening, sestavljen sproti na telovadnici, je tisti, pri katerem
+signal največ pomeni. Trener pritisne edini gumb, ki obljublja popravek programa, in ne dobi
+ničesar — niti pojasnila, da programa za popravek ni.
+
+**Predlog in preverjanje:** ko programa ni, gumba ne kazati, ali pa ga peljati do zapisa vaje
+oziroma do načrta tistega treninga in to povedati z besedo. Preizkus naj signal ustvari v
+treningu brez programa in zahteva, da pritisk na ta gumb pripelje nekam. Opaženo na objavljeni
+različici `0625bd6`; koda na `main` je ista.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
