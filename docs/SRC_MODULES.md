@@ -207,7 +207,7 @@ module, listed in the table below alongside that module's `.js`.
 | [src/modules/exercises/exercisePicker.css](../src/modules/exercises/exercisePicker.css) | `styles` | The reusable filtered exercise picker (routine builder + gym-floor swap + catalog picker). |
 | [src/modules/common/libraryTabs.js](../src/modules/common/libraryTabs.js) | `component` | The tab row that makes the exercise library and the routines one place, reached from the ☰ menu's *Exercises and routines*. Both views keep their own routes; the tabs are links routed in place, so a plain tap does not reload the app and a modified click still opens a new tab. |
 | [src/modules/common/libraryTabs.css](../src/modules/common/libraryTabs.css) | `styles` | The two library tabs: equal width, thumb-sized, the current page marked by `aria-current`. |
-| [src/modules/history/historyView.js](../src/modules/history/historyView.js) | `view` | Modular view renderer for workout history logs; owns `#view-history`'s markup. |
+| [src/modules/history/historyView.js](../src/modules/history/historyView.js) | `view` | How a client's completed sessions are drawn on their page (`renderHistoryItems`, called by clientsView.js). History is shown only there; the view listing every client's sessions was removed. |
 | [src/modules/history/historyView.css](../src/modules/history/historyView.css) | `styles` | History card items, the feedback icon/tooltip, and structured history rows. |
 | [src/modules/common/utils.js](../src/modules/common/utils.js) | `helper` | Shared formatting, date conversion, and string helper functions. |
 | [src/modules/common/dom.js](../src/modules/common/dom.js) | `helper` | DOM helper utilities and modal helpers. |

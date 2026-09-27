@@ -155,7 +155,6 @@ export function buildRouteTable() {
   const exercises = registry.register(
     new ViewRoute({ name: "exercises", pattern: "/exercises", viewId: "exercises" }),
   );
-  registry.register(new ViewRoute({ name: "history", pattern: "/history", viewId: "history" }));
 
   // Record editors. Each opens over its own list view, so Back returns to the list and a cold link
   // shows the record in context rather than a dialog floating on a blank shell.

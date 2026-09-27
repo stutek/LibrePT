@@ -56,7 +56,6 @@ STATIC_ROUTE_WALK = [
     ("adjustments", "/adjustments"),
     ("routines", "/routines"),
     ("exercises", "/exercises"),
-    ("history", "/history"),
     ("session.new", "/session/new"),
     ("routine.new", "/routines/new"),
     ("exercise.new", "/exercises/new"),

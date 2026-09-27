@@ -1,3 +1,8 @@
+// src/modules/history/historyView.js — how a client's completed sessions are drawn on their page.
+//
+// History is shown in one place: a client's page (clientsView.js calls renderHistoryItems). The view
+// that listed every client's sessions together was removed — a trainer reads one person's history,
+// not everyone's.
 import { orderedItems } from "../../data/sessionItemOrder.js";
 import {
   formatCompactDuration,
@@ -6,44 +11,7 @@ import {
 } from "../../domain/exerciseModality.js";
 import { formatLoad, formatReps } from "../../domain/repsAndLoad.js";
 import { isRestRecord, isSkippedRecord } from "../../domain/sessionItemRecord.js";
-// src/views/historyView.js - Domain module for global and client workout history logs
-import { renderMarkupOnce } from "../common/dom.js";
 import { escapeHTML, formatDateStr } from "../common/utils.js";
-
-export function renderHistoryViewShell() {
-  renderMarkupOnce(
-    "main-content",
-    (mainContent) => mainContent.querySelector("#view-history"),
-    `
-<section id="view-history" class="app-view">
-      <div class="view-header view-titlebar">
-        <button class="view-grabber" type="button" data-i18n-label="view_grabber_home" aria-label="Return to home"></button>
-        <h2>Global History</h2>
-      </div>
-      <p class="view-desc">Log of all completed sessions across all clients.</p>
-      
-      <div id="global-history-list" class="stack-list">
-        <!-- Injected via JS -->
-      </div>
-    </section>
-`,
-  );
-}
-
-export function renderGlobalHistory({ state, t, openSessionFromHistory }) {
-  const container = document.getElementById("global-history-list");
-  if (!container) return;
-  container.innerHTML = "";
-
-  const sorted = [...state.history].sort((a, b) => new Date(b.date) - new Date(a.date));
-
-  if (sorted.length === 0) {
-    container.innerHTML = `<div class="card glassmorphic text-center text-muted">${t("no_workouts_history")}</div>`;
-    return;
-  }
-
-  renderHistoryItems({ historyList: sorted, container, t, openSessionFromHistory });
-}
 
 function resolveFeedbackIconClass(tag) {
   if (tag.includes("Too Easy") || tag.includes("Increase Load")) {

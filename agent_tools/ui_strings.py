@@ -49,8 +49,9 @@ SRC = REPO_ROOT / "src"
 # the session form's placeholders and the signup review title (editSessionView.js,
 # signupReviewDialog.js), then every view's grabber label, then the header's close and version
 # labels (applicationHeader.js), then the intake page's language buttons, now built from the
-# registry's own language names (intakeView.js).
-BASELINE = 123
+# registry's own language names (intakeView.js), then the global History view's title and
+# description, removed with the view (historyView.js).
+BASELINE = 121
 
 # Upstream files and the dictionaries themselves: the first are not ours to translate, the second
 # ARE the translations.

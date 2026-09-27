@@ -51,8 +51,6 @@ export const de = {
   exercises_title: "Übungen",
   placeholder_search_exercises: "Übungen suchen...",
   btn_add_exercise: "Neue Übung",
-  history_title: "Gesamter Trainingsverlauf",
-  no_workouts_history: "Im gesamten Verlauf sind noch keine Trainings aufgezeichnet.",
   live_tracking_clipboard: "Klemmbrett für das laufende Training",
   active_session: "Laufendes Training",
   add_from_catalog: "Aus dem Katalog hinzufügen",
@@ -329,7 +327,6 @@ export const de = {
   library_import_refused_other_format:
     "Diese Datei gibt an, {detail} zu sein, und das ist keine Übungsbibliothek.",
   library_import_refused_no_exercises: "Diese Bibliothek enthält keine Übungen und keine Zirkel.",
-  history_desc: "Alle abgeschlossenen Trainings aller Kunden.",
   sessions_schedule: "Trainings",
   btn_sync_calendar: "Kalender synchronisieren",
   btn_sync_data: "Daten synchronisieren",

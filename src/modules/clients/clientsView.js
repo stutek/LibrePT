@@ -332,8 +332,8 @@ export function renderClientWorkoutHistory({ client, state, t, openSessionFromHi
   if (!container) return;
   container.innerHTML = "";
 
-  // Excludes isPlanning drafts (see the Global History view for those, historyView.js) — this
-  // widget is the client's actual workout history, not their in-progress plans.
+  // Excludes isPlanning drafts — this widget is the client's actual workout history, not their
+  // in-progress plans, which the notification area offers to resume.
   const clientHistory = state.history
     .filter((log) => log.clientId === client.id && !log.isPlanning)
     .sort((a, b) => new Date(b.date) - new Date(a.date));

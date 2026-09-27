@@ -25,11 +25,12 @@ def _nav(page, path):
 def test_reopening_a_structured_record_rebuilds_rests_and_modality(page, local_server):
     page.goto(local_server)
     page.wait_for_timeout(500)
-    _nav(page, f"{_base(page)}/history")
+    # History is shown on the client's page; c1a9f0e2's seeded record logged an Assault Bike.
+    _nav(page, f"{_base(page)}/clients/c1a9f0e2")
 
     # Open the structured record (the one that logged an Assault Bike).
     page.locator(
-        "#global-history-list .history-card", has_text="Assault Bike"
+        "#client-history-list .history-card", has_text="Assault Bike"
     ).first.click()
     page.wait_for_timeout(400)
 

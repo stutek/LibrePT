@@ -28,7 +28,6 @@ import {
   releaseScreenWakeLock,
   requestScreenWakeLock as requestScreenWakeLockHelper,
 } from "../modules/common/wakeLock.js";
-import { renderGlobalHistory } from "../modules/history/historyView.js";
 import { renderRoutinesList } from "../modules/plans/plansView.js";
 import { renderClipboardBar } from "../modules/session/sessionBar.js";
 import { saveActiveSessionToCache } from "./activeSessionCache.js";
@@ -250,7 +249,6 @@ export function deleteScheduledSession() {
   cancelWorkoutSession();
 
   appDeps.renderSessions?.();
-  renderGlobalHistory({ state, t: appDeps.t });
   renderNotificationArea();
 }
 
@@ -345,9 +343,10 @@ export function finishWorkoutSession() {
 
   renderClientsList({ state, t });
   renderRoutinesList({ state, t });
-  renderGlobalHistory({ state, t });
 
-  if (navigateToPath) navigateToPath("/history");
+  // Back to the sessions list, where the finished session's card is. It used to open the history of
+  // every client, which is gone: history is shown only on a client's page.
+  if (navigateToPath) navigateToPath("/");
 }
 
 export function recoverActiveSession() {

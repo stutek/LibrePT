@@ -148,10 +148,6 @@ import {
   renderExercisesList as exercisesViewRender,
   renderExercisesViewShell,
 } from "./modules/exercises/exercisesView.js";
-import {
-  renderGlobalHistory as historyViewRender,
-  renderHistoryViewShell,
-} from "./modules/history/historyView.js";
 import { isIntakeLocation, resolveIntakeLang } from "./modules/intake/intakeRoute.js";
 import { browserSignupPlatform, storySignupPlatform } from "./modules/intake/signupDelivery.js";
 import {
@@ -499,7 +495,6 @@ async function init() {
   registerShellRender("client-detail-view", renderClientDetailViewShell);
   registerShellRender("routines-view", renderRoutinesViewShell);
   registerShellRender("exercises-view", renderExercisesViewShell);
-  registerShellRender("history-view", renderHistoryViewShell);
   registerShellRender("workout-setup-view", renderWorkoutSetupViewShell);
   registerShellRender("error-view", renderErrorViewShell);
   runShellRenders();
@@ -579,7 +574,6 @@ async function init() {
     renderClientsList,
     renderRoutinesList,
     renderExercisesList,
-    renderGlobalHistory,
     populateDropdownSelectors,
     renderSessions,
     openEncryptedFileReader,
@@ -811,9 +805,6 @@ function renderExercisesList(filterQuery, categoryFilter) {
   // search box and chip, instead of this wrapper resetting them to "" / "All".
   exercisesViewRender({ state: getState(), t, filterQuery, categoryFilter });
 }
-function renderGlobalHistory() {
-  historyViewRender({ state: getState(), t, openSessionFromHistory });
-}
 
 /**
  * Repaint every view that reads the database, after the whole database was replaced under them
@@ -830,7 +821,6 @@ function renderEverything() {
   renderClientsList();
   renderRoutinesList();
   renderExercisesList();
-  renderGlobalHistory();
   renderPendingPlanAdjustments();
   renderSessions();
   renderNotificationArea();

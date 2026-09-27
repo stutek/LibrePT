@@ -92,8 +92,6 @@ export function applyStaticDOMMappings(tDict) {
     "#exercises-filter-label": "muscle",
 
     // History View
-    "#view-history .view-header h2": "history_title",
-    "#view-history .view-desc": "history_desc",
 
     // Active session clipboard overlay
     "#btn-add-exercise-to-session": "btn_inject_exercise",

@@ -77,7 +77,8 @@ def test_starting_late_offers_the_schedule_and_never_a_negative_clock(
     # Finishing asks twice over native confirms (early finish, and no sets logged).
     page.on("dialog", lambda d: d.accept())
     page.click("#btn-finish-session")
-    page.wait_for_selector("#view-history.active")
+    # Finishing lands on the sessions list, where the finished session's card is.
+    page.wait_for_selector("#view-clients.active")
     page.evaluate(
         """async () => {
             const queue = await import(new URL('data/writeQueue.js', document.baseURI).href);

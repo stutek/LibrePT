@@ -144,7 +144,7 @@ route classes, specificity ordering, and the invariants a new route must respect
 | `/clients/{clientId}` | a client detail page |
 | `/clients` | the Client Directory (its own view since TODO 4.8; the homepage keeps only the session list) |
 | `/adjustments` | the Pending Plan Adjustments deck (its own view since TODO 4.8) |
-| `/routines`, `/exercises`, `/history` | the primary list views |
+| `/routines`, `/exercises` | the primary list views |
 
 **Dialog routes.** A dialog is a state a reload should restore, so the globally-reachable ones are
 addressable too. Opening one **pushes** a history entry, which makes **Back close it** — the dismiss

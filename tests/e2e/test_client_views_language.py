@@ -87,10 +87,10 @@ def test_the_client_detail_view_is_in_slovenian_when_slovenian_is_chosen(
 
 def test_the_view_grabbers_are_labelled_in_slovenian(page, local_server):
     """What a screen reader says for the bar at the top of a view (TODO §38.20)."""
-    page.goto(local_server + "history?lang=sl")
-    expect(page.locator("#view-history")).to_be_visible()
+    page.goto(local_server + "routines?lang=sl")
+    expect(page.locator("#view-routines")).to_be_visible()
     home, clipboard = _slovenian(page, ["view_grabber_home", "view_grabber_clipboard"])
-    expect(page.locator("#view-history .view-grabber")).to_have_attribute(
+    expect(page.locator("#view-routines .view-grabber")).to_have_attribute(
         "aria-label", home
     )
 

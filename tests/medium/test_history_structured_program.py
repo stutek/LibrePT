@@ -5,8 +5,9 @@
 # chips, per-modality metrics, and a prescribed-but-skipped movement kept and greyed rather than
 # dropped.
 #
-# Mounted as one view over the same DEFAULT_HISTORY seed the real app boots with, so the structure
-# under test is production's, not a fixture that could drift from it. The re-open round-trip (which
+# Mounted as the client's page — the one place history is shown — over the same DEFAULT_HISTORY seed
+# the real app boots with, so the structure under test is production's, not a fixture that could
+# drift from it. Client c1a9f0e2 is the one whose seeded record holds the structured program. The re-open round-trip (which
 # rebuilds a live plan through the real controller) stays in tests/e2e/, and the pure
 # buildProgramSnapshot model is in tests/unit_js/domain/sessionItemRecord.test.mjs.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
@@ -19,24 +20,32 @@ pytestmark = pytest.mark.clean_start
 
 STUB = view_stub(
     imports="""
-import { renderHistoryViewShell, renderGlobalHistory } from './modules/history/historyView.js';
+import {
+  renderClientDetailViewShell,
+  renderClientWorkoutHistory,
+} from './modules/clients/clientsView.js';
 import { DEFAULT_HISTORY } from './data/index.js';
 """,
-    view_id="history",
+    view_id="client-detail",
     body="""
 const state = { lang: 'en', history: structuredClone(DEFAULT_HISTORY) };
 
-renderHistoryViewShell();
-renderGlobalHistory({ state, t, openSessionFromHistory: noop });
+renderClientDetailViewShell();
+renderClientWorkoutHistory({
+  client: { id: 'c1a9f0e2' },
+  state,
+  t,
+  openSessionFromHistory: noop,
+});
 """,
 )
 
 
 def test_history_renders_the_structured_program(page, local_server):
     load_with_stub(page, local_server, STUB)
-    page.wait_for_selector("#view-history.active")
+    page.wait_for_selector("#view-client-detail.active")
 
-    log = page.locator("#global-history-list")
+    log = page.locator("#client-history-list")
     # The seeded structured record preserves circuit grouping and first-class rests…
     assert log.locator(".history-circuit").count() >= 1, (
         "a circuit group should render in history"

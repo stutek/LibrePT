@@ -36,8 +36,6 @@ export const en = {
   exercises_title: "Exercise Library",
   placeholder_search_exercises: "Search exercises...",
   btn_add_exercise: "Add Exercise",
-  history_title: "Global Training History",
-  no_workouts_history: "No logged workouts in global history.",
   live_tracking_clipboard: "Live Tracking Clipboard",
   active_session: "Active session",
   add_from_catalog: "Add from catalog",
@@ -309,7 +307,6 @@ export const en = {
   library_import_refused_other_format:
     "This file says it is {detail}, which is not an exercise library.",
   library_import_refused_no_exercises: "This library lists no exercises and no circuits.",
-  history_desc: "Log of all completed sessions across all clients.",
   sessions_schedule: "Sessions",
   btn_sync_calendar: "Sync Calendar",
   btn_sync_data: "Sync Data",

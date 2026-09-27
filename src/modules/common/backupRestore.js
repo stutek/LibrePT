@@ -8,7 +8,6 @@
 //   renderClientsList(),
 //   renderRoutinesList(),
 //   renderExercisesList(),
-//   renderGlobalHistory(),
 //   populateDropdownSelectors(),
 //   renderSessions(),   // for the dialog's Sync Data button, which reseeds state.sessions
 //   openEncryptedFileReader(),   // the dialog's "Open an encrypted file" card
@@ -379,7 +378,6 @@ export function setupBackupRestore() {
       deps.renderClientsList();
       deps.renderRoutinesList();
       deps.renderExercisesList();
-      deps.renderGlobalHistory();
       deps.populateDropdownSelectors();
     });
   }
@@ -530,7 +528,6 @@ export function setupBackupRestore() {
             deps.renderClientsList();
             deps.renderRoutinesList();
             deps.renderExercisesList();
-            deps.renderGlobalHistory();
             deps.populateDropdownSelectors();
 
             if (importStatus) {

@@ -36,6 +36,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   *Connect cloud storage* and *Export data as a file* were two menu rows for this same dialog.
 - ***Add a client from their own details*** is under the client directory's title.
 - **Pending review** has no menu row. Its status message in the notification area leads to it.
+- **History is shown only on a client's page.** The view that listed every client's sessions
+  together is gone, and finishing a session now returns to the sessions list.
 
 ### Fixed
 
