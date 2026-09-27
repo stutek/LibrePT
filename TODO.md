@@ -7212,3 +7212,101 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#84-x-a-session-
 ## 85. [x] BUG — the rendered landing page showed a developer comment as text — fixed 2026-09-27
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#85-x-bug--the-rendered-landing-page-showed-a-developer-comment-as-text--fixed-2026-09-27).
+
+## 86. [Brainstorm] Kaj trener potrebuje za posel in česa aplikacija ne dela
+
+Nastalo 2026-09-27 iz istega dela kot §80: 84 ciklov raziskovalnega preizkušanja objavljene
+aplikacije (`0625bd6`), plus branje seznama poti (`routeTable.js`) in podatkovnega modela. §80 gleda,
+ali kar aplikacija dela, dela prav. Ta razdelek gleda drugo vprašanje: **kaj mora trener opraviti,
+da posel teče, in česa aplikacija ne prevzame.**
+
+**Kaj je izmerjeno in kaj ne.** Izmerjeno je, kaj aplikacija ima: v `src/` ni nobene kode za denar,
+račune, cene ali plačila (iskano po `invoice`, `payment`, `price`, `€`, `plačil`), ni zapisa o
+prisotnosti (`cancelled` obstaja samo kot »ta torek odpade«, ne kot »stranka ni prišla«) in ni
+nobenega seštevanja čez zapise. **Ocene vrednosti niso izmerjene.** Sestavljene so iz mehanike
+opravila (koliko minut vzame, kolikokrat na mesec) pod predpostavkami spodaj. Številke, ki jih Simon
+pozna iz prakse — cena ure, delež neprihodov, koliko strank plača z zamudo — naj popravi; ocene so
+napisane tako, da se popravijo z eno številko.
+
+**Predpostavke za vse ocene:** slovenski samostojni trener, 20 rednih strank, približno 90 vadb na
+mesec (4–5 na dan), večina ena na ena in dve manjši skupini, brez recepcije, cena ure 25 €.
+
+### 86.1 Pridobivanje strank
+
+| Opravilo                                   | Kaj aplikacija dela danes                                          | Kje je že prevzeto | Ocena vrednosti, če to prevzame program |
+| :----------------------------------------- | :----------------------------------------------------------------- | :----------------- | :-------------------------------------- |
+| Biti najden (splet, Instagram, Google)     | nič                                                                 | —                  | zunaj aplikacije; tu se ne splača      |
+| Sprejem podatkov nove stranke              | **dela**: stran `/intake`, stranka izpolni na svojem telefonu       | §26, izdelano      | prihranjenih ~10 min na stranko         |
+| Sled od prvega stika do prve vadbe         | nič — stranka je v imeniku ali je ni                                | nikjer             | ~1 h/mesec, večja pa je izgubljena stranka, ki se je pozabila |
+| Brezplačna uvodna vadba in njen izid       | nič                                                                 | nikjer             | majhna; to je opomnik, ne program       |
+
+### 86.2 Denar
+
+| Opravilo                                        | Kaj aplikacija dela danes | Kje je že prevzeto        | Ocena vrednosti |
+| :---------------------------------------------- | :------------------------ | :------------------------ | :-------------- |
+| Cenik in paketi (npr. karta za 10 vadb)         | nič                       | nikjer                    | ~0,7 h/mesec vodenja evidence; večja je izguba: ena nezaračunana vadba na deset strank na mesec je 50 € |
+| Stanje na paketu (koliko vadb je še ostalo)     | nič                       | nikjer                    | isto kot zgoraj; brez tega šteje stranka sama, trener pa ji verjame |
+| Izdaja računa                                   | nič                       | **ProPT** (§68)           | ~1,7 h/mesec (20 računov po 5 min) |
+| Davčno potrjevanje računov za gotovino          | nič                       | ni razčiščeno niti v §68  | zakonska obveznost, ne udobje; brez nje gotovina ni legalna |
+| Opomniki za neplačano                           | nič                       | nikjer                    | ~0,5 h/mesec, denar pa pride prej |
+| Pregled prihodka po mesecu, stranki in uri      | nič                       | nikjer                    | ~0,5 h/mesec ročnega seštevanja; brez tega trener ne ve, katera stranka se izplača |
+
+### 86.3 Termini
+
+| Opravilo                                     | Kaj aplikacija dela danes                                             | Kje je že prevzeto | Ocena vrednosti |
+| :------------------------------------------- | :-------------------------------------------------------------------- | :----------------- | :-------------- |
+| Dogovor za termin                            | trener vpiše sam; vabilo vpraša samo »prideš / ne prideš«             | ProPT (samopostrežna rezervacija) | ~3 h/mesec (90 vadb × 2 min pisanja sporočil) |
+| Opomnik dan prej                             | nič                                                                    | nikjer             | ~1,5 h/mesec; in en neprihod manj na mesec je 25 € |
+| Odpoved in pravilo o pozni odpovedi          | odpoved večera obstaja, zapisa o tem, kdo je odpovedal in kdaj, ni     | nikjer             | brez zapisa je pravilo neizvedljivo; 1–2 pozni odpovedi na mesec sta 25–50 € |
+| Čakalna vrsta za polno skupino               | zasedenost je vidna, vrste ni                                          | nikjer             | majhna pri 20 strankah, večja pri skupinah |
+| Uskladitev z lastnim koledarjem              | izvoz vabila v koledar (datoteka), sinhronizacija urnika prek oblaka   | delno izdelano     | ~0,5 h/mesec |
+
+### 86.4 Izvedba in stranka
+
+| Opravilo                                  | Kaj aplikacija dela danes                                   | Kje je že prevzeto | Ocena vrednosti |
+| :---------------------------------------- | :---------------------------------------------------------- | :----------------- | :-------------- |
+| Načrt vadbe in beležka med vadbo          | **dela; to je jedro aplikacije**                             | izdelano           | to je razlog, da aplikacija obstaja |
+| Zapis prisotnosti (prišla / ni prišla)    | nič — trening je zaključen ali ne                            | nikjer             | pogoj za vse zgoraj: obračun paketa, pozne odpovedi, opomnike |
+| Meritve in napredek skozi čas             | teža stranke je polje; zgodovine meritev ni                  | §78, odprto        | ~1,1 h/mesec poročil, večja pa je zadržana stranka |
+| Poročilo stranki o napredku               | nič                                                          | nikjer             | ista postavka kot meritve |
+| Domača naloga med vadbama                 | nič                                                          | nikjer             | majhna, dokler ni meritev |
+
+### 86.5 Zadrževanje strank in vodenje posla
+
+| Opravilo                                        | Kaj aplikacija dela danes | Kje je že prevzeto | Ocena vrednosti |
+| :---------------------------------------------- | :------------------------ | :----------------- | :-------------- |
+| Opozorilo na stranko, ki je ni bilo tri tedne   | nič                       | nikjer             | ena vrnjena stranka na mesec je 100 € (štiri vadbe) |
+| Zbiranje mnenj in priporočil                    | nič                       | nikjer             | posredna; vpliva na pridobivanje |
+| Izkoriščenost (koliko ur od razpoložljivih)     | nič                       | nikjer             | ~0,5 h/mesec; odloča o ceni in urniku |
+| Varnostna kopija in selitev na nov telefon      | **dela**: izvoz, uvoz, oblak | izdelano        | izdelano |
+| Več trenerjev, več telovadnic                   | nič                       | **EnterprisePT**   | zunaj te aplikacije |
+| Privolitve in pravice strank po GDPR            | **dela**: privolitev z datumom, izvoz, izbris | §27, izdelano | izdelano (napake v podrobnostih so v §80.30, §80.42, §80.43) |
+
+### 86.6 Seštevek in kaj iz tega sledi
+
+Pod predpostavkami zgoraj aplikacija danes pokriva **izvedbo vadbe in podatke o strankah**, ne pa
+**denarja, prisotnosti in stika s stranko med vadbama**. Seštevek nepokritega je približno **8 do 10
+ur pisarniškega dela na mesec** in **100 do 200 € na mesec, ki odtečejo** (nezaračunane vadbe, pozne
+odpovedi, neprihodi, stranke, ki tiho odidejo). Za trenerja, ki dela 90 ur na mesec, je to desetina
+delovnega časa in približno ena delovna ura tedensko, ki jo ne zaračuna nikomur.
+
+**Tri stvari, ki niso prevzete nikjer in so največ vredne:**
+
+1. **Zapis prisotnosti.** Sam po sebi je majhen (prišla / ni prišla / pozno odpovedala), brez njega pa
+   ni ne obračuna paketa, ne pravila o pozni odpovedi, ne opozorila o stranki, ki je ni. Vse tri
+   postavke zgoraj stojijo na njem. Aplikacija ima že vse, kar za to potrebuje: trening, udeležence in
+   zaključek.
+2. **Paket in stanje na njem.** Ne zahteva ne strežnika ne plačila v aplikaciji — samo števec ob
+   stranki in odštevanje ob zaključeni vadbi. Zaračunavanje ostane v ProPT, evidenca pa ne rabi biti
+   tam.
+3. **Opomnik dan prej.** Brez strežnika ga ni mogoče poslati samodejno, mogoče pa je narediti
+   »pripravljeno sporočilo za jutrišnje stranke« — en zaslon, ki trenerju pripravi besedila, in on
+   jih pošlje. To je ista rešitev, ki jo aplikacija že uporablja za vabila.
+
+**Kaj tu namenoma ne sodi.** Izdaja računov in samopostrežna rezervacija sta že prevzeti v ProPT
+(§68), zato tu nista predlagani. Davčno potrjevanje računov ni prevzeto nikjer in ni tehnično
+vprašanje — če ProPT izdaja račune za gotovino, brez tega ne sme.
+
+**Odprto vprašanje za Simona:** ali sta prisotnost in paket še »brezplačna aplikacija« ali sta že
+ProPT. Moja presoja: prisotnost sodi v brezplačno (brez nje je zapis o vadbi nepopoln), paket pa je
+mejni primer, ker je prvi korak k denarju. Odločitev je tvoja; napisana naj bo v §68, ne tukaj.
