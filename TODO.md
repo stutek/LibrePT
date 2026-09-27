@@ -6217,6 +6217,25 @@ prav tam se delo izgubi brez besede. P2, ker ga ne zadene vsak dan in ker trenin
 **Predlog in preverjanje:** zastarelost meriti od zadnje spremembe odprtega treninga, ne samo od konca
 termina. Preizkus naj uredi načrt treninga, ki je minil pred tremi urami, osveži in zahteva spremembo.
 
+### 80.54 [ ] P3 — Filtri kataloga vaj so v slovenščini angleški: »Chest«, »Barbell«, »Bodyweight«
+
+**Scenarij in koraki:** `?lang=sl` → trening → »Uredi načrt« → »Dodaj iz kataloga«.
+
+**Opaženo:** vrstici filtrov imata slovenski oznaki, gumbi v njih pa so angleški: »All, Chest, Back,
+Legs, Shoulders, Arms, Core, Recovery, Cardio« in »Barbell, Dumbbell, Cable, Machine, Band,
+Bodyweight«. Našel podagent v dnevu trenerja 03 (§88).
+
+**Vzrok, potrjen v kodi na `main`:** [exercisePicker.js](src/modules/exercises/exercisePicker.js) da
+vrstici izvora prevedene besede (`sources.words`), vrsticama mišic in opreme pa ne, zato gumb izpiše
+vrednost `MUSCLE_GROUPS` oziroma `EQUIPMENT` dobesedno. Enako angleške so možnosti skupine v obrazcu za
+vajo ([exerciseFormsController.js](src/controllers/exerciseFormsController.js), `<option value="Chest">Chest</option>`).
+
+**Težava in vpliv:** besedilo vmesnika, ne ime vaje (imena so namerno angleška). Trener v slovenščini
+filtrira po tujih besedah. P3.
+
+**Predlog in preverjanje:** obe vrstici dobita besede iz slovarja, kot jih ima vrstica izvora; vrednost
+filtra ostane angleška. Preizkus naj v slovenščini zahteva, da noben gumb filtra ni angleški.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
@@ -6521,6 +6540,8 @@ brez potrditve (§86.4).
 Dan 02 (trener pol v studiu, pol online, šest individualnih treningov): meritev ob prvem obisku
 ni kam vpisati, 2 min na stranko v zvezek (§86.4); paket osmih treningov po prvem obisku vodi ločeno
 (§86.2).
+Dan 03 (trenerka ob drugi službi, najeta dvorana v Celju, devet strank): domača naloga gre v isto
+polje kot zdravstvene opombe, zato se tedenska navodila mešajo s trajnimi (§86.4).
 
 ## 87. [ ] Prihodnja shema ne nosi polja glasovne opombe
 
@@ -6599,7 +6620,8 @@ samo, česar ni nikjer drugje, in presoja, ali se avtomatizacija izplača.
 
 Dan 01: trenerka je za krožno vadbo iskala »kettlebell«, »burpee«, »box jump« — nič od tega ni med
 48 vajami, in prazen seznam reče samo »No movements match this filter.«. Dan 02 potrdi z vajami brez opreme za
-online trening: navadnega počepa s telesno težo, burpeeja in kettlebell swinga ni. Aplikacija ima uvoz večjih
+online trening: navadnega počepa s telesno težo, burpeeja in kettlebell swinga ni. Dan 03: za nosečo stranko ni stenskega
+počepa ne vaje za medenično dno. Aplikacija ima uvoz večjih
 katalogov (`libraryImportDialog.js`) in dovoli vajo z lastnim imenom, a s praznega iskanja ne vodi do
 nobenega. Trener, ki vaje ne najde, jo zapiše na papir. **Vrednost:** vsak nov trener naleti na to pri
 prvem načrtu; vsaka vaja, zapisana mimo aplikacije, nima zgodovine. **Cena:** majhna — prazen seznam
@@ -6618,8 +6640,14 @@ dodajanje samo z imenom, ostali podatki pozneje. Paziti na privolitev po GDPR, k
 
 Dan 01: ko jo nadomesti kolegica, ji načrt pošlje kot sporočilo. **Vrednost:** redka (dopust,
 bolezen). **Cena:** srednja, če naj ga kolegica odpre v svoji aplikaciji; majhna, če je dovolj besedilo
-načrta za deljenje. Več trenerjev na enem računu je EnterprisePT. **Presoja: ne izplača se** za zdaj —
-besedilo za deljenje bi pokrilo večino, a pogostost je nizka.
+načrta za deljenje. Več trenerjev na enem računu je EnterprisePT. **Presoja (dan 01): ne izplača se** —
+pogostost je nizka.
+
+Dan 03 isto pokaže z druge strani: trenerka isti večer prevzame stranko bolnega kolega. Dogovor in
+sporočilo po treningu gresta po SMS-u, pojasnilo o nadomeščanju pa v polje za zdravstvene opombe. Dva
+od treh dni imata nadomeščanje, zato je pogostost višja, kot je predvidevala prva presoja. **Nova
+presoja: izplača se majhen del** — besedilo načrta in zapisa treninga za deljenje (»Deli kot besedilo«),
+brez drugega trenerja v aplikaciji; več trenerjev ostaja EnterprisePT.
 
 ### 88.4 [ ] Trening, vpisan za nazaj, aplikacija imenuje »Zamuja«
 
@@ -6629,4 +6657,20 @@ Poti »to se je zgodilo, zapiši« ni: trening je treba začeti in zaključiti, 
 **Vrednost:** vsak trener, ki kdaj vodi trening brez telefona, in to je pogosto (ocena trenerja).
 **Cena:** majhna do srednja — pri minulem, nezačetem treningu ponuditi »Zabeleži kot opravljen« z
 izbranim časom, namesto odštevanja zamude. **Presoja: izplača se**, najprej popravek §80.53.
+
+### 88.5 [ ] Naslednji teden se sestavi trening za treningom
+
+Dan 03: za prihodnji teden je trenerka vsak trening ustvarila posebej (ime, kraj, datum, čas, stranka,
+vaje). Ni pogleda na teden in ne kopije treninga na drug datum; »Ponovi vsak teden« pomaga le, ko je
+vsebina vsak teden enaka, »Kopiraj ta načrt na …« pa kopira načrt k drugemu udeležencu, ne na drug dan.
+Ocena trenerke: 10–15 min na teden več kot na papirju. **Vrednost:** vsak teden, pri vsakem trenerju, čigar
+programi napredujejo. **Cena:** majhna do srednja — »Kopiraj trening na datum«, z načrti udeležencev.
+**Presoja: izplača se.**
+
+### 88.6 [ ] Okno za vabila se odpre po vsakem shranjenem treningu
+
+Dan 03: ob sestavljanju petih treningov zapored se je po vsakem odprlo okno »Pošlji vabila« in ga je
+bilo treba zapreti, preden je lahko dodala vaje. **Vrednost:** majhna, a ob vsakem načrtovanju tedna.
+**Cena:** majhna. **Presoja: čaka na Simona** — samodejno odpiranje je bila odločitev (vabilo takoj po
+dodanem udeležencu); vprašanje je, ali ob načrtovanju vnaprej zadošča obvestilo »vabila niso poslana«.
 
