@@ -6370,6 +6370,24 @@ dvojnika lahko prizadelo načrtovani termin.
 zahtevati tri kartice, po eno na vsako nedeljo, tudi po ponovnem nalaganju. Preverjeno
 samo prek vmesnika, brez branja kode; vzrok ni ugotovljen.
 
+### 80.59 [ ] P2 — Neveljavni datum se brez pojasnila zamenja z drugim dnevom
+
+**Scenarij in koraki:** trener pri novem treningu »Kontrola datuma« vpiše 2027-02-29,
+09:00–09:45, Studio, izbere testno stranko in shrani. V ločenem osnutku s tipkovnico
+vpiše 2027-04-31, pritisne Tab, nato enako preveri 2028-02-29.
+
+**Opaženo:** prvi datum se spremeni v 2027-02-28 in trening je na seznamu na tem dnevu.
+31. april se ob zapustitvi polja spremeni v 30. april, brez validacijskega sporočila.
+Veljavni prestopni datum 2028-02-29 ostane pravilen. Primerjalni osnutek je zavržen.
+Objavljena `0625bd6`, sl, Chrome CDP, 390 × 844; brez zabeleženih napak brskalnika.
+
+**Težava in vpliv:** trenerjeva tipkarska napaka postane drug veljaven termin brez
+pojasnila. Spremembo lahko spregleda in nato stranko povabi na napačen dan.
+
+**Predlog in preverjanje:** neveljavni dan označiti in zahtevati popravek ali vidno
+pojasniti predlagano spremembo, preden se termin shrani. Veljavni 29. februar naj
+ostane nespremenjen. Gre za opažanje vmesnika in predlog izboljšave; kode nismo brali.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
