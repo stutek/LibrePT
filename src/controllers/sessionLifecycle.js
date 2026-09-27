@@ -122,7 +122,7 @@ export function startWorkoutSession(clientRoutines, sessionMeta = null, deps = {
       routineId: cr.routineId,
       routines: state.routines,
       exercises: libraryExercises(state),
-      emptyPlanName: t("custom_empty_plan") || "Custom / Empty Plan",
+      emptyPlanName: t("custom_empty_plan") || "Empty plan, no routine",
     });
     // An IMPORTED programme arrives as plan items rather than as a routine, so it
     // replaces what the routine would have supplied. Handled here, at the one place a plan is built,

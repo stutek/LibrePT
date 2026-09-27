@@ -58,7 +58,7 @@ function planFor(entry, { state, t }) {
       routineId: entry.session.routineId,
       routines: state.routines || [],
       exercises: libraryExercises(state),
-      emptyPlanName: t("custom_empty_plan") || "Custom / Empty Plan",
+      emptyPlanName: t("custom_empty_plan") || "Empty plan, no routine",
     });
     return {
       items: clientState.exercises,

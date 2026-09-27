@@ -78,6 +78,18 @@ def test_a_typed_name_finds_the_client_and_a_tap_books_them(page, local_server):
     expect(page.locator(MATCHES)).to_be_hidden()
 
 
+def test_the_picker_names_a_routine_by_one_name(page, local_server):
+    """The picker opened on "Select Exercise" although it lists routines, and its screen-reader
+    name said "Programme": one thing had several names on one screen. It is a routine."""
+    load_with_stub(page, local_server, STUB)
+    page.fill("#setup-participant-search", "Jane")
+    page.locator(f"{MATCHES} .participant-match").first.click()
+
+    select = page.locator(ROWS).first.locator("select")
+    assert select.locator("option").first.inner_text() == "Choose a routine"
+    assert select.get_attribute("aria-label") == "Routine for this client"
+
+
 def test_a_name_nobody_has_says_so_rather_than_showing_nothing(page, local_server):
     load_with_stub(page, local_server, STUB)
     page.fill("#setup-participant-search", "Zzz")

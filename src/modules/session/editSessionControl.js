@@ -853,12 +853,12 @@ function buildParticipantRow(client, ctx) {
 
   const select = document.createElement("select");
   select.className = "form-control select-routine-dropdown";
-  select.setAttribute("aria-label", t("select_routine_for") || "Programme");
+  select.setAttribute("aria-label", t("select_routine_for"));
 
-  select.innerHTML = `<option value="" disabled>${t("select_exercise")}</option>`;
+  select.innerHTML = `<option value="" disabled>${t("select_routine")}</option>`;
   const emptyOpt = document.createElement("option");
   emptyOpt.value = "empty_plan";
-  emptyOpt.textContent = t("custom_empty_plan") || "Custom / Empty Plan";
+  emptyOpt.textContent = t("custom_empty_plan") || "Empty plan, no routine";
   select.appendChild(emptyOpt);
 
   for (const r of state.routines) {

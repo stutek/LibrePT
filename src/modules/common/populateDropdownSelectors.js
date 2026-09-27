@@ -8,7 +8,7 @@ import { libraryExercises } from "../../data/exerciseLibrary.js";
 export function populateDropdownSelectors({ state, t }) {
   const routineSelect = document.getElementById("setup-select-routine");
   if (routineSelect && state.routines) {
-    routineSelect.innerHTML = `<option value="" disabled selected>${t("select_exercise")}</option>`;
+    routineSelect.innerHTML = `<option value="" disabled selected>${t("select_routine")}</option>`;
     for (const r of state.routines.slice().sort((a, b) => a.name.localeCompare(b.name))) {
       const opt = document.createElement("option");
       opt.value = r.id;
