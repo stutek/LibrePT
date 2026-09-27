@@ -528,6 +528,7 @@ export const de = {
   rsvp_send_email: "Als E-Mail senden",
   rsvp_send_hint:
     "Das öffnet deine eigene Nachrichten-App mit der fertigen Antwort — nichts wird gesendet, bevor du selbst sendest.",
+  rsvp_no_channel: "Sag deinem Trainer deine Antwort auf dem Weg, auf dem ihr sonst Kontakt habt.",
   rsvp_email_subject: "Zu unserem Training",
   rsvp_message_yes: "Ja, ich komme zu",
   rsvp_message_maybe: "Ich weiß noch nicht, ob ich komme zu",

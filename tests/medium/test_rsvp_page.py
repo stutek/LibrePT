@@ -36,7 +36,7 @@ const invite = {
   durationMinutes: 60,
   location: 'Studio 2',
   organizerName: 'Sam Ray',
-  organizerEmail: 'pt@example.com',
+  organizerEmail: window.__organizerEmail === null ? undefined : 'pt@example.com',
   organizerPhone: window.__organizerPhone === null ? undefined : '+386 41 234 567',
 };
 
@@ -54,9 +54,10 @@ appBoot.bootRsvpReply({
 """
 
 
-def _mount(page, local_server, with_phone=True):
+def _mount(page, local_server, with_phone=True, with_email=True):
     page.add_init_script(
         f"window.__organizerPhone = {json.dumps(None if not with_phone else '+386 41 234 567')};"
+        f"window.__organizerEmail = {json.dumps(None if not with_email else 'pt@example.com')};"
     )
     load_with_stub(page, local_server, RSVP_STUB)
     expect(page.locator("#view-rsvp")).to_be_visible()
@@ -133,6 +134,18 @@ def test_the_time_is_24_hour_and_the_date_is_iso_whatever_the_phone_says(
     assert "AM" not in body and "PM" not in body, body
 
 
+def test_an_invite_with_no_way_to_reply_says_what_to_do(page, local_server):
+    """With neither a number nor an address on the invite, both send buttons stayed hidden under a line
+    telling the client to send their answer: the reply could not leave, and nobody learned it."""
+    _mount(page, local_server, with_phone=False, with_email=False)
+
+    page.click("#rsvp-yes")
+
+    expect(page.locator("#rsvp-send-sms")).to_be_hidden()
+    expect(page.locator("#rsvp-send-email")).to_be_hidden()
+    expect(page.locator("#view-rsvp")).to_contain_text(
+        "Tell your trainer your answer the way you usually contact them."
+    )
 
 
 def test_a_channel_is_offered_only_after_an_answer_is_chosen(page, local_server):

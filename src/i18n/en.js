@@ -522,6 +522,7 @@ export const en = {
   rsvp_send_email: "Send as an email",
   rsvp_send_hint:
     "This opens your own messaging app with the reply ready — nothing is sent until you send it.",
+  rsvp_no_channel: "Tell your trainer your answer the way you usually contact them.",
   rsvp_email_subject: "About our session",
   rsvp_message_yes: "Yes, I'll be at",
   rsvp_message_maybe: "I'm not sure yet about",

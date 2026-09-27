@@ -507,6 +507,7 @@ export const sl = {
   rsvp_send_email: "Pošlji kot e-pošto",
   rsvp_send_hint:
     "Odpre se tvoja aplikacija za sporočila s pripravljenim odgovorom — nič ni poslano, dokler ne pošlješ sam.",
+  rsvp_no_channel: "Odgovor sporoči trenerju tako, kot sta običajno v stiku.",
   rsvp_email_subject: "Glede našega treninga",
   rsvp_message_yes: "Da, pridem na",
   rsvp_message_maybe: "Še ne vem glede",

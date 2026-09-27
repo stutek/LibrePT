@@ -190,6 +190,9 @@ export function setupRsvpReply({ encodedEvent, t, appUrl, platform, lang = "en" 
     // SMS only when the invite told us a number: a dead button is worse than one route that works.
     $id("rsvp-send-sms").classList.toggle("hidden", !invite.organizerPhone);
     $id("rsvp-send-email").classList.toggle("hidden", !invite.organizerEmail);
+    // With neither, no button can appear, so the hint says how to answer instead of pointing at one.
+    const noChannel = !invite.organizerPhone && !invite.organizerEmail;
+    $id("rsvp-send-hint").textContent = t(noChannel ? "rsvp_no_channel" : "rsvp_send_hint");
     $id("rsvp-send-hint").hidden = false;
   }
 
