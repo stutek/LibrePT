@@ -5800,6 +5800,51 @@ vadbo ter uskladiti stanja med beležko in zgodovino. Preveriti isto vajo kot sa
 načrtovano, dejansko opravljeno in izrecno preskočeno. Opaženo na objavljeni različici
 `0625bd6`; pot prek pravega termina še sledi, razvoj ni pregledan.
 
+### 80.7 [ ] P2 — Prvi prikaz novega termina pokaže 1970-01-01
+
+**Scenarij:** na začetnem zaslonu »Ustvari trening«, ime »Individualna vadba«, kraj
+»Telovadnica Center«, privzeti današnji datum 2026-09-27, 10:00–10:45, dodati Ano in
+izbrati »Odpri v beležki«. Vabil ne pošiljati.
+
+**Opaženo:** glava nove beležke kaže »1970-01-01 · 10:00 - 10:45 · Telovadnica
+Center«. Polje odprtega obrazca še vsebuje 2026-09-27. Po zaprtju vabil in beležke je
+termin pravilno v današnjem urniku; ob poznejšem odprtju glava kaže »Danes«.
+
+**Vpliv in predlog:** ob prvem prikazu trener ne more zaupati datumu prav pred
+pošiljanjem vabil. Uskladiti prvi izris glave z datumom shranjenega termina in
+preveriti pred ponovnim odpiranjem. Napačna rezervacija ali vsebina vabila nista
+dokazani. Objavljena različica `0625bd6`, razvoj ni pregledan.
+
+### 80.8 [ ] P1 — Prosta opomba brez izbrane ocene postane priporočilo za večjo težo
+
+**Scenarij:** na vaji izbrati »Opombe«, vnesti samo prosto besedilo in potrditi
+»Zapiši opozorilo«, brez namernega izbora ocene. Primer: »plank 30 s, 25 s, 20 s;
+tretjo serijo zaključila pred ciljem«. Enako pri počepu z zmanjšano zadnjo obremenitvijo.
+
+**Opaženo:** ob ponovnem odprtju načrta se obe opombi začneta z »Too Easy - Increase
+Load«. Tudi nevtralna opomba o veslanju po načrtu dobi isto oznako. Ročno dodani ločeni
+signal »Pretežko« pri počepu ostane, zato isti program kaže nasprotujoči si oceni.
+
+**Vpliv in predlog:** pri pripravi naslednje vadbe trener vidi predlog za večjo težo,
+ki ga ni podal. Prosta opomba mora ostati nevtralna; oceno izbrati izrecno ali zahtevati
+odločitev pred shranjevanjem. Preveriti zapis opombe brez izbire in po ponovnem odprtju.
+Objavljena različica `0625bd6`; ne gre za zdravstveni nasvet ali diagnozo.
+
+### 80.9 [ ] P2 — Pripravljenega programa ni mogoče izbrati pri ustvarjanju termina
+
+**Scenarij:** za Ano obstaja »Uvodna vadba« s tremi vajami v »Nenačrtovani programi«.
+Trener prek »Ustvari trening« ustvari današnjo »Individualna vadba« in doda isto Ano.
+
+**Opaženo:** »Program za to stranko« ponudi le »Poljuben / Prazen načrt«. Novi termin
+je prazen. Obvestilo odpre stari program; njegov »Kopiraj ta načrt na …« odgovori
+»V tem treningu ni še nikogar drugega.« Gumb »Danes« vrne novi prazni termin.
+
+**Vpliv in predlog:** pripravljeno delo ni dosegljivo tam, kjer trener izbira program
+za termin. Ponuditi nenačrtovane programe izbrane stranke ob rutinah oziroma jasno
+dejanje »Dodeli terminu« na programu. Preizkusiti dodelitev brez ponovnega sestavljanja
+vaj. Druge morebitne poti še niso izključene; to je izmerjena ovira pri prvi uporabi.
+Objavljena različica `0625bd6`, razvoj ni pregledan.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
