@@ -6759,6 +6759,10 @@ ga potem preiskuje med treningom.
 [clientFormsController.js](src/controllers/clientFormsController.js)), zato je za zavrženje
 potreben izrecen umik. Nanj je pripet samo gumb »Prekliči«.
 
+**Enako velja za vaje in rutine:** »Esc vaja« in »Esc rutina« sta po tipki Esc ostali v
+knjižnici oziroma na seznamu rutin, »Preklic rutina« pa je po gumbu »Prekliči« izginila. Torej
+gre za vse tri obrazce, ki pišejo sproti, ne le za stranke.
+
 **Predlog in preverjanje:** ✕ in Esc naj naredita isto kot »Prekliči«, ali pa naj obrazec
 vpraša, kaj naj stori z vpisanim. Tiho ohranjanje je najslabša od treh možnosti, ker trener ne
 izve, da je stranka nastala. Preizkus naj vse tri izhode preveri z vpisanim imenom in zahteva
