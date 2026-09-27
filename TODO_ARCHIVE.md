@@ -5307,3 +5307,202 @@ zahteva, da po koncu obstajajo vse tri stranke. Opaženo na objavljeni različic
 na `main` je ista.
 
 **Fixed 2026-09-27 (Claude Opus 5.5), commit `4b17230`.** One tab saves at a time (src/data/tabOwnership.js): the newest tab to boot claims the turn before it reads, every other tab stops saving and shows »LibrePT je odprt v drugem zavihku« with »Uporabi tukaj«, which reloads it. tests/e2e/test_two_tabs.py runs the scenario above and requires all three clients at the end.
+
+### 80.42 [x] P2 — Izvoz podatkov, ki ga prebere stranka, je v celoti angleški — popravljeno 2026-09-27
+
+**Scenarij in koraki:** trener v profilu stranke pritisne »Izvozi podatke (GDPR)«, prenese
+šifrirano datoteko in jo skupaj z geslom pošlje stranki. Stranka jo odpre v aplikaciji prek
+menija ☰ z »Open an encrypted file« in vpiše geslo.
+
+**Opaženo:** dešifriranje deluje in vse okoli njega je slovensko — okno, navodila, opozorilo,
+naj geslo pošlje po drugi poti. Dokument, ki ga stranka nato bere, pa je angleški od prve do
+zadnje vrstice: »# Your training data«, »## About you«, »- Name:«, »- Training goals:«,
+»If you believe your data has been mishandled you may complain to your national supervisory
+authority.«
+
+**Težava in vpliv:** to je edini dokument v aplikaciji, ki je napisan za stranko in ne za
+trenerja, in nastane zaradi njene pravice po GDPR. Prav njen jezik aplikacija pozna — obrazec
+ob včlanitvi zapiše `formLang` (v mojem preizkusu `sl`) —, uporabi pa ga ne. Slovenska stranka
+dobi pravni dokument v jeziku, ki ga morda ne bere.
+
+**Vzrok, potrjen v kodi na `main`:** [clientDataExport.js](src/data/clientDataExport.js) sestavi
+besedilo iz vpisanih angleških nizov; slovarja skoraj ne uporablja.
+
+**Predlog in preverjanje:** besedilo dokumenta peljati skozi slovar in izbrati jezik po
+`formLang` stranke, sicer po jeziku aplikacije. Preizkus naj izvozi stranko z `formLang: "sl"`
+in zahteva, da naslov dokumenta ni angleški. Opaženo na objavljeni različici `0625bd6`; koda na
+`main` je ista.
+
+**Fixed 2026-09-27 (Claude Opus 5.5), commit `4a5b114`.** The readable export and its email are written in the client's `formLang`, else the app's language; the language travels in the file, so the reader renders it the same way. The German and Slovenian legal paragraphs are a machine translation and need review.
+
+### 80.43 [x] P2 — Če trener ni vpisal svojih podatkov, v dokumentu piše »[trainer name]« — popravljeno 2026-09-27
+
+**Scenarij in koraki:** trener ni izpolnil »Moji podatki« (ti so izrecno neobvezni) in izvozi
+podatke stranke po GDPR.
+
+**Opaženo:** dokument se glasi »Prepared 2026-09-27 by **[trainer name]** (**[trainer
+contact]**), the data controller for these records.«
+
+**Težava in vpliv:** upravljavec podatkov je pravna vloga; v dokumentu, s katerim trener
+odgovarja na zahtevo stranke, ostane oglata oznaka namesto imena. Stranka ne izve, kdo hrani
+njene podatke, in trener tega ne opazi, ker se dokument sestavi brez vprašanja.
+
+**Vzrok, potrjen v kodi na `main`:** [clientDataExport.js](src/data/clientDataExport.js) vzame
+`trainer.name || "[trainer name]"` in enako za stik.
+
+**Predlog in preverjanje:** izvoz naj ne teče, dokler trener ni vpisal imena in enega stika —
+okno naj ju vpraša takrat, ko ju potrebuje, in ne prej. Oglate oznake iz dokumenta odstraniti.
+Preizkus naj poskusi izvoziti brez vpisanih podatkov in zahteva, da aplikacija to prepreči.
+Opaženo na objavljeni različici `0625bd6`; koda na `main` je ista.
+
+**Fixed 2026-09-27 (Claude Opus 5.5), commit `4a5b114`.** The dialog never passed the trainer, so every document said »[trainer name]«. It now names the trainer; without a name and a contact the export stops and says to fill in Nastavitve → Moji podatki.
+
+### 80.44 [x] P2 — Uvoz programa odgovori na napako v angleščini, z malo začetnico — popravljeno 2026-09-27
+
+**Scenarij in koraki:** trener v meniju ☰ izbere »Uvozi program«, v polje »Prilepi program
+sem« prilepi program, kakor bi ga napisal na roko —
+»Počep 3x8 60kg / Potisk s prsi 3x10 40kg / odmor 90s« — in pritisne »Odpri v urejevalniku«.
+
+**Opaženo:** okno se ne premakne, pod gumbi pa se izpiše »no programme data found in that
+text«. Vse ostalo v tem oknu je slovensko.
+
+**Težava in vpliv:** to je najbolj verjeten izid prvega poskusa, saj trener oblike še ne pozna.
+Sporočilo, ki naj bi ga naučilo, kako naprej, je v tujem jeziku in ne pove, kaj naj popravi.
+
+**Obseg, potrjen v kodi na `main`:** [programImport.js](src/domain/programImport.js) ima pet
+takih zavrnitev, vse vpisane kot angleški niz: »nothing to read«, »no programme data found in
+that text«, »that is not readable as a programme (…)«, »that file says it is …, not …«, »that
+programme lists no exercises«.
+
+**Predlog in preverjanje:** vsaka zavrnitev dobi ključ v `en`, `sl` in `de`, sestavo pa naj
+pokliče tisti, ki jo pokaže, da domenska koda ostane brez slovarja. Sporočilo naj pove tudi
+naslednji korak (»Pritisni Pokaži obliko in primerjaj«). Preizkus naj v slovenskem vmesniku
+prilepi neustrezno besedilo in zahteva, da odgovor ni angleški. Opaženo na objavljeni različici
+`0625bd6`; koda na `main` je ista.
+
+**Fixed 2026-09-27 (Claude Opus 5.5), commit `f066052`.** programImport.js returns a key with its parameters; the dialog says it in the trainer's language and names »Pokaži obliko« where comparing helps.
+
+### 80.45 [x] P3 — »Nikogar posebej« pri uvozu programa vseeno izbere prvo stranko — popravljeno 2026-09-27
+
+**Scenarij in koraki:** trener v »Uvozi program« pusti izbiro »Za koga« na privzetem
+»Nikogar posebej«, prilepi program v pravilni obliki (gumb »Pokaži obliko«) in pritisne »Odpri
+v urejevalniku«.
+
+**Opaženo:** urejevalnik se odpre z naslovom »Upper Body — Week 1« in podnaslovom »Nenačrtovano
+· **Test A**«, poleg pa s cilji in opombami o poškodbah te stranke. Test A je prva stranka v
+imeniku; trener je ni izbral.
+
+**Vzrok, potrjen v kodi na `main`:** [app.js](src/app.js), `openImportedProgramme` vzame
+`state.clients.find(row => row.id === clientId) || state.clients.find(row => row.active)` —
+brez izbire torej prvo dejavno stranko.
+
+**Kaj pri tem ni narobe:** nič se ne zapiše, dokler trener v urejevalniku ne shrani, in ime
+stranke je vidno. Zato P3 in ne več.
+
+**Težava:** možnost se imenuje »Nikogar posebej«, aplikacija pa vseeno izbere nekoga — in ob
+programu pokaže zdravstvene opombe osebe, ki z njim nima zveze. Aplikacija načrt brez stranke
+pozna (`isPlanning`), torej je to izvedljivo.
+
+**Predlog in preverjanje:** brez izbrane stranke naj se program odpre brez nje; polja o
+stranki naj ostanejo prazna, dokler je trener ne izbere. Preizkus naj uvozi program z
+»Nikogar posebej« in zahteva, da v glavi urejevalnika ni imena stranke. Opaženo na objavljeni
+različici `0625bd6`; koda na `main` je ista.
+
+**Fixed 2026-09-27 (Claude Opus 5.5), commit `e59dde2`.** The client choice is required: »Izberi stranko« cannot be picked, »Odpri v urejevalniku« waits for a choice, and app.js no longer falls back to the first client. A plan with no client at all would need the clipboard to work without a participant; not built.
+
+### 80.46 [x] P2 — Na podlogi skupinskega treninga sta dve stranki z istim imenom oba »Ana« — popravljeno 2026-09-27
+
+**Scenarij in koraki:** trener naredi trening s tremi udeleženci, med njimi »Test A« in
+»Test C«, in ga odpre.
+
+**Opaženo:** zavihki udeležencev se glasijo »TA Test«, »TC Test«, »EP Esc« — v napisu je samo
+prva beseda imena. Prvi dve stranki sta na zaslonu razločni le po dveh črkah v krogcu. Pri
+pravih imenih to pomeni, da sta »Ana Kovač« in »Ana Novak« obe »Ana«.
+
+**Težava in vpliv:** zavihek je tisto, kar trener med vadbo pritisne, preden vpiše serijo. Če
+zgreši, gre izvedba k napačni osebi — in tega pozneje nič ne pokaže kot napako. To je natanko
+tista zamenjava, ki je na telovadnici draga.
+
+**Vzrok, potrjen v kodi na `main`:** [utils.js](src/modules/common/utils.js),
+`getClientDisplayNameHTML` s `isShort` vzame `client.name.split(" ")[0]`. Vzdevek se doda, če
+obstaja — a polje zanj je v obrazcu opisano kot »samo če si dve stranki delita ime«, kar se pri
+»Ana Kovač« in »Ana Novak« ne zgodi: delita si samo tisti del, ki ga podloga pokaže.
+
+**Predlog in preverjanje:** ko imata dva udeleženca **istega treninga** enako prvo besedo imena,
+naj zavihek pokaže več — začetnico priimka (»Ana K.«, »Ana N.«) — ali pa naj aplikacija takrat
+predlaga vzdevek. Preizkus naj sestavi trening z dvema strankama z istim imenom in zahteva, da
+se napisa zavihkov razlikujeta. Opaženo na objavljeni različici `0625bd6`; koda na `main` je
+ista.
+
+**Fixed 2026-09-27 (Claude Opus 5.5), commit `3fd4df1`.** A tab adds the surname's initial when another participant of the same session shares the first word (»Ana K.«, »Ana N.«), and shows the full name when even the initials clash.
+
+### 80.47 [x] P3 — »Vsi na ta načrt« preklaplja v obe smeri, napis pa se ne spremeni — popravljeno 2026-09-27
+
+**Scenarij in koraki:** v skupinskem treningu trener v meniju ⋮ izbere »Vsi na ta načrt«.
+Zavihki treh udeležencev se združijo v eno vrstico »Skupaj TA · TC · EP«. Nato spet odpre ⋮.
+
+**Opaženo:** v meniju še vedno piše »Vsi na ta načrt«, čeprav so vsi že na enem načrtu.
+Ponoven pritisk jih res razdruži nazaj na tri zavihke — torej gumb dela oboje, pove pa samo
+eno.
+
+**Vzrok, potrjen v kodi na `main`:** napis je pripet na ključ `bind_participants`
+([activeSessionOverlayView.js](src/modules/clipboard/activeSessionOverlayView.js)). Ključ za
+drugo smer **obstaja in je preveden v vseh treh jezikih** — `unbind_participants`
+(»Vsak svoj načrt«, »Give everyone their own plan«, »Jedem einen eigenen Plan geben«) — in ga
+nihče ne uporabi: v `src/` ni nobenega klica.
+
+**Težava in vpliv:** trener, ki je vse združil in si premislil, na zaslonu ne vidi poti nazaj.
+Poskusi jo lahko le tako, da pritisne isto vrstico, ki pravi nasprotno od tega, kar bo storila.
+
+**Predlog in preverjanje:** ob združenem stanju izpisati `unbind_participants`, kakor je
+očitno bilo mišljeno. Preizkus naj po združitvi zahteva, da vrstica menija ne pravi več »Vsi na
+ta načrt«. Opaženo na objavljeni različici `0625bd6`; koda na `main` je ista.
+
+**Fixed 2026-09-27 (Claude Opus 5.5), commit `2a5e17f`.** Bound, the row reads `unbind_participants` (»Vsak svoj načrt«); unbound, »Vsi na ta načrt«.
+
+### 80.48 [x] P3 — Trening, ki se konča pred svojim začetkom, se shrani brez besede — popravljeno 2026-09-27
+
+**Scenarij in koraki:** trener v obrazcu za nov trening vpiše začetek 18:00 in konec 09:00 —
+ura, ki jo je zgrešil, ali popravek, pri katerem je pozabil na drugo polje. Doda stranko in
+shrani.
+
+**Opaženo:** aplikacija shrani brez pripombe. Kartica na plošči se glasi »18:00 - 09:00 …
+Se začne čez 06h 39m«, podloga pa »1970-01-01 · 18:00 - 09:00« (datum je §80.7). Trening torej
+traja minus devet ur.
+
+**Težava in vpliv:** iz takega zapisa se izračuna odštevanje, podaljšek in trajanje vadbe ob
+zaključku; vse to je od tod naprej narobe in trener tega ne izve, dokler mu številke ne
+zaškripajo. Napaka pri vnosu ure je na telefonu z eno roko običajna, zato jo je vredno ujeti
+takoj.
+
+**Preverjeno v kodi na `main`:** preverbe razmerja med začetkom in koncem v
+[editSessionControl.js](src/modules/session/editSessionControl.js) ni; v slovarjih ni ključa za
+tako napako.
+
+**Predlog in preverjanje:** ob shranjevanju preveriti, da je konec za začetkom, in to povedati
+pri polju, ne v oknu brskalnika (§80.19). Trening čez polnoč, če je mišljen, naj bo izbira in ne
+tiha posledica. Preizkus naj poskusi shraniti 18:00–09:00 in zahteva, da aplikacija to zavrne s
+sporočilom ob polju. Opaženo na objavljeni različici `0625bd6`.
+
+**Fixed 2026-09-27 (Claude Opus 5.5), commit `4eeeb2f`.** An end before the start is refused at the end field (»Trening se konča, preden se začne. Preveri uro konca.«); 00:00 stays allowed as midnight.
+
+### 80.49 [x] P3 — Pri brisanju enega večera ponavljajočega se treninga ni povedano, da gre za en večer — popravljeno 2026-09-27
+
+**Scenarij in koraki:** trener odpre en večer ponavljajočega se treninga in v meniju ⋮ izbere
+»Izbriši trening«.
+
+**Opaženo:** vprašanje se glasi »Izbriši ta trening? Odstranjen bo z urnika, zabeležen napredek
+in povratne informacije pa bodo izgubljeni — program vsakega udeleženca se ohrani med
+nenačrtovanimi programi.« O ponavljanju ne pove ničesar. Preizkušeno: izbriše se res samo ta
+večer, ostali ostanejo.
+
+**Težava in vpliv:** pri urejanju istega večera aplikacija obseg pove naravnost (»To je en
+večer ponavljajočega se treninga. Kar spremeniš tukaj, velja samo za ta večer.«), pri brisanju
+pa ne. Trener, ki tega ne ve, se bo brisanja izogibal ali pa se bo bal, da je pobrisal vse
+torke do konca leta.
+
+**Predlog in preverjanje:** ko ima trening `seriesId`, naj vprašanje doda isti stavek o obsegu,
+in naj po možnosti ponudi tudi »izbriši vse prihodnje večere«. Preizkus naj pri večeru serije
+zahteva, da je v vprašanju beseda o enem večeru. Opaženo na objavljeni različici `0625bd6`.
+
+**Fixed 2026-09-27 (Claude Opus 5.5), commit `acbad9a`.** For an evening of a series, both delete paths add »To je en večer ponavljajočega se treninga. Izbriše se samo ta večer, ostali ostanejo.« Deleting all future evenings is not offered; that would be a feature of its own.
