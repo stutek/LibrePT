@@ -4378,3 +4378,39 @@ Besedilo pogojev se prevede samo po sebi, brž ko je jezik izbran prej: `#terms-
   already does for the accepted terms.
 
 **Done 2026-09-26 (Claude), commit `f847eb4`; `build check` green 11:46–11:56.** Built as planned, with one finding: the splash had been started from `setupActiveSession`, ahead of the header, so a `?lang=` link reached the terms step before the dialog existed. It now starts once every component is wired and before the first draw — after the draw, a legacy database whose session card throws (§84) kept the trainer behind the splash.
+
+### 81.2 [x] The menu in five entries — done 2026-09-27
+
+Where each row of today's menu goes. The last row is not in the request; the choice is Claude's.
+
+| Today                                                       | Goes to                                       |
+|-------------------------------------------------------------|-----------------------------------------------|
+| Language, Theme, My details, App version                    | Settings                                      |
+| Enter the sandbox / Leave the sandbox                       | Settings; Leave also top-level in the sandbox |
+| Reset sandbox data                                          | Settings, only in the sandbox                 |
+| Clients Directory                                           | Client directory                              |
+| Add a client from their own details                         | Client directory, a button in the view        |
+| Routines, Exercises, Import a programme                     | Exercises and routines                        |
+| Connect cloud storage, Export data as a file                | Data management (both opened the same dialog) |
+| Open an encrypted file                                      | Data management                               |
+| Pending Review                                              | removed, see §81.3                            |
+| History                                                     | removed; the client's page keeps its history  |
+| GitHub, Send feedback, Bug Reporting, About, Terms, Privacy | Settings, a section *Help and legal*          |
+
+**The demo story points at four of these rows** (`#menu-clients-register`, `#menu-sandbox`,
+`#menu-sandbox-reset`, `#menu-trainer-details`), and its step texts name them. They move with the
+rows, and the texts name the new path — *Settings*, then the row.
+
+**Fixes the menu half of §80.4 here:** *Add a client from their own details* and *Open an encrypted
+file* have no translation key (neither `data-i18n` nor an entry in `domMappings.js`), so they stay
+English in every language. Both get a key in en, sl and de in their new place.
+
+**Done 2026-09-27 (Claude), commit `c3a057e`; `build check` green 03:47–03:56.** Parked in a stash on 2026-09-26 when Simon stopped every session, restored and finished the next day. Found on the way: the library's third header button and the routines' import button did not fit a phone in German, so both secondary actions sit in a row under the title; entering or leaving the sandbox from Settings remembered `/settings` as the view to return to, so Settings now goes Back first; the demo's theme step counted `<html>` as unreachable behind the Settings modal; `gear` and `database` were not in the icon subset, which was regenerated.
+
+### 81.3 [x] Pending review only in the notification area — done 2026-09-27
+
+The feed already carries it: `buildPendingSessionsItem` in `domain/notificationItems.js` counts the
+same unresolved `planUpdates` the menu badge counts, and links to `/adjustments`. What is left: remove
+the menu row and its badge (`app.js` updates the badge), and keep the route as the message's target.
+
+**Done 2026-09-27 (Claude), in commit `c3a057e` with §81.2:** the menu row and its badge are gone; `tests/e2e/test_view_split_navigation.py` reaches the view from the message and checks that its counts add up to the unresolved updates.

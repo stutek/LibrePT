@@ -5740,7 +5740,7 @@ za kršitev pravila projekta.
   `no_sessions_scheduled` so v [sl.js](src/i18n/sl.js) vsi prevedeni, nihče jih ni vprašal.
   Popravek je **ena** funkcija, ki jo kličeta obe poti, ne drugi izvod seznama. **V §81.1**, ki na
   to isto pot dodaja še korak teme in korak podatkov.
-- **Dve vrstici menija nimata prevoda nikjer.** `#menu-review-signup` in `#menu-open-encrypted`
+- **[x] Popravljeno 2026-09-27 (Claude), commit `c3a057e` (§81.2).** **Dve vrstici menija nimata prevoda nikjer.** `#menu-review-signup` in `#menu-open-encrypted`
   nista niti v tabeli `staticMappings` v [domMappings.js](src/i18n/domMappings.js) niti nosita
   atributa `data-i18n`; vse sosednje vrstice so v tabeli. Ostaneta angleški v slovenščini in
   nemščini. **V §81.2**, ki obe vrstici prestavi — prvo med gumbe imenika strank, drugo v
@@ -5892,58 +5892,19 @@ Order of work: §81.1, §81.2, §81.3, §81.4, then §81.5 and §81.6 once they 
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#811-x-language-theme-and-the-trainers-details-are-mandatory-on-the-welcome-screen--done-2026-09-26); what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-### 81.2 [~] The menu in five entries
+### 81.2 [x] The menu in five entries — done 2026-09-27
 
-**Stopped 2026-09-26 at Simon's request, half built and NOT verified. The work is in a local git
-stash**, not on `main`: `git stash list` shows it as *claude-opus §81.2 WIP: five-entry menu,
-settings dialog, library tabs*. `git stash pop` puts it back. Nothing else is in the tree.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#812-x-the-menu-in-five-entries--done-2026-09-27); what shipped is in [CHANGELOG.md](CHANGELOG.md). The global History view's removal is §81.7.
 
-- **In the stash:** the menu's five rows plus *Leave the sandbox* shown only in the sandbox; a
-  *Settings* dialog routed at `/settings` holding language, theme, *My details*, *App version*, the
-  sandbox toggle and reset, and *Help and legal*; a tab row between the exercise library and the
-  routines (`modules/common/libraryTabs.js` and `.css`, in the offline cache, `CACHE_NAME` v137);
-  *Import a programme* in the routines header; *Add a client from their own details* under the client
-  directory's title; *Open an encrypted file* as a card in the Sync & Backup dialog; the §81.3 menu
-  row and its badge removed; the old menu keys deleted and the new ones added in en, sl and de,
-  including the keys §80.4 asked for; the demo story's texts rewritten for the new path.
-- **Checked on the stash:** `build lint`, i18n parity, project layout, CSS tokens, import layering.
-  Nothing else — no test run, no gate.
-- **Not done:** the demo story's STEPS in `storyTour.js` (the welcome's Show me still points at rows
-  now inside Settings; the details and evening chapters need a step that opens Settings and one that
-  closes it — their three caption keys already exist); the tests that name the moved rows
-  (`tests/medium/test_header_menu.py` and others); the overflow walk's new `/settings` route;
-  `docs/SRC_MODULES.md` for `libraryTabs.js`/`.css`; the `/settings` row in UC5's route table; the
-  CHANGELOG entry; removing the global History view (ruled: history only on the client's page).
+### 81.3 [x] Pending review only in the notification area — done 2026-09-27
 
-Where each row of today's menu goes. The last row is not in the request; the choice is Claude's.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#813-x-pending-review-only-in-the-notification-area--done-2026-09-27).
 
-| Today                                                       | Goes to                                       |
-|-------------------------------------------------------------|-----------------------------------------------|
-| Language, Theme, My details, App version                    | Settings                                      |
-| Enter the sandbox / Leave the sandbox                       | Settings; Leave also top-level in the sandbox |
-| Reset sandbox data                                          | Settings, only in the sandbox                 |
-| Clients Directory                                           | Client directory                              |
-| Add a client from their own details                         | Client directory, a button in the view        |
-| Routines, Exercises, Import a programme                     | Exercises and routines                        |
-| Connect cloud storage, Export data as a file                | Data management (both opened the same dialog) |
-| Open an encrypted file                                      | Data management                               |
-| Pending Review                                              | removed, see §81.3                            |
-| History                                                     | removed; the client's page keeps its history  |
-| GitHub, Send feedback, Bug Reporting, About, Terms, Privacy | Settings, a section *Help and legal*          |
+### 81.7 [ ] Remove the global History view — ruled 2026-09-26
 
-**The demo story points at four of these rows** (`#menu-clients-register`, `#menu-sandbox`,
-`#menu-sandbox-reset`, `#menu-trainer-details`), and its step texts name them. They move with the
-rows, and the texts name the new path — *Settings*, then the row.
-
-**Fixes the menu half of §80.4 here:** *Add a client from their own details* and *Open an encrypted
-file* have no translation key (neither `data-i18n` nor an entry in `domMappings.js`), so they stay
-English in every language. Both get a key in en, sl and de in their new place.
-
-### 81.3 [ ] Pending review only in the notification area
-
-The feed already carries it: `buildPendingSessionsItem` in `domain/notificationItems.js` counts the
-same unresolved `planUpdates` the menu badge counts, and links to `/adjustments`. What is left: remove
-the menu row and its badge (`app.js` updates the badge), and keep the route as the message's target.
+Simon ruled that a client's history is shown only on that client's page. The ☰ row is gone (§81.2);
+what is left is the view itself — `/history`, `historyView.js` and `renderGlobalHistory` — and the
+tests and the overflow walk entry that name it. Next in line.
 
 ### 81.4 [ ] Import and export of exercises, routines and circuits in one place
 
