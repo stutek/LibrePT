@@ -76,6 +76,10 @@ export const de = {
   btn_add_set: "Satz hinzufügen",
   btn_inject_exercise: "Übung einfügen",
   btn_cancel: "Abbrechen",
+  other_tab_title: "LibrePT ist in einem anderen Tab geöffnet",
+  other_tab_body:
+    "Es speichert immer nur ein Tab, damit nichts überschrieben wird. Was du in diesem Tab tust, wird erst gespeichert, wenn du ihn hier wieder verwendest; dann lädt er neu mit allem, was der andere Tab gespeichert hat.",
+  other_tab_use_here: "Hier verwenden",
   dialog_ok: "OK",
   dialog_finish_now: "Jetzt beenden",
   dialog_save_anyway: "Trotzdem einplanen",

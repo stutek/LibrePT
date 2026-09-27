@@ -57,6 +57,11 @@ depends on — that tier mounts one component and nothing else.
   writing "wait until X", ask what X reads at the first instant.
 - **A rule that moves A to clear B must not be able to move B**, or, re-evaluated on a timer, it
   oscillates forever.
+- **One tab saves at a time.** Every save writes the whole state from memory, so two open tabs
+  deleted each other's work. The newest tab to boot claims the turn before it reads
+  ([tabOwnership.js](../src/data/tabOwnership.js)); every other tab stops saving and is covered
+  until the trainer uses it again, which reloads it. Keeping two tabs' memory in step was rejected:
+  a dialog open in one tab would still write into a record the other had replaced.
 
 ## Themes and styling
 

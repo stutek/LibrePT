@@ -60,6 +60,10 @@ export const en = {
   btn_add_set: "Add Set",
   btn_inject_exercise: "Inject Exercise",
   btn_cancel: "Cancel",
+  other_tab_title: "LibrePT is open in another tab",
+  other_tab_body:
+    "Only one tab saves at a time, so nothing is overwritten. Nothing you do in this tab is saved until you use it here again; that reloads it with everything saved in the other tab.",
+  other_tab_use_here: "Use it here",
   dialog_ok: "OK",
   dialog_finish_now: "Finish now",
   dialog_save_anyway: "Schedule anyway",

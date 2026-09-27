@@ -4,12 +4,14 @@
 
 import { assignPositions, positionIssues, repairPositions } from "./sessionItemOrder.js";
 import { readVersionScoped, removeVersionScoped, writeVersionScoped } from "./storageNamespace.js";
+import { isThisTabActive } from "./tabOwnership.js";
 
 // Version-scoped: a cached live session is written by one build's plan shape (see storageNamespace).
 const CACHE_KEY = "librept_active_session";
 
 export function saveActiveSessionToCache(activeSession) {
-  if (!activeSession) return;
+  // A tab another tab has taken over holds a stale session; writing it would replace the live one.
+  if (!activeSession || !isThisTabActive()) return;
   // The single choke point every plan edit funnels through — insert, delete, drag-reorder, circuit
   // regroup — so stamping order here is what makes "every writer writes position" true by
   // construction instead of a rule each new splice site has to remember.

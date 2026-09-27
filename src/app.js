@@ -80,6 +80,7 @@ import {
   stateHasData,
   switchWorkspace,
 } from "./data/stateStore.js";
+import { claimThisTab, onTabDeactivated } from "./data/tabOwnership.js";
 import { SANDBOX, isSandbox } from "./data/workspace.js";
 import { DEMO_NOTICE_TYPE } from "./domain/notificationItems.js";
 import { repsPresetsDatalistHTML } from "./domain/repsAndLoad.js";
@@ -119,6 +120,7 @@ import { openEncryptedFileReader } from "./modules/common/encryptedFileReader.js
 import { EVENT_PARAM, browserPlatform } from "./modules/common/eventTransports.js";
 import { openFeedbackModal } from "./modules/common/feedbackModal.js";
 import { renderNotificationArea } from "./modules/common/notificationArea.js";
+import { showOtherTabNotice } from "./modules/common/otherTabNotice.js";
 import { populateDropdownSelectors as populateDropdownsController } from "./modules/common/populateDropdownSelectors.js";
 import { registerShellRender, runShellRenders } from "./modules/common/renderRegistry.js";
 import { openResetSandboxDialog, openStaleSandboxDialog } from "./modules/common/sandboxDialogs.js";
@@ -397,6 +399,11 @@ async function init() {
   // A link asking for the sandbox picks the workspace BEFORE the load, so boot reads one database
   // rather than two. This is where the app's own "show me around" offers land.
   prepareWorkspaceForBoot(shareWorkspace);
+
+  // Claim the turn BEFORE reading: another tab still open stops saving now, so what is read next
+  // is not overwritten by it afterwards (data/tabOwnership.js).
+  claimThisTab();
+  onTabDeactivated(() => showOtherTabNotice({ t }));
 
   // Loading is IndexedDB-backed: everything below still assumes `state` is
   // fully populated once this resolves, exactly as when the call was synchronous.

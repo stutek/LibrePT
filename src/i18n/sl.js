@@ -76,6 +76,10 @@ export const sl = {
   btn_add_set: "Dodaj serijo",
   btn_inject_exercise: "Vstavi vajo",
   btn_cancel: "Prekliči",
+  other_tab_title: "LibrePT je odprt v drugem zavihku",
+  other_tab_body:
+    "Shranjuje lahko samo en zavihek hkrati, zato se nič ne prepiše. Kar narediš v tem zavihku, se ne shrani, dokler ga spet ne uporabiš tukaj; takrat se na novo naloži z vsem, kar je shranil drugi zavihek.",
+  other_tab_use_here: "Uporabi tukaj",
   dialog_ok: "V redu",
   dialog_finish_now: "Zaključi zdaj",
   dialog_save_anyway: "Vseeno razporedi",

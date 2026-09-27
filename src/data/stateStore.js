@@ -44,6 +44,7 @@ import { LIVE_SCHEMAS, fieldsHiddenFrom, narrowToSchema } from "./recordSchemas.
 import { describeMigration, migrateState } from "./schemaMigrations.js";
 import { DEMO_ORIGIN, stampAsSeeded } from "./seedProvenance.js";
 import { clearWorkspaceKeys, readVersionScoped, writeVersionScoped } from "./storageNamespace.js";
+import { isThisTabActive } from "./tabOwnership.js";
 import {
   SANDBOX,
   activeWorkspace,
@@ -469,6 +470,9 @@ export function onStateSaved(listener) {
 }
 
 export function saveToLocalStorage() {
+  // Every save writes the whole state from memory. A tab another tab has taken over holds a stale
+  // picture, and saving it would delete what the other tab added (tabOwnership.js).
+  if (!isThisTabActive()) return;
   if (indexedDbSupported()) {
     enqueueWrite(
       async () => {
