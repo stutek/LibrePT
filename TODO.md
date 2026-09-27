@@ -6671,6 +6671,28 @@ tistim, kar je v datoteki. Ključ `backup_import_desc` v `en`, `sl` in `de`. Pre
 da opis uvoza ne vsebuje besede za združevanje. Opaženo na objavljeni različici `0625bd6`; zapis
 na `main` je isti.
 
+### 80.39 [ ] P3 — Obrazca za povratno informacijo in za napako mešata slovenščino in angleščino
+
+**Scenarij in koraki:** trener v meniju ☰ izbere »Pošlji povratno informacijo« in nato »Napiši
+e-pošto«, oziroma »Prijavi napako na GitHubu«.
+
+**Opaženo:** obe pripravljeni besedili sta mešani. E-pošta se začne slovensko (»Kar sem hotel
+povedati:«), podatki pod črto pa so angleški (»Build«, »Page«, »Language«, »Screen«). Prijava
+napake ima slovenski začetek naslova (»Napaka: «) in slovensko vprašanje v skritem komentarju,
+naslovi razdelkov pa so angleški: »**What happened**«, »**A screenshot**«, »**Details LibrePT
+filled in**«, prav tako opozorilo, naj trener na sliki zakrije podatke strank.
+
+**Težava in vpliv:** trener, ki angleško ne bere, v obrazcu ne ve, kam kaj spada — in prav to
+opozorilo o zakrivanju podatkov strank je tisto, ki ga mora razumeti.
+
+**Odločitev, ki jo to terja:** ali sta ti dve besedili namenjeni Simonu in mednarodnim
+sodelavcem (potem naj bosta v celoti angleški, tudi vprašanje in opozorilo) ali trenerju (potem
+naj bosta v njegovem jeziku, z angleškim povzetkom le v podatkih o gradnji). Mešanica ne služi
+nobenemu.
+
+**Preverjanje:** ko bo odločeno, naj preizkus zahteva, da je pripravljeno besedilo v enem jeziku.
+Opaženo na objavljeni različici `0625bd6`.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
