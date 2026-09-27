@@ -98,6 +98,20 @@ def test_logging_once_counts_for_everyone_bound(page, local_server):
     assert logged == [True, True]
 
 
+def test_the_control_says_which_way_it_will_go(page, local_server):
+    """Bound, the row still read "Everyone on this plan", so the way back was a row that said the
+    opposite of what it would do."""
+    _mount(page, local_server)
+    row = page.locator("#btn-bind-participants")
+    assert "Everyone on this plan" in row.inner_text()
+
+    _bind(page)
+    assert "Give everyone their own plan" in row.inner_text()
+
+    _bind(page)
+    assert "Everyone on this plan" in row.inner_text()
+
+
 def test_it_can_be_undone_from_the_same_control(page, local_server):
     """A trainer who binds by mistake, or whose group splits mid-session, is one tap from their own
     plans again — and the plans are separate objects afterwards, not one shared by accident."""

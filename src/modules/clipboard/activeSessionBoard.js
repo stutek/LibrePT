@@ -28,6 +28,7 @@ import { hasBehaviour } from "../../data/appVersions.js";
 import { libraryExercises } from "../../data/exerciseLibrary.js";
 import { feedbackTagText } from "../../domain/feedbackTags.js";
 import { gymNotesForPlan } from "../../domain/gymNotes.js";
+import { bindingFor } from "../../domain/participantBinding.js";
 import { renderActiveUsersList } from "../common/activeUsersList.js";
 import { openFeedbackModal } from "../common/feedbackModal.js";
 import { escapeHTML, getClientDisplayNameHTML, getInitials } from "../common/utils.js";
@@ -227,6 +228,8 @@ function syncTitleBarEditChrome() {
   document.getElementById("btn-edit-plan")?.classList.toggle("hidden", editing);
   document.getElementById("btn-done-edit")?.classList.toggle("hidden", !editing);
 
+  syncBindingLabel(t);
+
   // In edit mode the ⋯ menu's destructive action targets the PLAN (clear its exercises), not the
   // whole session — relabel it so the trainer knows which one they're deleting. Preserve the icon.
   const delBtn = document.getElementById("btn-delete-session");
@@ -238,6 +241,19 @@ function syncTitleBarEditChrome() {
   delBtn.innerHTML = "";
   if (icon) delBtn.appendChild(icon);
   delBtn.appendChild(document.createTextNode(` ${label}`));
+}
+
+// The same row binds and unbinds, so it says the way it will go now. Bound, it kept reading
+// "Everyone on this plan", and the way back was a row that said the opposite of what it would do.
+function syncBindingLabel(t) {
+  const label = document.querySelector("#btn-bind-participants [data-i18n]");
+  const session = deps.getActiveSession();
+  if (!label || !session) return;
+  const bound = Boolean(bindingFor(session.bindings, session.activeClientId));
+  const key = bound ? "unbind_participants" : "bind_participants";
+  // The key too, so a language change re-labels it the same way.
+  label.dataset.i18n = key;
+  label.textContent = t(key);
 }
 
 function renderTitleBarForEditMode(activeClient) {
