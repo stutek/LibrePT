@@ -6196,6 +6196,27 @@ kaj izgubilo. Izguba dela brez opozorila, zato P1.
 **Predlog in preverjanje:** ko je trening s kartice že odprt, naj tap odpre tistega, ne novega. Preizkus
 naj spremeni načrt nezačetega treninga, zapre podlogo, trening odpre s kartice in zahteva spremembo.
 
+### 80.53 [ ] P2 — Načrt treninga, vpisanega za nazaj, po osvežitvi izgine
+
+**Scenarij in koraki:** trener popoldne odpre jutranji trening, ki ga ni začel v aplikaciji, v meniju ⋮
+izbere »Uredi načrt«, vpiše vaje in pritisne »Končano«. Nato osveži stran (ali mu telefon stran naloži
+znova).
+
+**Opaženo:** načrt je spet takšen, kot ga da rutina. Našel podagent v dnevu trenerja 02 (§88), ki je
+jutranje treninge vpisoval popoldne; ponovljeno na `main`: pri treningu, ki je minil pred več kot dvema
+urama, preimenovana vaja po osvežitvi izgine, pri prihodnjem treningu ostane.
+
+**Vzrok, potrjen v kodi na `main`:** `isCachedSessionStale` v
+[sessionClock.js](src/domain/sessionClock.js) šteje shranjen odprt trening za pozabljenega, ko je več kot
+dve uri čez načrtovani konec, in ga obnova zavrže. Merilo je konec termina, ne zadnja sprememba — tudi
+ko trener trening ureja prav zdaj.
+
+**Težava in vpliv:** vpis za nazaj je običajen (trener po jutranjem sklopu vpiše, kar je naredil), in
+prav tam se delo izgubi brez besede. P2, ker ga ne zadene vsak dan in ker trening ni izbrisan, le načrt.
+
+**Predlog in preverjanje:** zastarelost meriti od zadnje spremembe odprtega treninga, ne samo od konca
+termina. Preizkus naj uredi načrt treninga, ki je minil pred tremi urami, osveži in zahteva spremembo.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
@@ -6497,6 +6518,9 @@ paketi in odštevanje kartic 5 min na dan v Excelu, plačila 3 min, račun podje
 odpoved in neprihod je mogoče le izbrisati, zato ju beleži drugje (§86.3, §86.4); opomniki in
 sporočila 8 min na dan prek WhatsAppa (§86.3); meritve in napredek v zvezku (§86.4); domača naloga
 brez potrditve (§86.4).
+Dan 02 (trener pol v studiu, pol online, šest individualnih treningov): meritev ob prvem obisku
+ni kam vpisati, 2 min na stranko v zvezek (§86.4); paket osmih treningov po prvem obisku vodi ločeno
+(§86.2).
 
 ## 87. [ ] Prihodnja shema ne nosi polja glasovne opombe
 
@@ -6574,7 +6598,8 @@ samo, česar ni nikjer drugje, in presoja, ali se avtomatizacija izplača.
 ### 88.1 [ ] Iskanje v katalogu brez zadetka se konča, uvoz večjega kataloga pa obstaja
 
 Dan 01: trenerka je za krožno vadbo iskala »kettlebell«, »burpee«, »box jump« — nič od tega ni med
-48 vajami, in prazen seznam reče samo »No movements match this filter.«. Aplikacija ima uvoz večjih
+48 vajami, in prazen seznam reče samo »No movements match this filter.«. Dan 02 potrdi z vajami brez opreme za
+online trening: navadnega počepa s telesno težo, burpeeja in kettlebell swinga ni. Aplikacija ima uvoz večjih
 katalogov (`libraryImportDialog.js`) in dovoli vajo z lastnim imenom, a s praznega iskanja ne vodi do
 nobenega. Trener, ki vaje ne najde, jo zapiše na papir. **Vrednost:** vsak nov trener naleti na to pri
 prvem načrtu; vsaka vaja, zapisana mimo aplikacije, nima zgodovine. **Cena:** majhna — prazen seznam
@@ -6595,4 +6620,13 @@ Dan 01: ko jo nadomesti kolegica, ji načrt pošlje kot sporočilo. **Vrednost:*
 bolezen). **Cena:** srednja, če naj ga kolegica odpre v svoji aplikaciji; majhna, če je dovolj besedilo
 načrta za deljenje. Več trenerjev na enem računu je EnterprisePT. **Presoja: ne izplača se** za zdaj —
 besedilo za deljenje bi pokrilo večino, a pogostost je nizka.
+
+### 88.4 [ ] Trening, vpisan za nazaj, aplikacija imenuje »Zamuja«
+
+Dan 02: trener je jutranje treninge vpisoval popoldne, ker jih je vodil brez telefona v roki.
+Plošča jih je kazala kot »Zamuja 8 h«, načrt pa se je ob osvežitvi izgubil (to je napaka §80.53).
+Poti »to se je zgodilo, zapiši« ni: trening je treba začeti in zaključiti, s časi, ki niso pravi.
+**Vrednost:** vsak trener, ki kdaj vodi trening brez telefona, in to je pogosto (ocena trenerja).
+**Cena:** majhna do srednja — pri minulem, nezačetem treningu ponuditi »Zabeleži kot opravljen« z
+izbranim časom, namesto odštevanja zamude. **Presoja: izplača se**, najprej popravek §80.53.
 
