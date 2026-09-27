@@ -6160,6 +6160,35 @@ naj pod »Stranke s tem imenom ni« stoji ponudba, da se stranka s tem imenom do
 gre pot od prazne aplikacije do shranjenega prvega treninga z eno stranko, brez obiska menija.
 Opaženo na objavljeni različici `0625bd6`; koda na `main` je ista.
 
+### 80.19 [ ] P2 — Aplikacija sprašuje z okni brskalnika, ki jih ne oblikuje in ne prevaja
+
+**Scenarij in koraki:** trener shrani trening brez stranke; med izvedbo treninga pritisne
+»Zaključi vadbo« prej, kot se je trening iztekel; v podlogi pritisne brisanje treninga.
+
+**Opaženo:** v vseh treh primerih se odpre okno brskalnika (`alert` oziroma `confirm`), ne okno
+aplikacije. Pri shranjevanju piše »Izbrati moraš vsaj eno stranko.« Besedilo je slovensko,
+gumba v oknu pa nista aplikacijina: napiše ju brskalnik v jeziku naprave, torej »OK« in
+»Cancel« na napravi, nastavljeni na angleščino.
+
+**Težava in vpliv:** trikrat se zalomi isto. Gumb, ki potrdi ali prekliče, je v tujem jeziku,
+čeprav stran pravi `lang="sl"`. Okna ne doseže nobena tema, ker ga ne riše aplikacija. In
+dokler okno stoji, stran ne dela ničesar drugega — prav to je najbrž vzrok zastoja, opisanega
+v §80.10: zaključek vadbe pred iztekom časa in zaključek brez zabeležene serije odpreta dve
+taki vprašanji zaporedoma ([sessionLifecycle.js](src/controllers/sessionLifecycle.js)), in
+dokler nanju nihče ne odgovori, se zavihek ne premakne.
+
+**Obseg, preštet v kodi na `main`:** deset klicev `alert` in `confirm` v petih datotekah —
+[editSessionControl.js](src/modules/session/editSessionControl.js) (pet),
+[sessionLifecycle.js](src/controllers/sessionLifecycle.js) (dva),
+[activeSessionController.js](src/controllers/activeSessionController.js),
+[sessionScheduleAdjustment.js](src/controllers/sessionScheduleAdjustment.js) in
+[clientsView.js](src/modules/clients/clientsView.js). Aplikacija ima svoja okna
+(`dialog-modal card glassmorphic`) in jih drugod uporablja.
+
+**Predlog in preverjanje:** vsa ta vprašanja preseliti v okno aplikacije, z gumboma iz
+slovarja. Preizkus naj v slovenskem vmesniku prehodi te poti in zahteva, da se ne odpre nobeno
+okno brskalnika. Opaženo na objavljeni različici `0625bd6`; klici na `main` so isti.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
