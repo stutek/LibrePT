@@ -6209,6 +6209,30 @@ Pritisni "Dodaj stranko" in vpiši prvo.« — in besedo »Klikni« odpraviti iz
 »Click« iz angleščine. Preizkus naj v slovenskih napisih prepove »klikn«. Opaženo na objavljeni
 različici `0625bd6`; zapisa na `main` sta ista.
 
+### 80.21 [ ] P2 — Ista stvar se na enem zaslonu imenuje vaja, program, rutina in načrt
+
+**Scenarij in koraki:** trener v obrazcu novega treninga doda stranko »Ana Kovač«. Ob njenem
+imenu se pojavi spustni seznam.
+
+**Opaženo:** seznam se odpre z besedilom »Izberi vajo«, v njem pa ni vaj, temveč programi
+vadbe in možnost »Poljuben / Prazen načrt«. Če trener ne izbere ničesar in shrani, okno pravi
+»Dodeli predlogo rutine vsem izbranim strankam.« Bralnik zaslona prebere »Program za to
+stranko«.
+
+**Težava in vpliv:** za eno stvar štirje izrazi — vaja, program, predloga rutine, načrt — na
+enem samem zaslonu. Trener, ki se aplikacije šele uči, mora ugibati, ali gre za štiri različne
+reči. Povsem napačna je prva: »vaja« je v tej aplikaciji posamezen gib iz kataloga.
+
+**Vzrok, potrjen v kodi na `main`:** [editSessionControl.js](src/modules/session/editSessionControl.js)
+napolni prvo možnost s ključem `select_exercise` (»Izberi vajo«, »Select Exercise«,
+»Übung auswählen«), čeprav seznam gradi iz `state.routines`. Sporočilo napake uporablja
+`err_assign_routine`, bralnikov opis pa `select_routine_for`.
+
+**Predlog in preverjanje:** izbrati eno ime za to stvar v vsakem jeziku in ga uporabiti v vseh
+treh zapisih; prva možnost dobi svoj ključ, ne ključa za vaje. Preveriti tudi, da se ime ujema
+z imenom vrstice v meniju (»Rutine«). Preizkus naj zahteva, da se v tem obrazcu ne pojavi ključ
+`select_exercise`. Opaženo na objavljeni različici `0625bd6`; koda na `main` je ista.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
