@@ -150,6 +150,7 @@ export const en = {
   no_exercises_injected: "No Exercises Injected",
   no_exercises_desc:
     "No exercises yet. Tap the three dots (⋮) at the top right and choose Edit plan.",
+  edit: "Edit",
   edit_plan: "Edit plan",
   editing_plan_for: "Editing plan for",
   editing_plan_session: "Editing session plan",
@@ -335,6 +336,7 @@ export const en = {
   no_sessions_scheduled: "No sessions scheduled.",
   voice_note_label: "Privacy-First Voice Note",
   voice_ready: "Tap mic to record voice note",
+  voice_processing: "Processing the recording…",
   voice_recording: "Recording... Tap again to save",
   voice_transcription_done: "On-device transcription completed!",
   voice_playing: "Playing voice note...",

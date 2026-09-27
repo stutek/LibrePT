@@ -168,6 +168,7 @@ export const de = {
   no_exercises_injected: "Keine Übungen eingefügt",
   no_exercises_desc:
     "Noch keine Übungen. Tippe oben rechts auf die drei Punkte (⋮) und wähle Plan bearbeiten.",
+  edit: "Bearbeiten",
   edit_plan: "Plan bearbeiten",
   editing_plan_for: "Plan bearbeiten für",
   editing_plan_session: "Plan des Trainings bearbeiten",
@@ -356,6 +357,7 @@ export const de = {
   no_sessions_scheduled: "Keine Trainings geplant.",
   voice_note_label: "Sprachnotiz, nur auf dem Gerät",
   voice_ready: "Tippe auf das Mikrofon, um eine Sprachnotiz aufzunehmen",
+  voice_processing: "Aufnahme wird verarbeitet …",
   voice_recording: "Aufnahme läuft... Tippe noch einmal zum Speichern",
   voice_transcription_done: "Umwandlung in Text auf dem Gerät abgeschlossen.",
   voice_playing: "Sprachnotiz wird abgespielt...",
