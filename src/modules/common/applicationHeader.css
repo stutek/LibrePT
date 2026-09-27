@@ -563,3 +563,10 @@ select.menu-select {
   font-weight: 600;
   color: var(--text-muted);
 }
+
+/* One service in Settings' Connected accounts: its name, its state on this device, and its two acts. */
+.connected-account {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}

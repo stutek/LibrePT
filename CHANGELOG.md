@@ -18,6 +18,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-09-27 — Connected accounts
+
+### Added
+
+- **Settings → Connected accounts** lists every outside service the app is connected to — Google
+  Drive today — with two acts: *Clear from this device* forgets the connection here and leaves other
+  devices their access; *Revoke access* ends the app's access at the service for every device.
+
+### Fixed
+
+- **Disconnecting Google Drive after a reload did not reach Google.** The app said disconnected while
+  Google kept the access, because the token that a revoke needs is kept in memory only. The app now
+  asks Google for a token first, so its window may open; when Google cannot be reached, the app says
+  so and gives Google's page for removing the access by hand.
+
 ## 2026-09-27 — The menu has five entries
 
 ### Changed

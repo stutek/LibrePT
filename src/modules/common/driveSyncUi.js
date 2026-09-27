@@ -198,8 +198,16 @@ export function setupDriveSyncUi() {
   const disconnectBtn = document.getElementById("btn-drive-disconnect");
   if (disconnectBtn) {
     disconnectBtn.addEventListener("click", async () => {
-      await disconnectDriveSync();
+      const outcome = await disconnectDriveSync();
       renderDriveSyncCard();
+      // A revoke that did not reach Google leaves the grant standing: say so, and where to end it.
+      if (outcome === "unreachable") {
+        const status = document.getElementById("drive-sync-status");
+        if (status) {
+          status.textContent = `${tr("account_revoke_unreachable", "")} myaccount.google.com/linkedapps`;
+          status.className = "status-msg text-danger";
+        }
+      }
     });
   }
 

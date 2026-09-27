@@ -261,8 +261,16 @@ export async function connectDriveSync() {
   return syncNow();
 }
 
+/** End the app's Drive access at Google and forget it here; resolves to revokeAccess's outcome. */
 export async function disconnectDriveSync() {
-  await revokeAccess();
+  const outcome = await revokeAccess();
+  lastSyncResult = null;
+  return outcome;
+}
+
+/** Forget the Drive connection on this device only. Google is not asked; other devices keep syncing. */
+export function forgetDriveSyncOnThisDevice() {
+  forgetStoredConsent();
   lastSyncResult = null;
 }
 

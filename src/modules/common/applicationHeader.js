@@ -344,6 +344,10 @@ export function renderSettingsDialog() {
     <button id="menu-app-version" class="session-menu-item">
       <i class="fa-solid fa-code-compare"></i> <span data-i18n="menu_app_version">App version</span>
     </button>
+    <!-- Every outside service the app holds a credential for, each one clearable or revocable. -->
+    <button id="menu-connected-accounts" class="session-menu-item">
+      <i class="fa-solid fa-link"></i> <span data-i18n="menu_connected_accounts">Connected accounts</span>
+    </button>
     <!-- One control, both directions: its label says which one it is. -->
     <button id="menu-sandbox" class="session-menu-item">
       <i class="fa-solid fa-flask"></i> <span id="menu-sandbox-text" data-i18n="menu_sandbox_enter">Enter the sandbox</span>
@@ -690,6 +694,10 @@ function setupAppMenu() {
   on("menu-app-version", () => {
     closeMenu();
     deps.openAppVersion?.();
+  });
+  on("menu-connected-accounts", () => {
+    closeMenu();
+    deps.openConnectedAccounts?.();
   });
   // GitHub project, Bug reporting, and Privacy statement are real <a target="_blank">; just dismiss the menu.
   on("menu-github", () => closeMenu());

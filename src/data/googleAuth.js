@@ -148,17 +148,38 @@ export function forgetStoredConsent() {
   localStorage.removeItem(CONNECTED_KEY);
 }
 
-/** Revoke the current grant and forget local connection state. Does not throw on network failure —
- * the local "disconnected" state is what the UI needs, revocation on Google's side is best-effort. */
+// How long a revoke may wait for Google's answer before it is reported as not reached.
+const REVOKE_TIMEOUT_MS = 10_000;
+
+/** End this app's access at Google, for every device, and forget it here. Resolves to what happened:
+ * `revoked`, `not_connected` (this device held nothing, so nothing is asked of Google), or
+ * `unreachable` (no token could be had, or Google did not answer — the grant may still stand, and
+ * the trainer has to be told where to remove it). Never throws; the local state is cleared in every
+ * case.
+ *
+ * Google revokes only with a valid access token, and the token lives in memory: after a reload there
+ * is none. This used to skip Google then, and report the trainer disconnected while the grant stayed.
+ * So a token is asked for first. It runs from a tap, so Google's consent window may open. */
 export async function revokeAccess() {
-  const token = accessToken;
-  accessToken = null;
-  tokenExpiresAt = 0;
-  localStorage.removeItem(CONNECTED_KEY);
-  if (!token || !window.google?.accounts?.oauth2) return;
+  if (!hasStoredConsent() && !accessToken) return "not_connected";
+  let token = null;
   try {
-    window.google.accounts.oauth2.revoke(token, () => {});
+    token = await requestAccessToken({ interactive: true });
   } catch {
-    // Best-effort — the local disconnect already happened above.
+    token = null;
   }
+  forgetStoredConsent();
+  if (!token) return "unreachable";
+  return new Promise((resolve) => {
+    const timer = setTimeout(() => resolve("unreachable"), REVOKE_TIMEOUT_MS);
+    try {
+      window.google.accounts.oauth2.revoke(token, (response) => {
+        clearTimeout(timer);
+        resolve(response?.successful === false ? "unreachable" : "revoked");
+      });
+    } catch {
+      clearTimeout(timer);
+      resolve("unreachable");
+    }
+  });
 }

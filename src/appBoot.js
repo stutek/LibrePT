@@ -45,6 +45,10 @@ import {
 import { initBackupRestore, setupBackupRestore } from "./modules/common/backupRestore.js";
 import { initBuildInfoDialog, setupBuildInfoDialog } from "./modules/common/buildInfoDialog.js";
 import {
+  initConnectedAccountsDialog,
+  openConnectedAccountsDialog,
+} from "./modules/common/connectedAccountsDialog.js";
+import {
   initDemoCleanupDialog,
   openDemoCleanupDialog,
 } from "./modules/common/demoCleanupDialog.js";
@@ -215,8 +219,12 @@ export function bootHeader(deps) {
     isSessionRunning: () => Boolean(deps.getActiveSession?.()),
   });
 
+  // Settings' Connected accounts. What shows the connection is repainted after a clear or revoke.
+  initConnectedAccountsDialog({ t: deps.t, onChanged: () => deps.onAccountsChanged?.() });
+
   initApplicationHeader({
     ...deps,
+    openConnectedAccounts: openConnectedAccountsDialog,
     openFeedbackRoute: openFeedbackRouteDialog,
     openTrainerDetails: openTrainerDetailsDialog,
     openAppVersion: openAppVersionDialog,

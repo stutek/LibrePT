@@ -605,6 +605,8 @@ async function init() {
     onProgramImported: openImportedProgramme,
     saveToLocalStorage: saveState,
     changeLanguage,
+    // A connected account cleared or revoked in Settings: the header cloud shows the connection.
+    onAccountsChanged: () => renderSyncBadge(),
     navigateToPath,
     urlFor,
     getActiveSession: () => getActiveSession(),
