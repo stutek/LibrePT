@@ -68,6 +68,7 @@ export function renderEditSessionView(targetElement) {
             <div>
               <label for="setup-end-time" data-i18n="label_end_time">End Time *</label>
               <input type="text" id="setup-end-time" class="form-control" placeholder="10:00" required>
+              <p class="form-error" id="setup-end-time-error" hidden></p>
             </div>
           </div>
 

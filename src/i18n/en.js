@@ -103,6 +103,7 @@ export const en = {
   label_session_date: "Date",
   label_start_time: "Start Time",
   label_end_time: "End Time",
+  end_before_start: "The session ends before it starts. Check the end time.",
   time_field_later: "Five minutes later",
   time_field_earlier: "Five minutes earlier",
   time_field_set: "Set {time}",

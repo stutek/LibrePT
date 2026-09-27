@@ -513,6 +513,26 @@ function clearNameWordProblem(field) {
   }
 }
 
+/** True when the end comes after the start. An end of 00:00 is midnight, the one end that may be
+ *  "earlier" than the start; any other one is a typing slip (18:00–09:00), and a session saved like
+ *  that computes every countdown and duration wrong. Said at the field, like the name check. */
+function endComesAfterStart(t) {
+  const field = document.getElementById("setup-end-time");
+  if (!field) return true;
+  clearNameWordProblem(field);
+  const start = clockToMinutes(document.getElementById("setup-start-time")?.value.trim() || "");
+  const end = clockToMinutes(field.value);
+  if (start === null || end === null || end > start || end === 0) return true;
+  field.classList.add("is-invalid");
+  const line = document.getElementById("setup-end-time-error");
+  if (line) {
+    line.textContent = t("end_before_start");
+    line.hidden = false;
+  }
+  field.focus();
+  return false;
+}
+
 /** True when the form may be saved: neither the session's name nor its location names a client. */
 function sessionTextNamesNobody(deps) {
   const words = clientNameWords(deps.getState?.().clients || []);
@@ -581,6 +601,7 @@ export function setupEditSessionControl() {
     // Before the participant checks: a field problem is shown ON the field, and a trainer should see
     // that rather than a dialog about something else.
     if (!sessionTextNamesNobody(deps)) return;
+    if (!endComesAfterStart(deps.t)) return;
 
     const clientRoutines = collectSelectedClientRoutines();
     const { t } = deps;

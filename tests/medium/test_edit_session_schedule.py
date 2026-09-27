@@ -5,6 +5,8 @@
 # the double-booking readout under it — not what saving one does, which is a full-flow concern and
 # stays in tests/e2e/.
 
+import re
+
 from playwright.sync_api import expect
 
 from tests.conftest import answer_app_questions, app_question_messages, frozen_today_iso
@@ -103,6 +105,23 @@ def test_a_session_being_edited_does_not_clash_with_itself(page, local_server):
     )
 
     expect(page.locator("#setup-schedule-conflicts")).to_be_hidden()
+
+
+def test_an_end_before_the_start_is_refused_at_the_field(page, local_server):
+    """18:00 to 09:00 was saved without a word: a session nine hours long in the minus, and every
+    countdown and duration computed from it wrong. An end of 00:00 is midnight and stays allowed."""
+    load_with_stub(
+        page, local_server, setup_stub(SCHEDULED_SESSION, target_session="'s-edit'")
+    )
+    page.fill("#setup-start-time", "18:00")
+    page.fill("#setup-end-time", "09:00")
+    page.locator("#form-workout-setup button[type=submit]").click()
+
+    expect(page.locator("#setup-end-time")).to_have_class(re.compile("is-invalid"))
+    expect(page.locator("#setup-end-time-error")).to_have_text(
+        "The session ends before it starts. Check the end time."
+    )
+    expect(page.locator("#form-workout-setup")).to_be_visible()
 
 
 def fill_slot(page, start, end, location):

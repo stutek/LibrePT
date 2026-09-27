@@ -119,6 +119,7 @@ export const sl = {
   label_session_date: "Datum",
   label_start_time: "Začetni čas",
   label_end_time: "Končni čas",
+  end_before_start: "Trening se konča, preden se začne. Preveri uro konca.",
   time_field_later: "Pet minut pozneje",
   time_field_earlier: "Pet minut prej",
   time_field_set: "Nastavi {time}",
