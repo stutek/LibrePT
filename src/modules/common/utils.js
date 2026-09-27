@@ -147,9 +147,37 @@ export function escapeHTML(value) {
 // Render formatted client name, appending warning icon if they have injuries. The icon's name comes
 // from the caller in the trainer's language (`injuryLabel`); what the injury IS shows on the
 // clipboard's banner when that client is picked, and on their profile — never only in a hover.
-export function getClientDisplayNameHTML(client, isShort = false, injuryLabel = "Injury recorded") {
+// The short form a tab shows: the first word of the name, and the surname's initial when another
+// client on the same screen (`others`) shares that first word — "Ana K." and "Ana N." rather than
+// two tabs both reading "Ana", where a set logged on the wrong one goes to the wrong person. The
+// full name when even the initials clash.
+function shortClientName(client, others) {
+  const words = (name) =>
+    String(name || "")
+      .trim()
+      .split(/\s+/);
+  const initialForm = (parts) => `${parts[0]} ${parts[parts.length - 1][0]}.`;
+  const own = words(client.name);
+  const clashing = others.filter(
+    (other) => other && other.id !== client.id && words(other.name)[0] === own[0],
+  );
+  if (clashing.length === 0 || own.length < 2) return own[0];
+  const initials = initialForm(own);
+  const stillClashes = clashing.some((other) => {
+    const parts = words(other.name);
+    return parts.length > 1 && initialForm(parts) === initials;
+  });
+  return stillClashes ? client.name : initials;
+}
+
+export function getClientDisplayNameHTML(
+  client,
+  isShort = false,
+  injuryLabel = "Injury recorded",
+  others = [],
+) {
   if (!client) return "";
-  const baseName = isShort ? client.name.split(" ")[0] : client.name;
+  const baseName = isShort ? shortClientName(client, others) : client.name;
   // The alias rides along with the name EVERYWHERE the name is rendered, which is the whole point
   // of having one: it exists because two clients share a name, so showing it only on the profile
   // page would leave every list — the one place the two actually sit side by side — ambiguous.

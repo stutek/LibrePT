@@ -98,6 +98,27 @@ def test_logging_once_counts_for_everyone_bound(page, local_server):
     assert logged == [True, True]
 
 
+def test_two_clients_who_share_a_first_name_are_told_apart_on_their_tabs(
+    page, local_server
+):
+    """A tab showed only the first word of the name, so "Jane Doe" and "Jane Novak" were both
+    "Jane", and a set logged on the wrong one goes to the wrong person without a trace."""
+    page.set_viewport_size({"width": 390, "height": 844})
+    rename = (
+        "state.clients.find((client) => client.id === '%s').name = 'Jane Novak';\n"
+        "renderActiveGroupBoard();\n" % JOHN
+    )
+    load_with_stub(
+        page,
+        local_server,
+        clipboard_stub(_two_participant_session(), extra_body=rename),
+    )
+    page.wait_for_selector("#active-session-overlay:not(.hidden)")
+
+    names = page.locator(".client-tab-participant .client-tab-name").all_inner_texts()
+    assert sorted(name.strip() for name in names) == ["Jane D.", "Jane N."], names
+
+
 def test_the_control_says_which_way_it_will_go(page, local_server):
     """Bound, the row still read "Everyone on this plan", so the way back was a row that said the
     opposite of what it would do."""

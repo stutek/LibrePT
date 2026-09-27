@@ -63,6 +63,8 @@ export function renderActiveUsersList(tabsContainer, activeSession, ctx) {
   const bound = boundGroupTab(activeSession, ctx);
   if (bound) tabsContainer.appendChild(bound);
 
+  // Everyone on this session, so a tab can tell two clients who share a first name apart.
+  const participants = activeSession.participants.map((id) => clients.find((c) => c.id === id));
   for (const pId of activeSession.participants) {
     if (isBound(activeSession, pId)) continue;
     const client = clients.find((c) => c.id === pId);
@@ -85,7 +87,7 @@ export function renderActiveUsersList(tabsContainer, activeSession, ctx) {
       <div class="avatar client-tab-avatar ${isActive ? "active" : ""}">
         ${escapeHTML(client.avatar || getInitials(client.name))}
       </div>
-      <span class="client-tab-name">${getClientDisplayNameHTML(client, true, t("injury_mark_label"))}</span>
+      <span class="client-tab-name">${getClientDisplayNameHTML(client, true, t("injury_mark_label"), participants)}</span>
     `;
 
     tab.addEventListener("click", () => {
