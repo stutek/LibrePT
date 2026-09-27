@@ -6099,3 +6099,13 @@ before the first draw for the same reason, so the trainer is no longer kept behi
 **What is left:** the migration (or the card) must give a session with no participants an empty
 list, and a test must pin that the boot reaches its end on that database. Not built in §81.1: it is
 a separate defect with its own test.
+
+## 85. [ ] BUG — the rendered landing page shows a developer comment as text
+
+**Found 2026-09-27 (Claude) during §82.2.** `docs/LANDING.md` holds an HTML comment explaining why
+its three demo links are absolute. `agent_tools/render_docs.py` escapes it instead of dropping it, so
+`src/landing.html` shows it to every visitor as a paragraph starting `<!-- The three demo links…`.
+
+**What is left:** the renderer drops HTML comments (or the note moves out of the page), and the
+render check pins that no rendered page contains `&lt;!--`. Every page render_docs writes has the
+same exposure, not only this one.
