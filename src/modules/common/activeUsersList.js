@@ -85,7 +85,7 @@ export function renderActiveUsersList(tabsContainer, activeSession, ctx) {
       <div class="avatar client-tab-avatar ${isActive ? "active" : ""}">
         ${escapeHTML(client.avatar || getInitials(client.name))}
       </div>
-      <span class="client-tab-name">${getClientDisplayNameHTML(client, true)}</span>
+      <span class="client-tab-name">${getClientDisplayNameHTML(client, true, t("injury_mark_label"))}</span>
     `;
 
     tab.addEventListener("click", () => {

@@ -37,6 +37,8 @@ export const de = {
   placeholder_search_clients: "Kunden suchen...",
   btn_add_client: "Neuer Kunde",
   notes_injuries: "Frühere Verletzungen und Notizen",
+  injury_mark_label: "Verletzung vermerkt",
+  notif_unread: "Ungelesen",
   goals: "Trainingsziele",
   create_exercise_title: "Eigene Übung anlegen",
   exercise_name_label: "Name der Übung *",

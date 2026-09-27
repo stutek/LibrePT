@@ -185,10 +185,19 @@ export function showClientDetails({
   }
 
   activeDetailClientId = clientId;
-  document.getElementById("detail-client-name").innerHTML = getClientDisplayNameHTML(client);
+  const injuryLabel = t("injury_mark_label");
+  document.getElementById("detail-client-name").innerHTML = getClientDisplayNameHTML(
+    client,
+    false,
+    injuryLabel,
+  );
   document.getElementById("detail-client-avatar").textContent =
     client.avatar || getInitials(client.name);
-  document.getElementById("profile-name").innerHTML = getClientDisplayNameHTML(client);
+  document.getElementById("profile-name").innerHTML = getClientDisplayNameHTML(
+    client,
+    false,
+    injuryLabel,
+  );
   document.getElementById("profile-joined-date").textContent =
     `${t("joined")} ${formatDateStr(client.joinedDate)}`;
   document.getElementById("profile-goals").textContent = client.goals || t("no_goals_specified");

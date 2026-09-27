@@ -57,7 +57,7 @@ export function renderClientsViewShell() {
       <div class="sessions-timeline mb-6" id="sessions-categories-grid" role="region" aria-label="Sessions"></div>
 
       <!-- Floating "Create Session" button: stays visible while scrolling the sessions list -->
-      <button id="btn-create-session" class="btn primary-btn floating-action-btn" aria-label="Create Session" title="Create Session">
+      <button id="btn-create-session" class="btn primary-btn floating-action-btn">
         <i class="fa-solid fa-plus"></i> <span data-i18n="btn_create_session">Create Session</span>
       </button>
     </section>

@@ -114,7 +114,7 @@ function renderFirstRunInvitation(container, t, escapeHTML, summaryEls, deps) {
           <i class="fa-solid fa-wand-magic-sparkles"></i>
         </div>
         <div class="notification-card-content">
-          <h4 class="notification-card-title">${escapeHTML(t("notif_seed_demo_title"))} <span class="unread-dot" title="Unread"></span></h4>
+          <h4 class="notification-card-title">${escapeHTML(t("notif_seed_demo_title"))} <span class="unread-dot" role="img" aria-label="${escapeHTML(t("notif_unread"))}"></span></h4>
           <p class="notification-card-desc">${escapeHTML(t("notif_seed_demo_desc"))}</p>
           ${buildChapterIndexHTML(deps.storyChapters, t, escapeHTML)}
           <div class="notification-actions">
@@ -193,7 +193,9 @@ function buildNotificationCardHTML(item, escapeHTML, t) {
           ${item.actions.map((act) => buildNotificationActionHTML(act, item.id, escapeHTML)).join("")}
         </div>`
       : "";
-  const unreadDot = !item.read ? `<span class="unread-dot" title="Unread"></span>` : "";
+  const unreadDot = !item.read
+    ? `<span class="unread-dot" role="img" aria-label="${escapeHTML(t("notif_unread"))}"></span>`
+    : "";
 
   return `
       <div class="notification-card ${escapeHTML(item.type)} ${!item.read ? "unread" : "read"}" data-notification-id="${escapeHTML(item.id)}">

@@ -37,6 +37,8 @@ export const sl = {
   placeholder_search_clients: "Išči stranke...",
   btn_add_client: "Dodaj stranko",
   notes_injuries: "Predhodne poškodbe in opombe",
+  injury_mark_label: "Zabeležena poškodba",
+  notif_unread: "Neprebrano",
   goals: "Cilji treninga",
   create_exercise_title: "Ustvari vajo po meri",
   exercise_name_label: "Ime vaje *",

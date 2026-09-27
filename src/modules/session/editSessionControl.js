@@ -849,7 +849,7 @@ function buildParticipantRow(client, ctx) {
 
   const nameLabel = document.createElement("span");
   nameLabel.className = "participant-name";
-  nameLabel.innerHTML = getClientDisplayNameHTML(client);
+  nameLabel.innerHTML = getClientDisplayNameHTML(client, false, t("injury_mark_label"));
 
   const select = document.createElement("select");
   select.className = "form-control select-routine-dropdown";
@@ -972,7 +972,7 @@ function renderParticipantMatches(query) {
     button.type = "button";
     button.className = "participant-match";
     button.dataset.clientId = client.id;
-    button.innerHTML = `<span>${deps.getClientDisplayNameHTML(client)}</span><i class="fa-solid fa-plus" aria-hidden="true"></i>`;
+    button.innerHTML = `<span>${deps.getClientDisplayNameHTML(client, false, deps.t("injury_mark_label"))}</span><i class="fa-solid fa-plus" aria-hidden="true"></i>`;
     button.addEventListener("click", () => {
       addParticipant(client);
       clearParticipantSearch();

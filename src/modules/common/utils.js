@@ -144,8 +144,10 @@ export function escapeHTML(value) {
     .replace(/'/g, "&#039;");
 }
 
-// Render formatted client name, appending warning icon if they have injuries
-export function getClientDisplayNameHTML(client, isShort = false) {
+// Render formatted client name, appending warning icon if they have injuries. The icon's name comes
+// from the caller in the trainer's language (`injuryLabel`); what the injury IS shows on the
+// clipboard's banner when that client is picked, and on their profile — never only in a hover.
+export function getClientDisplayNameHTML(client, isShort = false, injuryLabel = "Injury recorded") {
   if (!client) return "";
   const baseName = isShort ? client.name.split(" ")[0] : client.name;
   // The alias rides along with the name EVERYWHERE the name is rendered, which is the whole point
@@ -153,7 +155,7 @@ export function getClientDisplayNameHTML(client, isShort = false) {
   // page would leave every list — the one place the two actually sit side by side — ambiguous.
   const nameText = client.alias ? `${baseName} (${client.alias})` : baseName;
   if (client.hasInjury) {
-    return `<span class="client-name-with-injury">${escapeHTML(nameText)} <i class="fa-solid fa-triangle-exclamation client-name-injury-mark" title="Has recorded injury: ${escapeHTML(client.injury || client.notes || "")}"></i></span>`;
+    return `<span class="client-name-with-injury">${escapeHTML(nameText)} <i class="fa-solid fa-triangle-exclamation client-name-injury-mark" role="img" aria-label="${escapeHTML(injuryLabel)}"></i></span>`;
   }
   return escapeHTML(nameText);
 }

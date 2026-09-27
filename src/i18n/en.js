@@ -21,6 +21,8 @@ export const en = {
   placeholder_search_clients: "Search clients...",
   btn_add_client: "Add Client",
   notes_injuries: "Pre-existing Injuries & Notes",
+  injury_mark_label: "Injury recorded",
+  notif_unread: "Unread",
   goals: "Training Goals",
   create_exercise_title: "Create Custom Exercise",
   exercise_name_label: "Exercise Name *",

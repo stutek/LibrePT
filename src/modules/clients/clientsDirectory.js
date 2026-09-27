@@ -42,7 +42,7 @@ export function renderClientsDirectory(container, deps) {
       <div class="client-info-block">
         <div class="avatar">${escapeHTML(client.avatar || getInitials(client.name))}</div>
         <div class="client-name-meta">
-          <h3>${getClientDisplayNameHTML(client)}</h3>
+          <h3>${getClientDisplayNameHTML(client, false, t("injury_mark_label"))}</h3>
           <p>${escapeHTML(truncateString(client.goals, 45))}</p>
         </div>
       </div>
