@@ -6059,6 +6059,28 @@ obliko. Preizkus naj vzorčne programe naloži v slovenščini in zahteva, da no
 `reps` ni angleški niz iz `routines.js`. Opaženo na objavljeni različici `0625bd6`; tabela na
 `main` je ista.
 
+### 80.15 [ ] P3 — Oznaka v glavi piše »PREVIEW« in »DEMO«, čeprav prevod obstaja
+
+**Scenarij in koraki:** trener v slovenskem vmesniku zapre peskovnik prek menija ☰ z
+»Zapusti peskovnik« in pogleda oznako levo od številke različice.
+
+**Opaženo:** oznaka se glasi »PREVIEW«. V peskovniku je pisala »PESKOVNIK«, torej je prevod
+tam upoštevan, tu pa ne. Z naloženimi vzorčnimi podatki piše »DEMO«.
+
+**Težava in vpliv:** dve angleški besedi v glavi slovenske aplikacije, in prav ob mestu, ki
+naj bi povedalo, da to še ni končni izdelek. Slovenski trener »PREVIEW« ne prebere nujno kot
+»predogled«.
+
+**Vzrok, potrjen v kodi na `main`:** [applicationHeader.js](src/modules/common/applicationHeader.js)
+vpiše oznako z `textContent`: za peskovnik prek `t("sandbox_badge")`, za drugi dve stanji pa
+dobesedno »DEMO« in »PREVIEW«. Ključ `preview_badge` je preveden v `en`, `sl` in `de` in je v
+[domMappings.js](src/i18n/domMappings.js) pripet na `#preview-badge-label`, tako da prevod
+nastane in ga ta vrstica takoj prepiše; za »DEMO« ključa ni nikjer.
+
+**Predlog in preverjanje:** obe stanji peljati prek `t(...)`, dodati ključ za »DEMO« v vse tri
+jezike in v preizkusu glave zahtevati, da oznaka v slovenščini ni angleška beseda. Opaženo na
+objavljeni različici `0625bd6`; koda na `main` je ista.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
