@@ -6470,6 +6470,30 @@ angleških besed. Paziti, da preverjanje primerja vpisano besedo z besedo TRENUT
 Preizkus naj v vseh treh jezikih zahteva, da se gumb odklene z besedo tistega jezika. Opaženo na
 objavljeni različici `0625bd6`; koda na `main` je ista.
 
+### 80.31 [ ] P2 — Po izbrisu stranke profil še vedno kaže ime, telefon in cilje
+
+**Scenarij in koraki:** v profilu stranke »Ana Kovač« pritisniti »Izbriši stranko (GDPR)«,
+vpisati potrditveno besedo in pritisniti »Izbriši dokončno«.
+
+**Opaženo:** okno se zapre, pod njim pa stoji nespremenjen profil: »Ana Kovač«, »+386 40 111
+222«, cilji in zapiski. Šele po osvežitvi strani piše »Client #DBV3KK«, cilji so prazni in
+zgoraj stoji »Izbrisano 2026-09-27 na zahtevo stranke. Spodnji zapisi treningov so anonimni.«
+
+**Kaj je v redu:** izbris sam je opravljen do konca. Po osvežitvi imena in telefonske številke
+ni nikjer — ne na plošči, ne v zgodovini, ne v shrambi brskalnika (iskano po nizu v
+`localStorage`). Zapisi treningov ostanejo brez osebe, kot okno obljubi.
+
+**Težava in vpliv:** trener po nepovratnem dejanju vidi zaslon, ki pravi, da se ni nič zgodilo.
+Lahko ga ponovi ali pa sklene, da izbris ni uspel. Če je stranka ob njem — izbris se zgodi
+prav na njeno zahtevo — vidi svoje ime in telefonsko številko na zaslonu, potem ko ju je dala
+izbrisati.
+
+**Vzrok:** isti razred kot §80.29 — dejanje spremeni podatke, pogled nad njimi se ne izriše
+znova. Popravek naj po izbrisu izriše profil (ali se vrne v imenik) iz novega stanja.
+
+**Preverjanje:** preizkus naj po izbrisu, brez osvežitve, zahteva, da imena in telefonske
+številke ni več na zaslonu. Opaženo na objavljeni različici `0625bd6`.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
