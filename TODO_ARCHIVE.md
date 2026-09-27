@@ -4454,3 +4454,13 @@ shape, which needs no Google account. The reason it survives at all is that a se
 strangers change at once needs a place where state lives outside one phone, and that place is the
 paid tier's, not this app's. It continues in the private `~/Projects/EnterprisePT` project, `TODO.md`
 §11 and §19. What stays here is §45.13: the trainer names the time and sends the client an `.ics`.
+
+### 82.2 [x] Remove every reference into TODO.md, then make one fail the build — done 2026-09-27
+
+One directory per commit, after §81, which rewrites many of the same files in `src/`. A reference
+that only tags a comment (`(TODO §45.2)`) is deleted. A reference that carries the reason ("see TODO
+§29 for why") is replaced by the reason, written where it is needed. The check that fails the build
+on a reference into TODO.md lands in the commit that removes the last one; before that it would fail
+every run.
+
+**Done 2026-09-27 (Claude), commits `14995f0` (src), `3ba641d` (tests), `8da80f0` (documents), `96afe34` (tools and the check); `build check` ran once on the whole tree, green 05:13–05:22.** Done by subagents, one per directory, reading each section before rewriting a sentence that needed it. Several pointers named the wrong section and were corrected rather than carried over; one was on screen — the erasure checklist told the trainer "(TODO §1.5)". `agent_tools/todo_refs.py` now fails the build on a new one. Found on the way: §85, the landing page shows a developer comment.

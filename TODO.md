@@ -6076,13 +6076,17 @@ stays allowed.
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#821-x-the-link-check-stops-scanning-todomd-and-its-archive--done-2026-09-26).
 
-### 82.2 [ ] Remove every reference into TODO.md, then make one fail the build
+### 82.2 [x] Remove every reference into TODO.md, then make one fail the build — done 2026-09-27
 
-One directory per commit, after §81, which rewrites many of the same files in `src/`. A reference
-that only tags a comment (`(TODO §45.2)`) is deleted. A reference that carries the reason ("see TODO
-§29 for why") is replaced by the reason, written where it is needed. The check that fails the build
-on a reference into TODO.md lands in the commit that removes the last one; before that it would fail
-every run.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#822-x-remove-every-reference-into-todomd-then-make-one-fail-the-build--done-2026-09-27).
+
+### 82.3 [ ] Five pointers left in the dev server's own file — blocked on a restart
+
+`deploy/local_http_server.py` keeps five pointers into TODO in its comments, and
+`agent_tools/todo_refs.py` exempts it. The test suite refuses to run against a dev server whose copy
+of that file differs from the working tree, and the server on :8081 has been running since
+2026-09-23; restarting it is Simon's call. **Blocks:** removing the last exemption. When the server
+is next restarted, remove the pointers and the exemption in one change.
 
 ## 84. [ ] BUG — a session from an old database stops the boot at the first draw
 
