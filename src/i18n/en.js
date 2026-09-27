@@ -732,7 +732,7 @@ export const en = {
   program_import_title: "Import a programme",
   program_import_lede:
     "Paste a programme written somewhere else — a chat window, a spreadsheet, a colleague's file. It opens in the ordinary plan editor, where you fix anything that came through wrong.",
-  program_import_client: "For whom (optional)",
+  program_import_client: "For whom",
   program_import_session: "Which session (optional)",
   program_import_text: "Paste the programme here",
   program_import_file: "Read a file",
@@ -741,7 +741,7 @@ export const en = {
   program_import_prompt_copied: "Prompt copied",
   program_import_prompt_text:
     'Write the training programme as JSON in this exact shape, and nothing else: {"format": "{format}", "title": "Session name", "items": [{"name": "Back Squat", "sets": 3, "reps": 5, "weight": 60, "unit": "kg"}, {"rest": 90}]}. Use one item per movement, in the order they are performed, and a {"rest": seconds} item wherever there is a pause.',
-  program_import_no_client: "Nobody in particular",
+  program_import_no_client: "Choose a client",
   program_import_no_session: "No session yet",
   program_import_open: "Open in the editor",
   program_import_read: "{count} items read, {custom} of them not in your catalogue.",

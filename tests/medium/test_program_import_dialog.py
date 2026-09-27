@@ -126,6 +126,7 @@ def test_the_lines_that_could_not_be_read_are_all_listed_with_their_position(
     expect(report).to_contain_text("1 could not be read")
     expect(report).to_contain_text("2:")
     # ...and the rest is still worth having: item 7 being unreadable must not lose items 1-6.
+    page.select_option("#program-import-client", index=1)
     expect(page.locator("#program-import-open")).to_be_enabled()
 
 
@@ -136,6 +137,20 @@ def test_the_format_can_be_looked_at_rather_than_interpreted(page, local_server)
     page.click("#program-import-template")
 
     expect(page.locator("#program-import-report")).to_contain_text("items read")
+
+
+def test_a_programme_opens_only_for_a_client_the_trainer_chose(page, local_server):
+    """ "Nobody in particular" opened the editor on the first client anyway, beside that person's
+    health notes. The editor needs a client, so the trainer chooses one; nothing chooses for them."""
+    _open(page, local_server)
+    _paste(page, GOOD)
+
+    expect(page.locator("#program-import-client option").first).to_have_text(
+        "Choose a client"
+    )
+    expect(page.locator("#program-import-open")).to_be_disabled()
+    page.select_option("#program-import-client", index=1)
+    expect(page.locator("#program-import-open")).to_be_enabled()
 
 
 def test_opening_hands_over_the_plan_and_who_it_is_for(page, local_server):
@@ -163,6 +178,7 @@ def test_a_movement_the_catalogue_does_not_have_is_marked_in_the_editor(
     quietly becomes forty spellings of one movement."""
     _open(page, local_server)
     _paste(page, GOOD)
+    page.select_option("#program-import-client", index=1)
 
     page.click("#program-import-open")
 

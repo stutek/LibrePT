@@ -87,11 +87,14 @@ export function renderProgramImportDialog() {
   );
 }
 
-function fillChoices(select, rows, placeholder) {
+function fillChoices(select, rows, placeholder, { required = false } = {}) {
   select.textContent = "";
   const none = document.createElement("option");
   none.value = "";
   none.textContent = placeholder;
+  // A required choice's placeholder asks for one and cannot itself be chosen.
+  none.disabled = required;
+  none.selected = true;
   select.appendChild(none);
   for (const row of rows) {
     const option = document.createElement("option");
@@ -148,8 +151,17 @@ function readCurrent() {
     result.items = matchAgainstCatalog(result.items, libraryExercises(state));
   }
   renderReport(result);
-  document.getElementById("program-import-open").disabled = !result.ok;
+  syncOpenButton(result.ok);
   return result.ok ? result : null;
+}
+
+// The editor opens on a client's plan, so it opens only once the trainer has chosen whose. "Nobody
+// in particular" used to be offered and opened the first client anyway, beside their health notes.
+let programReadable = false;
+function syncOpenButton(readable = programReadable) {
+  programReadable = readable;
+  const chosen = Boolean(document.getElementById("program-import-client").value);
+  document.getElementById("program-import-open").disabled = !(readable && chosen);
 }
 
 export function setupProgramImportDialog() {
@@ -189,6 +201,10 @@ export function setupProgramImportDialog() {
       textArea.value = t("program_import_prompt_text").replace("{format}", PROGRAM_FORMAT);
     }
   });
+
+  document
+    .getElementById("program-import-client")
+    .addEventListener("change", () => syncOpenButton());
 
   document.getElementById("program-import-open").addEventListener("click", () => {
     const result = readCurrent();
@@ -242,6 +258,7 @@ export function openProgramImportDialog() {
         label: client.name,
       })),
     t("program_import_no_client"),
+    { required: true },
   );
   fillChoices(
     document.getElementById("program-import-session"),
@@ -254,6 +271,7 @@ export function openProgramImportDialog() {
 
   document.getElementById("program-import-text").value = "";
   document.getElementById("program-import-report").classList.add("hidden");
+  programReadable = false;
   document.getElementById("program-import-open").disabled = true;
   openModal("dialog-program-import");
 }

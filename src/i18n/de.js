@@ -728,7 +728,7 @@ export const de = {
   program_import_title: "Programm importieren",
   program_import_lede:
     "Füge ein Programm ein, das woanders geschrieben wurde — in einem Chatfenster, einer Tabelle, der Datei eines Kollegen. Es öffnet sich im normalen Plan-Editor, wo du korrigierst, was falsch angekommen ist.",
-  program_import_client: "Für wen (freiwillig)",
+  program_import_client: "Für wen",
   program_import_session: "Welches Training (freiwillig)",
   program_import_text: "Programm hier einfügen",
   program_import_file: "Datei lesen",
@@ -737,7 +737,7 @@ export const de = {
   program_import_prompt_copied: "Prompt kopiert",
   program_import_prompt_text:
     'Schreib das Trainingsprogramm als JSON in genau dieser Form und sonst nichts: {"format": "{format}", "title": "Name des Trainings", "items": [{"name": "Back Squat", "sets": 3, "reps": 5, "weight": 60, "unit": "kg"}, {"rest": 90}]}. Verwende ein Element pro Übung, in der Reihenfolge der Ausführung, und ein {"rest": Sekunden}-Element überall dort, wo eine Pause ist.',
-  program_import_no_client: "Niemand Bestimmtes",
+  program_import_no_client: "Kunden auswählen",
   program_import_no_session: "Noch kein Training",
   program_import_open: "Im Editor öffnen",
   program_import_read: "{count} Elemente gelesen, davon {custom} nicht in deinem Katalog.",

@@ -1172,13 +1172,14 @@ function launchClipboardDirectly(arg, options = {}) {
  */
 function openImportedProgramme({ title, items, clientId, sessionId }) {
   const state = getState();
-  const client =
-    state.clients.find((row) => row.id === clientId) || state.clients.find((row) => row.active);
+  // The dialog asks whose plan this is; nothing picks a client for the trainer.
+  const client = state.clients.find((row) => row.id === clientId);
+  if (!client) return;
   const routineId = state.routines[0]?.id || "";
   const sessionName = title || t("program_import_title");
 
   startWorkoutSession(
-    [{ clientId: client?.id, routineId }],
+    [{ clientId: client.id, routineId }],
     {
       id: sessionId || newRecordId(),
       isPlanning: !sessionId,

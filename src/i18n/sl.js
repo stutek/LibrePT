@@ -688,7 +688,7 @@ export const sl = {
   program_import_title: "Uvozi program",
   program_import_lede:
     "Prilepi program, napisan drugje — v klepetu, preglednici, datoteki od kolega. Odpre se v običajnem urejevalniku načrta, kjer popraviš, kar je prišlo narobe.",
-  program_import_client: "Za koga (neobvezno)",
+  program_import_client: "Za koga",
   program_import_session: "Kateri trening (neobvezno)",
   program_import_text: "Prilepi program sem",
   program_import_file: "Preberi datoteko",
@@ -697,7 +697,7 @@ export const sl = {
   program_import_prompt_copied: "Navodilo kopirano",
   program_import_prompt_text:
     'Napiši program vadbe kot JSON točno v tej obliki in nič drugega: {"format": "{format}", "title": "Ime treninga", "items": [{"name": "Počep", "sets": 3, "reps": 5, "weight": 60, "unit": "kg"}, {"rest": 90}]}. Za vsako vajo ena postavka, v vrstnem redu izvajanja, in postavka {"rest": sekunde} povsod, kjer je odmor.',
-  program_import_no_client: "Nikogar posebej",
+  program_import_no_client: "Izberi stranko",
   program_import_no_session: "Zaenkrat brez treninga",
   program_import_open: "Odpri v urejevalniku",
   program_import_read: "Prebranih {count} postavk, {custom} jih ni v tvojem katalogu.",
