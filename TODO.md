@@ -6236,8 +6236,9 @@ lastnim besedilom opombe ostane; to je tisto, kar trener res napiše.
   ki trdijo, da imajo posnetek**: posnetka ni bilo nikoli, zato naj se oznaka o datoteki nikjer več
   ne izriše.
 
-**Preverjanje:** preizkus naj v delovnem prostoru odpre okno z opombami in zahteva, da gumba za
-snemanje ni; v peskovniku pa, da vstavljeno besedilo vsebuje oznako, da je primer. Opaženo na
+**Preverjanje:** preizkus naj odpre okno z opombami in zahteva, da gumba za snemanje ni — tudi v
+peskovniku ne. (Prvotno je ta vrstica zahtevala v peskovniku primer besedila; po odločitvi pot
+odpade povsod, zato tudi tam ni ničesar, kar bi bilo treba označiti.) Opaženo na
 objavljeni različici `0625bd6`; koda na `main` je ista. Sorodno: §80.8 (prosta opomba brez
 ocene postane priporočilo) in zapis v [TODO_ARCHIVE.md](TODO_ARCHIVE.md) o imenu »voice_memo.wav«,
 ki mock omenja, ne pa tega, da si izmisli vsebino.
