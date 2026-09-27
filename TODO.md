@@ -6836,6 +6836,32 @@ naslednji korak (»Pritisni Pokaži obliko in primerjaj«). Preizkus naj v slove
 prilepi neustrezno besedilo in zahteva, da odgovor ni angleški. Opaženo na objavljeni različici
 `0625bd6`; koda na `main` je ista.
 
+### 80.45 [ ] P3 — »Nikogar posebej« pri uvozu programa vseeno izbere prvo stranko
+
+**Scenarij in koraki:** trener v »Uvozi program« pusti izbiro »Za koga« na privzetem
+»Nikogar posebej«, prilepi program v pravilni obliki (gumb »Pokaži obliko«) in pritisne »Odpri
+v urejevalniku«.
+
+**Opaženo:** urejevalnik se odpre z naslovom »Upper Body — Week 1« in podnaslovom »Nenačrtovano
+· **Test A**«, poleg pa s cilji in opombami o poškodbah te stranke. Test A je prva stranka v
+imeniku; trener je ni izbral.
+
+**Vzrok, potrjen v kodi na `main`:** [app.js](src/app.js), `openImportedProgramme` vzame
+`state.clients.find(row => row.id === clientId) || state.clients.find(row => row.active)` —
+brez izbire torej prvo dejavno stranko.
+
+**Kaj pri tem ni narobe:** nič se ne zapiše, dokler trener v urejevalniku ne shrani, in ime
+stranke je vidno. Zato P3 in ne več.
+
+**Težava:** možnost se imenuje »Nikogar posebej«, aplikacija pa vseeno izbere nekoga — in ob
+programu pokaže zdravstvene opombe osebe, ki z njim nima zveze. Aplikacija načrt brez stranke
+pozna (`isPlanning`), torej je to izvedljivo.
+
+**Predlog in preverjanje:** brez izbrane stranke naj se program odpre brez nje; polja o
+stranki naj ostanejo prazna, dokler je trener ne izbere. Preizkus naj uvozi program z
+»Nikogar posebej« in zahteva, da v glavi urejevalnika ni imena stranke. Opaženo na objavljeni
+različici `0625bd6`; koda na `main` je ista.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
