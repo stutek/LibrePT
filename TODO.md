@@ -6301,6 +6301,29 @@ desno in izberi Uredi načrt.« Popraviti v vseh treh jezikih in `aria-label` pe
 ki je takrat na zaslonu. Opaženo na objavljeni različici `0625bd6`; koda in zapisi na `main`
 so isti.
 
+### 80.24 [ ] P3 — Vabilo stranki govori o stranki kot o moškem, njena lastna stran pa kot o ženski
+
+**Scenarij in koraki:** trener v imeniku strank pritisne »Povabi stranko«.
+
+**Opaženo:** okno pravi »Svoje podatke in privolitev izpolni sam na svojem telefonu in ti jih
+pošlje nazaj«, polje se imenuje »Njegova telefonska številka ali e-naslov«, spodaj pa piše
+»Pokaži mu to kodo in ga prosi, naj vanjo usmeri kamero telefona«. Stran, ki jo stranka nato
+odpre, isto osebo nagovori v ženski obliki: »komu jo daš, pa izbereš sama«.
+
+**Težava in vpliv:** ena oseba je na trenerjevem zaslonu moški in na svojem ženska. Aplikacija
+je pri trenerju dosledno previdna (»Dobrodošel(-la)«), pri stranki pa ne, čeprav so med
+strankami v vzorčnih podatkih večinoma ženske.
+
+**Obseg, potrjen v kodi na `main`:** [sl.js](src/i18n/sl.js) — `intake_invite_body`,
+`intake_invite_contact_label`, `intake_invite_qr_hint` in `switch_participant_hint` (»njegov
+lasten načrt«) proti `intake_disclaimer` (»izbereš sama«).
+
+**Predlog in preverjanje:** te zapise ubesediti brez spola. Slovenščina to tu dopušča prek
+besede »stranka«: »Pokaži stranki to kodo in jo prosi …«, »Telefonska številka ali e-naslov
+stranke«, »Podatke in privolitev izpolni stranka na svojem telefonu«. Preizkus naj v slovenskih
+zapisih o stranki prepove »mu«, »ga«, »njegov« in »sam«. Opaženo na objavljeni različici
+`0625bd6`; zapisi na `main` so isti.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
