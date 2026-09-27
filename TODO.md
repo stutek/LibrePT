@@ -5637,7 +5637,10 @@ in poti se določijo šele iz vidnega vmesnika. Uporabiti ločene testne podatke
 `ana@example.invalid`, ciljem in opombo. Brez označene privolitve profil jasno pove
 »Brez privolitve (samo lokalno)«. »Načrtuj program« ohrani izbrano stranko.
 Termin »Uvodna vadba«, kraj »Telovadnica Center«, 10:00–10:45; iz kataloga dodan
-»Dumbbell Goblet Squat«. Izvedba, zaključek in ponovni pregled treninga še čakajo.
+»Dumbbell Goblet Squat« 3 × 10 × 8 kg, »Single-Arm Dumbbell Row« 3 × 10 × 6 kg
+in »Plank« 3 × 30s. Pri vsaki vaji so shranjene opombe s simuliranimi dejanskimi
+serijami; pri počepu tudi »Pretežko«. Po ponovnem odprtju je program še nenačrtovan.
+Naslednji korak je ustvariti termin prek »Ustvari trening« in preveriti izvedbo v njem.
 
 **Opažanje za nadaljnji preizkus:** ime »TEST Ana — prvi trening« in kraj
 »TEST Telovadnica« sta zavrnjena zaradi besede »TEST« v imenu stranke. Po popravku
@@ -5756,6 +5759,46 @@ za kršitev pravila projekta.
   [utils.test.mjs](tests/unit_js/modules/common/utils.test.mjs).
 
 **Še ni preizkušeno:** ponovni obisk po izbiri jezika.
+
+### 80.5 [ ] P1 — Vnos datuma in ure iz profila ne ustvari pričakovanega termina
+
+**Scenarij:** v profilu izbrati »Načrtuj program«. Obrazec »Načrtuj prihodnji program«
+poziva »Nastavi termin in kraj«. Vnesti ime, lokacijo in 10:00–10:45, ohraniti privzeti
+današnji datum, izbrati »Odpri v beležki«, dodati tri vaje in zaključiti urejanje.
+
+**Opaženo:** med urejanjem glava kaže »Nenačrtovano«, nato beležka kaže 10:00–10:45.
+Po zapiranju začetni seznam kaže »Ni načrtovanih treningov«, spodnja kartica pa ime,
+uro in »Načrtovanje«. Po ponovnem nalaganju obvestilo pove, da program še ni dodeljen
+treningu. Program in opombe ostanejo; izguba podatkov ni dokazana.
+
+**Vpliv:** trener po vnosu termina pričakuje vpis v urnik, vendar termina tam ni.
+Besedilo in polja ne pojasnijo dodatnega koraka dodelitve. Ovira dogovarjanje prvega
+termina brez poznavanja aplikacije.
+
+**Predlog:** jasno ločiti pripravo programa in rezervacijo termina. Po vnosu datuma,
+ure in lokacije ponuditi shranitev v urnik ali vidno omogočiti manjkajočo dodelitev.
+Preverjanje: pot iz profila se konča s kartico na izbranem dnevu ali z jasnim obvestilom,
+da termin ni rezerviran. Opaženo na objavljeni različici `0625bd6`, razvoj ni pregledan.
+
+### 80.6 [ ] P1 — Zgodovina zaključenih vadb kaže načrt in vse vaje kot preskočene
+
+**Scenarij:** v programu iz profila pripraviti tri vaje, v beležki shraniti opombo o
+dejanskih serijah za vsako vajo, pri počepu še »Pretežko«. Zapreti beležko, ponovno
+naložiti stran in iz menija odpreti »Zgodovina«.
+
+**Opaženo:** »Splošna zgodovina vadb« z opisom »Dnevnik vseh zaključenih vadb za vse
+stranke.« vsebuje isti »Načrtovan program«. Vsaka vaja kaže »PreskočenoPRESKOČENO«,
+tudi počep, ki je v beležki po povratnem signalu kazal »Completed«. Ime predloge ostane
+»Poljuben / Prazen načrt« kljub trem dodanim vajam. Obvestila ohranijo štiri povratne
+signale; torej ne gre za dokaz izgube vseh opomb. Prikaz je potrjen tudi ob nadaljevanju.
+
+**Vpliv:** trener iz zgodovine ne more zanesljivo sklepati, kaj je bilo načrtovano,
+izvedeno ali preskočeno. To ovira pregled napredka.
+
+**Predlog:** ločiti načrte od izvedb, neizvedenega načrta ne označiti kot preskočeno
+vadbo ter uskladiti stanja med beležko in zgodovino. Preveriti isto vajo kot samo
+načrtovano, dejansko opravljeno in izrecno preskočeno. Opaženo na objavljeni različici
+`0625bd6`; pot prek pravega termina še sledi, razvoj ni pregledan.
 
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
