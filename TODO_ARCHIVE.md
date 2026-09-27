@@ -4414,3 +4414,11 @@ same unresolved `planUpdates` the menu badge counts, and links to `/adjustments`
 the menu row and its badge (`app.js` updates the badge), and keep the route as the message's target.
 
 **Done 2026-09-27 (Claude), in commit `c3a057e` with §81.2:** the menu row and its badge are gone; `tests/e2e/test_view_split_navigation.py` reaches the view from the message and checks that its counts add up to the unresolved updates.
+
+### 81.7 [x] Remove the global History view — done 2026-09-27
+
+Simon ruled that a client's history is shown only on that client's page. The ☰ row is gone (§81.2);
+what is left is the view itself — `/history`, `historyView.js` and `renderGlobalHistory` — and the
+tests and the overflow walk entry that name it.
+
+**Done 2026-09-27 (Claude), commit `c7ab3a2`; `build check` green 04:02–04:12.** Finishing a session opened this view, so it now returns to the sessions list (chosen over a client's page, which a group session would have to pick one of). Planning drafts, which only this view listed, stay reachable through the notification area's resume message.

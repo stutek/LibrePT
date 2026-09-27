@@ -5900,11 +5900,9 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#812-x-the-menu-
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#813-x-pending-review-only-in-the-notification-area--done-2026-09-27).
 
-### 81.7 [ ] Remove the global History view — ruled 2026-09-26
+### 81.7 [x] Remove the global History view — done 2026-09-27
 
-Simon ruled that a client's history is shown only on that client's page. The ☰ row is gone (§81.2);
-what is left is the view itself — `/history`, `historyView.js` and `renderGlobalHistory` — and the
-tests and the overflow walk entry that name it. Next in line.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#817-x-remove-the-global-history-view--done-2026-09-27); what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ### 81.4 [ ] Import and export of exercises, routines and circuits in one place
 
