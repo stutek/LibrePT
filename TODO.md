@@ -6142,6 +6142,10 @@ vpiše »Ana«.
 še ni nikogar. Stranko poišči v polju zgoraj.« Aplikacija ima takrat nič strank, torej to
 polje ne more uspeti — pa tega ne pove in ne ponudi nobene poti do vpisa nove stranke.
 
+**Kaj se zgodi ob shranjevanju:** pritisk na »Odpri v beležki« odpre okno brskalnika z
+besedilom »Izbrati moraš vsaj eno stranko.« Trening torej brez stranke ne nastane, poti do
+stranke pa na tem zaslonu ni.
+
 **Težava in vpliv:** prvo opravilo novega trenerja je prvi trening s prvo stranko. Tu obstane:
 mora sam uganiti, da gre najprej v meni ☰ in »Seznam strank (klientov)«, se vrniti in začeti
 znova. Navodilo na zaslonu ga pošilja nazaj v polje, ki ne more delovati.
