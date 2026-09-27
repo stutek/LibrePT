@@ -6348,6 +6348,28 @@ znak jasno zavrniti; nikoli ga tiho izpustiti. Pri slovenski aplikaciji na brska
 en-US preveriti vnose »2,5«, »0,5« in »2.5« ter prikaz ob ponovnem odprtju načrta.
 Ugotovitev temelji samo na objavljenem vmesniku, brez preverjanja kode.
 
+### 80.58 [ ] P2 — Prvi termin tedenske serije ima dve enaki kartici
+
+**Scenarij in koraki:** ustvariti »Nedeljska moč«, Studio, 2026-10-18, 09:00–09:45,
+ponavljanje ob nedeljah do vključno 2026-11-01, udeleženec TEST Luka Kovač (večerni),
+rutina SIM Osnovna moč. Shraniti, zapreti neodposlana vabila in trening, pregledati seznam
+ter osvežiti stran. Namen scenarija je bil preveriti termine čez oktobrski premik ure.
+
+**Opaženo:** 2026-10-18 ima dve kartici »Nedeljska moč« z enakim časom in udeležbo.
+2026-10-25 in 2026-11-01 imata vsaka eno. Štiri kartice ostanejo tudi po osvežitvi.
+Obe prvi kartici odpreta isti naslov treninga (ID `034WBB1veZioyikcozc7gC`).
+To potrjuje podvojen prikaz, ne nastanka dveh zapisov v podatkovni zbirki.
+Vse tri nedelje pravilno ohranijo lokalno uro 09:00–09:45 v časovnem pasu Europe/Ljubljana.
+Preizkus na objavljeni `0625bd6`, Chrome CDP, 390 × 844, sl; brez zabeleženih napak.
+
+**Težava in vpliv:** trener vidi dva prekrivajoča se termina in lahko sklepa, da je
+trening ustvaril dvakrat. Ker oba vodita na isti trening, bi popravljanje domnevnega
+dvojnika lahko prizadelo načrtovani termin.
+
+**Predlog in preverjanje:** en termin naj ima eno kartico. Ponoviti opisano serijo in
+zahtevati tri kartice, po eno na vsako nedeljo, tudi po ponovnem nalaganju. Preverjeno
+samo prek vmesnika, brez branja kode; vzrok ni ugotovljen.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
