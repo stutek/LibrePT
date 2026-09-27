@@ -155,7 +155,18 @@ export const sl = {
   restore_preview_only_lost: "teh datoteka ne vsebuje in se ne morejo vrniti",
   backup_import_title: "Uvozi varnostno kopijo",
   backup_import_desc:
-    "Naloži obstoječo .json datoteko. To bo združilo ali prepisalo trenutno bazo.",
+    "Naloži varnostno kopijo .json. Vse na tej napravi zamenja s tem, kar je v datoteki.",
+  import_success: "Uvoz je uspel.",
+  import_success_upgraded:
+    "Uvoz je uspel. Podatki iz datoteke so preneseni naprej iz sheme {version}.",
+  import_reerased_one:
+    "{count} stranka v tej datoteki je bila že izbrisana in je znova anonimizirana.",
+  import_reerased_two:
+    "{count} stranki v tej datoteki sta bili že izbrisani in sta znova anonimizirani.",
+  import_reerased_few:
+    "{count} stranke v tej datoteki so bile že izbrisane in so znova anonimizirane.",
+  import_reerased_other:
+    "{count} strank v tej datoteki je bilo že izbrisanih in so znova anonimizirane.",
   restore_count_clients_one: "{count} stranka",
   restore_count_clients_two: "{count} stranki",
   restore_count_clients_few: "{count} stranke",

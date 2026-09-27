@@ -159,7 +159,18 @@ export const de = {
   restore_preview_only_lost: "diese sind nicht in der Datei und können nicht zurückkommen",
   backup_import_title: "Datensicherung importieren",
   backup_import_desc:
-    "Eine vorhandene .json-Sicherungsdatei laden. Das führt sie mit deiner aktuellen Datenbank zusammen oder überschreibt sie.",
+    "Eine .json-Sicherungsdatei laden. Sie ersetzt alles auf diesem Gerät durch den Inhalt der Datei.",
+  import_success: "Import erfolgreich.",
+  import_success_upgraded:
+    "Import erfolgreich. Die Daten der Datei wurden von Schema {version} übernommen.",
+  import_reerased_one:
+    "Kunden in dieser Datei, die bereits gelöscht waren und erneut anonymisiert wurden: {count}",
+  import_reerased_two:
+    "Kunden in dieser Datei, die bereits gelöscht waren und erneut anonymisiert wurden: {count}",
+  import_reerased_few:
+    "Kunden in dieser Datei, die bereits gelöscht waren und erneut anonymisiert wurden: {count}",
+  import_reerased_other:
+    "Kunden in dieser Datei, die bereits gelöscht waren und erneut anonymisiert wurden: {count}",
   restore_count_clients_one: "{count} Kunde",
   restore_count_clients_two: "{count} Kunden",
   restore_count_clients_few: "{count} Kunden",

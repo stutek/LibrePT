@@ -141,7 +141,18 @@ export const en = {
   restore_preview_only_lost: "these are not in the file and cannot come back",
   backup_import_title: "Import Data Backup",
   backup_import_desc:
-    "Load an existing .json backup file. This will merge or overwrite your current database.",
+    "Load a .json backup file. It replaces everything on this device with what is in the file.",
+  import_success: "Import successful.",
+  import_success_upgraded:
+    "Import successful. The file's data was brought forward from schema {version}.",
+  import_reerased_one:
+    "{count} client in this file had been erased before and was anonymised again.",
+  import_reerased_two:
+    "{count} clients in this file had been erased before and were anonymised again.",
+  import_reerased_few:
+    "{count} clients in this file had been erased before and were anonymised again.",
+  import_reerased_other:
+    "{count} clients in this file had been erased before and were anonymised again.",
   restore_count_clients_one: "{count} client",
   restore_count_clients_two: "{count} clients",
   restore_count_clients_few: "{count} clients",

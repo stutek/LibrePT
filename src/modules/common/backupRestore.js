@@ -71,20 +71,29 @@ async function applyRestoredState(restored) {
 // codebase keeps refusing to ship. If the erasure register filtered the incoming data, say so.
 function erasureNotice(reErased) {
   if (!reErased || reErased.length === 0) return "";
-  return `${reErased.length} previously-erased client(s) in this file were re-anonymised on import.`;
+  return countedText(deps.t, document.documentElement.lang, "import_reerased", reErased.length);
+}
+
+/** The status line after a successful import, in the trainer's language. */
+function importSuccessText(migrated, summary, reErased) {
+  return [
+    migrated
+      ? deps.t("import_success_upgraded").replace("{version}", String(summary.fromVersion))
+      : deps.t("import_success"),
+    erasureNotice(reErased),
+  ]
+    .filter(Boolean)
+    .join(" ");
 }
 
 function renderImportSuccess(summary, reErased) {
   const importStatus = document.getElementById("import-status");
   if (!importStatus) return;
-  importStatus.textContent = [
-    summary && summary.fromVersion !== summary.toVersion
-      ? `Import successful! Upgraded from schema ${summary.fromVersion}.`
-      : "Import successful! Database synchronized.",
-    erasureNotice(reErased),
-  ]
-    .filter(Boolean)
-    .join(" ");
+  importStatus.textContent = importSuccessText(
+    Boolean(summary && summary.fromVersion !== summary.toVersion),
+    summary,
+    reErased,
+  );
   importStatus.className = "status-msg text-emerald";
 }
 
@@ -502,15 +511,11 @@ export function setupBackupRestore() {
             deps.populateDropdownSelectors();
 
             if (importStatus) {
-              const migrated = summary.applied.length > 0;
-              importStatus.textContent = [
-                migrated
-                  ? `Import successful! Upgraded from schema ${summary.fromVersion}.`
-                  : "Import successful! Database synchronized.",
-                erasureNotice(reErased),
-              ]
-                .filter(Boolean)
-                .join(" ");
+              importStatus.textContent = importSuccessText(
+                summary.applied.length > 0,
+                summary,
+                reErased,
+              );
               importStatus.className = "status-msg text-emerald";
             }
           } else {

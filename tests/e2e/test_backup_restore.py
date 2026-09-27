@@ -119,7 +119,7 @@ def test_restore_migrates_an_old_backup(page, local_server):
     )
     # %g so a whole float renders as "0", matching what the app prints — an f-string would
     # produce "0.0" and never match.
-    assert f"Upgraded from schema {baseline_schema_version():g}" in (
+    assert f"brought forward from schema {baseline_schema_version():g}" in (
         page.locator("#import-status").inner_text()
     )
 

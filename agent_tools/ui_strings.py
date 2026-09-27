@@ -50,7 +50,7 @@ SRC = REPO_ROOT / "src"
 # labels (applicationHeader.js), then the intake page's language buttons, now built from the
 # registry's own language names (intakeView.js), then the global History view's title and
 # description, removed with the view (historyView.js).
-BASELINE = 121
+BASELINE = 116
 
 # Upstream files and the dictionaries themselves: the first are not ours to translate, the second
 # ARE the translations.
