@@ -53,8 +53,13 @@ Three roles, three real Gmail accounts. The addresses live in the private notes,
 | Role | What it is | Used for |
 | :--- | :--- | :--- |
 | `admin@` | A project-branded account, not a person | Owns the GCP project and is the consent screen's user support address |
-| `canary@` | **A ROLE, not a third account** — it is `test@` wearing this hat | The identity the CI canary runs as — the only account whose refresh token is stored anywhere |
-| `maintainer@` | The maintainer's own daily inbox | Google's developer contact for verification and deprecation notices. **Not a test identity** — ruled 2026-09-27: the maintainer's private account is never signed into a test, by hand or otherwise |
+| `test@` | A dedicated throwaway, holding nothing | Everything that is not administration: the CI canary, the hand checks, the only account whose refresh token is stored anywhere |
+
+**There is no third account.** The maintainer's own address appears twice below as DATA Google
+asks for — the forwarding target for `admin@`'s mail, and the developer contact on the consent
+screen — and never as an identity this project signs in with. **Ruled 2026-09-27: his private
+account is never signed into a test, by hand or otherwise.** Every other role named in this runbook
+— the canary, the hand tester — is a description of work, not an account: `test@` does all of it.
 
 **A human test account IS needed, and this was learned the hard way (2026-08-12).** The canary was
 built to run as a SERVICE account precisely so CI would never touch a person's data. That lasted one
@@ -64,15 +69,13 @@ Google removed service-account Drive storage quota. Neither remedy they publish 
 service account can read the Drive API and can never write to it**, so the canary runs as a real
 account (Part B).
 
-**There are TWO accounts, not three** (corrected 2026-09-27, Simon): the project account and the
-test account. `canary@` is the test account in its canary role — a separate throwaway was attempted
-on 2026-08-16 and Google's per-phone-number signup limit refused it, so the role moved to the
-account that already existed. Read every `canary@` below as "the test account". It is the right
-identity for Part B
+**`test@` was created 2026-08-16**, after Google's per-phone-number signup limit refused an earlier
+attempt at a second throwaway — which is why one test account carries every non-administrative role.
+It is the right identity for Part B
 even though `admin@` would work. The canary is the one place a long-lived refresh token is stored, so
 the account it belongs to should own nothing else — `admin@` owns both GCP projects, and while the
 grant could never administer them (an OAuth token carries only its scopes), an account holding
-nothing is simply a smaller thing to lose. Running as `maintainer@` would also work and is the worst
+nothing is simply a smaller thing to lose. Running it on the maintainer's own account would also work and is the worst
 option: a daily job holding a token on a personal account.
 
 Google's signup anti-abuse blocked the first attempt at this account, rate-limiting per phone number,
@@ -85,7 +88,7 @@ without logging it).
 
 What no account of either kind can cover is the CONSENT flow, since Google fingerprints and blocks
 automated browsers on `accounts.google.com`. That check stays manual (A8), and it is run as
-`canary@`, which is the test account — ruled 2026-09-27. It used to say `maintainer@`, which put a
+`test@` — ruled 2026-09-27. It used to say the maintainer's own account, which put a
 personal account through a consent flow for no gain: A8 asks whether the consent screen works for an
 ordinary user, and a throwaway answers that as well as a person's inbox does. The account already
 exists and already carries the only stored refresh token, so nothing new is exposed by it.
@@ -111,9 +114,9 @@ Revisit only if a second person starts handling support.
 
 Signed in as `admin@` → Gmail → ⚙️ **See all settings** → **Forwarding and POP/IMAP**:
 
-1. **Add a forwarding address** → `maintainer@` → Next → Proceed
+1. **Add a forwarding address** → the maintainer's own address → Next → Proceed
 2. Confirm via the link Google mails to the personal inbox
-3. Back in `admin@` settings, tick **Forward a copy of incoming mail to** → `maintainer@`
+3. Back in `admin@` settings, tick **Forward a copy of incoming mail to** → that same address
 4. Keep Gmail's copy in the Inbox
 5. **Save Changes** — easy to miss, and nothing above applies without it
 
@@ -161,7 +164,7 @@ form.** The wizard asks only: App name + user support email → **Audience** →
 | :--- | :--- |
 | Wizard 1 — App Information | App name `LibrePT`, user support email `admin@` |
 | Wizard 2 — **Audience** | **External** (see below) |
-| Wizard 3 — Contact Information | `maintainer@` — this is the *developer contact* |
+| Wizard 3 — Contact Information | the maintainer's own address — this is the *developer contact* |
 | Wizard 4 — Finish | Agree to the User Data Policy |
 | Then: **Branding** | Home page, privacy policy link, authorized domains, logo — table below |
 | Then: **Audience** | Test users — step A4 |
@@ -187,7 +190,7 @@ seed data and never contacts Google.
 | Application privacy policy link | **leave empty** | Optional in Testing, required at verification — see below |
 | Application terms of service link | leave empty | Optional |
 | Authorized domains | `stutek.github.io` | Domain only — no scheme, no path. **Not `github.io`** — see below |
-| Developer contact information | `maintainer@` | ⚠️ **Google's** channel for verification and deprecation notices — use the inbox read daily, not the support address |
+| Developer contact information | the maintainer's own address | ⚠️ **Google's** channel for verification and deprecation notices — use the inbox read daily, not the support address |
 
 **Save and Continue.**
 
@@ -225,8 +228,8 @@ addresses as known hand-test identities.
 
 ```
 <the admin@ address>
-<the canary@ address>
-<the maintainer@ address>
+<the test@ address>
+<the maintainer's own address — kept only so he can grant by hand if he ever must; not a test identity>
 ```
 
 Anyone not on this list gets `403: access_denied`. The cap is 100.
@@ -304,7 +307,7 @@ A6, which is held server-side by Google and cannot be forged. A blank value stay
 
 ## A8. Verify by hand
 
-Load `http://localhost:8081/LibrePT/`, sign in as `maintainer@`, tap Connect in
+Load `http://localhost:8081/LibrePT/`, sign in as `test@`, tap Connect in
 Sync & Backup. Expect an "unverified app" warning — normal until verification; continue via
 **Advanced**.
 
@@ -430,12 +433,12 @@ refresh token, which genuinely is one.
 
 ## B2. Consent once, by hand
 
-Decide **which account** first — use **`canary@`**, the dedicated throwaway. Being an ordinary Gmail
+Decide **which account** first — use **`test@`**, the dedicated throwaway. Being an ordinary Gmail
 account it has the Drive storage quota a service account lacks, which is the whole reason this step
 needs a human account at all; and holding nothing else, it is the smallest thing that can be lost if
 the stored refresh token ever leaks.
 
-The consent screen is **In production**, so `canary@` can grant without being on A4's test-user list.
+The consent screen is **In production**, so `test@` can grant without being on A4's test-user list.
 Add it there anyway — the list costs nothing and is what would matter if the app ever returned to
 Testing.
 
@@ -455,7 +458,7 @@ What happens, in order, so nothing below is a surprise:
    hung prompt. Press Enter.
 3. It lists the two scopes it is about to request, then opens your browser. If no browser opens, the
    URL is printed above — paste it yourself, or re-run with `--no-browser`.
-4. **In the browser: pick `canary@`.** If it signs you in as someone else automatically, use *Use
+4. **In the browser: pick `test@`.** If it signs you in as someone else automatically, use *Use
    another account*. The account that approves here is the account the canary runs as forever.
 5. You will see an **unverified app** warning. That is expected until OAuth verification (see
    *Before public launch*); continue via **Advanced → Go to LibrePT (unsafe)**.
@@ -475,7 +478,7 @@ run; the tool just moves the discovery from "some scheduled morning" to now.
 **Use `--account` so the wrong identity cannot slip through:**
 
 ```bash
-.venv/bin/python -m agent_tools.google_credential --account <the canary@ address>
+.venv/bin/python -m agent_tools.google_credential --account <the test@ address>
 ```
 
 It pre-selects that account at the consent screen — which is the accident worth removing, since a
@@ -514,7 +517,7 @@ guessing "fresh" would hide exactly the case the check exists for. So the canary
 usable `minted` stamp"* on a credential that is otherwise perfectly valid.
 
 Re-run B2 rather than hand-editing a date in. It takes two minutes, and it is the moment to move the
-grant onto `canary@` if an older credential was minted as a different account.
+grant onto `test@` if an older credential was minted as a different account.
 
 ### When it goes wrong
 
