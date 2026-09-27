@@ -167,7 +167,7 @@ export const de = {
   btn_resolve: "Erledigen",
   no_exercises_injected: "Keine Übungen eingefügt",
   no_exercises_desc:
-    "Tippe oben auf das Bearbeiten-Symbol (✎), um Übungen für diesen Kunden zu planen und hinzuzufügen.",
+    "Noch keine Übungen. Tippe oben rechts auf die drei Punkte (⋮) und wähle Plan bearbeiten.",
   edit_plan: "Plan bearbeiten",
   editing_plan_for: "Plan bearbeiten für",
   editing_plan_session: "Plan des Trainings bearbeiten",

@@ -149,7 +149,7 @@ export const en = {
   btn_resolve: "Resolve",
   no_exercises_injected: "No Exercises Injected",
   no_exercises_desc:
-    "Please tap the edit icon (✎) above to plan and add exercises for this client.",
+    "No exercises yet. Tap the three dots (⋮) at the top right and choose Edit plan.",
   edit_plan: "Edit plan",
   editing_plan_for: "Editing plan for",
   editing_plan_session: "Editing session plan",

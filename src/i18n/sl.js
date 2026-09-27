@@ -164,8 +164,7 @@ export const sl = {
   btn_import_backup: "Uvozi varnostno kopijo JSON",
   btn_resolve: "Razreši",
   no_exercises_injected: "Ni vstavljenih vaj",
-  no_exercises_desc:
-    "Tapni ikono za urejanje (✎) zgoraj, da načrtuješ in dodaš vaje za to stranko.",
+  no_exercises_desc: "Vaj še ni. Pritisni tri pike (⋮) zgoraj desno in izberi Uredi načrt.",
   edit_plan: "Uredi načrt",
   editing_plan_for: "Urejanje načrta za",
   editing_plan_session: "Urejanje načrta treninga",

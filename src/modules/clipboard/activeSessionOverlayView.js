@@ -155,7 +155,7 @@ export function renderActiveSessionOverlayShell() {
                target or costing a row of height, and it also gives this menu a second reason to
                exist: it held nothing but Delete. -->
           <div id="session-menu" class="session-menu hidden" role="menu">
-            <button id="btn-edit-plan" class="session-menu-item" role="menuitem" aria-label="Edit plan">
+            <button id="btn-edit-plan" class="session-menu-item" role="menuitem">
               <i class="fa-solid fa-pen-to-square"></i> <span data-i18n="edit_plan">Edit plan</span>
             </button>
             <!-- Everybody on the same plan. Two or three people doing the identical
