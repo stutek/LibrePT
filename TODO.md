@@ -6568,8 +6568,13 @@ počaka in pritisne mikrofon še enkrat. Nazadnje pritisne »Zapiši opozorilo«
 
 **Opaženo:** po drugem pritisku piše »Prepis v napravi je zaključen!«, v polje za opombo pa se
 zapiše stavek, ki ga ni nihče izrekel: »Glasovna opomba (lokalno): Maja Horvat poroča o dobrem
-počutju pri vaji Barbell Bench Press.« Po pritisku na »Zapiši opozorilo« je ta stavek v
-shrambi brskalnika, torej v kartoteki stranke.
+počutju pri vaji Barbell Bench Press.« Po pritisku na »Zapiši opozorilo« je ta stavek shranjen
+kot povratna informacija, pripeta stranki in vaji: v »Čakajoče na pregled« se prebere kot
+»Maja Horvat — Too Easy - Increase Load - Glasovna opomba (lokalno): Maja Horvat poroča o dobrem
+počutju pri vaji Barbell Bench Press.«, pod njim pa piše »voice_memo.wav (0:04)« — ime in dolžina
+posnetka, ki ne obstaja. (V polje »Predhodne poškodbe in opombe« v profilu stranke ta stavek ne
+gre.) Pri tem se je potrdila tudi §80.8: oznake nisem izbral, zapis pa je dobil
+»Too Easy - Increase Load«.
 
 **Mikrofona pri tem sploh ni:** preizkus je tekel v brskalniku, kjer `getUserMedia` zavrne
 dovoljenje, aplikacija pa je vseeno pokazala »Snemanje…« in nato »Prepis v napravi je
