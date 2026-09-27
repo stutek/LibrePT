@@ -6029,6 +6029,10 @@ Vrstica z zamudo nosi oba razreda, `upcoming` in `overtime`, zato jo zadene tudi
 selektor — skrita sta oba napisa. Prvi selektor mora zamudo izvzeti
 (`.upcoming:not(.overtime) .when-overdue`).
 
+**Enako pri treningu, ki je zdavnaj mimo:** trening, vpisan za 2026-09-20 in nikoli začet, se
+na plošči glasi »167h 52m« — brez besede. Razred je isti (`upcoming overtime`), zato trener
+številko lahko bere le kot »čez 167 ur«, čeprav pomeni »zamuja teden dni«.
+
 **Ista tišina na drugem koncu treninga:** ko trening teče čez napovedani konec, vrstica nad dnom
 zaslona pokaže »-00:51« in šteje naprej v minus. Minus je edini znak, da je ura potekla; besede
 za to ni. To je zavestna izbira v [sessionBar.js](src/modules/session/sessionBar.js) (odštevanje
