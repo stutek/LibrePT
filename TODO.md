@@ -6542,6 +6542,8 @@ ni kam vpisati, 2 min na stranko v zvezek (§86.4); paket osmih treningov po prv
 (§86.2).
 Dan 03 (trenerka ob drugi službi, najeta dvorana v Celju, devet strank): domača naloga gre v isto
 polje kot zdravstvene opombe, zato se tedenska navodila mešajo s trajnimi (§86.4).
+Dan 04 (trener, zaposlen v fitnes klubu, dva kolega, 11 strank): paket desetih treningov v paru vodi
+v ločeni tabeli, 5–10 min na dan (§86.2).
 
 ## 87. [ ] Prihodnja shema ne nosi polja glasovne opombe
 
@@ -6621,7 +6623,8 @@ samo, česar ni nikjer drugje, in presoja, ali se avtomatizacija izplača.
 Dan 01: trenerka je za krožno vadbo iskala »kettlebell«, »burpee«, »box jump« — nič od tega ni med
 48 vajami, in prazen seznam reče samo »No movements match this filter.«. Dan 02 potrdi z vajami brez opreme za
 online trening: navadnega počepa s telesno težo, burpeeja in kettlebell swinga ni. Dan 03: za nosečo stranko ni stenskega
-počepa ne vaje za medenično dno. Aplikacija ima uvoz večjih
+počepa ne vaje za medenično dno. Dan 04: za tekmovalca v powerliftingu ni ozkega potiska s prsi; vpisal ga je kot
+lastno vajo, kar je delovalo. Aplikacija ima uvoz večjih
 katalogov (`libraryImportDialog.js`) in dovoli vajo z lastnim imenom, a s praznega iskanja ne vodi do
 nobenega. Trener, ki vaje ne najde, jo zapiše na papir. **Vrednost:** vsak nov trener naleti na to pri
 prvem načrtu; vsaka vaja, zapisana mimo aplikacije, nima zgodovine. **Cena:** majhna — prazen seznam
@@ -6647,7 +6650,8 @@ Dan 03 isto pokaže z druge strani: trenerka isti večer prevzame stranko bolneg
 sporočilo po treningu gresta po SMS-u, pojasnilo o nadomeščanju pa v polje za zdravstvene opombe. Dva
 od treh dni imata nadomeščanje, zato je pogostost višja, kot je predvidevala prva presoja. **Nova
 presoja: izplača se majhen del** — besedilo načrta in zapisa treninga za deljenje (»Deli kot besedilo«),
-brez drugega trenerja v aplikaciji; več trenerjev ostaja EnterprisePT.
+brez drugega trenerja v aplikaciji; več trenerjev ostaja EnterprisePT. Dan 04, trener v klubu s kolegoma: nadomeščanje
+prek sporočila ali tabele kluba, tretji dan od štirih.
 
 ### 88.4 [ ] Trening, vpisan za nazaj, aplikacija imenuje »Zamuja«
 
@@ -6673,4 +6677,13 @@ Dan 03: ob sestavljanju petih treningov zapored se je po vsakem odprlo okno »Po
 bilo treba zapreti, preden je lahko dodala vaje. **Vrednost:** majhna, a ob vsakem načrtovanju tedna.
 **Cena:** majhna. **Presoja: čaka na Simona** — samodejno odpiranje je bila odločitev (vabilo takoj po
 dodanem udeležencu); vprašanje je, ali ob načrtovanju vnaprej zadošča obvestilo »vabila niso poslana«.
+
+### 88.7 [ ] Polje za poškodbe nosi vse, kar trener ve o stranki
+
+Dan 03 je vanj pisal domačo nalogo, dan 04 »stranka pripelje hčerko, potrebuje varovan kotiček«.
+Polje se imenuje »Predhodne poškodbe in opombe« in je edino prosto polje o stranki poleg ciljev. Trener
+tedensko navodilo ali dogovor o otroku zapiše med zdravstvene podatke, in ob naslednjem branju ne loči
+trajnega od začasnega. **Vrednost:** dva od štirih dni; zdravstveni podatki so tudi občutljivi po GDPR,
+zato je mešanje z logistiko slabo še iz drugega razloga. **Cena:** majhna — ločeno polje »Druge
+opombe« (ali »Dogovori«), prikazano v urejevalniku načrta tako kot poškodbe. **Presoja: izplača se.**
 
