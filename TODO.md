@@ -6081,6 +6081,32 @@ nastane in ga ta vrstica takoj prepiše; za »DEMO« ključa ni nikjer.
 jezike in v preizkusu glave zahtevati, da oznaka v slovenščini ni angleška beseda. Opaženo na
 objavljeni različici `0625bd6`; koda na `main` je ista.
 
+### 80.16 [ ] P2 — Po izhodu iz peskovnika ostane vzorčni trening v vrstici nad dnom zaslona
+
+**Scenarij in koraki:** trener ima svojo aplikacijo še prazno. Prek menija ☰ izbere »Vstopi v
+peskovnik«, pritisne kartico »Skupinska moč in kondicija« (08:00–10:00, trening že teče), nato
+spet odpre ☰ in izbere »Zapusti peskovnik«.
+
+**Opaženo:** plošča je prazna, oznaka v glavi se vrne na predogled, spodaj pa še naprej stoji
+vrstica »Skupinska moč in kondicija + Vrnitev po poškodbi · 3 strank · 08:00 - 10:00« s
+tekočo uro. To je vzorčni trening s tremi vzorčnimi strankami, prikazan v trenerjevih lastnih
+podatkih. Pritisk nanjo ne odpre tega treninga. Po osvežitvi strani vrstica izgine; v
+`localStorage` sta ključa samo pod končnico `__sandbox`, torej se v trenerjeve podatke ni
+zapisalo nič. Ponovljeno dvakrat.
+
+**Težava in vpliv:** peskovnik obljubi, da nič iz njega ne doseže poslovnih podatkov, tu pa
+trener v svojem prostoru vidi trening, ki ga nima, z imeni ljudi, ki jih ne pozna. Ne izgubi
+podatkov, izgubi pa zaupanje v ločnico — in dokler ne osveži strani, mu vrstica jemlje prostor
+na dnu zaslona.
+
+**Predlog in preverjanje:** ob preklopu delovnega prostora poleg počiščene spomina počistiti
+tudi izris te vrstice. [app.js](src/app.js), `returnToLastView`, že pokliče
+`setActiveSession(null)` in `recoverActiveSession()` — komentar ob njiju opisuje isto napako v
+nasprotni smeri (vstop v peskovnik) — vrstica pa se očitno ne izriše znova. Popravek naj pokrije
+obe smeri, preizkus pa naj po izhodu iz peskovnika zahteva, da vrstice ni. Opaženo na objavljeni
+različici `0625bd6`; `89770cd`, ki je to pot uvedel, je v tej gradnji že vključen, zato
+verjetno velja tudi na `main` — preveriti na razvojnem strežniku pred popravkom.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
