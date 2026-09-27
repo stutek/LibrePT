@@ -18,6 +18,8 @@
 
 import { crashIssueUrl } from "../data/crashReport.js";
 import { escapedTestRecords } from "../data/seedProvenance.js";
+import { resolveLang } from "../i18n/index.js";
+import { countedText } from "../i18n/plural.js";
 import { walkthroughDataPresent } from "./walkthroughReadiness.js";
 
 /**
@@ -62,10 +64,12 @@ export function buildUnscheduledPlansItem(state, t) {
     type: "planning",
     icon: "fa-solid fa-clipboard-list",
     title: t("notif_unscheduled_plans_title") || "Unscheduled plans",
-    description: (
-      t("notif_unscheduled_plans_desc") ||
-      "{count} plan(s) drafted but not yet assigned to a session."
-    ).replace("{count}", String(plans.length)),
+    description: countedText(
+      t,
+      resolveLang(state.lang),
+      "notif_unscheduled_plans_desc",
+      plans.length,
+    ),
     actions: plans.map((plan) => ({
       label: `${plan.title || fallbackTitle} · ${plan.clientName || ""}`,
       resumePlanId: plan.id,
@@ -98,10 +102,12 @@ export function buildPendingSessionsItem(state, t) {
     type: "alert",
     icon: "fa-solid fa-triangle-exclamation",
     title: t("notif_pending_sessions_title") || "Sessions awaiting review",
-    description: (
-      t("notif_pending_sessions_desc") ||
-      "{count} client(s) have unresolved feedback signals from a session."
-    ).replace("{count}", String(byClient.size)),
+    description: countedText(
+      t,
+      resolveLang(state.lang),
+      "notif_pending_sessions_desc",
+      byClient.size,
+    ),
     actions: [...byClient.entries()].map(([clientId, updates]) => ({
       label: `${labelFor(clientId, updates[0].clientName)} (${updates.length})`,
       view: "/adjustments",

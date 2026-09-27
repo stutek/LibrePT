@@ -25,6 +25,7 @@
 // }
 
 import { computeActiveSessionCountdown } from "../../domain/sessionClock.js";
+import { countedText } from "../../i18n/plural.js";
 import { renderMarkupOnce } from "../common/dom.js";
 
 let deps = null;
@@ -78,7 +79,13 @@ export function renderClipboardBar() {
   const { t } = deps;
   const sourceSession = activeSession.sourceSession;
   const participantCount = activeSession.participants.length;
-  const clientsLabel = `${participantCount} ${t("bar_clients_label")}`;
+  // The page's language, which applyTranslations keeps in step with the trainer's choice.
+  const clientsLabel = countedText(
+    t,
+    document.documentElement.lang,
+    "bar_clients",
+    participantCount,
+  );
 
   // Merged titles joined, because one clipboard can cover several booked slots. An ad-hoc clipboard
   // has no source session at all and falls back to the generic name — there is no schedule to cite.

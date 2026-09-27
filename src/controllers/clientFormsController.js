@@ -6,6 +6,7 @@
 import { clientDisambiguator, clientsSharingName } from "../data/clientErasure.js";
 import { newRecordId } from "../data/recordId.js";
 import { readTrainerIdentity } from "../data/trainerIdentity.js";
+import { countedText } from "../i18n/plural.js";
 import {
   consentSectionMarkup,
   fillConsentSection,
@@ -87,15 +88,21 @@ ${consentSectionMarkup()}
 // surface downstream (the erasure confirmation, the export picker) risks acting on the wrong
 // person. The alias is the trainer's own answer to that, so the form asks for one at the exact
 // moment the collision appears rather than leaving them to discover it during an erasure.
-function renderNameCollisionHint(state, client) {
+function renderNameCollisionHint(state, client, t) {
   const hint = $id("client-name-collision");
   if (!hint) return;
   const namesakes = client?.name ? clientsSharingName(state, client) : [];
   hint.hidden = namesakes.length === 0;
   if (namesakes.length === 0) return;
-  hint.textContent = `${namesakes.length} other client${namesakes.length === 1 ? " has" : "s have"} this name (${namesakes
-    .map((namesake) => clientDisambiguator(namesake))
-    .join("; ")}). Add an alias so you can tell them apart.`;
+  const others = namesakes
+    .map((namesake) => clientDisambiguator(namesake, t("disambiguator_joined")))
+    .join("; ");
+  hint.textContent = countedText(
+    t,
+    document.documentElement.lang,
+    "name_collision_hint",
+    namesakes.length,
+  ).replace("{others}", others);
 }
 
 export function setupClientForms({
@@ -200,7 +207,7 @@ export function setupClientForms({
     openModal("dialog-client", { resetForm: true, formId: "form-client" });
     // After the reset, never before: reset() would otherwise wipe the date the block just derived.
     fillConsentSection(null);
-    renderNameCollisionHint(getState(), null);
+    renderNameCollisionHint(getState(), null, t);
     live.openNew();
   });
 
@@ -218,7 +225,7 @@ export function setupClientForms({
     $id("client-goals").value = client.goals || "";
     $id("client-notes").value = client.notes || "";
     fillConsentSection(client);
-    renderNameCollisionHint(getState(), client);
+    renderNameCollisionHint(getState(), client, t);
 
     openModal("dialog-client");
     live.openExisting(client);
@@ -234,11 +241,11 @@ export function setupClientForms({
     nameInput.addEventListener("input", () => {
       const editingId = $id("client-form-id").value;
       const editing = getState().clients.find((c) => c.id === editingId) || null;
-      renderNameCollisionHint(getState(), {
-        ...(editing || {}),
-        id: editingId,
-        name: nameInput.value,
-      });
+      renderNameCollisionHint(
+        getState(),
+        { ...(editing || {}), id: editingId, name: nameInput.value },
+        t,
+      );
     });
   }
 

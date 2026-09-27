@@ -798,7 +798,10 @@ export const sl = {
   unscheduled: "Nenačrtovano",
   undefined: "Nedoločen",
   combo_round_title: "Sklop vaj",
-  bar_clients_label: "strank",
+  bar_clients_one: "{count} stranka",
+  bar_clients_two: "{count} stranki",
+  bar_clients_few: "{count} stranke",
+  bar_clients_other: "{count} strank",
   signal_too_easy: "Prelahko",
   signal_too_hard: "Pretežko",
   feedback_short: "Opombe",
@@ -953,10 +956,18 @@ export const sl = {
   notif_count_badge: "{unread} neprebranih / {all} vseh",
   notif_mark_all_read: "Označi vse kot prebrano",
   notif_unscheduled_plans_title: "Nenačrtovani programi",
-  notif_unscheduled_plans_desc:
-    "{count} program(-i/-ov) je zasnovanih, a še ni dodeljenih treningu.",
+  notif_unscheduled_plans_desc_one: "{count} program je pripravljen, a še ni dodeljen treningu.",
+  notif_unscheduled_plans_desc_two:
+    "{count} programa sta pripravljena, a še nista dodeljena treningu.",
+  notif_unscheduled_plans_desc_few:
+    "{count} programi so pripravljeni, a še niso dodeljeni treningu.",
+  notif_unscheduled_plans_desc_other:
+    "{count} programov je pripravljenih, a še niso dodeljeni treningu.",
   notif_pending_sessions_title: "Treningi, ki čakajo na pregled",
-  notif_pending_sessions_desc: "{count} stranka(-e/-k) ima nerešene povratne signale iz treninga.",
+  notif_pending_sessions_desc_one: "{count} stranka ima nerešene povratne signale iz treninga.",
+  notif_pending_sessions_desc_two: "{count} stranki imata nerešene povratne signale iz treninga.",
+  notif_pending_sessions_desc_few: "{count} stranke imajo nerešene povratne signale iz treninga.",
+  notif_pending_sessions_desc_other: "{count} strank ima nerešene povratne signale iz treninga.",
   client_email: "E-pošta",
   client_phone: "Telefonska številka",
   not_specified: "Ni navedeno",
@@ -1009,6 +1020,15 @@ export const sl = {
   rights_erase_requested: "Datum zahteve",
   rights_copy_receipt: "Kopiraj potrdilo",
   rights_erase_confirm: "Izbriši dokončno",
+  disambiguator_joined: "v imeniku od",
+  name_collision_hint_one:
+    "To ime ima še {count} stranka ({others}). Dodaj vzdevek, da ju bo mogoče razlikovati.",
+  name_collision_hint_two:
+    "To ime imata še {count} stranki ({others}). Dodaj vzdevek, da jih bo mogoče razlikovati.",
+  name_collision_hint_few:
+    "To ime imajo še {count} stranke ({others}). Dodaj vzdevek, da jih bo mogoče razlikovati.",
+  name_collision_hint_other:
+    "To ime ima še {count} strank ({others}). Dodaj vzdevek, da jih bo mogoče razlikovati.",
   // The client detail view (modules/clients/clientsView.js).
   view_grabber_home: "Nazaj na začetek",
   view_grabber_clipboard: "Odpri podlogo treninga",

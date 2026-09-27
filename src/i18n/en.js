@@ -860,7 +860,10 @@ export const en = {
   unscheduled: "Unscheduled",
   undefined: "Undefined",
   combo_round_title: "Circuit",
-  bar_clients_label: "clients",
+  bar_clients_one: "{count} client",
+  bar_clients_two: "{count} clients",
+  bar_clients_few: "{count} clients",
+  bar_clients_other: "{count} clients",
   signal_too_easy: "Too Easy",
   signal_too_hard: "Too Hard",
   feedback_short: "Notes",
@@ -1020,9 +1023,18 @@ export const en = {
   notif_count_badge: "{unread} unread / {all} all",
   notif_mark_all_read: "Mark all as read",
   notif_unscheduled_plans_title: "Unscheduled plans",
-  notif_unscheduled_plans_desc: "{count} plan(s) drafted but not yet assigned to a session.",
+  notif_unscheduled_plans_desc_one: "{count} plan drafted but not yet assigned to a session.",
+  notif_unscheduled_plans_desc_two: "{count} plans drafted but not yet assigned to a session.",
+  notif_unscheduled_plans_desc_few: "{count} plans drafted but not yet assigned to a session.",
+  notif_unscheduled_plans_desc_other: "{count} plans drafted but not yet assigned to a session.",
   notif_pending_sessions_title: "Sessions awaiting review",
-  notif_pending_sessions_desc: "{count} client(s) have unresolved feedback signals from a session.",
+  notif_pending_sessions_desc_one: "{count} client has unresolved feedback signals from a session.",
+  notif_pending_sessions_desc_two:
+    "{count} clients have unresolved feedback signals from a session.",
+  notif_pending_sessions_desc_few:
+    "{count} clients have unresolved feedback signals from a session.",
+  notif_pending_sessions_desc_other:
+    "{count} clients have unresolved feedback signals from a session.",
   client_email: "Email",
   client_phone: "Phone Number",
   not_specified: "Not specified",
@@ -1074,6 +1086,15 @@ export const en = {
   rights_erase_requested: "Date they asked",
   rights_copy_receipt: "Copy receipt",
   rights_erase_confirm: "Erase permanently",
+  disambiguator_joined: "joined",
+  name_collision_hint_one:
+    "{count} other client has this name ({others}). Add an alias so you can tell them apart.",
+  name_collision_hint_two:
+    "{count} other clients have this name ({others}). Add an alias so you can tell them apart.",
+  name_collision_hint_few:
+    "{count} other clients have this name ({others}). Add an alias so you can tell them apart.",
+  name_collision_hint_other:
+    "{count} other clients have this name ({others}). Add an alias so you can tell them apart.",
   // The client detail view (modules/clients/clientsView.js).
   view_grabber_home: "Return to home",
   view_grabber_clipboard: "Open session clipboard",

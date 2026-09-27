@@ -134,10 +134,11 @@ export function clientsSharingName(state, client) {
  * all. Never returns an empty string — an unlabelled option in a destructive confirmation is how
  * the wrong person gets erased.
  */
-export function clientDisambiguator(client) {
+export function clientDisambiguator(client, joinedLabel = "joined") {
   // Alias first: it is the label the trainer chose FOR this purpose, so it beats anything derived.
   const parts = [client?.alias, client?.email, client?.phone].filter(Boolean);
-  if (client?.joinedDate) parts.push(`joined ${client.joinedDate}`);
+  // The word before the date comes from the caller, in the trainer's language; this layer has none.
+  if (client?.joinedDate) parts.push(`${joinedLabel} ${client.joinedDate}`);
   parts.push(`id …${String(client?.id || "").slice(-6)}`);
   return parts.join(" · ");
 }

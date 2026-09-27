@@ -138,7 +138,8 @@ def test_an_adhoc_clipboard_has_no_schedule_to_cite(page, local_server):
     )
 
     assert page.inner_text("#clipboard-bar-title") == "Live Tracking Clipboard"
-    assert page.inner_text("#clipboard-bar-meta") == "1 clients"
+    # One client in the singular: the count used to read "1 clients" in every language.
+    assert page.inner_text("#clipboard-bar-meta") == "1 client"
 
 
 def test_no_clipboard_means_no_bar(page, local_server):

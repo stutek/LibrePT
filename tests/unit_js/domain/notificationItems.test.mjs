@@ -23,10 +23,10 @@ import {
 } from "../../../src/domain/notificationItems.js";
 
 // A translator that marks what it touched, so a test can tell a resolved key from a literal. The
-// `_desc` keys keep the {count} placeholder, because a real dictionary's descriptions carry one and
-// the substitution is part of what is being tested.
+// `_desc` keys, counted ones included (`_desc_one` … `_desc_other`), keep the {count} placeholder,
+// because a real dictionary's descriptions carry one and the substitution is part of what is tested.
 const t = (key) => {
-  if (key.endsWith("_desc")) return `[${key}] {count}`;
+  if (/_desc(_(one|two|few|other))?$/.test(key)) return `[${key}] {count}`;
   if (key.startsWith("notif_") || key === "planned_program") return `[${key}]`;
   return "";
 };

@@ -8,11 +8,12 @@ import re
 
 
 def _locale_files(src_dir):
-    """Every locale file in src/i18n/ (the registry index.js and domMappings.js are not locales)."""
+    """Every locale file in src/i18n/ (the registry index.js, domMappings.js and the plural helper
+    plural.js are not locales)."""
     return sorted(
         p
         for p in (src_dir / "i18n").glob("*.js")
-        if p.name not in ("index.js", "domMappings.js")
+        if p.name not in ("index.js", "domMappings.js", "plural.js")
     )
 
 
