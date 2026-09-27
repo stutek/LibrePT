@@ -5845,6 +5845,27 @@ dejanje »Dodeli terminu« na programu. Preizkusiti dodelitev brez ponovnega ses
 vaj. Druge morebitne poti še niso izključene; to je izmerjena ovira pri prvi uporabi.
 Objavljena različica `0625bd6`, razvoj ni pregledan.
 
+### 80.10 [ ] P1 — Po zaključku aktivnega treninga se testni zavihek ne odziva
+
+**Scenarij:** prek »Ustvari trening« ustvariti »Individualna vadba« za Ano, dodati
+počep 3 × 10 × 8 kg, začeti trening, sprejeti ponujeni premik na dejanski čas,
+v »Opombe« izrecno izbrati »Too Hard - Reduce Load« in vnesti besedilo izvedbe.
+Ponovno odpreti in preklicati opombo ter pritisniti »Zaključi vadbo«.
+
+**Opaženo:** zahteva za klik in nato branje strani ne odgovorita v 30 sekundah.
+Chrome ohrani zavihek; CDP potrdi, da ni odprtega JavaScript potrditvenega okna.
+Po zaprtju samo testnega zavihka in odprtju aplikacije v istem profilu je trening še
+aktiven, opomba je ohranjena. Ponovljen zaključek z dejanskimi dogodki miške prek CDP
+znova obstane; prejšnje branje kartice uspe, klik zaključka pa ne odgovori.
+
+**Vpliv:** preizkus zaključka in pregleda opravljenih serij je blokiran. Vzrok še ni
+lokaliziran: to je ponovljiv zastoj testnega zavihka ob zaključku, ne dokaz določene
+napake v kodi. Preizkušeno v Chrome CDP na objavljeni različici `0625bd6`.
+
+**Predlog in preverjanje:** ponoviti zaključek v običajnem uporabniškem kliku ter
+ugotoviti vzrok neodzivnosti. Zaključek mora potrditi shranitev in po ponovnem odprtju
+pokazati zaključeno vadbo; preklic pa mora ohraniti odziven aktiven trening.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
