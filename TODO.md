@@ -6324,6 +6324,31 @@ stranke«, »Podatke in privolitev izpolni stranka na svojem telefonu«. Preizku
 zapisih o stranki prepove »mu«, »ga«, »njegov« in »sam«. Opaženo na objavljeni različici
 `0625bd6`; zapisi na `main` so isti.
 
+### 80.25 [ ] P3 — Na zaslonu za nov trening je 46 od 52 kontrol nižjih od 44 pik
+
+**Scenarij in koraki:** trener na telefonu (390×844) odpre »Ustvari trening« in z eno roko
+nastavlja datum in uro.
+
+**Izmerjeno v brskalniku:** od 52 stvari, ki jih je na tem zaslonu mogoče pritisniti, jih je 46
+nižjih od 44 pik, kar je najmanjša velikost, ki jo priporoča Apple (Android priporoča 48).
+Puščici za dan in za pet minut sta visoki 26 pik in stojita druga nad drugo; oznake ur in
+datumov (»danes«, »jutri«, »10:30«) so visoke 36 pik; potezni ročaj »Nazaj na začetek« je visok
+5 pik; oznaka različice 21 pik.
+
+**Težava in vpliv:** urnik se ureja s palcem, pogosto med hojo po telovadnici. Dve tarči po 26
+pik, ena nad drugo, sta ravno tisti par, pri katerem palec zgreši in trener premakne datum v
+napačno smer.
+
+**Vzrok, potrjen v kodi na `main`:** velikosti so zapisane namerno v
+[steppedField.css](src/modules/common/steppedField.css) — `min-height: 26px` za puščici in
+`min-height: 36px` za oznake. To ni napaka v izrisu, ampak izbrana vrednost.
+
+**Predlog in odločitev:** puščici dvigniti na 44 pik (stolpec 44 × 92 namesto 44 × 56) in
+oznake na 44; če je prostor pretesen, raje pokazati manj oznak kot nižje. Ker gre za zavestno
+izbrano vrednost, je sprememba Simonova odločitev, ne popravek. Preizkus naj na treh širinah
+zahteva, da nobena kontrola na tem zaslonu ni nižja od 44 pik. Izmerjeno na objavljeni
+različici `0625bd6`; pravila na `main` so ista.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
