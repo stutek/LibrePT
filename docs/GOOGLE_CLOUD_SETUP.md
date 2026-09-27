@@ -54,7 +54,7 @@ Three roles, three real Gmail accounts. The addresses live in the private notes,
 | :--- | :--- | :--- |
 | `admin@` | A project-branded account, not a person | Owns the GCP project and is the consent screen's user support address |
 | `canary@` | A dedicated throwaway, holding nothing | The identity the CI canary runs as — the only account whose refresh token is stored anywhere |
-| `maintainer@` | The maintainer's own daily inbox | Google's developer contact for verification and deprecation notices, and the hand-test identity for A8 |
+| `maintainer@` | The maintainer's own daily inbox | Google's developer contact for verification and deprecation notices. **Not a test identity** — ruled 2026-09-27: the maintainer's private account is never signed into a test, by hand or otherwise |
 
 **A human test account IS needed, and this was learned the hard way (2026-08-12).** The canary was
 built to run as a SERVICE account precisely so CI would never touch a person's data. That lasted one
@@ -80,7 +80,11 @@ grant is `drive.appdata` (a hidden folder holding one probe file, unreadable by 
 without logging it).
 
 What no account of either kind can cover is the CONSENT flow, since Google fingerprints and blocks
-automated browsers on `accounts.google.com`. That check stays manual (A8), as `maintainer@`.
+automated browsers on `accounts.google.com`. That check stays manual (A8), and it is run as
+`canary@` (`LibrePT.test@gmail.com`) — ruled 2026-09-27. It used to say `maintainer@`, which put a
+personal account through a consent flow for no gain: A8 asks whether the consent screen works for an
+ordinary user, and a throwaway answers that as well as a person's inbox does. The account already
+exists and already carries the only stored refresh token, so nothing new is exposed by it.
 
 Revisit only when the planned room-occupancy feature (see [TODO.md](../TODO.md)) needs a genuine second calendar identity — "PT A
 sees PT B as busy" cannot be tested from one account.
