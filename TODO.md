@@ -6034,6 +6034,31 @@ angleško v slovenskem in nemškem vmesniku.
 prebere vsak `title` in `aria-label` na zaslonu podloge in zahteva, da noben ni angleški niz
 iz kode. Opaženo na objavljeni različici `0625bd6`; vsi trije kraji na `main` so isti.
 
+### 80.14 [ ] P3 — V slovenskem vzorčnem treningu je stolpec z navodilom vaje angleški
+
+**Scenarij in koraki:** trener odpre peskovnik v slovenščini in v podlogi skupinskega
+treninga bere, kaj naj kdo naredi.
+
+**Opaženo:** naslovi krogov so slovenski (»Dinamično ogrevanje«, »Metabolni krog v trojkah«),
+navodilo pri vsaki vaji pa angleško: »10 reps (light)«, »10 per arm«, »Max«, »45 seconds«,
+»30s hold«, »20 per side«. V vzorčnih programih je deset različnih takih zapisov in nobenega
+ni v prevajalni tabeli. Angleščina tudi ni enotna: hkrati »45s« in »45 seconds«, »30s hold«
+in »60s hold«.
+
+**Težava in vpliv:** to je prav tisti stolpec, ki ga trener bere med serijo. Vzorčni podatki
+so prvo, kar slovenski trener vidi, in zgledajo kot na pol preveden izdelek. Ni P2, ker
+trener svoje programe piše sam in ga to pri njegovem delu ne ustavi.
+
+**Vzrok, potrjen v kodi na `main`:** [demoText.js](src/data/demoText.js) prevaja besedila
+vzorčnih podatkov in v uvodni opombi našteje, kaj ostane angleško namenoma — imena vaj, imena
+ljudi, ime telovadnice. Navodila vaj v tem seznamu ni, v tabeli `sl` pa jih ni; polje `reps` v
+[routines.js](src/data/routines.js) je prosto besedilo, ki se izriše, kakor je zapisano.
+
+**Predlog in preverjanje:** deset zapisov dodati v `sl` in `de`, hkrati poenotiti angleško
+obliko. Preizkus naj vzorčne programe naloži v slovenščini in zahteva, da noben zapis
+`reps` ni angleški niz iz `routines.js`. Opaženo na objavljeni različici `0625bd6`; tabela na
+`main` je ista.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
