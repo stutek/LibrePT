@@ -6370,6 +6370,12 @@ dvojnika lahko prizadelo načrtovani termin.
 zahtevati tri kartice, po eno na vsako nedeljo, tudi po ponovnem nalaganju. Preverjeno
 samo prek vmesnika, brez branja kode; vzrok ni ugotovljen.
 
+**Dodatno opažanje pri GDPR-izvozu iste stranke:** šifrirano datoteko smo odprli v
+vgrajenem bralniku. V razdelku »Sessions (4)« sta dve enaki vrstici za Nedeljsko moč
+2026-10-18 09:00–09:45. Torej podvajanje ni omejeno na kartici: vidno je tudi v
+izvozu. Ponavljanji 2026-10-25 in 2026-11-01, ki ju plošča kaže, v tem izvozu nista
+navedeni. Preverjanje naj zato zajame tudi dosleden seznam terminov v izvozu.
+
 ### 80.59 [ ] P2 — Neveljavni datum se brez pojasnila zamenja z drugim dnevom
 
 **Scenarij in koraki:** trener pri novem treningu »Kontrola datuma« vpiše 2027-02-29,
@@ -6387,6 +6393,33 @@ pojasnila. Spremembo lahko spregleda in nato stranko povabi na napačen dan.
 **Predlog in preverjanje:** neveljavni dan označiti in zahtevati popravek ali vidno
 pojasniti predlagano spremembo, preden se termin shrani. Veljavni 29. februar naj
 ostane nespremenjen. Gre za opažanje vmesnika in predlog izboljšave; kode nismo brali.
+
+### 80.60 [ ] P1 — Kartica »Sled predloge« odpre drug trening z drugima terminom in udeležbo
+
+**Scenarij in koraki:** v istem profilu obstajata »Par z vzdevkoma« (jutranji in večerni
+TEST Luka Kovač, jutri 18:30–19:30) in »Sled predloge« (jutranji Luka, rutina SIM Osnovna
+moč). Drugi trening začeti pred načrtovanim časom, izbrati »Prilagodi čas« (v preizkusu
+danes 18:41–19:26), odpreti Dumbbell Bicep Curl in označiti »Pretežko«. Zapreti trening,
+ustvariti »Naslednji obisk« za večernega Luko 2026-09-29 17:00–17:45. Zapreti vabila
+brez pošiljanja, se vrniti na seznam in odpreti kartico z naslovom »Sled predloge«.
+
+**Opaženo:** kartica kaže »Sled predloge«, 18:41–19:26 in eno mesto. Odprti pogled pa
+kaže »Par z vzdevkoma«, pod njim »Sled predloge«, jutri 18:30–19:30 in oba udeleženca.
+Naslov strani vsebuje ID treninga Par z vzdevkoma (`034WAw24qVRnACeQo4mLV3`), medtem
+ko je Sled predloge pred tem imel `034WB6QrvMesM2tyJDKucm`. Ponovljeno s klikom kartice,
+izbrane po njenem točnem naslovu; enak rezultat tudi po osvežitvi. Namesto zaključka
+prejšnje aktivne vadbe je v odprtem pogledu gumb za začetek. Po osvežitvi obvestilo
+»Pretežko« pripada »TEST Luka Kovač — Par z vzdevkoma«.
+
+**Težava in vpliv:** trener iz seznama ne pride do pričakovanega treninga; prikaz
+združi ime izbrane vadbe s terminom in udeleženci druge. Nadaljnji vnos bi lahko
+pripisal napačnemu treningu. To niso samo nejasna imena dveh istoimenskih oseb.
+
+**Predlog in preverjanje:** naslov, termin, udeleženci in povratne informacije naj
+ob odprtju ustrezajo izbrani kartici. Preizkusiti opisano prekinitev aktivne vadbe
+z načrtovanjem druge in vrnitev, tudi po osvežitvi. Vzrok in najmanjši nabor potrebnih
+korakov še nista ugotovljena. Objavljena `0625bd6`, Chrome CDP, 390 × 844, sl;
+brez zabeleženih napak brskalnika, brez pregleda kode.
 
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
