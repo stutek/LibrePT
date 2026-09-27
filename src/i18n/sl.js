@@ -285,7 +285,7 @@ export const sl = {
   edit_routine_title: "Uredi predlogo rutine",
   routine_name: "Ime rutine *",
   routine_desc: "Opis",
-  joined: "Pridružil se",
+  joined: "V imeniku od",
   no_goals_specified: "Cilji niso določeni.",
   no_notes_specified: "Brez zabeleženih zdravstvenih težav ali posebnosti.",
   log_weights_progression: "Zabeleži teže za spremljanje napredka.",
@@ -555,8 +555,7 @@ export const sl = {
   tour_step_focus_exercise:
     "Dotakni se kroga, da pride v fokus. Njegovi gumbi pridejo na doseg palca.",
   tour_step_signal: "Označi krog kot prelahek. En dotik ga zabeleži in pusti opombo za načrt.",
-  tour_step_next_participant:
-    "Preklopi na naslednjega udeleženca — isti trening, njegov lasten načrt.",
+  tour_step_next_participant: "Preklopi na zavihek naslednje stranke — isti trening, njen načrt.",
   gym_notes_label: "V telovadnici",
   label_repeats: "Ponovi vsak teden",
   label_repeat_days: "Na te dneve",
@@ -570,8 +569,8 @@ export const sl = {
   intake_invite_ready: "Povezava pripravljena — kopiraj jo spodaj",
   intake_invite_title: "Povabi stranko",
   intake_invite_lede:
-    "Svoje podatke in privolitev izpolni sam na svojem telefonu in ti jih pošlje nazaj. Tu se ne ustvari nič, dokler ne prebereš, kaj je poslal.",
-  intake_invite_contact_label: "Njegova telefonska številka ali e-naslov",
+    "Stranka izpolni svoje podatke in privolitev na svojem telefonu in ti jih pošlje nazaj. Tu se ne ustvari nič, dokler ne prebereš, kar je poslala.",
+  intake_invite_contact_label: "Telefonska številka ali e-naslov stranke",
   intake_invite_send_sms: "Napiši sporočilo SMS",
   intake_invite_send_email: "Napiši e-pošto",
   intake_invite_send_disabled: "Ni še kam poslati",
@@ -583,7 +582,7 @@ export const sl = {
   intake_invite_other_ways: "Druge poti pošiljanja",
   intake_invite_qr_label: "Koda, ki odpre stran za prijavo",
   intake_invite_qr_hint:
-    "Pokaži mu to kodo in ga prosi, naj vanjo usmeri kamero telefona. Odpre se ista stran za prijavo, na njej je tvoje ime.",
+    "Pokaži stranki to kodo in jo prosi, naj vanjo usmeri kamero telefona. Odpre se ista stran za prijavo, na njej je tvoje ime.",
   intake_invite_subject: "Tvoji podatki za najin trening",
   intake_invite_sent: "Povezava poslana",
   intake_invite_copied: "Povezava kopirana",
