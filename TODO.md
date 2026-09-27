@@ -6203,6 +6203,9 @@ slovenščina edina, ki tu veli klikanje.
 
 **Obseg, potrjen v kodi na `main`:** v [sl.js](src/i18n/sl.js) sta taka zapisa dva,
 `no_clients_found` in `no_routines_found`; enako v [en.js](src/i18n/en.js) (»Click«).
+Za isto dejanje so v slovenščini tri besede: »Pritisni« triinštiridesetkrat, »Tapni«
+šestkrat, »Klikni« dvakrat. Zapis `edit_exit_hint` uporabi dve v enem stavku: »Tapni Končano,
+pritisni Esc ali tapni zunaj za zaključek.«
 
 **Predlog in preverjanje:** oba napisa prepisati v stanje, ne v neuspeh — »Strank še ni.
 Pritisni "Dodaj stranko" in vpiši prvo.« — in besedo »Klikni« odpraviti iz slovenščine ter
