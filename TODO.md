@@ -6600,6 +6600,27 @@ objavljeni različici `0625bd6`; koda na `main` je ista. Sorodno: §80.8 (prosta
 ocene postane priporočilo) in zapis v [TODO_ARCHIVE.md](TODO_ARCHIVE.md) o imenu »voice_memo.wav«,
 ki mock omenja, ne pa tega, da si izmisli vsebino.
 
+### 80.36 [ ] P2 — »Anonimna kopija za AI« s seboj odnese cilje in zdravstvene opombe
+
+**Scenarij in koraki:** trener v profilu stranke pritisne »Anonimna kopija za AI«.
+
+**Opaženo:** okno pravi »Anonimni povzetek stranke je kopiran. Varno ga lahko uporabiš z
+AI-pomočniki.« Kaj je v odložišču, pove koda:
+[clientsView.js](src/modules/clients/clientsView.js) sestavi zapis z vrsticami »Entity: Client
+#<id>«, »Goals: <cilji>«, »Health & Mobility Notes: <opombe>« in seznamom vadb.
+
+**Težava in vpliv:** ime je res zamenjano z oznako, cilji in opombe o poškodbah pa gredo zraven
+dobesedno. To je prosto besedilo, ki ga piše trener — in prav tja se ime stranke najpogosteje
+zapiše (»Ana ima občutljivo koleno«), kar je odprto vprašanje §67. Poleg tega so opombe o
+poškodbah zdravstveni podatek. Beseda »Varno« v sporočilu obljublja več, kot kopija naredi:
+trener to prilepi v AI-pomočnika, torej k tuji storitvi.
+
+**Predlog in preverjanje:** povedati, kaj kopija vsebuje, preden se ustvari, in dati trenerju
+izbiro, ali gre zraven tudi prosto besedilo; sporočilo naj ne trdi, da je uporaba varna, ampak
+naj pove, kaj je odstranjeno. Preizkus naj zahteva, da kopija bodisi ne vsebuje polj s prostim
+besedilom bodisi da jih sporočilo poimensko napove. Opaženo na objavljeni različici `0625bd6`;
+koda na `main` je ista. Povezano z §67.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
