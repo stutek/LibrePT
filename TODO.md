@@ -6739,6 +6739,31 @@ trenerju pove, da je aplikacija odprta še nekje. `BroadcastChannel` je za to do
 zahteva, da po koncu obstajajo vse tri stranke. Opaženo na objavljeni različici `0625bd6`; koda
 na `main` je ista.
 
+### 80.41 [ ] P2 — Trije izhodi iz obrazca za stranko, dva izida: »Prekliči« zavrže, ✕ in Esc obdržita
+
+**Scenarij in koraki:** trener v imeniku pritisne »Dodaj stranko«, vpiše ime in si premisli.
+Iz obrazca vodijo trije izhodi: gumb »Prekliči«, križec ✕ zgoraj desno in tipka Esc.
+
+**Opaženo, vsako posebej preizkušeno:**
+- »Prekliči« — stranke ni v imeniku. Zapis je zavržen.
+- ✕ — stranka **ostane** v imeniku (»X gumb preizkus«).
+- Esc — stranka **ostane** v imeniku (»Esc preizkus«).
+
+Obrazec, ki se odpre in zapre brez vpisa, ne pusti ničesar; to je v redu.
+
+**Težava in vpliv:** isti premislek da dva različna izida, odvisno od tega, kje trener
+pritisne. V imeniku se nabirajo na pol vpisane stranke, ki jih ni želel — in to je imenik, ki
+ga potem preiskuje med treningom.
+
+**Kako je nastalo:** zapis stranke se piše ob vsaki tipki (»stranka obstaja od prve črke«,
+[clientFormsController.js](src/controllers/clientFormsController.js)), zato je za zavrženje
+potreben izrecen umik. Nanj je pripet samo gumb »Prekliči«.
+
+**Predlog in preverjanje:** ✕ in Esc naj naredita isto kot »Prekliči«, ali pa naj obrazec
+vpraša, kaj naj stori z vpisanim. Tiho ohranjanje je najslabša od treh možnosti, ker trener ne
+izve, da je stranka nastala. Preizkus naj vse tri izhode preveri z vpisanim imenom in zahteva
+isti izid. Opaženo na objavljeni različici `0625bd6`; koda na `main` je ista.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
