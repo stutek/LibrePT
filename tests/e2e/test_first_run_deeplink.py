@@ -68,3 +68,22 @@ def test_the_demo_waits_until_the_first_launch_is_answered(fresh, local_server):
     )
     results = fresh.evaluate("() => window.__demoTourResults")
     assert [r["ok"] for r in results] == [True] * len(results)
+
+
+def test_the_chosen_language_holds_on_the_next_visit(fresh, local_server):
+    """Choosing Slovenian at the first run left parts of the app English; those parts are fixed, and
+    what was never tried is the return visit. The choice must hold after a reload, menu included."""
+    fresh.goto(local_server)
+    fresh.locator("#app-splash-language").wait_for(state="visible", timeout=15_000)
+    complete_first_run(fresh, lang="sl")
+    fresh.wait_for_selector("#app-header")
+
+    fresh.reload()
+    fresh.wait_for_selector("#app-header")
+    assert fresh.evaluate("() => document.documentElement.lang") == "sl"
+    # The ordinary splash, shown on every visit: no language question on it this time.
+    assert fresh.locator("#app-splash-language").is_hidden()
+    fresh.locator("#splash-dismiss").click()
+    fresh.locator("#app-splash").wait_for(state="hidden", timeout=15_000)
+    fresh.locator("#btn-app-menu").click()
+    assert fresh.locator("#menu-data").inner_text().strip() == "Upravljanje podatkov"
