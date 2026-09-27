@@ -6768,6 +6768,51 @@ vpraša, kaj naj stori z vpisanim. Tiho ohranjanje je najslabša od treh možnos
 izve, da je stranka nastala. Preizkus naj vse tri izhode preveri z vpisanim imenom in zahteva
 isti izid. Opaženo na objavljeni različici `0625bd6`; koda na `main` je ista.
 
+### 80.42 [ ] P2 — Izvoz podatkov, ki ga prebere stranka, je v celoti angleški
+
+**Scenarij in koraki:** trener v profilu stranke pritisne »Izvozi podatke (GDPR)«, prenese
+šifrirano datoteko in jo skupaj z geslom pošlje stranki. Stranka jo odpre v aplikaciji prek
+menija ☰ z »Open an encrypted file« in vpiše geslo.
+
+**Opaženo:** dešifriranje deluje in vse okoli njega je slovensko — okno, navodila, opozorilo,
+naj geslo pošlje po drugi poti. Dokument, ki ga stranka nato bere, pa je angleški od prve do
+zadnje vrstice: »# Your training data«, »## About you«, »- Name:«, »- Training goals:«,
+»If you believe your data has been mishandled you may complain to your national supervisory
+authority.«
+
+**Težava in vpliv:** to je edini dokument v aplikaciji, ki je napisan za stranko in ne za
+trenerja, in nastane zaradi njene pravice po GDPR. Prav njen jezik aplikacija pozna — obrazec
+ob včlanitvi zapiše `formLang` (v mojem preizkusu `sl`) —, uporabi pa ga ne. Slovenska stranka
+dobi pravni dokument v jeziku, ki ga morda ne bere.
+
+**Vzrok, potrjen v kodi na `main`:** [clientDataExport.js](src/data/clientDataExport.js) sestavi
+besedilo iz vpisanih angleških nizov; slovarja skoraj ne uporablja.
+
+**Predlog in preverjanje:** besedilo dokumenta peljati skozi slovar in izbrati jezik po
+`formLang` stranke, sicer po jeziku aplikacije. Preizkus naj izvozi stranko z `formLang: "sl"`
+in zahteva, da naslov dokumenta ni angleški. Opaženo na objavljeni različici `0625bd6`; koda na
+`main` je ista.
+
+### 80.43 [ ] P2 — Če trener ni vpisal svojih podatkov, v dokumentu piše »[trainer name]«
+
+**Scenarij in koraki:** trener ni izpolnil »Moji podatki« (ti so izrecno neobvezni) in izvozi
+podatke stranke po GDPR.
+
+**Opaženo:** dokument se glasi »Prepared 2026-09-27 by **[trainer name]** (**[trainer
+contact]**), the data controller for these records.«
+
+**Težava in vpliv:** upravljavec podatkov je pravna vloga; v dokumentu, s katerim trener
+odgovarja na zahtevo stranke, ostane oglata oznaka namesto imena. Stranka ne izve, kdo hrani
+njene podatke, in trener tega ne opazi, ker se dokument sestavi brez vprašanja.
+
+**Vzrok, potrjen v kodi na `main`:** [clientDataExport.js](src/data/clientDataExport.js) vzame
+`trainer.name || "[trainer name]"` in enako za stik.
+
+**Predlog in preverjanje:** izvoz naj ne teče, dokler trener ni vpisal imena in enega stika —
+okno naj ju vpraša takrat, ko ju potrebuje, in ne prej. Oglate oznake iz dokumenta odstraniti.
+Preizkus naj poskusi izvoziti brez vpisanih podatkov in zahteva, da aplikacija to prepreči.
+Opaženo na objavljeni različici `0625bd6`; koda na `main` je ista.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
