@@ -6567,6 +6567,9 @@ v ločeni tabeli, 5–10 min na dan (§86.2).
 Dan 05 (samostojna trenerka v Ljubljani, 11 strank): na kartici treninga je videla »• Nedoločen« in
 iskala, kje ga spremeni v »prišla« ali »ni prišla«. Beseda pomeni, da trening nima izbrane rutine
 (§80.55); prisotnosti ni kam zapisati (§86.4).
+Dan 06 (samostojni trener v Ljubljani, tuji naročniki, pogodba s podjetjem): mesečni pavšal podjetju
+obračuna v Excelu, 15 min na mesec (§86.2); čakalno vrsto vodi v opombi in naslednjega povabi sam
+(§86.3); mesečni pregled meritev v ločeni preglednici, 8 min na stranko na mesec (§86.4).
 
 ## 87. [ ] Prihodnja shema ne nosi polja glasovne opombe
 
@@ -6717,4 +6720,47 @@ to vodi v ločenem zvezku, po njeni oceni eno uro na teden za tri do štiri stra
 trenerjih, ki prehrano svetujejo. **Cena:** velika, če naj aplikacija vodi jedilnike; prehransko
 svetovanje je tudi ločena stroka z lastnimi pravili. **Presoja: ne izplača se.** Kar od tega zares
 potrebuje prostor, pokrijeta ločeno polje za opombe (§88.7) in meritve skozi čas (§86.4, §78).
+
+### 88.9 [ ] Stranka, ki je podjetje, in lokacija z njegovim imenom
+
+Dan 06: trener ima pogodbo s podjetjem (osem zaposlenih, mesečni pavšal) in vadi pri njih. Podjetje je
+vpisal kot stranko, lokacija pa je naravno kar ime podjetja — in aplikacija jo zavrne: »Kraj ne sme
+vsebovati imena stranke, Northlight pa je ime stranke.« Pravilo je bilo narejeno za zasebnost
+posameznikov (ime stranke ne sme v naslov ali kraj, ki ga vidijo drugi). **Vrednost:** vsak trener s
+pogodbo za podjetje, vsak tak termin. **Cena:** majhna, a zahteva pojem »stranka je skupina ali
+podjetje«, ki ga danes ni (ni števila ljudi, ni ločenega obračuna). **Presoja: čaka na Simona** — ali
+podjetje sodi med stranke z izjemo pri pravilu o imenu, ali pa je to lokacija oziroma skupina.
+
+### 88.10 [ ] Izposoja opreme strankam
+
+Dan 06: trener strankam posoja opremo za domačo vadbo (15 € na mesec) in to vodi v opombah; ob treh
+strankah se boji, da pozabi pobrati najemnino. **Vrednost:** redka dejavnost ob treningu. **Cena:**
+srednja, in je denar, ki ga aplikacija sploh ne vodi (§86.2). **Presoja: ne izplača se.**
+
+**Opomba k dnevu 06:** podagent je poročal, da se vrednosti druge vaje zapišejo na prvo. Ni potrjeno:
+v vmesniku vpis v drugo vrstico spremeni samo drugo vrstico. Orodje za brskalnik piše z `fill` v prvi
+zadetek razreda, polja vaj pa nimajo lastnega id-ja; orodje ima zdaj ukaz `type`, navodilo pa opozorilo.
+
+### 88.11 Seštevek po šestih dneh (2026-09-27)
+
+Šest dni, šest različnih trenerjev, 15:20–17:20. Aplikacija je vsak dan nosila vnos strank, termine in
+sestavljanje načrta, pogosto hitreje od papirja; opozorilo o prekrivanju, drža pri izometričnih vajah,
+ločena programa v paru in delo brez signala so bili pohvaljeni. **Kar je vsak dan ostalo zunaj:**
+denar (paketi, plačila, računi) v petih dneh od šestih, meritve v štirih, nadomeščanje v treh,
+prisotnost in odpovedi v dveh (§86 in §88.3).
+
+**Izplača se, po vrstnem redu:**
+1. Popravki napak, ki so jih dnevi našli: §80.52 in §80.53 (izgubljen načrt), nato §80.54, §80.55.
+2. Paket in zapis prisotnosti (§86.6, točki 2 in 1) — paket ima največ dokazov, prisotnost je pogoj
+   zanj; odločitev »brezplačno ali ProPT« čaka na Simona (§86.6).
+3. Majhne stvari z veliko dokazi: prazno iskanje v katalogu naj vodi naprej (§88.1), ločeno polje za
+   opombe (§88.7), kopija treninga na drug datum (§88.5), vpis za nazaj (§88.4), deljenje načrta kot
+   besedilo (§88.3).
+
+**Čaka na Simona:** §88.2 (stranka brez privolitve), §88.6 (okno za vabila), §88.9 (podjetje kot stranka).
+**Ne izplača se:** §88.8 (prehrana), §88.10 (izposoja opreme).
+
+**O postopku:** vsak dan je izpeljal tri do šest treningov v eni uri; dnevi, ki so poskusili zajeti
+vse, niso prišli do konca. Dve poročili »napak« sta bili omejitvi orodja za brskalnik, ne aplikacije
+(kliki po besedilu v zaprtih oknih, `fill` v prvi zadetek); oboje je v orodju popravljeno.
 
