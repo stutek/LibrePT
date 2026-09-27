@@ -151,6 +151,41 @@ def test_a_sandbox_older_than_twelve_hours_offers_a_fresh_one(page, local_server
     assert dialog.is_hidden(), "a declined offer must stay declined for the cooldown"
 
 
+def test_a_session_opened_in_the_sandbox_leaves_the_bar_with_it(page, local_server):
+    """After leaving the sandbox, the bar at the bottom still showed the sample session, its three
+    sample clients and a running clock, over the trainer's own empty work."""
+    page.goto(f"{local_server}?init=demo_data_load&lang=en")
+    page.wait_for_selector(".session-card")
+    # The trainer's own work has no live session: the demo data starts one, so it is ended here.
+    page.evaluate(
+        """async () => {
+            const ctrl = await import(new URL('controllers/activeSessionController.js', document.baseURI).href);
+            const cache = await import(new URL('data/sessionCache.js', document.baseURI).href);
+            ctrl.setActiveSession(null);
+            cache.clearActiveSessionCache();
+        }"""
+    )
+    _switch(page, "sandbox")
+    page.evaluate(
+        """async () => {
+            const ctrl = await import(new URL('controllers/activeSessionController.js', document.baseURI).href);
+            const store = await import(new URL('data/stateStore.js', document.baseURI).href);
+            ctrl.openSessionFromHistory({
+                id: 'sandbox-bar-log', clientId: store.getState().clients[0].id,
+                routineName: 'Sandbox Bar', date: new Date().toISOString(), duration: 0,
+                exercises: [{ id: 'exA', type: 'exercise', name: 'Barbell Row',
+                              sets: [{ reps: 10, weight: 40, completed: false }], circuitId: null }],
+            });
+        }"""
+    )
+    page.wait_for_selector("#clipboard-bar:not(.hidden)", state="attached")
+
+    _switch(page, "working")
+    assert "hidden" in (page.locator("#clipboard-bar").get_attribute("class") or ""), (
+        "the sandbox's session is still on the bar in the trainer's own work"
+    )
+
+
 @pytest.mark.clean_start
 def test_coming_back_returns_to_the_view_you_left(page, local_server):
     """Ruled 2026-09-10: stepping out to look something up and coming back to the dashboard

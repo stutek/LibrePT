@@ -898,6 +898,9 @@ function returnToLastView() {
   // the sandbox keeps the trainer's real session on the clipboard bar.
   setActiveSession(null);
   recoverActiveSession();
+  // The bar draws the session in memory, which has just been replaced. Without this, leaving the
+  // sandbox kept its sample session on the bar over the trainer's own work until a reload.
+  renderClipboardBar();
   handlePathChange();
 }
 
