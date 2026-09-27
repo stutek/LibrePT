@@ -585,6 +585,11 @@ iCloud data is CloudKit JS, and four facts from Apple decide it:
   Against that, the Google refresh token this app holds stays valid until it is revoked or goes six
   months unused (§1.5.1). A trainer being signed out every fortnight, on a gym floor, is the failure
   this app exists to avoid.
+  **Corrected 2026-09-27 (Claude), read in `src/data/googleAuth.js`:** the app holds no refresh
+  token. It uses Google's browser token flow and keeps an access token of about an hour in memory
+  only; the six-month refresh token is the CI canary's (§1.5.1), not the app's. The comparison with
+  CloudKit's two-week token still points the same way, because Google renews the app's token
+  silently, but it is not the one written above.
 - What iCloud genuinely gives is the storage bill: *"Any data stored in a user's private database
   counts against their personal iCloud quota"*
   ([TN2241](https://developer.apple.com/library/archive/technotes/tn2241/_index.html)) — the same
@@ -5996,18 +6001,72 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#817-x-remove-th
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#814-x-import-and-export-of-exercises-routines-and-circuits-in-one-place--done-2026-09-27); what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-### 81.5 [ ] API keys in Settings — blocked
+### 81.5 [ ] Every service credential the app holds can be cleared or revoked — ruled 2026-09-27
 
-LibrePT has no API key anywhere. The only mention is EnterprisePT's AI, used with the trainer's own
-key (§68). **Blocks the Settings row:** which service a key is for, and what the app does with it.
+**Ruled 2026-09-27 (Simon):** *"Shramba vseh api ključev v aplikaciji mora omogočiti, da se
+počistijo ali razveljavijo. GDrive in iCloud sta zaenkrat edina."*
 
-### 81.6 [ ] Encryption keys and passwords in Data management — blocked
+**What the app holds, read in the code:** for Google Drive, a short-lived access token in memory only
+(`data/googleAuth.js`, about an hour) and a `librept_drive_connected` flag in `localStorage`. No key
+is typed by the trainer and none is stored long-term. For iCloud, nothing: there is no iCloud
+integration, and §3.13 found that one needs a native Apple app, a Mac and the $99 Apple Developer
+Program.
 
-Today every encrypted export asks for a one-time passphrase and stores nothing
-(`data/encryptedExport.js`); backups are not encrypted, which §18.8 decided to change and parked.
-**Blocks the Data management section:** what is stored — a passphrase for backups, one for client
-exports, a key — and where. A passphrase stored on the phone next to the data protects nothing from
-someone holding the phone; it protects only a file that leaves it.
+**Gap found while reading:** *Disconnect* (`revokeAccess`) calls Google's revoke only when a token is
+in memory. After a reload there is none, so the grant stays at Google while the app says
+disconnected. Google's `google.accounts.oauth2.revoke` needs *"a valid access token"* and *"revokes
+all of the scopes that the user granted to the app"*
+([reference](https://developers.google.com/identity/oauth2/web/reference/js-reference)).
+
+**Build:**
+
+- A Settings row that lists each connected service and what this device holds for it, with two acts:
+  **clear from this device** (the flag and the token; other devices keep their access) and **revoke
+  at the service** (the grant ends for every device). Named for the trainer, who never typed a key:
+  *Connected accounts*, not *API keys*.
+- Revoke gets a token first when none is in memory — it runs from a tap, so Google's consent window
+  may open — and when that fails it says so and names Google's own page for removing an app's access
+  (`myaccount.google.com/linkedapps`, *Remove access*, per
+  [Google's help](https://support.google.com/accounts/answer/13533235)).
+- One list of services, so iCloud is one entry more if it is ever built. **iCloud itself is not
+  built here:** it waits on §3.13's decision.
+
+### 81.6 [ ] The backup password is stored, safely — ruled 2026-09-27, design to agree
+
+**Ruled 2026-09-27 (Simon):** *"geslo za varnostne kopije naj bo shranjeno in poiščiva varen način
+za shranjevanje gesel za varnostne kopije."*
+
+**What it depends on:** backups are not encrypted today (§18.8 decided to encrypt them and parked
+it). A stored backup password means encrypting backups — the file and Drive — with it.
+
+**Researched 2026-09-27, primary sources read:**
+
+- **A key the app can use but nobody can read out.** WebCrypto keeps a derived key as a `CryptoKey`
+  whose `extractable` flag decides *"whether or not the key may be extracted using exportKey() or
+  wrapKey()"* ([MDN](https://developer.mozilla.org/en-US/docs/Web/API/CryptoKey)). The interface is
+  `[Serializable]`, so it can be kept in IndexedDB, and serialising keeps the flag: *"Set
+  serialized.[[Extractable]] to the [[extractable]] internal slot of value"*
+  ([W3C Web Crypto](https://www.w3.org/TR/WebCryptoAPI/)). So the password is never stored — only a
+  key derived from it, with `extractable: false`.
+- **A key unlocked by fingerprint or face.** The WebAuthn `prf` extension gives a value per passkey
+  that *"can be used to generate a symmetric key for encrypting sensitive data, and that can only be
+  decrypted by a user who has the seed and the associated authenticator"*
+  ([MDN](https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API/WebAuthn_extensions)).
+  Nothing is stored at all. Support per [caniuse](https://caniuse.com/mdn-api_credentialscontainer_create_publickey_option_extensions_prf):
+  Chrome 116+, Safari and iOS 18+, Firefox 139+ (partial from 135), Samsung Internet 24+.
+
+**What neither protects against:** someone holding the unlocked phone can open the app and restore a
+backup. What they do protect: a backup file or Drive copy that leaves the phone, and the key itself
+from being copied out of the browser.
+
+**The risk a stored password creates:** the backup exists for a lost phone. If the password lives only
+on that phone, the backup on Drive cannot be opened on the new one. The trainer must keep it
+elsewhere as well, and the app must say so when it is set.
+
+**Recommended:** the non-extractable key in IndexedDB now — no prompt at each backup, works offline
+and in every browser the app supports — with *forget the password* in Data management, and PRF as a
+later option. **Blocks:** Simon's choice of the storage (non-extractable key, PRF, or both), then
+§18.8's encryption of the backup itself.
 
 ## 83. [ ] §66 gleda samo naprej: stranka, ki pride za besedilom
 
