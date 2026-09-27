@@ -1115,7 +1115,7 @@ export const sl = {
   profile_erase_client: "Izbriši stranko (GDPR)",
   profile_send_consent: "Pošlji obrazec za privolitev",
   profile_ai_copied:
-    "Anonimni povzetek stranke je kopiran. Varno ga lahko uporabiš z AI-pomočniki.",
+    "Kopirano: oznaka stranke in zapisi njenih treningov. Ime, kontaktni podatki, cilji in opombe niso vključeni.",
   profile_erased_banner:
     "Izbrisano {date} na zahtevo stranke. Spodnji zapisi treningov so anonimni.",
   consent_badge_withdrawn: "Privolitev preklicana ({dates})",

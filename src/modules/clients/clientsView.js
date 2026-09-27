@@ -4,6 +4,7 @@ import {
   isConsentWithdrawn,
 } from "../../data/clientConsent.js";
 import { isErased } from "../../data/clientErasure.js";
+import { aiClientSummary } from "../../domain/aiClientSummary.js";
 import { consentEmailHref } from "../common/consentForm.js";
 import { renderMarkupOnce } from "../common/dom.js";
 import {
@@ -212,37 +213,8 @@ export function showClientDetails({
   if (aiCopyBtn) {
     aiCopyBtn.replaceWith(aiCopyBtn.cloneNode(true));
     document.getElementById("btn-ai-safe-copy").addEventListener("click", () => {
-      // Excludes isPlanning drafts — a plan awaiting a session is not a "logged session" for a
-      // performance summary (it inflates the count and has no completed reps/outcomes to report).
-      const clientHistory = state.history.filter(
-        (log) => log.clientId === client.id && !log.isPlanning,
-      );
-      const historyText =
-        clientHistory.length > 0
-          ? clientHistory
-              .slice(0, 10)
-              .map((h) => {
-                const exList = (h.completedExercises || [])
-                  .map(
-                    (ex) =>
-                      `- ${ex.name}: ${ex.completedReps} reps @ ${ex.weightUsed || "BW"} (Outcome: ${ex.outcome || "Completed"})`,
-                  )
-                  .join("\n");
-                return `### Session on ${h.date}\n${exList}`;
-              })
-              .join("\n\n")
-          : "_No session history recorded._";
-
-      const anonymizedSummary = `# Anonymized Client Performance Summary
-- Entity: Client #${client.id}
-- Goals: ${client.goals || "N/A"}
-- Health & Mobility Notes: ${client.notes || "None"}
-- Total Logged Sessions: ${clientHistory.length}
-
-## Recent Workout Logs
-${historyText}`;
-
-      // The summary itself stays English: it is data pasted into an AI tool, not text on screen.
+      // What goes in, and what is left out, is domain/aiClientSummary.js's decision.
+      const anonymizedSummary = aiClientSummary(client, state.history);
       navigator.clipboard.writeText(anonymizedSummary).then(() => {
         alert(t("profile_ai_copied"));
       });

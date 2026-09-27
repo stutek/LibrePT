@@ -1182,7 +1182,7 @@ export const en = {
   profile_erase_client: "Erase client (GDPR)",
   profile_send_consent: "Send Consent Form",
   profile_ai_copied:
-    "The anonymized client summary is copied. It is safe to use with AI assistants.",
+    "Copied: the client's ID and their workout records. Their name, contact details, goals and notes are left out.",
   profile_erased_banner:
     "Erased on {date} at the client's request. The training records below are anonymous.",
   consent_badge_withdrawn: "Consent Withdrawn ({dates})",

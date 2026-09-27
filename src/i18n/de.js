@@ -1166,7 +1166,7 @@ export const de = {
   profile_erase_client: "Kunden löschen (DSGVO)",
   profile_send_consent: "Einwilligung anfragen",
   profile_ai_copied:
-    "Die anonymisierte Zusammenfassung des Kunden ist kopiert. Du kannst sie gefahrlos mit KI-Assistenten verwenden.",
+    "Kopiert: die Kennung des Kunden und seine Trainingsaufzeichnungen. Name, Kontaktdaten, Ziele und Notizen sind nicht enthalten.",
   profile_erased_banner:
     "Am {date} auf Antrag des Kunden gelöscht. Die Trainingsaufzeichnungen unten sind anonym.",
   consent_badge_withdrawn: "Einwilligung widerrufen ({dates})",
