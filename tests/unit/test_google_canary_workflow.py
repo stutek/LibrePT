@@ -144,11 +144,9 @@ def test_a_missing_credential_fails_the_job_before_it_wastes_a_runner():
 
 def test_the_failure_message_says_where_the_instructions_are():
     """An error a maintainer has to reverse-engineer six months later is barely better than a
-    silent skip. The message carries the runbook path AND the public TODO section: the runbook is
-    the procedure, the TODO section is why the design is the way it is."""
+    silent skip. The message carries the runbook path, which holds the procedure."""
     first = _canary_steps()[0]
     assert "GOOGLE_CLOUD_SETUP.md" in first["run"], "no pointer to the setup runbook"
-    assert "1.5.1" in first["run"], "no pointer to the public rationale in TODO.md"
     assert "GOOGLE_LIVE_CREDENTIALS" in first["run"], "does not name the secret to set"
     # The likeliest cause on a repo that WAS working is the Testing-mode 7-day expiry, so the
     # message names it rather than leaving the reader to rediscover it.

@@ -16,7 +16,7 @@ exemption is a gate that documents debt instead of preventing it.
 The layering, bottom to top — each may import only from layers strictly below it:
 
     data/          persistence and record shape; imports nothing above itself
-    domain/        the training vocabulary — pure, no DOM, no storage (TODO §24.6)
+    domain/        the training vocabulary — pure, no DOM, no storage
     modules/common/ shared UI helpers, usable by any feature
     modules/<feat>/ one feature's views and components
     controllers/   orchestration; wires modules together and owns app-level actions

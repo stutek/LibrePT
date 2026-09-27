@@ -17,7 +17,7 @@ What is checked, and what deliberately is not:
     where it lives, and that claim must be true — the repo-relative path, `src/…` prefix included.
   • A header that opens with prose (`// Owns the Client create/edit dialog: …`) is making no such
     claim and is left alone. Requiring a path on every module would be a different, more annoying
-    rule that buys nothing: those headers are already self-documenting, which is what §5.4 asks for.
+    rule that buys nothing: those headers already say what the file is.
   • A path mentioned anywhere OTHER than the first token is a reference to some other module
     (`// Markup-only companion to activeSessionController.js`), not a self-claim, so it is ignored.
 

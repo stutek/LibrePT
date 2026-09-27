@@ -1,7 +1,7 @@
 """`python -m agent_tools.font_subset` — build the app's icon font from the glyphs it actually uses.
 
 Why this exists: the app shipped two whole Font Awesome faces, 252KB of woff2 for the ~50 glyphs it
-draws (TODO §12.6). On the first load in a basement gym — the load this app is designed around —
+draws. On the first load in a basement gym — the load this app is designed around —
 that is a quarter of a megabyte spent on ~1400 icons nobody asks for.
 
 **Not a build dependency.** `fonttools` is installed for the minutes this runs and uninstalled after

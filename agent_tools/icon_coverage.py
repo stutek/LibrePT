@@ -2,7 +2,7 @@
 
 Why this exists: today the app ships Font Awesome WHOLE (~1400 glyphs for the ~48 it uses), so a
 typo'd or renamed icon class renders as an invisible nothing — no error, no failing test, just a
-gap where a control should be. The moment the font is subset (TODO §12.6) that failure mode gets
+gap where a control should be. The moment the font is subset that failure mode gets
 worse rather than better: a correct class for a glyph nobody remembered to include looks identical
 to a typo. This check closes both, and it is deliberately built BEFORE any subsetting, because
 subsetting without it is a silent-breakage machine.

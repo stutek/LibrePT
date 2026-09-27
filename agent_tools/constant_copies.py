@@ -1,6 +1,6 @@
 """`python -m agent_tools.constant_copies` — a declared constant's value must appear only once.
 
-Why this exists (TODO §28.3): `a9cad18` centralised the dev-server port after its value had been
+Why this exists: `a9cad18` centralised the dev-server port after its value had been
 written out in six places, and `70aaec0` did the same for the Python version after thirteen.
 Both were found by a person noticing, which is not a strategy. The failure is silent by construction:
 every copy is correct on the day it is written and the repository keeps working after the declaration
@@ -21,7 +21,7 @@ nothing but the writing, while a Stage 1 task costs every commit forever and acq
 being maintained — before anyone knows whether it earns one. Run it in the duplication sweep. If it
 catches something more than once, it earns a gate task, a CI job and a catalog row.
 
-**Comments and docstrings count** (TODO §28.1, decided by the maintainer): *"if we ever change the
+**Comments and docstrings count** (decided by the maintainer): *"if we ever change the
 port or domain, we want to change in one place not 100s"*. A comment quoting a port number is a copy
 like any other — it goes stale silently, and the next reader believes it. Prose names the constant.
 
@@ -185,9 +185,7 @@ def main():
         print(
             "\n    Import the constant, or name it in the prose. A written-out value is a copy"
         )
-        print(
-            "    that goes stale silently, and the next reader believes it (TODO §28.1)."
-        )
+        print("    that goes stale silently, and the next reader believes it.")
         return 1
 
     print(

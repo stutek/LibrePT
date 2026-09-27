@@ -1,4 +1,4 @@
-"""build/quiet_machine.py — the gate starts only on a machine that is not already busy (TODO §64).
+"""build/quiet_machine.py — the gate starts only on a machine that is not already busy.
 
 Measured 2026-09-18, five runs of one tree: every red run started at a 1-minute load average of 3 or
 more, and the two green ones started at about 1. Each failure was a different test — a container that
@@ -71,7 +71,7 @@ def wait_for_quiet_machine(
             )
             announce(
                 "    The gate is not run here: a suite that fails because the box was saturated says "
-                "nothing about the tree (TODO §64). Stop what is using the machine — another agent "
+                "nothing about the tree. Stop what is using the machine — another agent "
                 "session running tests, a build, a game — and run it again."
             )
             return False

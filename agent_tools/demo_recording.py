@@ -1,8 +1,8 @@
 """`python -m agent_tools.demo_recording` — record the scripted demo tour as a video file.
 
-Why this exists: TODO §23.5 needs a video for channels that cannot embed a live app — Instagram and
-short-form especially (§23.3 item 5). What it must NOT become is the stale recording that section
-rejected: an asset that keeps playing after the app has moved, showing something that no longer
+Why this exists: a video is needed for channels that cannot embed a live app — Instagram and
+short-form especially. What it must NOT become is the stale recording that was rejected: an asset
+that keeps playing after the app has moved, showing something that no longer
 exists to the people being asked to trust it.
 
 So nothing here is authored. The tour is `src/modules/demo/gymFloorTour.js`, the same script

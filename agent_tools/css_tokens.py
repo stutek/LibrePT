@@ -10,7 +10,7 @@ That is not hypothetical. `modules/demo/storyNarration.css` asked for `--text-pr
 `--text-muted`, `--card-bg` and `--bg-color`. All five declarations fell through to their light-theme
 fallbacks, so the demo's story card was slate-on-white everywhere — correct on the Daylight theme by
 coincidence, and 2.38:1 body text on Midnight, which is the theme the story's own handover link
-forces on the client's phone. Reported 2026-08-27 as "the 2/8 card is hard to read" (TODO §38.8),
+forces on the client's phone. Reported 2026-08-27 as "the 2/8 card is hard to read",
 invisible in review for a year of edits, and invisible to every test that did not measure contrast.
 
 **A property is DEFINED by whoever writes it, which is not only a stylesheet.** Three writers count:

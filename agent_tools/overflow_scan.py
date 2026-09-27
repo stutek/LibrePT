@@ -2,7 +2,7 @@
 
 Why this exists: every test in this repo asserts *semantics* — text, counts, element ids — and none
 asserts *geometry*, so a control that runs off the screen edge or one whose label is silently
-clipped inside its own box passes the whole gate (TODO §25). The `.filter-chips` overflow recorded
+clipped inside its own box passes the whole gate. The `.filter-chips` overflow recorded
 in `src/index.css` was found by looking at the app, not by a test.
 
 This module owns the sweep itself — one function of browser-side JavaScript — so the e2e suite
@@ -26,7 +26,7 @@ Three invariants, deliberately separate:
 
   **C — nothing is wider than a parent that does not clip it.** A and B both need a box that clips,
   and the commonest overflow has none: text too long for its slot in a row simply draws over the
-  control beside the slot. The clipboard's session name ran under its ▶ and ⋮ buttons (TODO §47.1)
+  control beside the slot. The clipboard's session name ran under its ▶ and ⋮ buttons
   while ending 16px inside the screen, and A and B had nothing to measure it against. C compares
   an element in the normal flow with its parent's padding box, horizontally.
 
@@ -55,7 +55,7 @@ so it is not wired into a gate — the e2e suite is what gates these invariants.
 
 Usage:
   # The dev server's address is deploy.local_http_server.dev_server_url() — one declaration of
-  # the port and base path (TODO §28.1), so nothing here writes either out.
+  # the port and base path, so nothing here writes either out.
   python -m agent_tools.overflow_scan --url "$(.venv/bin/python -c \
       'from deploy.local_http_server import dev_server_url; print(dev_server_url("?init=demo_data_load"))')" \\
       --device iphone-14 --wait-selector "#view-clients.active"
@@ -213,7 +213,7 @@ OVERFLOW_SCAN_JS = r"""
 
   // Invariant C, horizontal only. An element in the normal flow that is wider than the parent it
   // sits in, where that parent does NOT clip, is drawn over whatever stands beside the parent: the
-  // clipboard's session name under its ▶ and ⋮ buttons (TODO §47.1). Measured against the parent's
+  // clipboard's session name under its ▶ and ⋮ buttons. Measured against the parent's
   // PADDING box, so a bar that bleeds edge to edge in a padded card is inside it. Vertically a
   // parent grows with its content, so the same test there would mostly report a fixed height.
   function escapesItsParent(element, style, rect) {

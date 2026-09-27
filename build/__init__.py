@@ -331,7 +331,7 @@ def format_run_header(label, when, snapshot, previous_seconds=None):
     """The two lines printed before a run starts (wanted 2026-08-19).
 
     They answer, at the only moment either can be answered honestly, the two questions asked AFTER a
-    slow run. "When will this be done?" is what §2.A.3 makes the agent quote as a wall-clock time,
+    slow run. "When will this be done?" is what the agent must quote as a wall-clock time,
     and it comes from the last run of this same command on this same machine — no estimate at all on
     the first run, because a made-up number is furthest out exactly when nobody can check it. "Was
     the box busy?" decides whether a stage past its budget is a regression or an oversubscribed
@@ -967,8 +967,8 @@ def run_icon_coverage_check():
     run and swapped for Free equivalents.
 
     Pure text analysis against the stylesheet, no font parsing and no fonttools, so it stays in
-    Stage 1 and adds no dependency. It also has to exist BEFORE the font is ever subset (TODO
-    §12.6): subsetting turns "correct class, glyph not included" into the same invisible gap.
+    Stage 1 and adds no dependency. It also has to exist BEFORE the font is ever subset:
+    subsetting turns "correct class, glyph not included" into the same invisible gap.
     """
     print("\n  Checking icon coverage...")
     from agent_tools import icon_coverage
@@ -991,6 +991,18 @@ def run_todo_hygiene_check():
         sys.exit(1)
 
 
+def run_todo_refs_check():
+    """No file outside TODO.md and its archive points at a section of them — see
+    agent_tools/todo_refs.py. A TODO section closes and its text moves, so a file that pointed at it
+    points at something else; a file writes its own reason instead.
+    """
+    print("\n  Checking pointers into TODO...")
+    from agent_tools import todo_refs
+
+    if todo_refs.main() != 0:
+        sys.exit(1)
+
+
 def run_css_token_check():
     """Verifies every `var(--token)` names a property something defines — see
     agent_tools/css_tokens.py.
@@ -1000,7 +1012,7 @@ def run_css_token_check():
     line was typed, which then stops following the theme. The demo's story card asked for four
     properties this app has never had and painted itself in light-theme slate everywhere, which was
     correct on the Daylight palette by coincidence and 2.38:1 body text on Midnight — the palette
-    the story's own handover link forces on the client's phone (TODO §38.8).
+    the story's own handover link forces on the client's phone.
 
     The parity half is the same failure one level up: the five palettes are alternatives, so a
     property only one of them defines is undefined for everyone on the other four.
@@ -1020,7 +1032,7 @@ def run_ui_string_check():
     translation: the dictionaries are in exact parity, and the English is written into the markup.
     There are hundreds, so this is a RATCHET — it fails when the number goes up, and again when it
     goes down without the baseline following, which is what keeps a finished sweep from quietly
-    stopping the check from holding anything (TODO §38.20).
+    stopping the check from holding anything.
     """
     print("\n  Checking untranslated interface text...")
     from agent_tools import ui_strings
@@ -1032,7 +1044,7 @@ def run_ui_string_check():
 def run_inline_style_check():
     """Refuses a style written in code — see agent_tools/inline_styles.py.
 
-    Ruled 2026-09-13 (TODO §49): a theme is a whole stylesheet that may restyle any component, and a
+    Ruled 2026-09-13: a theme is a whole stylesheet that may restyle any component, and a
     declaration on the element (`el.style.gap`, `style="…"`) beats every stylesheet, so a theme cannot
     reach it. A number only the code knows still goes through, as a custom property.
     """
@@ -1406,8 +1418,8 @@ def _playwright_worker_count():
 
     The cap is not the bottleneck either way. Average call time is 2.69s/test, of which a cold app
     boot in a fresh context measures ~0.94s under this same 8-way parallelism — about a third, not
-    the whole thing (see §12.7 for the full fresh-vs-warm numbers, and for the misreading that
-    briefly put that figure at 2.84s).
+    the whole thing (see CHANGELOG.md for the full fresh-vs-warm numbers, and for the misreading
+    that briefly put that figure at 2.84s).
     """
     cpu_count = os.cpu_count() or 2
     return max(1, cpu_count // 2)
@@ -1668,7 +1680,7 @@ def released_schema():
 
 
 def preview_schema_differs():
-    """Whether the PREVIEW shape declares anything the active schema does not (TODO §62).
+    """Whether the PREVIEW shape declares anything the active schema does not.
 
     Asked of the schema declarations themselves, never of a setting: the day a release mints the next
     number and the preview is empty, the second pass costs nothing and stops running with nothing to
@@ -1695,7 +1707,7 @@ def preview_schema_differs():
 
 
 def _read_schema_flags():
-    """`--read-schema=PREVIEW` for the browser suites, while a preview shape exists (TODO §62).
+    """`--read-schema=PREVIEW` for the browser suites, while a preview shape exists.
 
     Stage 3 is the stage for the work in hand, so it reads the shape the next version will use
     (Simon, 2026-09-19). What the RELEASED shape promises is stage 4's regression suite, pinned to
@@ -2135,6 +2147,7 @@ def run_stage_1_parallel():
         "Static Security Audits": run_static_security_checks,
         "Documentation Graph": run_doc_graph_check,
         "TODO Hygiene": run_todo_hygiene_check,
+        "TODO Pointers": run_todo_refs_check,
         "Module Catalog Coverage": run_catalog_coverage_check,
         "Module Headers": run_module_header_check,
         "Icon Coverage": run_icon_coverage_check,
@@ -2244,7 +2257,7 @@ def run_stage_3_e2e():
 
 
 def run_stage_4_regression():
-    """Stage 4: the regression suite, on the schema the released version reads (TODO §62).
+    """Stage 4: the regression suite, on the schema the released version reads.
 
     Its own stage rather than another task beside Stage 3's: a failure here means the version
     trainers are already running is broken, which is a different sentence from "the work in hand does
@@ -2283,7 +2296,7 @@ def run_stage_5_zap():
 # `.github/workflows/deploy.yml`'s job graph enforces the SAME order. Before this existed the
 # ordering was hand-maintained in two places and drifted: CI ran the medium and e2e suites
 # concurrently while the local gate staged them, so "the pipeline" meant two different things
-# depending on where it ran (TODO §6.4).
+# depending on where it ran.
 #
 # Each row is (stage number, the local stage runner, the leaf `run_*` checks CI must place in that
 # stage). Stage 1's leaves are deliberately empty here — it has many, and they are already declared
@@ -2367,7 +2380,7 @@ def run_build(base=None):
 def stamp_build_version(dist_dir):
     """Overwrite dist/version.js with the real short commit SHA and UTC build time (the header
     build stamp). Mirrors the Pages deploy (.github/workflows/deploy.yml) — keep the two writers in
-    sync. No release tag: multi-version hosting was dropped (TODO §16/§18) — one build carries every
+    sync. No release tag: multi-version hosting was dropped — one build carries every
     supported data schema concurrently, and storage keys on the schema major, not a release tag."""
     from datetime import datetime, timezone
 

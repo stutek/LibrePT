@@ -2,7 +2,7 @@
 
 Why this exists: [icon_coverage.py](icon_coverage.py) compares NAMES — every `fa-` class in `src/`
 against the classes the stylesheet declares — and that is the right Stage 1 check because it is pure
-text and costs nothing. But it cannot see the failure mode a SUBSET font introduces (TODO §12.6): a
+text and costs nothing. But it cannot see the failure mode a SUBSET font introduces: a
 correct class, a declared rule, and a glyph that is simply not in the font any more. The browser
 draws nothing at all, and every name-level check stays green.
 

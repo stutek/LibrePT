@@ -34,8 +34,7 @@ concurrency:
 # Stage 1 (fast checks, concurrent) → Stage 2 medium → Stage 3 e2e → Stage 4 regression → Stage 5
 # ZAP, then the post-gate
 # assemble and deploy. The order is declared ONCE, in build/__init__.py's PIPELINE_STAGES;
-# agent_tools/pipeline_gates.py reads that table and fails Stage 1 if this file drifts from it
-# (TODO §6.4).
+# agent_tools/pipeline_gates.py reads that table and fails Stage 1 if this file drifts from it.
 #
 # EVERY job states its stage in its `name:`, and that label is checked, not decorative — a job
 # running Stage N's checks must say `Stage N`, and a job running none must not claim a stage. That
@@ -136,6 +135,8 @@ jobs:
         run: .venv/bin/python -c "from build import run_catalog_coverage_check; run_catalog_coverage_check()"
       - name: TODO hygiene
         run: .venv/bin/python -c "from build import run_todo_hygiene_check; run_todo_hygiene_check()"
+      - name: TODO pointers
+        run: .venv/bin/python -c "from build import run_todo_refs_check; run_todo_refs_check()"
       - name: Module self-path headers
         run: .venv/bin/python -c "from build import run_module_header_check; run_module_header_check()"
       - name: Icon coverage
@@ -235,7 +236,7 @@ jobs:
       - name: Run Demo & Walkthrough Tests
         run: .venv/bin/python -c "from build import run_demo_tests; run_demo_tests()"
 
-  # === STAGE 4 === What the RELEASED version promises, on the schema it reads (TODO §62). Ruled by
+  # === STAGE 4 === What the RELEASED version promises, on the schema it reads. Ruled by
   # the maintainer 2026-09-19: its own suite in its own directory and its own stage, because a
   # failure here means the version trainers are already running is broken — a different sentence
   # from "the work in hand does not hold yet", and it should be read as one. Stage 3 above follows
@@ -288,7 +289,7 @@ jobs:
       # entry point local builds use too (build/__init__.py) — keep the two in sync.
       #
       # No release tags, no per-version folders, no versions.json: multi-version hosting was
-      # dropped (TODO §16/§18) — one build carries every supported data schema concurrently, and
+      # dropped — one build carries every supported data schema concurrently, and
       # storage keys on the schema major, not a release tag. Just the current build, at /<repo>/,
       # with its <base> rewritten for the Pages sub-path, a SPA 404 fallback, and — last, over the
       # exact bytes served — its SHA-256 integrity catalog.

@@ -11,7 +11,7 @@ transitive `needs` closure.** A second terminal job is by definition one nothing
 
 A second drift followed the same shape and needed the same treatment: the STAGE ORDER was written by
 hand in two files, so CI ran the medium and e2e suites concurrently while the local gate staged them
-(TODO §6.4). `build/__init__.py`'s `PIPELINE_STAGES` is now the single declaration of that order, and
+`build/__init__.py`'s `PIPELINE_STAGES` is now the single declaration of that order, and
 `out_of_order_stages()` asserts the workflow reproduces it — a job running a Stage N check must have
 every Stage N-1 job in its transitive closure.
 
@@ -179,7 +179,7 @@ def out_of_order_stages(jobs, commands):
     so a job running a Stage N check must have every Stage N-1 job in its transitive `needs`
     closure. Without this the two orderings are maintained by hand in two files, which is how CI
     came to run the medium and e2e suites concurrently while `build check` staged them: a broken
-    component failed fast locally and only after the slowest suite in CI (TODO §6.4).
+    component failed fast locally and only after the slowest suite in CI.
     """
     leaves = stage_leaves()
     stage_of_job = {}

@@ -10,8 +10,7 @@ the module tree, and each one is a small decision about wording rather than a me
 check that failed on all of them would be a check nobody could run, so this one fails when the number
 goes UP: the sweep proceeds file by file, `BASELINE` comes down with it, and no new dialog can be
 written in English in the meantime. When it reaches the irreducible set — a licence name, a
-taxonomy value that is the same word everywhere — the ratchet becomes an ordinary gate and TODO
-§38.20 closes.
+taxonomy value that is the same word everywhere — the ratchet becomes an ordinary gate.
 
 **What counts as user-visible.** Text between tags in a template literal, and the three attributes a
 person actually reads: `placeholder`, `aria-label`, `title`. An element carrying `data-i18n`,
@@ -31,12 +30,12 @@ SRC = REPO_ROOT / "src"
 # The count on the day the ratchet was fitted. It only ever goes down: 332 before the sweep started,
 # then the 27 `data-i18n` attributes nothing was applying, then the client dialog somebody reported
 # "Cancel" from, then the clipboard's Start and Done buttons becoming glyphs whose words live in
-# `aria-label` (TODO §39.6), then the day's expand-all control, whose label the timeline sets
-# from the dictionary in both directions (TODO §42.4), then the setup form's participant picker,
-# whose checkbox wall became a search field with two fewer hardcoded strings (TODO §46.2), then the
-# theme picker, whose options are built from theme.js's label table instead of the markup (§49.2),
+# `aria-label`, then the day's expand-all control, whose label the timeline sets
+# from the dictionary in both directions, then the setup form's participant picker,
+# whose checkbox wall became a search field with two fewer hardcoded strings, then the
+# theme picker, whose options are built from theme.js's label table instead of the markup,
 # then the board's Today button, which moved into the date filter's calendar and left its English
-# title and label behind with it (§74.2), then the two data-subject-request dialogs, whose markup now
+# title and label behind with it, then the two data-subject-request dialogs, whose markup now
 # carries a key on every text (clientDataRights.js), then the client directory and detail views,
 # whose placeholder texts went and whose labels carry their keys (clientsView.js), then the consent
 # button's words, which only the code sets now, then the Sync & Backup dialog (backupRestore.js),
@@ -104,7 +103,7 @@ def main():
             print(f"    {count:4}  {name}")
         print(
             "\n    New user-visible text has to go through the dictionary, or a trainer reading\n"
-            "    Slovenian meets it in English (TODO §38.20). Put the key on the element itself —\n"
+            "    Slovenian meets it in English. Put the key on the element itself —\n"
             '    `data-i18n="key"`, `data-i18n-placeholder`, `data-i18n-label` — or call `t()`.'
         )
         return 1
@@ -119,7 +118,7 @@ def main():
         )
         return 1
 
-    print(f"  ✓ UI strings: {total} hardcoded, none added (TODO §38.20 is the sweep).")
+    print(f"  ✓ UI strings: {total} hardcoded, none added.")
     return 0
 
 

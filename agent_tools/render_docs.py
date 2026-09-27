@@ -57,7 +57,7 @@ REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
 # is the right home for those. The test for inclusion is whether a non-developer reaches it from
 # the app, or a regulator needs it at a stable URL on a domain we own.
 DOCUMENTS = (
-    # The trainer-facing front door (TODO §23.5). README.md is developer-facing and correctly stays
+    # The trainer-facing front door. README.md is developer-facing and correctly stays
     # that way; a trainer arriving from a forum post needs one screen — what it is, a demo they can
     # drive themselves, and how to keep it on their phone.
     ("docs/LANDING.md", "src/landing.html", "LibrePT — the trainer's clipboard"),
@@ -103,7 +103,7 @@ DOCUMENTS = (
     ),
 )
 
-# The values a document may ask for by name instead of writing out (TODO §28.1/§28.2). Each is read
+# The values a document may ask for by name instead of writing out. Each is read
 # from the ONE place the repository declares it, so a document cannot hold a stale copy of an address
 # or a port: `{{PUBLIC_SITE_URL}}` in the Markdown becomes the deployed address at render time, and
 # the Stage 1 `--check` fails if a committed page no longer matches.

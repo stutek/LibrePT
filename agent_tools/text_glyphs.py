@@ -1,6 +1,6 @@
 """`python -m agent_tools.text_glyphs` — ship the symbols and emoji the app writes into its text.
 
-Why this exists (TODO §74.4): every typeface and every icon this app draws is vendored, so a first
+Why this exists: every typeface and every icon this app draws is vendored, so a first
 load in a basement gym needs no network and no host font. Its own SENTENCES were the exception. They
 carry ☰, ✕, ⚠, a pencil, a waving hand — sixteen characters, measured — and not one of them was in
 any file the app ships. They render on a developer's machine because the SYSTEM supplies them; on a
@@ -249,7 +249,7 @@ def _already_in_the_text_faces(codepoints):
 def check():
     """Which printable characters no vendored file can draw. Reads the fonts, never a manifest.
 
-    A manifest is what let four icons go missing for a month (TODO §74.5): the stylesheet said they
+    A manifest is what let four icons go missing for a month: the stylesheet said they
     were there and nothing asked the font. Needs fonttools, so the BUILD does not run this — the
     browser does, in tests/e2e/test_text_glyphs_render.py, which asks the page what it can draw.
     """
