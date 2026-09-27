@@ -6938,6 +6938,25 @@ pri polju, ne v oknu brskalnika (§80.19). Trening čez polnoč, če je mišljen
 tiha posledica. Preizkus naj poskusi shraniti 18:00–09:00 in zahteva, da aplikacija to zavrne s
 sporočilom ob polju. Opaženo na objavljeni različici `0625bd6`.
 
+### 80.49 [ ] P3 — Pri brisanju enega večera ponavljajočega se treninga ni povedano, da gre za en večer
+
+**Scenarij in koraki:** trener odpre en večer ponavljajočega se treninga in v meniju ⋮ izbere
+»Izbriši trening«.
+
+**Opaženo:** vprašanje se glasi »Izbriši ta trening? Odstranjen bo z urnika, zabeležen napredek
+in povratne informacije pa bodo izgubljeni — program vsakega udeleženca se ohrani med
+nenačrtovanimi programi.« O ponavljanju ne pove ničesar. Preizkušeno: izbriše se res samo ta
+večer, ostali ostanejo.
+
+**Težava in vpliv:** pri urejanju istega večera aplikacija obseg pove naravnost (»To je en
+večer ponavljajočega se treninga. Kar spremeniš tukaj, velja samo za ta večer.«), pri brisanju
+pa ne. Trener, ki tega ne ve, se bo brisanja izogibal ali pa se bo bal, da je pobrisal vse
+torke do konca leta.
+
+**Predlog in preverjanje:** ko ima trening `seriesId`, naj vprašanje doda isti stavek o obsegu,
+in naj po možnosti ponudi tudi »izbriši vse prihodnje večere«. Preizkus naj pri večeru serije
+zahteva, da je v vprašanju beseda o enem večeru. Opaženo na objavljeni različici `0625bd6`.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
