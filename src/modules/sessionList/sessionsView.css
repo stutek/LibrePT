@@ -101,8 +101,9 @@
 /* Both labels ship in the markup and CSS picks one, so the bar can flip from "Starts in" to
    "Overdue" at the moment the start passes without re-rendering the card — the 1s ticker already
    toggles `.overtime` here, and re-rendering a card under a trainer's thumb mid-set is exactly what
-   the dashboard avoids doing. */
-.session-live-bar.upcoming .when-overdue,
+   the dashboard avoids doing. The first selector excludes `.overtime`: a late bar carries both
+   classes, and without the exclusion it hid "Overdue" too, leaving a bare number. */
+.session-live-bar.upcoming:not(.overtime) .when-overdue,
 .session-live-bar.upcoming.overtime .when-upcoming {
   display: none;
 }

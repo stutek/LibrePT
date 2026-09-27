@@ -865,6 +865,7 @@ export const sl = {
   bar_clients_two: "{count} stranki",
   bar_clients_few: "{count} stranke",
   bar_clients_other: "{count} strank",
+  bar_past_end: "Čez konec {time}",
   sync_badge_ahead_one: "{count} sprememba na tej napravi čaka na pošiljanje",
   sync_badge_ahead_two: "{count} spremembi na tej napravi čakata na pošiljanje",
   sync_badge_ahead_few: "{count} spremembe na tej napravi čakajo na pošiljanje",

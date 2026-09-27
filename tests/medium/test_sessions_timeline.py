@@ -67,6 +67,25 @@ def test_upcoming_card_shows_a_starts_in_countdown(page, local_server):
     assert HOUR_MIN.match(countdown), f"expected '01h 32m' countdown, got {countdown!r}"
 
 
+def test_a_session_whose_start_has_passed_says_overdue_in_words(page, local_server):
+    """A late session showed only "01h 43m": the rule hiding "Overdue" on an upcoming bar also
+    matched the bar the ticker marks `overtime`, so both words were hidden.
+
+    The class is added here the way sessionCard.js's 1s ticker adds it when the start passes."""
+    load_with_stub(page, local_server, SESSIONS_STUB)
+    page.wait_for_selector(".sessions-day-group")
+    card = page.locator(".session-card", has_text="Morning Conditioning").first
+    bar = card.locator(".session-live-bar.upcoming")
+    assert bar.locator(".when-upcoming").is_visible()
+    assert not bar.locator(".when-overdue").is_visible()
+
+    bar.evaluate("el => el.classList.add('overtime')")
+
+    assert bar.locator(".when-overdue").is_visible()
+    assert bar.locator(".when-overdue").inner_text().strip() == "Overdue"
+    assert not bar.locator(".when-upcoming").is_visible()
+
+
 def test_a_card_is_one_compact_design_with_nothing_left_to_open(page, local_server):
     """Reported 2026-09-11 from a screenshot: the completed badge took space in the
     heading row, the card carried a block of empty space, and the programme name was written twice.

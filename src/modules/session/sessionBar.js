@@ -125,9 +125,13 @@ export function updateSessionBarTimer() {
     cardText = text;
   } else {
     const countdown = computeActiveSessionCountdown(activeSession);
-    text = countdown.isCountdown
-      ? deps.formatSignedDuration(countdown.seconds)
-      : deps.formatDuration(countdown.seconds);
+    // Past the planned end the time is said in words, not only with a minus sign: "-00:51" was the
+    // only sign that the time had run out.
+    text = countdown.isOvertime
+      ? deps.t("bar_past_end").replace("{time}", deps.formatDuration(-countdown.seconds))
+      : countdown.isCountdown
+        ? deps.formatSignedDuration(countdown.seconds)
+        : deps.formatDuration(countdown.seconds);
     cardText = deps.formatDurationHourMin(countdown.seconds);
     isOvertime = countdown.isOvertime;
   }

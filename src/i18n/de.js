@@ -917,6 +917,7 @@ export const de = {
   bar_clients_two: "{count} Kunden",
   bar_clients_few: "{count} Kunden",
   bar_clients_other: "{count} Kunden",
+  bar_past_end: "Über der Zeit {time}",
   sync_badge_ahead_one: "{count} Änderung auf diesem Gerät zum Senden",
   sync_badge_ahead_two: "{count} Änderungen auf diesem Gerät zum Senden",
   sync_badge_ahead_few: "{count} Änderungen auf diesem Gerät zum Senden",

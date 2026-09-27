@@ -97,6 +97,24 @@ MERGED = {
 }
 
 
+def test_past_the_planned_end_the_bar_says_so_in_words(page, local_server):
+    """Past the end the bar showed "-00:51", and the minus sign was the only thing saying the time
+    had run out. Started an hour ago, planned to end 51 seconds ago."""
+    session = (
+        _session_js(MERGED)
+        .replace('"startTime": Date.now()', '"startTime": Date.now() - 3600000')
+        .replace(
+            '"endDate": "2026-08-08T11:00:00.000Z"', '"endDate": Date.now() - 51000'
+        )
+    )
+    assert "Date.now() - 51000" in session
+    load_with_stub(page, local_server, _bar_stub(session))
+
+    duration = page.locator("#clipboard-bar-duration")
+    assert duration.inner_text().startswith("Past the end ")
+    assert "signed:" not in duration.inner_text(), "the word replaces the minus sign"
+
+
 def test_a_merged_clipboard_names_every_session_it_covers(page, local_server):
     """The case the app is built for: two overlapping slots are ONE clipboard. Both titles must
     appear — a bar built from `titles[0]` would silently drop the second booking, and the trainer
