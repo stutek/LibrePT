@@ -6208,6 +6208,15 @@ kaj izgubilo. Izguba dela brez opozorila, zato P1.
 **Predlog in preverjanje:** ko je trening s kartice že odprt, naj tap odpre tistega, ne novega. Preizkus
 naj spremeni načrt nezačetega treninga, zapre podlogo, trening odpre s kartice in zahteva spremembo.
 
+**Dodaten scenarij samo na objavljeni `0625bd6`:** ustvariti rutino »SIM Osnovna moč«
+z Dumbbell Bicep Curl 3×10×4 kg, po njej načrtovati »Sled predloge« za jutri 20:00–20:45.
+Nato v knjižnici spremeniti rutino na 6 kg. Spodnja vrstica odpre trening s 4 kg;
+zaprtje in odprtje istega treninga s kartice pokaže 6 kg. Nobeno odprtje ne pojasni
+spremembe. Trener tako dobi različno obremenitev glede na pot do istega treninga.
+Predlog dopolnitve: jasno ločiti trenutno predlogo od že pripravljenega načrta;
+oba načina odpiranja morata vrniti isti načrt. Brez zabeleženih napak brskalnika;
+kode v tem nadaljevanju nismo pregledovali.
+
 ### 80.53 [ ] P2 — Načrt treninga, vpisanega za nazaj, po osvežitvi izgine
 
 **Scenarij in koraki:** trener popoldne odpre jutranji trening, ki ga ni začel v aplikaciji, v meniju ⋮
