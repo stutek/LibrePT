@@ -6006,6 +6006,34 @@ začetkom kaže »Se začne čez«, kartica po zapadlem začetku »Zamuja«. Dan
 noben test — iskanje po `tests/` ne najde ne razreda `when-overdue` ne besede »Zamuja«.
 Opaženo na objavljeni različici `0625bd6`; pravilo na `main` je nespremenjeno.
 
+### 80.13 [ ] P2 — Opozorilo o poškodbi stranke je samo v opisu ob dotiku miške, in v angleščini
+
+**Scenarij in koraki:** trener v peskovniku pritisne kartico skupinskega treninga
+»Skupinska moč in kondicija« (08:00–10:00). Odpre se podloga z zavihki udeleženk in
+udeležencev; pri imenih »Jane« in »John« stoji oranžen trikotnik z klicajem.
+
+**Opaženo:** kaj trikotnik pomeni, ne piše nikjer na zaslonu. Edino besedilo je atribut
+`title`, ki se pokaže samo ob dotiku miške, in se glasi »Has recorded injury: Rahla napetost
+v levi rami pri dvigih nad glavo« — angleška uvodna beseda pred slovenskim zapisom.
+
+**Težava in vpliv:** na telefonu dotika miške ni, torej je na telovadnici opis poškodbe
+nedosegljiv. Trener vidi znak za nevarnost in ne more prebrati, katera poškodba je to, prav
+ko izbira obremenitev. Angleški uvod je poleg tega v slovenski aplikaciji.
+
+**Vzrok, potrjen v kodi na `main`:** [utils.js](src/modules/common/utils.js), funkcija, ki
+sestavi ime z znakom poškodbe, vpisuje niz »Has recorded injury: « dobesedno. Isti razred
+napake sta še dva kraja: gumb za nov trening v
+[sessionsView.js](src/modules/sessionList/sessionsView.js) nosi `aria-label` in `title`
+»Create Session«, pika neprebranega obvestila v
+[notificationArea.js](src/modules/common/notificationArea.js) pa `title="Unread"` — oboje
+angleško v slovenskem in nemškem vmesniku.
+
+**Predlog in preverjanje:** opis poškodbe mora biti dosegljiv s pritiskom, ne z dotikom miške
+— na primer znak odpre kratko sporočilo z zapisom. Vsak `title` in `aria-label` naj gre prek
+`t(...)`; ključe dodati v `en`, `sl` in `de`. Preveriti s preizkusom, ki v slovenskem vmesniku
+prebere vsak `title` in `aria-label` na zaslonu podloge in zahteva, da noben ni angleški niz
+iz kode. Opaženo na objavljeni različici `0625bd6`; vsi trije kraji na `main` so isti.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
