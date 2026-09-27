@@ -6821,3 +6821,16 @@ Poskusno izvedena in umaknjena, nič ni v commitu:
 contract«): kdaj je polje sme izginiti iz PREVIEW in iz naslednje številke — na primer šele, ko
 nobena gradnja, ki ga piše, ni več v obtoku —, in katero od obeh pravil se za to omili. Do takrat
 `hasVoiceNote` ostane v vseh oblikah; **nič ga ne piše več** (`ff15fff`) in nič ga ne izriše.
+
+**Moja napaka, da se ne ponovi:** §87 sem napisal kot lokalen poseg v eno datoteko, ne da bi
+pogledal, kaj shemo varuje. Pravili sta obe smiselni in obe podreta gradnjo; zahteva je zato
+pravilo, ne urejanje. Preveril sem ju sam v obeh preizkusih, preden to zapišem.
+
+**Predlog za odločitev (Claude), da ima Simon kaj potrditi ali zavrniti:** umik polja naj postane
+zapisano dejanje, ne izjema v preizkusu. Konkretno: seznam umaknjenih polj ob shemah — ime
+zbirke, ime polja, datum in razlog — in obe pravili ga upoštevata. Nenamerni izpust polja tako še
+naprej podre gradnjo, načrten umik pa je mogoč in je viden v isti datoteki kot sheme. Polje se na
+ta seznam sme uvrstiti šele, ko gradnja, ki ga je nehala pisati, teče v objavljeni različici dovolj
+dolgo, da je predpomnjena starejša gradnja s telefonov izginila — pri aplikaciji, ki se namesti,
+to ni dan ali dva. `hasVoiceNote` je prvi kandidat in dober preizkus tega postopka, ker ga danes
+ne bere nič razen pravila o golem dotiku.
