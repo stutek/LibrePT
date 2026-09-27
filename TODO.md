@@ -6888,6 +6888,28 @@ predlaga vzdevek. Preizkus naj sestavi trening z dvema strankama z istim imenom 
 se napisa zavihkov razlikujeta. Opaženo na objavljeni različici `0625bd6`; koda na `main` je
 ista.
 
+### 80.47 [ ] P3 — »Vsi na ta načrt« preklaplja v obe smeri, napis pa se ne spremeni
+
+**Scenarij in koraki:** v skupinskem treningu trener v meniju ⋮ izbere »Vsi na ta načrt«.
+Zavihki treh udeležencev se združijo v eno vrstico »Skupaj TA · TC · EP«. Nato spet odpre ⋮.
+
+**Opaženo:** v meniju še vedno piše »Vsi na ta načrt«, čeprav so vsi že na enem načrtu.
+Ponoven pritisk jih res razdruži nazaj na tri zavihke — torej gumb dela oboje, pove pa samo
+eno.
+
+**Vzrok, potrjen v kodi na `main`:** napis je pripet na ključ `bind_participants`
+([activeSessionOverlayView.js](src/modules/clipboard/activeSessionOverlayView.js)). Ključ za
+drugo smer **obstaja in je preveden v vseh treh jezikih** — `unbind_participants`
+(»Vsak svoj načrt«, »Give everyone their own plan«, »Jedem einen eigenen Plan geben«) — in ga
+nihče ne uporabi: v `src/` ni nobenega klica.
+
+**Težava in vpliv:** trener, ki je vse združil in si premislil, na zaslonu ne vidi poti nazaj.
+Poskusi jo lahko le tako, da pritisne isto vrstico, ki pravi nasprotno od tega, kar bo storila.
+
+**Predlog in preverjanje:** ob združenem stanju izpisati `unbind_participants`, kakor je
+očitno bilo mišljeno. Preizkus naj po združitvi zahteva, da vrstica menija ne pravi več »Vsi na
+ta načrt«. Opaženo na objavljeni različici `0625bd6`; koda na `main` je ista.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
