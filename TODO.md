@@ -2874,6 +2874,13 @@ The ask is a **mandatory alias on a name clash**, decided when the second one is
 discovered later. Open question the fix has to answer: what the clipboard, the plan editor and the
 history show once an alias exists.
 
+**Dodaten preizkus objavljene različice `0625bd6`:** dve stranki »TEST Luka Kovač«,
+vzdevka »jutranji« in »večerni«, dodani na »Par z vzdevkoma«. Izbirnik in zavihka
+vadbe pokažejo vzdevka; v oknu »Pošlji vabila v koledar« pa sta dve enaki oznaki
+»TEST Luka Kovač«. Trener ne vidi, kateremu pošilja vabilo. Predlog: tudi vrstici
+vabil naj pokažeta vzdevek ali naslov prejemnika. Vabil v preizkusu nismo poslali.
+Preizkušeno samo prek vmesnika, brez preverjanja kode.
+
 ### 39.6 [x] BUG — the clipboard says which session, and the chapter builds a programme
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#396-x-bug-the-clipboard-says-which-session-and-the-chapter-builds-a-programme); what shipped is in [CHANGELOG.md](CHANGELOG.md).
@@ -6305,6 +6312,32 @@ vnesel prav zaradi podvojenega imena. Sporočilo ga pri tem usmerja v ustvarjanj
 brisanje filtra. Ponoviti opisani scenarij: vsak vzdevek mora vrniti samo ustrezno stranko.
 Po izrecnem navodilu uporabnika gre za ugotovitev iz vmesnika; kode in stanja na `main`
 v tem nadaljevanju ne preverjamo.
+
+**Dopolnitev:** enako v nastavitvi treninga: »večerni« vrne »Stranke s tem imenom ni«,
+»Luka« pa obe pravilno označeni možnosti. Vzdevek naj upoštevata oba iskalnika.
+
+### 80.57 [ ] P1 — Decimalna vejica spremeni 2,5 kg v 25 kg brez opozorila
+
+**Scenarij in koraki:** slovenski trener v načrt »Par z vzdevkoma« doda ročno vajo
+»Dvig rok z lahkima utežema«. Polje KG označi v celoti in s tipkovnico vpiše »2,5«,
+pritisne Tab ter »Končano z urejanjem načrta«.
+
+**Opaženo:** polje po vnosu kaže »25«, nima validacijskega opozorila, v načrtu se
+izpiše »S3 × R10 × 25 kg«. Ponovno odprto urejanje še vedno kaže 25. Enak vnos s piko,
+»2.5«, ohrani pravilno vrednost in v načrtu pokaže »2.5 kg«. Testni načrt je popravljen
+na to vrednost. Zabeleženih napak brskalnika ni.
+
+**Okolje:** objavljena različica `0625bd6`, Chrome CDP, 390 × 844, jezik aplikacije
+slovenščina, `navigator.language` je `en-US`. Gre za tipkanje znakov, ne neposredno
+spreminjanje vrednosti prek JavaScripta. Preizkus drugega jezika brskalnika še ni izveden.
+
+**Težava in vpliv:** običajen slovenski decimalni zapis postane desetkrat večja
+obremenitev, ki je videti veljavna. Trener mora napako opaziti in vrednost popraviti.
+
+**Predlog in preverjanje:** sprejeti decimalno vejico in piko ali neustrezen ločilni
+znak jasno zavrniti; nikoli ga tiho izpustiti. Pri slovenski aplikaciji na brskalniku
+en-US preveriti vnose »2,5«, »0,5« in »2.5« ter prikaz ob ponovnem odprtju načrta.
+Ugotovitev temelji samo na objavljenem vmesniku, brez preverjanja kode.
 
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
