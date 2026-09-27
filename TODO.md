@@ -6446,6 +6446,30 @@ in na telefonu strani ne osvežuje.
 Preizkus naj razreši zadnji signal in zahteva, da predal takoj pokaže »Ni obvestil«. Opaženo na
 objavljeni različici `0625bd6`; koda na `main` je ista.
 
+### 80.30 [ ] P2 — Nepovratni izbris stranke se potrdi z angleškim navodilom in angleško besedo
+
+**Scenarij in koraki:** trener odpre profil stranke »Ana Kovač« in pritisne »Izbriši stranko
+(GDPR)«.
+
+**Opaženo:** okno je slovensko in jasno pove, kaj se zgodi, dve stvari v njem pa nista: vrstica
+s podatki stranke se glasi »Ana Kovač — +386 40 111 222 · **joined** 2026-09-27 · id …XsD94l«,
+navodilo nad poljem pa »**Type ERASE to confirm**«. Gumb »Izbriši dokončno« se odklene šele,
+ko trener vpiše angleško besedo »ERASE«.
+
+**Težava in vpliv:** to je edino dejanje v aplikaciji, ki ga ni mogoče razveljaviti, in njegova
+zadnja varovalka je napisana v jeziku, ki ga uporabnik morda ne bere. Slovenski trener mora
+uganiti, kaj naj vpiše. Beseda za potrditev naj bo v jeziku vmesnika.
+
+**Vzrok, potrjen v kodi na `main`:** [clientDataRights.js](src/modules/clients/clientDataRights.js)
+ima `ERASE_CONFIRMATION_WORD = "ERASE"` in oznako polja vpisano dobesedno v angleščini;
+[clientErasure.js](src/data/clientErasure.js) sestavi vrstico s podatki z besedo `joined`.
+
+**Predlog in preverjanje:** oznako polja in besedo za potrditev peljati prek `t(...)` — v
+slovenščini »IZBRIŠI«, v nemščini »LÖSCHEN« — in vrstico s podatki sestaviti iz ključev, ne iz
+angleških besed. Paziti, da preverjanje primerja vpisano besedo z besedo TRENUTNEGA jezika.
+Preizkus naj v vseh treh jezikih zahteva, da se gumb odklene z besedo tistega jezika. Opaženo na
+objavljeni različici `0625bd6`; koda na `main` je ista.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
