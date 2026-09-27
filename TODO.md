@@ -5959,6 +5959,27 @@ napake v kodi. Preizkušeno v Chrome CDP na objavljeni različici `0625bd6`.
 ugotoviti vzrok neodzivnosti. Zaključek mora potrditi shranitev in po ponovnem odprtju
 pokazati zaključeno vadbo; preklic pa mora ohraniti odziven aktiven trening.
 
+### 80.11 [ ] P2 — Števec sinhronizacije v glavi je brez besed in samo v angleščini
+
+**Scenarij in koraki:** trener prvič odpre objavljeno aplikacijo v slovenščini, ne poveže
+nobene shrambe v oblaku in pogleda glavo zaslona.
+
+**Opaženo:** desno od imena in oznake različice stojita puščica gor z »0« in puščica dol z
+»?«. Nikjer ni besede, ki bi povedala, kaj šteje. Edina razlaga je bralniku zaslona
+namenjen `aria-label`, ki se glasi »0 local changes to push, cloud status unknown« — v
+angleščini, čeprav stran pravi `lang="sl"`.
+
+**Težava in vpliv:** trener vidi vprašaj v glavi in ne ve, ali kaj ni v redu z njegovimi
+podatki. Pomen je samo v nevidnem besedilu, kar projektno pravilo prepoveduje, in to
+besedilo je v tujem jeziku. Znak »?« brez razlage vzbuja skrb pri uporabniku, ki oblaka
+sploh ni priklopil.
+
+**Predlog in preverjanje:** ko oblak ni nastavljen, števca ne kazati; ko je, mu dati vidno
+besedo ali ga odpreti v okno s stanjem. `aria-label` sestaviti prek `t(...)` s ključi v
+`en`, `sl` in `de`. Preverjeno na objavljeni različici `0625bd6`; koda na `main` je ista —
+[applicationHeader.js](src/modules/common/applicationHeader.js), funkcija, ki sestavi
+`sync-badge`, vpisuje oba angleška stavka dobesedno.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
