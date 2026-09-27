@@ -6175,6 +6175,27 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8050-x-p2--stra
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8051-x-p1--stranka-izbere-odgovor-na-vabilo-poslati-pa-ga-nima-s-čim--popravljeno-2026-09-27).
 
+### 80.52 [ ] P1 — Spremembe načrta nezačetega treninga izginejo, ko trening odpreš znova s kartice
+
+**Scenarij in koraki:** trener zvečer odpre jutrišnji trening s kartice na plošči, v meniju ⋮ izbere
+»Uredi načrt«, doda ali preimenuje vajo in pritisne »Končano«. Z ročico v naslovni vrstici se vrne na
+ploščo in isti trening spet odpre s kartice.
+
+**Opaženo:** načrt je spet takšen, kot ga da rutina; sprememba je izginila brez besede, tudi po
+osvežitvi strani. Našel podagent v dnevu trenerja 01 (§88); ponovljeno na `main` z začasnim preizkusom
+v brskalniku: prva vaja »Probe Movement« je bila po ponovnem odprtju spet »Face Pulls«.
+
+**Vzrok, potrjen v kodi na `main`:** tap na kartico ([sessionCard.js](src/modules/sessionList/sessionCard.js))
+vedno pokliče `launchClipboardDirectly` ([sessionsView.js](src/modules/sessionList/sessionsView.js)),
+ta pa `startWorkoutSession`, ki podlogo zgradi na novo iz rutine — tudi ko je isti trening že odprt
+in spremenjen.
+
+**Težava in vpliv:** načrt, ki ga trener pripravi zvečer, zjutraj ni več tam, in nič ne pove, da se je
+kaj izgubilo. Izguba dela brez opozorila, zato P1.
+
+**Predlog in preverjanje:** ko je trening s kartice že odprt, naj tap odpre tistega, ne novega. Preizkus
+naj spremeni načrt nezačetega treninga, zapre podlogo, trening odpre s kartice in zahteva spremembo.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
@@ -6471,6 +6492,12 @@ vprašanje — če ProPT izdaja račune za gotovino, brez tega ne sme.
 ProPT. Moja presoja: prisotnost sodi v brezplačno (brez nje je zapis o vadbi nepopoln), paket pa je
 mejni primer, ker je prvi korak k denarju. Odločitev je tvoja; napisana naj bo v §68, ne tukaj.
 
+**Dokazi iz izpeljanih dni (§88).** Dan 01 (trenerka v Mariboru, štiri lokacije, 14 strank):
+paketi in odštevanje kartic 5 min na dan v Excelu, plačila 3 min, račun podjetju 10 min (§86.2);
+odpoved in neprihod je mogoče le izbrisati, zato ju beleži drugje (§86.3, §86.4); opomniki in
+sporočila 8 min na dan prek WhatsAppa (§86.3); meritve in napredek v zvezku (§86.4); domača naloga
+brez potrditve (§86.4).
+
 ## 87. [ ] Prihodnja shema ne nosi polja glasovne opombe
 
 **Naročilo (Simon, 2026-09-27):** prihajajoča shema naj bo brez polj glasovne opombe.
@@ -6543,4 +6570,29 @@ poročila so v `.private/exploratory-test/days/`, seznam odigranih dni v
 **Razmerje do §86:** §86 je namizna ocena iz kode in predpostavk. Tukaj je vsaka vrzel izpričana z
 enim konkretnim dnem. Vrzel, ki jo §86 že ima, dobi tam vrstico dokaza, ne novega razdelka; tukaj je
 samo, česar ni nikjer drugje, in presoja, ali se avtomatizacija izplača.
+
+### 88.1 [ ] Iskanje v katalogu brez zadetka se konča, uvoz večjega kataloga pa obstaja
+
+Dan 01: trenerka je za krožno vadbo iskala »kettlebell«, »burpee«, »box jump« — nič od tega ni med
+48 vajami, in prazen seznam reče samo »No movements match this filter.«. Aplikacija ima uvoz večjih
+katalogov (`libraryImportDialog.js`) in dovoli vajo z lastnim imenom, a s praznega iskanja ne vodi do
+nobenega. Trener, ki vaje ne najde, jo zapiše na papir. **Vrednost:** vsak nov trener naleti na to pri
+prvem načrtu; vsaka vaja, zapisana mimo aplikacije, nima zgodovine. **Cena:** majhna — prazen seznam
+ponudi »Dodaj kot novo vajo« z vpisanim imenom in »Uvozi večji katalog«. **Presoja: izplača se.**
+
+### 88.2 [ ] Šest novih strank za skupinski trening je šest celih obrazcev
+
+Dan 01: prva jutranja skupina, šest strank, ki jih aplikacija še ne pozna. Vsaka je odprla cel obrazec
+za stranko; 9 minut namesto 4 v koledarju. Od §80.18 obrazec ponudi dodajanje s pravkar vpisanim imenom,
+še vedno pa vsaka stranka odpre celoten obrazec. **Vrednost:** enkratna pri vsaki novi skupini, a prav
+na prvi dan, ko se odloča, ali trener aplikacijo obdrži (ocena trenerke, ne meritev). **Cena:** majhna —
+dodajanje samo z imenom, ostali podatki pozneje. Paziti na privolitev po GDPR, ki ob vpisu nastane.
+**Presoja: čaka na Simona** — ali stranka sme nastati brez privolitve, je njegova odločitev (§27).
+
+### 88.3 [ ] Nadomestni trener dobi načrt po WhatsAppu
+
+Dan 01: ko jo nadomesti kolegica, ji načrt pošlje kot sporočilo. **Vrednost:** redka (dopust,
+bolezen). **Cena:** srednja, če naj ga kolegica odpre v svoji aplikaciji; majhna, če je dovolj besedilo
+načrta za deljenje. Več trenerjev na enem računu je EnterprisePT. **Presoja: ne izplača se** za zdaj —
+besedilo za deljenje bi pokrilo večino, a pogostost je nizka.
 
