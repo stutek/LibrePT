@@ -5506,3 +5506,131 @@ in naj po možnosti ponudi tudi »izbriši vse prihodnje večere«. Preizkus naj
 zahteva, da je v vprašanju beseda o enem večeru. Opaženo na objavljeni različici `0625bd6`.
 
 **Fixed 2026-09-27 (Claude Opus 5.5), commit `acbad9a`.** For an evening of a series, both delete paths add »To je en večer ponavljajočega se treninga. Izbriše se samo ta večer, ostali ostanejo.« Deleting all future evenings is not offered; that would be a feature of its own.
+
+### 80.4 [x] P3 — Po izbiri slovenščine del osnovnega vmesnika ostane angleški — popravljeno 2026-09-27
+
+**Scenarij in koraki:** ob prvem obisku izbrati »Slovenščina«, začeti s prazno
+aplikacijo, odpreti meni, dodati stranko in odpreti njen profil.
+
+**Opaženo:** seznam treningov kaže »Dates«, »Client«, »Location« in »No sessions
+scheduled.« Meni vsebuje »Add a client from their own details« in »Open an encrypted
+file«. Profil kaže »Pridružil se Sep 26, 2026«.
+
+**Težava in vpliv:** jezik ni dosleden prav pri začetnih opravilih; datum uporablja
+angleško ime meseca in drugačen vrstni red. Oteži razumevanje brez dokumentacije.
+
+**Predlog in preverjanje:** ob menjavi jezika osvežiti tudi že izrisane filtre in
+menijske možnosti; datum prikazati v obliki ISO. Preveriti začetni prehod iz angleščine
+v slovenščino ter ponovni obisk posebej. Ponovni obisk še ni preizkušen.
+Preverjeno na objavljeni različici `0625bd6`.
+
+**Verdikt 2026-09-26 (Claude): potrjeno na `main`, in to niso ena, ampak tri ločene napake.**
+Codexova diagnoza »osvežiti že izrisane« je pravilna; oznaka P3 je prenizka, ker gre pri datumu
+za kršitev pravila projekta.
+
+- **[x] Popravljeno 2026-09-26 (Claude), commit `f847eb4` (§81.1).** **Koren: jezikovna menjava je napisana dvakrat, en izvod je nepopoln.** `onChooseLanguage` na
+  pozdravnem zaslonu ([app.js](src/app.js)) pokliče `applyTranslations(lang)` in `saveState()`
+  in nič več. Stikalo v meniju ☰ ([applicationHeader.js](src/modules/common/applicationHeader.js))
+  pa poleg tega ponovno izriše sedem pogledov —
+  `renderClientsList`, `renderRoutinesList`, `renderExercisesList`, `renderGlobalHistory`,
+  `renderPendingPlanAdjustments`, `renderSessions`, `populateDropdownSelectors`.
+  `applyTranslations` prepiše le označeno besedilo v postavitvi; vse, kar JavaScript sestavi s
+  `t(...)`, ostane v jeziku zagona. Zato »Dates«, »Client«, »Location« in »No sessions
+  scheduled.« — ključi `filter_dates`, `filter_client`, `filter_location` in
+  `no_sessions_scheduled` so v [sl.js](src/i18n/sl.js) vsi prevedeni, nihče jih ni vprašal.
+  Popravek je **ena** funkcija, ki jo kličeta obe poti, ne drugi izvod seznama. **V §81.1**, ki na
+  to isto pot dodaja še korak teme in korak podatkov.
+- **[x] Popravljeno 2026-09-27 (Claude), commit `c3a057e` (§81.2).** **Dve vrstici menija nimata prevoda nikjer.** `#menu-review-signup` in `#menu-open-encrypted`
+  nista niti v tabeli `staticMappings` v [domMappings.js](src/i18n/domMappings.js) niti nosita
+  atributa `data-i18n`; vse sosednje vrstice so v tabeli. Ostaneta angleški v slovenščini in
+  nemščini. **V §81.2**, ki obe vrstici prestavi — prvo med gumbe imenika strank, drugo v
+  *Data management* — in kjer morata dobiti ključa v `en`, `sl` in `de`.
+- **[x] Datum: popravljeno 2026-09-26 (Claude), commit `3461d92`.** To ni bila nova odločitev,
+  ampak nedokončan §54, ki je že zahteval ISO datum v vsakem jeziku. `formatDateStr` v
+  [utils.js](src/modules/common/utils.js) je sestavljal »Sep 26, 2026« iz trdo vpisanega
+  seznama angleških okrajšav mesecev, v ameriškem vrstnem redu. §54 je popravil pretekle kartice
+  deka in si je v [exerciseDeckOfCards.js](src/modules/clipboard/exerciseDeckOfCards.js)
+  napisal lokalni ovoj prav zato, ker skupne funkcije ni mogel poklicati — te pa ni popravil.
+  Codex je videl profil stranke; ista funkcija je pisala tudi vsako vrstico zgodovine
+  ([historyView.js](src/modules/history/historyView.js)). Zdaj kliče `getISODateString`, ki je v
+  isti datoteki, dek pa je svoj lokalni izvod opustil, tako da je oblikovalec datuma spet en.
+  Varovalka za manjkajoč ali neberljiv datum ostaja v `formatDateStr` in ne gre v
+  `getISODateString`, ki mu devetnajst klicnih mest izroči datum, ki ga že ima. Pripeto v
+  [utils.test.mjs](tests/unit_js/modules/common/utils.test.mjs).
+
+**Še ni preizkušeno:** ponovni obisk po izbiri jezika.
+
+**Fixed 2026-09-27 (Claude Opus 5.5), commit `95369f8`.** The three defects were fixed earlier (f847eb4, c3a057e, 3461d92); the return visit is now tested: after choosing Slovenian at the first run and reloading, the page and the menu are Slovenian.
+
+### 80.24.1 [x] P3 — Pet slovenskih besedil še piše končnico v oklepaju, »(-a)« — popravljeno 2026-09-27
+
+Najdeno 2026-09-27 ob popravku izvoza (§80.42), ne v raziskovalnem preizkusu. Oblika »ostal(-a)« se
+bere kot obrazec za izpolnjevanje, ne kot stavek. Ključi v [sl.js](src/i18n/sl.js):
+`walkthrough_off_track` (»Zapustil(-a) si …«), vabilo k vpisu podatkov (»Vabljen(-a) si …«), kartica
+peskovnika (»… kjer si ostal(-a)«), »Moji podatki« (»… ki si jih vpisal(-a) …«) in prazna plošča
+(»… preizkušati sam(-a) …«). Predlog: vsako preoblikovati brez preteklega deležnika, ki nosi spol,
+kot pri §80.24 — na primer »pristaneš tam, kjer si ostal(-a)« → »vrneš se na isto mesto«.
+
+**Fixed 2026-09-27 (Claude Opus 5.5), commit `5ef85c0`.** Eight texts, not five: the two welcome titles and the off-track title too. Each reworded without a gendered past participle; tests/unit_js/i18n/genderNeutral.test.mjs fails the build on a bracketed ending.
+
+### 80.50 [x] P2 — Stran, na kateri stranka odgovori na vabilo, kaže »12:00 PM« in »Thursday, October 8« — popravljeno 2026-09-27
+
+**Scenarij in koraki:** trener v slovenski aplikaciji naredi trening za 2026-10-08 ob 12:00 in
+stranki pošlje vabilo. V vabilu (slovenskem) je povezava »Sporoči mi, ali lahko prideš«.
+Stranka jo odpre.
+
+**Opaženo:** stran je v angleščini (`<html lang="en">`): »WHEN | Thursday, October 8 at 12:00 PM
+(60 min) | You can answer here for another 260 h 28 min | Can you make it? | Yes, I'll be there
+| Not sure yet | No, I can't«.
+
+**Dve različni napaki:**
+1. **Ura in datum.** »12:00 PM« je dvanajsturni zapis, »Thursday, October 8« pa ni ISO. Projektno
+   pravilo zahteva 24-urni čas in ISO datum **povsod in v vsakem jeziku**, in prav zato, ker
+   `toLocale…` vpraša napravo. [rsvpView.js](src/modules/rsvp/rsvpView.js), `formatWhen`, kliče
+   `start.toLocaleString(lang, {weekday, day, month, hour, minute})` — torej napravo vpraša za
+   obliko. To drži tudi, če je jezik strani pravi.
+2. **Jezik.** Stran izbere jezik iz `?lang=` v povezavi ali iz jezikov brskalnika
+   ([app.js](src/app.js), `resolveIntakeLang`). Povezava, ki jo trener pošlje, jezika ne nosi —
+   torej slovenska stranka z angleško nastavljenim telefonom dobi angleško stran, čeprav je bilo
+   vabilo slovensko in aplikacija jezik stranke pozna (`formLang` iz obrazca ob včlanitvi).
+
+**Težava in vpliv:** to je prvo, kar stranka od LibrePT sploh vidi, in edini zaslon, kjer sama
+nekaj odgovori. Ura v tuji obliki je poleg tega natanko tista napaka, zaradi katere se pride ob
+napačnem času.
+
+**Predlog in preverjanje:** `formatWhen` naj sestavi zapis iz aplikacijinih pripomočkov
+(`formatClockFromEpoch`, ISO datum), ne iz `toLocaleString`. V povezavo vabila dodati `lang`, ki
+ga aplikacija pozna. Preizkus naj odpre povezavo vabila v brskalniku, nastavljenem na `en-US`, in
+zahteva 24-urni zapis ure ter ISO datum. Opaženo na objavljeni različici `0625bd6`; koda na
+`main` je ista.
+
+**Fixed 2026-09-27 (Claude Opus 5.5), commit `86aefd7`.** The reply page shows the ISO date and the 24-hour clock with the weekday in the page's language; the invite link carries `lang`, the language the invitation was written in.
+
+### 80.51 [x] P1 — Stranka izbere odgovor na vabilo, poslati pa ga nima s čim — popravljeno 2026-09-27
+
+**Scenarij in koraki:** trener svojih podatkov ni vpisal — pozdravni zaslon pravi, da so
+neobvezni — in pošlje vabilo. Stranka odpre povezavo in pritisne »Yes, I'll be there«.
+
+**Opaženo:** stran odgovori »You're saying yes. Send it so your trainer knows.« in »This opens
+your own messaging app with the reply ready — nothing is sent until you send it.« **Gumba za
+pošiljanje ni.** V HTML sta (»Send as a text«, »Send as an email«), oba skrita.
+
+**Vzrok, potrjen v kodi na `main`:** [rsvpView.js](src/modules/rsvp/rsvpView.js) prikaže gumb za
+SMS samo, če vabilo nosi trenerjevo telefonsko številko, in gumb za e-pošto samo, če nosi
+e-naslov. Brez trenerjevih podatkov vabilo ne nosi ne enega ne drugega, zato ostaneta oba skrita
+— navodilo nad njima pa vseeno govori o pošiljanju.
+
+**Težava in vpliv:** zanka vabila se tiho pretrga na zadnjem koraku, in to pri stranki, ne pri
+trenerju. Trener čaka odgovor, ki ne more priti, in ne izve, da se je to zgodilo. Podatki
+trenerja so povsod predstavljeni kot neobvezni, tu (in pri izvozu po GDPR, §80.43) pa so pogoj.
+
+**Predlog:** vabila brez trenerjevega stika sploh ne ponuditi — ob pošiljanju vprašati za
+številko ali e-naslov in to shraniti. Če vabilo vseeno pride brez stika, naj stran stranki pove,
+kaj naj stori (»odgovori svojemu trenerju po poti, po kateri sta v stiku«), namesto navodila o
+gumbu, ki ga ni.
+
+**Preverjanje:** preizkus naj z izpraznjenimi trenerjevimi podatki odpre povezavo vabila, izbere
+odgovor in zahteva, da je na zaslonu pot naprej. Opaženo na objavljeni različici `0625bd6`; koda
+na `main` je ista.
+
+**Fixed 2026-09-27 (Claude Opus 5.5), commit `16af98c`.** With neither a phone nor an email on the invite, the page says »Odgovor sporoči trenerju tako, kot sta običajno v stiku.« New installs cannot reach this: the welcome screen writes the trainer's phone and email on every path, and the invite dialog fills them in.
