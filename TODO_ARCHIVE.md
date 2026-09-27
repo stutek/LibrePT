@@ -4464,3 +4464,33 @@ on a reference into TODO.md lands in the commit that removes the last one; befor
 every run.
 
 **Done 2026-09-27 (Claude), commits `14995f0` (src), `3ba641d` (tests), `8da80f0` (documents), `96afe34` (tools and the check); `build check` ran once on the whole tree, green 05:13–05:22.** Done by subagents, one per directory, reading each section before rewriting a sentence that needed it. Several pointers named the wrong section and were corrected rather than carried over; one was on screen — the erasure checklist told the trainer "(TODO §1.5)". `agent_tools/todo_refs.py` now fails the build on a new one. Found on the way: §85, the landing page shows a developer comment.
+
+## 84. [x] A session with no participants stops the boot — test data, not a defect — closed 2026-09-27
+
+**Found 2026-09-26 (Claude) while building §81.1**, by
+`tests/e2e/test_schema_migrations.py::test_a_stored_legacy_database_is_migrated_on_boot`.
+
+A database from before the `bookings` → `sessions` rename carries sessions with no `participants`.
+`renderSessionCard` (`src/modules/sessionList/sessionCard.js`) calls `b.participants.map(...)` and
+throws. The throw is inside `renderEverything()`, the first draw in `init()` (app.js), so everything
+after it never runs: the recovery of a running session, the Back-button handler, the sync badge, the
+demo. The test passed only because the splash used to start earlier in `init()`; §81.1 now starts it
+before the first draw for the same reason, so the trainer is no longer kept behind the splash.
+
+**What is left:** the migration (or the card) must give a session with no participants an empty
+list, and a test must pin that the boot reaches its end on that database. Not built in §81.1: it is
+a separate defect with its own test.
+
+**Corrected and closed 2026-09-27 (Claude), commit `3eb6a00`.** The claim above that an old database carries sessions with no participants was written without checking, and it is wrong: `bookings` were renamed to `sessions` with the same shape, the seed was `bookings = [...SESSIONS]`, and the schema requires `participants`. The only such row was the test's own fixture. It now has the shape the rename carried, and the boot runs to its end. No product change; the splash starts before the first draw regardless (§81.1).
+
+## 85. [x] BUG — the rendered landing page showed a developer comment as text — fixed 2026-09-27
+
+**Found 2026-09-27 (Claude) during §82.2.** `docs/LANDING.md` holds an HTML comment explaining why
+its three demo links are absolute. `agent_tools/render_docs.py` escapes it instead of dropping it, so
+`src/landing.html` shows it to every visitor as a paragraph starting `<!-- The three demo links…`.
+
+**What is left:** the renderer drops HTML comments (or the note moves out of the page), and the
+render check pins that no rendered page contains `&lt;!--`. Every page render_docs writes has the
+same exposure, not only this one.
+
+**Fixed 2026-09-27 (Claude), commit `7c6ccc7`.** `render_docs.strip_comments` drops every HTML comment outside a code block before rendering; `tests/unit/test_render_docs.py` pins that and that no rendered page shows `&lt;!--`.

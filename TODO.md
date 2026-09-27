@@ -6088,28 +6088,10 @@ of that file differs from the working tree, and the server on :8081 has been run
 2026-09-23; restarting it is Simon's call. **Blocks:** removing the last exemption. When the server
 is next restarted, remove the pointers and the exemption in one change.
 
-## 84. [ ] BUG — a session from an old database stops the boot at the first draw
+## 84. [x] A session with no participants stops the boot — test data, not a defect — closed 2026-09-27
 
-**Found 2026-09-26 (Claude) while building §81.1**, by
-`tests/e2e/test_schema_migrations.py::test_a_stored_legacy_database_is_migrated_on_boot`.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#84-x-a-session-with-no-participants-stops-the-boot--test-data-not-a-defect--closed-2026-09-27).
 
-A database from before the `bookings` → `sessions` rename carries sessions with no `participants`.
-`renderSessionCard` (`src/modules/sessionList/sessionCard.js`) calls `b.participants.map(...)` and
-throws. The throw is inside `renderEverything()`, the first draw in `init()` (app.js), so everything
-after it never runs: the recovery of a running session, the Back-button handler, the sync badge, the
-demo. The test passed only because the splash used to start earlier in `init()`; §81.1 now starts it
-before the first draw for the same reason, so the trainer is no longer kept behind the splash.
+## 85. [x] BUG — the rendered landing page showed a developer comment as text — fixed 2026-09-27
 
-**What is left:** the migration (or the card) must give a session with no participants an empty
-list, and a test must pin that the boot reaches its end on that database. Not built in §81.1: it is
-a separate defect with its own test.
-
-## 85. [ ] BUG — the rendered landing page shows a developer comment as text
-
-**Found 2026-09-27 (Claude) during §82.2.** `docs/LANDING.md` holds an HTML comment explaining why
-its three demo links are absolute. `agent_tools/render_docs.py` escapes it instead of dropping it, so
-`src/landing.html` shows it to every visitor as a paragraph starting `<!-- The three demo links…`.
-
-**What is left:** the renderer drops HTML comments (or the note moves out of the page), and the
-render check pins that no rendered page contains `&lt;!--`. Every page render_docs writes has the
-same exposure, not only this one.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#85-x-bug--the-rendered-landing-page-showed-a-developer-comment-as-text--fixed-2026-09-27).
