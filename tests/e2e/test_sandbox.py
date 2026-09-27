@@ -42,6 +42,7 @@ def _switch(page, expected_workspace):
     none is used: a timeout here would be a guess about a machine rather than a wait for the app.
     """
     page.locator("#btn-app-menu").click()
+    page.locator("#menu-settings").click()
     page.locator("#menu-sandbox").click()
     page.wait_for_function(
         "(inSandbox) => document.body.classList.contains('in-sandbox') === inSandbox",

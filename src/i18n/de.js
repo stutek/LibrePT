@@ -24,7 +24,6 @@ export const de = {
   tab_clients: "Kunden",
   tab_routines: "Routinen",
   tab_exercises: "Übungen",
-  tab_history: "Verlauf",
   pending_adjustments: "Zu prüfen",
   btn_start_session: "Eigenes Training oder Gruppentraining starten",
   btn_create_session: "Training anlegen",
@@ -701,17 +700,20 @@ export const de = {
   story_welcome_body:
     "LibrePT ist eine App für Personal Trainer: Termine, Trainingspläne und ein Notizblock während des Trainings. In dieser Tour lädst du drei neue Kunden ein, bereitest das Training am Dienstag vor und passt es an, während es läuft. Alles geschieht in der Sandbox, einer getrennten Kopie mit erfundenen Kunden. Deine echten Kunden, Termine und Trainings ändert sie nicht.",
   story_step_welcome:
-    "Zeig es mir zeigt dir drei Dinge: das Abzeichen SANDBOX in der oberen Leiste und im Menü ☰ die Zeilen Sandbox verlassen und Sandbox-Daten zurücksetzen. Weiter startet die Tour. Um die App ohne Führung auszuprobieren, klapp diese Karte mit ▾ oben rechts weg. Eine kleine Leiste bleibt sichtbar: Ihr ✕ beendet die Tour.",
+    "Zeig es mir zeigt dir zwei Dinge: das Abzeichen SANDBOX in der oberen Leiste und die Zeile Sandbox verlassen oben im Menü ☰. Sandbox-Daten zurücksetzen findest du im Menü unter Einstellungen. Weiter startet die Tour. Um die App ohne Führung auszuprobieren, klapp diese Karte mit ▾ oben rechts weg. Eine kleine Leiste bleibt sichtbar: Ihr ✕ beendet die Tour.",
   story_persona_trainer: "Dein Telefon",
   story_chapter_trainer_details: "Deine Angaben eintragen",
   story_trainer_details_open_body:
-    "Deine Einladungen tragen deinen Namen, dein Telefon und deine E-Mail. Du musst sie jetzt nicht eintragen. Was du speicherst, bleibt nach der Tour, denn es sind deine Angaben, nicht die der Sandbox.",
+    "Deine Einladungen tragen die Angaben vom ersten Start: Name, Telefon und E-Mail. Hier änderst du sie. Sie gehören dir, nicht der Sandbox, und was du speicherst, bleibt nach der Tour.",
   story_step_trainer_details_menu:
     "Tippe auf ☰ — die drei waagerechten Striche oben rechts in der dunklen Leiste. Das Menü öffnet sich.",
+  story_step_trainer_details_settings:
+    "Tippe im Menü auf Einstellungen — die letzte Zeile, mit dem Zahnradsymbol. Die Einstellungen öffnen sich.",
   story_step_trainer_details_show:
-    "Tippe im Menü auf Meine Angaben — die Zeile mit dem Kartensymbol. Ein Formular mit Feldern für Name, Telefon und E-Mail öffnet sich.",
+    "Tippe in den Einstellungen auf Meine Angaben — die Zeile mit dem Kartensymbol. Ein Formular mit Feldern für Vorname, Nachname, Telefon und E-Mail öffnet sich.",
   story_step_trainer_details_close:
     "Tippe unten im Formular auf Abbrechen, oder auf Speichern, wenn du deine Angaben eingetragen hast. Beides schließt das Formular.",
+  story_step_settings_close: "Tippe oben rechts in den Einstellungen auf ✕. Sie schließen sich.",
   story_chapter_gym: "Das Training leiten und anpassen",
   story_persona_client: "Anas Telefon",
   story_chapter_arrive: "Drei neue Kunden aufnehmen",
@@ -721,7 +723,7 @@ export const de = {
   story_open_client_phone: "Anas Formular öffnen",
   story_step_arrive_menu: "Tippe oben rechts auf ☰. Das Menü öffnet sich.",
   story_step_arrive_clients:
-    "Tippe im Menü auf Kundenliste — die Zeile mit den drei kleinen Personen, oben in der Liste. Acht Personen sind schon darin.",
+    "Tippe im Menü auf Kundenliste — die Zeile mit den drei kleinen Personen, die zweite in der Liste. Acht Personen sind schon darin.",
   story_step_arrive_invite:
     "Tippe auf Kunden einladen — die Schaltfläche mit den Teilen-Pfeilen direkt unter der Überschrift Kunden. Ana bekommt einen Link und trägt ihre Angaben selbst ein; du schreibst sie nicht im Flur mit.",
   story_step_arrive_contact:
@@ -792,12 +794,14 @@ export const de = {
     "Jane, John und Sarah teilen einen Plan. Am Dienstag öffnest du ihn und fängst an.",
   story_programme_close_title: "Der Plan ist fertig",
   story_step_evening_menu: "Zu Hause, später am Abend. Tippe oben rechts auf ☰.",
+  story_step_evening_settings:
+    "Tippe im Menü auf Einstellungen — die letzte Zeile, mit dem Zahnradsymbol.",
   story_step_evening_move:
     "Diese Woche beginnt der Dienstag zwei Stunden später, abgesprochen mit allen dreien. Tippe auf den Stift auf der Karte Kraft dienstags und donnerstags. Das Formular fragt, ob du nur dieses Training änderst.",
   story_step_evening_move_time:
     "Gib 20:00 in das Feld Beginn ein. Die folgenden Dienstage bleiben um 18:00.",
   story_step_evening_theme:
-    "Spät am Abend, auf dem Sofa. Wähle im Menü unter Design die Option Mitternacht.",
+    "Spät am Abend, auf dem Sofa. Wähle in den Einstellungen unter Design die Option Mitternacht.",
   story_evening_open_body:
     "Das Training ist vorbei, und alle sind nach Hause gegangen. Zu Hause verschiebst du das Training am Dienstag, wie ihr es nach dem Training abgesprochen habt.",
   story_thanks_title: "Ende der Tour",
@@ -870,9 +874,12 @@ export const de = {
   menu_language: "Sprache",
   menu_theme: "Design",
   menu_clients_register: "Kundenliste",
-  menu_adjustments: "Zu prüfen",
-  menu_connect_cloud: "Cloud-Speicher verbinden",
-  menu_export_data: "Daten als Datei exportieren",
+  menu_sessions: "Trainingstermine",
+  menu_library: "Übungen und Routinen",
+  menu_data: "Datenverwaltung",
+  menu_settings: "Einstellungen",
+  settings_help_heading: "Hilfe und Rechtliches",
+  btn_review_signup: "Kunden aus den gesendeten Angaben hinzufügen",
   drive_sync_connect: "Google Drive verbinden",
   drive_sync_now: "Jetzt synchronisieren",
   drive_sync_syncing: "Wird synchronisiert…",

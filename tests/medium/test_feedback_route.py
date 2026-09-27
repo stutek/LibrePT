@@ -20,6 +20,7 @@ def _open(page, local_server):
     load_with_stub(page, local_server, HEADER_STUB)
     page.click("#btn-app-menu")
     page.wait_for_selector("#app-menu:not(.hidden)")
+    page.click("#menu-settings")
     page.click("#menu-feedback")
     page.wait_for_selector("#dialog-feedback-route[open]")
 

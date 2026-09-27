@@ -181,7 +181,7 @@ def test_the_menu_still_opens_the_dialog_while_connected(page, local_server):
     _load_connected(page, local_server)
 
     page.locator("#btn-app-menu").click()
-    page.locator("#menu-export-data").click()
+    page.locator("#menu-data").click()
 
     dialog = page.locator("#dialog-backup")
     assert dialog.get_attribute("open") is not None, (

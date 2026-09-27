@@ -141,11 +141,11 @@ const WELCOME_CHAPTER = {
       route: "/",
       keepOwnStep: true,
       caption: "story_step_welcome",
-      // Show me here shows the three controls the card's own promise rests on (asked 2026-09-11):
-      // the SANDBOX badge in the header, and behind the ☰ menu the way out and the way to start
-      // over. A promise a reader has to take on faith is the one thing a demo can simply show, and
-      // the two menu rows are pointed at rather than tapped — tapping either would leave the
-      // sandbox or throw it away in the middle of the first card.
+      // Show me here shows the two controls the card's own promise rests on: the SANDBOX badge in
+      // the header, and at the top of the ☰ menu the way out. A promise a reader has to take on
+      // faith is the one thing a demo can simply show, and the menu row is pointed at rather than
+      // tapped — tapping it would leave the sandbox in the middle of the first card. The way to
+      // start over is in Settings, and the card's text says where.
       //
       // It ends by closing the menu it opened. Two steps on, the story asks the trainer to open
       // that same menu; left standing, that step reads as already done before they touch anything.
@@ -157,11 +157,10 @@ const WELCOME_CHAPTER = {
         { target: "#preview-badge", point: true, settleMs: 900 },
         {
           target: "#btn-app-menu",
-          expect: { selector: "#menu-sandbox", visible: true },
+          expect: { selector: "#menu-sandbox-leave", visible: true },
           settleMs: 400,
         },
-        { target: "#menu-sandbox", point: true, settleMs: 900 },
-        { target: "#menu-sandbox-reset", point: true, settleMs: 900 },
+        { target: "#menu-sandbox-leave", point: true, settleMs: 900 },
         {
           target: "#btn-app-menu",
           expect: { selector: "#app-menu", visible: false },
@@ -193,6 +192,13 @@ const TRAINER_DETAILS_CHAPTER = {
       expect: { selector: "#app-menu:not(.hidden)", visible: true },
     },
     {
+      id: "trainer-details-settings",
+      persona: TRAINER,
+      target: "#menu-settings",
+      caption: "story_step_trainer_details_settings",
+      expect: { selector: "#dialog-settings", visible: true },
+    },
+    {
       id: "trainer-details-show",
       persona: TRAINER,
       target: "#menu-trainer-details",
@@ -207,6 +213,14 @@ const TRAINER_DETAILS_CHAPTER = {
       target: "#trainer-details-cancel",
       caption: "story_step_trainer_details_close",
       expect: { selector: "#dialog-trainer-details", visible: false },
+    },
+    {
+      // Settings is modal too, and closed for the same reason.
+      id: "trainer-details-settings-close",
+      persona: TRAINER,
+      target: "#dialog-settings .modal-close-btn",
+      caption: "story_step_settings_close",
+      expect: { selector: "#dialog-settings", visible: false },
     },
   ]),
 };
@@ -718,6 +732,13 @@ const EVENING_CHAPTER = {
       expect: { selector: "#app-menu:not(.hidden)", visible: true },
     },
     {
+      id: "evening-settings",
+      persona: TRAINER,
+      target: "#menu-settings",
+      caption: "story_step_evening_settings",
+      expect: { selector: "#dialog-settings", visible: true },
+    },
+    {
       // PICKED from a list, not tapped — the control is a `<select>`, and the demo performs what a
       // trainer performs (wanted 2026-08-22).
       id: "evening-theme",
@@ -725,7 +746,18 @@ const EVENING_CHAPTER = {
       target: "#theme-switcher",
       choose: "midnight",
       caption: "story_step_evening_theme",
-      expect: { selector: "html.midnight-theme", visible: true },
+      // Present, not visible: the choice is made in Settings, a modal, and the guide counts
+      // everything outside an open modal as unreachable — `<html>` included. What must hold is that
+      // the document wears the theme, which its class says.
+      expect: { selector: "html.midnight-theme" },
+    },
+    {
+      // Settings is modal: left open, it covers the session card the next step points at.
+      id: "evening-settings-close",
+      persona: TRAINER,
+      target: "#dialog-settings .modal-close-btn",
+      caption: "story_step_settings_close",
+      expect: { selector: "#dialog-settings", visible: false },
     },
     {
       // Event 21: the pre-agreed one-off move. The story's claim is what the form SAYS while it is

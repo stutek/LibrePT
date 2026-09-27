@@ -48,8 +48,10 @@ def test_a_stranger_becomes_a_client_without_the_trainer_typing_anything(
     # The trainer, on their own device, opening what arrived.
     page.goto(local_server)
     page.wait_for_selector("#app-header", timeout=15_000)
+    # The review sits under the client directory's title.
     page.locator("#btn-app-menu").click()
-    page.locator("#menu-review-signup").click()
+    page.locator("#menu-clients-register").click()
+    page.locator("#btn-review-signup").click()
 
     expect(page.locator("#dialog-signup-review")).to_be_visible()
     page.set_input_files("#signup-review-file", str(sent_file))

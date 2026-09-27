@@ -11,6 +11,7 @@
 //   renderGlobalHistory(),
 //   populateDropdownSelectors(),
 //   renderSessions(),   // for the dialog's Sync Data button, which reseeds state.sessions
+//   openEncryptedFileReader(),   // the dialog's "Open an encrypted file" card
 //   t
 // }
 
@@ -256,6 +257,15 @@ export function renderBackupDialog() {
           </div>
           <p id="import-status" class="status-msg"></p>
         </div>
+
+        <!-- A client's personal-data export, encrypted with a passphrase the trainer sent separately.
+             Here with the rest of the data, and opened by modules/common/encryptedFileReader.js. -->
+        <div class="action-card card">
+          <i class="fa-solid fa-lock-open backup-icon-large text-indigo"></i>
+          <h4 data-i18n="encrypted_title">Open an encrypted file</h4>
+          <p data-i18n="encrypted_lead">For a personal-data export your trainer sent you.</p>
+          <button type="button" id="btn-backup-open-encrypted" class="btn secondary-btn w-full" data-i18n="encrypted_open">Open</button>
+        </div>
       </div>
     </div>
   </dialog>
@@ -325,6 +335,10 @@ export function setupBackupRestore() {
   setupCalendarSync(); // after renderBackupDialog — #btn-sync-data is part of that markup
   const dialog = document.getElementById("dialog-backup");
   if (!dialog) return;
+
+  document
+    .getElementById("btn-backup-open-encrypted")
+    ?.addEventListener("click", () => deps.openEncryptedFileReader?.());
 
   const importFile = document.getElementById("import-db-file");
   const importStatus = document.getElementById("import-status");

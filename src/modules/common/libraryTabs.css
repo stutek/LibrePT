@@ -1,0 +1,30 @@
+/* modules/common/libraryTabs.css — the tab row between the exercise library and the routines
+   (libraryTabs.js). Two tabs sharing the width, each a thumb-sized target; the page the trainer is on
+   is marked by aria-current, which is also what a screen reader announces. */
+
+.library-tabs {
+  display: flex;
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
+.library-tab {
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  background: var(--card-bg);
+  color: var(--text-muted);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.library-tab[aria-current="page"] {
+  border-color: var(--primary);
+  color: var(--text-main);
+  box-shadow: inset 0 -3px 0 var(--primary);
+}

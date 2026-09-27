@@ -32,8 +32,11 @@ def _stored_identity(page):
 
 
 def _open_details(page):
-    page.locator("#btn-app-menu").click()
-    page.wait_for_selector("#app-menu:not(.hidden)")
+    # From Settings, which stay open behind the form and are where a save returns to.
+    if not page.locator("#dialog-settings[open]").count():
+        page.locator("#btn-app-menu").click()
+        page.wait_for_selector("#app-menu:not(.hidden)")
+        page.locator("#menu-settings").click()
     page.locator("#menu-trainer-details").click()
     page.wait_for_selector("#dialog-trainer-details[open]")
 

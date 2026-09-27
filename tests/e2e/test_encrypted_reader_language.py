@@ -19,8 +19,10 @@ def test_the_encrypted_reader_is_in_slovenian_when_slovenian_is_chosen(
     page, local_server
 ):
     page.goto(local_server + "?lang=sl")
+    # Data management, then the encrypted file's card in the Sync & Backup dialog.
     page.locator("#btn-app-menu").click()
-    page.locator("#menu-open-encrypted").click()
+    page.locator("#menu-data").click()
+    page.locator("#btn-backup-open-encrypted").click()
     expect(page.locator("#dialog-open-encrypted")).to_be_visible()
 
     _expect_slovenian(page, READER)

@@ -52,6 +52,7 @@ def test_selecting_a_theme_swaps_the_single_body_class(page, local_server, value
 
     page.locator("#btn-app-menu").click()
     page.wait_for_selector("#app-menu:not(.hidden)")
+    page.locator("#menu-settings").click()
     page.locator("#theme-switcher").select_option(value)
 
     others = {c for c in THEME_BODY_CLASS.values() if c != THEME_BODY_CLASS[value]}
@@ -93,6 +94,7 @@ def test_theme_persists_across_reload(page, local_server):
 
     page.locator("#btn-app-menu").click()
     page.wait_for_selector("#app-menu:not(.hidden)")
+    page.locator("#menu-settings").click()
     page.locator("#theme-switcher").select_option("nebula")
     assert "nebula-theme" in _body_classes(page)
 

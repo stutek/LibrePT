@@ -179,6 +179,7 @@ export function renderWorkspaceChrome() {
   // work cannot be left behind by a path that forgot: this is the one function that repaints on
   // every switch.
   document.getElementById("menu-sandbox-reset")?.classList.toggle("hidden", !sandbox);
+  document.getElementById("menu-sandbox-leave")?.classList.toggle("hidden", !sandbox);
 
   const label = document.getElementById("menu-sandbox-text");
   if (!label) return;
@@ -307,6 +308,78 @@ export function renderAboutDialog() {
   );
 }
 
+/** Settings: everything the ☰ menu held that is not a place to work in — the language, the theme,
+ *  the trainer's details, the app version, the sandbox, and help and legal. Routed (`/settings`), so
+ *  Back closes it. The controls keep the ids they had in the menu, so their wiring (setupAppMenu and
+ *  the language and theme switchers above) did not move with them. */
+export function renderSettingsDialog() {
+  renderMarkupOnce(
+    "dialogs-root",
+    (root) => root.querySelector("#dialog-settings"),
+    `
+<dialog id="dialog-settings" class="dialog-modal card glassmorphic">
+  <div class="modal-header">
+    <h3 data-i18n="menu_settings">Settings</h3>
+    <button class="modal-close-btn" data-i18n-label="close" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="settings-list">
+    <div class="menu-control-row">
+      <label class="menu-control-label" for="lang-switcher"><i class="fa-solid fa-language" aria-hidden="true"></i> <span id="menu-label-lang">Language</span></label>
+      <!-- Options come from the registry of shipped dictionaries (i18n/index.js), the same
+           way the theme options come from theme.js: a language is added by adding its
+           file, and this menu has nothing to remember. -->
+      <select id="lang-switcher" class="form-control menu-select" aria-label="Switch Language / Zamenjaj jezik"></select>
+    </div>
+    <div class="menu-control-row">
+      <label class="menu-control-label" for="theme-switcher"><i class="fa-solid fa-palette" aria-hidden="true"></i> <span id="menu-label-theme">Theme</span></label>
+      <!-- Options come from THEME_SWITCHER_LABELS (theme.js), so a theme is named in one place. -->
+      <select id="theme-switcher" class="form-control menu-select" aria-label="Theme / Tema"></select>
+    </div>
+    <!-- The trainer's own name, phone and address. With the settings rather than with the clients:
+         there is one trainer per install, and what they type here signs every invitation. -->
+    <button id="menu-trainer-details" class="session-menu-item">
+      <i class="fa-solid fa-id-card"></i> <span data-i18n="menu_trainer_details">My details</span>
+    </button>
+    <!-- Which supported version of the app this device runs. Choosing one reloads the app. -->
+    <button id="menu-app-version" class="session-menu-item">
+      <i class="fa-solid fa-code-compare"></i> <span data-i18n="menu_app_version">App version</span>
+    </button>
+    <!-- One control, both directions: its label says which one it is. -->
+    <button id="menu-sandbox" class="session-menu-item">
+      <i class="fa-solid fa-flask"></i> <span id="menu-sandbox-text" data-i18n="menu_sandbox_enter">Enter the sandbox</span>
+    </button>
+    <!-- Only ever shown INSIDE the sandbox: from the trainer's own work it would be an offer to
+         rebuild a workspace they are not looking at. -->
+    <button id="menu-sandbox-reset" class="session-menu-item hidden">
+      <i class="fa-solid fa-arrows-rotate"></i> <span id="menu-sandbox-reset-text" data-i18n="menu_sandbox_reset">Reset sandbox data</span>
+    </button>
+    <h4 class="settings-heading" data-i18n="settings_help_heading">Help and legal</h4>
+    <a id="menu-github" class="session-menu-item" target="_blank" rel="noopener noreferrer">
+      <i class="fa-brands fa-github"></i> GitHub project
+    </a>
+    <!-- The route out for someone with no GitHub account, which is most personal trainers. Above
+         the bug-reporting page because most of what a trainer wants to say is not a bug. -->
+    <button id="menu-feedback" class="session-menu-item">
+      <i class="fa-solid fa-comment-dots"></i> <span data-i18n="menu_feedback">Send feedback</span>
+    </button>
+    <a id="menu-bug-report" class="session-menu-item" href="./bug-reporting.html" target="_blank" rel="noopener noreferrer">
+      <i class="fa-solid fa-bug"></i> Bug Reporting
+    </a>
+    <button id="menu-about" class="session-menu-item">
+      <i class="fa-solid fa-circle-info"></i> About
+    </button>
+    <button id="menu-terms" class="session-menu-item">
+      <i class="fa-solid fa-shield-halved"></i> Terms &amp; disclaimer
+    </button>
+    <a id="menu-privacy" class="session-menu-item" href="./privacy.html" target="_blank" rel="noopener noreferrer">
+      <i class="fa-solid fa-lock"></i> Privacy &amp; GDPR Statement
+    </a>
+  </div>
+</dialog>
+`,
+  );
+}
+
 export function renderTermsDialog() {
   renderMarkupOnce(
     "dialogs-root",
@@ -399,102 +472,29 @@ export function renderHeaderShell() {
               <i class="fa-solid fa-bars"></i>
             </button>
             <div id="app-menu" class="session-menu hidden" role="menu">
-              <!-- Language + theme controls live here (same view on desktop and mobile) so the
-                   header bar stays compact. Same <select> elements as before, just relocated. -->
-              <div class="menu-control-row">
-                <label class="menu-control-label" for="lang-switcher"><i class="fa-solid fa-language" aria-hidden="true"></i> <span id="menu-label-lang">Language</span></label>
-                <!-- Options come from the registry of shipped dictionaries (i18n/index.js), the same
-                     way the theme options come from theme.js: a language is added by adding its
-                     file, and this menu has nothing to remember. -->
-                <select id="lang-switcher" class="form-control menu-select" aria-label="Switch Language / Zamenjaj jezik"></select>
-              </div>
-              <div class="menu-control-row">
-                <label class="menu-control-label" for="theme-switcher"><i class="fa-solid fa-palette" aria-hidden="true"></i> <span id="menu-label-theme">Theme</span></label>
-                <!-- Options come from THEME_SWITCHER_LABELS (theme.js), so a theme is named in one place. -->
-                <select id="theme-switcher" class="form-control menu-select" aria-label="Theme / Tema"></select>
-              </div>
-              <div class="menu-divider" role="separator"></div>
-              <!-- The mode switch, first in the list on purpose (TODO §40.5): entering the sandbox
-                   is occasional, but LEAVING it may be needed with a session about to start, and a
-                   way out that has to be hunted for is a way out that is not there. -->
-              <button id="menu-sandbox" class="session-menu-item" role="menuitem">
-                <i class="fa-solid fa-flask"></i> <span id="menu-sandbox-text" data-i18n="menu_sandbox_enter">Enter the sandbox</span>
+              <!-- Five entries: the places the trainer works in, then one place for the data and one
+                   for everything else. Each row opens a place; none acts on its own. -->
+              <!-- Only INSIDE the sandbox, and first: leaving it may be needed with a session about
+                   to start, and a way out that has to be hunted for is a way out that is not there.
+                   Entering it is occasional, so that lives in Settings. -->
+              <button id="menu-sandbox-leave" class="session-menu-item hidden" role="menuitem">
+                <i class="fa-solid fa-flask"></i> <span data-i18n="menu_sandbox_leave">Leave the sandbox</span>
               </button>
-              <!-- Only ever shown INSIDE the sandbox (TODO §40.4): from the trainer's own work it
-                   would be an offer to rebuild a workspace they are not looking at, wearing a red
-                   button, one row under the way in. -->
-              <button id="menu-sandbox-reset" class="session-menu-item hidden" role="menuitem">
-                <i class="fa-solid fa-arrows-rotate"></i> <span id="menu-sandbox-reset-text" data-i18n="menu_sandbox_reset">Reset sandbox data</span>
+              <button id="menu-sessions" class="session-menu-item" role="menuitem">
+                <i class="fa-solid fa-calendar-days"></i> <span data-i18n="menu_sessions">Training sessions</span>
               </button>
-              <div class="menu-divider" role="separator"></div>
-              <!-- The trainer's own name, phone and address (TODO §45.2). With the settings rather
-                   than with the clients: there is one trainer per install, and what they type here
-                   signs the invitations every client receives. -->
-              <button id="menu-trainer-details" class="session-menu-item" role="menuitem">
-                <i class="fa-solid fa-id-card"></i> <span data-i18n="menu_trainer_details">My details</span>
-              </button>
-              <!-- Which supported version of the app this device runs (TODO §76). A setting, like the
-                   theme; choosing one reloads the app. -->
-              <button id="menu-app-version" class="session-menu-item" role="menuitem">
-                <i class="fa-solid fa-code-compare"></i> <span data-i18n="menu_app_version">App version</span>
-              </button>
-              <div class="menu-divider" role="separator"></div>
               <button id="menu-clients-register" class="session-menu-item" role="menuitem">
                 <i class="fa-solid fa-users"></i> <span id="menu-clients-register-text" data-i18n="menu_clients_register">Clients Directory</span>
               </button>
-              <button id="menu-adjustments" class="session-menu-item" role="menuitem">
-                <i class="fa-solid fa-bell-concierge"></i> <span id="menu-adjustments-text" data-i18n="menu_adjustments">Pending Review</span>
-                <span class="badge badge-push-right hidden" id="menu-badge-adjustments-count">0</span>
+              <button id="menu-library" class="session-menu-item" role="menuitem">
+                <i class="fa-solid fa-dumbbell"></i> <span data-i18n="menu_library">Exercises and routines</span>
               </button>
-              <button id="menu-routines" class="session-menu-item" role="menuitem">
-                <i class="fa-solid fa-clipboard-list"></i> Routines
+              <button id="menu-data" class="session-menu-item" role="menuitem">
+                <i class="fa-solid fa-database"></i> <span data-i18n="menu_data">Data management</span>
               </button>
-              <button id="menu-exercises" class="session-menu-item" role="menuitem">
-                <i class="fa-solid fa-dumbbell"></i> Exercises
+              <button id="menu-settings" class="session-menu-item" role="menuitem">
+                <i class="fa-solid fa-gear"></i> <span data-i18n="menu_settings">Settings</span>
               </button>
-              <button id="menu-history" class="session-menu-item" role="menuitem">
-                <i class="fa-solid fa-clock-rotate-left"></i> History
-              </button>
-              <div class="menu-divider" role="separator"></div>
-              <button id="menu-connect-cloud" class="session-menu-item" role="menuitem">
-                <i class="fa-solid fa-cloud-arrow-up"></i> Connect cloud storage
-              </button>
-              <!-- A programme written somewhere else (TODO §29) — a chat window, a spreadsheet, a
-                   colleague's file. Beside the data actions rather than in the session menu: this is
-                   a desk activity, done before anybody is in the gym. -->
-              <button id="menu-import-program" class="session-menu-item" role="menuitem">
-                <i class="fa-solid fa-file-import"></i> <span data-i18n="menu_import_program">Import a programme</span>
-              </button>
-              <button id="menu-export-data" class="session-menu-item" role="menuitem">
-                <i class="fa-solid fa-file-export"></i> Export data as a file
-              </button>
-              <button id="menu-review-signup" class="session-menu-item" role="menuitem">
-                <i class="fa-solid fa-user-check"></i> Add a client from their own details
-              </button>
-              <button id="menu-open-encrypted" class="session-menu-item" role="menuitem">
-                <i class="fa-solid fa-lock-open"></i> Open an encrypted file
-              </button>
-              <a id="menu-github" class="session-menu-item" role="menuitem" target="_blank" rel="noopener noreferrer">
-                <i class="fa-brands fa-github"></i> GitHub project
-              </a>
-              <!-- The route out for someone with no GitHub account (TODO §23.5) — which is most
-                   personal trainers. Above the bug-reporting page because most of what a trainer
-                   wants to say is not a bug. -->
-              <button id="menu-feedback" class="session-menu-item" role="menuitem">
-                <i class="fa-solid fa-comment-dots"></i> <span data-i18n="menu_feedback">Send feedback</span>
-              </button>
-              <a id="menu-bug-report" class="session-menu-item" role="menuitem" href="./bug-reporting.html" target="_blank" rel="noopener noreferrer">
-                <i class="fa-solid fa-bug"></i> Bug Reporting
-              </a>
-              <button id="menu-about" class="session-menu-item" role="menuitem">
-                <i class="fa-solid fa-circle-info"></i> About
-              </button>
-              <button id="menu-terms" class="session-menu-item" role="menuitem">
-                <i class="fa-solid fa-shield-halved"></i> Terms &amp; disclaimer
-              </button>
-              <a id="menu-privacy" class="session-menu-item" role="menuitem" href="./privacy.html" target="_blank" rel="noopener noreferrer">
-                <i class="fa-solid fa-lock"></i> Privacy &amp; GDPR Statement
-              </a>
             </div>
           </div>
         </div>
@@ -541,6 +541,8 @@ export function setupApplicationHeader() {
   publishHeaderHeight();
   renderAboutDialog();
   renderTermsDialog();
+  // Before the language and theme switchers below, which live in it.
+  renderSettingsDialog();
 
   // Both repository links read the ONE declaration (data/publicUrls.js) rather than carrying a copy in
   // markup — the address appeared in five places before 2026-08-18, and a moved repository would have
@@ -598,6 +600,23 @@ export function setupApplicationHeader() {
   setupFirstRunTerms();
 }
 
+/**
+ * Leave Settings the way Back does, then `act`. The workspace switch remembers the address as the
+ * view to come back to, and with Settings open that address is `/settings`: the trainer came back to
+ * a dialog, and Settings stayed open over the workspace they had just entered. Going back first puts
+ * the view underneath in the address bar, and the router closes Settings on the way. The router's
+ * own popstate listener was added at boot, so it has run by the time this one does.
+ */
+function afterLeavingSettings(act) {
+  const settings = document.getElementById("dialog-settings");
+  if (!settings?.open || !settings.dataset.routeName) {
+    act();
+    return;
+  }
+  window.addEventListener("popstate", () => act(), { once: true });
+  history.back();
+}
+
 // Wires the ☰ header menu: toggle + close-on-outside-click (mirrors the .session-menu
 // pattern), plus each placeholder/real action and its About / Terms modals.
 function setupAppMenu() {
@@ -629,45 +648,40 @@ function setupAppMenu() {
     if (el) el.addEventListener("click", handler);
   };
 
-  // Client Directory / Pending Adjustments / Routines / Exercises / History — each its own
-  // first-class view+route (see TODO 4.8); moved out of the header bar into this menu.
+  // The five places. Each navigates to a route, so Back returns and a reload stays.
   const goto = (route) => {
     closeMenu();
     if (deps?.navigateToPath) deps.navigateToPath(route);
   };
+  on("menu-sessions", () => goto("/"));
   on("menu-clients-register", () => goto("/clients"));
-  on("menu-adjustments", () => goto("/adjustments"));
-  on("menu-routines", () => goto("/routines"));
-  on("menu-exercises", () => goto("/exercises"));
-  on("menu-history", () => goto("/history"));
-  // Connect cloud storage — opens the Sync & Backup dialog's Google Drive card (driveSyncUi.js),
-  // which itself reports "not configured" honestly on a deployment with no OAuth client id set.
-  // Both open the Sync & Backup dialog, and both navigate to its route rather than synthesising a
-  // click on #backup-btn — which is what they used to do, and what broke the moment that button
-  // learned to sync (TODO §3.11): for a CONNECTED trainer the simulated click ran a sync and never
-  // opened the dialog, so "Export data as a file" silently did something else entirely. The header
-  // button's behaviour is now state-dependent; these two are not, so they must not borrow it.
-  on("menu-connect-cloud", () => goto(deps.urlFor("backup")));
+  // The library; its tab row leads on to the routines.
+  on("menu-library", () => goto(deps.urlFor("exercises")));
+  // The Sync & Backup dialog: the cloud, export, import and an encrypted client file. Navigated to
+  // by its route rather than by a synthesised click on #backup-btn, whose behaviour depends on the
+  // connection: for a CONNECTED trainer that click runs a sync and never opens the dialog.
+  on("menu-data", () => goto(deps.urlFor("backup")));
+  on("menu-settings", () => goto(deps.urlFor("settings")));
   // The warning's remedy, one tap away: the dialog holds both a downloaded backup and a Drive sync,
   // and §3.8 turns on either being available — not on connecting Google.
   on("unbacked-badge", () => goto(deps.urlFor("backup")));
-  // Export data — reuse the existing Sync & Backup modal (it holds JSON export/restore).
-  on("menu-export-data", () => goto(deps.urlFor("backup")));
   // One control, both directions — the menu item says which one it is (TODO §40.5), so there is no
   // second item to leave behind in the wrong state.
   on("menu-sandbox", () => {
     closeMenu();
-    deps.onSwitchWorkspace?.(isSandbox() ? WORKING : SANDBOX);
+    const target = isSandbox() ? WORKING : SANDBOX;
+    afterLeavingSettings(() => deps.onSwitchWorkspace?.(target));
+  });
+  // The same way out, at the top of the menu — shown only inside the sandbox, and guarded as well.
+  on("menu-sandbox-leave", () => {
+    closeMenu();
+    if (isSandbox()) deps.onSwitchWorkspace?.(WORKING);
   });
   // Guarded here as well as hidden: the item is in the markup either way, and a hidden control is a
   // styling fact, not a promise about what a click can do (TODO §40.4).
   on("menu-sandbox-reset", () => {
     closeMenu();
     if (isSandbox()) deps.onResetSandbox?.();
-  });
-  on("menu-import-program", () => {
-    closeMenu();
-    deps.openProgramImport?.();
   });
   on("menu-trainer-details", () => {
     closeMenu();
@@ -676,19 +690,6 @@ function setupAppMenu() {
   on("menu-app-version", () => {
     closeMenu();
     deps.openAppVersion?.();
-  });
-  // For a CLIENT who was emailed their data export, not for the trainer — which is why it sits in
-  // the app menu and not on a client record: the person opening it has no client record.
-  // A submission a prospective client sent in (TODO §26.5). Sits in the app menu beside the encrypted
-  // reader because both answer "someone sent me a file" — but this one is FOR the trainer, and what it
-  // produces is a client record, which is why the review is a deliberate act and never an auto-import.
-  on("menu-review-signup", () => {
-    closeMenu();
-    deps.openSignupReview?.();
-  });
-  on("menu-open-encrypted", () => {
-    closeMenu();
-    deps.openEncryptedFileReader?.();
   });
   // GitHub project, Bug reporting, and Privacy statement are real <a target="_blank">; just dismiss the menu.
   on("menu-github", () => closeMenu());
@@ -706,7 +707,7 @@ function setupAppMenu() {
 
   // Modal close (×) buttons for the About / Terms dialogs.
   for (const btn of document.querySelectorAll(
-    "#dialog-about .modal-close-btn, #dialog-terms .modal-close-btn",
+    "#dialog-about .modal-close-btn, #dialog-terms .modal-close-btn, #dialog-settings .modal-close-btn",
   )) {
     btn.addEventListener("click", () => btn.closest("dialog").close());
   }

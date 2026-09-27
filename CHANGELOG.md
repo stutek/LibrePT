@@ -20,6 +20,28 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-09-27 — The menu has five entries
+
+### Changed
+
+- **The ☰ menu holds five places:** *Training sessions* (the home page), *Clients Directory*,
+  *Exercises and routines*, *Data management* and *Settings*. Inside the sandbox, *Leave the sandbox*
+  is first in the menu as well.
+- **Settings** is a dialog of its own: language, theme, *My details*, *App version*, entering,
+  leaving and resetting the sandbox, and *Help and legal* (GitHub, feedback, bug reporting, About,
+  Terms, Privacy). Back closes it.
+- **Exercises and routines are one place:** a tab row on both screens moves between the exercise
+  library and the routines. *Import a programme* is on the routines screen.
+- **Data management** opens the Sync & Backup dialog, which now also holds *Open an encrypted file*.
+  *Connect cloud storage* and *Export data as a file* were two menu rows for this same dialog.
+- ***Add a client from their own details*** is under the client directory's title.
+- **Pending review** has no menu row. Its status message in the notification area leads to it.
+
+### Fixed
+
+- *Add a client from their own details* and *Open an encrypted file* stayed in English in every
+  language. Both are translated now.
+
 ## 2026-09-26 — The welcome screen asks for everything once
 
 ### Changed

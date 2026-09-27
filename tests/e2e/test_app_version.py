@@ -35,10 +35,14 @@ def _with_no_session_running(page, local_server):
 def _choose(page, version):
     page.locator("#btn-app-menu").click()
     page.wait_for_selector("#app-menu:not(.hidden)")
+    page.locator("#menu-settings").click()
     page.locator("#menu-app-version").click()
     page.wait_for_selector("#dialog-app-version[open]")
     with page.expect_navigation():
         page.locator(f'#dialog-app-version [data-version="{version}"]').click()
+    # The reload comes back where the choice was made, in Settings; the library is one tap away.
+    page.wait_for_selector("#dialog-settings[open]")
+    page.goto(page.url.replace("/settings", "/exercises"))
     page.wait_for_selector("#view-exercises.active")
 
 

@@ -24,7 +24,6 @@ export const sl = {
   tab_clients: "Stranke",
   tab_routines: "Rutine",
   tab_exercises: "Vaje",
-  tab_history: "Zgodovina",
   pending_adjustments: "Čakajoče na pregled",
   btn_start_session: "Začni trening po meri ali skupinski trening",
   btn_create_session: "Ustvari trening",
@@ -663,17 +662,20 @@ export const sl = {
   story_welcome_body:
     "LibrePT je aplikacija za osebne trenerje: termini, načrti treningov in beležka med vadbo. V tem ogledu povabiš tri nove stranke, pripraviš torkov trening in ga med vadbo prilagodiš. Vse se dogaja v peskovniku, ločeni kopiji z izmišljenimi strankami. Tvojih pravih strank, terminov in vadb ne spremeni.",
   story_step_welcome:
-    "Z gumbom Pokaži mi ti vodnik pokaže troje: značko PESKOVNIK v zgornji vrstici ter v meniju ☰ vrstici Zapusti peskovnik in Ponastavi podatke peskovnika. Z gumbom Naprej začneš. Kartico lahko kadar koli pospraviš z ikono ▾ v njenem zgornjem desnem kotu in aplikacijo preizkušaš brez vodenja; na vrstici, ki ostane, je ✕, ki vodeni ogled konča.",
+    "Z gumbom Pokaži mi ti vodnik pokaže dvoje: značko PESKOVNIK v zgornji vrstici in vrstico Zapusti peskovnik na vrhu menija ☰. Ponastavi podatke peskovnika je v meniju pod Nastavitve. Z gumbom Naprej začneš. Kartico lahko kadar koli pospraviš z ikono ▾ v njenem zgornjem desnem kotu in aplikacijo preizkušaš brez vodenja; na vrstici, ki ostane, ogled končaš z ✕.",
   story_persona_trainer: "Tvoj telefon",
   story_chapter_trainer_details: "Vnesi svoje podatke",
   story_trainer_details_open_body:
-    "Preden povabiš prvo stranko, preveri, s čim se podpišeš na povabilih: ime, telefon in e-pošta. Zdaj ti tega ni treba vpisati. Kar shraniš, ostane tudi po koncu ogleda, ker so to tvoji podatki, ne podatki peskovnika.",
+    "Povabila podpišeš s podatki, ki si jih vpisal(-a) ob prvem zagonu: ime, telefon in e-pošta. Tukaj jih spremeniš. So tvoji, ne podatki peskovnika, zato kar shraniš, ostane tudi po ogledu.",
   story_step_trainer_details_menu:
     "Pritisni ☰ — tri vodoravne črtice zgoraj desno v temni vrstici. Odpre se meni.",
+  story_step_trainer_details_settings:
+    "V meniju pritisni Nastavitve — zadnjo vrstico, z ikono zobnika. Odprejo se nastavitve.",
   story_step_trainer_details_show:
-    "V meniju pritisni Moji podatki — vrstico z ikono kartice. Odpre se obrazec s polji za ime, telefon in e-pošto.",
+    "V nastavitvah pritisni Moji podatki — vrstico z ikono kartice. Odpre se obrazec s polji za ime, priimek, telefon in e-pošto.",
   story_step_trainer_details_close:
     "Pritisni Prekliči na dnu obrazca, ali Shrani, če si vpisal svoje podatke. Oboje obrazec zapre.",
+  story_step_settings_close: "Pritisni ✕ v zgornjem desnem kotu nastavitev. Nastavitve se zaprejo.",
   story_chapter_gym: "Izvedba in prilagoditve treninga",
   story_persona_client: "Anin telefon",
   story_chapter_arrive: "Sprejem treh novih strank",
@@ -683,7 +685,7 @@ export const sl = {
   story_open_client_phone: "Odpri Anin obrazec",
   story_step_arrive_menu: "Pritisni ☰ zgoraj desno. Odpre se meni.",
   story_step_arrive_clients:
-    "V meniju, ki se je pravkar spustil, pritisni Imenik strank — vrstica z znakom treh ljudi, na vrhu seznama. V njem je že osem ljudi.",
+    "V meniju, ki se je pravkar spustil, pritisni Imenik strank — vrstica z znakom treh ljudi, druga na seznamu. V njem je že osem ljudi.",
   story_step_arrive_invite:
     "Pritisni Povabi stranko — gumb s puščicami deljenja tik pod naslovom Stranke. Ana dobi povezavo in podatke vpiše sama; ti ji jih ne zapisuješ na hodniku.",
   story_step_arrive_contact:
@@ -749,11 +751,12 @@ export const sl = {
     "Jane, John in Sarah imajo en skupen načrt. V torek ga odpreš in začneš.",
   story_programme_close_title: "Načrt je pripravljen",
   story_step_evening_menu: "Doma, pozneje zvečer. Pritisni ☰ zgoraj desno.",
+  story_step_evening_settings: "V meniju pritisni Nastavitve — zadnjo vrstico, z ikono zobnika.",
   story_step_evening_move:
     "Torek se ta teden premakne za dve uri, dogovorjeno z vsemi tremi. Pritisni svinčnik na kartici Moč ob torkih in četrtkih. Obrazec vpraša, ali spremeniš samo ta termin.",
   story_step_evening_move_time:
     "V polje za začetek vpiši 20:00. Naslednji torki ostanejo ob 18:00.",
-  story_step_evening_theme: "Pozno zvečer, na kavču. V meniju pri Tema izberi Polnoč.",
+  story_step_evening_theme: "Pozno zvečer, na kavču. V nastavitvah pri Tema izberi Polnoč.",
   story_evening_open_body:
     "Trening je končan in vsi so šli domov. Doma premakneš torkov termin, kot ste se dogovorili po vadbi.",
   story_thanks_title: "Konec ogleda",
@@ -822,9 +825,12 @@ export const sl = {
   menu_language: "Jezik",
   menu_theme: "Tema",
   menu_clients_register: "Imenik strank",
-  menu_adjustments: "Čakajoče na pregled",
-  menu_connect_cloud: "Poveži shrambo v oblaku",
-  menu_export_data: "Izvozi podatke v datoteko",
+  menu_sessions: "Termini treningov",
+  menu_library: "Vaje in rutine",
+  menu_data: "Upravljanje podatkov",
+  menu_settings: "Nastavitve",
+  settings_help_heading: "Pomoč in pravno",
+  btn_review_signup: "Dodaj stranko iz podatkov, ki jih je poslala",
   drive_sync_connect: "Poveži Google Drive",
   drive_sync_now: "Sinhroniziraj zdaj",
   drive_sync_syncing: "Sinhroniziram…",

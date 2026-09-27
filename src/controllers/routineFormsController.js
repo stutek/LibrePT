@@ -7,9 +7,11 @@
 import { newRecordId } from "../data/recordId.js";
 import { parseLoad, parseReps } from "../domain/repsAndLoad.js";
 import { $id, closeModal, openModal, renderMarkupOnce } from "../modules/common/dom.js";
+import { wireLibraryTabs } from "../modules/common/libraryTabs.js";
 import { keepRecordLive } from "../modules/common/liveRecordForm.js";
 import { mountExercisePicker, pickerLabels } from "../modules/exercises/exercisePicker.js";
 import { addRoutineExerciseRow, renderRoutinesList } from "../modules/plans/plansView.js";
+import { openProgramImportDialog } from "../modules/plans/programImportDialog.js";
 
 // Filled in by setupRoutineForms, and called by the create-form ROUTE. The form fields, the
 // builder list, and the picker are closed over by that setup, so this is the seam that lets the
@@ -129,6 +131,8 @@ export function setupRoutineForms({
     live.openNew();
   };
   $id("btn-add-routine").addEventListener("click", () => navigateToPath(urlFor("routine.new")));
+  $id("btn-import-program")?.addEventListener("click", openProgramImportDialog);
+  wireLibraryTabs($id("view-routines"), navigateToPath, urlFor);
 
   const btnRoutineAddEx = $id("btn-routine-add-ex");
   if (btnRoutineAddEx) {

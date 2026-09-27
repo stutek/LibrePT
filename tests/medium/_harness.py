@@ -104,7 +104,7 @@ function applyTranslations(lang) {
   applyStaticDOMMappings(TRANSLATIONS[lang]);
 }
 
-// No real router: a route-backed dialog (build info, backup, about, terms) normally opens because
+// No real router: a route-backed dialog (build info, backup, settings, about, terms) normally opens because
 // the router's route.enter() calls the component's own "prepare, then show" pair. This fake just
 // does that same pairing directly, keyed on what urlFor() named the route.
 function navigateToPath(path) {
@@ -114,6 +114,8 @@ function navigateToPath(path) {
   if (path.includes('backup')) {
     prepareBackupDialog();
     document.getElementById('dialog-backup').showModal();
+  } else if (path.includes('settings')) {
+    document.getElementById('dialog-settings').showModal();
   } else if (path.includes('about')) {
     document.getElementById('dialog-about').showModal();
   } else if (path.includes('terms')) {

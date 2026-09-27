@@ -23,6 +23,7 @@ import {
   initIntakeInviteDialog,
   openIntakeInviteDialog,
 } from "../modules/clients/intakeInviteDialog.js";
+import { openSignupReview } from "../modules/clients/signupReviewDialog.js";
 import { $id, closeModal, openModal, renderMarkupOnce } from "../modules/common/dom.js";
 import { keepRecordLive } from "../modules/common/liveRecordForm.js";
 import { getInitials } from "../modules/common/utils.js";
@@ -190,6 +191,8 @@ export function setupClientForms({
     });
     openIntakeInviteDialog();
   });
+
+  $id("btn-review-signup")?.addEventListener("click", () => openSignupReview());
 
   $id("btn-add-client").addEventListener("click", () => {
     $id("client-modal-title").textContent = t("add_new_client");

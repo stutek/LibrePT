@@ -61,6 +61,7 @@ STATIC_ROUTE_WALK = [
     ("routine.new", "/routines/new"),
     ("exercise.new", "/exercises/new"),
     ("about", "/about"),
+    ("settings", "/settings"),
     ("build", "/build"),
     ("backup", "/backup"),
     ("terms", "/terms"),

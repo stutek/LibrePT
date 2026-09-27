@@ -20,6 +20,7 @@ def _open_about(page, local_server):
     page.wait_for_selector("#btn-app-menu")
     page.wait_for_timeout(300)
     page.locator("#btn-app-menu").click()
+    page.locator("#menu-settings").click()
     page.locator("#menu-about").click()
     page.wait_for_selector("#dialog-about[open]")
 
@@ -33,7 +34,12 @@ def test_back_closes_the_dialog(page, local_server):
     _open_about(page, local_server)
     page.go_back()
     page.wait_for_selector("#dialog-about", state="hidden")
-    # And lands on the view that was underneath, not out of the app.
+    # Back returns to where About was opened from — Settings — and once more to the view underneath,
+    # never out of the app.
+    page.wait_for_selector("#dialog-settings[open]")
+    assert _path(page).endswith("/settings")
+    page.go_back()
+    page.wait_for_selector("#dialog-settings", state="hidden")
     assert "/sessions/" in _path(page)
 
 
@@ -46,7 +52,8 @@ def test_the_close_button_and_back_agree(page, local_server):
     assert not _path(page).endswith("/about"), (
         "the ✕ closed the dialog but left its URL behind"
     )
-    assert "/sessions/" in _path(page)
+    # Popped back to where it was opened from, as Back does.
+    assert _path(page).endswith("/settings")
 
 
 def test_escape_closes_and_pops_too(page, local_server):
@@ -150,11 +157,12 @@ def test_first_run_terms_is_not_routed(browser, local_server):
 
 
 def test_terms_from_the_menu_is_routed(page, local_server):
-    """Reopened from the ☰ menu it is an ordinary dialog, so it gets a URL and Back closes it."""
+    """Reopened from Settings it is an ordinary dialog, so it gets a URL and Back closes it."""
     page.goto(local_server)
     page.wait_for_selector("#btn-app-menu")
     page.wait_for_timeout(300)
     page.locator("#btn-app-menu").click()
+    page.locator("#menu-settings").click()
     page.locator("#menu-terms").click()
     page.wait_for_selector("#dialog-terms[open]")
     assert _path(page).endswith("/terms")

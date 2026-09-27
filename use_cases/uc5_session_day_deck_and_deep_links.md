@@ -155,7 +155,8 @@ the dialog over the dashboard rather than a blank shell.
 | URL (under the base path) | Restores |
 | :--- | :--- |
 | `/about` | the About dialog |
-| `/terms` | the Terms & disclaimer dialog, reopened from the ☰ menu |
+| `/settings` | the Settings dialog, from the ☰ menu |
+| `/terms` | the Terms & disclaimer dialog, reopened from Settings |
 | `/build` | the build-identity dialog (release, commit, data schema, build time) |
 | `/backup` | the Sync & Backup dialog |
 

@@ -200,8 +200,8 @@ def test_share_params_survive_in_app_navigation(page, local_server):
 
     # Navigate through the app's own menu — the router's writer is what must carry the params over.
     for menu_item, view in (
-        ("#menu-exercises", "exercises"),
-        ("#menu-history", "history"),
+        ("#menu-library", "exercises"),
+        ("#menu-clients-register", "client-directory"),
     ):
         page.locator("#btn-app-menu").click()
         page.locator(menu_item).click()

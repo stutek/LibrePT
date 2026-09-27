@@ -201,6 +201,9 @@ export function buildRouteTable() {
   // restore and a link should be able to open, and routing them is what makes Back close them.
   for (const [name, segment, dialogId, open] of [
     ["about", "/about", "dialog-about", null],
+    // The ☰ menu's Settings: language, theme, the trainer's details, the app version, the sandbox,
+    // and help and legal.
+    ["settings", "/settings", "dialog-settings", null],
     // The build stamp is read off the running app, and a stale import status must not greet the
     // next open — so both are refreshed before the dialog is shown, not when the page loaded.
     ["build", "/build", "dialog-build-info", (ctx) => ctx.deps.renderBuildInfo?.()],

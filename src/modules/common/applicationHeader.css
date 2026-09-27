@@ -367,8 +367,7 @@ select.menu-select {
   justify-content: center;
   line-height: 1;
 }
-.cloud-sync-icon .fa-cloud,
-.session-menu-item .fa-cloud-arrow-up {
+.cloud-sync-icon .fa-cloud {
   font-size: 18px;
   color: var(--cloud-icon-color, #0284c7);
 }
@@ -547,4 +546,19 @@ select.menu-select {
   font-size: 0.78rem;
   line-height: 1.5;
   opacity: 0.85;
+}
+
+/* Settings (#dialog-settings): the menu's former rows, as a list inside a dialog. The rows keep the
+   menu's own item style, so a theme that restyles one restyles both. */
+.settings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settings-heading {
+  margin: 16px 0 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
 }

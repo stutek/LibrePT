@@ -14,10 +14,10 @@
 # test_clipboard.py was deleted into this file for the same reason (2026-08-05): its whole flow —
 # logo, language switch, the Slovenian sync label, sync success, switching back, the session cards,
 # the card tap, the Jane/John participant tabs — was a strict prefix of STEPS 1-3 below. Its one
-# assertion this file did not already make (a NAVIGATION item translating, `#menu-routines` ==
-# "Rutine", rather than only the dialog entries) moved down to
-# tests/medium/test_header_menu.py::test_menu_labels_translate_to_slovenian, where menu translation
-# already lives. Two near-identical full-app flows cost ~9s per run to assert the same thing twice.
+# assertion this file did not already make (a NAVIGATION item translating, rather than only the
+# dialog entries) moved down to
+# tests/medium/test_header_menu.py::test_menu_and_settings_translate_to_slovenian, where menu
+# translation already lives. Two near-identical full-app flows cost ~9s per run to assert the same thing twice.
 
 
 def test_interactive_dashboard_flow(page, local_server):
@@ -37,14 +37,17 @@ def test_interactive_dashboard_flow(page, local_server):
     assert page.locator(".logo-area h1").first.text_content() == "LibrePT"
 
     # --- STEP 1: INTERACTIVE LANGUAGE TRANSLATION ---
-    # Language + theme now live inside the ☰ menu; open it to reach the switcher.
+    # Language + theme live in Settings, behind the ☰ menu.
     page.locator("#btn-app-menu").click()
     page.wait_for_selector("#app-menu:not(.hidden)")
+    page.locator("#menu-settings").click()
     lang_switcher = page.locator("#lang-switcher")
     assert lang_switcher.is_visible()
 
-    # Toggle language to Slovenian (SL)
+    # Toggle language to Slovenian (SL), then close Settings — it is modal.
     lang_switcher.select_option("sl")
+    page.locator("#dialog-settings .modal-close-btn").click()
+    page.wait_for_selector("#dialog-settings", state="hidden")
 
     # The sync control now lives in the header cloud (Sync & Backup) modal; open it and
     # confirm its label translated too.
@@ -63,11 +66,17 @@ def test_interactive_dashboard_flow(page, local_server):
     page.locator("#dialog-backup .modal-close-btn").click()
     page.wait_for_selector("#dialog-backup", state="hidden")
 
-    # Switch back to English (EN) — reopen the ☰ menu to reach the switcher again.
+    # Switch back to English (EN) — through Settings again.
     page.locator("#btn-app-menu").click()
     page.wait_for_selector("#app-menu:not(.hidden)")
+    page.locator("#menu-settings").click()
     lang_switcher.select_option("en")
-    assert page.locator("#menu-routines").inner_text().strip() == "Routines"
+    page.locator("#dialog-settings .modal-close-btn").click()
+    page.wait_for_selector("#dialog-settings", state="hidden")
+    page.locator("#btn-app-menu").click()
+    assert (
+        page.locator("#menu-library").inner_text().strip() == "Exercises and routines"
+    )
     page.locator("#btn-app-menu").click()
 
     # Verify sessions list cards appear on the dashboard
@@ -133,10 +142,19 @@ def test_interactive_dashboard_flow(page, local_server):
     page.locator("#active-session-overlay .view-grabber").click()
     page.wait_for_selector("#active-session-overlay.hidden", state="attached")
 
-    # Pending Plan Adjustments is its own view/route now (TODO 4.8), not part of the dashboard.
-    page.locator("#btn-app-menu").click()
-    page.wait_for_selector("#app-menu:not(.hidden)")
-    page.locator("#menu-adjustments").click()
+    # Pending Plan Adjustments is its own view/route, reached from its status message in the
+    # notification area — the ☰ menu has no row for it.
+    page.evaluate(
+        """async () => {
+            const area = await import(
+                new URL('modules/common/notificationArea.js', document.baseURI).href
+            );
+            area.toggleNotificationArea(true);
+        }"""
+    )
+    page.locator(
+        '[data-notification-id="synthetic-pending-sessions"] [data-nav-target]'
+    ).first.click()
     page.wait_for_selector("#view-adjustments.active")
 
     # Verify the new adjustment alert card displays the play audio button

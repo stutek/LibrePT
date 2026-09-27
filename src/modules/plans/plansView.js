@@ -14,6 +14,7 @@ import {
 } from "../../domain/repsAndLoad.js";
 // src/views/routinesView.js - Domain module for routines catalog and template editor builder
 import { renderMarkupOnce } from "../common/dom.js";
+import { libraryTabsHtml } from "../common/libraryTabs.js";
 import { escapeHTML } from "../common/utils.js";
 
 // Navigation deps, set once at boot. Held at module level rather than passed per render because
@@ -39,6 +40,15 @@ export function renderRoutinesViewShell() {
           <i class="fa-solid fa-plus"></i> Create Template
         </button>
       </div>
+      <!-- A programme written somewhere else — a chat window, a spreadsheet, a colleague's file.
+           Here, with the routines, because a programme is a routine written elsewhere; in its own
+           row because a third button beside the title does not fit a phone in German. -->
+      <div class="view-subactions">
+        <button id="btn-import-program" class="btn secondary-btn btn-sm">
+          <i class="fa-solid fa-file-import"></i> <span data-i18n="menu_import_program">Import a programme</span>
+        </button>
+      </div>
+      ${libraryTabsHtml("routines")}
       <div class="routines-grid" id="routines-list"></div>
     </section>
 `,

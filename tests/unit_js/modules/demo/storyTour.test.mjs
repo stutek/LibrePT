@@ -25,13 +25,18 @@ test("the trainer-details chapter only shows the identity form", () => {
     chapter.steps.every((step) => step.enter === undefined),
     "the demo saves no invented data",
   );
-  // It shows the form, then closes it: a modal left open covers the ☰ the next chapter starts from.
-  assert.deepEqual(chapter.steps.at(-2).expect, {
+  // It shows the form, closes it, then closes Settings, which the form opened from: a modal left
+  // open covers the ☰ the next chapter starts from.
+  assert.deepEqual(chapter.steps.at(-3).expect, {
     selector: "#dialog-trainer-details",
     visible: true,
   });
-  assert.deepEqual(chapter.steps.at(-1).expect, {
+  assert.deepEqual(chapter.steps.at(-2).expect, {
     selector: "#dialog-trainer-details",
+    visible: false,
+  });
+  assert.deepEqual(chapter.steps.at(-1).expect, {
+    selector: "#dialog-settings",
     visible: false,
   });
 });

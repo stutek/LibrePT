@@ -96,7 +96,6 @@ import {
   renderClientDetailViewShell,
   renderClientDirectoryViewShell,
 } from "./modules/clients/clientsView.js";
-import { openSignupReview } from "./modules/clients/signupReviewDialog.js";
 import {
   askForTermsAgreement,
   needsTermsAgreement,
@@ -583,6 +582,7 @@ async function init() {
     renderGlobalHistory,
     populateDropdownSelectors,
     renderSessions,
+    openEncryptedFileReader,
     t,
   });
   // renderSyncBadge/renderNotificationArea are injected because a sync's START and its FAILURE
@@ -614,8 +614,6 @@ async function init() {
     navigateToPath,
     urlFor,
     getActiveSession: () => getActiveSession(),
-    openEncryptedFileReader,
-    openSignupReview,
   });
 
   appBoot.bootSessionTimeline({
@@ -789,13 +787,6 @@ function renderPendingPlanAdjustments() {
     navigateToPath,
     urlFor,
   });
-
-  const menuBadge = document.getElementById("menu-badge-adjustments-count");
-  if (menuBadge) {
-    const unresolved = (getState().planUpdates || []).filter((u) => !u.resolved).length;
-    menuBadge.textContent = unresolved;
-    menuBadge.classList.toggle("hidden", unresolved === 0);
-  }
 }
 
 function openAdjustmentWizard(updateId) {

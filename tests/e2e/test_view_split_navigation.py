@@ -1,8 +1,16 @@
 # tests/e2e/test_view_split_navigation.py
-# TODO 4.8: the dashboard used to bundle three things into one view/route (#view-clients) --
-# the session list, Pending Plan Adjustments, and the Client Directory. Each is now its own
-# first-class view with its own route and ☰-menu entry, and the homepage keeps only the session
-# list. Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
+# The dashboard used to bundle three things into one view/route (#view-clients) -- the session
+# list, Pending Plan Adjustments, and the Client Directory. Each is now its own first-class view with
+# its own route, and the homepage keeps only the session list. The Client Directory has a ☰ entry;
+# Pending Review has none — it is reached from its status message in the notification area.
+# Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
+
+PENDING_MESSAGE = '[data-notification-id="synthetic-pending-sessions"]'
+
+EXPAND_MESSAGES = """async () => {
+    const area = await import(new URL('modules/common/notificationArea.js', document.baseURI).href);
+    area.toggleNotificationArea(true);
+}"""
 
 
 def _open_menu(page):
@@ -20,12 +28,12 @@ def test_homepage_only_shows_the_session_list(page, local_server):
     assert page.locator("#view-clients #clients-list").count() == 0
 
 
-def test_menu_navigates_to_pending_adjustments(page, local_server):
+def test_the_pending_message_navigates_to_pending_review(page, local_server):
     page.goto(local_server)
     page.wait_for_selector("#view-clients.active")
-    _open_menu(page)
+    page.evaluate(EXPAND_MESSAGES)
 
-    page.locator("#menu-adjustments").click()
+    page.locator(f"{PENDING_MESSAGE} [data-nav-target]").first.click()
     page.wait_for_selector("#view-adjustments.active")
     # pathname, not the whole URL: a navigation legitimately carries the ?lang/?theme share params.
     assert page.evaluate("() => location.pathname").rstrip("/").endswith("/adjustments")
@@ -59,13 +67,17 @@ def test_deep_links_to_the_two_new_views(page, local_server):
     page.wait_for_selector("#view-client-directory.active")
 
 
-def test_pending_adjustments_menu_badge_matches_unresolved_count(page, local_server):
+def test_pending_review_is_a_message_not_a_menu_row(page, local_server):
     page.goto(local_server)
     page.wait_for_selector("#view-clients.active")
     _open_menu(page)
+    assert page.locator("#menu-adjustments").count() == 0
 
-    # Three seeded plan updates start unresolved (src/data/planUpdates.js).
-    assert page.locator("#menu-badge-adjustments-count").inner_text().strip() == "3"
+    # Three seeded plan updates start unresolved (src/data/planUpdates.js). The message lists them
+    # per client, each with its count in brackets; together they are the three.
+    labels = page.locator(f"{PENDING_MESSAGE} [data-nav-target]").all_inner_texts()
+    counts = [int(label.rsplit("(", 1)[1].rstrip(")")) for label in labels]
+    assert sum(counts) == 3
 
 
 # Regression: gestureController.js's goHome() and activeSessionController.js's

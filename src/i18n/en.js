@@ -9,7 +9,6 @@ export const en = {
   tab_clients: "Clients",
   tab_routines: "Routines",
   tab_exercises: "Exercises",
-  tab_history: "History",
   pending_adjustments: "Pending Review",
   btn_start_session: "Start Custom or Group Session",
   btn_create_session: "Create Session",
@@ -710,17 +709,20 @@ export const en = {
   // card and ✕ ends the run, and the ✕ is only on the bar the parked card leaves behind
   // (modules/demo/walkthrough.css hides it while the card is open) — so the order matters.
   story_step_welcome:
-    "Show me points out three things: the SANDBOX badge in the top bar, and in the ☰ menu the rows Leave the sandbox and Reset sandbox data. Next starts the walkthrough. To try the app without the guide, put this card away with ▾ in its top right corner. A small bar stays on screen: its ✕ ends the walkthrough.",
+    "Show me points out two things: the SANDBOX badge in the top bar, and the row Leave the sandbox at the top of the ☰ menu. Reset sandbox data is in the menu under Settings. Next starts the walkthrough. To try the app without the guide, put this card away with ▾ in its top right corner. A small bar stays on screen: its ✕ ends the walkthrough.",
   story_persona_trainer: "Your phone",
   story_chapter_trainer_details: "Enter your own details",
   story_trainer_details_open_body:
-    "Before you invite your first client, check what your invitations are signed with: name, phone and email. You do not have to enter them now. What you save stays after the walkthrough, because these are your details, not the sandbox's.",
+    "Your invitations are signed with the details you gave on the first launch: name, phone and email. You change them here. They are yours, not the sandbox's, so what you save stays after the walkthrough.",
   story_step_trainer_details_menu:
     "Tap ☰ — the three horizontal lines in the top right of the dark bar. The menu opens.",
+  story_step_trainer_details_settings:
+    "In the menu, tap Settings — the last row, with the gear icon. The settings open.",
   story_step_trainer_details_show:
-    "In the menu, tap My details — the row with the card icon. A form opens with fields for name, phone and email.",
+    "In the settings, tap My details — the row with the card icon. A form opens with fields for first name, last name, phone and email.",
   story_step_trainer_details_close:
     "Tap Cancel at the bottom of the form, or Save if you entered your details. Either one closes the form.",
+  story_step_settings_close: "Tap ✕ in the top right corner of the settings. They close.",
   story_chapter_gym: "Running the session and adjusting it",
   story_persona_client: "Ana's phone",
   story_chapter_arrive: "Taking on three new clients",
@@ -730,7 +732,7 @@ export const en = {
   story_open_client_phone: "Open Ana's form",
   story_step_arrive_menu: "Tap ☰ in the top right. The menu opens.",
   story_step_arrive_clients:
-    "In the menu that just dropped down, tap Clients Directory — the row with three little people next to it, at the top of the list. Eight people are already in that directory.",
+    "In the menu that just dropped down, tap Clients Directory — the row with three little people next to it, second in the list. Eight people are already in that directory.",
   story_step_arrive_invite:
     "Tap Invite a client — the button with the share arrows just under the Clients heading. Ana gets a link and fills in her own details; you do not write them down in the corridor.",
   story_step_arrive_contact:
@@ -803,12 +805,13 @@ export const en = {
     "Jane, John and Sarah share one plan. On Tuesday you open it and start.",
   story_programme_close_title: "The plan is ready",
   story_step_evening_menu: "At home, later that evening. Tap ☰ in the top right.",
+  story_step_evening_settings: "In the menu, tap Settings — the last row, with the gear icon.",
   story_step_evening_move:
     "This week Tuesday moves two hours later, agreed with all three. Tap the pencil on the card Tuesday & Thursday Strength. The form asks whether you change only this session.",
   story_step_evening_move_time:
     "Type 20:00 in the start time box. The following Tuesdays stay at 18:00.",
   story_step_evening_theme:
-    "Late in the evening, on the sofa. In the menu, under Theme, choose Midnight.",
+    "Late in the evening, on the sofa. In the settings, under Theme, choose Midnight.",
   story_evening_open_body:
     "The session is over and everyone has gone home. At home you move Tuesday's session, as you all agreed after the workout.",
   story_thanks_title: "End of the walkthrough",
@@ -886,9 +889,12 @@ export const en = {
   menu_language: "Language",
   menu_theme: "Theme",
   menu_clients_register: "Clients Directory",
-  menu_adjustments: "Pending Review",
-  menu_connect_cloud: "Connect cloud storage",
-  menu_export_data: "Export data as a file",
+  menu_sessions: "Training sessions",
+  menu_library: "Exercises and routines",
+  menu_data: "Data management",
+  menu_settings: "Settings",
+  settings_help_heading: "Help and legal",
+  btn_review_signup: "Add a client from their own details",
   drive_sync_connect: "Connect Google Drive",
   drive_sync_now: "Sync Now",
   drive_sync_syncing: "Syncing…",

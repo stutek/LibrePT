@@ -8,6 +8,7 @@ import {
 } from "../../data/exerciseLibrary.js";
 import { modalityOf } from "../../domain/exerciseModality.js";
 import { renderMarkupOnce } from "../common/dom.js";
+import { libraryTabsHtml } from "../common/libraryTabs.js";
 import { escapeHTML } from "../common/utils.js";
 import { sourceBadge, sourceLabels } from "./exercisePicker.js";
 
@@ -31,6 +32,7 @@ export function renderExercisesViewShell() {
           <i class="fa-solid fa-plus"></i> Add Exercise
         </button>
       </div>
+      ${libraryTabsHtml("exercises")}
       
       <div class="search-bar-container">
         <i class="fa-solid fa-magnifying-glass search-icon"></i>

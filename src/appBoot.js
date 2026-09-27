@@ -65,10 +65,7 @@ import {
 } from "./modules/common/trainerDetailsDialog.js";
 import { renderIntakeViewShell, setupIntakeForm } from "./modules/intake/intakeView.js";
 import { initPlansView } from "./modules/plans/plansView.js";
-import {
-  initProgramImportDialog,
-  openProgramImportDialog,
-} from "./modules/plans/programImportDialog.js";
+import { initProgramImportDialog } from "./modules/plans/programImportDialog.js";
 import { renderRsvpViewShell, setupRsvpReply } from "./modules/rsvp/rsvpView.js";
 import { initWorkoutSetup, setupWorkoutSetup } from "./modules/session/editSessionControl.js";
 import { renderWorkoutSetupView } from "./modules/session/editSessionView.js";
@@ -221,7 +218,6 @@ export function bootHeader(deps) {
   initApplicationHeader({
     ...deps,
     openFeedbackRoute: openFeedbackRouteDialog,
-    openProgramImport: openProgramImportDialog,
     openTrainerDetails: openTrainerDetailsDialog,
     openAppVersion: openAppVersionDialog,
   });

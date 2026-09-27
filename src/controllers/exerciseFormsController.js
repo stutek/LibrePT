@@ -8,6 +8,7 @@
 import { newRecordId } from "../data/recordId.js";
 import { metricOptionsFor } from "../domain/exerciseModality.js";
 import { $id, closeModal, openModal, renderMarkupOnce } from "../modules/common/dom.js";
+import { wireLibraryTabs } from "../modules/common/libraryTabs.js";
 import { keepRecordLive } from "../modules/common/liveRecordForm.js";
 import { renderExercisesList } from "../modules/exercises/exercisesView.js";
 import {
@@ -158,6 +159,7 @@ export function setupExerciseForms({
   if (btnAddExercise) {
     btnAddExercise.addEventListener("click", () => navigateToPath(urlFor("exercise.new")));
   }
+  wireLibraryTabs($id("view-exercises"), navigateToPath, urlFor);
 
   // ✕ keeps what was typed, like Save; only Cancel undoes it (liveRecordForm.js).
   if (closeBtn) closeBtn.addEventListener("click", () => closeModal("dialog-exercise"));

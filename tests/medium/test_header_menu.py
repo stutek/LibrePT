@@ -1,8 +1,10 @@
 # tests/medium/test_header_menu.py
-# End-to-end coverage of the application (hamburger / ☰) header menu (TODO 10.1): the dropdown
-# toggles and closes on an outside click, its items are translated, GitHub is a real new-tab
-# link, Export opens the Sync & Backup modal, About/Terms open their modals, and Connect cloud
-# storage opens the Drive sync card. Mounted via tests/medium/_harness.py's HEADER_STUB.
+# The application (hamburger / ☰) header menu: five places — training sessions, the client
+# directory, exercises and routines, data management, settings — plus Leave the sandbox inside the
+# sandbox only. The dropdown toggles and closes on an outside click, its items are translated, Data
+# management opens the Sync & Backup dialog, and Settings holds the language and theme, the help and
+# legal rows (GitHub a real new-tab link) and the About/Terms dialogs.
+# Mounted via tests/medium/_harness.py's HEADER_STUB.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
 import pytest
@@ -28,6 +30,12 @@ def _open_menu(page):
     page.wait_for_selector("#app-menu:not(.hidden)")
 
 
+def _open_settings(page):
+    _open_menu(page)
+    page.locator("#menu-settings").click()
+    page.wait_for_selector("#dialog-settings[open]")
+
+
 def test_menu_toggles_and_closes_on_outside_click(page, local_server):
     load_with_stub(page, local_server, HEADER_STUB)
     page.wait_for_selector("#app-header")
@@ -46,14 +54,33 @@ def test_menu_toggles_and_closes_on_outside_click(page, local_server):
     assert page.locator("#btn-app-menu").get_attribute("aria-expanded") == "false"
 
 
-def test_menu_items_present_and_github_link(page, local_server):
+def test_the_menu_holds_five_places(page, local_server):
     load_with_stub(page, local_server, HEADER_STUB)
     page.wait_for_selector("#app-header")
     _open_menu(page)
 
     for item_id, text in [
-        ("#menu-connect-cloud", "Connect cloud storage"),
-        ("#menu-export-data", "Export data as a file"),
+        ("#menu-sessions", "Training sessions"),
+        ("#menu-clients-register", "Clients Directory"),
+        ("#menu-library", "Exercises and routines"),
+        ("#menu-data", "Data management"),
+        ("#menu-settings", "Settings"),
+    ]:
+        el = page.locator(item_id)
+        assert el.is_visible()
+        assert text in el.inner_text()
+    visible_rows = page.locator("#app-menu .session-menu-item:visible")
+    assert visible_rows.count() == 5
+    # Outside the sandbox there is nothing to leave.
+    assert page.locator("#menu-sandbox-leave").is_hidden()
+
+
+def test_settings_holds_help_and_legal_and_github_link(page, local_server):
+    load_with_stub(page, local_server, HEADER_STUB)
+    page.wait_for_selector("#app-header")
+    _open_settings(page)
+
+    for item_id, text in [
         ("#menu-github", "GitHub project"),
         ("#menu-about", "About"),
         ("#menu-terms", "Terms & disclaimer"),
@@ -65,12 +92,12 @@ def test_menu_items_present_and_github_link(page, local_server):
 
     github = page.locator("#menu-github")
     # Compared against the app's own declaration rather than a second copy of the URL: what this
-    # asserts is that the menu points at the tracker publicUrls.js names, not that the tracker is
-    # any particular address (TODO §28.1).
+    # asserts is that the link points at the tracker publicUrls.js names, not that the tracker is
+    # any particular address.
     assert github.get_attribute("href") == _issue_tracker_url(page)
     assert github.get_attribute("target") == "_blank"
 
-    # The privacy policy is a SHIPPED page now, not a GitHub link — which is what makes it readable
+    # The privacy policy is a SHIPPED page, not a GitHub link — which is what makes it readable
     # offline and what OAuth verification requires (a policy on a domain we own). The distinction
     # from #menu-github above is the point: the repo link goes off-site on purpose, this one must not.
     privacy = page.locator("#menu-privacy")
@@ -79,13 +106,17 @@ def test_menu_items_present_and_github_link(page, local_server):
     assert privacy.get_attribute("target") == "_blank"
 
 
-def test_export_item_opens_backup_modal(page, local_server):
+def test_data_management_opens_the_backup_dialog(page, local_server):
+    """One row for the cloud, export, import and an encrypted file. Before, two rows (Connect cloud
+    storage, Export data as a file) opened this same dialog."""
     load_with_stub(page, local_server, HEADER_STUB)
     page.wait_for_selector("#app-header")
     _open_menu(page)
 
-    page.locator("#menu-export-data").click()
+    page.locator("#menu-data").click()
     assert page.locator("#dialog-backup").get_attribute("open") is not None
+    assert page.locator("#drive-sync-card").is_visible()
+    assert page.locator("#btn-backup-open-encrypted").is_visible()
     # The menu closed behind the modal.
     assert "hidden" in (page.locator("#app-menu").get_attribute("class") or "")
 
@@ -93,7 +124,7 @@ def test_export_item_opens_backup_modal(page, local_server):
 def test_about_modal_opens_and_closes(page, local_server):
     load_with_stub(page, local_server, HEADER_STUB)
     page.wait_for_selector("#app-header")
-    _open_menu(page)
+    _open_settings(page)
 
     page.locator("#menu-about").click()
     about = page.locator("#dialog-about")
@@ -109,7 +140,7 @@ def test_about_modal_opens_and_closes(page, local_server):
 def test_terms_modal_opens_and_agree_closes_it(page, local_server):
     load_with_stub(page, local_server, HEADER_STUB)
     page.wait_for_selector("#app-header")
-    _open_menu(page)
+    _open_settings(page)
 
     page.locator("#menu-terms").click()
     terms = page.locator("#dialog-terms")
@@ -120,34 +151,22 @@ def test_terms_modal_opens_and_agree_closes_it(page, local_server):
     assert terms.get_attribute("open") is None
 
 
-def test_connect_cloud_opens_the_drive_sync_card(page, local_server):
-    # menu-connect-cloud opens the Sync & Backup dialog on its Google Drive card (driveSyncUi.js).
-    # What that card shows is test_drive_sync_ui.py's concern; this pins only the routing.
-    load_with_stub(page, local_server, HEADER_STUB)
-    page.wait_for_selector("#app-header")
-    _open_menu(page)
-
-    page.locator("#menu-connect-cloud").click()
-    assert page.locator("#dialog-backup").get_attribute("open") is not None
-    assert page.locator("#drive-sync-card").is_visible()
-
-
-def test_menu_labels_translate_to_slovenian(page, local_server):
+def test_menu_and_settings_translate_to_slovenian(page, local_server):
     load_with_stub(page, local_server, HEADER_STUB)
     page.wait_for_selector("#app-header")
 
-    # The language switcher lives inside the ☰ menu, so open it first, then switch.
-    _open_menu(page)
+    # The language switcher lives in Settings.
+    _open_settings(page)
     page.locator("#lang-switcher").select_option("sl")
 
-    assert "Poveži shrambo" in page.locator("#menu-connect-cloud").inner_text()
     assert "O aplikaciji" in page.locator("#menu-about").inner_text()
-    # A navigation item, not just the dialog entries — inherited from the deleted
-    # tests/e2e/test_clipboard.py, whose every other assertion test_gym_floor_flow.py already made.
-    assert page.locator("#menu-routines").inner_text().strip() == "Rutine"
-    # The relocated control labels translate too.
     assert page.locator("#menu-label-lang").inner_text().strip() == "Jezik"
     assert page.locator("#menu-label-theme").inner_text().strip() == "Tema"
+    page.locator("#dialog-settings .modal-close-btn").click()
+
+    _open_menu(page)
+    assert page.locator("#menu-library").inner_text().strip() == "Vaje in rutine"
+    assert page.locator("#menu-data").inner_text().strip() == "Upravljanje podatkov"
 
 
 def test_every_menu_item_is_reachable_on_a_phone(page, local_server):

@@ -48,6 +48,15 @@ export function renderClientDirectoryViewShell() {
           <i class="fa-solid fa-user-plus"></i> <span data-i18n="btn_add_client">Add Client</span>
         </button>
       </div>
+      <!-- The other end of Invite a client: the person filled their details in on their own phone and
+           sent them back. Its own row, under the title, because a third button does not fit beside
+           the two above on a phone. It opens the review, where the trainer reads one record before
+           it enters the register (modules/clients/signupReviewDialog.js). -->
+      <div class="view-subactions">
+        <button id="btn-review-signup" class="btn secondary-btn btn-sm">
+          <i class="fa-solid fa-user-check"></i> <span data-i18n="btn_review_signup">Add a client from their own details</span>
+        </button>
+      </div>
 
       <div class="search-bar-container">
         <i class="fa-solid fa-magnifying-glass search-icon"></i>

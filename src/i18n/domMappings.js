@@ -59,14 +59,6 @@ export function applyStaticDOMMappings(tDict) {
     "#menu-label-lang": "menu_language",
     "#menu-label-theme": "menu_theme",
     "#menu-clients-register": "menu_clients_register",
-    // Targets the text span, not the button: the button also carries a count badge sibling that
-    // the icon-preserving replacement below would otherwise wipe out along with the icon+text.
-    "#menu-adjustments-text": "menu_adjustments",
-    "#menu-routines": "tab_routines",
-    "#menu-exercises": "tab_exercises",
-    "#menu-history": "tab_history",
-    "#menu-connect-cloud": "menu_connect_cloud",
-    "#menu-export-data": "menu_export_data",
     "#menu-github": "menu_github",
     "#menu-bug-report": "menu_bug_report",
     "#menu-about": "menu_about",
