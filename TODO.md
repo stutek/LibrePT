@@ -6531,3 +6531,16 @@ ta seznam sme uvrstiti šele, ko gradnja, ki ga je nehala pisati, teče v objavl
 dolgo, da je predpomnjena starejša gradnja s telefonov izginila — pri aplikaciji, ki se namesti,
 to ni dan ali dva. `hasVoiceNote` je prvi kandidat in dober preizkus tega postopka, ker ga danes
 ne bere nič razen pravila o golem dotiku.
+
+## 88. [~] Dan trenerja: vrzeli, ki jih pokaže izpeljan delovni dan
+
+Odprto 2026-09-27. Način 2 raziskovalnega preizkusa (veščina `exploratory-test`): podagent brez
+konteksta si kot osebni trener zamisli svoj delovni dan — treninge, stranke in vaje, pa tudi podporne
+naloge, pakete, plačila, sporočila — in ga nato poskusi izpeljati z LibrePT na `main`. Dnevi in
+poročila so v `.private/exploratory-test/days/`, seznam odigranih dni v
+`.private/exploratory-test/scenarios.md`.
+
+**Razmerje do §86:** §86 je namizna ocena iz kode in predpostavk. Tukaj je vsaka vrzel izpričana z
+enim konkretnim dnem. Vrzel, ki jo §86 že ima, dobi tam vrstico dokaza, ne novega razdelka; tukaj je
+samo, česar ni nikjer drugje, in presoja, ali se avtomatizacija izplača.
+
