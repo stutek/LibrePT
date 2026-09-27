@@ -6287,6 +6287,25 @@ kar ob vedno vidnem gumbu postane še bolj vidno neskladje.
 da je ta ob odprtju znotraj zaslona. To je ista vrsta meritve kot §80.25 (velikost tarč) in sodi v
 isti preizkus geometrije.
 
+### 80.56 [ ] P2 — Iskanje strank ne najde vidnega vzdevka
+
+**Scenarij in koraki:** trener vodi dve stranki z enakim imenom »TEST Luka Kovač«.
+Prvi v obrazcu doda vzdevek »jutranji«, drugi »večerni«, različna izmišljena e-naslova
+in različna cilja. Obe shrani. V imeniku poišče »Luka«, nato »jutranji« in »večerni«.
+
+**Opaženo:** »Luka« pokaže obe kartici z ustreznima vzdevkoma in ciljema. Vsak vzdevek
+zase pokaže »Strank ni mogoče najti. Klikni \"Dodaj stranko\", da jo ustvariš.«
+Po izbrisu iskalnega niza sta obe stranki spet vidni. Prestreznik napak ni zabeležil napak.
+Preizkus: objavljena različica `0625bd6`, Chrome CDP, 390 × 844, slovenščina.
+
+**Težava in vpliv:** trener ne more poiskati stranke po razlikovalnem podatku, ki ga je
+vnesel prav zaradi podvojenega imena. Sporočilo ga pri tem usmerja v ustvarjanje nove stranke.
+
+**Predlog in preverjanje:** iskanje naj upošteva tudi vzdevek. Pri nič zadetkih naj ponudi
+brisanje filtra. Ponoviti opisani scenarij: vsak vzdevek mora vrniti samo ustrezno stranko.
+Po izrecnem navodilu uporabnika gre za ugotovitev iz vmesnika; kode in stanja na `main`
+v tem nadaljevanju ne preverjamo.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
