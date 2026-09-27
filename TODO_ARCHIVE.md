@@ -4861,3 +4861,217 @@ da opis uvoza ne vsebuje besede za združevanje. Opaženo na objavljeni različi
 na `main` je isti.
 
 **Fixed 2026-09-27 (Claude Opus 5.5), commit `5d9c541`.** The import text says it replaces everything; success and re-erased messages are translated.
+
+### 80.7 [x] P2 — Prvi prikaz novega termina pokaže 1970-01-01 — popravljeno 2026-09-27
+
+**Scenarij:** na začetnem zaslonu »Ustvari trening«, ime »Individualna vadba«, kraj
+»Telovadnica Center«, privzeti današnji datum 2026-09-27, 10:00–10:45, dodati Ano in
+izbrati »Odpri v beležki«. Vabil ne pošiljati.
+
+**Opaženo:** glava nove beležke kaže »1970-01-01 · 10:00 - 10:45 · Telovadnica
+Center«. Polje odprtega obrazca še vsebuje 2026-09-27. Po zaprtju vabil in beležke je
+termin pravilno v današnjem urniku; ob poznejšem odprtju glava kaže »Danes«.
+
+**Vpliv in predlog:** ob prvem prikazu trener ne more zaupati datumu prav pred
+pošiljanjem vabil. Uskladiti prvi izris glave z datumom shranjenega termina in
+preveriti pred ponovnim odpiranjem. Napačna rezervacija ali vsebina vabila nista
+dokazani. Objavljena različica `0625bd6`, razvoj ni pregledan.
+
+**Ponovljeno 2026-09-27 (Claude) in vzrok najden:** ista pot, s stranko »Ana Kovač« in
+praznim načrtom, glava »1970-01-01 · 10:00 - 11:00 · Telovadnica Center«. V tistem trenutku
+so vsa tri polja, iz katerih glava bere dan, prazna — izmerjeno v brskalniku: `startTime`
+odprtega treninga, `sourceSession.startDate` in `sourceSession.day` so `null`. V
+[sessionTitleBar.js](src/modules/session/sessionTitleBar.js) `whenAndWhere` naredi
+`new Date(null)`, kar je 1. januar 1970, in ga izpiše kot dan, ker `day` ni nastavljen.
+Datoteka se od objavljene gradnje ni vsebinsko spremenila (razlika sta samo komentarja), torej
+**napaka stoji tudi na `main`**. Popravek ni nov izračun datuma, ampak da glava ne izriše
+dneva, ki ga ni: ko so vsa tri polja prazna, prevzame datum iz shranjenega termina, sicer pa
+dneva ne pokaže. Preizkus naj tik po shranitvi prebere glavo in zahteva današnji datum.
+
+**Fixed 2026-09-27 (Claude Opus 5.5), commit `e83891b`.** `buildRealSessionMeta` (src/domain/sessionRecord.js) carries `day`, `startDate` and `endDate`, as a dashboard launch does; the header reads today's day right after the save.
+
+### 80.8 [x] P1 — Prosta opomba brez izbrane ocene postane priporočilo za večjo težo — popravljeno 2026-09-27
+
+**Scenarij:** na vaji izbrati »Opombe«, vnesti samo prosto besedilo in potrditi
+»Zapiši opozorilo«, brez namernega izbora ocene. Primer: »plank 30 s, 25 s, 20 s;
+tretjo serijo zaključila pred ciljem«. Enako pri počepu z zmanjšano zadnjo obremenitvijo.
+
+**Opaženo:** ob ponovnem odprtju načrta se obe opombi začneta z »Too Easy - Increase
+Load«. Tudi nevtralna opomba o veslanju po načrtu dobi isto oznako. Ročno dodani ločeni
+signal »Pretežko« pri počepu ostane, zato isti program kaže nasprotujoči si oceni.
+
+**Vpliv in predlog:** pri pripravi naslednje vadbe trener vidi predlog za večjo težo,
+ki ga ni podal. Prosta opomba mora ostati nevtralna; oceno izbrati izrecno ali zahtevati
+odločitev pred shranjevanjem. Preveriti zapis opombe brez izbire in po ponovnem odprtju.
+Objavljena različica `0625bd6`; ne gre za zdravstveni nasvet ali diagnozo.
+
+**Fixed 2026-09-27 (Claude Opus 5.5), commit `9537542`.** The feedback dialog starts on a neutral sixth choice, »Samo opomba, brez ocene« (stored as `Note`); a rating is chosen on purpose.
+
+### 80.12 [x] P2 — Zamujen trening na plošči pokaže samo številko, besede »Zamuja« ni nikoli — popravljeno 2026-09-27
+
+**Scenarij in koraki:** trener ob 09:45 pogleda ploščo treningov v peskovniku. Na njej stoji
+trening »Skupinska moč in kondicija«, 08:00–10:00, ki se še ni začel.
+
+**Opaženo:** kartica kaže samo »01h 43m« na oranžni podlagi, brez ene same besede. Ne pove,
+ali je to pretekli čas, preostali čas ali zamuda. Obe oznaki sta v HTML — »Se začne čez« in
+»Zamuja« — a obe imata `display: none`, izmerjeno v brskalniku.
+
+**Težava in vpliv:** trener na plošči ne vidi, da trening zamuja; vidi številko, ki je enaka
+tisti pri treningih, ki se šele začnejo. Beseda »Zamuja« (`overdue` v [sl.js](src/i18n/sl.js))
+se ne pokaže nikoli, v nobenem jeziku. To zadeva vsako kartico, ki ji je napovedani začetek
+že ušel.
+
+**Vzrok, potrjen v kodi na `main`:** v [sessionsView.css](src/modules/sessionList/sessionsView.css)
+sta obe pravili v enem seznamu selektorjev:
+`.session-live-bar.upcoming .when-overdue, .session-live-bar.upcoming.overtime .when-upcoming { display: none }`.
+Vrstica z zamudo nosi oba razreda, `upcoming` in `overtime`, zato jo zadene tudi prvi
+selektor — skrita sta oba napisa. Prvi selektor mora zamudo izvzeti
+(`.upcoming:not(.overtime) .when-overdue`).
+
+**Enako pri treningu, ki je zdavnaj mimo:** trening, vpisan za 2026-09-20 in nikoli začet, se
+na plošči glasi »167h 52m« — brez besede. Razred je isti (`upcoming overtime`), zato trener
+številko lahko bere le kot »čez 167 ur«, čeprav pomeni »zamuja teden dni«.
+
+**Ista tišina na drugem koncu treninga:** ko trening teče čez napovedani konec, vrstica nad dnom
+zaslona pokaže »-00:51« in šteje naprej v minus. Minus je edini znak, da je ura potekla; besede
+za to ni. To je zavestna izbira v [sessionBar.js](src/modules/session/sessionBar.js) (odštevanje
+do konca, s predznakom), vendar pade v isto vrzel: aplikacija pove s številko, kar bi morala
+povedati z besedo.
+
+**Predlog in preverjanje:** popraviti selektor in pripeti besedo v test plošče: kartica pred
+začetkom kaže »Se začne čez«, kartica po zapadlem začetku »Zamuja«, vrstica v podaljšku pa
+besedo za podaljšek ob času. Danes tega ne preverja
+noben test — iskanje po `tests/` ne najde ne razreda `when-overdue` ne besede »Zamuja«.
+Opaženo na objavljeni različici `0625bd6`; pravilo na `main` je nespremenjeno.
+
+**Fixed 2026-09-27 (Claude Opus 5.5), commit `59bd6c8`.** The selector is `.upcoming:not(.overtime) .when-overdue`; past the planned end the bar reads »Čez konec 00:51«.
+
+### 80.16 [x] P2 — Po izhodu iz peskovnika ostane vzorčni trening v vrstici nad dnom zaslona — popravljeno 2026-09-27
+
+**Scenarij in koraki:** trener ima svojo aplikacijo še prazno. Prek menija ☰ izbere »Vstopi v
+peskovnik«, pritisne kartico »Skupinska moč in kondicija« (08:00–10:00, trening že teče), nato
+spet odpre ☰ in izbere »Zapusti peskovnik«.
+
+**Opaženo:** plošča je prazna, oznaka v glavi se vrne na predogled, spodaj pa še naprej stoji
+vrstica »Skupinska moč in kondicija + Vrnitev po poškodbi · 3 strank · 08:00 - 10:00« s
+tekočo uro. To je vzorčni trening s tremi vzorčnimi strankami, prikazan v trenerjevih lastnih
+podatkih. Pritisk nanjo ne odpre tega treninga. Po osvežitvi strani vrstica izgine; v
+`localStorage` sta ključa samo pod končnico `__sandbox`, torej se v trenerjeve podatke ni
+zapisalo nič. Ponovljeno dvakrat.
+
+**Težava in vpliv:** peskovnik obljubi, da nič iz njega ne doseže poslovnih podatkov, tu pa
+trener v svojem prostoru vidi trening, ki ga nima, z imeni ljudi, ki jih ne pozna. Ne izgubi
+podatkov, izgubi pa zaupanje v ločnico — in dokler ne osveži strani, mu vrstica jemlje prostor
+na dnu zaslona.
+
+**Predlog in preverjanje:** ob preklopu delovnega prostora poleg počiščene spomina počistiti
+tudi izris te vrstice. [app.js](src/app.js), `returnToLastView`, že pokliče
+`setActiveSession(null)` in `recoverActiveSession()` — komentar ob njiju opisuje isto napako v
+nasprotni smeri (vstop v peskovnik) — vrstica pa se očitno ne izriše znova. Popravek naj pokrije
+obe smeri, preizkus pa naj po izhodu iz peskovnika zahteva, da vrstice ni. Opaženo na objavljeni
+različici `0625bd6`; `89770cd`, ki je to pot uvedel, je v tej gradnji že vključen, zato
+verjetno velja tudi na `main` — preveriti na razvojnem strežniku pred popravkom.
+
+**Fixed 2026-09-27 (Claude Opus 5.5), commit `62bc100`.** `returnToLastView` in src/app.js draws the bar again after the workspace's session replaces the one in memory.
+
+### 80.27 [x] P2 — Svinčnik pri čakajočem signalu ne naredi nič, če vaja ni iz programa — popravljeno 2026-09-27
+
+**Scenarij in koraki:** trener izvede trening, sestavljen s »Poljuben / Prazen načrt«, z vajo,
+dodano iz kataloga. Med vadbo pritisne »Prelahko«. Po zaključku odpre »Čakajoče na pregled« in
+pri vrstici pritisne svinčnik (»Uredi načrt«).
+
+**Opaženo:** nič. Naslov strani se ne spremeni, okno se ne odpre, sporočila ni, v dnevniku
+brskalnika ni napake. Gumb je viden in ni onemogočen. Preizkušeno z dotikom in s programskim
+klikom, oba brez učinka. Drugi gumb v isti vrstici (kljukica, »Razreši«) deluje.
+
+**Vzrok, potrjen v kodi na `main`:** [planAdjustments.js](src/modules/plans/planAdjustments.js)
+ob pritisku poišče vajo v knjižnici in nato program, ki to vajo vsebuje, ter se premakne
+**samo, če program obstaja** (`if (routine)`). Trening iz praznega načrta ne pripada nobenemu
+programu, zato pogoj ne drži in funkcija se tiho konča.
+
+**Težava in vpliv:** prav trening, sestavljen sproti na telovadnici, je tisti, pri katerem
+signal največ pomeni. Trener pritisne edini gumb, ki obljublja popravek programa, in ne dobi
+ničesar — niti pojasnila, da programa za popravek ni.
+
+**Predlog in preverjanje:** ko programa ni, gumba ne kazati, ali pa ga peljati do zapisa vaje
+oziroma do načrta tistega treninga in to povedati z besedo. Preizkus naj signal ustvari v
+treningu brez programa in zahteva, da pritisk na ta gumb pripelje nekam. Opaženo na objavljeni
+različici `0625bd6`; koda na `main` je ista.
+
+**Fixed 2026-09-27 (Claude Opus 5.5), commit `d2c012f`.** The pencil is shown only when a routine holds the exercise.
+
+### 80.28 [x] P2 — Predlagana ciljna teža je 2,5 kg za vajo, ki jo je stranka delala s 40 kg — popravljeno 2026-09-27
+
+**Scenarij in koraki:** trening brez programa, vaja »Barbell Back Squat« s 3 × 10 × 40 kg. Med
+vadbo trener pritisne »Prelahko«. Po treningu odpre »Čakajoče na pregled«, pritisne kljukico in
+v oknu »Uveljavi spremembo programa« pogleda polje »Ciljna teža (kg)«.
+
+**Opaženo:** v polju piše **2,5**. Ponovitve so 10 in serije 3, kar se ujema, teža pa ne: stranka
+je delala s 40 kg. Če trener pritisne »Uveljavi in razreši«, se kot cilj zapiše 2,5 kg.
+
+**Vzrok, potrjen v kodi na `main`:** [planAdjustments.js](src/modules/plans/planAdjustments.js),
+`prefillAdjustmentFields`: če vaja pripada programu, je predlog »trenutna teža + 2,5«; če
+programa ni, je predlog gola številka 2,5 (pri »Pretežko« pa 0). Trening iz praznega načrta
+nima programa, dejansko težo pa aplikacija ves čas pozna — zapisana je v treningu, ki je pravkar
+tekel.
+
+**Težava in vpliv:** okno predlaga breme, ki je šestnajstkrat prelahko, in to na poti, ki
+obljublja popravek programa. Trener, ki predlogu zaupa, stranki zapiše napačen cilj.
+
+**Predlog in preverjanje:** kadar programa ni, vzeti težo, ponovitve in serije iz zapisa
+treninga, iz katerega je signal prišel, in šele nanje prišteti 2,5. Če tudi tega ni, polja
+pustiti prazna in ne ponuditi številke. Preizkus naj signal ustvari pri 40 kg brez programa in
+zahteva, da predlog ni manjši od izvedene teže. Opaženo na objavljeni različici `0625bd6`; koda
+na `main` je ista.
+
+**Fixed 2026-09-27 (Claude Opus 5.5), commit `d2c012f`.** src/domain/adjustmentSuggestion.js starts from the routine's target, else from the sets recorded in the session the signal came from (found by the signal's id); with neither, the fields stay empty.
+
+### 80.29 [x] P3 — Predal obvestil še naprej trdi, da signal čaka, dokler strani ne osvežiš — popravljeno 2026-09-27
+
+**Scenarij in koraki:** trener v oknu »Uveljavi spremembo programa« pritisne »Uveljavi in
+razreši«, nato pogleda predal obvestil.
+
+**Opaženo:** stran s pregledom pravi »Nič ne čaka na pregled. Vsi signali s tal so usklajeni!«,
+predal obvestil pa v isti sapi »1 stranka(-e/-k) ima nerešene povratne signale iz treninga« in
+»Ana Kovač — Jutranja vadba (1)«. Po osvežitvi strani je predal prazen in pravilen.
+
+**Vzrok, potrjen v kodi na `main`:** obvestilo ni shranjen zapis, ampak se sestavi ob vsakem
+izrisu iz nerešenih signalov ([notificationItems.js](src/domain/notificationItems.js)). Podatek
+je torej pravilen, izris pa star: pot za uveljavitev v
+[planAdjustments.js](src/modules/plans/planAdjustments.js) osveži seznam pregleda in seznam
+programov, predala pa ne — `renderNotificationArea` se pokliče ob zagonu in ob menjavi jezika.
+
+**Težava in vpliv:** dva dela istega zaslona si nasprotujeta; trener ne ve, kateremu verjeti,
+in na telefonu strani ne osvežuje.
+
+**Predlog in preverjanje:** po uveljavitvi in po razrešitvi poklicati isti izris predala.
+Preizkus naj razreši zadnji signal in zahteva, da predal takoj pokaže »Ni obvestil«. Opaženo na
+objavljeni različici `0625bd6`; koda na `main` je ista.
+
+**Fixed 2026-09-27 (Claude Opus 5.5), commit `0abf5e4`.** `renderPendingPlanAdjustments` in src/app.js also redraws the notification drawer.
+
+### 80.31 [x] P2 — Po izbrisu stranke profil še vedno kaže ime, telefon in cilje — popravljeno 2026-09-27
+
+**Scenarij in koraki:** v profilu stranke »Ana Kovač« pritisniti »Izbriši stranko (GDPR)«,
+vpisati potrditveno besedo in pritisniti »Izbriši dokončno«.
+
+**Opaženo:** okno se zapre, pod njim pa stoji nespremenjen profil: »Ana Kovač«, »+386 40 111
+222«, cilji in zapiski. Šele po osvežitvi strani piše »Client #DBV3KK«, cilji so prazni in
+zgoraj stoji »Izbrisano 2026-09-27 na zahtevo stranke. Spodnji zapisi treningov so anonimni.«
+
+**Kaj je v redu:** izbris sam je opravljen do konca. Po osvežitvi imena in telefonske številke
+ni nikjer — ne na plošči, ne v zgodovini, ne v shrambi brskalnika (iskano po nizu v
+`localStorage`). Zapisi treningov ostanejo brez osebe, kot okno obljubi.
+
+**Težava in vpliv:** trener po nepovratnem dejanju vidi zaslon, ki pravi, da se ni nič zgodilo.
+Lahko ga ponovi ali pa sklene, da izbris ni uspel. Če je stranka ob njem — izbris se zgodi
+prav na njeno zahtevo — vidi svoje ime in telefonsko številko na zaslonu, potem ko ju je dala
+izbrisati.
+
+**Vzrok:** isti razred kot §80.29 — dejanje spremeni podatke, pogled nad njimi se ne izriše
+znova. Popravek naj po izbrisu izriše profil (ali se vrne v imenik) iz novega stanja.
+
+**Preverjanje:** preizkus naj po izbrisu, brez osvežitve, zahteva, da imena in telefonske
+številke ni več na zaslonu. Opaženo na objavljeni različici `0625bd6`.
+
+**Fixed 2026-09-27 (Claude Opus 5.5), commit `0abf5e4`.** The erasure's `onErased` re-enters the current route, so the profile behind the receipt is drawn from the erased record.
