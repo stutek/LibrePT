@@ -6373,8 +6373,16 @@ to ključ, po katerem se signal prepozna in izklopi. Napaka je, da se ta ključ 
 neposredno: [planAdjustments.js](src/modules/plans/planAdjustments.js) postavi `u.tag` v značko
 in `update.tag` v besedilo okna.
 
-**Predlog in preverjanje:** ključ naj v zapisu ostane, izpisuje pa naj se prek slovarja — dva
-nova ključa v `en`, `sl` in `de`. Paziti na
+**Širše, kot je videti:** okno »Zabeleži povratne informacije«, ki se odpre z gumbom »Opombe«
+na kartici vaje, ponuja pet oznak in vse so angleške: »🚀 Too Easy - Increase Load«,
+»⚠️ Too Hard - Reduce Load«, »🔬 Form Break - Focus Required«, »🔥 Joint Pain / Discomfort«,
+»💪 Good Progression«. Vpisane so dobesedno v
+[feedbackModal.js](src/modules/common/feedbackModal.js), brez prevajalnega ključa. Pri tretji
+se napis in shranjena vrednost celo razlikujeta: trener pritisne »Form Break - Focus
+Required«, shrani pa se »Form Break - Watch Position«, in prav to pozneje prebere v pregledu.
+
+**Predlog in preverjanje:** ključ naj v zapisu ostane, izpisuje pa naj se prek slovarja — pet
+novih ključev v `en`, `sl` in `de`, in napis naj se ujema s shranjeno vrednostjo. Paziti na
 [historyView.js](src/modules/history/historyView.js), ki iz iste oznake bere `Too Hard` in
 `Reduce Load`, da ugane barvo; tudi to naj bere ključ, ne besedila. Preizkus naj v slovenskem
 vmesniku pritisne »Prelahko« in zahteva, da v pregledu ni angleškega niza. Opaženo na objavljeni
@@ -6536,6 +6544,22 @@ obdelavo izpiše »voice_processing«, kar je videti kot napaka programa.
 naj ta primerjava postane preizkus: vsak `t("ključ")` v `src/` mora obstajati v `en.js`. To je
 ista vrsta preverbe, kot jo že dela [ui_strings.py](agent_tools/ui_strings.py), in sodi zraven.
 Opaženo na objavljeni različici `0625bd6`; koda na `main` je ista.
+
+### 80.34 [ ] P3 — »Glasovna opomba (zasebnost-prva)« je izmišljen izraz
+
+**Scenarij in koraki:** trener na kartici vaje pritisne »Opombe«; v oknu je razdelek za glasovno
+opombo.
+
+**Opaženo:** naslov razdelka se glasi »Glasovna opomba (zasebnost-prva)«. »Zasebnost-prva« ni
+slovenska besedna zveza; nastala je s prevodom angleškega »privacy-first«. Pod njo že piše
+»Samo na napravi«, kar isto stvar pove razumljivo.
+
+**Težava in vpliv:** bralec obstane pri besedi, ki je ne pozna, na mestu, kjer gre za zaupanje —
+kam gre posnetek njegove stranke.
+
+**Predlog in preverjanje:** oklepaj izpustiti; naslov naj bo »Glasovna opomba«, pojasnilo pa
+ostane »Samo na napravi«. `voice_note_label` v [sl.js](src/i18n/sl.js); preveriti tudi nemško
+ustreznico. Opaženo na objavljeni različici `0625bd6`.
 
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
