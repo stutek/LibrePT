@@ -6042,7 +6042,7 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8023-x-p2--praz
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8024-x-p3--vabilo-stranki-govori-o-stranki-kot-o-moškem-njena-lastna-stran-pa-kot-o-ženski--popravljeno-2026-09-27).
 
-#### 80.24.1 [ ] P3 — Pet slovenskih besedil še piše končnico v oklepaju, »(-a)«
+### 80.24.1 [ ] P3 — Pet slovenskih besedil še piše končnico v oklepaju, »(-a)«
 
 Najdeno 2026-09-27 ob popravku izvoza (§80.42), ne v raziskovalnem preizkusu. Oblika »ostal(-a)« se
 bere kot obrazec za izpolnjevanje, ne kot stavek. Ključi v [sl.js](src/i18n/sl.js):
