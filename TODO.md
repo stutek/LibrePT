@@ -6561,6 +6561,40 @@ kam gre posnetek njegove stranke.
 ostane »Samo na napravi«. `voice_note_label` v [sl.js](src/i18n/sl.js); preveriti tudi nemško
 ustreznico. Opaženo na objavljeni različici `0625bd6`.
 
+### 80.35 [ ] P1 — Glasovna opomba si izmisli stavek o stranki in ga zapiše v njeno kartoteko
+
+**Scenarij in koraki:** trener med treningom na kartici vaje pritisne »Opombe«, nato mikrofon,
+počaka in pritisne mikrofon še enkrat. Nazadnje pritisne »Zapiši opozorilo«.
+
+**Opaženo:** po drugem pritisku piše »Prepis v napravi je zaključen!«, v polje za opombo pa se
+zapiše stavek, ki ga ni nihče izrekel: »Glasovna opomba (lokalno): Maja Horvat poroča o dobrem
+počutju pri vaji Barbell Bench Press.« Po pritisku na »Zapiši opozorilo« je ta stavek v
+shrambi brskalnika, torej v kartoteki stranke.
+
+**Mikrofona pri tem sploh ni:** preizkus je tekel v brskalniku, kjer `getUserMedia` zavrne
+dovoljenje, aplikacija pa je vseeno pokazala »Snemanje…« in nato »Prepis v napravi je
+zaključen!«. V kodi ni ne `getUserMedia` ne `MediaRecorder`:
+[feedbackModal.js](src/modules/common/feedbackModal.js) ob prvem pritisku zamenja ikono, ob
+drugem po zakasnitvi sestavi stavek iz imena stranke in imena vaje, posebej za `sl`, `de` in
+`en`. Uvodna opomba datoteke to imenuje »mock«.
+
+**Težava in vpliv:** aplikacija izmisli zapis o imenovani osebi in ga predstavi kot prepis
+njenih besed, v kartoteki, ki je podlaga za odločitve o treningu — in za katero stranka podpiše
+privolitev. Trener, ki opombo pozneje bere, nima kako vedeti, da je ni nihče izrekel. To ni
+nedokončana funkcija, ampak neresničen zapis o človeku. Da posnetka ni, ni nikjer povedano;
+napis trdi nasprotno.
+
+**Predlog:** dokler snemanja ni, mora ta pot izginiti iz delovne aplikacije. Najmanj: gumb za
+mikrofon ponuditi samo v peskovniku, in tudi tam napisati, da gre za prikaz. Nikoli ne vpisati
+izmišljenega besedila v polje, ki se shrani. Če ostane prikaz, naj vstavi besedilo, ki se samo
+razglasi za primer (»primer prepisa — posnetka ni«).
+
+**Preverjanje:** preizkus naj v delovnem prostoru odpre okno z opombami in zahteva, da gumba za
+snemanje ni; v peskovniku pa, da vstavljeno besedilo vsebuje oznako, da je primer. Opaženo na
+objavljeni različici `0625bd6`; koda na `main` je ista. Sorodno: §80.8 (prosta opomba brez
+ocene postane priporočilo) in zapis v [TODO_ARCHIVE.md](TODO_ARCHIVE.md) o imenu »voice_memo.wav«,
+ki mock omenja, ne pa tega, da si izmisli vsebino.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
