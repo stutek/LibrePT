@@ -63,7 +63,9 @@ def view_stub(imports, view_id, body):
 {imports}
 import {{ TRANSLATIONS }} from './i18n/index.js';
 
-const t = (key) => TRANSLATIONS.en[key] || key;
+// English unless a test names another language before the page loads (`stub_language`).
+const t = (key) =>
+  TRANSLATIONS[globalThis.stubLanguage || 'en']?.[key] || TRANSLATIONS.en[key] || key;
 const noop = () => {{}};
 
 // switchView() also clears nav highlighting and resolves a main tab; a single mounted view has

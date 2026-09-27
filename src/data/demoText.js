@@ -147,9 +147,6 @@ export const DEMO_TEXT = {
     "Strong hinge focus": "Poudarek na kolčnem upogibu",
     "To failure": "Do odpovedi",
 
-    // ── Plan adjustments the demo already carries (data/planUpdates.js) ───────────────────────
-    "Too Easy - Increase Load": "Prelahko – povečaj težo",
-    "Form Break - Depth Alert": "Tehnika popušča – pozor na globino",
     // ── What each exercise asks for, the column read during a set (data/routines.js) ─────────
     "10 per arm": "10 na roko",
     "10 reps": "10 ponovitev",
@@ -288,9 +285,6 @@ export const DEMO_TEXT = {
     "Strong hinge focus": "Schwerpunkt auf der Hüftbeugung",
     "To failure": "Bis zum Muskelversagen",
 
-    // ── Plan adjustments the demo already carries (data/planUpdates.js) ───────────────────────
-    "Too Easy - Increase Load": "Zu leicht – Last erhöhen",
-    "Form Break - Depth Alert": "Technik lässt nach – auf die Tiefe achten",
     // ── What each exercise asks for, the column read during a set (data/routines.js) ─────────
     "10 per arm": "10 pro Arm",
     "10 reps": "10 Wdh.",

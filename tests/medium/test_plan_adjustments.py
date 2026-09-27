@@ -99,8 +99,14 @@ def test_apply_adjustment_wizard_opens_prefilled(page, local_server):
     dlg = page.locator("#dialog-apply-adjustment")
     assert dlg.get_attribute("open") is not None
     assert page.locator("#adjust-client-name").inner_text().strip() == "Jane Doe"
-    # "Too Easy - Increase Load" splits into the tag head and the detail.
-    assert page.locator("#adjust-feedback-tag").inner_text().strip() == "Too Easy"
+    # The stored key is shown in words from the dictionary; with no note typed, the details say so.
+    assert (
+        page.locator("#adjust-feedback-tag").inner_text().strip()
+        == "Too easy – increase the load"
+    )
+    assert (
+        page.locator("#adjust-details").inner_text().strip() == "No details specified."
+    )
 
     # The modify panel is the default; swap is hidden.
     assert "hidden" not in (
@@ -127,3 +133,16 @@ def test_apply_adjustment_resolves_and_drops_the_count(page, local_server):
     # The resolved item leaves the deck and the badge decrements.
     assert page.locator("#badge-adjustments-count").inner_text().strip() == "2"
     assert _cards(page).count() == 2
+
+
+def test_a_slovenian_trainer_reads_the_tag_in_slovenian(page, local_server):
+    """The review list printed the stored English key: a trainer who pressed »Prelahko« read
+    »Too Easy - Increase Load«. The key stays in the record; only its words are shown."""
+    page.add_init_script("globalThis.stubLanguage = 'sl'")
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#view-adjustments.active")
+
+    badges = page.locator(".adjustment-tag-badge").all_inner_texts()
+    assert badges[0] == "Prelahko – povečaj težo"
+    assert badges[1] == "Tehnika popušča – pazi na položaj"
+    assert not [text for text in badges if "Too Easy" in text or "Form Break" in text]

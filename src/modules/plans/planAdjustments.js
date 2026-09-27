@@ -2,6 +2,7 @@
 // Logic for displaying the pending plan adjustments widget on the dashboard,
 // as well as launching and submitting the interactive Apply Plan Adjustment Dialog wizard.
 import { libraryExercises } from "../../data/exerciseLibrary.js";
+import { feedbackTagText, readFeedbackTag } from "../../domain/feedbackTags.js";
 import { renderMarkupOnce } from "../common/dom.js";
 import { mountExercisePicker, pickerLabels } from "../exercises/exercisePicker.js";
 
@@ -30,11 +31,15 @@ export function renderAdjustmentsViewShell() {
   );
 }
 
+const BADGE_CLASS = {
+  joint_pain: "badge-danger",
+  too_hard: "badge-warning",
+  too_easy: "badge-success",
+  progression: "badge-success",
+};
+
 function resolveAdjustmentBadgeClass(tag) {
-  if (tag.includes("Pain") || tag.includes("Discomfort")) return "badge-danger";
-  if (tag.includes("Hard")) return "badge-warning";
-  if (tag.includes("Easy") || tag.includes("Progression")) return "badge-success";
-  return "badge-primary";
+  return BADGE_CLASS[readFeedbackTag(tag).known?.id] || "badge-primary";
 }
 
 function buildVoiceNoteHTML(u) {
@@ -82,7 +87,7 @@ function buildAdjustmentCard(u, ctx) {
   info.innerHTML = `
       <div class="adjustment-card-row">
         <strong class="adjustment-client-name">${escapeHTML(u.clientName)}</strong>
-        <span class="badge ${badgeClass} adjustment-tag-badge">${escapeHTML(u.tag)}</span>
+        <span class="badge ${badgeClass} adjustment-tag-badge">${escapeHTML(feedbackTagText(u.tag, t))}</span>
       </div>
       <div class="adjustment-exercise-line">
         ${t("exercise_of")}: <span class="font-semibold adjustment-exercise-name">${escapeHTML(u.exerciseName)}</span>
@@ -240,14 +245,6 @@ export function renderApplyAdjustmentDialog() {
   );
 }
 
-// A feedback tag can carry a free-text detail after " - " (e.g. "Too Hard - knee twinge on rep 4");
-// when it does, the short tag and the detail are shown separately.
-function parseAdjustmentNote(tag) {
-  if (!tag.includes(" - ")) return { label: tag, detail: tag };
-  const parts = tag.split(" - ");
-  return { label: parts[0], detail: parts.slice(1).join(" - ") };
-}
-
 function wireVoiceNotePreview(update, voiceContainer) {
   if (!update.hasVoiceNote) {
     voiceContainer.classList.add("hidden");
@@ -287,9 +284,10 @@ function prefillAdjustmentFields(exMapping, tag) {
   document.getElementById("adjust-reps").value = exMapping ? exMapping.reps : 10;
   document.getElementById("adjust-sets").value = exMapping ? exMapping.sets : 3;
 
-  if (tag.includes("Easy")) {
+  const tagId = readFeedbackTag(tag).known?.id;
+  if (tagId === "too_easy") {
     document.getElementById("adjust-weight").value = exMapping ? exMapping.weight + 2.5 : 2.5;
-  } else if (tag.includes("Hard")) {
+  } else if (tagId === "too_hard") {
     document.getElementById("adjust-weight").value = exMapping
       ? Math.max(0, exMapping.weight - 2.5)
       : 0;
@@ -331,12 +329,12 @@ export function openAdjustmentWizardComponent(updateId, ctx) {
 
   // Set text labels
   document.getElementById("adjust-client-name").textContent = update.clientName;
-  document.getElementById("adjust-feedback-tag").textContent = update.tag;
-
-  // Parse note details for display
-  const { label, detail } = parseAdjustmentNote(update.tag);
-  document.getElementById("adjust-feedback-tag").textContent = label;
-  document.getElementById("adjust-details").textContent = detail;
+  // The tag in the trainer's language, and the note they typed after it, if any.
+  const { known, note } = readFeedbackTag(update.tag);
+  document.getElementById("adjust-feedback-tag").textContent = feedbackTagText(update.tag, t);
+  document.getElementById("adjust-details").textContent = known
+    ? note || t("no_details_specified")
+    : update.tag;
 
   wireVoiceNotePreview(update, document.getElementById("adjust-voice-player-container"));
 

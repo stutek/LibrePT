@@ -11,10 +11,12 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { DEFAULT_CLIENTS } from "../../../src/data/clients.js";
-import { DEMO_TEXT, localiseDemoText } from "../../../src/data/demoText.js";
+import { DEMO_TEXT, localiseDemoRecords, localiseDemoText } from "../../../src/data/demoText.js";
+import { DEFAULT_HISTORY } from "../../../src/data/history.js";
 import { DEFAULT_PLAN_UPDATES } from "../../../src/data/planUpdates.js";
 import { DEFAULT_ROUTINES } from "../../../src/data/routines.js";
 import { DEFAULT_SESSIONS } from "../../../src/data/sessions.js";
+import { readFeedbackTag } from "../../../src/domain/feedbackTags.js";
 import { TRANSLATIONS } from "../../../src/i18n/index.js";
 
 test("a translated demo string comes back in the chosen language", () => {
@@ -66,7 +68,6 @@ for (const lang of Object.keys(TRANSLATIONS).filter((code) => code !== "en")) {
       need(client.notes);
       need(client.injury);
     }
-    for (const update of DEFAULT_PLAN_UPDATES) need(update.tag);
 
     assert.deepEqual(
       missing.filter((value) => value !== "Trib gym base"),
@@ -75,3 +76,23 @@ for (const lang of Object.keys(TRANSLATIONS).filter((code) => code !== "en")) {
     );
   });
 }
+
+// A feedback tag is a key, not words: the quick-signal toggle and the load suggestion recognise it
+// by its English string, and the screens translate it through the dictionary. A demo tag written
+// into the database in Slovenian was neither recognised nor translatable.
+test("seeded feedback tags are known keys and stay untranslated in every language", () => {
+  const tags = [
+    ...DEFAULT_PLAN_UPDATES.map((update) => update.tag),
+    ...DEFAULT_HISTORY.flatMap((log) => (log.feedback || []).map((entry) => entry.tag)),
+  ];
+  assert.ok(tags.length > 0);
+  for (const tag of tags) assert.ok(readFeedbackTag(tag).known, `not a known feedback tag: ${tag}`);
+  for (const lang of Object.keys(DEMO_TEXT)) {
+    const localised = localiseDemoRecords(DEFAULT_PLAN_UPDATES, lang).map((update) => update.tag);
+    assert.deepEqual(
+      localised,
+      DEFAULT_PLAN_UPDATES.map((update) => update.tag),
+      lang,
+    );
+  }
+});

@@ -1,7 +1,7 @@
 # tests/e2e/test_feedback_dialog_language.py
 # The feedback dialog a trainer opens from a live clipboard card (src/modules/common/feedbackModal.js)
-# speaks the language the trainer chose. The five feedback choices are stored in English
-# and shown so elsewhere, so they are not part of this promise.
+# speaks the language the trainer chose, the five feedback choices included: each is stored as an
+# English key (src/domain/feedbackTags.js) and shown in words from the dictionary.
 # Opened the way tests/e2e/test_gym_note_kept_on_record.py opens it, with `?lang=sl` in the address.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
@@ -25,6 +25,9 @@ FEEDBACK_DIALOG = {
     "label[for='feedback-custom-note']": "custom_details",
     "#dialog-feedback .modal-cancel": "btn_cancel",
     "#form-feedback button[type=submit]": "btn_log_alert",
+    "#form-feedback input[value='Too Easy - Increase Load'] + span > span": "feedback_tag_too_easy",
+    "#form-feedback input[value='Form Break - Watch Position'] + span > span": "feedback_tag_form_break",
+    "#form-feedback input[value='Completed reps easily'] + span > span": "feedback_tag_progression",
 }
 
 

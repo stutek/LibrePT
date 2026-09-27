@@ -102,6 +102,7 @@ self.swCacheManifest = (() => {
     "./domain/circuitGrouping.js",
     "./domain/demoTour.js",
     "./domain/demoStory.js",
+    "./domain/feedbackTags.js",
     "./domain/gymNotes.js",
     "./domain/sessionSeries.js",
     "./domain/contactChannel.js",

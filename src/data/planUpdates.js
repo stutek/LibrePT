@@ -15,7 +15,7 @@ export const DEFAULT_PLAN_UPDATES = [
     clientName: "John Smith",
     date: "2026-07-08T17:30:00.000Z",
     exerciseName: "Barbell Back Squat",
-    tag: "Form Break - Depth Alert",
+    tag: "Form Break - Watch Position",
     resolved: false,
   },
   {

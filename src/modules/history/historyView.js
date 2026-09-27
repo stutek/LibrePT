@@ -9,27 +9,24 @@ import {
   formatMetricValue,
   usesLoad,
 } from "../../domain/exerciseModality.js";
+import { feedbackTagText, readFeedbackTag } from "../../domain/feedbackTags.js";
 import { formatLoad, formatReps } from "../../domain/repsAndLoad.js";
 import { isRestRecord, isSkippedRecord } from "../../domain/sessionItemRecord.js";
 import { escapeHTML, formatDateStr } from "../common/utils.js";
 
+const FEEDBACK_ICON_CLASS = {
+  too_easy: "fa-solid fa-rocket text-success",
+  too_hard: "fa-solid fa-triangle-exclamation text-warning",
+  form_break: "fa-solid fa-microscope text-warning",
+  joint_pain: "fa-solid fa-fire text-danger",
+  progression: "fa-solid fa-dumbbell text-success",
+};
+
+// Read from the stored tag's key, never from its English words.
 function resolveFeedbackIconClass(tag) {
-  if (tag.includes("Too Easy") || tag.includes("Increase Load")) {
-    return "fa-solid fa-rocket text-success";
-  }
-  if (tag.includes("Too Hard") || tag.includes("Reduce Load")) {
-    return "fa-solid fa-triangle-exclamation text-warning";
-  }
-  if (tag.includes("Form Break") || tag.includes("Focus") || tag.includes("Form")) {
-    return "fa-solid fa-microscope text-warning";
-  }
-  if (tag.includes("Pain") || tag.includes("Discomfort")) {
-    return "fa-solid fa-fire text-danger";
-  }
-  if (tag.includes("easily") || tag.includes("Progression") || tag.includes("Completed reps")) {
-    return "fa-solid fa-dumbbell text-success";
-  }
-  return "fa-solid fa-comment-dots text-primary";
+  return (
+    FEEDBACK_ICON_CLASS[readFeedbackTag(tag).known?.id] || "fa-solid fa-comment-dots text-primary"
+  );
 }
 
 function buildFeedbackIconsHTML(log, ex, t) {
@@ -41,7 +38,7 @@ function buildFeedbackIconsHTML(log, ex, t) {
           <span class="history-feedback-icon">
             <i class="${resolveFeedbackIconClass(f.tag)}"></i>
             <span class="tooltip-content">
-              <div class="tooltip-title">${escapeHTML(f.tag)}</div>
+              <div class="tooltip-title">${escapeHTML(feedbackTagText(f.tag, t))}</div>
               <div class="tooltip-body">${tooltipBody}</div>
             </span>
           </span>

@@ -12,6 +12,7 @@
 //   renderPendingPlanAdjustments()
 // }
 
+import { FEEDBACK_TAGS } from "../../domain/feedbackTags.js";
 import { notesWithGymNote } from "../../domain/gymNotes.js";
 import { $id, closeModal, openModal, renderMarkupOnce } from "./dom.js";
 
@@ -66,6 +67,26 @@ export function openFeedbackModal(exId) {
   openModal("dialog-feedback", { resetForm: true, formId: "form-feedback" });
 }
 
+const CHIP_EMOJI = {
+  too_easy: "🚀",
+  too_hard: "⚠️",
+  form_break: "🔬",
+  joint_pain: "🔥",
+  progression: "💪",
+};
+
+// One chip per known tag, built from the tag list so the words shown and the value stored cannot
+// drift apart — they did: the chip read "Form Break - Focus Required" and saved "Form Break -
+// Watch Position". The words come from the dictionary when the markup is translated.
+function feedbackChipsHTML() {
+  return FEEDBACK_TAGS.map(
+    ({ id, tag, key }, index) => `          <label class="feedback-chip-option">
+            <input type="radio" name="feedback-tag" value="${tag}"${index === 0 ? " checked" : ""}>
+            <span>${CHIP_EMOJI[id]} <span data-i18n="${key}"></span></span>
+          </label>`,
+  ).join("\n");
+}
+
 export function renderFeedbackDialog() {
   renderMarkupOnce(
     "dialogs-root",
@@ -81,31 +102,11 @@ export function renderFeedbackDialog() {
       <input type="hidden" id="feedback-exercise-name">
       
       <div class="form-group">
-        <!-- The two names are filled on every open (openFeedbackModal). The feedback choices below
-             are stored in English and shown so on other screens. -->
+        <!-- The two names are filled on every open (openFeedbackModal). -->
         <label><span data-i18n="feedback_for">Feedback for</span> <span id="feedback-client-display-name" class="text-emerald font-semibold"></span> <span data-i18n="feedback_on">on</span> <span id="feedback-ex-display-name" class="text-emerald font-semibold"></span></label>
         
         <div class="feedback-chips-selector">
-          <label class="feedback-chip-option">
-            <input type="radio" name="feedback-tag" value="Too Easy - Increase Load" checked>
-            <span>🚀 Too Easy - Increase Load</span>
-          </label>
-          <label class="feedback-chip-option">
-            <input type="radio" name="feedback-tag" value="Too Hard - Reduce Load">
-            <span>⚠️ Too Hard - Reduce Load</span>
-          </label>
-          <label class="feedback-chip-option">
-            <input type="radio" name="feedback-tag" value="Form Break - Watch Position">
-            <span>🔬 Form Break - Focus Required</span>
-          </label>
-          <label class="feedback-chip-option">
-            <input type="radio" name="feedback-tag" value="Joint Pain / Discomfort">
-            <span>🔥 Joint Pain / Discomfort</span>
-          </label>
-          <label class="feedback-chip-option">
-            <input type="radio" name="feedback-tag" value="Completed reps easily">
-            <span>💪 Good Progression</span>
-          </label>
+${feedbackChipsHTML()}
         </div>
       </div>
 

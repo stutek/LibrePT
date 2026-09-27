@@ -62,7 +62,8 @@ def test_the_trainer_sees_what_the_gym_said_while_shaping_the_next_plan(
     block = page.locator("#client-focus-gym")
     expect(block).to_be_visible()
     expect(block).to_contain_text("Barbell Row")
-    expect(block).to_contain_text("Too Hard")
+    # The tag in words from the dictionary, not the stored English key "Too Hard - Reduce Load".
+    expect(block).to_contain_text("Too hard – reduce the load")
     expect(block).to_contain_text("Deadlift")
 
 

@@ -325,7 +325,9 @@ def test_the_story_leaves_the_note_on_the_person_it_was_about(page, local_server
     _walk_the_whole_story(page)
 
     expect(page.locator("#client-focus-gym")).to_be_visible()
-    expect(page.locator("#client-focus-gym")).to_contain_text("Joint Pain")
+    expect(page.locator("#client-focus-gym")).to_contain_text(
+        "Joint pain or discomfort"
+    )
     notes = page.locator("#client-focus-notes").inner_text()
     assert "left knee, third round" in notes
 

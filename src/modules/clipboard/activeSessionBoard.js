@@ -26,6 +26,7 @@
 
 import { hasBehaviour } from "../../data/appVersions.js";
 import { libraryExercises } from "../../data/exerciseLibrary.js";
+import { feedbackTagText } from "../../domain/feedbackTags.js";
 import { gymNotesForPlan } from "../../domain/gymNotes.js";
 import { renderActiveUsersList } from "../common/activeUsersList.js";
 import { openFeedbackModal } from "../common/feedbackModal.js";
@@ -103,7 +104,7 @@ function renderGymNotes(activeClient, activeClientState) {
     movement.textContent = note.exerciseName || "";
     const tag = document.createElement("span");
     tag.className = "gym-note-tag";
-    tag.textContent = note.tag || "";
+    tag.textContent = feedbackTagText(note.tag, t);
     row.append(movement, tag);
     // Says WHY this row is at the top, in words. A colour or a bullet would leave the ordering
     // reading as arbitrary to anyone who cannot see the difference — and on a phone the trainer
