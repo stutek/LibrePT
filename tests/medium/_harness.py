@@ -92,7 +92,9 @@ import { prepareBackupDialog } from './modules/common/backupRestore.js';
 import { applyStaticDOMMappings } from './i18n/domMappings.js';
 import { TRANSLATIONS } from './i18n/index.js';
 
-const t = (key) => TRANSLATIONS.en[key] || key;
+// In the chosen language, as app.js's t() is: a language switch in a test must reach what the
+// header writes in code, not only the static labels.
+const t = (key) => TRANSLATIONS[state.lang]?.[key] || TRANSLATIONS.en[key] || key;
 const noop = () => {};
 const state = {
   lang: 'en', clients: [], routines: [], exercises: [], history: [], planUpdates: [], sessions: [],

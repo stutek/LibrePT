@@ -56,7 +56,7 @@ def test_ahead_count_reflects_real_local_edits_since_the_synced_ancestor(
 
     assert page.locator("#sync-badge .sync-ahead").inner_text().strip() == "1"
     aria = page.locator("#sync-badge").get_attribute("aria-label")
-    assert "1 local change to push" in aria
+    assert "1 change on this device to send" in aria
 
 
 READ_BACKUP_HISTORY = """
@@ -117,8 +117,8 @@ def test_never_synced_counts_every_record_of_the_trainers_own(page, local_server
         page.locator("#dialog-client button[type='submit']").click()
 
     aria = page.locator("#sync-badge").get_attribute("aria-label") or ""
-    assert "local changes to push" in aria
-    count = int(aria.split(" local change")[0])
+    assert "changes on this device to send" in aria
+    count = int(aria.split(" change")[0])
     assert count == 3, f"expected only the trainer's three records counted, got {count}"
 
 
@@ -145,6 +145,6 @@ def test_more_than_nine_unpushed_changes_reads_as_an_alarm(page, local_server):
         "the alarm replaces the digit, not the arrow"
     )
     # ...while the exact count still rides along in the aria-label for screen readers.
-    assert "local changes to push" in (
+    assert "changes on this device to send" in (
         page.locator("#sync-badge").get_attribute("aria-label") or ""
     )

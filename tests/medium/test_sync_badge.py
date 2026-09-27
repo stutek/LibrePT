@@ -21,7 +21,7 @@ pytestmark = pytest.mark.clean_start
 # `renderSyncBadge` is already imported by HEADER_STUB (it hands the real one to bootDriveSyncUi, so
 # a sync starting or failing repaints the cloud). Re-importing it here would be a duplicate binding
 # in the same module — a SyntaxError that silently leaves nothing mounted at all.
-STUB = HEADER_STUB + "\nrenderSyncBadge();\n"
+STUB = HEADER_STUB + "\nrenderSyncBadge();\nwindow.renderSyncBadge = renderSyncBadge;\n"
 
 
 def test_sync_badge_shows_real_zero_ahead_and_unknown_behind_before_any_sync(
@@ -42,8 +42,24 @@ def test_sync_badge_shows_real_zero_ahead_and_unknown_behind_before_any_sync(
     # Behind is still genuinely unknown ("?") rather than a fabricated number.
     assert page.locator("#sync-badge .sync-zero").inner_text().strip() == "0"
     aria = badge.get_attribute("aria-label")
-    assert "0 local changes to push" in aria
-    assert "cloud status unknown" in aria
+    assert "0 changes on this device to send" in aria
+    assert "the cloud's changes are not known" in aria
+
+
+def test_the_counters_are_described_in_the_chosen_language(page, local_server):
+    """The description a screen reader reads was English whatever the language."""
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#app-header")
+    page.locator("#btn-app-menu").click()
+    page.locator("#menu-settings").click()
+    page.locator("#lang-switcher").select_option("sl")
+    page.evaluate("window.renderSyncBadge()")
+
+    aria = page.locator("#sync-badge").get_attribute("aria-label")
+    assert (
+        aria
+        == "0 sprememb na tej napravi čaka na pošiljanje, spremembe v oblaku niso znane"
+    )
 
 
 def test_counters_are_legible_and_grow_on_desktop(page, local_server):

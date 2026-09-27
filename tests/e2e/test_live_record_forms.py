@@ -93,7 +93,7 @@ def test_a_client_counts_as_a_local_change_only_once_its_dialog_is_left(
     page.locator("#btn-add-client").click()
     page.locator("#client-name").fill("Counted Later")
     assert _record(page, "clients", "Counted Later") is not None
-    assert _ahead_label(page).startswith("0 local changes"), (
+    assert _ahead_label(page).startswith("0 changes on this device"), (
         "a client still being typed is already stored, but must not count yet"
     )
 

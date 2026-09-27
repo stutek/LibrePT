@@ -14,6 +14,7 @@ import { ISSUE_TRACKER_URL } from "../../data/publicUrls.js";
 import { isDemoOnlyStore } from "../../data/seedProvenance.js";
 import { SANDBOX, WORKING, isSandbox } from "../../data/workspace.js";
 import { TRANSLATIONS, dictionaryFor, resolveLang } from "../../i18n/index.js";
+import { countedText } from "../../i18n/plural.js";
 import { isGuideSurface, renderMarkupOnce } from "./dom.js";
 import { syncGlyphFor } from "./syncStatusGlyph.js";
 import { setupThemeSwitcher } from "./theme.js";
@@ -252,12 +253,14 @@ export function renderSyncBadge() {
   badge.innerHTML =
     `<span class="${aheadClass}">${cell(local, "up")}</span>` +
     `<span class="${behindClass}">${cell(remote, "down", true)}</span>`;
+  const t = deps?.t || ((key) => key);
+  const lang = document.documentElement.lang;
   const remoteText = isUnreachable
-    ? "cloud status unknown"
-    : `${remote} remote change${remote === 1 ? "" : "s"} to pull`;
+    ? t("sync_badge_behind_unknown")
+    : countedText(t, lang, "sync_badge_behind", remote);
   badge.setAttribute(
     "aria-label",
-    `${local} local change${local === 1 ? "" : "s"} to push, ${remoteText}`,
+    `${countedText(t, lang, "sync_badge_ahead", local)}, ${remoteText}`,
   );
 }
 
