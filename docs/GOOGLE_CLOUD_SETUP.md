@@ -53,7 +53,7 @@ Three roles, three real Gmail accounts. The addresses live in the private notes,
 | Role | What it is | Used for |
 | :--- | :--- | :--- |
 | `admin@` | A project-branded account, not a person | Owns the GCP project and is the consent screen's user support address |
-| `canary@` | A dedicated throwaway, holding nothing | The identity the CI canary runs as — the only account whose refresh token is stored anywhere |
+| `canary@` | **A ROLE, not a third account** — it is `test@` wearing this hat | The identity the CI canary runs as — the only account whose refresh token is stored anywhere |
 | `maintainer@` | The maintainer's own daily inbox | Google's developer contact for verification and deprecation notices. **Not a test identity** — ruled 2026-09-27: the maintainer's private account is never signed into a test, by hand or otherwise |
 
 **A human test account IS needed, and this was learned the hard way (2026-08-12).** The canary was
@@ -64,7 +64,11 @@ Google removed service-account Drive storage quota. Neither remedy they publish 
 service account can read the Drive API and can never write to it**, so the canary runs as a real
 account (Part B).
 
-**`canary@` is a dedicated throwaway, created 2026-08-16**, and it is the right identity for Part B
+**There are TWO accounts, not three** (corrected 2026-09-27, Simon): the project account and the
+test account. `canary@` is the test account in its canary role — a separate throwaway was attempted
+on 2026-08-16 and Google's per-phone-number signup limit refused it, so the role moved to the
+account that already existed. Read every `canary@` below as "the test account". It is the right
+identity for Part B
 even though `admin@` would work. The canary is the one place a long-lived refresh token is stored, so
 the account it belongs to should own nothing else — `admin@` owns both GCP projects, and while the
 grant could never administer them (an OAuth token carries only its scopes), an account holding
@@ -81,7 +85,7 @@ without logging it).
 
 What no account of either kind can cover is the CONSENT flow, since Google fingerprints and blocks
 automated browsers on `accounts.google.com`. That check stays manual (A8), and it is run as
-`canary@` (`LibrePT.test@gmail.com`) — ruled 2026-09-27. It used to say `maintainer@`, which put a
+`canary@`, which is the test account — ruled 2026-09-27. It used to say `maintainer@`, which put a
 personal account through a consent flow for no gain: A8 asks whether the consent screen works for an
 ordinary user, and a throwaway answers that as well as a person's inbox does. The account already
 exists and already carries the only stored refresh token, so nothing new is exposed by it.
