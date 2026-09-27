@@ -334,7 +334,7 @@ export const en = {
   filter_next_month: "Next month",
   no_sessions_for_filters: "No sessions match these filters. Clear them to see the whole board.",
   no_sessions_scheduled: "No sessions scheduled.",
-  voice_note_label: "Privacy-First Voice Note",
+  voice_note_label: "Voice note, on this device only",
   voice_ready: "Tap mic to record voice note",
   voice_processing: "Processing the recording…",
   voice_recording: "Recording... Tap again to save",

@@ -347,7 +347,7 @@ export const sl = {
   no_sessions_for_filters:
     "Tem filtrom ne ustreza noben trening. Počisti jih, da vidiš vso ploščo.",
   no_sessions_scheduled: "Ni načrtovanih treningov.",
-  voice_note_label: "Glasovna opomba (zasebnost-prva)",
+  voice_note_label: "Glasovna opomba",
   voice_ready: "Tapni mikrofon za snemanje opombe",
   voice_processing: "Obdelujem posnetek …",
   voice_recording: "Snemanje... Tapni ponovno za shranitev",

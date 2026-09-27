@@ -355,7 +355,7 @@ export const de = {
   no_sessions_for_filters:
     "Kein Training passt zu diesen Filtern. Lösche sie, um die ganze Übersicht zu sehen.",
   no_sessions_scheduled: "Keine Trainings geplant.",
-  voice_note_label: "Sprachnotiz, nur auf dem Gerät",
+  voice_note_label: "Sprachnotiz, nur auf diesem Gerät",
   voice_ready: "Tippe auf das Mikrofon, um eine Sprachnotiz aufzunehmen",
   voice_processing: "Aufnahme wird verarbeitet …",
   voice_recording: "Aufnahme läuft... Tippe noch einmal zum Speichern",
