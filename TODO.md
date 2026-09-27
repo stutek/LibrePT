@@ -1068,6 +1068,11 @@ with rest- and completed-aware readers and a back-compat shape guard.
 (`plansView`) metric authoring to match the inline editor, and `hiit` (rounds), which has no logging
 surface yet.
 
+**Dokaz iz dneva trenerja 05 (§88):** krog ob reki s petimi postajami, 40 s dela in 20 s počitka,
+štirje krogi, in intervali 6 × 400 m. Čas in razdaljo je trenerka vpisala v polje za ponovitve (»40s«,
+»400m«), pregled pa je izpisal »S4 × R40s«, kar stranka ne razume. Merilo po vaji (čas, razdalja) pri
+vaji z lastnim imenom ni ponujeno.
+
 ### 17.2 [ ] Edit rules for a completed, dated session — immutable except three narrow cases
 A completed dated session is an **immutable execution record**; anything forward-looking is
 copy-to-a-new-session from a template, never an edit of the past. The only permitted mutations:
@@ -6236,6 +6241,21 @@ filtrira po tujih besedah. P3.
 **Predlog in preverjanje:** obe vrstici dobita besede iz slovarja, kot jih ima vrstica izvora; vrednost
 filtra ostane angleška. Preizkus naj v slovenščini zahteva, da noben gumb filtra ni angleški.
 
+### 80.55 [ ] P3 — Kartica treninga pravi samo »Nedoločen«, trener pa to bere kot stanje
+
+**Scenarij in koraki:** trening brez izbrane rutine na plošči treningov.
+
+**Opaženo:** v vrstici kartice stoji »• Nedoločen« z ikono odložišča. Trenerka v dnevu trenerja 05 (§88)
+je to prebrala kot stanje udeležbe in iskala, kje ga spremeni v »prišla«.
+
+**Vzrok, potrjen v kodi na `main`:** [sessionCard.js](src/modules/sessionList/sessionCard.js) izpiše
+`t("undefined")` (»Nedoločen«, »Undefined«), ko trening nima rutine. Beseda ne pove, kaj je nedoločeno.
+
+**Težava in vpliv:** na plošči, ki jo trener bere med vadbami, beseda brez predmeta zavaja. P3.
+
+**Predlog in preverjanje:** napis naj pove, česa ni (»Rutina ni izbrana«), ali pa naj ga ni. Preizkus
+naj pri treningu brez rutine zahteva besedilo, ki imenuje rutino.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
@@ -6544,6 +6564,9 @@ Dan 03 (trenerka ob drugi službi, najeta dvorana v Celju, devet strank): domač
 polje kot zdravstvene opombe, zato se tedenska navodila mešajo s trajnimi (§86.4).
 Dan 04 (trener, zaposlen v fitnes klubu, dva kolega, 11 strank): paket desetih treningov v paru vodi
 v ločeni tabeli, 5–10 min na dan (§86.2).
+Dan 05 (samostojna trenerka v Ljubljani, 11 strank): na kartici treninga je videla »• Nedoločen« in
+iskala, kje ga spremeni v »prišla« ali »ni prišla«. Beseda pomeni, da trening nima izbrane rutine
+(§80.55); prisotnosti ni kam zapisati (§86.4).
 
 ## 87. [ ] Prihodnja shema ne nosi polja glasovne opombe
 
@@ -6686,4 +6709,12 @@ tedensko navodilo ali dogovor o otroku zapiše med zdravstvene podatke, in ob na
 trajnega od začasnega. **Vrednost:** dva od štirih dni; zdravstveni podatki so tudi občutljivi po GDPR,
 zato je mešanje z logistiko slabo še iz drugega razloga. **Cena:** majhna — ločeno polje »Druge
 opombe« (ali »Dogovori«), prikazano v urejevalniku načrta tako kot poškodbe. **Presoja: izplača se.**
+
+### 88.8 [ ] Prehransko svetovanje nima mesta
+
+Dan 05: trenerka nekaterim strankam svetuje tudi prehrano (teža, cilj kalorij, jedilnik za teden) in
+to vodi v ločenem zvezku, po njeni oceni eno uro na teden za tri do štiri stranke. **Vrednost:** samo pri
+trenerjih, ki prehrano svetujejo. **Cena:** velika, če naj aplikacija vodi jedilnike; prehransko
+svetovanje je tudi ločena stroka z lastnimi pravili. **Presoja: ne izplača se.** Kar od tega zares
+potrebuje prostor, pokrijeta ločeno polje za opombe (§88.7) in meritve skozi čas (§86.4, §78).
 
