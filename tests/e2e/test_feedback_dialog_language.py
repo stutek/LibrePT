@@ -21,7 +21,6 @@ OPEN_ONE_EXERCISE = """async () => {
 # Each control, and the key whose words it must show.
 FEEDBACK_DIALOG = {
     "#dialog-feedback .modal-header h3": "log_client_feedback",
-    "#dialog-feedback .feedback-local-badge": "feedback_local_only",
     "label[for='feedback-custom-note']": "custom_details",
     "#dialog-feedback .modal-cancel": "btn_cancel",
     "#form-feedback button[type=submit]": "btn_log_alert",

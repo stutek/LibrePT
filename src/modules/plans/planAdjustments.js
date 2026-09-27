@@ -43,39 +43,6 @@ function resolveAdjustmentBadgeClass(tag) {
   return BADGE_CLASS[readFeedbackTag(tag).known?.id] || "badge-primary";
 }
 
-function buildVoiceNoteHTML(u) {
-  if (!u.hasVoiceNote) return "";
-  return `
-        <div class="mini-audio-note">
-          <button type="button" class="btn-play-adjustment-audio" data-id="${u.id}"><i class="fa-solid fa-circle-play adjustment-audio-play-icon"></i></button>
-          <span class="audio-status-label">voice_memo.wav (0:04)</span>
-        </div>
-      `;
-}
-
-// Toggles the mini play/pause icon on the voice-memo preview — a fixed 3s "playing" state, no real
-// audio (there is no recorded file to play back yet; TODO tracks wiring a real one).
-function wireAdjustmentAudioPreview(card, t) {
-  const playBtn = card.querySelector(".btn-play-adjustment-audio");
-  const audioStatus = card.querySelector(".audio-status-label");
-  if (!playBtn || !audioStatus) return;
-  playBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    const playIcon = playBtn.querySelector("i");
-    if (!playIcon.classList.contains("fa-circle-play")) {
-      playIcon.className = "fa-solid fa-circle-play";
-      audioStatus.textContent = "voice_memo.wav (0:04)";
-      return;
-    }
-    playIcon.className = "fa-solid fa-circle-pause";
-    audioStatus.textContent = t("voice_playing");
-    setTimeout(() => {
-      playIcon.className = "fa-solid fa-circle-play";
-      audioStatus.textContent = "voice_memo.wav (0:04)";
-    }, 3000);
-  });
-}
-
 function buildAdjustmentCard(u, ctx) {
   const { state, t, escapeHTML, navigateToPath, urlFor } = ctx;
 
@@ -93,7 +60,6 @@ function buildAdjustmentCard(u, ctx) {
       <div class="adjustment-exercise-line">
         ${t("exercise_of")}: <span class="font-semibold adjustment-exercise-name">${escapeHTML(u.exerciseName)}</span>
       </div>
-      ${buildVoiceNoteHTML(u)}
     `;
 
   // Icon-only actions (matching the clipboard's own compact .icon-btn edit control) — a card
@@ -138,8 +104,6 @@ function buildAdjustmentCard(u, ctx) {
 
   card.appendChild(info);
   card.appendChild(actions);
-
-  wireAdjustmentAudioPreview(card, t);
 
   return card;
 }
@@ -195,11 +159,6 @@ export function renderApplyAdjustmentDialog() {
         <div class="adjust-summary-row">
           <strong class="adjust-summary-label" data-i18n="adjust_feedback">Feedback:</strong> <span id="adjust-feedback-tag" class="font-semibold text-primary"></span>
         </div>
-        <div id="adjust-voice-player-container" class="hidden adjust-voice-row">
-          <strong class="adjust-voice-label" data-i18n="adjust_voice">Voice:</strong>
-          <button type="button" id="adjust-btn-play-voice" class="adjust-voice-play-btn"><i class="fa-solid fa-circle-play adjust-voice-play-icon"></i></button>
-          <span class="adjust-voice-duration-label">voice_memo.wav (0:04)</span>
-        </div>
         <div class="adjust-summary-row-last">
           <strong class="adjust-summary-label" data-i18n="adjust_details">Details:</strong> <span id="adjust-details" class="italic text-color"></span>
         </div>
@@ -249,29 +208,6 @@ export function renderApplyAdjustmentDialog() {
   </dialog>
 `,
   );
-}
-
-function wireVoiceNotePreview(update, voiceContainer) {
-  if (!update.hasVoiceNote) {
-    voiceContainer.classList.add("hidden");
-    return;
-  }
-  voiceContainer.classList.remove("hidden");
-  const playBtn = document.getElementById("adjust-btn-play-voice");
-  // reset listener
-  playBtn.replaceWith(playBtn.cloneNode(true));
-  const newPlayBtn = document.getElementById("adjust-btn-play-voice");
-  newPlayBtn.addEventListener("click", () => {
-    const icon = newPlayBtn.querySelector("i");
-    if (!icon.classList.contains("fa-circle-play")) {
-      icon.className = "fa-solid fa-circle-play";
-      return;
-    }
-    icon.className = "fa-solid fa-circle-pause";
-    setTimeout(() => {
-      icon.className = "fa-solid fa-circle-play";
-    }, 3000);
-  });
 }
 
 // Find target exercise & routine database links.
@@ -336,8 +272,6 @@ export function openAdjustmentWizardComponent(updateId, ctx) {
   document.getElementById("adjust-details").textContent = known
     ? note || t("no_details_specified")
     : update.tag;
-
-  wireVoiceNotePreview(update, document.getElementById("adjust-voice-player-container"));
 
   const { exercise, exerciseId, routine, exMapping } = resolveAdjustmentTargets(state, update);
 

@@ -1,7 +1,7 @@
 ---
 type: use_case
 title: UC2 - Asynchronous Plan Adjustments & Progression Review
-description: Specification for back-office review of logged session signals, voice notes, and progressive overload adjustments.
+description: Specification for back-office review of logged session signals, typed notes, and progressive overload adjustments.
 status: active
 tags:
   - back-office
@@ -11,7 +11,7 @@ tags:
 
 # Use Case 2: Asynchronous Program Updates & Client Progression
 
-This use case describes the desk-side workflow where the Personal Trainer (PT) reviews exercise feedback and voice notes logged during live sessions to adjust client routines and plan future progressive overload trajectories asynchronously.
+This use case describes the desk-side workflow where the Personal Trainer (PT) reviews exercise feedback and typed notes logged during live sessions to adjust client routines and plan future progressive overload trajectories asynchronously.
 
 ---
 
@@ -22,13 +22,13 @@ graph TD
     subgraph Trainer["Trainer Lane"]
         Start([Start: Desk Prep Session]) --> OpenDashboard[1. View Dashboard Home Screen]
         OpenDashboard --> ReviewAdjustments["2. Review 'Pending Plan Adjustments' Deck"]
-        ReviewAdjustments --> ListenVoice["3. Tap Alert Card: Review Tag & Playback Voice Note"]
-        ListenVoice --> EditTemplate[4. Open Client's Routine Template & Adjust Load/Reps/Sets]
+        ReviewAdjustments --> ReadNote["3. Tap Alert Card: Review Tag & Typed Note"]
+        ReadNote --> EditTemplate[4. Open Client's Routine Template & Adjust Load/Reps/Sets]
         EditTemplate --> ResolveAlert[5. Click 'Resolve Card']
     end
     
     subgraph System["LibrePT System Lane"]
-        ReviewAdjustments --> QueryDB[6. Query Local Database for Unresolved Session Feedback & Audio Logs]
+        ReviewAdjustments --> QueryDB[6. Query Local Database for Unresolved Session Feedback]
         QueryDB --> OpenDashboard
         
         ResolveAlert --> UpdateAlertState[7. Mark Feedback Item as Resolved]
@@ -44,14 +44,14 @@ graph TD
 
 ### 1. Preconditions
 - The PT has completed group or individual sessions.
-- Granular exercise feedback tags or on-the-fly voice notes were recorded during those sessions.
+- Granular exercise feedback tags or short typed notes were recorded during those sessions.
 
 ### 2. Main Flow of Events
 1. **Access Back-Office**: The PT opens the LibrePT app on their computer or tablet.
 2. **Review Feedback Deck**: The system queries the database and displays the **Pending Plan Adjustments** deck on the home screen.
 3. **Analyze Alert**: The PT reviews an alert card:
    - e.g., *"Jane Doe - Barbell Back Squat - Form Break (Depth Alert)"*
-   - The card includes a playback button for a 5-second audio note recorded in the gym: *"Jane felt slight lower back tightness on set 3, so we limited depth. Drop load by 5kg next week and focus on hip mobility warm-ups."*
+   - The dialog shows the note typed in the gym: *"Lower back tight on set 3, limited depth."*
 4. **Modify Template**: The PT clicks the card to jump into Jane's program template. They:
    - Lower the squat target weight by 5kg.
    - Insert a custom note: *"Focus on deep squats during warm-up; monitor depth."*

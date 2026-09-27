@@ -270,7 +270,6 @@ export const en = {
   adjust_title: "Apply Program Adjustment",
   adjust_client: "Client:",
   adjust_feedback: "Feedback:",
-  adjust_voice: "Voice:",
   adjust_details: "Details:",
   adjust_action_label: "Adjustment Action",
   adjust_action_modify: "Modify Target Load & Reps",
@@ -392,12 +391,6 @@ export const en = {
   filter_next_month: "Next month",
   no_sessions_for_filters: "No sessions match these filters. Clear them to see the whole board.",
   no_sessions_scheduled: "No sessions scheduled.",
-  voice_note_label: "Voice note, on this device only",
-  voice_ready: "Tap mic to record voice note",
-  voice_processing: "Processing the recording…",
-  voice_recording: "Recording... Tap again to save",
-  voice_transcription_done: "On-device transcription completed!",
-  voice_playing: "Playing voice note...",
   program_not_defined: "Program Not Defined",
   no_members_assigned: "No Participants",
   session_completed: "Completed",
@@ -758,7 +751,6 @@ export const en = {
     "This is one evening of a repeating session. What you change here changes this evening only.",
   gym_note_in_this_plan: "in this plan",
   feedback_keep_on_record: "Keep this on the client's record",
-  feedback_local_only: "Local Only",
   feedback_note_placeholder: "e.g. Left knee clicks, reduced load...",
   // The demo's front door, and the only card a stranger reads standing still rather than mid-tap:
   // it says what the app is, what this run is a story OF, and that none of it can reach their own

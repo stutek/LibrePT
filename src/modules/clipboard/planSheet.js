@@ -38,7 +38,7 @@ function makeIcon(glyph, label, kind) {
 }
 
 // The signal icons for one exercise row, in the active card's own glyphs (exerciseCard.js):
-// fa-feather too easy, fa-weight-hanging too hard, fa-note-sticky a written or voice note. Any
+// fa-feather too easy, fa-weight-hanging too hard, fa-note-sticky a written note. Any
 // combination may apply at once, or none.
 function buildSignalIcons({ feedback, clientId, name, t }) {
   const icons = [];

@@ -91,7 +91,7 @@ export class ExerciseDeckCard extends DeckCard {
     // already logged, so a second tap (which un-logs it) reads correctly the moment it lands.
     const isEasyActive = hasQuickSignal(activeClientId, item.name, "Too Easy - Increase Load");
     const isHardActive = hasQuickSignal(activeClientId, item.name, "Too Hard - Reduce Load");
-    // A written or voice note is INDEPENDENT of any signal — a card can carry either, both or
+    // A written note is INDEPENDENT of any signal — a card can carry either, both or
     // neither — so the feedback button marks its own state rather than borrowing the signal's.
     const hasNote = this.ctx.hasExerciseNote?.(activeClientId, item.name) || false;
 

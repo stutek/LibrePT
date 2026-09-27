@@ -1,6 +1,10 @@
 // src/modules/common/feedbackModal.js
-// Controls the feedback modal dialog (#dialog-feedback), handles custom outcome tagging,
-// and manages the mock local voice note recorder / speech-to-text transcription.
+// Controls the feedback modal dialog (#dialog-feedback): a tag and the trainer's own typed note.
+//
+// There is no voice note, by ruling (2026-09-27): the microphone never goes into this app, for
+// privacy. A mock recorder stood here and wrote a sentence nobody had said into the client's
+// record ("… reported good form and speed on …"), under a file name for audio that never existed.
+// `hasVoiceNote` stays readable on old records (quickSignals.js) and nothing here writes it.
 //
 // deps: {
 //   getState(),
@@ -17,9 +21,6 @@ import { notesWithGymNote } from "../../domain/gymNotes.js";
 import { $id, closeModal, openModal, renderMarkupOnce } from "./dom.js";
 
 let deps = null;
-
-let feedbackIsRecording = false;
-let feedbackHasVoiceNote = false;
 
 export function initFeedbackModal(d) {
   deps = d;
@@ -46,23 +47,6 @@ export function openFeedbackModal(exId) {
   $id("feedback-custom-note").value = "";
   $id("feedback-keep-on-record").checked = false;
   $id("feedback-keep-on-record-label").textContent = t("feedback_keep_on_record");
-
-  // Reset voice recorder state
-  feedbackIsRecording = false;
-  feedbackHasVoiceNote = false;
-  const audioWave = $id("voice-audio-wave");
-  const audioPlayer = $id("voice-audio-player");
-  const recordIcon = $id("voice-record-icon");
-  const recordStatus = $id("voice-record-status");
-  if (audioWave) {
-    audioWave.classList.add("hidden");
-    audioWave.classList.remove("recording");
-  }
-  if (audioPlayer) audioPlayer.classList.add("hidden");
-  if (recordStatus) recordStatus.textContent = t("voice_ready");
-  if (recordIcon) {
-    recordIcon.className = "fa-solid fa-microphone voice-record-icon";
-  }
 
   openModal("dialog-feedback", { resetForm: true, formId: "form-feedback" });
 }
@@ -111,37 +95,6 @@ ${feedbackChipsHTML()}
         </div>
       </div>
 
-      <!-- Privacy-First Voice Note Group -->
-      <div class="form-group feedback-voice-group">
-        <label class="feedback-voice-label">
-          <span id="label-voice-note" data-i18n="voice_note_label">Privacy-First Voice Note</span>
-          <span class="badge badge-emerald feedback-local-badge" data-i18n="feedback_local_only">Local Only</span>
-        </label>
-        <div class="voice-recorder-widget">
-          <button type="button" id="btn-voice-record" class="btn secondary-btn voice-record-btn">
-            <i class="fa-solid fa-microphone voice-record-icon" id="voice-record-icon"></i>
-          </button>
-          <div class="voice-status-col">
-            <div id="voice-record-status" class="voice-record-status-text" data-i18n="voice_ready">Ready to record voice memo</div>
-            <!-- Mock audio wave visualization -->
-            <div id="voice-audio-wave" class="audio-wave-container hidden">
-              <span class="wave-bar"></span>
-              <span class="wave-bar"></span>
-              <span class="wave-bar"></span>
-              <span class="wave-bar"></span>
-              <span class="wave-bar"></span>
-              <span class="wave-bar"></span>
-              <span class="wave-bar"></span>
-            </div>
-            <!-- Audio player review if recorded -->
-            <div id="voice-audio-player" class="audio-player-mini hidden">
-              <button type="button" id="btn-play-voice-preview" class="voice-preview-btn"><i class="fa-solid fa-circle-play voice-preview-icon"></i></button>
-              <div class="voice-memo-filename">voice_memo.wav (0:04)</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div class="form-group">
         <label for="feedback-custom-note" data-i18n="custom_details">Custom Details / Notes</label>
         <input type="text" id="feedback-custom-note" data-i18n-placeholder="feedback_note_placeholder" placeholder="e.g. Left knee clicks, reduced load..." class="form-control">
@@ -177,102 +130,12 @@ export function setupFeedbackForms() {
 
   const fbForm = $id("form-feedback");
   const {
-    t,
     newRecordId,
     saveActiveSessionToCache,
     saveToLocalStorage,
     renderPendingPlanAdjustments,
     enforceQuickSignalExclusivity,
   } = deps;
-
-  // Voice recording mock handlers
-  const recordBtn = $id("btn-voice-record");
-  if (recordBtn) {
-    recordBtn.addEventListener("click", () => {
-      const recordIcon = $id("voice-record-icon");
-      const recordStatus = $id("voice-record-status");
-      const audioWave = $id("voice-audio-wave");
-      const audioPlayer = $id("voice-audio-player");
-      const state = deps.getState();
-
-      if (!feedbackIsRecording) {
-        // Start snemanje / record
-        feedbackIsRecording = true;
-        feedbackHasVoiceNote = false;
-        if (recordIcon) {
-          // is-recording (feedbackModal.css) colors the icon var(--danger) while recording.
-          recordIcon.className = "fa-solid fa-stop voice-record-icon is-recording";
-        }
-        if (recordStatus) recordStatus.textContent = t("voice_recording");
-        if (audioWave) {
-          audioWave.classList.remove("hidden");
-          audioWave.classList.add("recording");
-        }
-        if (audioPlayer) audioPlayer.classList.add("hidden");
-      } else {
-        // Stop recording
-        feedbackIsRecording = false;
-        feedbackHasVoiceNote = true;
-        if (recordIcon) {
-          recordIcon.className = "fa-solid fa-microphone voice-record-icon";
-        }
-        if (recordStatus) recordStatus.textContent = t("voice_processing");
-        if (audioWave) {
-          audioWave.classList.remove("recording");
-          audioWave.classList.add("hidden");
-        }
-
-        // Mock speech transcription after delay
-        setTimeout(() => {
-          if (recordStatus) recordStatus.textContent = t("voice_transcription_done");
-          if (audioPlayer) audioPlayer.classList.remove("hidden");
-
-          const exName = $id("feedback-exercise-name").value || "exercise";
-          const clientName = $id("feedback-client-display-name").textContent || "Client";
-
-          let generatedTranscript = "";
-          if (state.lang === "sl") {
-            generatedTranscript = `Glasovna opomba (lokalno): ${clientName} poroča o dobrem počutju pri vaji ${exName}.`;
-          } else if (state.lang === "de") {
-            generatedTranscript = `Sprachnotiz (lokal): ${clientName} berichtet von sauberer Technik und gutem Tempo bei ${exName}.`;
-          } else {
-            generatedTranscript = `Voice note (local): ${clientName} reported good form and speed on ${exName}.`;
-          }
-
-          const currentNoteInput = $id("feedback-custom-note");
-          if (currentNoteInput) {
-            if (currentNoteInput.value) {
-              currentNoteInput.value += ` (${generatedTranscript})`;
-            } else {
-              currentNoteInput.value = generatedTranscript;
-            }
-          }
-        }, 1200);
-      }
-    });
-  }
-
-  const playPreviewBtn = $id("btn-play-voice-preview");
-  if (playPreviewBtn) {
-    playPreviewBtn.addEventListener("click", () => {
-      const playIcon = playPreviewBtn.querySelector("i");
-      const recordStatus = $id("voice-record-status");
-      if (playIcon) {
-        if (playIcon.classList.contains("fa-circle-play")) {
-          playIcon.className = "fa-solid fa-circle-pause voice-preview-icon";
-          if (recordStatus) recordStatus.textContent = t("voice_playing");
-
-          setTimeout(() => {
-            playIcon.className = "fa-solid fa-circle-play voice-preview-icon";
-            if (recordStatus) recordStatus.textContent = t("voice_transcription_done");
-          }, 3000);
-        } else {
-          playIcon.className = "fa-solid fa-circle-play voice-preview-icon";
-          if (recordStatus) recordStatus.textContent = t("voice_transcription_done");
-        }
-      }
-    });
-  }
 
   const cancelBtn = fbModal.querySelector(".modal-cancel");
   const closeBtn = fbModal.querySelector(".modal-close-btn");
@@ -298,7 +161,6 @@ export function setupFeedbackForms() {
         date: new Date().toISOString(),
         exerciseName: exName,
         tag: tagVal + (customNote ? ` - ${customNote}` : ""),
-        hasVoiceNote: feedbackHasVoiceNote,
         resolved: false,
       };
 
@@ -324,8 +186,8 @@ export function setupFeedbackForms() {
           activeSession.feedback = [];
         }
         // Too Easy / Too Hard are mutually exclusive everywhere a PT can log them, not just the
-        // quick-tap buttons — this modal offers the same two tags as its own radio choices
-        // (default-checked to "Too Easy"), so without this a submission here could leave both
+        // quick-tap buttons — this modal offers the same two tags as its own radio choices, so
+        // without this a submission here could leave both
         // active at once alongside an existing quick-tap on the opposite tag.
         enforceQuickSignalExclusivity?.(clientId, exName, tagVal);
         activeSession.feedback.push({
@@ -334,7 +196,6 @@ export function setupFeedbackForms() {
           exerciseName: exName,
           tag: tagVal,
           note: customNote,
-          hasVoiceNote: feedbackHasVoiceNote,
         });
         saveActiveSessionToCache();
       }

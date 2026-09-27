@@ -1,8 +1,8 @@
 // tests/unit_js/domain/quickSignals.test.mjs
 // The one rule these functions exist to protect: a one-tap signal is disposable, but a signal the
 // trainer WROTE is not. Toggling Too Easy off, or swapping it for Too Hard, must never delete an
-// entry carrying a typed note or a voice memo — that content cannot be reconstructed, and the
-// trainer did not aim the toggle at it.
+// entry carrying a typed note, or an old record's voice flag — that content cannot be
+// reconstructed, and the trainer did not aim the toggle at it.
 //
 // This was reachable only through a mounted clipboard until the rules were pulled out as pure logic.
 
@@ -81,7 +81,9 @@ test("one tap builds a session entry and a plan update sharing an id", () => {
   assert.equal(planUpdate.clientName, "Ana");
   assert.equal(planUpdate.resolved, false);
   assert.equal(sessionFeedback.note, "");
-  assert.equal(sessionFeedback.hasVoiceNote, false);
+  // Nothing new writes the voice flag: the app never records audio.
+  assert.equal("hasVoiceNote" in sessionFeedback, false);
+  assert.equal("hasVoiceNote" in planUpdate, false);
   // The reporting twin is the one that carries a timestamp; the session copy stays lean.
   assert.equal(typeof planUpdate.date, "string");
   assert.equal("date" in sessionFeedback, false);
@@ -116,7 +118,7 @@ test("an exercise the trainer wrote a note on is marked as having one", () => {
   assert.equal(hasExerciseNote(feedback, "c1", "Squat"), true);
 });
 
-test("a voice memo counts as a note even with nothing typed", () => {
+test("an old record's voice flag still counts as a note with nothing typed", () => {
   const feedback = [
     { id: "1", clientId: "c1", exerciseName: "Squat", tag: "", note: "", hasVoiceNote: true },
   ];

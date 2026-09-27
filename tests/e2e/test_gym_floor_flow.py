@@ -1,6 +1,6 @@
 # tests/e2e/test_gym_floor_flow.py
 # End-to-end "gym floor" smoke flow: a trainer's session from the dashboard through language/theme
-# switching, calendar sync, launching the clipboard, logging a voice-note-backed feedback entry, and
+# switching, calendar sync, launching the clipboard, logging a feedback entry with a typed note, and
 # resolving a pending plan adjustment. Broad by design — it exercises the seams between features
 # rather than one feature in isolation, which is what the more focused suites elsewhere in
 # tests/e2e/ cover.
@@ -114,22 +114,13 @@ def test_interactive_dashboard_flow(page, local_server):
     )
     page.wait_for_timeout(400)
 
-    # --- STEP 5: PRIVACY-FIRST VOICE NOTE RECORDING ---
-    # Log Feedback now lives on the in-focus exercise card
+    # --- STEP 5: A FEEDBACK ENTRY WITH A TYPED NOTE ---
+    # Log Feedback lives on the in-focus exercise card. There is no microphone: by ruling, the app
+    # never records, and a mock recorder here once wrote a sentence nobody said into the record.
     page.locator("#btn-log-feedback").click()
     page.wait_for_selector("#dialog-feedback", state="visible")
-
-    # Tap record mic button to start recording
-    page.locator("#btn-voice-record").click()
-    page.wait_for_timeout(1000)
-
-    # Tap record mic button again to stop and trigger mock on-device transcription
-    page.locator("#btn-voice-record").click()
-    page.wait_for_timeout(1500)  # wait for transcription timeout to append note
-
-    # Assert transcription text was generated and appended locally
-    custom_note_val = page.locator("#feedback-custom-note").input_value()
-    assert "Voice note" in custom_note_val or "Glasovna opomba" in custom_note_val
+    assert page.locator("#dialog-feedback .fa-microphone").count() == 0
+    page.locator("#feedback-custom-note").fill("Left knee, third round")
 
     # Log/Submit the feedback
     page.locator("#dialog-feedback button[type='submit']").click()
@@ -157,9 +148,11 @@ def test_interactive_dashboard_flow(page, local_server):
     ).first.click()
     page.wait_for_selector("#view-adjustments.active")
 
-    # Verify the new adjustment alert card displays the play audio button
-    page.wait_for_selector(".btn-play-adjustment-audio", state="visible")
-    assert page.locator(".btn-play-adjustment-audio").is_visible()
+    # The new alert card is there, and no card draws a recording: there never was one.
+    page.wait_for_selector(
+        "#dashboard-adjustments-list .adjustment-card", state="visible"
+    )
+    assert page.locator("#dashboard-adjustments-list .fa-circle-play").count() == 0
 
     # Click Resolve Alert button to trigger the adjustment wizard modal
     page.locator(".btn-resolve-alert").first.click()

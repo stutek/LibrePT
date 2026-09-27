@@ -25,7 +25,7 @@ LibrePT is used one-handed, mid-set, on a noisy gym floor — often on a phone w
 - **Low-interaction first**: Prefer one-tap actions over typing. The phone keyboard is a last resort.
 - **Mobile-first, single-column**: The gym-floor phone view is the primary view. Layouts show one thing at a time rather than dense multi-column grids.
 - **Offline by default**: The app must stay fully usable with no network. Nothing on the critical path may block on a remote call.
-- **Privacy-first**: Voice notes and client PII stay on the device. Do not add cloud transcription or third-party analytics.
+- **Privacy-first**: Client PII stays on the device. The app never records audio, and nothing adds cloud transcription or third-party analytics.
 - **No build step**: The app is dependency-free vanilla HTML/CSS/JS served statically. Do not introduce a bundler or a runtime framework.
 
 ---

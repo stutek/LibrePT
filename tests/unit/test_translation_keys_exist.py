@@ -1,7 +1,8 @@
 # tests/unit/test_translation_keys_exist.py
 # Every translation key the code asks for by name exists in the dictionary. When one does not, t()
-# returns the key itself, and the trainer reads "voice_processing" or a lower-case English "edit" on
-# screen — in every language, and unnoticed in English because it looks almost right.
+# returns the key itself, and the trainer reads a raw key such as "rights_erase_word", or a
+# lower-case English "edit", on screen — in every language, and unnoticed in English because it
+# looks almost right.
 #
 # Only keys written out whole are checked (`t("key")`); a key built at run time (`t(`account_${x}`)`)
 # cannot be read here.

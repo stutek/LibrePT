@@ -1,7 +1,7 @@
 // src/domain/quickSignals.js — the rules behind the deck's one-tap Too Easy / Too Hard buttons.
 //
 // A quick signal is a bare tag the trainer taps mid-set, as opposed to a feedback-modal entry that
-// carries a typed note or a voice memo. The distinction is the whole point of this module: a
+// carries a typed note. The distinction is the whole point of this module: a
 // quick tap is disposable and may be un-tapped or superseded, while something the trainer actually
 // wrote must never be deleted by a toggle they did not aim at it.
 //
@@ -9,13 +9,16 @@
 // or a new entry — none of them mutate a session, persist, or render. The controller owns those.
 //
 // A feedback entry, as it appears on `activeSession.feedback`:
-//   { id, clientId, exerciseName, tag, note, hasVoiceNote }
+//   { id, clientId, exerciseName, tag, note }
+// A record written before the voice note was removed may also carry `hasVoiceNote: true`. The app
+// never recorded audio, and nothing writes the flag now; it is still read, so such an old entry
+// keeps counting as written content that a tap must not remove.
 // and its `state.planUpdates` twin, which carries the extra reporting fields (clientName, date,
 // resolved) but shares the id — the two are removed together or not at all.
 
 import { newRecordId } from "../data/recordId.js";
 
-// The "vanilla" entry logQuickSignal itself creates — no typed note, no voice note. A
+// The "vanilla" entry logQuickSignal itself creates — no typed note. A
 // modal-authored entry always carries at least a tag choice and may append a note, so this
 // predicate is how the toggle avoids ever deleting something the PT actually wrote: only an
 // untouched quick-tap is safe to un-tap.
@@ -45,8 +48,8 @@ export function hasQuickSignal(feedback, clientId, exerciseName, tag) {
   );
 }
 
-// Whether the trainer WROTE something here — a typed note or a voice memo — as opposed to having
-// tapped a bare signal. Deliberately the exact inverse of isPlainQuickSignal rather than its own
+// Whether the trainer WROTE something here — a typed note, or an old record's voice flag — as
+// opposed to having tapped a bare signal. Deliberately the exact inverse of isPlainQuickSignal rather than its own
 // condition, so "safe to un-tap" and "has a note worth marking" can never disagree about the same
 // entry. Independent of any signal: a card can carry either, both or neither.
 export function hasExerciseNote(feedback, clientId, exerciseName) {
@@ -82,10 +85,9 @@ export function buildQuickSignalEntries({ clientId, clientName, exerciseName, ta
       date: new Date().toISOString(),
       exerciseName,
       tag,
-      hasVoiceNote: false,
       resolved: false,
     },
-    sessionFeedback: { id, clientId, exerciseName, tag, note: "", hasVoiceNote: false },
+    sessionFeedback: { id, clientId, exerciseName, tag, note: "" },
   };
 }
 

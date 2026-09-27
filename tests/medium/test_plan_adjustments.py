@@ -170,6 +170,24 @@ def test_a_signal_from_a_session_without_a_routine(page, local_server):
     assert page.locator("#adjust-sets").input_value() == "3"
 
 
+def test_an_old_record_claiming_a_recording_draws_none(page, local_server):
+    """Records written by the removed mock recorder carry `hasVoiceNote: true`. There was never a
+    recording, so neither the card nor the dialog may show a file name or a play button."""
+    old = NO_ROUTINE_STUB.replace(
+        "tag: 'Too Easy - Increase Load', resolved: false }],",
+        "tag: 'Too Easy - Increase Load', resolved: false, hasVoiceNote: true }],",
+    )
+    assert old != NO_ROUTINE_STUB
+    load_with_stub(page, local_server, old)
+    page.wait_for_selector("#view-adjustments.active")
+
+    card = _cards(page).first
+    assert "voice_memo" not in card.inner_text()
+    assert card.locator(".fa-circle-play").count() == 0
+    card.locator(".btn-resolve-alert").click()
+    assert "voice_memo" not in page.locator("#dialog-apply-adjustment").inner_text()
+
+
 def test_a_slovenian_trainer_reads_the_tag_in_slovenian(page, local_server):
     """The review list printed the stored English key: a trainer who pressed »Prelahko« read
     »Too Easy - Increase Load«. The key stays in the record; only its words are shown."""

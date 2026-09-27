@@ -92,7 +92,7 @@ export function logQuickSignal(tag, exId) {
   renderActiveSessionBoard();
 }
 
-// "Is there a written or voice note on this exercise?" — the deck's note mark. Same wrapper shape
+// "Is there a written note on this exercise?" — the deck's note mark. Same wrapper shape
 // as hasQuickSignal above, for the same reason: the rule is pure and lives in domain/quickSignals.js.
 export function hasExerciseNote(clientId, exerciseName) {
   return hasPlainExerciseNote(getActiveSession()?.feedback, clientId, exerciseName);

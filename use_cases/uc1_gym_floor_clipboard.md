@@ -1,13 +1,13 @@
 ---
 type: use_case
 title: UC1 - Active PT Session Logging & Gym Floor Clipboard
-description: Specification for the trainer's mobile PWA clipboard, including single-exercise focus cards, reversible plan pivots, and local-only voice notes.
+description: Specification for the trainer's mobile PWA clipboard, including single-exercise focus cards, reversible plan pivots, and typed feedback notes.
 status: active
 tags:
   - gym-floor
   - pwa
   - session-logging
-  - voice-notes
+  - feedback-notes
   - progression-signals
 ---
 
@@ -138,21 +138,21 @@ graph LR
     style End3B fill:#f8d7da,stroke:#dc3545,stroke-width:4px,color:#721c24
 ```
 
-### Scenario 4: Acute Pain / Injury Report (Physical Intervention, Clinical Audio Note & Rehab Pivot)
-BPMN swimlane modeling physical injury intervention, tactile assessment, clinical voice note recording, and setting up rehab equipment on the floor.
+### Scenario 4: Acute Pain / Injury Report (Physical Intervention, Typed Note & Rehab Pivot)
+BPMN swimlane modeling physical injury intervention, tactile assessment, a short typed note, and setting up rehab equipment on the floor.
 
 ```mermaid
 graph LR
     subgraph PWALane ["📱 LibrePT PWA Clipboard Lane"]
         PWA41["Render Focus Card: Romanian Deadlift | 90kg | Set 2/3 | 90s Rest | 8 Reps"]
-        PWA42["Highlight Exercise Red | Encrypt Local Audio File & Map Metadata"]
+        PWA42["Highlight Exercise Red | Save the Note with Client & Exercise"]
         PWA43["Wipe Active Routine & Inject '[ Mobility & Rehab Placeholder Card ]'"]
         End4(("End"))
     end
 
     subgraph TrainerLane ["🏋️ Personal Trainer Orchestration Lane"]
         T41["Immediate Physical Safety Check:<br/>Seat client safely on box -> Assess pull location & sharpness"]
-        T42["Tap '[ ⚠️ Pain / Injury Flag ]' & hold Mic Icon -> Dictate:<br/>'Left hamstring strain near insertion on eccentric rep 3 @ 90kg'"]
+        T42["Tap '[ ⚠️ Pain / Injury Flag ]' & type a short note:<br/>'Left hamstring, eccentric rep 3 @ 90kg'"]
         T43["Setup Rehab Floor Station:<br/>Tap '[ 🔄 Pivot Plan ]' -> Fetch foam roller & resistance band<br/>Demonstrate gentle isometric drill -> Switch tab to Client C"]
     end
 
@@ -196,7 +196,7 @@ graph LR
      - `[ ⬆ Load Up Next ]`: Client completed the set cleanly; increase target load for their next session.
      - `[ ⬇ Step Back ]`: Client struggled or failed reps; reduce target load for their next session.
      - `[ ⚠️ Pain / Injury Flag ]`: Immediately flag joint pain or acute discomfort on this exercise.
-   - **Privacy-First Voice Notes (Auto-Mapped & Local-Only)**: Triggered directly from the feedback UI, voice notes are automatically tagged with the active client and exercise metadata (`clientId`, `exerciseId`). Audio is stored locally on the device and converted asynchronously using **local, on-device transcription libraries only**—ensuring sensitive client medical/physical PII never leaves the local device to external cloud speech APIs.
+   - **Typed feedback notes, no voice**: the feedback dialog takes a tag and a short typed note, attached to the active client and exercise. **The app never records audio** — ruled 2026-09-27 for privacy: a microphone in a gym records everyone near it. A mock recorder that once stood here wrote a sentence nobody had said into the client's record, so it was removed, not finished.
    - **Reversible Plan Pivot & Session Wipe**: If a client arrives with acute fatigue or equipment is unavailable, the PT taps `[ 🔄 Pivot / Wipe Plan ]`. This wipes the planned routine and immediately injects pre-configured **Generic Placeholder Cards** (`[ Mobility & Core Flow ]`, `[ Machine Circuit/Giant Set ]`, `[ Freestyle Block ]`) to maintain effort tracking without typing. This action is fully undoable (`[ ↩ Undo Pivot ]`) and preserved in the audit log for later desk review.
    - **Inline Plan Editing (Focus on the Client)**: For a finer on-the-fly reshape, the PT taps the clipboard's **✎ edit** icon to flip the deck into an editable list — reorder, swap, add/remove exercises, circuits, and rests, all applied to the **live session only**. While editing, the live-session chrome (the active-member tabs and the running timer) **steps aside** and the panel surfaces that client's **personal goals and notes**, so the plan is shaped against the client's aims rather than the clock. Edit mode is a **deep-linkable, reload-proof state**: its URL (`…/edit`) survives a page reload — the PT lands back in the editor, not the live deck — and every change is **persisted on each keystroke**, so nothing is lost if the phone reloads mid-edit. Exit is zero-friction (Done, Esc, or tap-outside). **The item just touched is never lost in the list**: inserting an exercise, circuit or rest — from the live deck's fast-adjust bar, an insert bar, or the catalog — re-renders the whole plan, so the new row is highlighted, scrolled into view and given the caret, ready to type — **no badge**: a blank row holding the caret already announces itself, and a tag beside it is noise on a narrow row. A row the catalog filled in takes no focus and reads as ordinary, so it *does* carry a label — **New** when injected, **Swapped** when a movement was retargeted in place. The call-out is **one-shot** — the next action moves it, so a highlight never outlives the moment it describes. Each exercise row also carries a **📖 catalog button** next to its name combobox, opening the filtered taxonomy picker for that row and swapping the movement **in place** — same slot, same sets, same logs (see [UC6](uc6_exercise_taxonomy_and_picker.md)). The ⋯ session menu is **context-aware**: while editing it reads **Delete Plan** and clears just that client's exercises (session stays open, still editing); on the live deck it reads **Delete Session** and takes the slot **off the schedule for good** — the card leaves the dashboard, its logged sets and feedback are discarded, but **each participant's plan is kept as an Unscheduled plan** so the programming can be re-run on another day (it surfaces in the notification feed's *Unscheduled plans* item). The same delete is offered from the **off-schedule dialog** raised when a session is started well outside its slot: hours late, the honest answer is often that the session never ran at all. **Completing is not offered while editing**: *Complete Workout Session* logs an execution to history, which is meaningless mid-edit, so the whole finish bar steps aside and **Done** is the only exit — it returns on exit from edit mode. The same applies to a **planning-mode programme**, which was never run and so is never completable. See [UC5 — Deep-Linkable Views](uc5_session_day_deck_and_deep_links.md).
    - **Per-client timer stack**: rest and exercise (work) timers start from the cards and stack on the clipboard, each **labelled with the client's name** + what's being timed, so a trainer running several people at once can tell them apart. There is **one active timer per client** — a start on a still-running timer refuses to reset it (warning flash), while a start on one that has run into overtime resets it (acknowledge blink). At zero a timer does **not** stop at "done": it keeps counting into **negative overtime** (red) with a beep at the crossing. Timers are dismiss-only and **persist across clipboard reloads**.
@@ -209,5 +209,5 @@ graph LR
    - Queues a background sync to send the logged data to the server.
 
 ### 3. Alternative Flows
-- **Offline Mode**: If internet access is lost on the gym floor, all signals, focus card progressions, and audio recordings are saved locally in browser storage, syncing automatically once a connection is re-established.
+- **Offline Mode**: If internet access is lost on the gym floor, all signals, focus card progressions, and typed notes are saved locally in browser storage, syncing automatically once a connection is re-established.
 - **Session starts off schedule**: Gyms run late — the previous group overruns, a client turns up twenty minutes after the hour. When **Start** is tapped more than **±15 minutes** from the scheduled slot, the session starts *immediately* (nothing waits on a dialog) and the PT is then **offered the schedule**, prefilled with the whole slot shifted onto the clock and keeping its planned length. Accepting moves the slot on the dashboard card and on the session record, so history and the day's timeline record when the session actually ran; declining (**Keep scheduled**, Esc, or ✕) changes nothing. A session begun *after* its scheduled end has no countdown left to run, so its clock **counts up from the actual start** rather than opening on an overrun it never had.

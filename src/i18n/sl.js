@@ -285,7 +285,6 @@ export const sl = {
   adjust_title: "Uveljavi spremembo programa",
   adjust_client: "Stranka:",
   adjust_feedback: "Povratna informacija:",
-  adjust_voice: "Glasovna opomba:",
   adjust_details: "Podrobnosti:",
   adjust_action_label: "Vrsta spremembe",
   adjust_action_modify: "Spremeni ciljno breme in ponovitve",
@@ -405,12 +404,6 @@ export const sl = {
   no_sessions_for_filters:
     "Tem filtrom ne ustreza noben trening. Počisti jih, da vidiš vso ploščo.",
   no_sessions_scheduled: "Ni načrtovanih treningov.",
-  voice_note_label: "Glasovna opomba",
-  voice_ready: "Tapni mikrofon za snemanje opombe",
-  voice_processing: "Obdelujem posnetek …",
-  voice_recording: "Snemanje... Tapni ponovno za shranitev",
-  voice_transcription_done: "Prepis v napravi je zaključen!",
-  voice_playing: "Predvajanje opombe...",
   program_not_defined: "Program ni določen",
   no_members_assigned: "Ni udeležencev",
   session_completed: "Zaključeno",
@@ -714,7 +707,6 @@ export const sl = {
     "To je en večer ponavljajočega se treninga. Kar spremeniš tukaj, velja samo za ta večer.",
   gym_note_in_this_plan: "v tem načrtu",
   feedback_keep_on_record: "Shrani to v kartoteko stranke",
-  feedback_local_only: "Samo na napravi",
   feedback_note_placeholder: "npr. levo koleno klikne, manjše breme ...",
   // Vodeni ogled, ne demo — tako se ta tek imenuje v walkthrough_title.
   // Pozdrav v obeh oblikah, kot že walkthrough_off_track_title in intake_invite_message_unsigned:

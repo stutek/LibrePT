@@ -4,7 +4,7 @@
 # modal to correct. The two are also mutually exclusive — tapping the OPPOSITE signal swaps it rather
 # than stacking both, which is what actually corrects a mistype (tapping the wrong one first, then
 # the right one, without having to untap the wrong one in between). Both rules are bounded by
-# isPlainQuickSignal: a noted or voice-memo'd entry is never removed by a button tap.
+# isPlainQuickSignal: an entry with a note (or an old record's voice flag) is never removed by a tap.
 #
 # Migrated from tests/e2e/test_quick_signal_toggle.py. That file's header rejected a "hand-built
 # shortcut" in favour of the real openSessionFromHistory path — the rejected shortcut was a session
@@ -158,7 +158,7 @@ def test_tapping_the_opposite_signal_swaps_it(page, local_server):
 
 def test_swap_never_touches_a_noted_opposite_signal(page, local_server):
     """The opposite-tag removal is bounded by the same isPlainQuickSignal rule as the same-tag
-    toggle: a noted/voice-memo'd entry on the opposite tag must survive being swapped away from."""
+    toggle: a noted entry on the opposite tag must survive being swapped away from."""
     _mount(page, local_server, "Noted Swap Exercise")
 
     result = page.evaluate(
@@ -192,9 +192,10 @@ def test_swap_never_touches_a_noted_opposite_signal(page, local_server):
     assert result["hardNoteSurvived"] is True
 
 
-def test_toggle_never_removes_a_note_or_voice_memo(page, local_server):
+def test_toggle_never_removes_a_note_or_an_old_voice_flag(page, local_server):
     """The toggle only removes the exact untouched quick-signal it would itself have created —
-    a typed note or a voice memo on the same tag must survive a re-tap of the plain button."""
+    a typed note, or an old record's voice flag, on the same tag must survive a re-tap of the plain
+    button."""
     _mount(page, local_server, "Noted Exercise")
 
     result = page.evaluate(

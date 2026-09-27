@@ -288,7 +288,6 @@ export const de = {
   adjust_title: "Programmänderung übernehmen",
   adjust_client: "Kunde:",
   adjust_feedback: "Rückmeldung:",
-  adjust_voice: "Sprachnotiz:",
   adjust_details: "Details:",
   adjust_action_label: "Änderung",
   adjust_action_modify: "Ziellast und Wiederholungen ändern",
@@ -413,12 +412,6 @@ export const de = {
   no_sessions_for_filters:
     "Kein Training passt zu diesen Filtern. Lösche sie, um die ganze Übersicht zu sehen.",
   no_sessions_scheduled: "Keine Trainings geplant.",
-  voice_note_label: "Sprachnotiz, nur auf diesem Gerät",
-  voice_ready: "Tippe auf das Mikrofon, um eine Sprachnotiz aufzunehmen",
-  voice_processing: "Aufnahme wird verarbeitet …",
-  voice_recording: "Aufnahme läuft... Tippe noch einmal zum Speichern",
-  voice_transcription_done: "Umwandlung in Text auf dem Gerät abgeschlossen.",
-  voice_playing: "Sprachnotiz wird abgespielt...",
   program_not_defined: "Kein Programm festgelegt",
   no_members_assigned: "Keine Teilnehmer",
   session_completed: "Abgeschlossen",
@@ -754,7 +747,6 @@ export const de = {
     "Das ist ein Abend eines wiederkehrenden Trainings. Was du hier änderst, ändert nur diesen Abend.",
   gym_note_in_this_plan: "in diesem Plan",
   feedback_keep_on_record: "In der Kundenakte behalten",
-  feedback_local_only: "Nur lokal",
   feedback_note_placeholder: "z. B. linkes Knie knackt, weniger Last...",
   // The demo's front door (see en.js). "Willkommen" addresses the reader without a gendered ending,
   // which Slovenian needs two forms for.
