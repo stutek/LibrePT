@@ -6423,6 +6423,28 @@ pustiti prazna in ne ponuditi številke. Preizkus naj signal ustvari pri 40 kg b
 zahteva, da predlog ni manjši od izvedene teže. Opaženo na objavljeni različici `0625bd6`; koda
 na `main` je ista.
 
+### 80.29 [ ] P3 — Predal obvestil še naprej trdi, da signal čaka, dokler strani ne osvežiš
+
+**Scenarij in koraki:** trener v oknu »Uveljavi spremembo programa« pritisne »Uveljavi in
+razreši«, nato pogleda predal obvestil.
+
+**Opaženo:** stran s pregledom pravi »Nič ne čaka na pregled. Vsi signali s tal so usklajeni!«,
+predal obvestil pa v isti sapi »1 stranka(-e/-k) ima nerešene povratne signale iz treninga« in
+»Ana Kovač — Jutranja vadba (1)«. Po osvežitvi strani je predal prazen in pravilen.
+
+**Vzrok, potrjen v kodi na `main`:** obvestilo ni shranjen zapis, ampak se sestavi ob vsakem
+izrisu iz nerešenih signalov ([notificationItems.js](src/domain/notificationItems.js)). Podatek
+je torej pravilen, izris pa star: pot za uveljavitev v
+[planAdjustments.js](src/modules/plans/planAdjustments.js) osveži seznam pregleda in seznam
+programov, predala pa ne — `renderNotificationArea` se pokliče ob zagonu in ob menjavi jezika.
+
+**Težava in vpliv:** dva dela istega zaslona si nasprotujeta; trener ne ve, kateremu verjeti,
+in na telefonu strani ne osvežuje.
+
+**Predlog in preverjanje:** po uveljavitvi in po razrešitvi poklicati isti izris predala.
+Preizkus naj razreši zadnji signal in zahteva, da predal takoj pokaže »Ni obvestil«. Opaženo na
+objavljeni različici `0625bd6`; koda na `main` je ista.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
