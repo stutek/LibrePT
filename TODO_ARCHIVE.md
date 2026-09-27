@@ -4422,3 +4422,13 @@ what is left is the view itself — `/history`, `historyView.js` and `renderGlob
 tests and the overflow walk entry that name it.
 
 **Done 2026-09-27 (Claude), commit `c7ab3a2`; `build check` green 04:02–04:12.** Finishing a session opened this view, so it now returns to the sessions list (chosen over a client's page, which a group session would have to pick one of). Planning drafts, which only this view listed, stay reachable through the notification area's resume message.
+
+### 81.4 [x] Import and export of exercises, routines and circuits in one place — done 2026-09-27
+
+- Exercises and circuits: import is built (§45.5, in the exercise library view); the export
+  (`catalogToInterchange`, `catalogToCsv`) sits in the Sync & Backup dialog and moves beside the
+  import.
+- **Routines have no import and no export.** New work: carried in the same file as the library, so
+  one file moves a trainer's whole library.
+
+**Done 2026-09-27 (Claude), commit `8f0f808`; `build check` green 04:18–04:30.** The export moved to the library screen beside Import; the JSON carries routines, which Import reads back. A routine carries no source, because schema 5 gives it no such field.

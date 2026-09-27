@@ -5904,13 +5904,9 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#813-x-pending-r
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#817-x-remove-the-global-history-view--done-2026-09-27); what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-### 81.4 [ ] Import and export of exercises, routines and circuits in one place
+### 81.4 [x] Import and export of exercises, routines and circuits in one place — done 2026-09-27
 
-- Exercises and circuits: import is built (§45.5, in the exercise library view); the export
-  (`catalogToInterchange`, `catalogToCsv`) sits in the Sync & Backup dialog and moves beside the
-  import.
-- **Routines have no import and no export.** New work: carried in the same file as the library, so
-  one file moves a trainer's whole library.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#814-x-import-and-export-of-exercises-routines-and-circuits-in-one-place--done-2026-09-27); what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ### 81.5 [ ] API keys in Settings — blocked
 
