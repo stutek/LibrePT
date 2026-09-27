@@ -6107,6 +6107,31 @@ obe smeri, preizkus pa naj po izhodu iz peskovnika zahteva, da vrstice ni. Opaž
 različici `0625bd6`; `89770cd`, ki je to pot uvedel, je v tej gradnji že vključen, zato
 verjetno velja tudi na `main` — preveriti na razvojnem strežniku pred popravkom.
 
+### 80.17 [ ] P3 — Slovenska števila: »3 strank«, »3 stranka(-e/-k) ima«
+
+**Scenarij in koraki:** trener odpre peskovnik, pogleda vrstico odprtega treninga nad dnom
+zaslona in nato predal obvestil.
+
+**Opaženo:** vrstica pravi »3 strank«, obvestilo pa »3 stranka(-e/-k) ima nerešene povratne
+signale iz treninga.« Pravilno slovensko je »3 stranke« in »3 stranke imajo«. Enako je pri
+programih: »{count} program(-i/-ov) je zasnovanih«.
+
+**Težava in vpliv:** aplikacija zveni kot strojni prevod prav v napisih, ki jih trener vidi
+najpogosteje. Angleščina in nemščina te napake nimata, ker imata eno množinsko obliko.
+
+**Vzrok, potrjen v kodi na `main`:** [sl.js](src/i18n/sl.js) ima `bar_clients_label: "strank"`
+— ena sama oblika za vsa števila — ter dva zapisa z oklepajem, `notif_pending_sessions_desc` in
+`notif_unscheduled_plans_desc`. Oblike z oklepajem, ki povedo spol bralca (»Dobrodošel(-la)«),
+so nekaj drugega in ostanejo: tam aplikacija spola ne ve, števila pa vedno ve.
+Pripomočka za množino v `src/` ni; opomba v
+[exercisePicker.js](src/modules/exercises/exercisePicker.js) že pravi, da ima slovenščina štiri
+oblike, in se jim je ta napis izognil z drugačno ubeseditvijo.
+
+**Predlog in preverjanje:** dodati pripomoček na `Intl.PluralRules` (»one«, »two«, »few«,
+»other«) in mu dati te tri napise; jezik, ki ima eno obliko, zapiše eno. Preizkus naj za 1, 2,
+3 in 5 zahteva pravilno slovensko obliko in ujemanje glagola. Opaženo na objavljeni različici
+`0625bd6`; zapisi na `main` so isti.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
