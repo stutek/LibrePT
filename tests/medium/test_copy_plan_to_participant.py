@@ -1,10 +1,10 @@
 # tests/medium/test_copy_plan_to_participant.py
-# Giving another participant tonight's plan (TODO §8.8) — the walk-in who joins a session already
+# Giving another participant tonight's plan — the walk-in who joins a session already
 # underway, handed what the room is doing in one tap instead of re-authoring it.
 #
 # What is copied is pinned without a browser in tests/unit_js/domain/planCopy.test.mjs. What needs
 # the DOM is the promise a trainer feels: they see WHO they are giving it to, the other person's
-# plan is theirs from that moment, and it is not the same thing as putting them on one plan (§8.1) —
+# plan is theirs from that moment, and it is not the same thing as putting them on one plan —
 # a copy diverges, a binding does not.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
@@ -90,7 +90,7 @@ def test_copying_hands_over_the_session_being_run(page, local_server):
 
 
 def test_the_copy_is_his_own_from_that_moment(page, local_server):
-    """The difference from binding them (§8.1), and the reason both controls exist: editing one plan
+    """The difference from binding them, and the reason both controls exist: editing one plan
     afterwards must not touch the other."""
     _mount(page, local_server)
     _open_copy_list(page)

@@ -1,5 +1,5 @@
 // tests/unit_js/domain/sessionRecord.test.mjs
-// The session form's output, which had no test at all before TODO §24.7 — it was reachable only by
+// The session form's output, which had no test at all before this was pulled out — it was reachable only by
 // filling in a real form in a real browser, so the rules below were only ever verified by clicking.
 //
 // The two that would cost a trainer real data if they broke:

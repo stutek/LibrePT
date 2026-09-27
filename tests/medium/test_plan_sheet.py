@@ -1,5 +1,5 @@
-# tests/medium/test_plan_sheet.py — the read-only plan sheet drawn under the live clipboard
-# (TODO §52.2 step 2). Nothing calls src/modules/clipboard/planSheet.js yet except this test; the
+# tests/medium/test_plan_sheet.py — the read-only plan sheet drawn under the live clipboard.
+# Nothing calls src/modules/clipboard/planSheet.js yet except this test; the
 # drag that reveals it under the current plan is step 3.
 #
 # Needs the DOM/CSS (computed colours, aria-labels, DOM order) but no router, no persistence and no

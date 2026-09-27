@@ -1,8 +1,8 @@
 # tests/medium/test_routine_builder.py
-# The routine builder's movement picker (TODO §13 / UC6, Scenario A): the builder drops standardized
+# The routine builder's movement picker (UC6, Scenario A): the builder drops standardized
 # movement IDs through a filtered picker rather than free text, and each dropped row authors its
 # metrics per the movement's MODALITY — a cardio movement hides the load axis and relabels the
-# primary field to its effort metric, at parity with the inline clipboard editor (TODO §17.1).
+# primary field to its effort metric, at parity with the inline clipboard editor.
 #
 # These lived in tests/e2e/test_exercise_taxonomy.py under a header claiming they "span views".
 # That claim was wrong: #routine-ex-picker and #routine-exercises-list are both rendered by
@@ -45,7 +45,7 @@ function navigateToPath(path) {
 renderRoutinesViewShell();
 renderRoutinesList({ state, t, openWorkoutSetupModal: noop });
 setupRoutineForms({
-  // The controller reads the state WHEN a handler runs, not when it was wired (TODO §40.3).
+  // The controller reads the state WHEN a handler runs, not when it was wired.
   getState: () => state,
   t,
   saveToLocalStorage: noop,

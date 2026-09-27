@@ -1,5 +1,5 @@
 // tests/unit_js/domain/inviteExpiry.test.mjs
-// When an invitation stops being answerable (src/domain/inviteExpiry.js) — TODO §1.6.
+// When an invitation stops being answerable (src/domain/inviteExpiry.js).
 //
 // Asked for 2026-08-17 (Simon): "can invitations expire (PT sets the expiry padding — example 4 hours
 // before session)". Three things these pin, all of them consequences of there being no server:

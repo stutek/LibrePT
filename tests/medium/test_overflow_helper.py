@@ -1,7 +1,7 @@
 # tests/medium/test_overflow_helper.py
 # The helper in tests/medium/_overflow.py is an assertion other component tests lean on, so it
-# needs its own proof that it fails when the component overflows and passes when it does not
-# (TODO §25.6). Without this, a helper that silently swept nothing would make every caller green.
+# needs its own proof that it fails when the component overflows and passes when it does not.
+# Without this, a helper that silently swept nothing would make every caller green.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
 import pytest
@@ -39,7 +39,7 @@ def test_the_live_clipboard_fits_the_phone_it_is_used_on(page, local_server):
 def test_a_card_pushed_out_of_the_clipboard_is_reported_against_the_clipboard(
     page, local_server
 ):
-    """The defect §25 was built for: an element wider than the phone, clipped away silently."""
+    """The defect the sweep exists to catch: an element wider than the phone, clipped away silently."""
     _mount(page, local_server)
     page.evaluate(
         """() => {

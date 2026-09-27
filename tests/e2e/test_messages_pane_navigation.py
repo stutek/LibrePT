@@ -1,5 +1,5 @@
 # tests/e2e/test_messages_pane_navigation.py
-# Navigating away must reveal where you navigated TO (TODO §28.7).
+# Navigating away must reveal where you navigated TO.
 #
 # The messages drawer expands to cover everything below the header, so a route change underneath it
 # is a route change nobody can see. Reported as "the ☰ menu does not work while the messages pane is
@@ -58,8 +58,8 @@ def test_the_drawer_survives_actions_that_are_not_navigation(page, local_server)
 
 
 def test_the_drawer_stays_open_when_nothing_changed_view(page, local_server):
-    """The other half of §28.7, and the regression it caused (reported 2026-08-18: "the message area
-    can't be expanded").
+    """The other half of the rule above, and the regression it caused
+    (reported 2026-08-18: "the message area can't be expanded").
 
     Expanding the drawer settles the timeline, which rewrites the URL to the focused day — so the
     router re-enters the SAME route, and a rule that collapsed on every switchView collapsed the

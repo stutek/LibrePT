@@ -16,7 +16,7 @@ import {
 } from "../../../../src/modules/common/eventTransports.js";
 
 // A foreign host on purpose: what these pin is how a link is BUILT, not where this app happens
-// to be deployed — that address is declared once in src/data/publicUrls.js (TODO §28.1).
+// to be deployed — that address is declared once in src/data/publicUrls.js.
 const BASE_URL = "https://app.example.test/LibrePT/";
 const EVENT = { kind: SESSION_INVITE, sessionId: "s1", title: "Hypertrophy Upper" };
 

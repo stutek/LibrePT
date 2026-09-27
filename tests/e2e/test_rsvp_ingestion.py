@@ -1,5 +1,5 @@
 # tests/e2e/test_rsvp_ingestion.py
-# The trainer tapping the link a client's reply carried (TODO §1.6).
+# The trainer tapping the link a client's reply carried.
 #
 # This is the last leg of the loop and the only one that WRITES: the client answered on their own
 # phone, the answer came back as a message, and one tap has to land it in the trainer's own store —

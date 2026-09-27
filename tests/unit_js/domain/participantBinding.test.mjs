@@ -1,5 +1,5 @@
 // tests/unit_js/domain/participantBinding.test.mjs
-// Several participants training ONE programme (src/domain/participantBinding.js) — TODO §8.1.
+// Several participants training ONE programme (src/domain/participantBinding.js).
 //
 // The promise: the trainer logs the set once and it counts for everyone doing it, while what each
 // person THOUGHT of it stays their own — one client can find a shared circuit too hard while

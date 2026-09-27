@@ -5,7 +5,7 @@
 // plausible: two blocks with the same name, a member whose set count no longer matches the rounds,
 // a round counter pointing at round 5 of a 3-round circuit that can therefore never be completed.
 //
-// None of this was reachable without mounting the editor in a browser until TODO §24.5.
+// None of this was reachable without mounting the editor in a browser until this was pulled out.
 
 import assert from "node:assert/strict";
 import { test } from "node:test";

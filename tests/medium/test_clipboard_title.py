@@ -100,7 +100,7 @@ def test_every_control_on_the_line_is_still_reachable(page, local_server):
 
 
 def test_the_bar_says_which_session_over_when_and_where(page, local_server):
-    """TODO §39.6, reported 2026-08-31 at desktop width: "this one clips on desktop".
+    """Reported 2026-08-31 at desktop width: "this one clips on desktop".
 
     The bar carried `2026-09-01 11:30 playground outside` on one 22px line — no session name
     anywhere in the clipboard, and 90px of that line lost to an ellipsis on a desktop window. The
@@ -132,7 +132,7 @@ def test_the_bar_says_which_session_over_when_and_where(page, local_server):
 
 
 def test_nothing_in_the_title_bar_is_pushed_out_of_it(page, local_server):
-    """§25.5's defect was here: with the title ellipsised, the edit-mode chip beside it was pushed
+    """The defect was here: with the title ellipsised, the edit-mode chip beside it was pushed
     169px outside the bar and vanished entirely. Geometry, in the test that owns this component —
     the route walk in tests/e2e/ sees the same thing but names only the route it happened on."""
     _mount(page, local_server)
@@ -157,9 +157,9 @@ _NAME_LINES = """() => {
 
 
 def test_a_merged_clipboard_gives_each_session_its_own_line(page, local_server):
-    """TODO §47.1, reported 2026-09-12 from the sandbox: the name of a merged clipboard ran under
+    """Reported 2026-09-12 from the sandbox: the name of a merged clipboard ran under
     the ▶ and ⋮ buttons. The fit test above passed all along, because `_mount` writes a plain
-    string into the h3 — the shape this bar had before §39.6 gave it two lines, and the one shape
+    string into the h3 — the shape this bar had before it was given two lines, and the one shape
     where the h3 still shrank. Through the real renderer, the h3 was 379px wide in a 240px slot.
 
     Cutting the joined name with "…" was measured and rejected: at 390px it showed "Group Strength &
@@ -233,8 +233,8 @@ def test_the_session_name_opens_the_same_menu_as_the_dots(page, local_server):
     click instead of separate button".
 
     ADDED to the ⋯ rather than replacing it, deliberately. That menu holds Delete Session, and a
-    destructive action reachable only by tapping a title that carries no affordance is §38.16's
-    lesson again — a control that promised less than it did. The ⋯ is the one mark on this bar
+    destructive action reachable only by tapping a title that carries no affordance repeats a
+    lesson already learned — a control that promised less than it did. The ⋯ is the one mark on this bar
     saying there is more here; what the title buys is a much bigger target for the same action,
     which is the ergonomics the request was actually after."""
     _mount(page, local_server)
@@ -355,7 +355,7 @@ def _render_reopened_record(page, title):
 
 
 def test_a_reopened_finished_session_is_called_by_its_own_name(page, local_server):
-    """TODO §55.1, seen 2026-09-14. A finished session opened from History — or, since §52.2, by
+    """Seen 2026-09-14. A finished session opened from History — or by
     pulling the plan aside on the clipboard — read "Untitled Session" even when the trainer had
     named it. Its name is on the record; nothing was reading it."""
     _mount(page, local_server)

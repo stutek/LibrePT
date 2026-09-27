@@ -1,12 +1,12 @@
 // tests/unit_js/domain/catalogMatch.test.mjs
-// Deciding which imported movements the catalog already knows (TODO §29.1,
-// src/domain/catalogMatch.js).
+// Deciding which imported movements the catalog already knows
+// (src/domain/catalogMatch.js).
 //
 // The ruling this implements: **a movement the catalog does not have is ALLOWED**, not refused and
 // not silently normalised into the nearest thing. It is marked instead, so a trainer can see at a
 // glance which movements in an imported plan have taxonomy behind them and which arrived with the
 // paste. Silently adopting a near-match is how a catalog becomes forty spellings of "Bench Press",
-// which is what §13's taxonomy work exists to prevent — and silently REJECTING one would throw away
+// which is what the movement taxonomy exists to prevent — and silently REJECTING one would throw away
 // the trainer's programme.
 
 import assert from "node:assert/strict";

@@ -1,13 +1,13 @@
 # tests/medium/test_clients_directory.py
-# The Client Directory grid (modules/clients/clientsDirectory.js), its own first-class view/route
-# since TODO 4.8: it lists one .client-card per seeded client, filters live as the search box is
+# The Client Directory grid (modules/clients/clientsDirectory.js), its own first-class view/route:
+# it lists one .client-card per seeded client, filters live as the search box is
 # typed (by name or goal), and shows an empty state when nothing matches. Mounted as a single view
 # via tests/medium/_harness.py's view_stub — no router, no IndexedDB, no app boot.
 #
 # The search box's listener lives in clientFormsController, not in the view module, so the stub
 # boots that controller through appBoot.bootClientForms — the exact step app.js calls. It used to
 # hand-duplicate the listener instead, which passed navigateToPath on both paths and so could not
-# see that the real controller passed it on neither (TODO §22, fixed alongside this change): the
+# see that the real controller passed it on neither, fixed alongside this change: the
 # filtered grid rendered correctly and threw on the first card tap.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
@@ -41,7 +41,7 @@ renderClientDetailViewShell();
 // the callback EXISTS and is reached, which is exactly what was broken.
 window.__navigated = [];
 bootClientForms({
-  // The controller reads the state WHEN a handler runs, not when it was wired (TODO §40.3).
+  // The controller reads the state WHEN a handler runs, not when it was wired.
   getState: () => state,
   t,
   navigateToPath: (path) => window.__navigated.push(path),
@@ -97,7 +97,7 @@ def test_search_with_no_match_shows_empty_state(page, local_server):
 
 
 def test_a_card_still_opens_after_the_grid_has_been_filtered(page, local_server):
-    """TODO §22: the search re-render dropped navigateToPath, so every card in a FILTERED grid threw
+    """The search re-render dropped navigateToPath, so every card in a FILTERED grid threw
     on tap while an unfiltered one worked — the failure only ever appeared after a search."""
     load_with_stub(page, local_server, STUB)
     page.wait_for_selector("#view-client-directory.active")

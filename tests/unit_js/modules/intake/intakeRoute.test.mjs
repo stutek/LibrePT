@@ -1,5 +1,5 @@
 // tests/unit_js/modules/intake/intakeRoute.test.mjs
-// Which visitor is this, and what language do they read? (src/modules/intake/intakeRoute.js) — §1.7.
+// Which visitor is this, and what language do they read? (src/modules/intake/intakeRoute.js).
 //
 // Both answers gate a boot decision, which is why they are pure and pinned here: getting the first
 // one wrong runs the trainer's whole app on a stranger's phone, and getting the second wrong stamps a

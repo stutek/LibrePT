@@ -1,5 +1,5 @@
 // tests/unit_js/data/driveSyncConflict.test.mjs
-// resolveSyncConflict() (src/data/driveSyncService.js, TODO §3.3) — the "not built" gap that section
+// resolveSyncConflict() (src/data/driveSyncService.js) — the "not built" gap the sync design
 // used to flag: a sync's three-way merge (syncMerge.js) already applies a safe default per conflict
 // and reports it, but nothing let a trainer override that default. This pins the override itself:
 // it doesn't re-run the merge, it replaces (or deletes) the one record in local state that the

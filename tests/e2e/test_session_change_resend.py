@@ -1,5 +1,5 @@
 # tests/e2e/test_session_change_resend.py
-# Being asked to tell the clients when a session moves (TODO §1.6).
+# Being asked to tell the clients when a session moves.
 #
 # Asked for 2026-08-17 (Simon): "when a session gets changed, PT should be asked if they want to resend
 # invitations". WHICH changes count is pinned without a browser
@@ -14,7 +14,7 @@ from playwright.sync_api import expect
 
 # Planted through the app's own store rather than into a named IndexedDB store: which store the app
 # reads is not this test's business, and a test that wrote into `schemaP` broke the day schema 4
-# became the one read (TODO §61).
+# became the one read.
 INVITED_SESSION = """
 async ([sessionId, clientId]) => {
   const store = await import(new URL('data/stateStore.js', document.baseURI).href);

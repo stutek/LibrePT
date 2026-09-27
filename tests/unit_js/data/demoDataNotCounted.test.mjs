@@ -1,10 +1,9 @@
 // tests/unit_js/data/demoDataNotCounted.test.mjs
-// Demo records are not the trainer's work, so nothing that counts their work counts them
-// (TODO §28.5, §28.6).
+// Demo records are not the trainer's work, so nothing that counts their work counts them.
 //
 // Two separate surfaces reported the same complaint on 2026-08-18: loading the demo dataset pushed
-// the header's ahead counter up (§3.9's "records not on Drive") and tripped the unbacked-data
-// warning (§3.8's "this exists in one evictable place"). Both were factually right about the
+// the header's ahead counter up ("records not on Drive") and tripped the unbacked-data
+// warning ("this exists in one evictable place"). Both were factually right about the
 // records and wrong about the person: seeded people, sessions and messages are a sales demo, and
 // telling a trainer to back them up or sync them teaches them that both indicators mean nothing.
 //

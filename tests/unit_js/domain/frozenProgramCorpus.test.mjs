@@ -1,5 +1,5 @@
 // tests/unit_js/domain/frozenProgramCorpus.test.mjs
-// The frozen corpus of real pasted programmes (TODO §29.2, point 4).
+// The frozen corpus of real pasted programmes.
 //
 // This is the answer to "how do we make the data ingestion not fragile". A parser tested only
 // against examples its author invented drifts toward the shapes that author imagined; a parser
@@ -52,7 +52,7 @@ for (const fixture of fixtures) {
 }
 
 test("a fixture with movements outside the catalog is read like any other", () => {
-  // §29.1: an unknown movement is ALLOWED. The parser has no opinion about the catalog at all —
+  // An unknown movement is ALLOWED. The parser has no opinion about the catalog at all —
   // matching happens later, and what it produces is the CUSTOM tag, not a rejection.
   const result = readProgram(readFileSync(`${FIXTURES_DIR}custom-movements.txt`, "utf-8"));
 

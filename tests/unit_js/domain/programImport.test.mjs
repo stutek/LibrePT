@@ -1,5 +1,5 @@
 // tests/unit_js/domain/programImport.test.mjs
-// Reading a programme written somewhere else (TODO §29, src/domain/programImport.js).
+// Reading a programme written somewhere else (src/domain/programImport.js).
 //
 // The design constraint that shapes every test here: the result lands in the SESSION EDITOR, not in
 // the database. So the parser's job is not to be right, it is to be USEFUL — a wrong guess is a
@@ -152,7 +152,7 @@ test("the format marker distinguishes 'not ours' from 'ours, one field wrong'", 
   assert.ok(result.reason.includes(PROGRAM_FORMAT), result.reason);
 });
 
-// ── What the trainer is shown before the editor opens (TODO §29.1) ─────────────────────────────
+// ── What the trainer is shown before the editor opens ──────────────────────────────────────────
 // Decided 2026-08-18: parsing failures — ALL of them, not the first — are surfaced before jumping
 // into the edit window. A trainer who lands in an editor and only then notices three rows are blank
 // has been given a puzzle; one who is told "3 of 12 lines could not be read, here they are" can fix

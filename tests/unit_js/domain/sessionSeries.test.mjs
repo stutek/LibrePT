@@ -1,5 +1,5 @@
 // tests/unit_js/domain/sessionSeries.test.mjs
-// A repeating session, and the occurrences it stands for (src/domain/sessionSeries.js) — TODO §35.3a.
+// A repeating session, and the occurrences it stands for (src/domain/sessionSeries.js).
 //
 // The promise a trainer feels: "Tuesdays and Thursdays at six" is ONE thing they set up, the board
 // still shows every evening it produces, and moving next Tuesday moves next Tuesday only. Everything

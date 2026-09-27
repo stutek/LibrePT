@@ -1,6 +1,6 @@
 // tests/unit_js/domain/clientNameWords.test.mjs
-// Keeping a client's name out of a session's name and location (TODO §66,
-// src/domain/clientNameWords.js). Ruled 2026-09-18 (Simon): whole words only, from names, surnames
+// Keeping a client's name out of a session's name and location
+// (src/domain/clientNameWords.js). Ruled 2026-09-18 (Simon): whole words only, from names, surnames
 // and aliases, and the save is refused.
 //
 // Pure logic, so Node rather than a browser: what the form does with the answer is a component test.

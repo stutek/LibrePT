@@ -1,6 +1,6 @@
 # tests/medium/test_plan_adjustments.py
 # The pending plan-adjustments deck and the Apply-Adjustment wizard (modules/plans/planAdjustments.js),
-# its own first-class view/route since TODO 4.8: the view renders the seeded unresolved feedback as
+# its own first-class view/route: the view renders the seeded unresolved feedback as
 # cards with a count badge, the wizard opens pre-filled from a card, and "Apply & Resolve" resolves
 # the item and updates the count. Closes the UC2 (feedback -> adjustment) loop under test.
 #

@@ -1,5 +1,5 @@
 // tests/unit_js/data/feedbackRoute.test.mjs
-// Where a trainer's feedback goes (src/data/feedbackRoute.js) — TODO §23.5.
+// Where a trainer's feedback goes (src/data/feedbackRoute.js).
 //
 // The promise: a personal trainer with no GitHub account can still reach someone, and what leaves
 // their device is four lines they can read and delete before sending. Nothing here touches a DOM.

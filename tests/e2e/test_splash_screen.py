@@ -108,7 +108,7 @@ def test_splash_offers_onboarding_while_the_database_is_empty(page, local_server
     onboarding.wait_for(state="visible", timeout=15000)
     assert page.locator("#splash-load-demo").is_visible()
     assert page.locator("#splash-start-empty").is_visible()
-    # Built since 2026-08-17 (TODO §9.5). It was the last control in the app announcing something
+    # Built since 2026-08-17. It was the last control in the app announcing something
     # that did not exist; since 2026-09-21 the promise is kept by the chapter list rather than by a
     # button, so what must be here is a chapter to tap.
     assert page.locator(".app-splash-chapter").first.is_enabled()
@@ -120,7 +120,7 @@ def test_splash_offers_onboarding_while_the_database_is_empty(page, local_server
 @pytest.mark.clean_start
 @pytest.mark.keep_splash
 def test_choosing_slovenian_translates_the_offer_it_leads_to(page, local_server):
-    """Reported by the first trainer to use the app (TODO §45.1): pick Slovenian on first run and
+    """Reported by the first trainer to use the app: pick Slovenian on first run and
     the invitation into the demo was still in English.
 
     The three buttons carried their English text in the markup with no translation key, so a
@@ -281,7 +281,7 @@ def test_start_with_an_empty_app_dismisses_the_splash(page, local_server):
 @pytest.mark.clean_start
 @pytest.mark.keep_splash
 def test_demo_data_choice_loads_the_dataset_and_stops_offering(page, local_server):
-    """The demo button opens the SANDBOX (TODO §40.9), which seeds itself on first entry. It used to
+    """The demo button opens the SANDBOX, which seeds itself on first entry. It used to
     reload through ?init=demo_data_load, which put the sample people into the database the trainer
     was about to start working in. Once there is data, the onboarding offer is gone — that is the
     whole 'until something is saved' rule, and it holds in either workspace."""
@@ -300,7 +300,7 @@ def test_demo_data_choice_loads_the_dataset_and_stops_offering(page, local_serve
 def test_walkthrough_choice_arrives_with_data_to_walk_through(page, local_server):
     """The guided demo drives the seeded sessions, so its entry point has to bring the dataset
     with it. A guide started on the empty app a first-run trainer is looking at would be a
-    panel pointing at nothing — which is why this offer opens the sandbox too (TODO §40.9), rather
+    panel pointing at nothing — which is why this offer opens the sandbox too, rather
     than only setting ?demo=. The sandbox is seeded on first entry, so the data is there by the time
     the first step looks for it.
 
@@ -481,7 +481,7 @@ def test_a_chosen_language_is_never_asked_for_again(page, local_server):
 @pytest.mark.clean_start
 @pytest.mark.keep_splash
 def test_a_leftover_splash_off_does_not_skip_the_first_run(page, local_server):
-    """The reported flow (TODO §28.11): clear browser data, reload the URL still in the address bar.
+    """The reported flow: clear browser data, reload the URL still in the address bar.
 
     `?splash=off` is set by every demo link and carried forward by every later navigation, while
     `?init=` is stripped as a boot-only param — so the URL a trainer has open after using the demo

@@ -1,5 +1,5 @@
 # tests/medium/test_clipboard_quick_signals.py
-# The Too Easy / Too Hard quick-signal buttons are toggles, not one-way stamps (TODO §8.7): a second
+# The Too Easy / Too Hard quick-signal buttons are toggles, not one-way stamps: a second
 # tap on the SAME signal undoes it, so a mis-tap on the gym floor doesn't need a trip to the feedback
 # modal to correct. The two are also mutually exclusive — tapping the OPPOSITE signal swaps it rather
 # than stacking both, which is what actually corrects a mistype (tapping the wrong one first, then

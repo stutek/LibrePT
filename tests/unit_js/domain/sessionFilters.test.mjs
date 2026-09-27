@@ -1,4 +1,4 @@
-// tests/unit_js/domain/sessionFilters.test.mjs — the board's filters as rules (TODO §45.6).
+// tests/unit_js/domain/sessionFilters.test.mjs — the board's filters as rules.
 //
 // Unit tier: these are four strings and two pure functions. What is pinned here is the CLICK MODEL,
 // because it is the part that was argued over and the part a person's expectations are built on —
@@ -142,7 +142,7 @@ test("the controls offer only what is actually on the board", () => {
   assert.deepEqual(participantsOf(sessions, clients), [{ id: "c1", name: "Ana" }]);
 });
 
-test("Today drops a date filter that leaves today out, and keeps everything else (TODO §77.7)", () => {
+test("Today drops a date filter that leaves today out, and keeps everything else", () => {
   const filtered = { from: "2026-09-07", to: "2026-09-07", clientId: "c1", location: "Gym One" };
 
   assert.deepEqual(filtersIncludingDay(filtered, "2026-09-24"), {

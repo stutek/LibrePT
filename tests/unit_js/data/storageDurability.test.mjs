@@ -1,5 +1,5 @@
 // tests/unit_js/data/storageDurability.test.mjs
-// Storage durability reporting (TODO §18.6, §18.8): pure — every test here injects its own fake
+// Storage durability reporting: pure — every test here injects its own fake
 // `storage` object, so none of it needs a real browser. The one test that doesn't (asserting the
 // REAL Storage API reports a usable quota) stays in tests/e2e/test_storage_durability.py.
 
@@ -88,7 +88,7 @@ test("durability reports the consequence that tripped it", async () => {
   assert.equal(noApi.atRisk, true);
   assert.equal(noApi.reason, "no-storage-api");
 
-  // A very busy PT reaches ~16.6 MiB/yr in one bucket (§18.6), so the floor must clear that with
+  // A very busy PT reaches ~16.6 MiB/yr in one bucket, so the floor must clear that with
   // room for the star write's multiple.
   assert.equal(MINIMUM_WORKABLE_QUOTA_BYTES, 50 * 1024 * 1024);
 });

@@ -1,6 +1,6 @@
 // tests/unit_js/modules/intake/signupDelivery.test.mjs
 // Handing a filled-in introduction to whatever app the client already uses
-// (src/modules/intake/signupDelivery.js) — TODO §1.7.
+// (src/modules/intake/signupDelivery.js).
 //
 // The promise: a client who taps Send either knows their details went, or knows they did not. The two
 // ways that goes wrong are both pinned here — a cancelled share reported as a failure (telling someone
@@ -101,7 +101,7 @@ test("a share that genuinely failed is never reported as sent", async () => {
 });
 
 test("the refusal names the browser's own error, not just its message", async () => {
-  // A Galaxy S23 refused a share that `canShare` had approved (TODO §45.4), and the only evidence
+  // A Galaxy S23 refused a share that `canShare` had approved, and the only evidence
   // of why is what the browser threw. A DOMException carries that in its NAME — the message is
   // frequently empty — so a reason built from the message alone reports nothing at all.
   const refusal = Object.assign(new Error(""), { name: "NotAllowedError" });
@@ -118,8 +118,8 @@ test("the refusal names the browser's own error, not just its message", async ()
 });
 
 test("a refused share leaves the client with the file, not only with the bad news", async () => {
-  // Android Chrome shares only file types on a list of its own, and this one is not on it (TODO
-  // §45.4): the S23 that reported this refused the share after offering the button. The client was
+  // Android Chrome shares only file types on a list of its own, and this one is not on it:
+  // the S23 that reported this refused the share after offering the button. The client was
   // then told it failed and left holding nothing, on a phone they may not use again — so the refusal
   // itself produces the file, and the page can go straight to explaining how to send it.
   const refusal = Object.assign(new Error("Permission denied"), { name: "NotAllowedError" });

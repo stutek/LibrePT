@@ -104,7 +104,7 @@ def test_every_data_i18n_attribute_is_actually_applied(src_dir):
     2026-08-30 nothing read those attributes: 27 of them sat in the markup — the whole session
     editor, the client register's invite button, the clipboard's plan menu — and every one shipped
     its English placeholder text in every language (reported as "na slovenski strani se včasih
-    pojavlja angleški tekst", TODO §38.20).
+    pojavlja angleški tekst").
 
     The attribute is the cheaper half of the mechanism and the one a person writing markup reaches
     for, so what has to stay true is that SOMETHING applies it.

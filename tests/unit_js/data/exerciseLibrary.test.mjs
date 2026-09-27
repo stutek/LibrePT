@@ -1,6 +1,6 @@
 // tests/unit_js/data/exerciseLibrary.test.mjs
 // The exercise library a trainer picks from: LibrePT's catalog, read from code, plus the trainer's
-// own exercises from storage (src/data/exerciseLibrary.js, TODO §45.5).
+// own exercises from storage (src/data/exerciseLibrary.js).
 
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync, statSync } from "node:fs";

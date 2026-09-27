@@ -1,5 +1,5 @@
 # tests/medium/test_demo_narrator_card.py
-# The long demo's narration surface (TODO §35.1) — the cards, the persona label and the caption bar
+# The long demo's narration surface — the cards, the persona label and the caption bar
 # that carry a four-minute story between its taps.
 #
 # Why this is a component test: the surface is what a VIEWER reads, so the claims are about what is
@@ -105,7 +105,7 @@ def _show(page, step):
 
 
 def test_a_narrated_step_puts_its_words_on_screen(page, local_server):
-    """§35.1's rule for narrated steps: the words are ON SCREEN and they are the story's, not a key.
+    """The rule for narrated steps: the words are ON SCREEN and they are the story's, not a key.
 
     The card carried its own Continue button until 2026-08-23, when a step whose only control was
     that button left the guide's own Next greyed out beside it — two ways on, one of them dead. The
@@ -121,7 +121,7 @@ def test_a_narrated_step_puts_its_words_on_screen(page, local_server):
 
 
 def test_the_viewer_is_told_whose_phone_they_are_looking_at(page, local_server):
-    """One persona at a time was the ruling (§35.1), so this label is the ONLY thing separating the
+    """One persona at a time was the ruling, so this label is the ONLY thing separating the
     trainer's app from a client's — the two look the same."""
     _mount(page, local_server)
 
@@ -154,7 +154,7 @@ def test_the_first_tap_on_the_app_takes_the_card_away(page, local_server):
 
 
 def test_the_paper_track_is_words_not_a_drawn_form(page, local_server):
-    """§35.1: the paper steps SAY what happens on a printed form. A drawn form among live screens
+    """The paper steps SAY what happens on a printed form. A drawn form among live screens
     reads as a real one, and the first viewer who goes looking for it in the app has been misled —
     so what the paper card holds is text, and its paper-ness is the surface it is written on."""
     _mount(page, local_server)
@@ -196,7 +196,7 @@ ONWARD_STEP = {
 
 
 def test_the_last_card_offers_the_two_ways_onward(page, local_server):
-    """§30.2: the demo used to end by simply closing, leaving a trainer inside the clipboard it had
+    """The demo used to end by simply closing, leaving a trainer inside the clipboard it had
     just shown them with nothing said. Dismissing IS "play around" — the app stays where the story
     put it — and the other way is the cleanup dialog the demo notice already opens."""
     _mount(page, local_server)
@@ -265,7 +265,7 @@ def test_the_card_is_readable_on_every_theme(page, local_server):
     """
     _mount(page, local_server)
 
-    # Every kind, on every palette: they are one family since 2026-08-27 (§38.10), and a family is
+    # Every kind, on every palette: they are one family since 2026-08-27, and a family is
     # only as readable as its worst member. The off-track card is the guide's own and is drawn
     # through the same surface, so it is walked here too.
     kinds = ("chapter", "message", "paper", "screenshot")

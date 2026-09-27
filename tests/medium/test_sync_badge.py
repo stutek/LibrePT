@@ -4,7 +4,7 @@
 # tests/medium/_harness.py's HEADER_STUB.
 #
 # The two OTHER tests in the e2e original stay there deliberately: they drive real client creation
-# through the form and assert the count reflects it, which is the whole point of TODO §3.9 — that
+# through the form and assert the count reflects it, which is the whole point of that guarantee — that
 # `onStateSaved` at the stateStore seam catches every writer, including call sites that bypass
 # app.js's save wrapper. That claim is only meaningful against the real store, so a mounted
 # component with a fake state would assert nothing.
@@ -82,7 +82,7 @@ def test_counters_are_legible_and_grow_on_desktop(page, local_server):
 def test_an_unconnected_cloud_reads_as_unhealthy(page, local_server):
     """With no Drive grant the slashed cloud carries the warning colour, not a muted grey.
 
-    **This reverses the 2026-07 decision, on the maintainer's ruling (TODO §28.8).** The old
+    **This reverses the 2026-07 decision, on the maintainer's ruling.** The old
     reasoning was that PRIVACY.md makes local-first a supported choice, so declining cloud sync is
     not a fault and must not spend the warning vocabulary. What that produced in practice was a
     subtle line nobody read as a problem — reported directly: *"the strikethrough marking backup as
@@ -149,8 +149,8 @@ def _load_connected(page, local_server):
 
 
 def test_a_connected_tap_syncs_instead_of_opening_the_dialog(page, local_server):
-    """Connected, the header cloud is "sync now" — the dialog was an extra tap nobody needed
-    (TODO §3.11), and it stays reachable from the ☰ menu.
+    """Connected, the header cloud is "sync now" — the dialog was an extra tap nobody needed,
+    and it stays reachable from the ☰ menu.
 
     The sync attempted here cannot succeed (no real grant), which is what makes the second half
     assertable: the failure has to reach the glyph, because the dialog that used to report it is
@@ -214,10 +214,10 @@ def test_the_whole_cluster_greys_out_when_no_cloud_is_connected(page, local_serv
     that does not exist — the numbers are real, but the colour promises a sync that cannot happen.
     Grey says "these are facts about a thing you have not set up", which is what they are.
 
-    **This does not undo TODO §28.8.** The SLASH keeps its warning colour: it is the one part
+    **This does not undo the 2026-07 ruling above.** The SLASH keeps its warning colour: it is the one part
     reporting a state worth acting on (every client record in one evictable place), and it was made
     visible that morning after being reported as unreadable. Greying the cloud body around it is what
-    §3.11 originally had and what this restores — a bright cloud under a grey slash reads as
+    the badge originally had and what this restores — a bright cloud under a grey slash reads as
     connected.
     """
     load_with_stub(page, local_server, STUB)
@@ -252,5 +252,5 @@ def test_the_whole_cluster_greys_out_when_no_cloud_is_connected(page, local_serv
         "a green counter promises a sync that cannot happen"
     )
     assert colors["ahead"] != colors["success"]
-    # The one part that still speaks up, and the reason it does is TODO §28.8.
+    # The one part that still speaks up, and the reason it does is the 2026-07 ruling above.
     assert colors["slash"] == colors["warning"]

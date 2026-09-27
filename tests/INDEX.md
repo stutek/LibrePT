@@ -23,7 +23,7 @@ localises the fault better, and a test placed too low simply cannot express what
 | [tests/unit_js/security/](unit_js/security/) (4 files, 15 tests) | `node:test`, stage 1 | one ES module, no DOM | It pins a **security property** with no DOM: injection into a generated file, attacker-controlled object keys. Its own gate task and its own CI job (`security-tests`), so a regression is named as a security one instead of a generic unit-test failure. Excluded from the glob above — it is gated separately, not twice. |
 | [tests/medium/](medium/) (60 files, 349 tests) | Playwright, stage 2 | one component against real `index.html` markup | It needs the **DOM/CSS** but not navigation, persistence or a real app boot. Four shapes, all in [_harness.py](medium/_harness.py): `HEADER_STUB` (header + its route-backed dialogs), `SESSIONS_STUB` (the dashboard timeline), `clipboard_stub()` (the live session, fed an injected `activeSession`), and `view_stub()` to build one for any other view — shell markup → activate → render. |
 | [tests/e2e/](e2e/) (55 files, 253 tests) | Playwright, stage 3 | the whole app | It needs the router, IndexedDB, the service worker, reload/deep-link behaviour, or a multi-step flow across views. |
-| [tests/regression/](regression/) (2 files, 5 tests) | Playwright, stage 4 | the whole app, on the RELEASED schema | It states a promise the shipped version makes — data survives a reload, a backup carries every collection, an erasure leaves no name, the demo loads. Its own suite and stage (TODO §62, ruled 2026-09-19): when behaviour changes, the schema and these tests change together, so an ordinary change to a screen must not touch this directory. [test_frozen_schema.py](regression/test_frozen_schema.py) fails the day the released schema moves past the number the suite froze, which is what stops the two suites drifting apart quietly. |
+| [tests/regression/](regression/) (2 files, 5 tests) | Playwright, stage 4 | the whole app, on the RELEASED schema | It states a promise the shipped version makes — data survives a reload, a backup carries every collection, an erasure leaves no name, the demo loads. Its own suite and stage: when behaviour changes, the schema and these tests change together, so an ordinary change to a screen must not touch this directory. [test_frozen_schema.py](regression/test_frozen_schema.py) fails the day the released schema moves past the number the suite froze, which is what stops the two suites drifting apart quietly. |
 
 **Every test runs in the same environment, wherever it is run.** `tests/conftest.py`'s
 `one_environment_everywhere` clears the variables this repository's own code branches on — today that
@@ -59,8 +59,8 @@ Four things to know before writing one:
 **One e2e file is not about behaviour at all**: [test_layout_overflow.py](e2e/test_layout_overflow.py)
 walks every route at three real device widths (iPhone 14, Galaxy S23 Ultra, desktop) plus one
 Slovenian pass, and asserts *geometry* — that nothing extends past its clipping boundary, nothing
-is silently clipped inside its own box ([TODO §25](../TODO.md)), and nothing is wider than a parent
-that does not clip it ([TODO §47.1](../TODO.md)). A walk only sees the text the seed data holds, so it
+is silently clipped inside its own box, and nothing is wider than a parent
+that does not clip it. A walk only sees the text the seed data holds, so it
 opens the clipboard with the LONGEST seeded name, not the first one. It lives here rather than in
 `medium/` because an overflow is a property of the **composed** page: the same component fits alone
 and breaks beside a long client name. The sweep itself is
@@ -78,8 +78,7 @@ the app writes into its own sentences, and takes the device's fonts away first �
 browser against a fontconfig holding one Latin face, so a character that appears can only have come
 from a file the app ships. Neither claim can be made below this tier: what a glyph looks like is
 something only a real font stack in a real page can answer, and both are claims the build has to
-hold rather than diagnostics someone remembers to run ([TODO §74.4](../TODO.md),
-[§74.5](../TODO.md)).
+hold rather than diagnostics someone remembers to run.
 
 **The other geometry test sits one tier down**:
 [medium/test_clipboard_deck_legibility.py](medium/test_clipboard_deck_legibility.py) asserts that a
@@ -100,12 +99,11 @@ So this runs as a scheduled canary (`.github/workflows/google-canary.yml`) and, 
 Actions secret, so there is one code path rather than two. The identity is a **real Google account,
 not a service account**: Google refuses a service account's `appDataFolder` writes for lack of
 storage quota, and the folder cannot be seeded by hand either, so a service-account canary could
-only ever list an empty folder (verified 2026-08-12; [TODO §1.5.1](../TODO.md)).
+only ever list an empty folder (verified 2026-08-12).
 With no credentials present it **skips rather than fails** — the correct outcome on every machine
 that never configured one. **CI is the exception**: the canary workflow fails on a missing
 credential in its first step, before the checkout, because there "no credential" means an expired
-token or a deleted secret, i.e. a canary that quietly stopped watching. See
-[TODO §1.5](../TODO.md).
+token or a deleted secret, i.e. a canary that quietly stopped watching.
 
 **What a test may assert, in any tier: the behaviour a caller depends on, never the mechanics that
 produce it**. The tier decides how much of the app boots;
@@ -196,13 +194,13 @@ new one when a version is added.
 
 **The frozen device corpus** lives in [tests/fixtures/devices/](fixtures/devices/) — what an install's
 IndexedDB and localStorage held at one point, with its own store layout, restored and booted by
-[e2e/test_device_database_corpus.py](e2e/test_device_database_corpus.py) (TODO §63). A backup file is
+[e2e/test_device_database_corpus.py](e2e/test_device_database_corpus.py). A backup file is
 not what a phone holds: the stores per schema, the meta store and the collections that exist only in
 one store are only ever tested here. Same rule: never edit a snapshot, add one.
 
 **Every browser test also checks what was stored.** After the test body,
 `stored_records_match_their_schema` reads the app's databases and fails the test if a record carries a
-field, or sits in a collection, no live schema declares (TODO §62) — a feature writing ahead of its
+field, or sits in a collection, no live schema declares — a feature writing ahead of its
 schema looks fine on the device that wrote it and is missing from every backup.
 
 **Stage 3 reads the shape the NEXT version will use.** While a preview shape exists, the e2e and demo
@@ -231,7 +229,7 @@ suite race ahead of the app:
 
 **The frozen programme corpus** lives in [tests/fixtures/programs/](fixtures/programs/) — real pasted
 shapes an assistant or a spreadsheet actually produces, which
-[unit_js/domain/frozenProgramCorpus](unit_js/domain/frozenProgramCorpus.test.mjs) must keep parsing
-(TODO §29.2). Same rule as the backup corpus: never edit one, and **every paste that fails in real
+[unit_js/domain/frozenProgramCorpus](unit_js/domain/frozenProgramCorpus.test.mjs) must keep parsing.
+Same rule as the backup corpus: never edit one, and **every paste that fails in real
 use joins it**. A parser tested only against examples its author invented drifts toward the shapes
 that author imagined.

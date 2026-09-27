@@ -1,5 +1,5 @@
 # tests/e2e/test_session_item_record.py
-# TODO §17.1: a finished session is persisted as the WHOLE structured program — a flat list of typed
+# A finished session is persisted as the WHOLE structured program — a flat list of typed
 # items (exercise | rest) with circuit grouping via circuitId and a completed flag per exercise —
 # not just the performed sets. What stays here needs the real, live-booted app: the re-open
 # round-trip that rebuilds a live plan from the stored snapshot, through the real

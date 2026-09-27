@@ -1,5 +1,5 @@
 # tests/medium/test_clipboard_rest_focus.py
-# Rests are first-class, focusable plan items (TODO §8.6): a collapsed standalone rest card's only
+# Rests are first-class, focusable plan items: a collapsed standalone rest card's only
 # allowed action is bringing itself into focus, exactly like a collapsed exercise or circuit card —
 # starting its timer is only reachable from the focused state, via RestDeckCard's Start action. Also
 # covers the focus-model change that made this possible: completeCircuitRound lands focus on a

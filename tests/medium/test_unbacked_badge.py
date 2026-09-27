@@ -1,5 +1,5 @@
 # tests/medium/test_unbacked_badge.py
-# The header's unbacked-data warning (TODO §3.8, renderBackupBadge in applicationHeader.js).
+# The header's unbacked-data warning (renderBackupBadge in applicationHeader.js).
 #
 # Mounted on HEADER_STUB and driven by calling renderBackupBadge() with an assessment directly:
 # what the assessment DECIDES is pure logic and belongs in tests/unit_js/data/backupHealth.test.mjs,
@@ -89,7 +89,7 @@ def test_the_warning_clears_without_a_reload(page, local_server):
 
 def test_tapping_the_warning_opens_the_remedy(page, local_server):
     """Not an explainer — the Sync & Backup dialog, which offers BOTH a downloaded file and a Drive
-    sync. §3.8 turns on either being available, so the warning must not route only to Google."""
+    sync. The warning turns on either being available, so it must not route only to Google."""
     load_with_stub(page, local_server, STUB)
     page.wait_for_selector("#app-header")
     page.evaluate("window.showBackupHealth({ level: 'due', unbackedCount: 25 })")

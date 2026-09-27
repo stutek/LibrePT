@@ -1,5 +1,5 @@
 // tests/unit_js/modules/demo/demoNarratorCard.test.mjs
-// The kinds of card the demo narrates with (src/modules/demo/demoNarratorCard.js) — TODO §38.10.
+// The kinds of card the demo narrates with (src/modules/demo/demoNarratorCard.js).
 //
 // The cards were four different-looking boxes: a `kind` string interpolated into a class name, two
 // stylesheet blocks, and a caption line the guide wrote by hand. Asked 2026-08-27 to make them one
@@ -87,7 +87,7 @@ test("the guide's own card speaks for the guide, not for the story", () => {
 });
 
 test("only a card the story ends on may offer the way out", () => {
-  // Offering it earlier reads as the demo asking to be stopped (§30.2).
+  // Offering it earlier reads as the demo asking to be stopped.
   assert.equal(new ChapterNarratorCard(t).offersWayOnward({ onward: true }), true);
   assert.equal(new ChapterNarratorCard(t).offersWayOnward({}), false);
   assert.equal(new OffTrackNarratorCard(t).offersWayOnward({ onward: true }), false);

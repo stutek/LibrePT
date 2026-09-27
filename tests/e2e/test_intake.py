@@ -1,5 +1,5 @@
 # tests/e2e/test_intake.py
-# A prospective client opening /intake on their own phone (TODO §1.7/§26).
+# A prospective client opening /intake on their own phone.
 #
 # What only this tier can prove is the BOOT DECISION. tests/medium/test_intake_form.py mounts
 # `bootIntake` directly and covers the form's behaviour; nothing there can tell you that a real
@@ -52,8 +52,8 @@ def test_a_client_gets_the_form_and_not_the_trainers_app(page, local_server):
 
 @pytest.mark.clean_start
 def test_filling_it_in_leaves_nothing_that_outlives_the_tab(page, local_server):
-    """§26.1's stateless promise, through a real navigation and a real IndexedDB, and since
-    2026-08-29 stated exactly (§38.12): nothing persists.
+    """The stateless promise, through a real navigation and a real IndexedDB, and since
+    2026-08-29 stated exactly: nothing persists.
 
     What she types is held in sessionStorage while the tab is open, so a reload does not throw her
     work away — that is the test below. Everything that OUTLIVES the tab is what this one is about,

@@ -1,6 +1,6 @@
 // tests/unit_js/domain/walkthroughReadiness.test.mjs
-// Whether the guided walkthrough has anything to walk through (TODO §28.14,
-// src/domain/walkthroughReadiness.js).
+// Whether the guided walkthrough has anything to walk through
+// (src/domain/walkthroughReadiness.js).
 //
 // The walkthrough drives the app's own real controls: open the group session, focus a CIRCUIT card,
 // signal it too easy, switch to the second participant. Every one of those needs a specific shape in

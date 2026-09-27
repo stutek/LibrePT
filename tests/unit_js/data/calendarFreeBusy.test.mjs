@@ -1,5 +1,5 @@
 // tests/unit_js/data/calendarFreeBusy.test.mjs
-// Google Calendar freeBusy client (TODO §1.3/§1.5, src/data/calendarFreeBusy.js).
+// Google Calendar freeBusy client (src/data/calendarFreeBusy.js).
 //
 // The promise worth pinning is not "it parses JSON" — it is that a room whose calendar could not be
 // read never comes back looking free. Google reports that failure per-calendar inside an HTTP 200,
@@ -136,6 +136,6 @@ test("a dead grant surfaces as an auth failure the caller can act on", async () 
 
 test("the scope stays the narrowest one Google publishes", () => {
   // Widening this to `calendar` or `calendar.events` would make every trainer's session titles and
-  // client names readable by anyone holding a room-calendar grant (TODO §1.5).
+  // client names readable by anyone holding a room-calendar grant.
   assert.equal(GOOGLE_CALENDAR_FREEBUSY_SCOPE, "https://www.googleapis.com/auth/calendar.freebusy");
 });

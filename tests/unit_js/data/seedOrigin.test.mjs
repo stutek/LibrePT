@@ -1,6 +1,6 @@
 // tests/unit_js/data/seedOrigin.test.mjs
 // Which switch wrote a seeded record, and whether test rows have reached the trainer's own database
-// (src/data/seedProvenance.js, TODO §46.7).
+// (src/data/seedProvenance.js).
 //
 // The origin can only be recorded at the moment the row is written — a demo row and a test row are
 // byte-identical afterwards — so these are the assertions standing between "test data escaped" and

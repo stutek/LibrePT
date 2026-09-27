@@ -1,5 +1,5 @@
 # tests/medium/test_intake_invite_dialog.py
-# Sending the intake link to one particular person (TODO §26.3 step 2).
+# Sending the intake link to one particular person.
 #
 # Which channel a typed contact implies is pinned without a browser in
 # tests/unit_js/domain/contactChannel.test.mjs. What needs the DOM is the surface's promises: the
@@ -105,7 +105,7 @@ def test_correcting_the_contact_re_aims_the_send(page, local_server):
 
 
 def test_the_way_that_needs_no_contact_detail_is_still_offered(page, local_server):
-    """§26.3's first step, and the only route that reaches WhatsApp, Viber or Signal — or a client
+    """The generic share route, and the only one that reaches WhatsApp, Viber or Signal — or a client
     who would rather not give a number at all."""
     _open(page, local_server)
 

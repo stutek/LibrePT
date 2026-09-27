@@ -1,5 +1,5 @@
 // tests/unit_js/modules/demo/storyTour.test.mjs
-// The long demo's script as DATA (src/modules/demo/storyTour.js) — TODO §35, §38.13.
+// The long demo's script as DATA (src/modules/demo/storyTour.js).
 //
 // The script is content, and content is checked by reading it. What is checked here is the one thing
 // reading cannot see: what the script becomes after its cards are FOLDED into the steps they
@@ -43,7 +43,7 @@ test("the trainer-details chapter only shows the identity form", () => {
 
 test("every chapter on the trainer's phone says which screen it starts on", () => {
   // Without it a chapter begins wherever the previous one left the app. The evening chapter did
-  // exactly that (§38.13): the gym chapter ends inside the plan editor, so the evening opened there,
+  // exactly that: the gym chapter ends inside the plan editor, so the evening opened there,
   // and by the third step the guide had greyed out every button for five seconds and then told the
   // trainer to go back to the sessions board — while the board was where it had just navigated.
   //

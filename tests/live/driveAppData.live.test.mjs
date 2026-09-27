@@ -1,5 +1,5 @@
 // tests/live/driveAppData.live.test.mjs — the real src/data/driveAppData.js against the real Google
-// Drive API, with a real token (TODO §1.5/§3.3).
+// Drive API, with a real token.
 //
 // **This imports the production module, not a reimplementation of it.** Node 18+ ships a global
 // `fetch`, and every function in driveAppData.js takes `fetchImpl` defaulting to exactly that — so

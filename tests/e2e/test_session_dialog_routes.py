@@ -3,7 +3,7 @@
 # reopens it over the restored session instead of dropping the trainer back on the deck mid-browse.
 #
 # `#dialog-add-session-exercise` is not covered here because it is unreachable UI: its only button
-# sits in a `display: none !important` container and the editor never calls its opener (TODO §19).
+# sits in a `display: none !important` container and the editor never calls its opener.
 #
 # These add no new class of exposure: the client id is already in the parent session URL.
 #

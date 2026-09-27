@@ -1,5 +1,5 @@
 # tests/medium/test_participant_binding.py
-# Several participants on ONE plan, in the clipboard (TODO §8.1).
+# Several participants on ONE plan, in the clipboard.
 #
 # The rules are pinned without a browser in tests/unit_js/domain/participantBinding.test.mjs. What
 # needs the DOM is the promise a trainer feels on the gym floor: two people doing the identical

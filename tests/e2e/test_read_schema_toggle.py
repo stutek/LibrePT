@@ -45,7 +45,7 @@ def _records_in_schema(page, schema, collections=None):
     the same answer whichever store was really being read.
 
     `collections` narrows the comparison, which is what makes it fair across schemas that do not
-    declare the same set: a PREVIEW-ONLY collection (§18.4's expand-first staging — `previewProbe`)
+    declare the same set: a PREVIEW-ONLY collection (the expand-first staging schema — `previewProbe`)
     is deliberately absent from the stable store, and counting it as a difference
     would report the staging rule working as though it were broken."""
     return _evaluate(
@@ -178,7 +178,7 @@ def test_an_unknown_stored_schema_falls_back_instead_of_stranding_the_install(
 def test_a_preview_only_record_is_written_to_the_preview_store_alone(
     page, local_server
 ):
-    """Staging through the real stores (TODO §61): `previewProbe` is declared by the PREVIEW schema
+    """Staging through the real stores: `previewProbe` is declared by the PREVIEW schema
     only, so saving one puts it into `schemaPREVIEW` and nowhere else — and a backup, written at the
     stable schema, does not carry it."""
     page.goto(local_server + "?init=demo_data_load")
@@ -219,7 +219,7 @@ def _row(page, schema, record_id):
 def test_saving_while_reading_an_older_schema_keeps_the_fields_it_cannot_see(
     page, local_server
 ):
-    """TODO §70, the case §45.5 made real: schema 4 does not declare `exercises.source`, so its store
+    """Schema 4 does not declare `exercises.source`, so its store
     does not hold it and an install reading 4 never loads it. A save made there must still leave the
     source in the newer store, or switching back finds it gone."""
     page.goto(local_server + "?init=demo_data_load")
@@ -238,7 +238,7 @@ def test_saving_while_reading_an_older_schema_keeps_the_fields_it_cannot_see(
         """,
     )
     assert "source" not in _row(page, older, "imported-sled"), (
-        "the older store must not hold a field only a newer schema declares (TODO §62)"
+        "the older store must not hold a field only a newer schema declares"
     )
 
     _evaluate(

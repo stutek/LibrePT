@@ -1,6 +1,6 @@
 # tests/e2e/test_routine_dialog_language.py
 # The Routine Template dialog (src/controllers/routineFormsController.js) and the exercise rows it
-# builds on every open (src/modules/plans/plansView.js) speak the chosen language (TODO §38.20). The
+# builds on every open (src/modules/plans/plansView.js) speak the chosen language. The
 # rows are built after the markup's translation pass, so they are checked separately.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
@@ -33,7 +33,7 @@ def test_the_routine_dialog_is_in_slovenian_when_slovenian_is_chosen(
 
 
 def test_the_exercise_picker_counts_and_comes_up_empty_in_slovenian(page, local_server):
-    """The picker's count and its empty message were English in every language (TODO §38.20)."""
+    """The picker's count and its empty message were English in every language."""
     page.goto(local_server + "routines?lang=sl")
     page.locator("#btn-add-routine").click()
     page.wait_for_selector("#routine-ex-picker:not(.hidden)")

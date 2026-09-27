@@ -1,6 +1,6 @@
 # tests/e2e/test_adjustment_dialog_language.py
 # The Apply Program Adjustment dialog (src/modules/plans/planAdjustments.js) speaks the language the
-# trainer chose (TODO §38.20). Opened the way tests/e2e/test_record_dialog_routes.py opens it.
+# trainer chose. Opened the way tests/e2e/test_record_dialog_routes.py opens it.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
 from tests.e2e.test_client_views_language import _expect_slovenian

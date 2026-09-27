@@ -9,7 +9,7 @@
 #
 # Both elements are asserted because each theme stylesheet declares its tokens against `html.X,
 # body.X`, and theme-boot.js can only reach <html>: when two divergent copies of applyTheme() were
-# live (TODO §24.1), the switcher updated <body> only and left the root on the boot theme.
+# live, the switcher updated <body> only and left the root on the boot theme.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
 import pytest
@@ -74,7 +74,7 @@ def test_selecting_a_theme_swaps_the_single_body_class(page, local_server, value
 
 @pytest.mark.parametrize("how", ["saved", "link"])
 def test_the_retired_red_theme_opens_as_spreadsheet(page, local_server, how):
-    """Red was replaced by Spreadsheet on 2026-09-13 (TODO §49.2). A trainer who had chosen Red, or
+    """Red was replaced by Spreadsheet on 2026-09-13. A trainer who had chosen Red, or
     opens an old link naming it, lands on its replacement, not silently on the default."""
     if how == "saved":
         page.add_init_script("localStorage.setItem('librept-theme', 'red')")

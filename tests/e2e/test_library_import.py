@@ -1,5 +1,5 @@
 # tests/e2e/test_library_import.py
-# Importing a trainer's exercise library into the real, booted app (TODO §45.5): what the import
+# Importing a trainer's exercise library into the real, booted app: what the import
 # writes survives a reload, which only the real storage path can show — the review and the marks
 # are covered by tests/medium/test_exercise_catalog.py.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
@@ -48,7 +48,7 @@ FLUSH = "await (await import(new URL('data/writeQueue.js', document.baseURI).hre
 def test_an_imported_id_that_a_client_holds_does_not_replace_the_client(
     page, local_server
 ):
-    """Found by Codex's review, TODO §77.1: every record of one schema shares one key in IndexedDB,
+    """Found by Codex's review: every record of one schema shares one key in IndexedDB,
     and the import kept a file's id after checking only the exercises. An exercise carrying a
     client's id replaced that client, with nothing said."""
     page.goto(local_server + "exercises")
@@ -87,7 +87,7 @@ def test_an_imported_id_that_a_client_holds_does_not_replace_the_client(
 
 
 def test_a_chosen_file_names_the_source_of_what_it_adds(page, local_server):
-    """Found by Codex's review, TODO §77.4: the field showed the file's name, but Add to library read
+    """Found by Codex's review: the field showed the file's name, but Add to library read
     the box again without it and emptied the field. The exercise was saved as the trainer's own."""
     page.goto(local_server + "exercises")
     page.wait_for_selector("#view-exercises.active")

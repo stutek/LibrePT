@@ -1,5 +1,5 @@
 # tests/medium/test_walkthrough_show_me.py
-# What "Show me" does to the guide's position (TODO §38.18).
+# What "Show me" does to the guide's position.
 #
 # Reported 2026-08-30: "show me behavior is inconsistent, should it advance always or never?" — and it
 # was neither. Two rules laid down three days apart had come to contradict each other: Show me was

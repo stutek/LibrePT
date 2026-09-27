@@ -1,6 +1,6 @@
 // tests/unit_js/data/demoOnlyStore.test.mjs
-// "Is everything in here the demo?" — the question the header badge asks (TODO §28.9,
-// src/data/seedProvenance.js).
+// "Is everything in here the demo?" — the question the header badge asks
+// (src/data/seedProvenance.js).
 //
 // The badge names ONE state, so the two candidates had to be ordered. PREVIEW warns that a
 // pre-release build may lose data; DEMO says nothing here is yours. Both are true after `?init=demo`

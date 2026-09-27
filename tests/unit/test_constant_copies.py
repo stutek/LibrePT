@@ -112,7 +112,7 @@ def test_the_tool_runs_against_the_real_tree():
     """Deliberately asserts that it RUNS, not that the tree is clean.
 
     Asserting `main() == 0` here would quietly make this a gate — Stage 1 runs the unit tests — and
-    TODO §28.3 rules the opposite: an agent tool first, wired into the pipeline only once it has
+    the rule is the opposite: an agent tool first, wired into the pipeline only once it has
     caught something more than once. What this does prevent is the other failure
     mode of a hand-run tool: rotting until it cannot run at all.
     """

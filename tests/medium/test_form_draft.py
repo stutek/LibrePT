@@ -1,5 +1,5 @@
 # tests/medium/test_form_draft.py
-# What a half-filled form remembers across a reload (src/modules/common/formDraft.js, TODO §38.12).
+# What a half-filled form remembers across a reload (src/modules/common/formDraft.js).
 #
 # Reported 2026-08-29: "kadar se izpolnjujejo obrazci in se zgodi page reload poskrbi, da se vsebina
 # vnosnih polj ohrani". Measured on the client's intake page before anything was written: type a

@@ -28,7 +28,7 @@ const TOKENINFO_ENDPOINT = "https://oauth2.googleapis.com/tokeninfo";
 
 // Imported from the shipping module now that src/data/calendarFreeBusy.js exists, so the scope the
 // canary checks and the scope the app will ask for cannot drift apart. It is not yet in the grant
-// googleAuth.js requests — §1.5 adds a scope in the change that ships its feature — but the consent
+// googleAuth.js requests — the occupancy feature adds a scope in the change that ships it — but the consent
 // screen it is checked against already carries it.
 const CALENDAR_FREEBUSY_SCOPE = GOOGLE_CALENDAR_FREEBUSY_SCOPE;
 

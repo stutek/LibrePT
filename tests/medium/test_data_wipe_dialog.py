@@ -1,5 +1,5 @@
 # tests/medium/test_data_wipe_dialog.py
-# The support data-wipe (TODO §31) — the link support sends by SMS when a trainer's install is stuck,
+# The support data-wipe — the link support sends by SMS when a trainer's install is stuck,
 # and the dialog that is the whole of its authority.
 #
 # What would be erased is planned without a browser in tests/unit_js/data/dataWipe.test.mjs. What

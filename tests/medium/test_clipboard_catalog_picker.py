@@ -114,7 +114,7 @@ def test_filter_rows_are_labelled_by_axis(page, local_server):
 
 
 def test_source_filter_limits_the_choice_to_the_trainers_own(page, local_server):
-    """TODO §45.5: the picker narrows by where a movement comes from, and marks the trainer's own
+    """The picker narrows by where a movement comes from, and marks the trainer's own
     with the pencil and a word — the same mark as the library."""
     load_with_stub(
         page,

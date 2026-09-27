@@ -82,7 +82,7 @@ activateView('{view_id}');
 # Backup, Drive sync card) — three separate components (applicationHeader.js, backupRestore.js,
 # driveSyncUi.js) that always boot together in production and share the #backup-btn click wiring:
 # backupRestore.js owns the listener, and asks driveSyncUi's handleHeaderCloudTap() first, which
-# takes the tap when a sync is possible (TODO §3.11). One shared stub here rather than three
+# takes the tap when a sync is possible. One shared stub here rather than three
 # near-identical copies, so a real change to any of these boot steps' deps shape breaks this ONE
 # place, not three silently-drifting ones.
 HEADER_STUB = """
@@ -198,7 +198,7 @@ initSessionTimeline({
 });
 // The filter row is part of the board, so the stub boots it the way appBoot does — otherwise
 // renderSessions() would paint a board with no filters and a test would be proving nothing about
-// what production shows (TODO §45.6).
+// what production shows.
 initSessionFilterBar({
   t,
   lang: () => 'en',
@@ -317,7 +317,7 @@ def exercise_item(item_id, name, circuit_id=None, **overrides):
 
 def rest_item(item_id, seconds=45, circuit_id=None):
     """One first-class rest — a plan item in its own right, not a property of the exercise before
-    it (TODO §8.6), which is why it is focusable and reorderable like any other row."""
+    it, which is why it is focusable and reorderable like any other row."""
     return {"id": item_id, "type": "rest", "rest": seconds, "circuitId": circuit_id}
 
 

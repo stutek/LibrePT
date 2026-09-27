@@ -1,4 +1,4 @@
-# tests/medium/test_plan_peek.py — the blanket drag (TODO §52.2 step 3): press-and-hold narrows
+# tests/medium/test_plan_peek.py — the blanket drag: press-and-hold narrows
 # and densifies the current plan; a sideways drag pulls it aside to reveal the previous/next plan
 # drawn underneath (planSheet.js, step 2) via controllers/planPeekController.js and
 # modules/clipboard/planPeek.js. Step 4: a pull past the threshold opens what it uncovered, Today
@@ -252,7 +252,7 @@ def test_holding_and_releasing_the_plan_leaves_the_active_card_where_it_was(
 ):
     """The rows get denser while the plan is held and grow back on release, and the browser answers
     both with a scroll of its own. On a phone a touchmove has just marked that window as the
-    trainer's scrolling, so §48.1's rule would pick another active card. It must not: the trainer
+    trainer's scrolling, so the active-card rule would pick another active card. It must not: the trainer
     did not scroll, the plan changed shape under the finger."""
     _mount(page, local_server)
     before = _active_index(page)

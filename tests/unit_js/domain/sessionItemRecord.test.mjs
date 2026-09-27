@@ -1,5 +1,5 @@
 // tests/unit_js/modules/common/sessionItemRecord.test.mjs
-// TODO §17.1: a finished session is persisted as the WHOLE structured program — a flat list of typed
+// A finished session is persisted as the WHOLE structured program — a flat list of typed
 // items (exercise | rest) with circuit grouping via circuitId and a completed flag per exercise —
 // not just the performed sets. This covers the pure buildProgramSnapshot model (keeps rests +
 // skipped work).

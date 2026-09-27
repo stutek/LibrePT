@@ -1,5 +1,5 @@
 // tests/unit_js/domain/walkthrough.test.mjs
-// The guided walkthrough's cursor (src/domain/walkthrough.js) — TODO §9.5.
+// The guided walkthrough's cursor (src/domain/walkthrough.js).
 //
 // What these pin is the PROMISE the panel makes to a trainer standing in a gym: you are never asked
 // to do something you have already done, you cannot be advanced past a control that does not exist
@@ -138,7 +138,7 @@ test("a link naming a step that is not in the script starts the story from the b
 // A run that is only PART of a story — which is what each side of the demo's handover is. The
 // client's page boots on its own, with the three steps that happen on her phone and nothing else,
 // and used to count them 1, 2, 3 in the middle of a story the viewer was ten steps into (reported
-// 2026-08-27, TODO §38.9).
+// 2026-08-27).
 const HANDED_OVER_RUN = {
   id: "story-intake",
   steps: [

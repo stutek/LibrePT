@@ -25,7 +25,7 @@ def _body_classes(page):
 
 def _db(page):
     """The app's live in-memory state — the authoritative source now that persistence is
-    IndexedDB-backed (TODO §18.6 part 4); `librept_db` in localStorage is only ever the one-time
+    IndexedDB-backed; `librept_db` in localStorage is only ever the one-time
     legacy import source, never the ongoing store, so reading it directly no longer reflects what
     the app actually holds."""
     return page.evaluate(
@@ -167,7 +167,7 @@ def test_init_seeds_only_once_then_edits_persist(page, local_server):
     assert seeded_count > 0
 
     # Simulate a user edit: wipe the clients collection but keep other demo data present. Goes
-    # through the real write path (IndexedDB, TODO §18.6 part 4) rather than poking localStorage
+    # through the real write path (IndexedDB) rather than poking localStorage
     # directly, since ongoing saves no longer land there.
     page.evaluate(
         """async () => {

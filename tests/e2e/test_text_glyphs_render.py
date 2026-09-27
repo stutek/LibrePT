@@ -1,5 +1,5 @@
 # tests/e2e/test_text_glyphs_render.py
-# Every character the app writes into its own text is drawn by a font the app SHIPS (TODO §74.4).
+# Every character the app writes into its own text is drawn by a font the app SHIPS.
 #
 # The app vendors every typeface and every icon so a first load in a basement gym needs no network
 # and no host font. Its own sentences were the exception: ☰, ✕, ⚠, a pencil, a waving hand — none of
@@ -38,7 +38,7 @@ LEAN_DEVICE = """<?xml version="1.0"?>
 # Draws each character and reports the ones that came out as the browser's missing-glyph mark.
 #
 # "It left some ink" is NOT the question, and asking it that way is what hid four missing icons for a
-# month (TODO §74.5): with nothing to fall back to, Chromium draws a box, and a box is ink. So every
+# month: with nothing to fall back to, Chromium draws a box, and a box is ink. So every
 # drawing is compared against the drawing of a codepoint no font on earth carries — whatever THAT
 # looks like is this browser's way of saying "I have no glyph", and a character that matches it is a
 # character the app does not ship.

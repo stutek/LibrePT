@@ -1,5 +1,5 @@
 # tests/e2e/test_schema_migrations.py
-# The schema-migration chain (TODO §16.2): a PT can sit on one version for months while several
+# The schema-migration chain: a PT can sit on one version for months while several
 # ship, so an upgrade walks a SEQUENCE of small per-version transforms rather than one big jump.
 # Pure migration-runner coverage (clone-not-mutate, per-step validation, refusal of a newer-build
 # database, absent-vs-corrupt collections) moved to tests/unit_js/data/schemaMigrations.test.mjs.

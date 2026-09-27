@@ -3,13 +3,13 @@
 // properties matter more than the field-by-field mapping:
 //
 //   1. ORDER. `activeExerciseIndex` points into `exercises` by index, so a snapshot must be read in
-//      its own program order (TODO §17.5) before the first item is pushed — sorting afterwards
+//      its own program order before the first item is pushed — sorting afterwards
 //      would be too late, and a scrambled program passes every id-based integrity check we have.
-//   2. STRUCTURE. Rests and prescribed-but-skipped movements survive the round trip (TODO §17.1).
+//   2. STRUCTURE. Rests and prescribed-but-skipped movements survive the round trip.
 //      Dropping them still yields a plausible-looking plan, which is exactly what makes it a bug
 //      nobody notices.
 //
-// Reachable only through a booted app until TODO §24.4 moved the factory into domain/.
+// Reachable only through a booted app until the factory was moved into domain/.
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
@@ -240,7 +240,7 @@ test("focus is clamped into range, and a rest is a valid place to land", () => {
   clampFocusIndex(negative);
   assert.equal(negative.activeExerciseIndex, 1);
 
-  // Already valid, and pointing at a rest — rests are first-class focus targets (TODO §8.6), so
+  // Already valid, and pointing at a rest — rests are first-class focus targets, so
   // this must not be "corrected" to the nearest exercise.
   const onRest = plan(1);
   clampFocusIndex(onRest);

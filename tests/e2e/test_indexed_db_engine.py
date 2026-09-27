@@ -1,5 +1,5 @@
 # tests/e2e/test_indexed_db_engine.py
-# stateStore.js's move onto IndexedDB (TODO §18.6 part 4). test_indexed_db.py pins the low-level
+# stateStore.js's move onto IndexedDB. test_indexed_db.py pins the low-level
 # adapter in isolation; these tests pin the app's actual boot/save wiring on top of it: a legacy
 # localStorage database is imported into IndexedDB exactly once and left untouched afterwards (the
 # rollback snapshot for a build revert), a fresh install starts empty without error, and a write

@@ -1,5 +1,5 @@
 // tests/unit_js/data/inviteRecord.test.mjs
-// The invitation record, which is where an RSVP lives (src/data/inviteRecord.js) — TODO §1.6.
+// The invitation record, which is where an RSVP lives (src/data/inviteRecord.js).
 //
 // **Decided 2026-08-17 (Simon):** "invites should host the RSVP status, sessions should host
 // attendees list (by reference only for easier anonymization)", and "not all attendees need an

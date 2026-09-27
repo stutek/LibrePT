@@ -1,5 +1,5 @@
 # tests/medium/test_session_filters.py
-# The board's filter row (TODO §45.6): the chips narrow the board, they SAY what they narrowed it to,
+# The board's filter row: the chips narrow the board, they SAY what they narrowed it to,
 # and the calendar's taps follow the documented model rather than one of our own.
 #
 # Medium tier: this is markup plus the board's own render, and nothing here needs the router, a

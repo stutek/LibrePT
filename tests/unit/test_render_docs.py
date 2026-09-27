@@ -187,8 +187,8 @@ def test_a_query_string_survives_rendering_intact():
 def test_the_landing_page_demo_links_reach_the_app_not_a_code_host():
     """A relative link from docs/ is rewritten to a github.com blob URL for anything not shipped —
     correct for a developer file, catastrophic for this page, whose two calls to action are the
-    whole point and whose readers will never have a GitHub account (TODO §3.12's defect)."""
-    # Read AFTER the placeholders are resolved (TODO §28.2): the source now names the deployed
+    whole point and whose readers will never have a GitHub account."""
+    # Read AFTER the placeholders are resolved: the source now names the deployed
     # address rather than writing it out, and what matters is where the rendered link points.
     source = render_docs.inject_declared_values(
         (render_docs.REPO_ROOT / "docs" / "LANDING.md").read_text(encoding="utf-8")

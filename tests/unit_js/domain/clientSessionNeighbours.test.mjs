@@ -183,7 +183,7 @@ test("missing arrays on state are treated as empty rather than throwing", () => 
   assert.equal(next, null);
 });
 
-// ---- clientSessionToday: where the clipboard's Today control leads back to (TODO §52.2 step 4) ----
+// ---- clientSessionToday: where the clipboard's Today control leads back to ----
 
 const NOW = Date.parse("2026-09-14T12:00:00.000Z");
 

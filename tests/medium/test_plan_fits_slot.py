@@ -1,5 +1,5 @@
 # tests/medium/test_plan_fits_slot.py
-# "Does this fit in the hour?", answered while the plan is still being built (TODO §35.3b).
+# "Does this fit in the hour?", answered while the plan is still being built.
 #
 # The arithmetic is pinned without a browser in tests/unit_js/domain/planDuration.test.mjs. What
 # needs the DOM is where the answer appears and when it shuts up: beside the plan being edited,

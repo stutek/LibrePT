@@ -9,7 +9,7 @@
 //
 // Synthetic items lead, because outstanding work outranks FYI.
 //
-// Pinned here rather than in a browser as of TODO §24.7.
+// Pinned here rather than in a browser.
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
@@ -163,7 +163,7 @@ test("read state applies to synthetic items too, or they could never be dismisse
 });
 
 test("a failed sync leads the feed, ahead of the work items", () => {
-  // Once a header tap syncs directly instead of opening the Sync & Backup dialog (TODO §3.11), the
+  // Once a header tap syncs directly instead of opening the Sync & Backup dialog, the
   // feed is where a failure lives. Everything else here is work waiting; this is something the
   // trainer asked for that did not happen, so it goes first or it is missed.
   const state = {
@@ -200,7 +200,7 @@ test("no failure means no card at all, not an empty one", () => {
   assert.equal(resolveNotificationItems({}, t, []).length, 0);
 });
 
-// --- Answers that came back (TODO §1.6). Synthetic, like every other item derived from state: an
+// --- Answers that came back. Synthetic, like every other item derived from state: an
 // RSVP already lives on the invitation, and a stored copy would ride into the backup and the Drive
 // snapshot as a second source of truth for the same fact. ---
 
@@ -253,7 +253,7 @@ test("nothing is said when nobody has answered", () => {
 });
 
 test("an answer from someone no longer in the register still reports itself", () => {
-  // The client may have been erased (§27.2) between answering and the trainer opening the link. The
+  // The client may have been erased between answering and the trainer opening the link. The
   // answer is still a fact about an invitation, and silently dropping it would lose it.
   const state = {
     invites: [{ id: "i1", sessionId: "s1", clientId: "gone", status: "answered", answer: "no" }],
@@ -266,7 +266,7 @@ test("an answer from someone no longer in the register still reports itself", ()
   assert.ok(item, "the answer is still reported");
 });
 
-// --- A crash the trainer can report (TODO §12.4). Synthetic, and deliberately the LAST thing offered:
+// --- A crash the trainer can report. Synthetic, and deliberately the LAST thing offered:
 // it must never interrupt a live session, and a modal over a set is worse than the original bug. ---
 
 test("a captured crash is offered as something to report, not as an alert", () => {
@@ -319,7 +319,7 @@ test("with nowhere to report it, nothing is offered rather than a dead link", ()
   );
 });
 
-// ── Schedule churn, accumulated (TODO §28.10) ──────────────────────────────────────────────────
+// ── Schedule churn, accumulated ───────────────────────────────────────────────────────────────
 // Every cancellation and booking used to arrive as its own card, so an evening where three clients
 // rearranged pushed everything else off a phone screen. They are the same KIND of news — "who is
 // coming, who is not" — so they belong on one card, one line each.
@@ -418,7 +418,7 @@ test("one arrival on its own is still just that message", () => {
   assert.equal(card.title, "Spot cancelled", "a single cancellation reads as itself");
 });
 
-// ── Test data that escaped into the trainer's own database (TODO §46.7) ────────────────────────
+// ── Test data that escaped into the trainer's own database ─────────────────────────────────────
 
 const withTestRows = () => ({
   clients: [
@@ -533,7 +533,7 @@ test("a notice written by an earlier build loses its button too", () => {
 });
 
 test("no chapters are offered where the walkthrough itself cannot be", () => {
-  // A store missing what the steps need has the offer withheld (TODO §28.14). A list of chapters
+  // A store missing what the steps need has the offer withheld. A list of chapters
   // would then be several offers the app cannot honour instead of one.
   const [card] = resolveNotificationItems({ notifications: [DEMO_NOTICE] }, t, [], null, {
     sandbox: true,

@@ -1,5 +1,5 @@
 # tests/unit/test_theme_colours.py
-# A theme's own colours may only be written in that theme (TODO §42.7).
+# A theme's own colours may only be written in that theme.
 #
 # Reported 2026-09-10: "nebula tema vizualno premalo loči pretekle kartice od aktivne seje", and then
 # "midnight tema: past kartice so obdržale nebula barvo ob preklopu na midnight". One cause behind
@@ -14,7 +14,7 @@
 # **A RATCHET, not a gate that can be passed** — the same shape as agent_tools/ui_strings.py, and for
 # the same reason. There are 21 of these already, spread across a dozen files, and each is a small
 # judgement about which token a colour should have been. A check that failed on all of them is a
-# check nobody could run, so this one fails when the number goes UP. The sweep is TODO §42.7; bring
+# check nobody could run, so this one fails when the number goes UP. The sweep stays; bring
 # BASELINE down with it.
 #
 # Pure text analysis, no browser — Stage 1. Uses the src_dir fixture (tests/conftest.py).
@@ -106,5 +106,5 @@ def test_the_baseline_comes_down_with_the_sweep(src_dir):
 
     assert len(findings) >= BASELINE, (
         f"good — {len(findings)} left, below the baseline of {BASELINE}. Set BASELINE = "
-        f"{len(findings)} in this file (TODO §42.7)."
+        f"{len(findings)} in this file."
     )

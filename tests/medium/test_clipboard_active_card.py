@@ -1,5 +1,5 @@
 # tests/medium/test_clipboard_active_card.py
-# The ACTIVE card and the OPEN card on the live clipboard (TODO §48.1).
+# The ACTIVE card and the OPEN card on the live clipboard.
 #
 # The open card is the one the trainer tapped: it shows its controls. The active card is the one the
 # trainer is looking at: a scroll that brings another card to the focus line makes that card active,

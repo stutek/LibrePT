@@ -1,5 +1,5 @@
 # tests/e2e/test_app_version.py
-# Choosing the app version (TODO §76): the ☰ menu offers the supported versions, a tap reloads the
+# Choosing the app version: the ☰ menu offers the supported versions, a tap reloads the
 # app under the chosen version's behaviours, and no choice changes the data the trainer holds.
 # A real boot, because the promise includes the reload. Fixtures come from tests/conftest.py.
 
@@ -65,7 +65,7 @@ def test_a_version_changes_what_the_app_offers_and_nothing_it_holds(page, local_
 
 
 def test_the_version_cannot_change_while_a_session_is_running(page, local_server):
-    """A reload in front of a client is the one moment the switch must not happen (TODO §18.12)."""
+    """A reload in front of a client is the one moment the switch must not happen."""
     _open_exercises(page, local_server)
     result = page.evaluate(
         """async () => {

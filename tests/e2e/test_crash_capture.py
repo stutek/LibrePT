@@ -1,12 +1,12 @@
 # tests/e2e/test_crash_capture.py
-# A thrown error becoming something a trainer can report (TODO §12.4).
+# A thrown error becoming something a trainer can report.
 #
 # Before this, an exception died in a console a PT will never open, while docs/BUG_REPORTING.md asked
 # them to retype the build stamp by hand. What the payload may contain is pinned without a browser
 # (tests/unit_js/data/crashReport.test.mjs); what needs the whole app is that a REAL uncaught error
 # reaches the offer at all — the wiring, which is the part that silently does nothing when it breaks.
 #
-# The other half of §12.4 is what must NOT happen: no modal, no stolen focus, nothing over a live
+# The other half of this is what must NOT happen: no modal, no stolen focus, nothing over a live
 # session. A crash handler that interrupts a set mid-rep is worse than the bug it reports.
 
 from playwright.sync_api import expect
@@ -61,7 +61,7 @@ def test_the_report_carries_the_build_stamp_nobody_should_retype(page, local_ser
 
 
 def test_a_crash_never_steals_the_screen(page, local_server):
-    """§12.4's own warning: a handler that renders a modal over a live session mid-set is worse than the
+    """A handler that renders a modal over a live session mid-set is worse than the
     original bug. The feed waits to be looked at; nothing opens on its own."""
     _boot(page, local_server)
 

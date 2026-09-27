@@ -1,5 +1,5 @@
 // tests/unit_js/data/sandboxWorkspace.test.mjs
-// The two workspaces and the sandbox's staleness clock (TODO §40, src/data/workspace.js,
+// The two workspaces and the sandbox's staleness clock (src/data/workspace.js,
 // src/data/sandboxStaleness.js).
 //
 // What these pin is the promise the whole design rests on: the working workspace keeps the database
@@ -56,10 +56,10 @@ test("a scoped key still starts with the app's own prefix", () => {
 });
 
 test("rebuilding the sandbox keeps the trainer's own details and their cloud connection", () => {
-  // The promise the menu's "Reset sandbox data" makes (TODO §40.4), pinned where it is decided
+  // The promise the menu's "Reset sandbox data" makes, pinned where it is decided
   // rather than where it is worded: a reset clears the sandbox's own per-workspace keys and the
   // sandbox database, and the trainer's identity and Drive connection belong to the PERSON, so they
-  // are unscoped and must survive (§40.1). Asserted by NAME, because the isolation here is naming:
+  // are unscoped and must survive. Asserted by NAME, because the isolation here is naming:
   // the day one of these is added to VERSION_SCOPED_KEYS it starts being swept, silently.
   const survives = [
     "librept_trainer_name",
@@ -168,7 +168,7 @@ test("a clock that moved backwards does not make the sandbox stale", () => {
 });
 
 test("a backup written in the sandbox is refused into the trainer's own work", () => {
-  // TODO §40.10. One rule, one direction: sample data may never enter the working database, while a
+  // One rule, one direction: sample data may never enter the working database, while a
   // real backup restored INTO the sandbox is one of the more useful things it offers.
   const fromSandbox = { workspace: SANDBOX, clients: [] };
 

@@ -123,7 +123,7 @@ def test_stage_leaves_reads_every_stage_from_the_build_table():
     assert stages[2] == {"run_medium_tests"}
     # Stage 3 holds two tasks that run side by side: the e2e suite and the demo/walkthrough suite,
     # which is its own gate so a broken demo names itself rather than appearing as red node ids
-    # inside a suite of 205. Both follow the work in hand and read the PREVIEW shape (TODO §62).
+    # inside a suite of 205. Both follow the work in hand and read the PREVIEW shape.
     assert stages[3] == {"run_e2e_tests", "run_demo_tests"}
     # Stage 4 is what the RELEASED version promises, on the schema it reads — its own suite and its
     # own stage, so a failure there is read as "what shipped is broken".

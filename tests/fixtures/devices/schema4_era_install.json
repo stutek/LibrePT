@@ -1,6 +1,6 @@
 {
  "about": {
-  "what": "The IndexedDB database and localStorage of an install on schema 4, as the app wrote them before schema 5 became the schema every install reads (TODO §76). Store 4 carries no 'backfilled' marker: it was always the store read, never filled from another. Frozen: never edit.",
+  "what": "The IndexedDB database and localStorage of an install on schema 4, as the app wrote them before schema 5 became the schema every install reads. Store 4 carries no 'backfilled' marker: it was always the store read, never filled from another. Frozen: never edit.",
   "madeFrom": "fc172f9",
   "madeOn": "2026-09-23",
   "clock": "the browser tests' frozen now, 2026-08-19T09:00:00Z",

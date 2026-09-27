@@ -1,5 +1,5 @@
 // tests/unit_js/data/clientConsent.test.mjs
-// Consent state and the withdrawal transition (TODO §27.7, src/data/clientConsent.js).
+// Consent state and the withdrawal transition (src/data/clientConsent.js).
 //
 // The promise under test is legal, not cosmetic: Art. 7(3) says withdrawal must be as easy as
 // consent, and Art. 7(1) says the controller must still be able to DEMONSTRATE that consent was

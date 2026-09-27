@@ -1,11 +1,11 @@
 // tests/unit_js/modules/common/sessionItemOrder.test.mjs
-// Explicit session-item ordering (TODO §17.5): `position` is dense 0..n-1 across one session's item
+// Explicit session-item ordering: `position` is dense 0..n-1 across one session's item
 // list, readers sort by it, and circuit members occupy a contiguous run.
 //
 // Why this is gated rather than reviewed: the failure it prevents is a program in the wrong order
-// with every id present, which passes §18.3's completeness check and every other integrity test we
+// with every id present, which passes the completeness check and every other integrity test we
 // have. Positions must be written and authoritative BEFORE the store stops preserving list order
-// (§18.6 part 4), because after that there is no array index left to derive them from.
+// because after that there is no array index left to derive them from.
 
 import assert from "node:assert/strict";
 import { test } from "node:test";

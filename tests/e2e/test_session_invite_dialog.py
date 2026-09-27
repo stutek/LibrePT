@@ -1,5 +1,5 @@
 # tests/e2e/test_session_invite_dialog.py
-# TODO §1.1: assigning clients to a session directly from the PT's setup form (not only via
+# Assigning clients to a session directly from the PT's setup form (not only via
 # client self-subscription) offers a "Send calendar invites" dialog for newly-assigned
 # participants, and re-saving the same assignment must not re-prompt.
 

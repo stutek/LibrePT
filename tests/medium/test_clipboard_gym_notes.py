@@ -1,8 +1,7 @@
 # tests/medium/test_clipboard_gym_notes.py
-# What the gym already said about this client, shown where their next plan is being shaped
-# (TODO §35.3d).
+# What the gym already said about this client, shown where their next plan is being shaped.
 #
-# The claim under test is the one §35's story is built around: a signal taken one-handed mid-circuit
+# The claim under test is the one the demo story is built around: a signal taken one-handed mid-circuit
 # comes back at the moment it can change something, against the right person, with the ones about
 # movements in THIS plan first. The selection and ordering rules are pinned without a browser in
 # tests/unit_js/domain/gymNotes.test.mjs; what needs the DOM is that the panel shows them, marks
@@ -70,7 +69,7 @@ def test_the_trainer_sees_what_the_gym_said_while_shaping_the_next_plan(
 def test_a_note_about_a_movement_in_this_plan_comes_first_and_says_so(
     page, local_server
 ):
-    """§35.3d's actual promise. Newest-first alone would bury the row note under the deadlift one,
+    """The actual promise: newest-first alone would bury the row note under the deadlift one,
     and an unexplained order reads as arbitrary — so the in-plan entry is also marked."""
     _mount(page, local_server, SEEDED_NOTES)
 

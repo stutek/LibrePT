@@ -1,5 +1,5 @@
 # tests/medium/test_repeating_sessions.py
-# A repeating session on the board (TODO §35.3a).
+# A repeating session on the board.
 #
 # The rules themselves are pinned without a browser in tests/unit_js/domain/sessionSeries.test.mjs.
 # What needs the DOM is the promise a trainer feels: an evening they never created is on the board

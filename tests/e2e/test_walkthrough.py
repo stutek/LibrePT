@@ -1,5 +1,5 @@
 # tests/e2e/test_walkthrough.py
-# The guided walkthrough over the real app (TODO §9.5).
+# The guided walkthrough over the real app.
 #
 # It plays the SAME script as the automatic demo (gymFloorTour.js) — the difference is who taps. So
 # what is worth testing here is not the flow (test_demo_tour.py already proves the four steps work),
@@ -7,7 +7,7 @@
 # themselves, it never asks for something already done, and it can be left in one tap without
 # touching their data.
 #
-# The blank-app churn §23.5 names is what this exists for, so the entry-point half of it — the splash
+# The blank-app churn this guards against is what this exists for, so the entry-point half of it — the splash
 # button bringing demo data with it — is asserted in test_splash_screen.py where the splash lives.
 #
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
@@ -68,7 +68,7 @@ def _card_moved_on(page, progress_before, timeout=20_000):
     the walk stopped tapping Next altogether (found 2026-08-31 in the story suite's copy of this).
 
     Asked rather than assumed, because both are legitimate: a step DONE in front of the viewer
-    carries the card on (§38.5, and since §38.18 that includes Show me doing it), while one that
+    carries the card on (that now includes Show me doing it), while one that
     arrived already satisfied — a narrated card, the last step of a tour — waits for Next. Polling
     for it also avoids the race that reading the number once creates: the advance can land between
     the read and the tap, and then Next is disabled because the NEXT step has not happened yet.
@@ -277,7 +277,7 @@ def test_getting_the_guide_out_of_the_way_is_one_tap_and_takes_nothing_with_it(
     page, local_server
 ):
     """Gym-floor rule: any guide that cannot be dropped mid-set is a guide that gets in the way of a
-    client. One tap still does it — but what one tap does is PARK it (§38.16, decided 2026-08-30),
+    client. One tap still does it — but what one tap does is PARK it, decided 2026-08-30,
     because a trainer with a client waiting needs the screen back, not 49 steps of demo destroyed.
     The app underneath is usable immediately, which is what the rule is actually about.
 
@@ -383,7 +383,7 @@ def test_a_step_whose_ground_was_pulled_away_rebuilds_it(page, local_server):
 
     # Since 2026-08-26 the guide does not put this back under the trainer's hands: closing the
     # clipboard is somebody looking around their own app, so the card says where they are and offers
-    # the way back (TODO §38.5). The rebuild is the same one — it is now asked for.
+    # the way back. The rebuild is the same one — it is now asked for.
     expect(page.locator("#walkthrough-return")).to_be_visible(timeout=15_000)
     expect(page.locator(SHOW_ME)).to_be_hidden()
     page.locator("#walkthrough-return").click()
@@ -395,7 +395,7 @@ def test_a_step_whose_ground_was_pulled_away_rebuilds_it(page, local_server):
 
 
 def test_a_tap_the_step_did_not_ask_for_interrupts_the_demo(page, local_server):
-    """Reported 2026-09-13 (TODO §51): "klik na meni ne odstrani highlightov od walkthrough-a,
+    """Reported 2026-09-13: "klik na meni ne odstrani highlightov od walkthrough-a,
     nepričakovani klik naj prekine walkthrough in kartica ponudi vrnitev".
 
     The ☰ menu drops down over the board while the step's session card is still on screen, so the
@@ -516,7 +516,7 @@ def test_the_diagnosis_goes_to_the_console_not_to_the_trainer(page, local_server
 
     page.locator("#active-session-overlay .view-grabber").click()
     # Closing the clipboard is a tap the step did not ask for, so the guide is interrupted and offers
-    # the way back (§51). Until then this walked Back and Next, which only worked while the guide took
+    # the way back. Until then this walked Back and Next, which only worked while the guide took
     # three polls to notice — a race the test won on a quiet machine. Wait for the CONDITION, not for
     # a stopwatch — and for BOTH conditions: the interruption lands on the next poll, before the
     # clipboard has finished closing, and a way back tapped then finds the step still ready and has

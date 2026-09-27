@@ -4,7 +4,7 @@
 #   {base}/session/{sessionId}/client/{clientId}/exercise/{exerciseId}
 #   {base}/session/{sessionId}/client/{clientId}/exercise/{exerciseId}/closed
 # where {base} is the app's sub-path (/LibrePT). `/closed` names the ACTIVE card while no card is
-# open (TODO §48.1), so a reload brings back a highlighted card without opening it. Opening the session upgrades the URL to the
+# open, so a reload brings back a highlighted card without opening it. Opening the session upgrades the URL to the
 # focused card; tapping a card or navigating to such a URL moves focus; a stale/unknown card id
 # is ignored (URL falls back to the real focus).
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
@@ -198,7 +198,7 @@ def test_a_cold_deep_link_names_the_session_it_opened(page, local_server):
 def test_leaving_the_editor_puts_the_session_back_not_the_placeholder(
     page, local_server
 ):
-    """The other half of deriving rather than stashing (§39.6's neighbour, 2026-08-31).
+    """The other half of deriving rather than stashing, 2026-08-31.
 
     Edit mode repurposes the title bar. It used to keep the bar's HTML in a variable and put it back
     verbatim on the way out — which faithfully restored whatever was there, including the
@@ -225,7 +225,7 @@ def test_leaving_the_editor_puts_the_session_back_not_the_placeholder(
 
 
 def test_the_clipboard_names_the_session_without_truncating_it(page, local_server):
-    """Reported 2026-08-31 (Simon) at desktop width: "this one clips on desktop" (§39.6).
+    """Reported 2026-08-31 (Simon) at desktop width: "this one clips on desktop".
 
     The bar read `2026-09-01 11:30 playground outside` and lost 90px to an ellipsis — one 22px line
     led by an ISO date, carrying date, time and gym. The repo's own sweep passes it, correctly: an
@@ -261,7 +261,7 @@ DECK_STATE = """() => {
 }"""
 
 
-# What happened between the wheel and the check, for a failure to report (TODO §53): every wheel
+# What happened between the wheel and the check, for a failure to report: every wheel
 # and scroll event with its time, so a failed run says whether the scroll came late, came short, or
 # never came.
 RECORD_SCROLL = """() => {
@@ -292,7 +292,7 @@ def _reload(page):
 
 
 def test_a_reload_keeps_the_active_card_closed_when_it_was_closed(page, local_server):
-    """Simon, 2026-09-13: a reload returns to the same state as before (TODO §48.1). The trainer
+    """Simon, 2026-09-13: a reload returns to the same state as before. The trainer
     scrolled, so the highlight moved and no card is open. After a reload the same card is marked,
     and it has not opened by itself."""
     page.set_viewport_size({"width": 390, "height": 844})
@@ -306,7 +306,7 @@ def test_a_reload_keeps_the_active_card_closed_when_it_was_closed(page, local_se
     page.evaluate(RECORD_SCROLL)
     page.mouse.wheel(0, 400)
     # Waited for, never slept on: the state this test is about is the end of the scroll. It failed
-    # twice in full gate runs on 2026-09-24 and never alone (TODO §53); the timeline is what it
+    # twice in full gate runs on 2026-09-24 and never alone; the timeline is what it
     # reports when it fails.
     try:
         page.wait_for_function(

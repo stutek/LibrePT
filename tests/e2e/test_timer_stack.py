@@ -22,7 +22,7 @@ def _open_session(page, local_server):
 
 def _start_a_timer(page):
     # A real countdown, not the exercise (⏱) button: no exercise in the seed data sets
-    # workDuration, so that button always starts a count-up stopwatch (see TODO 13.5) -- a rest
+    # workDuration, so that button always starts a count-up stopwatch -- a rest
     # break's data-rest is the only place a genuine countdown (with an endTime to rewind) exists.
     page.locator("#active-exercise-scroll-deck .circuit-break-play").first.click()
     page.wait_for_selector("#clipboard-timer-stack .timer-card")

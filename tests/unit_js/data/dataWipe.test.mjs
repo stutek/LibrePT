@@ -1,10 +1,10 @@
 // tests/unit_js/data/dataWipe.test.mjs
-// What a support wipe offers, and what it admits it cannot reach (TODO §31, src/data/dataWipe.js).
+// What a support wipe offers, and what it admits it cannot reach (src/data/dataWipe.js).
 //
 // The link that opens this dialog is sent by SMS or email to someone who is already confused, so the
 // planning here is deliberately dull and total: every store the device actually has, named, with
 // nothing inferred and nothing hidden. The dialog is the only thing standing between a forwarded
-// message and somebody's client history — see §31.1 — so what it lists has to be the truth about
+// message and somebody's client history, so what it lists has to be the truth about
 // THIS device rather than what the current build expects to find.
 
 import assert from "node:assert/strict";

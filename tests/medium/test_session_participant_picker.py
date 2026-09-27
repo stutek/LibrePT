@@ -1,5 +1,5 @@
 # tests/medium/test_session_participant_picker.py
-# Who is on a session, chosen from a client base that may hold hundreds (TODO §46.2).
+# Who is on a session, chosen from a client base that may hold hundreds.
 #
 # The form used to render every client as a checkbox row with a routine <select>, and to open with
 # all of them ticked. This tier is where that behaviour belongs: it is the setup view's own DOM,

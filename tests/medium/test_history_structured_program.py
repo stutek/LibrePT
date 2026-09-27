@@ -1,5 +1,5 @@
 # tests/medium/test_history_structured_program.py
-# TODO §17.1: a finished session is persisted as the WHOLE structured program — a flat list of typed
+# A finished session is persisted as the WHOLE structured program — a flat list of typed
 # items (exercise | rest) with circuit grouping via circuitId and a completed flag per exercise —
 # not just the performed sets. This pins the History RENDER of that structure: circuit groups, rest
 # chips, per-modality metrics, and a prescribed-but-skipped movement kept and greyed rather than

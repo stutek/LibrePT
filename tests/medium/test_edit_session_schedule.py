@@ -125,7 +125,7 @@ def test_a_slot_in_a_different_place_at_the_same_time_is_flagged(page, local_ser
 
 
 def test_two_sessions_in_the_same_room_are_a_note_not_a_warning(page, local_server):
-    """The merged-clipboard case (§1.2). A warning here would fire on the ordinary case — a trainer
+    """The merged-clipboard case. A warning here would fire on the ordinary case — a trainer
     running two clients on different programmes side by side — and be ignored within a week."""
     load_with_stub(page, local_server, setup_stub(SCHEDULED_SESSION))
 
@@ -145,7 +145,7 @@ def test_a_free_slot_says_nothing_at_all(page, local_server):
 
 
 def test_an_external_calendar_saying_the_trainer_is_busy_is_flagged(page, local_server):
-    """The seam the Google/Microsoft half plugs into (§1.6): busy intervals reach the same rules and
+    """The seam the Google/Microsoft half plugs into: busy intervals reach the same rules and
     the same readout as the app's own sessions, so nothing downstream has to learn about calendars."""
     load_with_stub(
         page,
@@ -350,7 +350,7 @@ SESSION_WITH_FEEDBACK = """[
 def test_taking_someone_off_a_session_with_feedback_asks_in_the_dictionary_s_words(
     page, local_server
 ):
-    """The question was an English sentence in code, in every language (TODO §38.20). Declining it
+    """The question was an English sentence in code, in every language. Declining it
     leaves the session as it was."""
     load_with_stub(
         page,

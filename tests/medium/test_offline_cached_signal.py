@@ -16,7 +16,7 @@ from tests.medium._harness import HEADER_STUB, load_with_stub
 pytestmark = pytest.mark.clean_start
 
 # #btn-sync-data needs no extra boot step: its handler now lives in backupRestore.js, the module that
-# owns its markup. Until 2026-08-05 (TODO §22) it was wired by sessionsView.js's
+# owns its markup. Until 2026-08-05 it was wired by sessionsView.js's
 # setupCalendarSessions, so this stub had to boot a sessions-module function to exercise a
 # backup-dialog button — the import-layering gate could not see that, both sides being legal
 # cross-feature imports and the problem being ownership rather than direction.

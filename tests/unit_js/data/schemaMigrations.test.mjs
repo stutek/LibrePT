@@ -1,5 +1,5 @@
 // tests/unit_js/data/schemaMigrations.test.mjs
-// The schema-migration chain (TODO §16.2): a PT can sit on one version for months while several
+// The schema-migration chain: a PT can sit on one version for months while several
 // ship, so an upgrade walks a SEQUENCE of small per-version transforms rather than one big jump.
 // Migrations can never be tested against a real PT's database — it is local-only by design — so the
 // guarantees that stand in for that are pinned here: nothing is mutated in place, every step's
@@ -60,7 +60,7 @@ test("current database is a no op but gets stamped", () => {
 });
 
 test("pre-release sessions gain a derived start date", () => {
-  // TODO §7.3 item 8, now folded into the chain from 0: a session with only a `day` bucket +
+  // Now folded into the chain from 0: a session with only a `day` bucket +
   // free-text `time` gets a real absolute `startDate`, without disturbing `day` itself (other
   // systems still key off it) or a session that already has one. `schemaVersion: 2` is a RETIRED
   // value — it must be read as pre-release and normalised, never refused as newer-build data.
@@ -192,7 +192,7 @@ test("the chain from 0 clears a non-English stored language too", async () => {
 });
 
 test("schema 5 is active; a legacy P reads as 4 and a preview shape is refused", () => {
-  // Schema 5 is the active schema (TODO §76). Everything P held moved into schema 4 (TODO §61).
+  // Schema 5 is the active schema. Everything P held moved into schema 4.
   assert.equal(CURRENT_SCHEMA_VERSION, 5);
 
   // A stored "P" is schema 4: accepted and brought forward from 4, not walked back through the chain.
@@ -216,7 +216,7 @@ test("schema 5 is active; a legacy P reads as 4 and a preview shape is refused",
 });
 
 test("PREVIEW data is refused by its version, towards the active schema or any later one", () => {
-  // Wanted 2026-09-17 (Simon, TODO §63): refused because it IS preview data, not because the next
+  // Wanted 2026-09-17 (Simon): refused because it IS preview data, not because the next
   // version happens not to exist. Before this, 4.5 was refused only as "newer" — and would have been
   // accepted once 5 was active, stamped 5 with the 4 → 5 step skipped — while "PREVIEW" was taken for
   // a pre-release database, walked through the whole chain and lost its stored language.
@@ -232,7 +232,7 @@ test("PREVIEW data is refused by its version, towards the active schema or any l
   for (const version of [4, 5, 6]) assert.equal(isPreviewVersion(version), false, String(version));
 });
 
-// --- Forward-migration consent (TODO §18.7's last open item). The restore prompt says what a trainer
+// --- Forward-migration consent. The restore prompt says what a trainer
 // loses from THIS DEVICE; it never said what importing does to the FILE. Bringing a schema-3 backup
 // forward means it stops being openable by the older build the trainer may still have on another phone —
 // a one-way door, and the kind a person is entitled to be told about before walking through it. ---

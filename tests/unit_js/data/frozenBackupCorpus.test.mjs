@@ -1,5 +1,5 @@
 // tests/unit_js/data/frozenBackupCorpus.test.mjs
-// The frozen backup-fixture corpus TODO §18.7/§18.13 asks for: one committed fixture per historical
+// The frozen backup-fixture corpus: one committed fixture per historical
 // schema, asserted on every commit to still import to the expected domain object. Without this, a
 // long-restore guarantee ("readers are retained forever") is a hope; with it, a regression in
 // migrationSteps.js/schemaMigrations.js is caught against real frozen bytes, not an inline literal
@@ -48,7 +48,7 @@ function localDayAt(offsetDays, hour, minute) {
 }
 
 test("schema1 baseline fixture still imports, keeping its bookings", () => {
-  // Pre-`schemaVersion` (TODO §14.6). `bookings` was a RENAME of `sessions`, so its records are
+  // Pre-`schemaVersion`. `bookings` was a RENAME of `sessions`, so its records are
   // carried over under the new name — a real database at this version holds the trainer's whole
   // schedule there, and dropping it would destroy exactly that.
   const r = migrate("schema1_baseline.json");
@@ -160,7 +160,7 @@ test("the v0 demo corpus survives the chain with its records intact", () => {
 });
 
 test("the v0 demo corpus loses the legacy `bookings` field and keeps `sessions`", () => {
-  // The v1→v2 rename window (TODO §14.6): a pre-release database could carry BOTH fields. The
+  // The v1→v2 rename window: a pre-release database could carry BOTH fields. The
   // step drops `bookings` outright — there was no real PT data to protect — while `sessions` is
   // what every later step and every reader actually keys off.
   const r = migrate("schema0_demo.json");

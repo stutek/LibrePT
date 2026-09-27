@@ -1,6 +1,6 @@
 // tests/unit_js/modules/intakeInvite.test.mjs
 // The link a trainer sends someone so they can fill their own details in
-// (src/modules/clients/intakeInvite.js) — TODO §26.3.
+// (src/modules/clients/intakeInvite.js).
 //
 // The promise: a prospective client gets a link that opens the intake page in a language they read,
 // on their own phone, and the trainer never types their details for them. Nothing here touches a

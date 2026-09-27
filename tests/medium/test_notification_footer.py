@@ -154,8 +154,8 @@ def test_nothing_in_the_demo_feed_promises_a_walkthrough_or_leaves_the_app(
     page, local_server
 ):
     """Both of the welcome card's original actions were promises the app does not keep. "Explore
-    Walkthrough" navigated to the client list, standing in for the engine TODO §9.5 has not built
-    — the splash announces that one honestly, disabled and marked "soon". "Open Live Demo" and
+    Walkthrough" navigated to the client list, standing in for a walkthrough engine that did not
+    exist yet — the splash announces that one honestly, disabled and marked "soon". "Open Live Demo" and
     "About demo data" left for the web: the first to the app's own public URL, which is a reload
     from the hosted origin and a jump into a stranger's data from anywhere else, the second to a
     README on github.com. Both are dead without signal, in an app whose whole premise is the
@@ -204,7 +204,7 @@ SCHEDULE_CHURN = """{ notifications: [
 
 
 def test_accumulated_schedule_news_renders_as_separate_lines(page, local_server):
-    """One card, three readable lines (TODO §28.10).
+    """One card, three readable lines.
 
     Which arrivals get grouped is pure logic and is pinned in
     tests/unit_js/domain/notificationItems.test.mjs. What only a browser can answer is whether the
@@ -241,7 +241,7 @@ WALKTHROUGH_NOT_READY = """{
 
 
 def test_the_demo_card_offers_the_walkthrough_by_chapter(page, local_server):
-    """TODO §28.14: the splash offers the walkthrough on a first run, and a trainer who dismissed it
+    """The splash offers the walkthrough on a first run, and a trainer who dismissed it
     had nowhere else to find it. The demo card is where they are already being told they are looking
     at sample data.
 

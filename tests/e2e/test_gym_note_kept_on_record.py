@@ -1,5 +1,5 @@
 # tests/e2e/test_gym_note_kept_on_record.py
-# A note taken mid-session can be kept on the CLIENT's record (TODO §35.3c).
+# A note taken mid-session can be kept on the CLIENT's record.
 #
 # Why that matters: a twinge a client mentions between rounds changes how they are programmed for
 # months, but logged as an alert it waits on the Pending Review screen and is resolved away within
@@ -94,7 +94,7 @@ def test_the_default_leaves_the_record_alone(page, local_server):
 
 
 def test_the_kept_note_is_waiting_when_the_next_plan_is_shaped(page, local_server):
-    """The payoff §35 is built around: it comes back against the right person, in the panel the
+    """The payoff this feature is built around: it comes back against the right person, in the panel the
     trainer reads while editing their plan — not on a screen they have to think to visit."""
     _open_session_with_one_exercise(page, local_server, log_id="keep-on-record-log-3")
     _submit_note(page, "left knee clicks on the last rep", keep=True)

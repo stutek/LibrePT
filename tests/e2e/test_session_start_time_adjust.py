@@ -20,7 +20,7 @@
 # CLAMPED to 03..17 so the demo sits in plausible gym hours, which means that from ~18:00 onward
 # the seeded slot has already ended. That is not an edge case to design around, it is the ordinary
 # "opening yesterday's session" path, and it is what exposed the fabricated end date this test now
-# guards: the slot's LENGTH must survive its end having passed (TODO §24.4).
+# guards: the slot's LENGTH must survive its end having passed.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
 import re

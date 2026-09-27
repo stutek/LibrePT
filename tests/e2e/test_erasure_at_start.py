@@ -1,12 +1,12 @@
 # tests/e2e/test_erasure_at_start.py
-# Every erasure runs again when the app starts (TODO §65, src/data/clientErasure.js's
+# Every erasure runs again when the app starts (src/data/clientErasure.js's
 # resweepErasedClients, called from app.js). The sweep itself is pinned in
 # tests/unit_js/data/clientErasure.test.mjs; this holds that the START really calls it and saves the
 # result, which only the real app with its real store can show.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
-# Leaves one client in the state an older build left an erasure in: marked erased, alias still kept
-# (TODO §59). Written through the real store and flushed, so the reload reads it back from IndexedDB.
+# Leaves one client in the state an older build left an erasure in: marked erased, alias still kept.
+# Written through the real store and flushed, so the reload reads it back from IndexedDB.
 HALF_ERASE_FIRST_CLIENT = """async () => {
     const s = await import(new URL('data/stateStore.js', document.baseURI).href);
     const q = await import(new URL('data/writeQueue.js', document.baseURI).href);

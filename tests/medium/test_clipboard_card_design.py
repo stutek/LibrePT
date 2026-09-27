@@ -1,16 +1,16 @@
 # tests/medium/test_clipboard_card_design.py
-# Every deck card has ONE design (TODO §42.3), and being in focus ADDS to it rather than swapping in
+# Every deck card has ONE design, and being in focus ADDS to it rather than swapping in
 # a second, taller one. Three promises are read here, all of them things a trainer sees:
 #
 #   1. The card in focus shows the same line it showed before it was tapped, plus what it takes to
 #      log against it. It used to throw that line away and say the same numbers again as big tiles.
-#   2. The tag — Completed, Upcoming, Past — stays in the title row in every state (§42.5).
+#   2. The tag — Completed, Upcoming, Past — stays in the title row in every state.
 #   3. A card that is NOT in focus carries nothing to tap. Live Too Easy / Too Hard / timer buttons
 #      on a card the trainer is only reading put a mis-tap one thumb-width from logging against the
 #      wrong exercise. They are never drawn rather than drawn and then removed, so what this reads is
 #      that the buttons are absent from the DOM.
 #
-# This file was tests/medium/test_clipboard_expand_all.py until §42.14 removed that setting: once
+# This file was tests/medium/test_clipboard_expand_all.py until that setting was removed: once
 # every card said everything it had on its own row, "open them all" had nothing left to open. What it
 # asserted about SAFETY is what survived, and it is asserted here on the collapsed stack itself.
 #
@@ -93,7 +93,7 @@ def test_only_the_card_in_focus_can_be_acted_on(page, local_server):
     assert live_cards[0]["inFocus"], "that card is the one in focus"
 
 
-# The tag's place is the report that produced §42.5: opening a card moved its status tag from the end
+# The tag's place is where a bug report put it: opening a card moved its status tag from the end
 # of the title row onto a line of its own above the name, so one card read as two designs. What is
 # asserted is the INVARIANT — the tag is inside the same head row as the name, in every state — not
 # the pixel position, which is the stylesheet's to move.
@@ -125,7 +125,7 @@ def test_the_status_tag_sits_in_the_title_row_in_every_state(page, local_server)
             assert card["sameRow"], f"{state}: the tag left the title row — {card}"
 
 
-# A collapsed circuit names its movements (TODO §42.6). Asked for by the maintainer: "Tri-Set
+# A collapsed circuit names its movements. Asked for by the maintainer: "Tri-Set
 # Metabolic Circuit" alone says three unnamed things are coming, while every other collapsed card
 # already says what it is. The rest INSIDE a circuit is a member like any other and has no name or
 # reps to show — asking it for them printed a line reading "undefined" under every circuit.
@@ -156,7 +156,7 @@ def test_a_collapsed_circuit_names_its_movements(page, local_server):
     assert summary["controls"] == 0, "a collapsed card offers nothing to tap"
 
 
-# A card looks like itself however open it is (TODO §42.3, ruled 2026-09-10): "expanding the card
+# A card looks like itself however open it is (ruled 2026-09-10): "expanding the card
 # should just insert elements into existing exercise design, not load a completely different one".
 # The exercise card used to answer a tap by throwing its target line away and saying the same three
 # numbers again as a block of big tiles, so the row the trainer had been reading was replaced rather
@@ -235,7 +235,7 @@ PAST_STUB = clipboard_stub(
 
 
 def test_the_past_card_writes_its_date_as_an_iso_day(page, local_server):
-    """TODO §54. The badge read "Past: 20. jul." on a Slovenian screen and "Jul 20" on an English
+    """The badge read "Past: 20. jul." on a Slovenian screen and "Jul 20" on an English
     one: `toLocaleDateString` asked the DEVICE how to write the date, so the same record was
     written two ways and neither said the year. A date is ISO everywhere in this app, in every
     language, and the word beside it comes from the dictionary rather than from the markup."""

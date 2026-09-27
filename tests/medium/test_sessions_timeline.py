@@ -1,7 +1,7 @@
 # tests/medium/test_sessions_timeline.py
 # The sessions dashboard renders as ONE continuous, chronologically-ordered vertical scroll of
 # day-groups — not per-viewport paged columns (UC5) — and an upcoming session's card carries a
-# "starts in" countdown (TODO §2.3).
+# "starts in" countdown.
 #
 # Both are pure render facts about the timeline, so they mount on _harness.py's SESSIONS_STUB. What
 # stays in tests/e2e/ from these two files is everything that is NOT a render fact: scroll-driven
@@ -68,7 +68,7 @@ def test_upcoming_card_shows_a_starts_in_countdown(page, local_server):
 
 
 def test_a_card_is_one_compact_design_with_nothing_left_to_open(page, local_server):
-    """Reported 2026-09-11 from a screenshot (TODO §45.16): the completed badge took space in the
+    """Reported 2026-09-11 from a screenshot: the completed badge took space in the
     heading row, the card carried a block of empty space, and the programme name was written twice.
 
     The empty space was the heading row WRAPPING — the badge pushed the edit button onto a line of

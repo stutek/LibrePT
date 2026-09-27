@@ -1,5 +1,5 @@
 // tests/unit_js/data/driveAppData.test.mjs
-// Google Drive appDataFolder REST client (TODO §1.5/§3.3, src/data/driveAppData.js). Every call takes
+// Google Drive appDataFolder REST client (src/data/driveAppData.js). Every call takes
 // an injectable `fetchImpl`, so these pin the request SHAPE (method, URL, headers, body) against a
 // stub with no real network call or access token — never against the live Drive API.
 

@@ -1,5 +1,5 @@
 # tests/e2e/test_edit_mode_hides_complete.py
-# TODO §8.4 — creating a planning-mode programme, end to end: client directory → client detail →
+# Creating a planning-mode programme, end to end: client directory → client detail →
 # "Plan Client Program" → the workout-setup form → the clipboard it opens. Four views and a real
 # form submission, which is why this one stays here.
 #

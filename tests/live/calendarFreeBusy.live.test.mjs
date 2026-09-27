@@ -1,5 +1,5 @@
 // tests/live/calendarFreeBusy.live.test.mjs — proves the live credential actually carries Calendar
-// access, and that `freeBusy.query` still answers the shape TODO §1.5's occupancy shading will read.
+// access, and that `freeBusy.query` still answers the shape the occupancy shading feature will read.
 //
 // **It now drives the production module**, as its earlier note promised it would once
 // `src/data/calendarFreeBusy.js` existed. That is the point of a live test: the hermetic suite pins
@@ -14,8 +14,8 @@
 //
 // **freeBusy, never events.** The production scope is `calendar.freebusy`, the narrowest Google
 // publishes: it authorises this endpoint and nothing else, so a token minted with it CANNOT read an
-// event's summary, attendees or location even if asked. That is TODO §1.5's "no PT's session detail
-// leaks to another", enforced by Google rather than by our own restraint.
+// event's summary, attendees or location even if asked. That is the occupancy design's promise
+// that no PT's session detail leaks to another, enforced by Google rather than by our own restraint.
 //
 // **So there IS one `events.list` call below, and it is the opposite of a convenience** — it asserts
 // that the call is REFUSED. The privacy claim is not "we chose not to read event bodies", which is
@@ -23,7 +23,7 @@
 // them." Nothing verified that until now: `tokenScopes.live.test.mjs` proves the token was granted
 // no broader scope, which is a statement about our consent screen, not about what Google enforces
 // at the endpoint. If that call ever starts SUCCEEDING, the scope has been widened or reclassified
-// and §1.5's isolation argument has quietly stopped being true — exactly the class of Google-side
+// and the occupancy design's isolation argument has quietly stopped being true — exactly the class of Google-side
 // change this suite exists to catch. Any other `events` call is still forbidden here.
 
 import assert from "node:assert/strict";
@@ -57,7 +57,7 @@ describe("Calendar freeBusy contract", { skip: skipReason(accessToken) }, () => 
     // The one place this suite touches `events` — to prove the door is locked. A `calendar.freebusy`
     // token must be refused here; if it is ever accepted, every trainer's session titles, client
     // names and locations became readable by anyone holding a room-calendar grant, and PRIVACY.md
-    // and TODO §1.5 both stop being accurate.
+    // both stop being accurate.
     const response = await fetch(
       "https://www.googleapis.com/calendar/v3/calendars/primary/events?maxResults=1",
       { headers: { Authorization: `Bearer ${accessToken}` } },
@@ -66,7 +66,7 @@ describe("Calendar freeBusy contract", { skip: skipReason(accessToken) }, () => 
       response.ok,
       false,
       "calendar.freebusy was accepted for events.list — the scope no longer bounds what this " +
-        "grant can read, and §1.5's occupancy design leaks session detail between trainers",
+        "grant can read, and the occupancy design leaks session detail between trainers",
     );
     // 401 would mean the token is simply dead, which is a different failure and would make the
     // assertion above pass for the wrong reason — the suite's other tests would be failing too.
@@ -78,7 +78,7 @@ describe("Calendar freeBusy contract", { skip: skipReason(accessToken) }, () => 
   });
 
   test("an unreadable calendar is reported per-calendar, not as a failed request", async () => {
-    // The occupancy view queries several room calendars at once (TODO §1.3). Google answers a
+    // The occupancy view queries several room calendars at once. Google answers a
     // partial failure with HTTP 200 and a per-calendar `errors` array rather than failing the whole
     // batch — so the renderer must read that, or one unshared room silently blanks every other
     // room's shading. Pinning it here is what makes that a known contract instead of a surprise.

@@ -1,6 +1,6 @@
 # tests/medium/test_demo_badge.py
-# The header build badge naming the state a trainer is actually in (TODO §28.9,
-# renderBuildStateBadge in applicationHeader.js).
+# The header build badge naming the state a trainer is actually in
+# (renderBuildStateBadge in applicationHeader.js).
 #
 # WHICH state it names is pure logic and is pinned far more cheaply in
 # tests/unit_js/data/demoOnlyStore.test.mjs. What only a browser can answer is the other half:

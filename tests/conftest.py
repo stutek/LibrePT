@@ -250,10 +250,10 @@ def dismiss_splash(request):
     yield
 
 
-# Back to Playwright's own 30s default (2026-08-22, TODO §21). It was raised to 60s on 2026-08-04,
+# Back to Playwright's own 30s default (2026-08-22). It was raised to 60s on 2026-08-04,
 # when a contended dev server could spend the whole budget in the kernel's connection queue before
 # the app or Chromium had done anything wrong — but the CAUSE of that contention was root-caused and
-# fixed (§21: the dev server's backlog, plus the worker count that was starving it), and a doubled
+# fixed (the dev server's backlog, plus the worker count that was starving it), and a doubled
 # budget outliving its reason is a suite that takes twice as long to tell you something is stuck.
 #
 # Action and `expect()` timeouts were never raised, for the reason that still applies: "the page took
@@ -289,7 +289,7 @@ def raise_navigation_timeout(request):
 # It also NAMES A LANGUAGE, unless the test named one itself. Seeding the demo used to set `lang` on
 # the way past (a store that had never chosen one came out looking as though it had), which quietly
 # answered the splash's language question for the whole suite; that was a real bug for a trainer who
-# cleared their browser (TODO §30.3) and is fixed. A link that names a language answers the question
+# cleared their browser, and is fixed. A link that names a language answers the question
 # in production too, so this keeps the suite representing the case it means: someone who already has
 # an app, not someone meeting it for the first time. Tests about the first run build their own
 # context and get neither this nor the terms auto-accept.
@@ -347,7 +347,7 @@ def wait_for_stored_record(page, collection, matches, timeout=10_000):
     page.wait_for_function(
         """async ([collection, matches]) => {
           // The store the app READS, asked of the app: naming one here broke nothing until the day
-          // the read store changed from P to 4 (TODO §61).
+          // the read store changed from P to 4.
           const readSchema = await import(new URL('data/readSchema.js', document.baseURI).href);
           const storeName = readSchema.readStoreName();
           const db = await new Promise((resolve) => {
@@ -431,10 +431,10 @@ def seed_demo_data(request):
     yield
 
 
-# Every field the app stored during a test, checked against the schema it was written at (TODO §62,
-# ruled 2026-09-17: a schema is released before or with the code that uses it). A feature writing a
+# Every field the app stored during a test, checked against the schema it was written at — a
+# schema is released before or with the code that uses it. A feature writing a
 # field its shape does not declare looks perfectly fine on the device that wrote it and is missing
-# from every backup — how invitations and repeating sessions were nearly lost (§61).
+# from every backup — how invitations and repeating sessions were nearly lost.
 #
 # Read from the stores rather than from the write path, so no production code carries a check that
 # exists for the tests, and so it catches whatever the test actually made the app do.
@@ -475,7 +475,7 @@ UNDECLARED_STORED_FIELDS = """async (names) => {
 @pytest.fixture(autouse=True)
 def stored_records_match_their_schema(request):
     """After a browser test, nothing in the app's own databases may carry a field its schema does not
-    declare (TODO §62).
+    declare.
 
     Runs on the page the test already has, after the test body: one pass over the stores, so a
     feature that writes ahead of its schema fails the test that exercised it rather than surfacing
@@ -496,7 +496,7 @@ def stored_records_match_their_schema(request):
         return
     assert offenders == [], (
         "the app stored fields no live schema declares — declare them in recordSchemas.js before "
-        f"the code that writes them ships (TODO §62): {offenders}"
+        f"the code that writes them ships: {offenders}"
     )
 
 
@@ -514,7 +514,7 @@ HARNESS_LOCAL_STORAGE_KEYS = (
 
 
 def pytest_addoption(parser):
-    """`--read-schema=PREVIEW` runs the whole browser suite against the preview shape (TODO §62).
+    """`--read-schema=PREVIEW` runs the whole browser suite against the preview shape.
 
     Ruled 2026-09-17 (Simon): the browser tests run twice — once on the schema trainers read, once on
     the one an upcoming version will. The second pass proves the next shape works on the data a

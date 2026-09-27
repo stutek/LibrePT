@@ -1,6 +1,6 @@
 # tests/e2e/test_sessions_dashboard.py
-# End-to-end coverage of the dashboard's continuous, time-ordered session timeline (TODO §7.3
-# item 8): the focused date reflected in the URL, the Today control, a real touch
+# End-to-end coverage of the dashboard's continuous, time-ordered session timeline:
+# the focused date reflected in the URL, the Today control, a real touch
 # scroll updating the focused date, and the single-vertical-column invariant across viewports.
 # Fixtures (page, browser, local_server) come from tests/conftest.py + pytest-playwright.
 
@@ -125,7 +125,7 @@ def test_sessions_day_navigation(page, local_server):
         tomorrow_iso,
     )
     page.wait_for_timeout(900)
-    # Today lives in the date filter's calendar since 2026-09-21 (§74.2), so reaching it is two
+    # Today lives in the date filter's calendar since 2026-09-21, so reaching it is two
     # taps: the date chip opens the calendar, and Today is in its header beside the month.
     page.locator("#filter-chip-dates").click()
     page.locator(".filter-today-btn").click()
@@ -153,7 +153,7 @@ def test_scrolling_the_timeline_updates_the_focused_day(page, local_server):
     _wait_for_focused_date_to_change_from(page, today_iso)
 
 
-# The date-jump control was removed on 2026-09-11 and its test with it (TODO §45.6). It opened a
+# The date-jump control was removed on 2026-09-11 and its test with it. It opened a
 # native `<input type="date">` and SCROLLED the timeline to the chosen day; the filter row's date
 # chip now filters to that day, which is the stronger answer to the same need and is covered by
 # tests/medium/test_session_filters.py. The test is deleted rather than rewritten because what it
@@ -162,7 +162,7 @@ def test_scrolling_the_timeline_updates_the_focused_day(page, local_server):
 
 
 def test_the_filter_calendar_survives_the_boards_own_rerender(page, local_server):
-    """Reported by Simon the day it was built: the calendar closed after the first tap (TODO §45.6).
+    """Reported by Simon the day it was built: the calendar closed after the first tap.
 
     The medium tier could not see it — the board there is rendered by the stub and nothing else — and
     in the real app renderSessions() is called by half a dozen other things (the timers, the
@@ -192,7 +192,7 @@ def test_the_filter_calendar_survives_the_boards_own_rerender(page, local_server
 
 
 def test_the_filter_row_stays_on_screen_while_the_board_scrolls(page, local_server):
-    """The filters live in the sticky header with the title (asked 2026-09-11, TODO §45.6).
+    """The filters live in the sticky header with the title (asked 2026-09-11).
 
     They were a row below it, which meant scrolling the board took the filters off the screen while
     the thing they filter stayed on it — a filter you cannot see is the modal's defect arriving by
@@ -216,7 +216,7 @@ def test_the_filter_row_stays_on_screen_while_the_board_scrolls(page, local_serv
 
 
 def test_today_brings_today_back_when_a_date_filter_left_it_out(page, local_server):
-    """Found by Codex's review, TODO §77.7: with another day chosen in the calendar, Today moved the
+    """Found by Codex's review: with another day chosen in the calendar, Today moved the
     grid and tried to scroll, but the board was still limited to that day, so today's sessions were
     not there to reach."""
     page.goto(local_server)

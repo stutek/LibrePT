@@ -1,5 +1,5 @@
 // tests/unit_js/domain/demoTour.test.mjs
-// The scripted-demo step contract (TODO §23.5, src/domain/demoTour.js).
+// The scripted-demo step contract (src/domain/demoTour.js).
 //
 // What matters here is that a step can FAIL. The whole reason the demo is a script rather than a
 // recording is that it breaks loudly when the app moves under it — so the rule that decides "did

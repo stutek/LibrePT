@@ -1,5 +1,5 @@
 # tests/medium/test_feedback_route.py
-# The way out of the app for a trainer with something to say (TODO §23.5).
+# The way out of the app for a trainer with something to say.
 #
 # The addresses and the message bodies are pinned without a browser in
 # tests/unit_js/data/feedbackRoute.test.mjs. What needs the DOM is the promise the dialog makes:

@@ -1,5 +1,5 @@
 # tests/e2e/test_rsvp_link.py
-# Opening an invite link as the client who received it (TODO §1.6's confirm link).
+# Opening an invite link as the client who received it.
 #
 # The page's behaviour is covered in tests/medium/test_rsvp_page.py. What only this tier can show is the
 # BOOT DECISION, and here it turns on the payload rather than on a path: an invite link is the app's own

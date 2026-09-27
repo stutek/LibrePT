@@ -74,7 +74,7 @@ SLOVENIAN_WORDS = """async (keys) => {
 
 
 def test_the_title_and_buttons_speak_the_chosen_language(page, local_server):
-    """The title and Remove had keys in every language and nothing applied them (TODO §38.20)."""
+    """The title and Remove had keys in every language and nothing applied them."""
     load_with_stub(page, local_server, SLOVENIAN_STUB)
     page.wait_for_selector("#dialog-demo-cleanup[open]")
 

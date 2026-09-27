@@ -1,6 +1,6 @@
 # tests/e2e/test_signup_round_trip.py
 # The whole loop, end to end: a client fills in /intake, the file they send is opened by the trainer,
-# and the person becomes a client record that survives a reload (TODO §1.7/§26).
+# and the person becomes a client record that survives a reload.
 #
 # Every step of this is covered in isolation elsewhere — the form in tests/medium/test_intake_form.py,
 # the review in tests/medium/test_signup_review_dialog.py, the artifact in
@@ -40,7 +40,7 @@ def _client_file(tmp_path, page, local_server):
 def test_a_stranger_becomes_a_client_without_the_trainer_typing_anything(
     page, local_server, tmp_path
 ):
-    """§26's whole point: the slowest and least accurate part of taking on a client is the trainer
+    """The slowest and least accurate part of taking on a client is the trainer
     retyping what the person said. Here the client's own words end up in the register, and the trainer's
     only act is to read them and accept."""
     sent_file = _client_file(tmp_path, page, local_server)

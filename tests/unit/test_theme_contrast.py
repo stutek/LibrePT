@@ -1,5 +1,5 @@
 # tests/unit/test_theme_contrast.py
-# Muted text must stay readable in every theme, with room to spare (TODO §38.11).
+# Muted text must stay readable in every theme, with room to spare.
 #
 # `--text-muted` is what every secondary line in the app takes — timestamps, hints, the target under
 # an exercise name, the card that tells a trainer what the app wants from them. On 2026-09-10 the two
@@ -125,7 +125,7 @@ def test_muted_text_has_room_to_spare_in_every_theme(src_dir):
 
     assert not too_low, (
         f"muted text needs {MIN_CONTRAST}:1 so a tinted surface still leaves it above the 4.5:1 "
-        "a paragraph needs (TODO §38.11):\n  " + "\n  ".join(too_low)
+        "a paragraph needs:\n  " + "\n  ".join(too_low)
     )
 
 
@@ -135,7 +135,7 @@ def test_the_temporal_colours_are_readable_as_text_in_every_theme(src_dir):
     planSheet.css and planPeek.css set `color:` from both tokens — the plan pulled aside under the
     blanket writes a future session's exercises in `--temporal-future`, and so does the "no next
     plan" line. Blossom's was rose-400 #fb7185 at 2.68:1 on its card and 2.46:1 on the field, far
-    under the bar, and nothing caught it until someone read the screen (TODO §55.2).
+    under the bar, and nothing caught it until someone read the screen.
 
     The bar is 4.5:1, what a line of text needs, not the 6:1 the muted text above carries: these are
     accents on a plain surface rather than body text a component may tint further.
@@ -167,6 +167,6 @@ def test_the_temporal_colours_are_readable_as_text_in_every_theme(src_dir):
                     )
 
     assert not too_low, (
-        f"a temporal colour is read as text, so it needs {TEXT_CONTRAST}:1 (TODO §55.2):\n  "
+        f"a temporal colour is read as text, so it needs {TEXT_CONTRAST}:1:\n  "
         + "\n  ".join(too_low)
     )

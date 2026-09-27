@@ -5,7 +5,7 @@
 # wrong for a while: at desktop width a ~37px card showed 11px, and since the name renders at y=8-25
 # inside the card, roughly three pixels of every glyph survived.
 #
-# It is ALL of a card's content now, not just its first line (§42.14). Until then a trainer who could
+# It is ALL of a card's content now, not just its first line. Until then a trainer who could
 # not read the stack had "open every card" to fall back on; that setting was removed once each card
 # said everything it had on its own row, so the stack is the only reading there is. A circuit names
 # its movements one per line, and the last of them has to clear the card above it too.
@@ -111,7 +111,7 @@ def test_a_collapsed_card_is_fully_readable_on_desktop(page, local_server):
 
 
 def test_a_collapsed_card_is_fully_readable_on_a_phone(page, local_server):
-    """The same promise on the device this app is actually used on (TODO §28.4).
+    """The same promise on the device this app is actually used on.
 
     The phone was left out of the 2026-08-16 fix on the reasoning that a tight stack is right where
     vertical space is scarce. What that traded away was the whole point of the peeking row: 11px of

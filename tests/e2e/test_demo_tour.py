@@ -1,5 +1,5 @@
 # tests/e2e/test_demo_tour.py
-# The scripted demo tour, replayed as a test (TODO §23.5).
+# The scripted demo tour, replayed as a test.
 #
 # This file is the reason the demo is a script and not a screen recording. A recording of a real set
 # being logged goes stale the first time a control moves, and NOTHING tells you — the asset keeps
@@ -8,8 +8,8 @@
 # flow still works, and a change that breaks the demo turns this red instead.
 #
 # The tour taps four things a trainer taps: open the session, focus an exercise, signal Too Easy,
-# switch participant. §23.4 settled why that flow and not a feature tour — pitch the clipboard, the
-# one job trainers hate, not "replace your PT software".
+# switch participant, and not a feature tour: it pitches the clipboard, the one job trainers
+# hate, not "replace your PT software".
 #
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
@@ -106,8 +106,7 @@ def test_the_signal_survives_switching_participant(page, local_server):
 
     Worth its own assertion because it is the failure a viewer would never notice and a trainer
     would: per-participant state that quietly belongs to whoever is on screen. Coming back has to
-    show the signal still set (TODO §7.2's whole point — a control that does not show its state gets
-    tapped twice).
+    show the signal still set — a control that does not show its state gets tapped twice.
     """
     _run_tour(page, local_server)
 

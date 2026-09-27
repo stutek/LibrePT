@@ -1,7 +1,7 @@
 # tests/e2e/test_indexed_db.py
-# The IndexedDB adapter (TODO §18.6). These tests pin the layout constraint the star-write design
+# The IndexedDB adapter. These tests pin the layout constraint the star-write design
 # rests on — ONE database with one object store per schema, so a single transaction can span every
-# live schema — plus the indexes that make §17.1's lazy per-client load cheap, additive provisioning,
+# live schema — plus the indexes that make the lazy per-client load cheap, additive provisioning,
 # and the commit-not-request-success promise contract.
 #
 # Each test uses its own throwaway database name so it never touches the app's, and IndexedDB is
@@ -35,7 +35,7 @@ def test_provisions_one_store_per_schema_plus_meta(page, local_server):
 def test_the_version_rises_only_when_a_store_is_missing_and_never_falls(
     page, local_server
 ):
-    """The database version is not a schema number (TODO §61). A PREVIEW schema has a name, not a
+    """The database version is not a schema number. A PREVIEW schema has a name, not a
     number, and removing it must not lower the version: IndexedDB refuses to open a database below
     the version it holds, which would lock a trainer out of their own data."""
     page.goto(local_server)
@@ -137,7 +137,7 @@ def test_one_transaction_spans_every_schema_store(page, local_server):
         }"""
     )
     assert r["two"]["reps"] == 8
-    # The newer schema carries the field the older one cannot represent — §18.4's projection.
+    # The newer schema carries the field the older one cannot represent.
     assert r["three"]["rounds"] == 4
 
 
@@ -226,20 +226,20 @@ def test_indexes_support_collection_scan_and_lazy_per_client_load(page, local_se
     )
     assert r["history"] == 3
     # CLIENT_INDEX alone: everything about client c1, history AND planUpdates interleaved — the
-    # shape §17.3's whole-client erasure/anonymization sweep wants, not the shape §17.1 wants.
+    # shape a whole-client erasure/anonymization sweep wants, not the shape a lazy per-client load wants.
     assert r["forClient"] == ["h1", "h2", "p1"]
-    # CLIENT_COLLECTION_INDEX: §17.1's actual lazy per-client load — client c1's history ONLY, one
+    # CLIENT_COLLECTION_INDEX: the lazy per-client load — client c1's history ONLY, one
     # exact index hit, p1 excluded without a client-side filter over a record nobody asked to load.
     assert r["historyForClient"] == ["h1", "h2"]
     # The catalog has no owner, so it is absent from both client-scoped indexes rather than bucketed.
     assert r["total"] == 5
-    # count() goes through the index B-tree — this is what makes §18.3's completeness query cheap.
+    # count() goes through the index B-tree — this is what makes a completeness query cheap.
     assert r["historyCount"] == 3
 
 
 # --- Injection: the query-language question, answered for a store that has none -----------------
 # LibrePT has no SQL. Storage is IndexedDB (plus localStorage), and SQLite-wasm was considered and
-# rejected (TODO §3.7/§18.6), so there is no query string for a payload to break out of — an
+# rejected, so there is no query string for a payload to break out of — an
 # `' OR 1=1 --` in a client name is inert because nothing ever parses it. That is an architectural
 # property, not a lucky one, and this test exists to keep it true: it drives hostile values through
 # every lookup path the app actually uses (primary key, single index, compound index, count) and

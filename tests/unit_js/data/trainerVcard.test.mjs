@@ -1,6 +1,5 @@
 // tests/unit_js/data/trainerVcard.test.mjs
-// The trainer's own contact, as a file the client's phone can save (src/data/trainerVcard.js,
-// TODO §26.3).
+// The trainer's own contact, as a file the client's phone can save (src/data/trainerVcard.js).
 //
 // The promise: a client who reached the intake page can put the trainer in their address book
 // without copying a number off the screen. What this file must not do is produce a card a phone
@@ -67,7 +66,7 @@ test("a contact with no name is not offered at all", () => {
 });
 
 test("a name with punctuation in it does not break the card apart", () => {
-  // §3.4 gives TEXT values the same four escapes the calendar file uses. Unescaped, a comma turns
+  // RFC 6350 §3.4 gives TEXT values the same four escapes the calendar file uses. Unescaped, a comma turns
   // one value into two and a newline ends the property early — with the rest of the card as
   // whatever the parser makes of the remains.
   const card = buildTrainerVcard({ name: "Novak, Sam; PT\nStudio\\Ljubljana", phone: "1" });
@@ -77,7 +76,7 @@ test("a name with punctuation in it does not break the card apart", () => {
 });
 
 test("a long name is folded, not truncated and not left over-long", () => {
-  // §3.2 again: content lines are folded at 75 octets. Slovene letters are two octets each, so the
+  // RFC 6350 §3.2 again: content lines are folded at 75 octets. Slovene letters are two octets each, so the
   // count is of bytes and the split may never fall inside one — half a character is a card a strict
   // parser rejects.
   const name = "Češkovič".repeat(12);

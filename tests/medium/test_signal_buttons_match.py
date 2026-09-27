@@ -5,8 +5,8 @@
 # Too Easy / Too Hard / Notes appear on a standalone exercise card and on every row inside a circuit.
 # They mean the same thing and are tapped with the same thumb, and they had drifted into two looks —
 # grey and 32px tall in a circuit, coloured and 40px on a card. A trainer learns one vocabulary at
-# the start of a session and meets another halfway through it (TODO §7.2 says so in words; this says
-# it in a way that fails).
+# the start of a session and meets another halfway through it — stated in words elsewhere, and
+# enforced here by failing when it is not true.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
 import pytest
@@ -90,7 +90,7 @@ def test_too_easy_looks_the_same_on_a_card_and_in_a_circuit(page, local_server):
 
 
 def test_neither_surface_shrinks_the_target_below_a_thumb(page, local_server):
-    """The circuit rows were 32px tall — under what this app promises everywhere else (§7.1)."""
+    """The circuit rows were 32px tall — under what this app promises everywhere else."""
     card, circuit = _both_looks(page, local_server)
 
     assert card["height"] >= 36, f"the card's button is {card['height']}px tall"

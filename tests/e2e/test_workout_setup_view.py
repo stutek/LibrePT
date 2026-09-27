@@ -39,7 +39,7 @@ def test_workout_setup_draft_persists_across_reload(page, local_server):
 
 
 def test_the_name_and_place_fields_prompt_in_slovenian(page, local_server):
-    """Both placeholders were English in every language (TODO §38.20)."""
+    """Both placeholders were English in every language."""
     page.goto(f"{local_server}session/new?lang=sl")
     page.wait_for_selector("#view-workout-setup.active")
     words = page.evaluate(

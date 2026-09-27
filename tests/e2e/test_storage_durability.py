@@ -1,5 +1,5 @@
 # tests/e2e/test_storage_durability.py
-# Storage durability reporting (TODO §18.6, §18.8). The pure model (fake storage APIs) is covered
+# Storage durability reporting. The pure model (fake storage APIs) is covered
 # by tests/unit_js/data/storageDurability.test.mjs; this file keeps only the one check that needs
 # a REAL browser Storage API rather than an injected double.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.

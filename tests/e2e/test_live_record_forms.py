@@ -1,6 +1,6 @@
 # tests/e2e/test_live_record_forms.py
-# The client, exercise and routine dialogs write into their record as it is typed (TODO §50.2,
-# src/modules/common/liveRecordForm.js), and a record counts as a local change only once its dialog
+# The client, exercise and routine dialogs write into their record as it is typed
+# (src/modules/common/liveRecordForm.js), and a record counts as a local change only once its dialog
 # is left (src/data/openRecordEdits.js).
 #
 # E2E because the promises are about the real store: what a reload finds in IndexedDB, and what the
@@ -43,7 +43,8 @@ def test_a_client_typed_but_not_finished_survives_a_reload(page, local_server):
     page.locator("#client-name").fill("Reload Survivor")
     page.locator("#client-notes").fill("Left knee.")
     # The store is written behind the typing (data/writeQueue.js). A reload in the same instant as the
-    # last keystroke loses that keystroke — the window TODO §50.2 records — so this waits it out.
+    # last keystroke loses that keystroke, a known limit of writing behind the typing — so this
+    # waits it out.
     page.evaluate(
         """async () => {
             const q = await import(new URL('data/writeQueue.js', document.baseURI).href);

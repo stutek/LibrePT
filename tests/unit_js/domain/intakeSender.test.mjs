@@ -1,5 +1,5 @@
 // tests/unit_js/domain/intakeSender.test.mjs
-// Who an intake link says it came from (src/domain/intakeSender.js, TODO §26.3).
+// Who an intake link says it came from (src/domain/intakeSender.js).
 //
 // The promise is modest and worth stating exactly: this gives the person receiving a link something
 // to CHECK — the name in the message, the name on the page and the person they just spoke to should

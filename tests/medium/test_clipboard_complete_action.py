@@ -1,5 +1,5 @@
 # tests/medium/test_clipboard_complete_action.py
-# TODO §8.4 — "Complete Workout Session" is a LIVE-session action: it logs the session to history.
+# "Complete Workout Session" is a LIVE-session action: it logs the session to history.
 # Whether it is offered is a pure function of two things the clipboard already knows,
 # `canStartSession = !clipboardEditMode && currentPlanMode() !== "planning"` and `started`
 # (activeSessionController.syncStartCompleteVisibility), so all three rules mount as one component:
@@ -103,8 +103,8 @@ def test_planning_programme_never_offers_complete(page, local_server):
 def test_a_reopened_finished_session_offers_neither_start_nor_complete(
     page, local_server
 ):
-    """TODO §55.1, seen 2026-09-14. A finished session reopened from History, or by pulling the plan
-    aside on the clipboard (§52.2), is a record being read. It came up with Start on the title bar —
+    """Seen 2026-09-14. A finished session reopened from History, or by pulling the plan
+    aside on the clipboard, is a record being read. It came up with Start on the title bar —
     an offer to run a session that already happened — because `canStartSession` knew only about edit
     mode and planning mode. `finishedRecord` is what openSessionFromHistory puts on such a session,
     and it is the third thing that answer depends on.

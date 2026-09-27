@@ -41,7 +41,7 @@ test("a backup is stamped at the stable numbered schema, never at a preview shap
   const payload = backup.buildBackupPayload(database());
 
   assert.equal(payload.schemaVersion, BACKUP_SCHEMA);
-  // Since 2026-09-17 the active schema IS the stable one (TODO §61); a preview build would still
+  // Since 2026-09-17 the active schema IS the stable one; a preview build would still
   // write its files at the stable number, since a preview shape is restorable only by its own build.
   assert.equal(CURRENT_SCHEMA_VERSION, BACKUP_SCHEMA);
   assert.equal(
@@ -157,8 +157,8 @@ test("settings that belong to the database, not to a record, are carried", () =>
 });
 
 test("a PREVIEW-only collection is not in the file, and the trainer is warned it will be lost", () => {
-  // The cost of staging (§18.4), made visible at the one moment it bites. `previewProbe` lives in the
-  // PREVIEW schema only (TODO §61), so a backup written at the stable schema cannot carry it — and a
+  // The cost of staging, made visible at the one moment it bites. `previewProbe` lives in the
+  // PREVIEW schema only, so a backup written at the stable schema cannot carry it — and a
   // restore is a whole-database replace, which means those records go. Saying so beforehand is the
   // difference between a documented limitation and a surprise.
   const state = {
@@ -194,7 +194,7 @@ test("a PREVIEW-only collection is not in the file, and the trainer is warned it
 
 test("invitations and repeating-session rules are in the file, so a restore keeps them", () => {
   // Until 2026-09-17 both lived in the preview schema alone, so a backup could not carry them and a
-  // restore — a whole-database replace — lost them (TODO §61). Schema 4 declares them now.
+  // restore — a whole-database replace — lost them. Schema 4 declares them now.
   //
   // Unit-level on purpose (Simon, 2026-08-17: "we can unit test P backups if needed, but not e-2-e"):
   // what a file carries is a fact about projection, not about a browser.

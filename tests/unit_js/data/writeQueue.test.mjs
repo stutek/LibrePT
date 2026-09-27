@@ -1,5 +1,5 @@
 // tests/unit_js/data/writeQueue.test.mjs
-// The persistence write queue (TODO §18.6). Moving the store to IndexedDB makes persistence async,
+// The persistence write queue. Moving the store to IndexedDB makes persistence async,
 // but the app has ~52 synchronous save call sites against ~47 synchronous state reads — so the read
 // model stays synchronous and writes become write-behind. These tests pin the two properties that
 // makes safe: writes land in the order they were issued even when they resolve out of order, and a

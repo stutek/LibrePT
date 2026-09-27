@@ -1,5 +1,5 @@
 # tests/e2e/test_share_target.py
-# A client's submission shared straight into the app, through the real service worker (TODO §38.22).
+# A client's submission shared straight into the app, through the real service worker.
 #
 # The operating system's half cannot be driven from a test — no browser lets a page pretend to be the
 # Android share sheet — but everything after it can: the OS makes an ordinary multipart POST to the
@@ -32,7 +32,7 @@ async (payload) => {
   const body = new FormData();
   // The type and the name the client's own phone gives it (data/signupFile.js), not a generic JSON:
   // that pair is what the manifest claims, and claiming anything wider would offer LibrePT in the
-  // share sheet for every JSON file somebody has (TODO §38.22).
+  // share sheet for every JSON file somebody has.
   body.append(
     'signup',
     new File([payload], 'ana-novak.json.librept-signup', {
@@ -47,10 +47,10 @@ async (payload) => {
 
 @pytest.mark.clean_start
 def test_a_shared_submission_opens_in_the_review(page, local_server):
-    """The whole point of §38.22: the trainer taps Share on the attachment in their messaging app and
+    """The trainer taps Share on the attachment in their messaging app and
     picks LibrePT. No saving the file, no file picker, no menu — and no auto-import either: what they
     get is the review dialog with the submission in it, because a human reads every field before a
-    record is written (§26.5)."""
+    record is written."""
     page.goto(local_server)
     # The worker answers the POST, so it has to be running first — which is also true on a phone: the
     # share target is only offered once the app is installed.

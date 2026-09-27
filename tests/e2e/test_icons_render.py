@@ -1,5 +1,5 @@
 # tests/e2e/test_icons_render.py
-# Every icon the app asks for actually DRAWS, and draws the shape it drew before (TODO §12.6).
+# Every icon the app asks for actually DRAWS, and draws the shape it drew before.
 #
 # `agent_tools/icon_coverage.py` compares NAMES from Stage 1, which is the right cheap check and
 # structurally cannot see this: after subsetting, a correct class with a declared rule can point at a

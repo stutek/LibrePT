@@ -1,6 +1,6 @@
 // tests/unit_js/domain/libraryImport.test.mjs
 // Reading a trainer's exercise library — theirs, or one a colleague exported — and planning what it
-// adds (src/domain/libraryImport.js, TODO §45.5).
+// adds (src/domain/libraryImport.js).
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
@@ -212,7 +212,7 @@ test("a circuit refers to its exercises by id, new or already in the library", (
   ]);
 });
 
-test("an imported id another record already holds is replaced, never reused (TODO §77.1)", () => {
+test("an imported id another record already holds is replaced, never reused", () => {
   // Every record of one schema shares one key in the store, so an exercise written under a
   // client's id replaces that client. The file's id is a hint, not a right to a slot.
   const parsed = readLibrary(

@@ -1,5 +1,5 @@
 // tests/unit_js/domain/scheduleConflicts.test.mjs
-// Double-booking rules (TODO §1.6, src/domain/scheduleConflicts.js).
+// Double-booking rules (src/domain/scheduleConflicts.js).
 //
 // The promise under test is not "overlaps are found" — it is that the trainer is interrupted for the
 // thing that is actually impossible (being in two places at once) and left alone for the thing the

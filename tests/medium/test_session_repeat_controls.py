@@ -1,5 +1,5 @@
 # tests/medium/test_session_repeat_controls.py
-# Setting up a session that repeats, in the form a trainer actually fills in (TODO §35.3a).
+# Setting up a session that repeats, in the form a trainer actually fills in.
 #
 # The recurrence rules are pinned without a browser in tests/unit_js/domain/sessionSeries.test.mjs,
 # and the board's side of it in tests/medium/test_repeating_sessions.py. What needs the DOM is the
@@ -97,7 +97,7 @@ def test_the_form_reads_back_as_the_rule_it_describes(page, local_server):
 
 def test_every_weekday_is_a_thumb_sized_target(page, local_server):
     """Seven controls on a 390px phone is where a design starts shrinking things below what a thumb
-    can hit (§7.1)."""
+    can hit."""
     _mount(page, local_server)
     page.check("#setup-repeat")
 

@@ -1,5 +1,5 @@
 // tests/unit_js/data/clientSignup.test.mjs
-// A prospective client introducing themselves (src/data/clientSignup.js) — TODO §1.7/§26.
+// A prospective client introducing themselves (src/data/clientSignup.js).
 //
 // Two promises are being pinned. To the CLIENT: what they ticked, in the language they read it, on the
 // date they ticked it, survives the trip intact — that is the whole Art. 7(1) value of them doing it

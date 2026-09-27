@@ -1,6 +1,6 @@
 # tests/e2e/test_client_views_language.py
 # The client directory, the client detail view and its two data-subject-request dialogs speak the
-# language the trainer chose (TODO §38.20; src/modules/clients/clientsView.js and
+# language the trainer chose (src/modules/clients/clientsView.js and
 # clientDataRights.js). E2E because the words reach the markup through the app's own translation
 # pass (i18n/domMappings.js), which a mounted view does not run.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
@@ -86,7 +86,7 @@ def test_the_client_detail_view_is_in_slovenian_when_slovenian_is_chosen(
 
 
 def test_the_view_grabbers_are_labelled_in_slovenian(page, local_server):
-    """What a screen reader says for the bar at the top of a view (TODO §38.20)."""
+    """What a screen reader says for the bar at the top of a view."""
     page.goto(local_server + "routines?lang=sl")
     expect(page.locator("#view-routines")).to_be_visible()
     home, clipboard = _slovenian(page, ["view_grabber_home", "view_grabber_clipboard"])
@@ -103,8 +103,8 @@ def test_the_view_grabbers_are_labelled_in_slovenian(page, local_server):
 
 
 def test_the_header_buttons_are_labelled_in_slovenian(page, local_server):
-    """The version and Sync & Backup buttons are icons; the label is all a screen reader has
-    (TODO §38.20). The menu and language labels stay bilingual on purpose."""
+    """The version and Sync & Backup buttons are icons; the label is all a screen reader has.
+    The menu and language labels stay bilingual on purpose."""
     page.goto(local_server + "clients?lang=sl")
     expect(page.locator("#view-client-directory")).to_be_visible()
     version, backup = _slovenian(page, ["app_version_button_label", "backup_center"])
@@ -117,7 +117,7 @@ def test_the_header_buttons_are_labelled_in_slovenian(page, local_server):
 
 
 def test_the_signup_review_is_titled_in_slovenian(page, local_server):
-    """The dialog a trainer reviews a client's own details in had an English title (TODO §38.20).
+    """The dialog a trainer reviews a client's own details in had an English title.
     Its markup exists from boot, so the title is read without a signup to open it with."""
     page.goto(local_server + "clients?lang=sl")
     expect(page.locator("#view-client-directory")).to_be_visible()

@@ -2,7 +2,7 @@
 # What agent_tools/overflow_scan.py reports, on the smallest page that shows each case.
 #
 # The route walk (tests/e2e/test_layout_overflow.py) can only say "the app has no overflow". It
-# cannot say whether the sweep would have SEEN one. TODO §47.1 is that gap: a session name ran
+# cannot say whether the sweep would have SEEN one. That gap showed up when a session name ran
 # under the clipboard's ▶ and ⋮ buttons, and the sweep reported nothing, because the text never
 # crossed a box that clips and never crossed the screen edge. So each rule is pinned here against a
 # page built to break it, and against the near-miss it must leave alone.
@@ -13,7 +13,7 @@
 
 from agent_tools import overflow_scan
 
-# The clipboard title bar of §47.1, reduced to its layout: a 300px row, a title slot that may
+# The clipboard title bar's overflow defect, reduced to its layout: a 300px row, a title slot that may
 # shrink, and a 60px button beside it. The title's own `min-width` is the one thing each case
 # changes.
 _TITLE_ROW = """
@@ -34,7 +34,7 @@ def _findings(page, html, invariant):
 
 
 def test_c_reports_text_that_runs_out_of_its_slot_and_under_the_next_control(page):
-    """The §47.1 defect. Nothing on this page clips, and the text stays well inside the 800px
+    """The clipboard-title overflow defect. Nothing on this page clips, and the text stays well inside the 800px
     body — so A has no boundary to measure against and B no clipping box to look in."""
     findings = _findings(page, _TITLE_ROW.format(title_style=""), "C")
 

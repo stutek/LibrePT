@@ -1,6 +1,6 @@
 # tests/e2e/test_exercise_dialog_language.py
 # The Custom Exercise dialog (src/controllers/exerciseFormsController.js) speaks the language the
-# trainer chose (TODO §38.20). The muscle, equipment and pattern options are taxonomy values and stay
+# trainer chose. The muscle, equipment and pattern options are taxonomy values and stay
 # as stored; how an exercise is logged is the app's own wording, so those options are translated.
 # E2E because the words reach the markup through the app's own translation pass.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.

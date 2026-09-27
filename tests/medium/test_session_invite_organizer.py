@@ -86,7 +86,7 @@ def test_a_half_typed_address_is_not_remembered(page, local_server):
     assert page.evaluate("() => localStorage.getItem('librept_trainer_email')") is None
 
 
-# --- The confirm link (TODO §1.6). An invite that cannot be answered is the state this closes: the
+# --- The confirm link. An invite that cannot be answered is the state this closes: the
 # .ics gets an acceptance only from a calendar client that speaks iMIP, which is not what a gym client
 # has. So the invite also carries a link to LibrePT's own reply page. SMS was ruled in on 2026-08-17,
 # and it only works if the trainer's phone rides in the payload — hence the phone field here. ---
@@ -180,7 +180,7 @@ def test_the_trainers_phone_is_remembered_between_sessions(page, local_server):
 
 def test_the_cutoff_field_says_what_zero_means(page, local_server):
     """The label and hint for the cutoff had keys in every language and nothing applied them: the
-    label stayed English and the hint was always empty (TODO §38.20). Zero is the one value a
+    label stayed English and the hint was always empty. Zero is the one value a
     trainer cannot guess, so the hint is what has to arrive."""
     load_with_stub(page, local_server, INVITE_STUB)
 
@@ -195,7 +195,7 @@ def test_the_cutoff_field_says_what_zero_means(page, local_server):
 
 
 def test_the_invite_carries_the_cutoff_the_trainer_set(page, local_server):
-    """§1.6's expiry: the padding is the trainer's setting, and it has to travel as an absolute instant,
+    """The expiry padding is the trainer's setting, and it has to travel as an absolute instant,
     because the client's device cannot compute a deadline it was never told about."""
     load_with_stub(page, local_server, INVITE_WITH_PHONE_STUB)
     page.fill("#session-invite-organizer", "pt@librept.test")

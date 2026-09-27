@@ -1,6 +1,6 @@
 // tests/unit_js/data/openRecordEdits.test.mjs
 // A record open in a form is written as it is typed, but counts only once the form is left
-// (TODO §50.2, src/data/openRecordEdits.js). These tests pin what the counts see and what Cancel
+// (src/data/openRecordEdits.js). These tests pin what the counts see and what Cancel
 // gets back.
 
 import assert from "node:assert/strict";

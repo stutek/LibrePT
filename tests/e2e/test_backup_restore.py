@@ -16,7 +16,7 @@ from tests.conftest import current_schema_version, baseline_schema_version
 
 
 LEGACY_BACKUP = {
-    # No schemaVersion: a backup taken before the v2->v3 `startDate` migration (TODO §7.3 item 8).
+    # No schemaVersion: a backup taken before the v2->v3 `startDate` migration.
     "clients": [{"id": "c1", "name": "Restored Client"}],
     "exercises": [{"id": "e1", "name": "Restored Squat"}],
     "routines": [
@@ -278,7 +278,7 @@ def test_a_restore_onto_an_empty_device_does_not_ask(page, local_server):
     """The prompt appears only when something is at stake — a warning shown every time is a warning
     nobody reads.
 
-    Rewritten 2026-08-18 for TODO §18.7: this used to import the LEGACY backup and assert silence, which
+    Rewritten 2026-08-18: this used to import the LEGACY backup and assert silence, which
     stopped being right once forward-migration consent existed. Bringing an old file forward IS something
     at stake — it stops opening in an older build — so the no-prompt case is now a file already at this
     build's shape, which is the one that truly costs nothing. The old-file case is asserted below."""
@@ -316,7 +316,7 @@ def test_a_restore_onto_an_empty_device_does_not_ask(page, local_server):
 
 @pytest.mark.clean_start
 def test_an_old_backup_asks_before_bringing_the_file_forward(page, local_server):
-    """TODO §18.7's last item. The prompt has always covered what a trainer loses from THIS DEVICE, so an
+    """The prompt has always covered what a trainer loses from THIS DEVICE, so an
     empty device skipped it entirely — and that is exactly the case where the other consequence still
     applies: bringing a schema-1 file forward means it stops opening in an older build they may still
     have on a second phone. A one-way door is worth a sentence beforehand."""

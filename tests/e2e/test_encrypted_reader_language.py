@@ -1,7 +1,7 @@
 # tests/e2e/test_encrypted_reader_language.py
 # The encrypted-file reader (src/modules/common/encryptedFileReader.js) is the one screen a CLIENT
 # uses, to open the export their trainer sent. It speaks the chosen language, its markup and the
-# messages its code writes alike (TODO §38.20).
+# messages its code writes alike.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
 from playwright.sync_api import expect

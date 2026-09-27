@@ -77,8 +77,8 @@ test("initials are derived from non-Latin names, not replaced by the fallback", 
 });
 
 // escapeHTML is the sink every rendered string in the app passes through, and it had NO test —
-// which is how a second, subtly different copy lived in exerciseAndRestTimer.js unnoticed until
-// TODO §24.2. build/frontend_audit.py checks that interpolated values are wrapped in a call named
+// which is how a second, subtly different copy lived in exerciseAndRestTimer.js unnoticed.
+// build/frontend_audit.py checks that interpolated values are wrapped in a call named
 // escapeHTML; it cannot check that the call escapes anything. That is this test's job.
 test("escapeHTML neutralises every character that can break out of markup", () => {
   assert.equal(escapeHTML("<script>alert(1)</script>"), "&lt;script&gt;alert(1)&lt;/script&gt;");
@@ -105,7 +105,7 @@ test("escapeHTML renders zero, and renders absent values as nothing", () => {
 // fabricated end is not a schedule, and it is read as one downstream: the adjust dialog derives the
 // session's planned LENGTH from it. A 16:00-18:00 slot opened at 21:40 therefore proposed a
 // 21:40-05:20 session. Found by the e2e suite only because that run happened to be in the evening;
-// every earlier run that day was before 18:00 and passed (TODO §24.4).
+// every earlier run that day was before 18:00 and passed.
 test("a session's scheduled end survives that end having already passed", () => {
   const dayStart = new Date();
   dayStart.setHours(0, 0, 0, 0);
@@ -134,10 +134,10 @@ test("a slot spanning several sessions reports the outer range as its schedule",
   assert.deepEqual(meta.ids, ["s1", "s2"]);
 });
 
-// The app writes a date as ISO, in every language (TODO §54). `formatDateStr` is what the client
+// The app writes a date as ISO, in every language. `formatDateStr` is what the client
 // profile's "Joined" line and every row of the history view write their date with, and it used to
 // build "Sep 26, 2026" from a hardcoded list of English month abbreviations — the month in English
-// and the day before the year in US order, whatever language the trainer had chosen (TODO §80.4).
+// and the day before the year in US order, whatever language the trainer had chosen.
 //
 // Pinned here rather than through the two screens: it is a pure function, and a screen test would
 // prove the same thing while booting an app to reach it.

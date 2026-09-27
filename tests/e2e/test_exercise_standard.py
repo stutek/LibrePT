@@ -1,5 +1,5 @@
 # tests/e2e/test_exercise_standard.py
-# The open-standard crosswalk (TODO §13.1, UC6 §6): LibrePT's movement taxonomy mapped to the wger
+# The open-standard crosswalk (UC6 §6): LibrePT's movement taxonomy mapped to the wger
 # dataset so catalog exports stay universally interchangeable. Pure mapping-model coverage
 # (category/equipment → wger canonical names, the interchange record, CSV shape) moved to
 # tests/unit_js/domain/exerciseStandard.test.mjs. What stays here needs the real,

@@ -1,5 +1,5 @@
 # tests/e2e/test_sync_backup.py
-# The header's ahead/behind change badge (renderSyncBadge, TODO §3.9 — no longer a mock) proved
+# The header's ahead/behind change badge (renderSyncBadge — no longer a mock) proved
 # against REAL local writes. The badge's never-synced state and the backup dialog's open/close are
 # pure header surface and moved to tests/medium/test_sync_badge.py; what stays here needs the real
 # store, because the claim under test is that `onStateSaved` at the stateStore seam catches every
@@ -33,8 +33,8 @@ def test_ahead_count_reflects_real_local_edits_since_the_synced_ancestor(
     # the view mounts, which is BEFORE boot finishes writing demo data — so seeding on activation
     # alone captures a near-empty ancestor, and every record that arrives afterwards counts as a
     # change since it. Measured while diagnosing: 90 changes immediately after a seed that should
-    # have read 0. The race was always here; an unrelated `await` added to init() for TODO §3.8 just
-    # changed the interleaving enough to lose it.
+    # have read 0. The race was always here; an unrelated `await` added to init() for the
+    # coming-unbacked warning just changed the interleaving enough to lose it.
     # Waiting on MARKUP is not enough — `#clients-list` gets an empty-state child before any record
     # exists, so a DOM wait passes while the store is still empty. Wait on the store itself.
     page.wait_for_function(
@@ -46,8 +46,8 @@ def test_ahead_count_reflects_real_local_edits_since_the_synced_ancestor(
     page.evaluate(SEED_ANCESTOR_TO_CURRENT_STATE)
 
     # clientFormsController.js calls stateStore's saveToLocalStorage() directly (not through
-    # app.js's saveState() wrapper) — exactly the call-site-bypasses-the-counter shape TODO §3.9
-    # described as broken under the old per-call-site `incrementLocalSync` design. The badge
+    # app.js's saveState() wrapper) — exactly the call-site-bypasses-the-counter shape the old
+    # per-call-site `incrementLocalSync` design got broken under. The badge
     # re-rendering here proves the fix: onStateSaved() at the stateStore.js seam catches every
     # writer, regardless of which path it came in through.
     page.locator("#btn-add-client").click()
@@ -70,7 +70,7 @@ async () => {
 def test_downloading_a_backup_records_it_without_involving_drive(page, local_server):
     """A downloaded file is a real backup, and must be recorded as one.
 
-    This is what keeps TODO §3.8's coming unbacked warning honest: a trainer who exports weekly has
+    This is what keeps the unbacked-data warning honest: a trainer who exports weekly has
     to be able to clear it WITHOUT connecting Google. If only a Drive sync counted, a safety
     indicator would quietly be a prompt to enable an integration, and trainers can tell.
     """
@@ -97,7 +97,7 @@ def test_never_synced_counts_every_record_of_the_trainers_own(page, local_server
     "nothing to report" — it reads as "everything is backed up" while nothing is. The same answer is
     right for a trainer who never connects: their data really is in one evictable place.
 
-    The demo dataset loaded around these clients is NOT theirs and is not counted (TODO §28.6), so
+    The demo dataset loaded around these clients is NOT theirs and is not counted, so
     the number here is exactly the three records they created — the two claims are one assertion.
 
     Deliberately NOT seeding an ancestor — the absence is the condition under test.
@@ -125,7 +125,7 @@ def test_never_synced_counts_every_record_of_the_trainers_own(page, local_server
 def test_more_than_nine_unpushed_changes_reads_as_an_alarm(page, local_server):
     """Past nine, the ahead cell drops the digit for `↑!` — an alarm, not a second arrow.
 
-    The two directions are deliberately asymmetric (TODO §3.11). Ahead means those edits exist ONLY
+    The two directions are deliberately asymmetric. Ahead means those edits exist ONLY
     on this device, so past a handful the point is "many, and at risk"; behind means Drive holds
     changes not pulled yet, where nothing is at risk. `↑↑` said "many" only to whoever wrote it, and
     using it on both sides flattened the one distinction that makes either worth reading.

@@ -1,4 +1,4 @@
-# tests/unit/test_quiet_machine.py — the gate refuses to start on a busy machine (TODO §64).
+# tests/unit/test_quiet_machine.py — the gate refuses to start on a busy machine.
 #
 # Pure decision plus an injected clock, so the waiting is tested without a busy machine and without
 # waiting. What it protects: five gate runs on one tree in an hour, each red on a different test,

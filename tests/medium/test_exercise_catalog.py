@@ -1,6 +1,6 @@
 # tests/medium/test_exercise_catalog.py
 # The exercise catalog view (modules/exercises/exercisesView.js) as a professional movement
-# taxonomy rather than a beginner encyclopedia (TODO §13 / UC6): cards carry equipment/pattern
+# taxonomy rather than a beginner encyclopedia (UC6): cards carry equipment/pattern
 # badges instead of instructional text, a cardio movement leads with a highlighted modality badge
 # where a strength lift shows none, and custom-exercise creation forces the taxonomy fields so
 # volume analytics stay clean (Scenario C).
@@ -54,7 +54,7 @@ function navigateToPath(path) {
 window.__state = state;
 
 setupExerciseForms({
-  // The controller reads the state WHEN a handler runs, not when it was wired (TODO §40.3).
+  // The controller reads the state WHEN a handler runs, not when it was wired.
   getState: () => state,
   t,
   saveToLocalStorage: noop,
@@ -67,7 +67,7 @@ setupExerciseForms({
 
 
 STUB = _stub("structuredClone(DEFAULT_EXERCISES)")
-# A working database as a trainer has it: no exercise stored at all (TODO §45.5).
+# A working database as a trainer has it: no exercise stored at all.
 EMPTY_STUB = _stub("[]")
 
 
@@ -248,7 +248,7 @@ LIBRARY_FILE = """{
 
 
 def test_import_reviews_first_then_adds_under_its_source(page, local_server):
-    """TODO §45.5: the report comes before the write — what is new, what the library already has,
+    """The report comes before the write — what is new, what the library already has,
     what could not be read — and the library then opens on the imported source, each exercise
     marked with its name. A circuit with no name is given one from its first two exercises."""
     load_with_stub(page, local_server, EMPTY_STUB)

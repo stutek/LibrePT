@@ -1,5 +1,5 @@
 # tests/unit/test_vendored_files.py
-# Third-party code that ships inside src/ (TODO §26.3, THIRD_PARTY_NOTICES.md).
+# Third-party code that ships inside src/ (THIRD_PARTY_NOTICES.md).
 #
 # **Why a checksum and not a glance.** A vendored file looks exactly like ours: it sits in src/, it
 # is imported like ours, and the day a formatter or a well-meant fix touches it, the next upgrade

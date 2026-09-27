@@ -1,5 +1,5 @@
 // tests/unit_js/data/backupFormat.test.mjs
-// The backup envelope version (TODO §18.7, src/data/backupFile.js).
+// The backup envelope version (src/data/backupFile.js).
 //
 // ONE integer on the envelope, shared by the container and the records. What makes it worth pinning
 // is that both failure modes are silent and destructive: a reader that GUESSES at an unknown version
@@ -67,6 +67,6 @@ test("a legacy file with no schema either is still not treated as unopenable", (
 test("version 4 stays a plain-JSON container", () => {
   // Rows are append-only: a file declaring 4 is in the wild forever, so row 4 must keep meaning
   // what it meant when written. Editing it in place silently redefines files nobody can re-export.
-  // §18.8's encryption is version 5 with a new row, not an edit to this one.
+  // A later encryption scheme is version 5 with a new row, not an edit to this one.
   assert.deepEqual(BACKUP_FORMATS[4], { container: "json" });
 });

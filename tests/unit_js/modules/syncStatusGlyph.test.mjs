@@ -1,4 +1,4 @@
-// tests/unit_js/modules/syncStatusGlyph.test.mjs — the header cloud's four sync states (TODO §3.11).
+// tests/unit_js/modules/syncStatusGlyph.test.mjs — the header cloud's four sync states.
 //
 // Pure mapping, so it runs here rather than in a browser tier. What the states LOOK like belongs to
 // tests/medium/test_sync_badge.py; what this pins is which state a given status is in, and the

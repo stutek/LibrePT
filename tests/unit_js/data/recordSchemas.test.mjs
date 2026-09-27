@@ -1,5 +1,5 @@
 // tests/unit_js/data/recordSchemas.test.mjs
-// The declared schema (TODO §18.1 / §18.4): recordSchemas.js's SCHEMA_4 is the first time "schema N"
+// The declared schema: recordSchemas.js's SCHEMA_4 is the first time "schema N"
 // exists as data rather than as a side effect of whatever migrationSteps.js happens to produce, and
 // recordProjections.js is the star-write model's projection layer for the one schema that is live
 // today. This file is the proof that both are faithful to what the app ACTUALLY writes, not an
@@ -38,7 +38,7 @@ test("field issues catches missing required and wrong type", () => {
 });
 
 test("undeclared fields are not an error", () => {
-  // The store round-trips the whole object (TODO §16.3's invariant) — a field the shape does not
+  // The store round-trips the whole object — a field the shape does not
   // know about is forward-compatible data, not corruption.
   const shape = { id: { required: true, type: "string" } };
   const issues = m.fieldIssues({ id: "a1", fromTheFuture: "kept" }, shape);
@@ -129,7 +129,7 @@ test("a live created client validates clean", () => {
 
 test("a live finished session history record validates clean", () => {
   // Reconstructs exactly what finishWorkoutSession pushes to state.history: a buildProgramSnapshot
-  // output (already position-stamped per TODO §17.5) wrapped in the surrounding log fields.
+  // output (already position-stamped) wrapped in the surrounding log fields.
   const clientState = {
     exercises: [
       { id: "e1", name: "Squat", setsTargetCount: 2, repsTarget: 5 },
@@ -183,13 +183,13 @@ test("projecting into an undeclared collection fails loud", () => {
   );
 });
 
-// --- A numbered shape does not move (TODO §60, ruled 2026-09-21 by the maintainer) ---
+// --- A numbered shape does not move (ruled 2026-09-21 by the maintainer) ---
 //
 // Until this ruling, two rules in docs/DATA_MODEL.md disagreed: "a schema major is bumped only when
 // a migration step is added" allowed an optional field to be added to schema 4, while "two files
 // declaring the same numbered schema have the same shape by definition" said it could not. Schema 4
 // gained fields four times under the first rule (`alias` on 2026-08-11; `startDate`, `seriesId`,
-// `occurrenceDate`, `cancelled` with §61; `completed`, `duration`, `titles`, `icon` with §62), so
+// `occurrenceDate`, `cancelled` in one later change; `completed`, `duration`, `titles`, `icon` in another), so
 // "4" named four shapes and the second rule was simply false.
 //
 // The ruling settles it the other way: ANY change to a numbered shape — a field added, removed,
@@ -218,7 +218,7 @@ test("a numbered schema never moves: every live one still matches its frozen sha
       JSON.parse(JSON.stringify(m.LIVE_SCHEMAS[schemaMajor])),
       frozenShapeFor(schemaMajor),
       [
-        `SCHEMA_${schemaMajor} has changed shape. A numbered schema is frozen (TODO §60): mint the`,
+        `SCHEMA_${schemaMajor} has changed shape. A numbered schema is frozen: mint the`,
         "next number, declare the change there with a migration step that may do nothing, and",
         `freeze that number in its own fixture. Do not edit tests/fixtures/schemas/schema_${schemaMajor}.json.`,
       ].join(" "),
@@ -227,7 +227,7 @@ test("a numbered schema never moves: every live one still matches its frozen sha
 });
 
 test("the schema every install reads declares everything any other live schema declares", () => {
-  // Every install reads DEFAULT_READ_SCHEMA whatever app version it runs (TODO §76), and memory —
+  // Every install reads DEFAULT_READ_SCHEMA whatever app version it runs, and memory —
   // what a save, a backup and a sync are built from — holds only what that read brings in. A field
   // or collection some live schema declares and the read schema does not would be dropped from
   // memory at boot and from the next backup, and a restore of that backup would delete it.
@@ -278,7 +278,7 @@ test("every live numbered schema is frozen on disk", () => {
   );
 });
 
-// TODO §58's first step (§45.5 needed it): the store of an older live schema does not receive a field
+// The store of an older live schema does not receive a field
 // that only a newer live schema declares — schema 4's store never gets `exercises.source`. Only that:
 // a field NO live schema declares is still written whole everywhere, because dropping unknown data
 // from every store would lose it for good.

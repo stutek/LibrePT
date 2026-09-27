@@ -1,6 +1,6 @@
 # tests/e2e/test_feedback_dialog_language.py
 # The feedback dialog a trainer opens from a live clipboard card (src/modules/common/feedbackModal.js)
-# speaks the language the trainer chose (TODO §38.20). The five feedback choices are stored in English
+# speaks the language the trainer chose. The five feedback choices are stored in English
 # and shown so elsewhere, so they are not part of this promise.
 # Opened the way tests/e2e/test_gym_note_kept_on_record.py opens it, with `?lang=sl` in the address.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.

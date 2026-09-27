@@ -1,5 +1,5 @@
 // tests/unit_js/modules/clipboard/planColumns.test.mjs — how many programmes are edited side by
-// side, and in what order (TODO §41.0).
+// side, and in what order.
 //
 // Unit tier: the count is arithmetic over a width and a participant list, and the order is a rule
 // about which name the trainer tapped. Neither needs a DOM, and both are what a later layout change

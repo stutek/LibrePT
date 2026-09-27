@@ -1,5 +1,5 @@
 // tests/unit_js/data/appVersions.test.mjs
-// The app versions a trainer can choose (TODO §76): the registry's own rules, and the two promises
+// The app versions a trainer can choose: the registry's own rules, and the two promises
 // the rest of the code relies on — that a behaviour asked for by name exists, and that every schema a
 // version writes stays live.
 

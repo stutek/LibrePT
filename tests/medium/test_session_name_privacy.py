@@ -1,12 +1,12 @@
 # tests/medium/test_session_name_privacy.py — a session's name and location may not name a client.
 #
-# Ruled 2026-09-18 (Simon), TODO §66: whole-word matches against every client's name, surname and
+# Ruled 2026-09-18 (Simon): whole-word matches against every client's name, surname and
 # alias, and the save is refused. A name typed here is a name the app can never take out again —
-# scrubbing prose needs the name, and after an erasure the name is gone (§65).
+# scrubbing prose needs the name, and after an erasure the name is gone.
 #
 # Mounts ONE component (bootWorkoutSetup) against index.html's real markup: the subject is what the
 # form does with what was typed, not what saving one does — including the refusal of a session with
-# nobody in it, in the chosen language (TODO §38.20).
+# nobody in it, in the chosen language.
 
 import re
 
@@ -69,7 +69,7 @@ def test_a_session_with_nobody_in_it_is_refused_in_the_chosen_language(
     page, local_server
 ):
     """The two refusals below the field checks were written in English beside keys that held the
-    same sentence in every language (TODO §38.20)."""
+    same sentence in every language."""
     load_with_stub(page, local_server, SLOVENIAN_STUB)
     messages = []
     page.on(

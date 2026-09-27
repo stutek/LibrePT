@@ -1,12 +1,12 @@
 // tests/unit_js/domain/planCopy.test.mjs
-// Copying tonight's plan onto another participant (src/domain/planCopy.js) — TODO §8.8.
+// Copying tonight's plan onto another participant (src/domain/planCopy.js).
 //
 // The promise: a walk-in joins a session already underway, and the trainer gives them what the room
 // is doing in one tap instead of re-authoring it. What is copied is the PRESCRIPTION — movements,
 // targets, rests, circuits — and never what anybody did: a copy carrying someone else's logged sets
 // would put a stranger's numbers in this person's history.
 //
-// Distinct from binding (§8.1) on purpose, and the difference is the whole reason both exist: a
+// Distinct from binding on purpose, and the difference is the whole reason both exist: a
 // bound pair share one plan and stay identical; a copy diverges the moment either is edited.
 
 import assert from "node:assert/strict";
@@ -73,7 +73,7 @@ test("every item is a new item, so editing one plan never edits the other", () =
   const copy = copyPlanForParticipant(PLAN, { newId });
 
   assert.ok(copy.every((item) => !PLAN.some((original) => original.id === item.id)));
-  // This is exactly what makes a COPY different from a binding (§8.1), where the two share one plan.
+  // This is exactly what makes a COPY different from a binding, where the two share one plan.
   copy[0].repsTarget = 8;
   assert.equal(PLAN[0].repsTarget, 5);
 });

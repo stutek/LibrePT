@@ -1,5 +1,5 @@
 # tests/regression/test_released_promises.py — what the RELEASED version promises the trainers who
-# are already using it (TODO §62, stage 4).
+# are already using it (stage 4).
 #
 # Ruled 2026-09-19 (Simon): a suite of its own, run against the released schema, because when
 # behaviour changes the schema and these tests change together. Stage 3 follows the work in hand and
@@ -83,7 +83,7 @@ def test_what_a_trainer_types_is_still_there_after_a_reload(page, local_server):
 def test_a_backup_carries_every_collection_the_release_promises(page, local_server):
     """A backup is the only copy that leaves the phone. A collection missing from it is data the
     trainer loses on the day they restore — which is how invitations and repeating sessions were
-    nearly lost (§61)."""
+    nearly lost."""
     _open_register(page, local_server)
 
     payload = page.evaluate(
@@ -103,7 +103,7 @@ def test_a_backup_carries_every_collection_the_release_promises(page, local_serv
         }"""
     )
 
-    # Schema 5 since 2026-09-23 (TODO §76): the file carries `circuits` as well.
+    # Schema 5 since 2026-09-23: the file carries `circuits` as well.
     assert payload["schemaVersion"] == 5, "the file says which shape it holds"
     missing = [name for name, present in payload["collections"].items() if not present]
     assert missing == [], f"a backup written today cannot carry: {missing}"
@@ -113,7 +113,7 @@ def test_a_backup_carries_every_collection_the_release_promises(page, local_serv
 @pytest.mark.clean_start
 def test_erasing_a_client_leaves_their_name_nowhere(page, local_server):
     """Article 17 in one assertion: after an erasure, the name must not appear anywhere in the stored
-    data — not on the client, not on a session, not in a note a trainer typed (§59, §65)."""
+    data — not on the client, not on a session, not in a note a trainer typed."""
     page.goto(local_server + "clients?init=demo_data_load")
     page.wait_for_selector("#view-client-directory.active")
     page.wait_for_function(STORE_READY)

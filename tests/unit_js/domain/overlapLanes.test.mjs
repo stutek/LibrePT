@@ -1,5 +1,5 @@
 // tests/unit_js/domain/overlapLanes.test.mjs
-// Overlapping-block lane layout (TODO §1.3, src/domain/overlapLanes.js).
+// Overlapping-block lane layout (src/domain/overlapLanes.js).
 //
 // These pin the four decisions the layout actually rests on, each of which is invisible in the code
 // and obvious on screen: touching blocks are sequential rather than clashing, width is shared per
@@ -27,7 +27,7 @@ test("a lone block gets the full width", () => {
 });
 
 test("partial overlaps sit side by side, both still rendered", () => {
-  // §1.3's leading requirement: 10:00-11:00 and 10:30-11:30 must show the overlap rather than
+  // The leading requirement: 10:00-11:00 and 10:30-11:30 must show the overlap rather than
   // stacking as if one followed the other.
   const result = layout([span("a", "10:00", "11:00"), span("b", "10:30", "11:30")]);
   assert.notEqual(result.a.lane, result.b.lane);

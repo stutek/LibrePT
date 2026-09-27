@@ -1,5 +1,5 @@
 # tests/medium/test_plan_columns.py
-# Several participants' programmes edited side by side while PLANNING (TODO §41.0).
+# Several participants' programmes edited side by side while PLANNING.
 #
 # The COUNT rule is arithmetic and is pinned in tests/unit_js/modules/clipboard/planColumns.test.mjs.
 # What needs a browser is the branch itself: that width and plan mode together decide whether the
@@ -109,7 +109,7 @@ def test_a_phone_gets_one_programme_however_many_participants(page, local_server
 
 
 def test_a_live_session_never_gets_columns_however_wide_the_screen(page, local_server):
-    """A safety property rather than a layout preference (TODO §41.0, and §41.4 which argued it).
+    """A safety property rather than a layout preference.
     The live clipboard is where sets and quick signals are WRITTEN, and one participant per screen
     with thumb-sized targets is what keeps a mis-tap from logging against the wrong client. A plan
     is not a log."""

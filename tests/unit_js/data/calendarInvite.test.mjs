@@ -84,7 +84,7 @@ test("the filename is a slug of the session, never empty", () => {
   assert.equal(buildIcsFilename(""), "session.ics");
 });
 
-// ── A session that repeats (TODO §35.3a) ──────────────────────────────────────────────────────
+// ── A session that repeats ──────────────────────────────────────────────────────────────────────
 // The whole point of getting this right is that a client's calendar holds ONE entry for "Tuesdays
 // and Thursdays at six", and that moving next Tuesday moves next Tuesday in it — not that it gains
 // a second event beside the first.

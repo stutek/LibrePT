@@ -1,4 +1,4 @@
-# tests/medium/_overflow.py — one line of geometry for a component test (TODO §25.6).
+# tests/medium/_overflow.py — one line of geometry for a component test.
 #
 # tests/e2e/test_layout_overflow.py walks every route and sweeps the whole page, which finds the
 # defect but names the ROUTE it appeared on; the component that produced it is then a guess. This

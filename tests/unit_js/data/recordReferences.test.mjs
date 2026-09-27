@@ -1,8 +1,8 @@
 // tests/unit_js/data/recordReferences.test.mjs
-// The cross-collection reference graph (TODO §18.5) must be acyclic: migration replay order means
+// The cross-collection reference graph must be acyclic: migration replay order means
 // correct order of foreign-key availability, so a convenience back-reference added later could
 // otherwise deadlock migration or silently pick an arbitrary order — caught here instead of by a
-// trainer. §17.4 (saving a past session as a routine template) is flagged as the first realistic
+// trainer. Saving a past session as a routine template is flagged as the first realistic
 // cycle risk.
 
 import assert from "node:assert/strict";

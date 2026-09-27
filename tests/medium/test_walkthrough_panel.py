@@ -1,5 +1,5 @@
 # tests/medium/test_walkthrough_panel.py
-# The walkthrough panel must never sit on top of the control it is asking for (TODO §28.15).
+# The walkthrough panel must never sit on top of the control it is asking for.
 #
 # The panel already knows how to move to the top of the screen when it would cover the step's target
 # — a guide that hides the thing it points at is worse than no guide on a phone, where there is
@@ -95,8 +95,8 @@ def test_the_panel_gets_out_of_the_way_again_after_the_page_scrolls(page, local_
 # The same promise, with the story's own card in the panel — which is what makes the panel tall
 # enough to have nowhere to go. A chapter's opening card rides on the first real step, so the panel
 # carries a paragraph AND an instruction, and on a phone that was over half the screen: docked at the
-# bottom it covered a control in the middle, and flipping to the top covered it too (TODO §38.15,
-# measured on iPhone 14 and iPhone SE at story steps 23 and 30).
+# bottom it covered a control in the middle, and flipping to the top covered it too
+# (measured on iPhone 14 and iPhone SE at story steps 23 and 30).
 CARD_STUB = """
 import { startGuidedWalkthrough } from './modules/demo/walkthroughOverlay.js';
 import { mountDemoNarrator } from './modules/demo/demoNarratorCard.js';
@@ -197,7 +197,7 @@ def test_a_card_does_not_grow_the_panel_past_the_room_it_needs_to_move(
     assert share <= 45, f"{phone}: the panel is {share}% of the screen with a card open"
 
 
-# Putting the guide away and getting it back (TODO §38.16). Reported 2026-08-30: "demo cards exiting
+# Putting the guide away and getting it back. Reported 2026-08-30: "demo cards exiting
 # does not allow for return to demo" — the corner of the panel held a ✕ that ended the walkthrough
 # outright, which is the most final act on the panel wearing the glyph that everywhere else in this
 # app means "close this box".

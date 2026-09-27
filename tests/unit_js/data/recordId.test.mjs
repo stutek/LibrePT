@@ -1,6 +1,6 @@
 // tests/unit_js/modules/common/recordId.test.mjs
-// The record identity primitive (TODO §18.2): UUIDv7 rendered as fixed-width base62. These tests pin
-// the two properties the persistence design in §18 actually depends on — collision resistance from a
+// The record identity primitive: UUIDv7 rendered as fixed-width base62. These tests pin
+// the two properties the persistence design actually depends on — collision resistance from a
 // cryptographic source, and lexicographic order matching creation order — plus the back-compatibility
 // rule that ids minted by older builds stay valid keys.
 
@@ -59,7 +59,7 @@ test("ids stay ordered when the clock jumps backwards", () => {
   const before = m.newRecordId();
   try {
     // A device clock going backwards is ordinary: NTP correction after an offline
-    // stretch, a hand-set clock, DST on a device storing local time (§18.5).
+    // stretch, a hand-set clock, DST on a device storing local time.
     Date.now = () => realNow() - 60000;
     const after = Array.from({ length: 50 }, () => m.newRecordId());
     // A backwards clock must never reissue an id range that was already handed out.

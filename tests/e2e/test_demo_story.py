@@ -1,5 +1,5 @@
 # tests/e2e/test_demo_story.py
-# The long demo, walked as a trainer would walk it (TODO §35).
+# The long demo, walked as a trainer would walk it.
 #
 # Same bargain as tests/e2e/test_demo_tour.py, and the reason both are scripts rather than
 # recordings: the story drives the real controls, so the artifact that promotes the app is the
@@ -65,7 +65,7 @@ def _step_id(page):
 
 
 def _walk_to(page, step_id):
-    """Forward until the story stands on `step_id`. Found by id, never counted (TODO §57): a step
+    """Forward until the story stands on `step_id`. Found by id, never counted: a step
     added inside the stretch would move a counted walk onto another screen, and the failure would
     then name that screen instead of the insertion (the welcome card broke three tests that way on
     2026-09-10, and none of them said why)."""
@@ -237,7 +237,7 @@ def test_the_whole_story_can_be_walked_with_show_me(page, local_server):
     captions = _walk_the_whole_story(page)
 
     # The whole story, exactly once each — both phones. Since 2026-08-27 the counter says how long
-    # the STORY is rather than how long this leg of it is (§38.9), so the walk and the denominator
+    # the STORY is rather than how long this leg of it is, so the walk and the denominator
     # are directly comparable: anything less means the walk stopped somewhere, and anything more
     # means it went round twice.
     assert len(captions) == story_length, len(captions)
@@ -503,13 +503,13 @@ def test_the_trainer_reads_what_ana_sent_and_she_lands_in_the_register(
     page, local_server
 ):
     """The step the story used to skip, and the one the whole first chapter is FOR: a person exists
-    in the register only once they sent their own details and the trainer accepted them (§26.5).
+    in the register only once they sent their own details and the trainer accepted them.
 
     It was called unscriptable because opening a file needs the operating system's picker, which no
     page can drive. The seam moved rather than the refusal. Since 2026-08-30 the story shows where
     the file actually is — an attachment under Ana's message, drawn as a screenshot of the trainer's
     messaging app — and tapping it opens the review, which is what tapping it on a phone now does
-    (§38.22). The app then reads it, matches it and saves it unchanged. What this asserts is the
+    The app then reads it, matches it and saves it unchanged. What this asserts is the
     outcome a trainer cares about: she is in the register, and nobody typed her in."""
     # On the register, which is where the hand back from Ana's phone lands — and where the result of
     # this chapter has to be visible.
@@ -543,7 +543,7 @@ def test_one_chapter_can_be_walked_on_its_own(page, local_server):
     a way of joining a long story part-way. Now the chapters are how the tour is offered at all, so a
     viewer who chose one is watching that chapter: "step 1 of 9", not "step 18 of 41", which measured
     them against four minutes they never asked for. The whole story still counts across its own
-    length, handover included — that is §38.9 and it is the test below this one.
+    length, handover included, and that is the test below this one.
     """
     chapters = _chapter_ids()
     assert chapters, "the story declares no chapters"
@@ -577,8 +577,9 @@ def test_the_story_does_not_run_without_demo_data(page, local_server):
 
 @pytest.mark.clean_start
 def test_the_client_half_is_played_on_the_client_page(page, local_server):
-    """§35.3e's handover. One persona at a time, and the client's screens are the REAL ones — so the
-    story crosses to `/intake` by NAVIGATING, exactly as someone following the trainer's link does,
+    """The trainer's handover to the client. One persona at a time, and the client's screens
+    are the REAL ones — so the story crosses to `/intake` by NAVIGATING, exactly as someone
+    following the trainer's link does,
     and the guide picks up there. A drawn "client phone" would be a recording with extra steps."""
     page.goto(f"{local_server}intake?demo=story&chapter=intake")
 
@@ -608,8 +609,8 @@ def test_crossing_to_the_client_phone_carries_the_story_count_over(page, local_s
     Her chapter is still not folded into the trainer's step list: it lives in a different boot on a
     different device, and a guide walking those steps on his phone would point at a form that is not
     there. What crosses is the NUMBER. A viewer watching "step 10 of 41" become "step 1 of 8" reads
-    it as having left the story and started something else, which is exactly what they have not done
-    (§38.9).
+    it as having left the story and started something else, which is exactly what they have
+    not done.
 
     It is reached by GOING there, which since 2026-08-23 is what the guide's own Next does on that
     step (reported: "why is Open Ana's phone a different button from Next, and why does Next skip the
@@ -655,7 +656,7 @@ new MutationObserver((records) => {
 def test_the_guide_does_not_call_the_screen_wrong_while_scrolling_to_it(
     page, local_server
 ):
-    """TODO §38.17, measured at the evening's session move: the guide said "this step needs a
+    """Measured at the evening's session move: the guide said "this step needs a
     different screen" for half a second on the very screen the step lives on, then scrolled to the
     control and withdrew it.
 
@@ -686,7 +687,7 @@ def test_the_guide_does_not_call_the_screen_wrong_while_scrolling_to_it(
 
 def test_crossing_to_the_client_phone_carries_the_language(page, local_server):
     """Reported 2026-08-31 (Simon) at the review card: "zagotovo je Ana imela nekaj slovenskih
-    besedil, če ne kar celega UI slo, ta import pa pravi 'en'" (§39.2).
+    besedil, če ne kar celega UI slo, ta import pa pravi 'en'".
 
     Her page is a separate boot with no database — no state, no saved choice, nothing to read a
     language from — so the only way it can know is the address the handover sends it to. That

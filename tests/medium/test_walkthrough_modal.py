@@ -1,6 +1,6 @@
 # tests/medium/test_walkthrough_modal.py
-# The guide and whatever the app has left on top of the step — its MODALS and its dropdown MENUS
-# (TODO §38.3). Every rule here was invisible from the code and plain on screen.
+# The guide and whatever the app has left on top of the step — its MODALS and its dropdown MENUS.
+# Every rule here was invisible from the code and plain on screen.
 #
 # A `<dialog>` opened with showModal() makes the rest of the page inert. The guide answers that by
 # moving its panel INTO the open dialog, which is what keeps Show me and Next tappable. That single
@@ -235,7 +235,7 @@ def test_an_open_menu_is_closed_before_the_step_is_demonstrated(page, local_serv
         f"the stub's menu is not covering the control: {covered}"
     )
 
-    # Since 2026-09-13 (§51) that tap interrupts the guide, so Show me is not offered from here: the
+    # Since 2026-09-13 that tap interrupts the guide, so Show me is not offered from here: the
     # card's way back closes the menu first, and the step is then shown on a clean screen.
     page.locator("#walkthrough-return").click()
     page.locator("#walkthrough-show").click()

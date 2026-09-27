@@ -1,5 +1,5 @@
 # tests/e2e/test_sandbox.py
-# The two workspaces against the real engine (TODO §40): switching between them, and the isolation
+# The two workspaces against the real engine: switching between them, and the isolation
 # that makes the whole design worth having.
 #
 # The naming, the key suffixes and the staleness clock are pinned as pure logic
@@ -28,7 +28,7 @@ WORKSPACE = """async () => {
 def _switch(page, expected_workspace):
     """Use the menu, not the module: the control the trainer taps is part of what is being tested.
 
-    **Waits for `body.in-sandbox`, NOT for `activeWorkspace()`** (TODO §45.14). The stored workspace
+    **Waits for `body.in-sandbox`, NOT for `activeWorkspace()`.** The stored workspace
     flag is set in the MIDDLE of the switch: `switchWorkspace` in data/stateStore.js calls
     `setActiveWorkspace(name)` and only then awaits `loadSavedState()` and, for a first entry, seeding
     the sandbox. A test that waited on the flag was reading the URL, and clicking the menu, while all
@@ -66,7 +66,7 @@ def _add_client(page, name):
 
 @pytest.mark.clean_start
 def test_the_sandbox_is_a_separate_database_and_nothing_leaks_back(page, local_server):
-    """The promise the whole of §40 rests on. A client added in the sandbox must not exist in the
+    """The promise the whole sandbox design rests on. A client added in the sandbox must not exist in the
     trainer's own work — not hidden from a view, ABSENT, in another database."""
     page.goto(f"{local_server}?init=demo_data_load&lang=en")
     page.wait_for_selector(".session-card")
@@ -93,7 +93,7 @@ def test_the_sandbox_is_a_separate_database_and_nothing_leaks_back(page, local_s
 
 @pytest.mark.clean_start
 def test_switching_repaints_instead_of_reloading(page, local_server):
-    """§40.3's ruling: the move re-renders. A reload costs the splash hold, the open view and any
+    """Ruled 2026-09-10: the move re-renders. A reload costs the splash hold, the open view and any
     half-filled dialog, and puts a service-worker fetch in the path of a switch that can happen mid
     session. A marker set on `window` survives a repaint and dies with a reload."""
     page.goto(f"{local_server}?init=demo_data_load&lang=en")
@@ -111,7 +111,7 @@ def test_switching_repaints_instead_of_reloading(page, local_server):
 
 @pytest.mark.clean_start
 def test_a_sandbox_older_than_twelve_hours_offers_a_fresh_one(page, local_server):
-    """§40.4. The seeded board is built around the day it was made, so by the next morning the demo
+    """The seeded board is built around the day it was made, so by the next morning the demo
     has nothing live on it. Declining must be remembered — a question asked again immediately is a
     question that was not answered."""
     page.goto(f"{local_server}?init=demo_data_load&lang=en")
@@ -133,7 +133,7 @@ def test_a_sandbox_older_than_twelve_hours_offers_a_fresh_one(page, local_server
             db.close();
         }"""
     )
-    # Out and back in through the MENU, not by calling switchWorkspace from here (TODO §45.14): a
+    # Out and back in through the MENU, not by calling switchWorkspace from here: a
     # module call moves the app's stored workspace without repainting, so `body.in-sandbox` would
     # still say sandbox and every later wait would be satisfied by a stale class. Leaving the way a
     # trainer leaves keeps the page's own account of itself true.
@@ -153,7 +153,7 @@ def test_a_sandbox_older_than_twelve_hours_offers_a_fresh_one(page, local_server
 
 @pytest.mark.clean_start
 def test_coming_back_returns_to_the_view_you_left(page, local_server):
-    """§40.3, ruled 2026-09-10: stepping out to look something up and coming back to the dashboard
+    """Ruled 2026-09-10: stepping out to look something up and coming back to the dashboard
     means finding your session, your client and your exercise again — three taps on a gym floor with
     somebody waiting. The route is remembered per workspace, and the live session is recovered for
     the workspace being entered so the clipboard has something to draw."""
@@ -196,7 +196,7 @@ def test_coming_back_returns_to_the_view_you_left(page, local_server):
 
 @pytest.mark.clean_start
 def test_the_sandbox_says_how_to_leave_it(page, local_server):
-    """§42.10, ruled 2026-09-10: the menu is way enough out — but the trainer has to be told it is
+    """Ruled 2026-09-10: the menu is way enough out — but the trainer has to be told it is
     there. The feed's leading card is where they are already being told none of this is real, so it
     is where the way back belongs, naming the control rather than describing it."""
     page.goto(f"{local_server}?init=demo_data_load&lang=en")
@@ -217,10 +217,10 @@ def test_the_sandbox_says_how_to_leave_it(page, local_server):
 
 @pytest.mark.clean_start
 def test_the_badge_offers_nothing_to_follow_in_the_sandbox(page, local_server):
-    """§42.12. The badge links to the preview build's data-loss notice, which is the wrong
+    """The badge links to the preview build's data-loss notice, which is the wrong
     destination from a workspace holding sample data — and it is the one link a trainer taps
     expecting an explanation of what they are looking at. The explanation lives in the feed
-    (§42.10); the badge becomes a marker, and gets its link back on the way out."""
+    instead; the badge becomes a marker, and gets its link back on the way out."""
     page.goto(f"{local_server}?init=demo_data_load&lang=en")
     page.wait_for_selector(".session-card")
     badge = page.locator("#preview-badge")
@@ -243,7 +243,7 @@ def test_the_badge_offers_nothing_to_follow_in_the_sandbox(page, local_server):
 
 @pytest.mark.clean_start
 def test_leaving_the_sandbox_takes_the_guide_with_it(page, local_server):
-    """§42.15, reported 2026-09-11: "leave sandbox did not close the (collapsed) walktrough cards".
+    """Reported 2026-09-11: "leave sandbox did not close the (collapsed) walktrough cards".
 
     The story's steps drive the sandbox's seeded records, so in the trainer's own work the guide
     points at controls for records that are not there — and parked, it is a bar over their real

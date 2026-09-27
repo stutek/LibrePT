@@ -1,5 +1,5 @@
 // tests/unit_js/domain/gymNotes.test.mjs
-// What the floor already said about one client (src/domain/gymNotes.js) — TODO §35.3c/d.
+// What the floor already said about one client (src/domain/gymNotes.js).
 //
 // The promise: a signal or note taken one-handed mid-circuit comes back at the moment the trainer
 // plans that client's next session, and the ones about movements in the plan they are looking at
@@ -62,7 +62,7 @@ test("a note the trainer already acted on stays gone", () => {
 });
 
 test("what the plan on screen is about comes first", () => {
-  // §35.3d's whole claim: the deadlift note resurfaces when the deadlift is next programmed for
+  // The whole claim: the deadlift note resurfaces when the deadlift is next programmed for
   // this client. Newest-first ordering alone would bury it under an unrelated signal.
   const notes = forJane(["Barbell Back Squat"]);
 
@@ -101,7 +101,7 @@ test("nothing logged yet is an empty list, not a failure", () => {
 });
 
 test("a note kept on the record is added to what the trainer already wrote", () => {
-  // §35.3c: it has to reach the CLIENT record, because that is the text the next plan is written
+  // It has to reach the CLIENT record, because that is the text the next plan is written
   // against — and it must not replace notes the trainer typed themselves.
   const notes = notesWithGymNote("Prefers morning sessions.", {
     on: "2026-08-21",

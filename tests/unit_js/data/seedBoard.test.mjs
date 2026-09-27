@@ -1,5 +1,5 @@
 // tests/unit_js/data/seedBoard.test.mjs
-// What the board looks like the second a sandbox is built (TODO §35.3a, §40.4).
+// What the board looks like the second a sandbox is built.
 //
 // The seed is generated relative to "now", so its defects appear and disappear with the clock and
 // none of them can be seen by reading the file. Two were reported on 2026-09-11, both on a Friday
@@ -44,7 +44,7 @@ test("nothing on a fresh board is overdue by more than its own day", () => {
   // about a session running late — the demo's live pair started an hour ago — and dishonest about
   // an evening days back that the sandbox invented already finished.
   //
-  // **The cut is ELAPSED TIME, not the calendar day** (TODO §69, 2026-09-21). It used to be the
+  // **The cut is ELAPSED TIME, not the calendar day** (2026-09-21). It used to be the
   // start of today, which failed this test for a whole hour every night: the live pair is
   // `slot(-1, +1)` in data/sessions.js and is DELIBERATELY allowed to cross midnight — the point of
   // that dataset is that something is running whenever a trainer opens it, and an earlier clamp

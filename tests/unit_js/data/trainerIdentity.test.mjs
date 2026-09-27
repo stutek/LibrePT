@@ -100,7 +100,7 @@ test("an obvious non-address is rejected before it can be stored", () => {
   assert.equal(looksLikeEmail(undefined), false);
 });
 
-// --- The trainer's phone (TODO §1.6, SMS ruled in 2026-08-17). Kept for one reason: an invite has to
+// --- The trainer's phone (SMS ruled in 2026-08-17). Kept for one reason: an invite has to
 // carry it, or the client's reply can only ever be an email — their device knows nothing about the
 // trainer except what the invite told it. ---
 
@@ -136,7 +136,7 @@ test("clearing the phone removes it rather than storing a blank", () => {
   assert.equal(readTrainerIdentity(store).email, "pt@example.com");
 });
 
-// --- The expiry padding (TODO §1.6, asked for 2026-08-17). A setting, not a record: it belongs to the
+// --- The expiry padding (asked for 2026-08-17). A setting, not a record: it belongs to the
 // install the way `lang` does, and it is stamped onto each invite at send time so the cutoff can travel. ---
 
 test("the padding a trainer sets is remembered in hours", () => {

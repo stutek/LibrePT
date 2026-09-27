@@ -6,7 +6,7 @@
 //
 // It did not hold for standalone rests. The timer wrote `{ type: "exercise" }` for one, and
 // focusIndexFromRef's exercise branch explicitly excludes rests, so the ref resolved to nothing and
-// tapping the timer card left focus wherever it happened to be (TODO §24.4).
+// tapping the timer card left focus wherever it happened to be.
 
 import assert from "node:assert/strict";
 import { test } from "node:test";

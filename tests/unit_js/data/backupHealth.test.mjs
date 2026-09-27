@@ -1,6 +1,6 @@
 // tests/unit_js/data/backupHealth.test.mjs
-// When the app should tell a trainer their data exists in exactly one evictable place (TODO §3.8,
-// src/data/backupHealth.js).
+// When the app should tell a trainer their data exists in exactly one evictable place
+// (src/data/backupHealth.js).
 //
 // The rule this suite mostly exists to defend is the one that keeps the warning trustworthy: **a
 // downloaded backup clears it exactly as a Drive sync does.** If only syncing could silence a safety

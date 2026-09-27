@@ -1,6 +1,6 @@
 // tests/unit_js/modules/clients/signupInbox.test.mjs
-// A submission arriving without anybody going looking for it (src/modules/clients/signupInbox.js) —
-// TODO §38.22.
+// A submission arriving without anybody going looking for it
+// (src/modules/clients/signupInbox.js).
 //
 // Asked 2026-08-30: "a PWA import rabi shranjevanje datoteke iz message-a in nato odpiranje?" It did:
 // save the attachment out of the messaging app, open LibrePT, open the menu, choose "Review a
@@ -107,7 +107,7 @@ test("an empty inbox opens nothing", async () => {
 
 test("a browser with no cache storage falls through rather than throwing", async () => {
   // Private windows and blocked site data. The menu's file picker is still there, which is the whole
-  // reason it stays (§38.22).
+  // reason it stays.
   const view = { location: { href: "https://gym.example/LibrePT/?open=signup" }, history: {} };
 
   assert.equal(await takeSharedSubmission(view), null);

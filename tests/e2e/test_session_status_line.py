@@ -1,12 +1,12 @@
 # tests/e2e/test_session_status_line.py
 # Every session card on the dashboard carries a status line (components/sessionCard.js): live
 # (existing), a countdown to the scheduled start for not-yet-started sessions, and an editable
-# elapsed-time readout for finished ones, which also carries the completed tick (§45.16). The upcoming-countdown RENDER moved to
+# elapsed-time readout for finished ones, which also carries the completed tick. The upcoming-countdown RENDER moved to
 # tests/medium/test_sessions_timeline.py; what stays needs a reload or the real finish-session
 # controller. The live/starts-in countdowns render "01h 32m"
 # (formatDurationHourMin); the editable elapsed-time field stays "HH:MM" (formatDurationHM,
 # parseDurationHM's inverse — it's a value the trainer types back in, not just a countdown display).
-# Closes the loop for TODO 2.3. Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
+# Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
 import re
 
@@ -23,7 +23,7 @@ def test_past_card_shows_editable_elapsed_time(page, local_server):
     bar = card.locator(".session-live-bar.past")
     assert bar.count() == 1
     # A tick, not a clock: this session is COMPLETED, and since 2026-09-11 the bar is where a card
-    # says so (TODO §45.16) — the badge that used to say it in the heading row was breaking that
+    # says so — the badge that used to say it in the heading row was breaking that
     # row's layout. A past session that was never finished still shows the clock.
     assert "fa-circle-check" in bar.locator("i").first.get_attribute("class")
 
@@ -48,7 +48,7 @@ def test_past_card_shows_editable_elapsed_time(page, local_server):
     assert new_value == "02:15"
 
     # Survives a reload (persisted onto the session via saveToLocalStorage, write-behind onto
-    # IndexedDB now — TODO §18.6 part 4 — so wait for the queue to drain before reloading).
+    # IndexedDB now — so wait for the queue to drain before reloading).
     page.evaluate(
         """async () => {
             const queue = await import(new URL('data/writeQueue.js', document.baseURI).href);
@@ -94,7 +94,7 @@ def test_finishing_a_session_stamps_completed_and_duration_on_the_session(
     page.locator("#btn-finish-session").click()
     page.wait_for_timeout(300)
 
-    # The stamp is persisted write-behind onto IndexedDB now (TODO §18.6 part 4) — wait for the
+    # The stamp is persisted write-behind onto IndexedDB now — wait for the
     # queue to drain before navigating away, or the navigation can race the write.
     page.evaluate(
         """async () => {

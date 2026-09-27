@@ -1,5 +1,5 @@
 // tests/unit_js/modules/demo/storyLanguage.test.mjs
-// The demo must be finishable in every language it ships in (TODO §38.19).
+// The demo must be finishable in every language it ships in.
 //
 // Reported 2026-08-30, from a Slovenian run: "Tega koraka ni bilo mogoče zaključiti" at step 16 of
 // 49 — the one where Ana sends her file. The step's expectation was `containsText: "Shared"`, and the

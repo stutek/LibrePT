@@ -1,8 +1,8 @@
 // tests/unit_js/data/crashReport.test.mjs
-// What a crash report contains, and what it must never contain (src/data/crashReport.js) — TODO §12.4.
+// What a crash report contains, and what it must never contain (src/data/crashReport.js).
 //
 // The whole design is decided by one fact: **the issue tracker is public**. A stack is safe; the state
-// around it is not — a client's name, their notes, their injuries (§17.3). So the payload is
+// around it is not — a client's name, their notes, their injuries. So the payload is
 // non-identifying BY CONSTRUCTION rather than by a redaction pass that has to be kept correct: it is
 // built from a fixed list of safe fields, and anything else a caller hands over is dropped.
 //
@@ -94,7 +94,7 @@ test("a thrown non-error still produces a report", () => {
 });
 
 test("the log keeps only the most recent crashes", () => {
-  // A crash log must never grow into the storage budget (§18.6).
+  // A crash log must never grow into the storage budget.
   let log = [];
   for (let index = 0; index < MAX_KEPT_CRASHES + 5; index += 1) {
     log = recordCrash(log, buildCrashReport(new Error(`boom ${index}`), { at: AT, route: "/" }));

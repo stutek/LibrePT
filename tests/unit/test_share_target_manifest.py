@@ -1,5 +1,5 @@
 # tests/unit/test_share_target.py
-# The app offers itself to the phone as somewhere a file can be sent (TODO §38.22).
+# The app offers itself to the phone as somewhere a file can be sent.
 #
 # Asked 2026-08-30: "a PWA import rabi shranjevanje datoteke iz message-a in nato odpiranje?" It did.
 # Three files have to agree for it to stop: the manifest declares the URL and the field name, the
@@ -48,11 +48,11 @@ def _declared_pair(src_dir):
 
 
 def test_the_app_claims_its_own_files_and_no_others(src_dir):
-    """LibrePT declares BOTH a media type and a distinctive extension (TODO §1.7): an Android intent
+    """LibrePT declares BOTH a media type and a distinctive extension: an Android intent
     routes on the type, an OS association on the extension, and an email gateway frequently relabels
     the type on the way. The manifest has to name that pair and nothing wider.
 
-    The first version of §38.22 named `application/json` and `.json`, which would have offered
+    The first version of this manifest named `application/json` and `.json`, which would have offered
     LibrePT in the share sheet for every JSON file on the phone and claimed the extension
     system-wide. Asked about directly: "a nisva rekla, da bova imela custom mime in custom končnico
     za uvoz v LibrePT?"

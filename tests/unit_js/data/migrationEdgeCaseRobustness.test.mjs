@@ -1,5 +1,5 @@
 // tests/unit_js/data/migrationEdgeCaseRobustness.test.mjs
-// The "migration fuzzing" item TODO §18.13 asks for: synthetic edge-case databases through the
+// Synthetic edge-case databases through the
 // migration runner, checking it refuses rather than corrupts. This is a hand-authored table, not
 // true property-based fuzzing — this stack is deliberately dependency-light (no fuzzing library),
 // so the substitute is a growing, committed battery of hostile inputs asserted never to throw and

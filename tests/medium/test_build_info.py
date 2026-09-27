@@ -1,7 +1,7 @@
 # tests/medium/test_build_info.py
 # "Which build am I on" has to be answerable ON A PHONE. The long build identity used to live only
 # in the header stamp's `title` tooltip, which a touch device cannot reach at all. The stamp is a
-# button opening a dialog that shows commit and DATA SCHEMA (two different axes, TODO §16). The
+# button opening a dialog that shows commit and DATA SCHEMA (two different axes). The
 # pure copyable-text-block model (buildInfoText()) is covered by
 # tests/unit_js/modules/common/buildInfoDialog.test.mjs; this file covers the DOM: the touch
 # target and the dialog itself. Mounted via appBoot.bootBuildInfoDialog() (see

@@ -1,5 +1,5 @@
 # tests/medium/test_rsvp_page.py
-# The page a client lands on from an invite, where they answer it (TODO §1.6's confirm link).
+# The page a client lands on from an invite, where they answer it.
 #
 # **Why a page and not two links in the invite.** The original sketch put prefilled `mailto:`/`sms:`
 # Confirm links straight in the invite body. That works in an email and fails in a text: an `sms:` URI
@@ -178,7 +178,7 @@ def test_a_broken_or_stale_link_says_so_instead_of_showing_a_blank_page(
     expect(page.locator("#rsvp-answers")).to_be_hidden()
 
 
-# --- Expiry (TODO §1.6, asked for 2026-08-17: "PT sets the expiry padding — example 4 hours before
+# --- Expiry (asked for 2026-08-17: "PT sets the expiry padding — example 4 hours before
 # session"). The page is where it is enforced, because the page is on the device that is deciding. It is
 # advisory by nature — two clocks, no server — so what matters is that it never silently swallows an
 # answer, and never claims more certainty than it has. ---

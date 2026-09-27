@@ -57,9 +57,9 @@ test("a boot slower than the minimum owes no further hold", () => {
 });
 
 test("the demo link opens the SANDBOX, and suppresses the splash", () => {
-  // TODO §40.9: it used to carry ?init=demo_data_load, which put the sample people into the
+  // It used to carry ?init=demo_data_load, which put the sample people into the
   // database the trainer was about to start working in. The offer now opens the sandbox instead,
-  // and the parameter keeps its own meaning for everything else that uses it (§40.7).
+  // and the parameter keeps its own meaning for everything else that uses it.
   const url = new URL(demoDataUrl("https://app.example.test/LibrePT/?lang=sl&init=demo_data_load"));
   assert.equal(url.searchParams.get("workspace"), "sandbox");
   // A promo link minted before this change still carries the old parameter; left on, it would seed
@@ -95,7 +95,7 @@ test("splash=off still wins even on the first load of a session", () => {
   assert.equal(requestedMinimumVisibleMs("?splash=off", false), 0);
 });
 
-// ── A first run outranks a leftover deep link (TODO §28.11) ────────────────────────────────────
+// ── A first run outranks a leftover deep link ───────────────────────────────────────────────────
 // Clearing browser data does not clear the ADDRESS BAR, so the reload arrives carrying whatever
 // link was open — and `?splash=off`, which every demo link sets and every later navigation carries
 // forward, suppresses both first-run screens. The trainer is then dropped into an empty app having

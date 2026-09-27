@@ -1,5 +1,5 @@
 // tests/unit_js/data/syncMerge.test.mjs
-// Pure three-way merge for Google Drive appDataFolder sync (TODO §1.5/§3.3, src/data/syncMerge.js).
+// Pure three-way merge for Google Drive appDataFolder sync (src/data/syncMerge.js).
 // These pin the actual decisions the design rests on: no wall-clock ordering, deletions win only when
 // the other side left the record untouched, and same-record conflicts are reported rather than
 // guessed away.

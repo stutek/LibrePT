@@ -1,5 +1,5 @@
 # tests/unit/test_theme_selectors.py
-# Every class a theme restyles still exists (TODO §49.2).
+# Every class a theme restyles still exists.
 #
 # Since 2026-09-13 a theme is a whole stylesheet: besides its tokens it may restyle any component,
 # by the component's class (docs/ARCHITECTURE.md#themes-and-styling). That couples the theme to a

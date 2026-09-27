@@ -1,5 +1,5 @@
 // tests/unit_js/data/starWriteInvariants.test.mjs
-// The CD-pipeline invariants TODO §18.13 asks for around §18.4's staging guard: expand-first schema
+// The CD-pipeline invariants around the staging guard: expand-first schema
 // evolution, projections that are pure/total (idempotent + invertible), and the specific loss
 // scenario staging exists to prevent — an older schema's UI writing a record the newest schema
 // requires more of. recordSchemas.test.mjs covers the single-schema half (real writer shapes
@@ -58,7 +58,7 @@ function buildLiveWriters() {
 }
 
 test("schema evolution is additive never drops a field", () => {
-  // Expand-first (TODO §18.4): a field lands in every live schema before the UI that writes it
+  // Expand-first: a field lands in every live schema before the UI that writes it
   // ever ships, so a live schema's declared field set may only grow release over release, never
   // shrink — a field disappearing would silently break every OLDER build still writing it.
   const older = schemas.SCHEMA_4;
@@ -94,7 +94,7 @@ test("every live writer shape validates against every live schema", () => {
 });
 
 test("projections are idempotent and invertible", () => {
-  // "Projections must be pure and total" (TODO §18.4) made concrete: projecting twice is the same
+  // "Projections must be pure and total" made concrete: projecting twice is the same
   // as once, and un-projecting a projection recovers the exact domain object — together, what lets a
   // bucket be re-derived by re-projection rather than restored from a backup.
   const liveWriters = buildLiveWriters();
@@ -114,7 +114,7 @@ test("projections are idempotent and invertible", () => {
 });
 
 test("an older schemas writer missing a newer required field is caught", () => {
-  // The specific loss scenario staging exists to prevent (TODO §18.4): a session literal shaped
+  // The specific loss scenario staging exists to prevent: a session literal shaped
   // exactly like what schema 4's UI wrote — no `startDate` at all, since schema 4 never declared the
   // field — must fail schema P's projection, which requires it. If this ever silently passed, a
   // star write from an old cached build would plant an invalid record in the newest bucket.
@@ -144,11 +144,11 @@ test("an older schemas writer missing a newer required field is caught", () => {
   );
 });
 
-// --- Staging is enforced, not merely intended (TODO §18.4). Decided 2026-08-17: a new collection goes
+// --- Staging is enforced, not merely intended. Decided 2026-08-17: a new collection goes
 // into the PREVIEW schema first, because doing it that way "would actually test our rollout plans".
 // It did — it found that nothing enforced the boundary. These are that enforcement. ---
 
-// `previewProbe` is declared by the PREVIEW schema alone (TODO §61), so staging is exercised by the
+// `previewProbe` is declared by the PREVIEW schema alone, so staging is exercised by the
 // real schemas and cannot pass trivially the day no feature happens to be in preview.
 const STAGED_PREVIEW = schemas.SCHEMA_PREVIEW;
 

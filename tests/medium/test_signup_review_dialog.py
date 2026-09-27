@@ -1,8 +1,8 @@
 # tests/medium/test_signup_review_dialog.py
-# The trainer reviewing a submission a client sent them (TODO §26.5).
+# The trainer reviewing a submission a client sent them.
 #
 # **The dialog IS the trust boundary, not a nicety.** Anyone who photographs the QR on a gym wall can
-# craft a file, and there is deliberately no signature to check (§26.8 — signing needs a key exchange,
+# craft a file, and there is deliberately no signature to check (signing needs a key exchange,
 # which needs the server this project does not have). So every test here is about the same promise:
 # nothing enters the trainer's register that they did not look at and accept.
 #
@@ -123,7 +123,7 @@ def test_accepting_a_new_person_adds_them_once(page, local_server):
 def test_a_returning_client_is_offered_as_an_update_rather_than_a_second_record(
     page, local_server
 ):
-    """§26.5's dedupe. Matched on email or phone, never on name — and the trainer still decides, since
+    """The dedupe: matched on email or phone, never on name — and the trainer still decides, since
     only they know whether this is the same person."""
     _mount(page, local_server)
 

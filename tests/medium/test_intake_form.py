@@ -1,7 +1,7 @@
 # tests/medium/test_intake_form.py
-# The client intake form, mounted cold (TODO §1.7/§26.1).
+# The client intake form, mounted cold.
 #
-# §26.1 asked for exactly this tier: "intake must render on a stock, cold browser — no IndexedDB
+# This tier was asked for exactly this: "intake must render on a stock, cold browser — no IndexedDB
 # write, no demo seed, no service-worker dependency, no boot of the trainer's app state. It is the
 # only route in the app that is stateless by design, and a medium test should pin that rather than
 # trusting it."
@@ -38,7 +38,7 @@ appBoot.bootIntake({
   platform: {
     canShareFiles: () => window.__canShare !== false,
     shareFiles: async (data) => {
-      // A browser that refuses the file AFTER offering the button — the Galaxy S23 in TODO §45.4.
+      // A browser that refuses the file AFTER offering the button — the Galaxy S23.
       // The name is what carries the reason; a DOMException's message is frequently empty.
       if (window.__shareRefusal) {
         throw Object.assign(new Error('Permission denied'), { name: window.__shareRefusal });
@@ -92,7 +92,7 @@ def _fill(page, name="Jana Novak", email="jana@example.com", goals="", injury=""
 
 
 def test_the_form_leaves_nothing_on_the_client_phone(page, local_server):
-    """The promise §26.1 makes and the one a stranger is entitled to: filling this in and walking away
+    """The promise made here and the one a stranger is entitled to: filling this in and walking away
     stores nothing. No database, no keys, not even a theme preference — the trainer's boot writes all
     three and this path runs none of it."""
     _mount(page, local_server)
@@ -170,7 +170,7 @@ def test_the_tick_itself_says_what_is_being_agreed_to(page, local_server):
     sentence names where the details live, that there may be a backup copy in cloud storage, that
     nobody else receives them, and the right to withdraw.
 
-    **The VENDOR is not part of that list** (ruled 2026-08-31, §39.3). This asked for "Drive" until
+    **The VENDOR is not part of that list** (ruled 2026-08-31). This asked for "Drive" until
     then, which put it at odds with the letter it summarises — that letter says "my personal cloud
     storage" and names nobody, and a client handed one wording while ticking another has not been
     informed. What is disclosed here is the KIND of recipient; who it is belongs in the privacy
@@ -278,7 +278,7 @@ def test_where_sharing_works_it_is_the_one_tap_route(page, local_server):
 
 
 def test_a_refused_share_saves_the_file_and_says_how_to_send_it(page, local_server):
-    """Reported from a Galaxy S23 (§45.4): the phone offered the Share button, refused the file, and
+    """Reported from a Galaxy S23: the phone offered the Share button, refused the file, and
     the client was left with an error and nothing in their hands. Android Chrome shares only file
     types on a list of its own and this one is not on it, so the refusal is permanent on that phone —
     the file is saved instead, and the page says how to send it."""

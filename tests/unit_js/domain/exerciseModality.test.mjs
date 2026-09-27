@@ -1,5 +1,5 @@
 // tests/unit_js/modules/common/exerciseModality.test.mjs
-// The exercise MODALITY axis (TODO §13.3 / §17.1): a movement is not always sets × reps × load.
+// The exercise MODALITY axis: a movement is not always sets × reps × load.
 // Cardio is logged against an effort metric (time/distance/calories/watts), stretch & balance
 // against a hold-time. These tests cover the pure metric-formatting model that the focus card /
 // plans / history all render through.
@@ -64,7 +64,7 @@ test("isometric agility and extended cardio metrics", () => {
   assert.equal(r.strengthOpts, null);
 });
 
-test("compactTargetString: the one wording the live card and the plan sheet share (TODO §52.2)", () => {
+test("compactTargetString: the one wording the live card and the plan sheet share", () => {
   const strength = m.compactTargetString({
     setsTarget: 4,
     repsTarget: 6,

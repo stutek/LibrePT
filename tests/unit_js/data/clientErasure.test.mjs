@@ -123,7 +123,7 @@ test("every identifying field on the client record is cleared", () => {
   for (const field of ["alias", "email", "phone", "goals", "notes", "injury"]) {
     assert.equal(erased[field], "", `${field} should be cleared`);
   }
-  // The alias was kept until 2026-09-18 (TODO §59) and it is identifying on its own: the form asks
+  // The alias was kept until 2026-09-18 and it is identifying on its own: the form asks
   // for a surname or a distinguishing detail, and it is drawn beside the name everywhere a client
   // is shown, so an erasure that left it named the person the pseudonym is there to hide.
   assert.ok(!JSON.stringify(erased).includes("morning"), "no trace of the trainer's own label");
@@ -137,7 +137,7 @@ test("every identifying field on the client record is cleared", () => {
 });
 
 test("a repeating rule for this client alone is dropped, a shared one is kept without them", () => {
-  // Ruled 2026-09-19 (Simon, TODO §65): a rule that exists for one client exists only to keep
+  // Ruled 2026-09-19 (Simon): a rule that exists for one client exists only to keep
   // producing their evenings, and an erased person must not still be scheduled every week. A rule
   // with other people in it belongs to those others.
   const { state, summary } = eraseClientInState(stateWithTwoJanes(), "c-jane-a", {});
@@ -272,11 +272,11 @@ test("erasing an unknown client changes nothing at all", () => {
   assert.deepEqual(state, before);
 });
 
-// The repeat sweep (TODO §65, ruled 2026-09-18 by Simon): every erasure runs again at start, so an
+// The repeat sweep (ruled 2026-09-18 by Simon): every erasure runs again at start, so an
 // erasure an older build left half done is finished without anyone asking.
 test("the repeat sweep finishes an erasure an older build left half done", () => {
   const { state: erased } = eraseClientInState(stateWithTwoJanes(), "c-jane-a", {});
-  // What a build before §59 and §65 left behind: the alias kept, the solo rule still scheduling her.
+  // What an older build left behind: the alias kept, the solo rule still scheduling her.
   const older = structuredClone(erased);
   older.clients.find((client) => client.id === "c-jane-a").alias = "morning";
   older.sessionSeries.push({ id: "ser-solo", title: "Tuesdays", participants: ["c-jane-a"] });

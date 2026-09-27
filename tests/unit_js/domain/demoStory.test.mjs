@@ -1,5 +1,5 @@
 // tests/unit_js/domain/demoStory.test.mjs
-// The story's chapter cursor (src/domain/demoStory.js) — TODO §35.
+// The story's chapter cursor (src/domain/demoStory.js).
 //
 // The story is the LONG demo: three friends from a leaflet to their second session, ~23 events. The
 // promise these pin is why it is chaptered at all — nobody watches five unbroken minutes of software
@@ -95,7 +95,7 @@ test("a chapter with no title cannot be offered by name", () => {
 });
 
 test("every step still needs an expectation, narrated ones included", () => {
-  // TODO §35.1: a paper-action card is not exempt — its expectation is that the card was on screen
+  // A paper-action card is not exempt — its expectation is that the card was on screen
   // and could be dismissed. A step that claims something about the app while asserting nothing is
   // what makes a demo a recording again.
   const narrated = {
@@ -118,7 +118,7 @@ test("a story with no chapters says so rather than playing empty", () => {
 
 test("a chapter played on the client's own page is not part of the trainer's walk", () => {
   // It lives in a different boot on a different device; flattening it into the trainer's run would
-  // leave the guide pointing at a form that is not on screen (TODO §35.3e).
+  // leave the guide pointing at a form that is not on screen.
   const withClient = {
     id: "s",
     chapters: [
@@ -143,7 +143,7 @@ test("a chapter played on the client's own page is not part of the trainer's wal
 // The story hands the browser over to the client's page mid-way and takes it back four steps later.
 // Each side is a separate boot with its own step list, so each side used to count from one: the
 // viewer watched "step 10 of 41" become "step 1 of 8" and then "step 11 of 41", as if they had
-// started something else and come back. Reported 2026-08-27 (TODO §38.9). A step's number is now its
+// started something else and come back. Reported 2026-08-27. A step's number is now its
 // place in the STORY, which is the one thing both boots can agree on without sharing any state.
 const HANDOVER_STORY = {
   id: "handover",

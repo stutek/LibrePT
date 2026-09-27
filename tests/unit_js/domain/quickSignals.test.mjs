@@ -4,7 +4,7 @@
 // entry carrying a typed note or a voice memo — that content cannot be reconstructed, and the
 // trainer did not aim the toggle at it.
 //
-// This was reachable only through a mounted clipboard until TODO §24.4 made the rules pure.
+// This was reachable only through a mounted clipboard until the rules were pulled out as pure logic.
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
@@ -101,7 +101,7 @@ test("signal colour ranks written feedback above either quick tap", () => {
   assert.equal(quickSignalColor(voiced, "c1", "Bench Press"), "var(--danger)");
 });
 
-// TODO §7.2: the note mark is a THIRD state, independent of the two signals.
+// The note mark is a THIRD state, independent of the two signals.
 test("an exercise the trainer wrote a note on is marked as having one", () => {
   const feedback = [
     {

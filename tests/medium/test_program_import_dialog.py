@@ -1,5 +1,5 @@
 # tests/medium/test_program_import_dialog.py
-# Bringing in a programme written somewhere else (TODO §29).
+# Bringing in a programme written somewhere else.
 #
 # The parser and its refusals are pinned without a browser in tests/unit_js/domain/ (including the
 # frozen corpus of real pasted shapes). What needs the DOM is the surface's own promises: every
@@ -91,7 +91,7 @@ def test_a_pasted_programme_says_what_came_through_before_anything_opens(
     expect(report).to_be_visible()
     expect(report).to_contain_text("3 items read")
     # The movement the catalogue does not have is ALLOWED and COUNTED, never refused and never
-    # silently renamed into the nearest thing (§29.1).
+    # silently renamed into the nearest thing.
     expect(report).to_contain_text("1 of them not in your catalogue")
 
 
@@ -158,7 +158,7 @@ def test_opening_hands_over_the_plan_and_who_it_is_for(page, local_server):
 def test_a_movement_the_catalogue_does_not_have_is_marked_in_the_editor(
     page, local_server
 ):
-    """§29.1's ruling has two halves and both matter: the movement is ALLOWED — refusing it would
+    """The ruling has two halves and both matter: the movement is ALLOWED — refusing it would
     throw away the trainer's programme over a naming difference — and it is MARKED, or the catalogue
     quietly becomes forty spellings of one movement."""
     _open(page, local_server)

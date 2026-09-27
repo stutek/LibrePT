@@ -1,5 +1,5 @@
 // tests/unit_js/domain/contactChannel.test.mjs
-// Reading the one contact detail a trainer was just given (src/domain/contactChannel.js, TODO §26.3).
+// Reading the one contact detail a trainer was just given (src/domain/contactChannel.js).
 //
 // The promise: a trainer types what they were told — a number read off a screen, an address said out
 // loud — and the app works out how to reach it. Getting this wrong is not cosmetic: it either opens

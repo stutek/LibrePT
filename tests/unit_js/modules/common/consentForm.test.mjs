@@ -177,7 +177,7 @@ test("the sms href uses the ?&body= form both mobile platforms accept", () => {
 
 test("every shipped letter is verbatim its printable template", () => {
   for (const lang of LANGS) {
-    // The template names the deployed address rather than writing it out (TODO §28.2), the same
+    // The template names the deployed address rather than writing it out, the same
     // placeholder render_docs.py resolves when it builds the client-facing page. Resolved here from
     // the SAME declaration the app reads, so this stays a drift test between the letter and the
     // template rather than a second place the URL is written.
@@ -217,7 +217,7 @@ test("every shipped letter is verbatim its printable template", () => {
 const STORAGE_VENDORS = [/google/i, /\bdrive\b/i, /icloud/i, /dropbox/i, /onedrive/i];
 
 test("no consent text a client ticks or signs names the storage vendor", () => {
-  // Ruled 2026-08-31 (§39.3), reported as "privacy consent naj ne omeni google drive-a". The tick on
+  // Ruled 2026-08-31, reported as "privacy consent naj ne omeni google drive-a". The tick on
   // the intake form said "my trainer's personal Google Drive" while the letter it summarises said
   // "my personal cloud storage" and named nobody — one promise, two texts, disagreeing, and the
   // shorter one is the one a client actually ticks. This is the same drift the letters are already

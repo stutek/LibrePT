@@ -1,5 +1,5 @@
 // tests/unit_js/modules/common/qrCode.test.mjs
-// A QR code as geometry (src/modules/common/qrCode.js, TODO §26.3/§26.4).
+// A QR code as geometry (src/modules/common/qrCode.js).
 //
 // **A picture that does not scan is invisible to an assertion**, which is why the encoder itself is
 // vendored rather than written here and why these tests pin the two things around it: the arithmetic

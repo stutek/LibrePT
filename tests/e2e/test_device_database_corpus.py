@@ -1,5 +1,5 @@
 # tests/e2e/test_device_database_corpus.py
-# Frozen DEVICE databases (TODO §63): what an install's IndexedDB and localStorage actually held at a
+# Frozen DEVICE databases: what an install's IndexedDB and localStorage actually held at a
 # given point, restored byte for byte and booted by today's app. The backup corpus
 # (tests/fixtures/backups/) proves files; this proves the phone.
 #
@@ -92,7 +92,7 @@ def test_every_device_snapshot_is_booted_here():
 def test_a_p_era_install_keeps_its_repeating_sessions_invitations_and_cancelled_evenings(
     page, local_server
 ):
-    """An install from before schema 4 became live (TODO §61) holds `sessionSeries` and `invites` in
+    """An install from before schema 4 became live holds `sessionSeries` and `invites` in
     its P store alone. Whatever schema the app reads, the trainer's rules of repeating sessions,
     the invitations they sent and the evenings they cancelled must all still be there."""
     loaded = _boot_snapshot(page, local_server, "p_era_install.json")
@@ -104,7 +104,7 @@ def test_a_p_era_install_keeps_its_repeating_sessions_invitations_and_cancelled_
 
 
 def test_a_p_era_install_read_at_schema_4_keeps_them_too(page, local_server):
-    """Schema 4 is the live schema (TODO §61). Before the P → 4 transfer (src/data/previewTransfer.js)
+    """Schema 4 is the live schema. Before the P → 4 transfer (src/data/previewTransfer.js)
     an install reading schema 4 found no repeating-session rule and no invitation, because an older
     build had written both into its P store alone — measured on this snapshot 2026-09-17."""
     loaded = _boot_snapshot(page, local_server, "p_era_install.json", read_schema="4")
@@ -131,7 +131,7 @@ COUNTS = """async () => {
 
 
 def test_a_schema_4_install_reads_schema_5_with_everything_it_had(page, local_server):
-    """The first boot after schema 5 became the schema every install reads (TODO §76). The snapshot's
+    """The first boot after schema 5 became the schema every install reads. The snapshot's
     store 4 holds the data and carries no "filled" marker, because it was always the store read. The
     schema 5 store does not exist yet. Filling 5 from the schema being read instead of from 4 opened
     this install EMPTY: every collection below must arrive whole."""

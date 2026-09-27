@@ -80,7 +80,7 @@ test("nothing that is not a payload ever throws", () => {
   }
 });
 
-// --- The reply leg (TODO §1.6's confirm link). SMS was ruled in on 2026-08-17, and these pin what
+// --- The reply leg. SMS was ruled in on 2026-08-17, and these pin what
 // that costs: the invite has to carry the trainer's PHONE, since `sms:` needs a number to address and
 // an invite that only knows an email address can only ever be answered by email. ---
 

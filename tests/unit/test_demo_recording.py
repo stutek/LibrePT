@@ -3,7 +3,7 @@
 The tool needs a browser and a dev server, so what is testable here is the decision it hinges on:
 whether to save the file at all. That decision is the whole reason the tool is safe to have — a
 recorder that writes a video regardless of the tour's outcome would reintroduce exactly the stale,
-confident-looking asset TODO §23.5 rejected, only now it would be showing a *broken* app.
+confident-looking asset a plain recording was rejected for, only now it would be showing a *broken* app.
 """
 
 import pytest

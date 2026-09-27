@@ -50,7 +50,7 @@ def test_the_first_line_promises_a_finish_TIME_when_there_is_evidence_for_one():
         "build check", AT, FULL, previous_seconds=165.0
     ).splitlines()[0]
 
-    # §2.A.3 wants a wall clock, not a duration: "~3 minutes" makes the reader do arithmetic and
+    # The reader wants a wall clock, not a duration: "~3 minutes" makes them do arithmetic and
     # then remember when they started reading. Both are given, and the clock is the point.
     assert "2m45s" in line
     assert "09:07" in line
@@ -83,8 +83,8 @@ def test_a_busy_box_says_so_rather_than_leaving_the_reader_to_divide():
         "build check", AT, FULL._replace(load=(19.4, 18.2, 15.0))
     ).splitlines()[1]
 
-    # Load only means something against the core count, and reading it is the first diagnostic
-    # §2.A.3 asks for when a stage overruns. The header does that division so the reader does not
+    # Load only means something against the core count, and it is the first thing to read when a
+    # stage overruns. The header does that division so the reader does not
     # have to know this box has 16 cores.
     assert "quiet" in quiet
     assert "oversubscribed" in loaded.lower()

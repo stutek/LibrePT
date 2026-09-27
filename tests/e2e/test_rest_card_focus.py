@@ -1,5 +1,5 @@
 # tests/e2e/test_rest_card_focus.py
-# What remains of the first-class-rest coverage (TODO §8.6) that genuinely needs the whole app: a
+# What remains of the first-class-rest coverage that genuinely needs the whole app: a
 # focused rest is deep-linkable (focusType=rest) and that focus survives a reload. Writing the URL
 # needs the real router, and restoring from it needs the real boot to read it back — neither exists
 # in tests/medium/. The focus MODEL itself (tapping a collapsed rest focuses without starting its

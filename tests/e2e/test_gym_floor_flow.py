@@ -6,7 +6,7 @@
 # tests/e2e/ cover.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 #
-# Migrated from the legacy tests/test_browser.py (TODO §12.3) — the other three tests that used to
+# Migrated from the legacy tests/test_browser.py — the other three tests that used to
 # live there (sessions day navigation, timeline scroll, continuous vertical layout) were stale
 # duplicates of the maintained versions in test_sessions_dashboard.py and were dropped rather than
 # moved.

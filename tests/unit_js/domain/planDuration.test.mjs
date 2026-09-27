@@ -1,6 +1,6 @@
 // tests/unit_js/domain/planDuration.test.mjs
-// How long a programme actually takes, against the slot it has to fit in (src/domain/planDuration.js)
-// — TODO §35.3b.
+// How long a programme actually takes, against the slot it has to fit in
+// (src/domain/planDuration.js).
 //
 // The promise: while a trainer is building a session, the answer to "does this fit in the hour?" is
 // on screen. It is an ESTIMATE and says so — nobody can know how long a set takes — but a trainer

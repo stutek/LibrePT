@@ -1,5 +1,5 @@
-# tests/e2e/test_plan_peek_open.py — the sideways deck of a client's plans, opened for real (TODO
-# §52.2 step 4). tests/medium/test_plan_peek.py covers the gesture and what the clipboard ASKS to
+# tests/e2e/test_plan_peek_open.py — the sideways deck of a client's plans, opened for real.
+# tests/medium/test_plan_peek.py covers the gesture and what the clipboard ASKS to
 # open; this file needs the router, because the promise is where the trainer lands: the previous
 # plan's clipboard for the same client, a Today control that leads back, and the planning form when
 # there is no next plan. Demo data, frozen clock (tests/conftest.py).

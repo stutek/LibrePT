@@ -1,5 +1,5 @@
 # tests/medium/test_walkthrough_target.py
-# The walkthrough must point at a control the trainer can actually SEE (TODO §28.13).
+# The walkthrough must point at a control the trainer can actually SEE.
 #
 # Every view lives in the DOM at once — the router activates one and leaves the rest in place — so a
 # selector as ordinary as `.session-card` matches cards in views nobody is looking at. Reported after
@@ -91,7 +91,7 @@ moveDemoHand(hand, 120, 200);
 
 
 def test_the_pointer_is_a_hand_with_a_pointing_finger(page, local_server):
-    """TODO §28.12: "add an animated hand with extended index finger too".
+    """Reported: "add an animated hand with extended index finger too".
 
     It was a white dot — a radial-gradient circle — in a module named for a hand. A dot next to a
     control reads as a bullet or a glitch; a hand reads as a person using the app, which is the
@@ -341,7 +341,7 @@ def test_the_rings_are_drawn_and_played_before_the_tap_reaches_the_app(
 # A control that EXISTS and a claim that never comes true — a demonstration that runs and fails,
 # rather than one that cannot start. Pointing the step at nothing was the earlier version and is now
 # a different case entirely: since 2026-08-26 a step whose control is not on screen is the trainer
-# having wandered off, and the panel swaps itself for the two-button card (TODO §38.5). That card is
+# having wandered off, and the panel swaps itself for the two-button card. That card is
 # the answer to "never leave a dead-looking guide" for THAT case; this stub keeps the other one.
 BROKEN_TOUR_STUB = """
 import { startGuidedWalkthrough } from './modules/demo/walkthroughOverlay.js';

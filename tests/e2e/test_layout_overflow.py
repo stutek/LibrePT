@@ -1,5 +1,5 @@
 # tests/e2e/test_layout_overflow.py
-# TODO §25: the suite asserts semantics everywhere and geometry nowhere, so a control that runs off
+# The rest of the suite asserts semantics everywhere and geometry nowhere, so a control that runs off
 # the screen edge — or one whose label is silently clipped inside its own box — passes the whole
 # gate. This walks every addressable state of the app at three real device widths and sweeps the
 # rendered DOM for both, using the shared sweep in agent_tools/overflow_scan.py (the same one an
@@ -44,7 +44,7 @@ DELIBERATELY_NOT_WALKED = {
     # whatever focus the app opened with; navigating to a second card re-renders no new component.
     "session.edit.item": "same editor markup as session.edit, one row highlighted",
     "session.catalog.slot": "same picker markup as session.catalog, prefiltered",
-    # The overlay sweep opens a session with no card open, which is exactly this state (§48.1).
+    # The overlay sweep opens a session with no card open, which is exactly this state.
     "session.focus.closed": "same overlay markup as session.focus, with no card open",
 }
 
@@ -177,7 +177,7 @@ def _walk_live_session(page, base, findings):
     # The MERGED clipboard, whose name joins two sessions and is the longest title the seed has
     # (src/data/sessions.js pairs "Group Strength & Conditioning" with "Return-to-Play Rehab" on
     # purpose). The first card is a finished session with a short name, and opening it is why
-    # this walk never saw that name run under the ▶ and ⋮ buttons (TODO §47.1).
+    # this walk never saw that name run under the ▶ and ⋮ buttons.
     session_card = page.locator(".session-card", has_text="Group Strength").first
     if not session_card.count():
         return

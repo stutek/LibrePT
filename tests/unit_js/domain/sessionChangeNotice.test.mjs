@@ -1,5 +1,5 @@
 // tests/unit_js/domain/sessionChangeNotice.test.mjs
-// What kind of session edit is worth telling a client about (src/domain/sessionChangeNotice.js) — §1.6.
+// What kind of session edit is worth telling a client about (src/domain/sessionChangeNotice.js).
 //
 // Asked for 2026-08-17 (Simon): "when a session gets changed, PT should be asked if they want to resend
 // invitations". The asking is the easy half. The half that decides whether the feature is useful or

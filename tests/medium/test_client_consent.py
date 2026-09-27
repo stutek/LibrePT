@@ -58,7 +58,7 @@ renderClientDirectoryViewShell();
 renderClientDetailViewShell();
 
 bootClientForms({
-  // The controller reads the state WHEN a handler runs, not when it was wired (TODO §40.3).
+  // The controller reads the state WHEN a handler runs, not when it was wired.
   getState: () => state,
   t,
   navigateToPath: noop,
@@ -203,7 +203,7 @@ def test_editing_a_consented_client_keeps_the_version_they_signed_under(
 def test_unticking_consent_records_a_withdrawal_and_keeps_the_evidence(
     page, local_server
 ):
-    """REPLACES an earlier test that asserted unticking blanked the whole record (TODO §27.7).
+    """REPLACES an earlier test that asserted unticking blanked the whole record.
 
     That behaviour was chosen to stop a stale stamp claiming a live consent — a real concern, but it
     paid for it with the wrong thing. Art. 7(1) requires the controller to DEMONSTRATE that consent
@@ -233,7 +233,7 @@ def test_unticking_consent_records_a_withdrawal_and_keeps_the_evidence(
 
 
 def test_a_withdrawal_survives_typing_after_it(page, local_server):
-    """The dialog writes the record on every keystroke (TODO §50.2). Each write must judge consent
+    """The dialog writes the record on every keystroke. Each write must judge consent
     against the record as the dialog opened it: judged against the previous keystroke, the second
     write would find consent already withdrawn and blank the proof the first one recorded."""
     load_with_stub(page, local_server, STUB)
