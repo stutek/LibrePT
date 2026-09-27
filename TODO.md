@@ -6132,6 +6132,30 @@ oblike, in se jim je ta napis izognil z drugačno ubeseditvijo.
 3 in 5 zahteva pravilno slovensko obliko in ujemanje glagola. Opaženo na objavljeni različici
 `0625bd6`; zapisi na `main` so isti.
 
+### 80.18 [ ] P2 — Prvi trening: iskanje udeleženca je slepa ulica, ko strank še ni
+
+**Scenarij in koraki:** trener z novo, prazno aplikacijo pritisne »Ustvari trening«, vpiše ime
+»Jutranja vadba« in kraj »Telovadnica Center«, nato v polju »Poišči stranko po imenu...«
+vpiše »Ana«.
+
+**Opaženo:** pod poljem se izpiše »Stranke s tem imenom ni«, spodaj pa stoji »Na tem treningu
+še ni nikogar. Stranko poišči v polju zgoraj.« Aplikacija ima takrat nič strank, torej to
+polje ne more uspeti — pa tega ne pove in ne ponudi nobene poti do vpisa nove stranke.
+
+**Težava in vpliv:** prvo opravilo novega trenerja je prvi trening s prvo stranko. Tu obstane:
+mora sam uganiti, da gre najprej v meni ☰ in »Seznam strank (klientov)«, se vrniti in začeti
+znova. Navodilo na zaslonu ga pošilja nazaj v polje, ki ne more delovati.
+
+**Vzrok, potrjen v kodi na `main`:** [editSessionControl.js](src/modules/session/editSessionControl.js),
+`renderParticipantMatches` pozna en sam odgovor za nič zadetkov — napis »Stranke s tem imenom
+ni«. Prazen imenik in »to ime ni med osmimi strankami« sta zanj isto stanje.
+
+**Predlog in preverjanje:** ko je imenik prazen, naj napis to pove in ponudi gumb, ki odpre
+vpis nove stranke, po vpisu pa se vrne v ta obrazec z izbrano stranko. Ko imenik ni prazen,
+naj pod »Stranke s tem imenom ni« stoji ponudba, da se stranka s tem imenom doda. Preizkus naj
+gre pot od prazne aplikacije do shranjenega prvega treninga z eno stranko, brez obiska menija.
+Opaženo na objavljeni različici `0625bd6`; koda na `main` je ista.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
