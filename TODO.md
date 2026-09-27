@@ -556,6 +556,62 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#39-x-decided-ev
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#310-x-decided-drive-syncing-is-manual-only-periodicresume-ticks-refresh-counters-not-data); what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
+### 3.13 [ ] A second sync store for Apple users, or a backend of our own — researched 2026-09-27
+
+**Asked by Simon, 2026-09-27**: would a private sync layer on Google Cloud (for Android users) or
+iCloud (for Apple users) be easier than using the services those accounts already provide?
+
+**No, and the Google half of the question is already answered by working code.** Drive
+`appDataFolder` (§3.3) IS a private sync layer inside the trainer's own Google account: one hidden
+folder only this app can read, on a scope that reaches nothing else, with the merge, the conflict
+detection and a live canary already built and green. There is no easier version of that, because
+there is no remaining work in it.
+
+**iCloud, read at Apple's own pages rather than assumed.** The only way a web app reaches a user's
+iCloud data is CloudKit JS, and four facts from Apple decide it:
+
+- *"You must have an existing CloudKit app and enable web services to use CloudKit JS"*, and
+  *"You'll use Xcode to create your app's containers … Then create an iOS or Mac app that uses
+  CloudKit to store your app's data"*
+  ([CloudKit JS](https://developer.apple.com/documentation/cloudkitjs)). The web client is the
+  companion to a native app, not a way in on its own — so the documented path starts with an iOS or
+  Mac app, a Mac to build it on, and $99 a year for the Apple Developer Program
+  ([Apple Developer Program](https://developer.apple.com/programs/)).
+- The web session is short and fragile: *"the web authentication token expires 30 minutes after it
+  is created. If the user selects 'Keep me signed in' … the duration of the token is 2 weeks"*, and
+  *"Each token is intended for a single round trip to the server … the previous token is no longer
+  valid"*
+  ([CloudKit Web Services Reference](https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/CloudKitWebServicesReference/SettingUpWebServices.html)).
+  Against that, the Google refresh token this app holds stays valid until it is revoked or goes six
+  months unused (§1.5.1). A trainer being signed out every fortnight, on a gym floor, is the failure
+  this app exists to avoid.
+- What iCloud genuinely gives is the storage bill: *"Any data stored in a user's private database
+  counts against their personal iCloud quota"*
+  ([TN2241](https://developer.apple.com/library/archive/technotes/tn2241/_index.html)) — the same
+  arrangement `appDataFolder` already has with Google.
+- An API token is issued per container from the CloudKit Console, with the allowed web domains named
+  on it
+  ([Obtaining an API token](https://developer.apple.com/documentation/CloudKit/obtaining-an-api-token-for-an-icloud-container)).
+  That part is ordinary.
+
+So iCloud costs a yearly fee, a Mac, a native app nobody asked for and a second sync implementation
+to maintain, and it buys one thing: an Apple user not needing a Google account. They can already
+sign in to Drive from Safari today.
+
+**A backend of our own on Google Cloud is the expensive direction, not the easy one.** Google's own
+terms are explicit: *"Google is a processor and Customer is a controller or processor, as
+applicable, of Customer Personal Data"*
+([Cloud Data Processing Addendum](https://cloud.google.com/terms/data-processing-addendum)). The
+moment a server we run holds a trainer's clients, we are in that chain — a processing agreement per
+trainer, a hosting location, deletion and export duties, a breach notification path. That is the
+reason §1.5 rejected Firestore, and none of it applies while the data sits in the trainer's own
+account.
+
+**Open, and the only part worth spending on**: an Apple user has to have a Google account to sync at
+all. The cheap answer is not a second cloud but the file the app already writes — export and import
+through the share sheet, which needs no account anywhere. Whether that is enough for a trainer with
+two devices is not known, and nobody has been asked.
+
 ## 4. UI / UX
 
 ### 3.11 [x] Sync surface — the icon vocabulary and tap-to-sync — SHIPPED 2026-08-12
