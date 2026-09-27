@@ -6123,68 +6123,9 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8033-x-p3--dva-
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8034-x-p3--glasovna-opomba-zasebnost-prva-je-izmišljen-izraz--popravljeno-2026-09-27).
 
-### 80.35 [ ] P1 — Glasovna opomba si izmisli stavek o stranki in ga zapiše v njeno kartoteko
+### 80.35 [x] P1 — Glasovna opomba si izmisli stavek o stranki in ga zapiše v njeno kartoteko — popravljeno 2026-09-27
 
-**Scenarij in koraki:** trener med treningom na kartici vaje pritisne »Opombe«, nato mikrofon,
-počaka in pritisne mikrofon še enkrat. Nazadnje pritisne »Zapiši opozorilo«.
-
-**Opaženo:** po drugem pritisku piše »Prepis v napravi je zaključen!«, v polje za opombo pa se
-zapiše stavek, ki ga ni nihče izrekel: »Glasovna opomba (lokalno): Maja Horvat poroča o dobrem
-počutju pri vaji Barbell Bench Press.« Po pritisku na »Zapiši opozorilo« je ta stavek shranjen
-kot povratna informacija, pripeta stranki in vaji: v »Čakajoče na pregled« se prebere kot
-»Maja Horvat — Too Easy - Increase Load - Glasovna opomba (lokalno): Maja Horvat poroča o dobrem
-počutju pri vaji Barbell Bench Press.«, pod njim pa piše »voice_memo.wav (0:04)« — ime in dolžina
-posnetka, ki ne obstaja. (V polje »Predhodne poškodbe in opombe« v profilu stranke ta stavek ne
-gre.) Pri tem se je potrdila tudi §80.8: oznake nisem izbral, zapis pa je dobil
-»Too Easy - Increase Load«.
-
-**Mikrofona pri tem sploh ni:** preizkus je tekel v brskalniku, kjer `getUserMedia` zavrne
-dovoljenje, aplikacija pa je vseeno pokazala »Snemanje…« in nato »Prepis v napravi je
-zaključen!«. V kodi ni ne `getUserMedia` ne `MediaRecorder`:
-[feedbackModal.js](src/modules/common/feedbackModal.js) ob prvem pritisku zamenja ikono, ob
-drugem po zakasnitvi sestavi stavek iz imena stranke in imena vaje, posebej za `sl`, `de` in
-`en`. Uvodna opomba datoteke to imenuje »mock«.
-
-**Težava in vpliv:** aplikacija izmisli zapis o imenovani osebi in ga predstavi kot prepis
-njenih besed, v kartoteki, ki je podlaga za odločitve o treningu — in za katero stranka podpiše
-privolitev. Trener, ki opombo pozneje bere, nima kako vedeti, da je ni nihče izrekel. To ni
-nedokončana funkcija, ampak neresničen zapis o človeku. Da posnetka ni, ni nikjer povedano;
-napis trdi nasprotno.
-
-**Odločeno 2026-09-27 (Simon): mikrofona v kodi ne bo, ker je vprašanje zasebnosti.** S tem ta
-razdelek ni manjši, ampak dokončen: to ni nedokončana funkcija, ki čaka na snemanje, ampak pot, ki
-mora izginiti. Dokler je tam, aplikacija za vedno trdi »Prepis v napravi je zaključen!« in piše
-stavke, ki jih ni nihče izrekel.
-
-**Predlog, po tej odločitvi:** pot glasovne opombe odstraniti iz delovne aplikacije v celoti —
-gumb z mikrofonom, napis o snemanju, izmišljeni prepis in oznako »voice_memo.wav (0:04)«. Polje z
-lastnim besedilom opombe ostane; to je tisto, kar trener res napiše.
-
-**Kaj vse gre s tem, in tega se iz enega gumba ne vidi:**
-- **Obljuba v specifikacijah.** [uc1_gym_floor_clipboard.md](use_cases/uc1_gym_floor_clipboard.md)
-  navaja »Privacy-First Voice Notes (Auto-Mapped & Local-Only)« kot eno od nosilnih zmožnosti, z
-  opisom prepisa na napravi; [uc2_async_plan_adjustments.md](use_cases/uc2_async_plan_adjustments.md)
-  ima predvajanje glasovne opombe v koraku pregleda, [INDEX.md](use_cases/INDEX.md) pa jo našteje v
-  povzetku UC1. Vse troje mora odpasti v isti spremembi, sicer specifikacija obljublja, česar ni.
-- **Opis modulov.** [SRC_MODULES.md](docs/SRC_MODULES.md) opisuje `feedbackModal.js` kot »voice
-  recorder handler« in `feedbackModal.css` kot animacijo valovanja.
-- **Besedila.** Šest ključev `voice_*` v vsakem od treh slovarjev; med njimi »Glasovna opomba
-  (zasebnost-prva)« iz §80.34 in `voice_processing` iz §80.33. Oba sta bila danes popravljena, še
-  preden je odločitev prišla; popravka s to potjo odpadeta in to ni izgubljeno delo, ampak vrstni
-  red dogodkov.
-- **Zapisi.** `hasVoiceNote` je polje sheme ([recordSchemas.js](src/data/recordSchemas.js)) in ga
-  bere `isPlainQuickSignal` v [quickSignals.js](src/domain/quickSignals.js) pri odločitvi, ali je
-  signal »gol dotik«, ki se sme umakniti. Polje naj ostane v shemi (stari zapisi ga imajo), pisati
-  pa ga ne sme nič novega. **Preveriti je treba, kaj se zgodi s trenerjevimi obstoječimi zapisi,
-  ki trdijo, da imajo posnetek**: posnetka ni bilo nikoli, zato naj se oznaka o datoteki nikjer več
-  ne izriše.
-
-**Preverjanje:** preizkus naj odpre okno z opombami in zahteva, da gumba za snemanje ni — tudi v
-peskovniku ne. (Prvotno je ta vrstica zahtevala v peskovniku primer besedila; po odločitvi pot
-odpade povsod, zato tudi tam ni ničesar, kar bi bilo treba označiti.) Opaženo na
-objavljeni različici `0625bd6`; koda na `main` je ista. Sorodno: §80.8 (prosta opomba brez
-ocene postane priporočilo) in zapis v [TODO_ARCHIVE.md](TODO_ARCHIVE.md) o imenu »voice_memo.wav«,
-ki mock omenja, ne pa tega, da si izmisli vsebino.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8035-x-p1--glasovna-opomba-si-izmisli-stavek-o-stranki-in-ga-zapiše-v-njeno-kartoteko--popravljeno-2026-09-27).
 
 ### 80.36 [ ] P2 — »Anonimna kopija za AI« s seboj odnese cilje in zdravstvene opombe
 
