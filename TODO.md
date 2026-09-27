@@ -6864,6 +6864,30 @@ stranki naj ostanejo prazna, dokler je trener ne izbere. Preizkus naj uvozi prog
 »Nikogar posebej« in zahteva, da v glavi urejevalnika ni imena stranke. Opaženo na objavljeni
 različici `0625bd6`; koda na `main` je ista.
 
+### 80.46 [ ] P2 — Na podlogi skupinskega treninga sta dve stranki z istim imenom oba »Ana«
+
+**Scenarij in koraki:** trener naredi trening s tremi udeleženci, med njimi »Test A« in
+»Test C«, in ga odpre.
+
+**Opaženo:** zavihki udeležencev se glasijo »TA Test«, »TC Test«, »EP Esc« — v napisu je samo
+prva beseda imena. Prvi dve stranki sta na zaslonu razločni le po dveh črkah v krogcu. Pri
+pravih imenih to pomeni, da sta »Ana Kovač« in »Ana Novak« obe »Ana«.
+
+**Težava in vpliv:** zavihek je tisto, kar trener med vadbo pritisne, preden vpiše serijo. Če
+zgreši, gre izvedba k napačni osebi — in tega pozneje nič ne pokaže kot napako. To je natanko
+tista zamenjava, ki je na telovadnici draga.
+
+**Vzrok, potrjen v kodi na `main`:** [utils.js](src/modules/common/utils.js),
+`getClientDisplayNameHTML` s `isShort` vzame `client.name.split(" ")[0]`. Vzdevek se doda, če
+obstaja — a polje zanj je v obrazcu opisano kot »samo če si dve stranki delita ime«, kar se pri
+»Ana Kovač« in »Ana Novak« ne zgodi: delita si samo tisti del, ki ga podloga pokaže.
+
+**Predlog in preverjanje:** ko imata dva udeleženca **istega treninga** enako prvo besedo imena,
+naj zavihek pokaže več — začetnico priimka (»Ana K.«, »Ana N.«) — ali pa naj aplikacija takrat
+predlaga vzdevek. Preizkus naj sestavi trening z dvema strankama z istim imenom in zahteva, da
+se napisa zavihkov razlikujeta. Opaženo na objavljeni različici `0625bd6`; koda na `main` je
+ista.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
