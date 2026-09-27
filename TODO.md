@@ -6316,7 +6316,8 @@ strankami v vzorčnih podatkih večinoma ženske.
 
 **Obseg, potrjen v kodi na `main`:** [sl.js](src/i18n/sl.js) — `intake_invite_body`,
 `intake_invite_contact_label`, `intake_invite_qr_hint` in `switch_participant_hint` (»njegov
-lasten načrt«) proti `intake_disclaimer` (»izbereš sama«).
+lasten načrt«) proti `intake_disclaimer` (»izbereš sama«). Isto je v profilu stranke: `joined`
+se glasi »Pridružil se«, torej piše »Ana Kovač — Pridružil se …«. Brez spola: »V imeniku od«.
 
 **Predlog in preverjanje:** te zapise ubesediti brez spola. Slovenščina to tu dopušča prek
 besede »stranka«: »Pokaži stranki to kodo in jo prosi …«, »Telefonska številka ali e-naslov
