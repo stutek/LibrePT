@@ -4,6 +4,8 @@ Ensures /session/new and /session/setup/:id are URL-addressable routes and that 
 auto-persist across page reloads via localStorage.
 """
 
+from urllib.parse import urlparse
+
 from playwright.sync_api import expect
 
 
@@ -29,6 +31,24 @@ def test_a_name_nobody_has_can_be_added_as_a_client_from_the_form(page, local_se
     ).to_contain_text("Zala Novak")
 
 
+def test_a_group_session_started_from_a_routine_survives_a_reload(page, local_server):
+    """Started from a routine, the form kept the address /routines: a reload, which a phone does
+    by itself, showed the routine list again and the name typed was gone, and Back went to the
+    dashboard instead of the routines."""
+    page.goto(f"{local_server}routines")
+    page.locator("#routines-list .btn-launch-routine").first.click()
+    page.wait_for_selector("#view-workout-setup.active")
+    assert "/session/new" in page.url
+    page.fill("#setup-session-name", "Skupina ponedeljek")
+    page.wait_for_timeout(400)
+
+    page.reload()
+    page.wait_for_selector("#view-workout-setup.active")
+    expect(page.locator("#setup-session-name")).to_have_value("Skupina ponedeljek")
+
+    page.go_back()
+    page.wait_for_selector("#routines-list")
+    assert urlparse(page.url).path.rstrip("/").endswith("/routines")
 
 
 def test_workout_setup_view_route_loads(page, local_server):

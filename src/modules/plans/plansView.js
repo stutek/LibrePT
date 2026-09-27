@@ -55,7 +55,7 @@ export function renderRoutinesViewShell() {
   );
 }
 
-export function renderRoutinesList({ state, t, openWorkoutSetupModal }) {
+export function renderRoutinesList({ state, t }) {
   const container = document.getElementById("routines-list");
   if (!container) return;
   container.innerHTML = "";
@@ -106,9 +106,13 @@ export function renderRoutinesList({ state, t, openWorkoutSetupModal }) {
       </button>
     `;
 
+    // A route like "Create Session", with the routine in the address: the form kept /routines
+    // before, so a reload showed the routine list and lost what was typed, and Back went home.
     card.querySelector(".btn-launch-routine").addEventListener("click", (e) => {
       e.stopPropagation();
-      openWorkoutSetupModal(null, routine.id);
+      deps.navigateToPath?.(
+        `${deps.urlFor("session.new")}?routine=${encodeURIComponent(routine.id)}`,
+      );
     });
 
     // The editor is a route (`/routines/{id}`): Back closes it and a link opens it on that routine.

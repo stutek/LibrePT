@@ -20,10 +20,12 @@ export class SessionsDayRoute extends Route {
 // `/session/new`, `/sessions/new`, `/session/setup/:sessionId` — the setup form. Despite its
 // `…Modal` name, openWorkoutSetupModal switches to a full `#view-workout-setup`, so this is a view
 // route, not a dialog route.
+// `?routine=<id>` preselects a routine: a group session started from the routines list.
 export class WorkoutSetupRoute extends Route {
   enter(ctx) {
     super.enter(ctx);
-    ctx.deps.openWorkoutSetupModal?.(null, null, ctx.params.sessionId || null, false);
+    const routineId = new URLSearchParams(window.location.search).get("routine");
+    ctx.deps.openWorkoutSetupModal?.(null, routineId, ctx.params.sessionId || null, false);
     return this;
   }
 }

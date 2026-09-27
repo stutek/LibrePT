@@ -807,7 +807,7 @@ function renderClientsList(filterQuery = "") {
   clientsViewRender({ state: getState(), t, navigateToPath, filterQuery });
 }
 function renderRoutinesList() {
-  routinesViewRender({ state: getState(), t, openWorkoutSetupModal });
+  routinesViewRender({ state: getState(), t });
 }
 function renderExercisesList(filterQuery, categoryFilter) {
   // Left undefined on purpose when a caller passes nothing: the view then reads the visible
@@ -971,7 +971,6 @@ function setupRoutineForms() {
     t,
     saveToLocalStorage: saveState,
     populateDropdownSelectors,
-    openWorkoutSetupModal,
     navigateToPath,
     urlFor,
   });

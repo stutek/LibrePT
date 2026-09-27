@@ -88,7 +88,6 @@ export function setupRoutineForms({
   t,
   saveToLocalStorage,
   populateDropdownSelectors,
-  openWorkoutSetupModal,
   navigateToPath,
   urlFor,
 }) {
@@ -184,7 +183,7 @@ export function setupRoutineForms({
       !$id("routine-desc").value.trim() &&
       !builderList.querySelector(".routine-builder-row"),
     onChange: () => {
-      renderRoutinesList({ state: getState(), t, openWorkoutSetupModal });
+      renderRoutinesList({ state: getState(), t });
       populateDropdownSelectors();
     },
   });
