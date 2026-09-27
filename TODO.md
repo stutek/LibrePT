@@ -6773,3 +6773,36 @@ vprašanje — če ProPT izdaja račune za gotovino, brez tega ne sme.
 **Odprto vprašanje za Simona:** ali sta prisotnost in paket še »brezplačna aplikacija« ali sta že
 ProPT. Moja presoja: prisotnost sodi v brezplačno (brez nje je zapis o vadbi nepopoln), paket pa je
 mejni primer, ker je prvi korak k denarju. Odločitev je tvoja; napisana naj bo v §68, ne tukaj.
+
+## 87. [ ] Prihodnja shema ne nosi polja glasovne opombe
+
+**Naročilo (Simon, 2026-09-27):** prihajajoča shema naj bo brez polj glasovne opombe.
+
+**Popravek dejstva, preden se to izvede:** shema 5 ni prihajajoča, ampak **živa** —
+[recordSchemas.js](src/data/recordSchemas.js) ima `STABLE_SCHEMA = 5` in `DEFAULT_READ_SCHEMA = 5`,
+varnostne kopije se pišejo pri 5 in vsak nameščen telefon bere 5. Prihajajoča oblika je
+`SCHEMA_PREVIEW`, ki je namenoma brez številke: nastane iz SCHEME_5 in doda, kar še čaka na
+številko. Naročilo torej zadene `SCHEMA_PREVIEW` in vsako številko, ki iz nje nastane.
+
+**Kje polje sploh je:** `hasVoiceNote` je eno samo polje, deklarirano v `SCHEMA_4.planUpdates`;
+SCHEMA_5 in SCHEMA_PREVIEW ga podedujeta, ker sta zgrajeni z razširitvijo prejšnje. Drugih polj
+glasovne opombe ni — posnetek se ni nikoli nikamor zapisal, ker snemanja ni bilo (§80.35).
+
+**Kaj se naredi:** `SCHEMA_PREVIEW` naj `planUpdates` izpiše na novo, brez `hasVoiceNote`, namesto
+da ga podeduje. Številki 4 in 5 ostaneta nedotaknjeni: §60 prepoveduje spreminjanje oblike
+oštevilčene sheme brez nove številke, zapisi na telefonih pa polje nosijo.
+
+**Posledica, ki jo je treba povedati naravnost.** Na namestitvi, ki bere PREVIEW (CI in predogledi),
+star zapis s `hasVoiceNote: true` v tej shrambi izgubi zastavico. `isPlainQuickSignal`
+([quickSignals.js](src/domain/quickSignals.js)) tak vnos od tam naprej šteje za gol dotik, ki ga
+ponoven pritisk sme odstraniti. **To je prav in ni izguba podatkov:** zastavica je trdila, da vnos
+nosi posnetek, posnetka pa ni bilo nikoli. Vnos, ki nima ne besedila ne posnetka, res ni nosil
+ničesar, kar bi bilo vredno varovati. Varnostne kopije se pišejo pri 5, zato izvoz trenerja tega ne
+občuti.
+
+**Preverjanje:** preizkus sheme naj zahteva, da `SCHEMA_PREVIEW.planUpdates` nima `hasVoiceNote`,
+in da ga `SCHEMA_4` in `SCHEMA_5` še imata. Merila `tests/fixtures/schemas/schema_4.json` in
+`schema_5.json` ostaneta, kakršni sta.
+
+**Izvedba:** `src/` in `tests/` v tem trenutku drži seja `claude-opus-exploratory-fixes`; sprememba
+je predana njej, skupaj z zgornjim.
