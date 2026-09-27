@@ -27,7 +27,7 @@ See also the deep-link routing overview in
 
 - **Primary actor**: the Personal Trainer, on the mobile PWA.
 - The app has loaded and seeded (or restored from `localStorage`) its sessions, each carrying a
-  real absolute `startDate` timestamp (TODO §7.3 item 8; schema 3, `src/data/migrationSteps.js`).
+  real absolute `startDate` timestamp (schema 3, `src/data/migrationSteps.js`).
 - The dashboard opens **focused on today**.
 
 ---
@@ -102,7 +102,7 @@ exclusive states, so the PT reads a card's state at a glance without opening it:
   time** beyond what the trainer confirms; a fallback (the scheduled slot length) covers completed
   bookings from before this recording existed.
 
-### 3.1 PT-Side Assignment & Calendar Invite (TODO §1)
+### 3.1 PT-Side Assignment & Calendar Invite
 
 Client assignment is not only client-initiated: the card's Edit button opens the same
 participant-assignment form used to create a session, letting the PT check clients directly onto
@@ -137,13 +137,13 @@ route classes, specificity ordering, and the invariants a new route must respect
 | `/session/{sessionId}/client/{clientId}/exercise/{exerciseId}` | the clipboard with that card in focus |
 | `/session/{sessionId}/client/{clientId}/circuit/{circuitId}` | the clipboard with that circuit in focus |
 | `…/superset/{circuitId}` | **legacy alias** for the row above — the pre-2026-07-26 spelling. Still resolves, and the address bar is rewritten to `/circuit/`, so shared and bookmarked links never break |
-| `/session/{sessionId}/client/{clientId}/rest/{restId}` | the clipboard with that standalone rest in focus — a rest is a first-class plan item, focusable exactly like an exercise or circuit (TODO §8.6) |
-| `…/exercise/{exerciseId}/closed` (and `…/circuit/…/closed`, `…/rest/…/closed`) | the clipboard with that card **active but not open**: marked by its outline and left edge, no controls shown. The trainer scrolled past the card they had open, and a reload must not open it again (TODO §48.1) |
+| `/session/{sessionId}/client/{clientId}/rest/{restId}` | the clipboard with that standalone rest in focus — a rest is a first-class plan item, focusable exactly like an exercise or circuit |
+| `…/exercise/{exerciseId}/closed` (and `…/circuit/…/closed`, `…/rest/…/closed`) | the clipboard with that card **active but not open**: marked by its outline and left edge, no controls shown. The trainer scrolled past the card they had open, and a reload must not open it again |
 | `/session/{sessionId}/client/{clientId}/edit` | the **inline plan editor** open on that participant's plan |
 | `/session/{sessionId}/client/{clientId}/edit/exercise/{slotId}` | the plan editor **with that row called out** — inserting or swapping a row names it here, so a reload lands back on the row the trainer was in the middle of. A restore highlights and scrolls to it but takes no caret and shows no badge: nothing just happened to it. An id that no longer resolves is ignored and the segment is dropped |
 | `/clients/{clientId}` | a client detail page |
-| `/clients` | the Client Directory (its own view since TODO 4.8; the homepage keeps only the session list) |
-| `/adjustments` | the Pending Plan Adjustments deck (its own view since TODO 4.8) |
+| `/clients` | the Client Directory (its own view since an earlier split; the homepage keeps only the session list) |
+| `/adjustments` | the Pending Plan Adjustments deck (its own view since that same split) |
 | `/routines`, `/exercises` | the primary list views |
 
 **Dialog routes.** A dialog is a state a reload should restore, so the globally-reachable ones are
@@ -233,10 +233,10 @@ not-found view (`#view-error`) *inside* the content area:
 ## 7. Related Use Cases
 
 - **[UC1 — Gym-Floor Clipboard](uc1_gym_floor_clipboard.md)**: this timeline is where the PT **launches** the clipboard UC1 specifies; the deep links in § 4 address that clipboard down to the focused card.
-- **[UC2 — Asynchronous Plan Adjustments](uc2_async_plan_adjustments.md)**: the Pending Review deck reviewed at the desk is its own view (§ 3), reachable from the ☰ menu — it was part of this same dashboard before TODO 4.8 split it out.
+- **[UC2 — Asynchronous Plan Adjustments](uc2_async_plan_adjustments.md)**: the Pending Review deck reviewed at the desk is its own view (§ 3), reachable from the ☰ menu — it was part of this same dashboard before an earlier split moved it out.
 - **[UC4 — Client Self-Subscription](uc4_client_self_subscription.md)**: bookings surfaced in the timeline originate from the self-subscription flow.
 
-> **Closed 2026-07-27 (TODO §7.3 item 8).** Sessions now carry a real `startDate` (schema 3), and
+> **Closed 2026-07-27.** Sessions now carry a real `startDate` (schema 3), and
 > `/sessions/{YYYY-MM-DD}` resolves to any date, not just one of four relative buckets — the gap
 > this note used to describe. `day` (`yesterday|today|tomorrow|upcoming`) still exists on a
 > session record, but only as a coarse bucket other systems (overlap detection, card temporal

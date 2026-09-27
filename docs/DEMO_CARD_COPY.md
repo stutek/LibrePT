@@ -10,7 +10,7 @@ tags:
 ---
 
 > **Status: the pass is running, card by card, from 2026-09-10.** Nothing here is shipped, and
-> nothing under `src/` is touched while [TODO §40](../TODO.md)'s workspace rewrite is in flight —
+> nothing under `src/` is touched while the workspace rewrite is in flight —
 > that is why the agreed wording is written down here first (asked 2026-09-10).
 >
 > **[The 2026-09-10 pass](#the-2026-09-10-pass) is the live part of this file.** It carries the
@@ -23,7 +23,7 @@ tags:
 > are a machine translation of the English and are not reviewed in this file.
 >
 > The defects listed below were found by walking the demo; the fixes that were made without waiting
-> are in [TODO.md](../TODO.md) §38.13 to §38.19.
+> are recorded in [TODO.md](../TODO.md).
 
 # Demo card copy — English, for editing together
 
@@ -266,7 +266,7 @@ PROPOSED
 
 ## Two more, found by walking all 49 steps at full speed (2026-08-29)
 
-**A · Card 4 now says something the app no longer does.** Since the reload fix (§38.12), what Ana
+**A · Card 4 now says something the app no longer does.** Since the reload fix, what Ana
 types is held until she closes the tab. Card 4's body still says *"nothing is kept on this phone"*,
 and the page's own wording was changed to match the new behaviour — so the card and the screen it is
 sitting on now disagree, in the one chapter that is about trusting a stranger's phone.
@@ -311,7 +311,7 @@ for. Say the word and I will rewrite these seven to the rule, in the same pass.
 # The 2026-09-10 pass
 
 The maintainer writes each card, in Slovenian; the review below each one says what it found and what
-it proposes. **Nothing is written into `src/` until [TODO §40](../TODO.md)'s workspace rewrite has
+it proposes. **Nothing is written into `src/` until the workspace rewrite has
 landed** — that work is changing where demo data lives, and these cards talk about exactly that.
 
 **Two rules the maintainer set for this pass** (2026-09-10):
@@ -327,7 +327,7 @@ One name per thing. Where the app already has a word, that word wins.
 | The thing | English | Slovenian | Where the app already says it |
 | :-- | :-- | :-- | :-- |
 | the guided run itself | guided walkthrough | **vodeni ogled** | `walkthrough_title` |
-| the learning workspace | sandbox | **peskovnik** | [data/workspace.js](../src/data/workspace.js), [TODO §40](../TODO.md) |
+| the learning workspace | sandbox | **peskovnik** | [data/workspace.js](../src/data/workspace.js) |
 | a booked hour with clients | session | **trening** — ruled 2026-09-10, replacing *seja* | `btn_start_group_session` |
 | its slot in the diary | — | **termin**, and only where the slot is the point | `schedule_conflict_confirm` |
 | the person training | client | **stranka** | `btn_invite_client` |
@@ -369,13 +369,13 @@ the demo is where they became visible.
 1. **The ✕ is not on the card, and has not been since 2026-08-30.** The card's own corner carries ▾
    (`walkthrough_collapse`); the ✕ sits on the bar the card leaves behind
    ([walkthroughOverlay.js:130-149](../src/modules/demo/walkthroughOverlay.js#L130-L149)). It was
-   moved there deliberately — see [TODO §38.16](../TODO.md) — because a trainer reported that
+   moved there deliberately because a trainer reported that
    closing the card gave them no way back. **The intent in the wording is ▾, not ✕:** put the card
    away and keep tapping around. The ✕ ends the run.
 2. **"izklop peskovnika" cannot be instructed yet.** The sandbox is decided and unbuilt
-   ([TODO §40](../TODO.md), same day). A worse problem than the timing: leaving the sandbox
+   (same day). A worse problem than the timing: leaving the sandbox
    mid-walkthrough leaves the guide pointing at sessions that do not exist in the working
-   workspace. The switch re-renders rather than reloads ([TODO §40.3](../TODO.md)), so the guide
+   workspace. The switch re-renders rather than reloads, so the guide
    survives the switch and breaks. **A rule is needed before this sentence can be written:** either
    the switch parks the walkthrough, or the walkthrough refuses the switch.
 3. **The card's title is the chapter's title.** `story_chapter_arrive` — "Trije prijatelji pridejo"
@@ -386,7 +386,7 @@ the demo is where they became visible.
    saying *demo* and *vodeni ogled*. See the table above.
 5. **"od prijave do izvedbe"** reads as *from login to delivery*. **povabila**, not *prijave*.
 6. **The sandbox makes the old promise obsolete, and the new one is stronger.** Until now the card
-   had to offer to clear the demo data afterwards. With a separate database ([TODO §40.2](../TODO.md))
+   had to offer to clear the demo data afterwards. With a separate database
    there is nothing to clear: the demo cannot reach the trainer's own records at all. Worth saying.
 7. Spelling: *applikacija* → **aplikacija**, *načrtoanju* → **načrtovanju**, *preiskušate* →
    **preizkušate**, *walktrough* → dropped.
@@ -434,7 +434,7 @@ the demo is where they became visible.
   This answers what was open here: a card MAY now promise that it carries on where you left off.
   `resumeWalkthroughAt` already exists ([domain/walkthrough.js](../src/domain/walkthrough.js)) and
   the story's chapter crossings already pass `?step=`; what is missing is saving the step id. It is
-  per-workspace state, so it belongs in [TODO §40.1](../TODO.md)'s meta, not beside it.
+  per-workspace state, so it belongs in the workspace rewrite's own meta, not beside it.
 
 ### The trap in adding card 1 — it would delete card 2
 
@@ -476,7 +476,7 @@ which is what it should be anyway, since its instruction is *"Z gumbom Naprej za
 
 ## Should the ✕ go, leaving only ▾?
 
-**Yes — but only after [TODO §40](../TODO.md) ships, and one more string has to change with it.**
+**Yes — but only after the workspace rewrite ships, and one more string has to change with it.**
 
 The ✕ was worth having while ending the run was the only way to get the guide off the screen and
 the demo data was mixed in with real records. Both of those facts have now gone:
@@ -485,15 +485,16 @@ the demo data was mixed in with real records. Both of those facts have now gone:
   Once the position is kept across a workspace switch, throwing it away is not a second thing a
   trainer wants — it is the same thing with the memory deleted.
 - **The bar belongs to the sandbox, so leaving the sandbox is what dismisses it.** That is the
-  frictionless switch, already ruled. Nothing has to be built for it beyond §40 itself.
+  frictionless switch, already ruled. Nothing has to be built for it beyond the workspace rewrite
+  itself.
 - It is one fewer control on a bar read one-handed, and it removes the glyph that everywhere else in
   this app means *close this box* from the one place where it meant *end this run* (the distinction
-  [TODO §38.16](../TODO.md) had to introduce in the first place).
+  an earlier fix had to introduce in the first place).
 
 **What it costs, and this is the part that must not be skipped:**
 
-- **Until §40 ships there is no switch, so removing the ✕ first leaves no way out at all.** Order
-  matters: §40, then the ✕.
+- **Until the workspace rewrite ships there is no switch, so removing the ✕ first leaves no way out
+  at all.** Order matters: the workspace rewrite, then the ✕.
 - `walkthrough_off_track` still offers **"Ustavi demo"** (`walkthrough_leave`) when the trainer has
   wandered off. If ending is gone from the bar, that button must become *park*, or the app has
   removed a control and kept its twin two screens away.
@@ -548,7 +549,7 @@ addressing a customer.
 **Why no setting.** Slovenian register is not a word swap — it changes verb person, participle
 number and gender agreement (*"Zašel(-la) si drugam"* → *"Zašli ste drugam"*, *"Vpiši"* →
 *"Vpišite"*). So a setting means every trainer-facing string written twice, forever, in the one file
-that [TODO §38.20](../TODO.md) already records as drifting with a single variant. No check can fail
+that already drifts with a single variant. No check can fail
 on the branch that merely reads badly. If the choice is ever wanted, it belongs on the three or four
 **client**-facing texts and nowhere else.
 

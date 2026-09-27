@@ -62,7 +62,7 @@ depends on — that tier mounts one component and nothing else.
 
 - **A theme is a stylesheet, not a palette.** Each theme owns one file in `src/modules/themes/`: its
   tokens on `html.<name>-theme`, and any component it restyles — shape, spacing, borders, shadows —
-  under the same class. Ruled 2026-09-13 (TODO §49): a palette alone cannot make a spreadsheet look
+  under the same class. Ruled 2026-09-13: a palette alone cannot make a spreadsheet look
   like a spreadsheet, because the grid is spacing and edges, not colour.
 - **Theme files load after every module stylesheet**, so a theme's rule wins over the component's
   on order as well as on specificity.
@@ -79,7 +79,7 @@ depends on — that tier mounts one component and nothing else.
   from the first typed character, Cancel undoes, and any other way out finishes the record. A record
   still open in its dialog is counted as it was before the dialog opened
   ([`data/openRecordEdits.js`](../src/data/openRecordEdits.js)), so the ahead count and the backup
-  warning rise only once it is finished. Ruled 2026-09-17 (TODO §50.2).
+  warning rise only once it is finished. Ruled 2026-09-17.
 - **Hide a control with the `.hidden` class, never the `hidden` attribute.** Every `.btn` sets
   `display: flex`, which beats the user-agent stylesheet's `[hidden]` rule, so the control stays on
   screen and only a test notices.

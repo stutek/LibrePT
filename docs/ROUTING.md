@@ -138,7 +138,7 @@ Breaking any of these is a behaviour change, not a refactor.
 1. **Patterns never name a version.** They are stored without the base path; `toUrl()` prepends
    `BASE_PATH`, derived from `import.meta.url`. Which release is running is the PT's own
    upgrade/downgrade choice, never a path segment — so the same route resolves wherever the app is
-   hosted. See [§16 in TODO.md](../TODO.md).
+   hosted.
 2. **Patterns are additive.** A URL that once worked must keep working: links are shared and
    bookmarked. `…/superset/{circuitId}` still resolves after the circuit rename, and the address bar
    is upgraded to `/circuit/` on arrival. Removing a pattern is a breaking change that needs a

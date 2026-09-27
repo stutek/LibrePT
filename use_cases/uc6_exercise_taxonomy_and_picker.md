@@ -18,7 +18,7 @@ A certified Personal Trainer knows every movement by heart — they do not need 
 catalog therefore exists for **referential integrity**, not tutorials: immutable movement IDs plus
 an **equipment** tag and a **biomechanical movement pattern**, so long-term volume-load and 1RM
 analytics stay consistent across months of client history. This use case specifies the catalog's
-professional pivot and the three concrete ways a trainer selects movements. It realises TODO §13.
+professional pivot and the three concrete ways a trainer selects movements.
 
 See also the deep-link routing overview in
 [UC5](uc5_session_day_deck_and_deep_links.md) and the
@@ -48,7 +48,7 @@ The exercises view is a **high-density taxonomy inspector**, not a beginner ency
 ### 2.1 Where an exercise comes from
 
 The library is **LibrePT's catalog plus the trainer's own exercises**
-([../src/data/exerciseLibrary.js](../src/data/exerciseLibrary.js), TODO §45.5):
+([../src/data/exerciseLibrary.js](../src/data/exerciseLibrary.js)):
 
 - **The catalog is read from code, in every workspace.** A trainer's own database stores no exercise
   until they add one, so before this the library was empty everywhere except the sandbox. Nothing of
@@ -181,8 +181,8 @@ and history log all render the right unit and drop the load tile for non-strengt
 offers a modality selector (cardio additionally picks its metric); the catalog and picker flag
 non-strength movements with a highlighted modality badge. The **routine builder** authors metrics the
 same way — picking a movement relabels the row's primary field to its metric and hides the load axis
-for non-load-bearing modalities, at parity with the inline clipboard editor. Delivers TODO §13.3 and the
-modality field of §17.1. *(`hiit` is reserved by §17.1 but has no distinct logging surface yet.)*
+for non-load-bearing modalities, at parity with the inline clipboard editor.
+*(`hiit` is reserved but has no distinct logging surface yet.)*
 
 ---
 
@@ -212,7 +212,7 @@ where ExRx is proprietary
   its exercises), so another trainer can import the whole library; CSV remains the movement table for
   spreadsheet inspection.
 
-Delivers TODO §13.1's last bullet (adopt an open standard for interchangeable exports).
+Adopts an open standard for interchangeable exports.
 
 ---
 

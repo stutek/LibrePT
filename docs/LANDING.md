@@ -14,7 +14,7 @@ tags:
 <!-- The three demo links below are ABSOLUTE, deliberately, for the same reason consentForm.js
 hardcodes PUBLIC_SITE_URL: a relative link here is rewritten by render_docs.py into a github.com
 blob URL — which is what shipped in 1b3c9e1 and pointed this page's only calls to action at a
-code host, aimed at trainers who will never have a GitHub account (the exact defect §3.12 fixed).
+code host, aimed at trainers who will never have a GitHub account.
 A link that has to work from a rendered page, from GitHub, and from a shared URL must name the
 app's real home. -->
 

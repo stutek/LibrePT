@@ -1,7 +1,7 @@
 ---
 type: use_case
 title: UC7 - From Demo Data to a Clean Working Database
-description: The one-time migration for a database where demo and real records already coexist — clearing the sample dataset without deleting the records the trainer created or the movement catalog their programmes depend on. New installs keep sample data in the sandbox instead (TODO §40).
+description: The one-time migration for a database where demo and real records already coexist — clearing the sample dataset without deleting the records the trainer created or the movement catalog their programmes depend on. New installs keep sample data in the sandbox instead.
 status: active
 tags:
   - demo-data
@@ -12,7 +12,7 @@ tags:
 
 # Use Case 7: From Demo Data to a Clean Working Database
 
-> **Since TODO §40 this is a MIGRATION, not a standing feature.** Sample data lives in its own
+> **Since the sandbox shipped, this is a MIGRATION, not a standing feature.** Sample data lives in its own
 > database now — the sandbox ([workspace.js](../src/data/workspace.js)) — so "clear the demo" for
 > anyone arriving today is deleting that database, and the app's own offers never put sample people
 > in the trainer's own workspace in the first place. What this document specifies is the one-time
@@ -27,7 +27,7 @@ sooner or later the fake people become a stain across a dashboard being used for
 
 This use case specifies removing them.
 
-**Why the split does not do this on its own** (TODO §40.8, ruled 2026-09-10): a mixed install is
+**Why the split does not do this on its own** (ruled 2026-09-10): a mixed install is
 **not** divided automatically. Splitting by the stamp would tear a demo client the trainer renamed
 and has been training for months away from the real records that reference them — the exact case the
 fixpoint below exists to protect, and one no rule applied at boot can protect without a trainer
@@ -35,7 +35,7 @@ looking at it.
 
 ## Where sample data lives now
 
-| | Before §40 | Now |
+| | Before the sandbox | Now |
 | :--- | :--- | :--- |
 | Where the demo lives | the trainer's own database, marked per record | its own database, `librept_sandbox` |
 | "Show me around" | seeded the working database | opens the sandbox |

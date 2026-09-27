@@ -68,7 +68,7 @@ trainer's boot with conditions threaded through it. The client's device gets no 
 no service worker, no first-run agreement, and no splash hold — and nothing written that outlives the
 tab, `initTheme` included, since that persists the resolved theme. The one thing written at all is the
 form's own draft, in `sessionStorage`, so that a reload does not throw away what somebody has typed
-(TODO §38.12); closing the page takes it with it, which is what the page says in as many words.
+; closing the page takes it with it, which is what the page says in as many words.
 
 The reason it is a separate path rather than a flag: every step of the trainer's boot writes or asks
 something, so a flag would work until the day one step was missed, and the failure would be a
@@ -107,7 +107,7 @@ has already delivered the file; and not as a text, which cannot carry one at all
 holds no instruction to the client — that sits on the page, where the person who must act on it is
 looking.
 
-**A refused share now leaves the client holding the file** (2026-09-18, TODO §45.4). Android Chrome
+**A refused share now leaves the client holding the file** (2026-09-18). Android Chrome
 hands the share sheet only file types on a list of its own — pictures, sound, video, `pdf`, `txt`,
 `csv`, `html` — and this one is not on it, nor would a plain `.json` be; a Galaxy S23 therefore
 offered the Share button and then refused the file. So a refusal saves the file instead of ending in

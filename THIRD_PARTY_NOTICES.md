@@ -46,8 +46,7 @@ Licence text: <https://openfontlicense.org> (SIL OFL 1.1). Each upstream reposit
 Vendored 2026-09-21 as [`src/fonts/librept-symbols.woff2`](src/fonts/librept-symbols.woff2) and
 [`src/fonts/librept-emoji.woff2`](src/fonts/librept-emoji.woff2), cut by
 [`agent_tools/text_glyphs.py`](agent_tools/text_glyphs.py). Fifteen characters in all — ☰ ✕ ✎ ⚠ ▾ ⋯ →
-✓ and seven emoji — which the app's sentences use and no other vendored face carries
-([TODO §74.4](TODO.md)).
+✓ and seven emoji — which the app's sentences use and no other vendored face carries.
 
 | Source | Copyright | Licence | Upstream |
 | :--- | :--- | :--- | :--- |
@@ -115,7 +114,7 @@ plus `librept-icons.woff2` and `librept-icons-brands.woff2`, which are **subsets
 - The icons themselves are CC BY 4.0; the set has been subset, which is stated here as that licence
   requires changes to be indicated.
 - **Historical note.** Until 2026-08-22 the binaries were byte-identical to upstream. **If the font is ever
-  subset** (see [TODO §12.6](TODO.md)), that changes: deleting glyphs creates a Modified Version,
+  subset**, that changes: deleting glyphs creates a Modified Version,
   and clause 3 then forbids presenting it under the name "Font Awesome" — the `font-family` would
   have to be renamed.
 
@@ -126,4 +125,4 @@ plus `librept-icons.woff2` and `librept-icons-brands.woff2`, which are **subsets
 - [LICENSE](LICENSE) — LibrePT's own licence (MIT)
 - [src/fonts/fonts.css](src/fonts/fonts.css) — the vendored webfont declarations
 - [assets/dejavu-upstream/README.md](assets/dejavu-upstream/README.md) — the symbols source, unmodified
-- [TODO.md](TODO.md) — §12.6 covers the icon-font vendoring and the subsetting constraints
+- [TODO.md](TODO.md) — covers the icon-font vendoring and the subsetting constraints

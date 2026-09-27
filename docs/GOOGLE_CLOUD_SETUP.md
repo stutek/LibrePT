@@ -44,7 +44,7 @@ sitting in `.private/`.
 **Do Part A first** — it is what makes cross-device sync exist for users at all. Part B only protects
 it from breaking silently later, and can be deferred indefinitely.
 
-Background and the decisions behind all of this: [TODO.md](../TODO.md) §1.5.
+Background and the decisions behind all of this: [TODO.md](../TODO.md).
 
 ## Accounts
 
@@ -82,7 +82,7 @@ without logging it).
 What no account of either kind can cover is the CONSENT flow, since Google fingerprints and blocks
 automated browsers on `accounts.google.com`. That check stays manual (A8), as `maintainer@`.
 
-Revisit only when [TODO.md](../TODO.md) §1.3's room occupancy needs a genuine second calendar identity — "PT A
+Revisit only when the planned room-occupancy feature (see [TODO.md](../TODO.md)) needs a genuine second calendar identity — "PT A
 sees PT B as busy" cannot be tested from one account.
 
 ## Part 0 — Forward the admin inbox
@@ -237,7 +237,7 @@ Anyone not on this list gets `403: access_denied`. The cap is 100.
 ⚠️ **Never widen these.** Do not add `drive`, `drive.file`, `drive.readonly`, `calendar`,
 `calendar.readonly`, or `calendar.events`. The broad `drive*` scopes are Google's *restricted* tier,
 which requires a paid annual third-party security assessment (CASA); these two avoid that tier
-entirely. `calendar.freebusy` is also what makes §1.5's "no PT's session detail leaks to another"
+entirely. `calendar.freebusy` is also what makes "no PT's session detail leaks to another"
 enforced by Google rather than by our own restraint.
 
 The sensitivity label the console shows beside each scope is authoritative — trust it over any list,
@@ -658,15 +658,15 @@ Both were considered and dropped; re-proposing either should clear these bars fi
 `connect-src` are currently tight enough that `accounts.google.com` is the only external origin, and
 any change must be mirrored in *both* `src/index.html` and `deploy/local_http_server.py`, enforced by
 the gate's CSP-parity audit); breaks offline-first, the app's core scenario; and forfeits the privacy
-position §1.5 paid for by rejecting Firestore, adding an ePrivacy cookie banner to an app whose pitch
+position paid for by rejecting Firestore, adding an ePrivacy cookie banner to an app whose pitch
 is zero friction. (Note also that the Cloud console's "Google Analytics API" *reads* GA reports — it
 is not tracking, and enabling it would achieve nothing.)
 
 **Gmail / SMTP.** Google Cloud has no SMTP service, and the Gmail API contradicts shipped
 architecture: `src/data/calendarInvite.js` builds a downloadable `.ics` for a prefilled `mailto:`
 compose precisely because there is no backend relay, and it sends from the trainer's real address,
-which delivers better than any relay would. TODO §3.5 already settled the adjacent question ("no
-IMAP — considered and dropped, and still dropped"). Gmail scopes are sensitive at minimum and several
+which delivers better than any relay would. The adjacent question ("no IMAP") was already settled and
+is still dropped. Gmail scopes are sensitive at minimum and several
 are restricted, and the consent screen would read *"send email on your behalf"* — a trust killer for
 a feature `mailto:` already covers.
 

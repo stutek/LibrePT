@@ -83,7 +83,7 @@ The verify → build → deploy chain lives in the `build/` and `deploy/` packag
 
 ### Verifying the session timeline by hand
 
-The dashboard's session timeline (TODO §7.3 item 8) is one continuous **vertical** scroll — plain
+The dashboard's session timeline is one continuous **vertical** scroll — plain
 mouse wheel, trackpad, or touch all work with no emulation needed, unlike the old horizontal
 day-deck this replaced. The title-bar `◀`/`▶`/Today/date-jump controls are there for a fast,
 discrete jump; scrolling itself is standard native browser behaviour.

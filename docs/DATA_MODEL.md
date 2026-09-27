@@ -15,16 +15,16 @@ tags:
 # LibrePT Data Model & Storage Schema
 
 How LibrePT stores a trainer's data, and why it is shaped this way. Design rationale and open
-questions live in [TODO §18](../TODO.md); this document is the reference for what exists.
+questions live in [TODO.md](../TODO.md); this document is the reference for what exists.
 
 > **Status:** the physical layout is **built** ([indexedDb.js](../src/data/indexedDb.js)) and the
 > main read/write path now runs through it
-> ([stateStore.js](../src/data/stateStore.js), TODO §18.6 part 4) — `getState()`/`setState()` stay
+> ([stateStore.js](../src/data/stateStore.js)) — `getState()`/`setState()` stay
 > synchronous, only load-at-boot and save-on-write are async, via a one-time, revertable import from
 > the legacy `localStorage` bucket (left untouched as the rollback snapshot). **Still pending:**
-> §17.1's lazy per-client load — every collection is still fully hydrated at boot, not loaded
-> on-demand per client — and §16.5/§16.3 (retiring multi-version hosting, rekeying buckets on the
-> schema major).
+> lazy per-client load — every collection is still fully hydrated at boot, not loaded
+> on-demand per client — and retiring multi-version hosting and rekeying buckets on the
+> schema major.
 
 ---
 
@@ -60,7 +60,7 @@ last stamped and walks only the steps it is missing.
 | **1 → 2** | `bookings` carried over to `sessions` |
 | **2 → 3** | every session given an absolute `startDate` |
 | **3 → 4** | stored language cleared so every trainer is asked once |
-| **4** | **the active schema** (since 2026-09-17, TODO §61): what this build reads, writes and stamps, and the shape backups are written at |
+| **4** | **the active schema** (since 2026-09-17): what this build reads, writes and stamps, and the shape backups are written at |
 | **"P"** | the preview schema installs were stamped with before 4 became active. Read as 4, never written: everything it held moved into 4. Replaced by **PREVIEW**, which a live build refuses rather than migrates |
 | **5** | **does not exist yet.** Reserved for the first stable release. A preview shape never becomes a step on the way to it |
 
@@ -77,7 +77,7 @@ position. Reading a stored 4 as "pre-release, start over" is precisely the bug t
 settled language question.
 
 **A stored "P" reads as 4.** Until 2026-09-17 the build stamped "P"; everything P held beyond 4 moved
-into schema 4 that day (TODO §61), so `schemaRank` ranks "P" as 4 — accepted as it is, never walked
+into schema 4 that day, so `schemaRank` ranks "P" as 4 — accepted as it is, never walked
 back through the chain, which would re-ask the language question.
 
 **A preview shape is a dead branch, never a step** (ruled 2026-09-17): a chain 4 → PREVIEW → 5 must
@@ -127,7 +127,7 @@ sync, which is the more dangerous of the two because it runs unattended and offe
 trainer could be warned.
 
 Preview data is never migrated, in either direction: `migrateState` refuses a version that names a
-preview shape before it compares ranks at all (TODO §63), because ranked against a later active schema
+preview shape before it compares ranks at all, because ranked against a later active schema
 a preview version would sort below it and be stamped as current with the steps it skipped never run.
 Only the **commit SHA** tells two preview databases apart — the chain numbers the **data**, the SHA
 identifies the **code**.
@@ -145,7 +145,7 @@ somewhere to exist.
 
 This replaced the rule that a major is bumped only when a migration step is added, which allowed an
 optional field into a shape that was already released. Schema 4 gained fields four times under it —
-`alias` on 2026-08-11, then §61's four session fields, then §62's `completed`, `duration`, `titles`
+`alias` on 2026-08-11, then four session fields, then `completed`, `duration`, `titles`
 and `icon` — so "4" named four shapes, and the promise two paragraphs up, that two files declaring
 the same numbered schema have the same shape, was simply false. The ruling makes that promise true
 instead of deleting it.
@@ -203,7 +203,7 @@ else, because every other collection is *replaced* while these are simply *gone*
 
 ### Schema 4 took the preview collections (2026-09-17)
 
-Ruled by the maintainer (TODO §61): **schema 4 is the live schema**, and nothing an install holds may
+Ruled by the maintainer: **schema 4 is the live schema**, and nothing an install holds may
 be lost. Every install had written `invites` and `sessionSeries` into its P store alone, and the
 sessions' `startDate`, `seriesId`, `occurrenceDate` and `cancelled` were declared only in P. All of
 them are declared in schema 4 now, accepting that "4" names a wider shape than it did — the
@@ -268,7 +268,7 @@ cannot span *databases*. Giving each schema its own database would make an atomi
 impossible by construction — and a phone locking mid-fan-out would leave one schema written and
 another not.
 
-**A database per WORKSPACE is the opposite case, and it is why the two do not conflict** (TODO §40).
+**A database per WORKSPACE is the opposite case, and it is why the two do not conflict.**
 The trainer's own work is `librept`; the sandbox they learn and experiment in is `librept_sandbox`
 ([workspace.js](../src/data/workspace.js)). Nothing ever writes across that line — the fan-out is
 always within one workspace — so no transaction has to span the two, and the isolation is structural
@@ -281,7 +281,7 @@ The working workspace keeps the names every install already has, so this axis ar
 device that has never opened the sandbox has no second database at all.
 
 Store names are `schema4`, `schemaPREVIEW` — one per live schema, on the SAME naming as
-`schemaVersion` (§1). **The database `version` is not a schema number** (changed 2026-09-17, TODO §61):
+`schemaVersion` (§1). **The database `version` is not a schema number** (changed 2026-09-17):
 the database is opened at whatever version it holds, and only when a store is missing is it reopened
 one version higher to add it. It used to be the highest numbered live schema, which left no way to
 provision a store for PREVIEW — a name, not a number — and would have LOWERED the version the day a
@@ -361,7 +361,7 @@ erDiagram
     }
     SESSION {
         string id PK
-        string[] participants FK "GROUP sessions — many clients, not one; TODO §1.2"
+        string[] participants FK "GROUP sessions — many clients, not one"
         string routineId FK
         string time
         string location
@@ -412,7 +412,7 @@ Three modelling decisions worth knowing before changing anything here:
 - **`routineName` is a soft string reference on purpose.** Making template provenance a hard FK would
   create `history → routine → history`, the first cycle in the graph, and break §4's ordering.
 - **`SESSION.participants` is many-to-many, not the single `clientId` an earlier version of this
-  diagram drew.** A session can hold several clients (TODO §1.2's group-session merge) and a client
+  diagram drew.** A session can hold several clients (an earlier group-session merge) and a client
   sits in many sessions, so the CLIENT↔SESSION edge is `}o--o{`. **Open, not built**: whether that
   earns `participants` a `multiEntry` IndexedDB index (one entry per participant, so "this client's
   upcoming sessions" is an index hit) — sessions are a small, bounded collection next to history's
@@ -431,7 +431,7 @@ positions(one session's items) === [0, 1, 2, … , n-1]     — dense, unique, g
 ```
 
 **Why explicit at all: the store no longer preserves order for us.** On JSON, sequence rode along
-free in an array; the move to IndexedDB (§2, [TODO §18.6](../TODO.md)) retires that. Records are
+free in an array; the move to IndexedDB (§2) retires that. Records are
 keyed and indexed, and a key order is not a program order — so unless order is a *field*, a
 projection, a per-row store or an import loses it with nothing left to rebuild from. The §4
 completeness check would not notice, because every id is still present and only the sequence is
@@ -612,11 +612,11 @@ The two halves of the star are asymmetric on purpose, and the asymmetry is the i
 
 - **Writes fan out and compare no versions.** Every live schema's store gets the projected record on
   every save, so no writer decides which schema is "current". Two exceptions, both per field
-  (`narrowToSchema` and `fieldsHiddenFrom` in [recordSchemas.js](../src/data/recordSchemas.js),
-  TODO §58's first step): a store does not receive a field only a newer live schema declares —
+  (`narrowToSchema` and `fieldsHiddenFrom` in [recordSchemas.js](../src/data/recordSchemas.js)):
+  a store does not receive a field only a newer live schema declares —
   schema 4's store never holds `exercises.source` — and a field the schema being READ does not
   declare is carried over from the row the store already holds, so a save made while reading an
-  older schema cannot wipe it in a newer one (§70). A field no live schema declares is written
+  older schema cannot wipe it in a newer one. A field no live schema declares is written
   whole everywhere.
 **The two live shapes do different jobs, and only one is durable.** `schema4` is stable and active —
 what this build reads and stamps, what a backup is written at, and the copy `schemaPREVIEW` is rebuilt
@@ -624,7 +624,7 @@ FROM. `schemaPREVIEW` is for CI and for previewing an upcoming version, and is d
 can change on any commit, so it is never a source of truth for anything that has to outlive the build. On boot, if the recorded build SHA does not match the
 running one — **or is absent, which counts as not matching** — the preview store is emptied, and
 re-projected from the stable store only for an install that READS it; otherwise it is filled at activation
-(`refreshPreviewStoreIfBuildChanged` and `setReadSchema`, TODO §61). Emptying at every start was tried
+(`refreshPreviewStoreIfBuildChanged` and `setReadSchema`). Emptying at every start was tried
 and reverted the same day: a preview session spans reloads, and CI's second pass reads the store on
 every navigation. There is no migration between preview shapes, and there does not need to be: the
 durable copy makes PREVIEW rebuildable rather than something that must be preserved. Preview-only fields do not survive that rebuild, which is the same
@@ -633,7 +633,7 @@ cost the backup and sync surfaces warn about, applied at the same boundary.
 - **Reads come from one DECLARED schema**, never derived. `DEFAULT_READ_SCHEMA` in
   [recordSchemas.js](../src/data/recordSchemas.js) is what every install reads — schema 5 since
   2026-09-23, 4 from 2026-09-17, P before. **It is the newest numbered schema, whatever app version the
-  trainer runs** (TODO §76): the app version decides behaviour, never what is read. Memory holds only
+  trainer runs**: the app version decides behaviour, never what is read. Memory holds only
   what the read brings in, and a save, a backup and a Drive sync are all built from memory — so
   reading a narrower schema would drop from the next backup what only the wider one holds, and a
   restore of that backup would delete it. `recordSchemas.test.mjs` fails the build when the read schema
@@ -655,7 +655,7 @@ The only real work is the **backfill**. A store a build has just provisioned sta
 otherwise only become current at the next save, so it is filled once — **at boot, before anything
 reads** — from the numbered schema just below it. **Never from the schema being read**: on the first
 boot of a build that reads a new schema, the schema being read IS the empty one, and taking it as the
-source opened a real install empty (TODO §76; `tests/e2e/test_device_database_corpus.py` boots a
+source opened a real install empty (`tests/e2e/test_device_database_corpus.py` boots a
 schema-4 install to prove it). The schema below is complete on every install that ran the previous
 build, whose star write kept it current, and filling in ascending order carries an install across a
 jump of two numbers. It runs through the normal projection path (`read record →
@@ -745,7 +745,7 @@ part so those clients read as consented rather than as blank.
 pseudonym derived from their own opaque record id, and the execution records stay, so longitudinal
 analytics survive.
 
-**It is irreversible, which resolves the open question in [TODO §17.3](../TODO.md).** A reversible
+**It is irreversible, which resolves that open question.** A reversible
 scheme needs a mapping from pseudonym back to person; with no server, that mapping would live in the
 same local database it is meant to protect — one file that un-erases everyone. So nothing is stored
 that could reverse it, and the pseudonym is derived rather than looked up. That is also the line
@@ -786,7 +786,7 @@ inside the database would be replaced by the very restore it exists to filter.
 
 **What erasure cannot reach** is itemised for the trainer rather than glossed over
 ([erasureChecklist.js](../src/data/erasureChecklist.js)): the gym calendar (reachable on the Google
-grant the app already asks for — automatable once §1.5 lands), sent mail and SMS (never reachable —
+grant the app already asks for — automatable once Google Calendar integration lands), sent mail and SMS (never reachable —
 composed in the trainer's own client), backup files already written, and the signed consent form,
 which must deliberately be **kept**.
 
@@ -941,8 +941,8 @@ assume this applies. (`resolveTheme` survives only by accident: the object it re
 the string `"[object Object]"`, which misses its own map and falls through to the default.)
 
 **There is no SQL to inject into, and that is architectural rather than lucky.** Storage is
-IndexedDB plus `localStorage` (§2), and SQLite-wasm was considered and rejected
-([TODO §3.7/§18.6](../TODO.md)). IndexedDB takes structured keys and `IDBKeyRange` objects, never a
+IndexedDB plus `localStorage` (§2), and SQLite-wasm was considered and rejected.
+IndexedDB takes structured keys and `IDBKeyRange` objects, never a
 parsed query string, so `' OR 1=1 --` is a key that matches itself and nothing else. The e2e test
 pins exactly that property — hostile payloads driven through every lookup path the app uses
 (primary key, single index, compound index, count), each matching only its own record — so it fails
@@ -952,10 +952,10 @@ the day someone builds a lookup by assembling a key from strings, or introduces 
 
 ## Related
 
-- [TODO §18](../TODO.md) — design rationale, decisions and open questions
-- [TODO §20](../TODO.md) — the test tiers this document's §7 was written for
+- [TODO.md](../TODO.md) — design rationale, decisions and open questions, including the test tiers
+  this document's §7 was written for
 - [indexedDb.js](../src/data/indexedDb.js) — the adapter implementing §2
 - [recordSchemas.js](../src/data/recordSchemas.js) / [recordProjections.js](../src/data/recordProjections.js) — §4's declared shapes and projections
-- [recordId.js](../src/data/recordId.js) — UUIDv7 identity, doubling as `lineageId` (TODO §18.2)
+- [recordId.js](../src/data/recordId.js) — UUIDv7 identity, doubling as `lineageId`
 - [storageDurability.js](../src/data/storageDurability.js) — §6
 - [PRIVACY.md](../PRIVACY.md) — the GDPR statement §5 serves
