@@ -12,8 +12,10 @@ JANE = ("c1a9f0e2", "Jane Doe")
 JOHN = ("c2b8e1d3", "John Smith")
 
 
-def _create_session_with_participants(page, local_server, participants, session_name):
-    page.goto(f"{local_server}session/new")
+def _create_session_with_participants(
+    page, local_server, participants, session_name, query=""
+):
+    page.goto(f"{local_server}session/new{query}")
     page.wait_for_selector("#view-workout-setup.active")
     page.fill("#setup-session-name", session_name)
     page.fill("#setup-session-date", "2026-09-01")
@@ -59,6 +61,19 @@ def test_new_session_with_participants_opens_invite_dialog(page, local_server):
 
     dialog.locator(".modal-cancel").click()
     expect(dialog).not_to_be_visible()
+
+
+def test_the_invite_dialog_is_in_the_chosen_language_to_its_last_button(
+    page, local_server
+):
+    """The dialog is built after the boot's translation pass; its Done button kept "Done"."""
+    _create_session_with_participants(
+        page, local_server, [JANE], "Jutranja vadba", query="?lang=sl"
+    )
+
+    dialog = page.locator("#dialog-session-invite")
+    expect(dialog).to_be_visible()
+    expect(dialog.locator(".modal-cancel")).to_have_text("Končano")
 
 
 def test_resaving_unchanged_participants_does_not_reopen_invite_dialog(

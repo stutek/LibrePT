@@ -30,6 +30,7 @@ import {
 } from "../../data/trainerIdentity.js";
 import { inviteExpiresAt } from "../../domain/inviteExpiry.js";
 import { occurrenceCalendarFields } from "../../domain/sessionSeries.js";
+import { translateMarkup } from "../../i18n/domMappings.js";
 import { closeModal, openModal, renderMarkupOnce } from "../common/dom.js";
 import { downloadFile } from "../common/download.js";
 import { buildEventLink } from "../common/eventTransports.js";
@@ -394,6 +395,11 @@ export function openSessionInviteDialog(sessionInfo) {
   if (clients.length === 0) return;
 
   renderInviteDialogShell();
+  // The dialog is built after the boot's translation pass, so its own `data-i18n` words are put in
+  // here — the Done button kept its template's English until this ran.
+  translateMarkup(document.getElementById("dialog-session-invite"), (key) =>
+    t(key) === key ? undefined : t(key),
+  );
   renderDialogChrome(t);
   renderOrganizerHint(t);
   renderInviteRows(clients, sessionInfo);

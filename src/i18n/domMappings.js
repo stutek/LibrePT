@@ -19,6 +19,13 @@
  * on it. All three were being written in English into markup that then never changed.
  */
 function applyMarkupKeys(tDict) {
+  translateMarkup(document, (key) => tDict[key]);
+}
+
+/** The same pass over one part of the page, for markup built after the boot's pass has run — a
+ *  dialog drawn the first time it opens. `lookup(key)` returns the words, or nothing when the key
+ *  has none. Without it, such a dialog kept whatever English its template carried. */
+export function translateMarkup(root, lookup) {
   for (const [selector, dataKey, set] of [
     // `replaceChildren` rather than `textContent =`: the same write, said as a call, because an
     // assignment inside an arrow is what the linter reads as a value being smuggled out of an
@@ -37,8 +44,8 @@ function applyMarkupKeys(tDict) {
       (element, value) => element.setAttribute("aria-label", value),
     ],
   ]) {
-    for (const element of document.querySelectorAll(selector)) {
-      const value = tDict[element.dataset[dataKey]];
+    for (const element of root.querySelectorAll(selector)) {
+      const value = lookup(element.dataset[dataKey]);
       // A key with no translation leaves the element alone rather than blanking it: the English in
       // the markup is a worse answer than the Slovenian, and both are better than nothing at all.
       if (value) set(element, value);
