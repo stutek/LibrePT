@@ -6813,6 +6813,29 @@ okno naj ju vpraša takrat, ko ju potrebuje, in ne prej. Oglate oznake iz dokume
 Preizkus naj poskusi izvoziti brez vpisanih podatkov in zahteva, da aplikacija to prepreči.
 Opaženo na objavljeni različici `0625bd6`; koda na `main` je ista.
 
+### 80.44 [ ] P2 — Uvoz programa odgovori na napako v angleščini, z malo začetnico
+
+**Scenarij in koraki:** trener v meniju ☰ izbere »Uvozi program«, v polje »Prilepi program
+sem« prilepi program, kakor bi ga napisal na roko —
+»Počep 3x8 60kg / Potisk s prsi 3x10 40kg / odmor 90s« — in pritisne »Odpri v urejevalniku«.
+
+**Opaženo:** okno se ne premakne, pod gumbi pa se izpiše »no programme data found in that
+text«. Vse ostalo v tem oknu je slovensko.
+
+**Težava in vpliv:** to je najbolj verjeten izid prvega poskusa, saj trener oblike še ne pozna.
+Sporočilo, ki naj bi ga naučilo, kako naprej, je v tujem jeziku in ne pove, kaj naj popravi.
+
+**Obseg, potrjen v kodi na `main`:** [programImport.js](src/domain/programImport.js) ima pet
+takih zavrnitev, vse vpisane kot angleški niz: »nothing to read«, »no programme data found in
+that text«, »that is not readable as a programme (…)«, »that file says it is …, not …«, »that
+programme lists no exercises«.
+
+**Predlog in preverjanje:** vsaka zavrnitev dobi ključ v `en`, `sl` in `de`, sestavo pa naj
+pokliče tisti, ki jo pokaže, da domenska koda ostane brez slovarja. Sporočilo naj pove tudi
+naslednji korak (»Pritisni Pokaži obliko in primerjaj«). Preizkus naj v slovenskem vmesniku
+prilepi neustrezno besedilo in zahteva, da odgovor ni angleški. Opaženo na objavljeni različici
+`0625bd6`; koda na `main` je ista.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
