@@ -34,8 +34,6 @@ import { $id, closeModal, openModal, renderMarkupOnce } from "../common/dom.js";
 import { downloadFile } from "../common/download.js";
 import { escapeHTML } from "../common/utils.js";
 
-const ERASE_CONFIRMATION_WORD = "ERASE";
-
 let deps = {};
 
 // The injected dictionary, falling back to the key so a missing entry is visible rather than blank.
@@ -113,8 +111,8 @@ export function renderDataRightsDialogs() {
       </div>
 
       <div class="form-group">
-        <label for="client-erase-confirm">Type ${ERASE_CONFIRMATION_WORD} to confirm</label>
-        <input type="text" id="client-erase-confirm" class="form-control" autocomplete="off" placeholder="${ERASE_CONFIRMATION_WORD}">
+        <label for="client-erase-confirm" id="client-erase-confirm-label"></label>
+        <input type="text" id="client-erase-confirm" class="form-control" autocomplete="off">
       </div>
 
       <div id="client-erase-receipt" class="data-rights-receipt" hidden></div>
@@ -145,7 +143,8 @@ export function openClientExportDialog(clientId) {
   if (!client) return;
 
   const payload = buildClientExport(deps.getState(), clientId);
-  $id("client-export-subject").textContent = `${client.name} — ${clientDisambiguator(client)}`;
+  $id("client-export-subject").textContent =
+    `${client.name} — ${clientDisambiguator(client, tr("disambiguator_joined"))}`;
   $id("client-export-scope").textContent = tr("rights_export_scope")
     .replace("{logged}", String(payload.counts.loggedSessions))
     .replace("{sessions}", String(payload.counts.sessions))
@@ -207,7 +206,8 @@ export function openClientEraseDialog(clientId) {
   if (!client) return;
 
   const state = deps.getState();
-  $id("client-erase-subject").textContent = `${client.name} — ${clientDisambiguator(client)}`;
+  $id("client-erase-subject").textContent =
+    `${client.name} — ${clientDisambiguator(client, tr("disambiguator_joined"))}`;
   const namesakeEl = $id("client-erase-namesakes");
   const namesakes = (state.clients || []).filter(
     (candidate) =>
@@ -220,11 +220,18 @@ export function openClientEraseDialog(clientId) {
     // its distinguishing details, is what lets them notice they have the wrong record open.
     namesakeEl.textContent = tr("rights_erase_namesakes").replace(
       "{others}",
-      namesakes.map((namesake) => clientDisambiguator(namesake)).join("; "),
+      namesakes
+        .map((namesake) => clientDisambiguator(namesake, tr("disambiguator_joined")))
+        .join("; "),
     );
   }
 
   $id("client-erase-requested").value = new Date().toISOString().substring(0, 10);
+  // The word to type is the language's own — "IZBRIŠI", "LÖSCHEN" — and so is the instruction: the
+  // last guard before the one act that cannot be undone was English in every language.
+  const word = tr("rights_erase_word");
+  $id("client-erase-confirm-label").textContent = tr("rights_erase_type").replace("{word}", word);
+  $id("client-erase-confirm").placeholder = word;
   $id("client-erase-confirm").value = "";
   $id("btn-erase-confirm").disabled = true;
   $id("btn-erase-confirm").hidden = false;
@@ -331,7 +338,8 @@ export function setupClientDataRights() {
   confirmInput?.addEventListener("input", () => {
     // Case-sensitive on purpose: the point of the ceremony is that it cannot be completed by
     // reflex, and lowercase "erase" is what a reflex types.
-    $id("btn-erase-confirm").disabled = confirmInput.value !== ERASE_CONFIRMATION_WORD;
+    // Compared with the word of the language on screen now, not with English.
+    $id("btn-erase-confirm").disabled = confirmInput.value !== tr("rights_erase_word");
   });
   $id("btn-erase-confirm")?.addEventListener("click", () => {
     performErasure();

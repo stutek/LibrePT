@@ -1108,6 +1108,8 @@ export const en = {
   rights_copy_receipt: "Copy receipt",
   rights_erase_confirm: "Erase permanently",
   disambiguator_joined: "joined",
+  rights_erase_word: "ERASE",
+  rights_erase_type: "Type {word} to confirm",
   name_collision_hint_one:
     "{count} other client has this name ({others}). Add an alias so you can tell them apart.",
   name_collision_hint_two:

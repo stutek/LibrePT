@@ -1092,6 +1092,8 @@ export const de = {
   rights_copy_receipt: "Bestätigung kopieren",
   rights_erase_confirm: "Endgültig löschen",
   disambiguator_joined: "dabei seit",
+  rights_erase_word: "LÖSCHEN",
+  rights_erase_type: "Zum Bestätigen {word} eingeben",
   name_collision_hint_one:
     "Weitere Kunden mit diesem Namen: {count} ({others}). Füge einen Spitznamen hinzu, um sie zu unterscheiden.",
   name_collision_hint_two:

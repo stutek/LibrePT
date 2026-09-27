@@ -1041,6 +1041,8 @@ export const sl = {
   rights_copy_receipt: "Kopiraj potrdilo",
   rights_erase_confirm: "Izbriši dokončno",
   disambiguator_joined: "v imeniku od",
+  rights_erase_word: "IZBRIŠI",
+  rights_erase_type: "Za potrditev vpiši {word}",
   name_collision_hint_one:
     "To ime ima še {count} stranka ({others}). Dodaj vzdevek, da ju bo mogoče razlikovati.",
   name_collision_hint_two:
