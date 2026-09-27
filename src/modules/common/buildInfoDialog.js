@@ -8,8 +8,8 @@
 // as much as the display: the point of a commit SHA is pasting it into a bug report.
 //
 // The DATA SCHEMA is shown alongside the commit deliberately — code version and data-schema version
-// are two different axes (TODO §16): there are no release tags any more (one build carries every
-// supported schema concurrently, TODO §18), so the schema is what actually explains a missing record
+// are two different axes: there are no release tags any more (one build carries every
+// supported schema concurrently), so the schema is what actually explains a missing record
 // after a cached build updates, not the commit.
 //
 // Injected dependencies: { t } (translator).

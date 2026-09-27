@@ -1,8 +1,8 @@
-// src/modules/common/sandboxDialogs.js — the things the sandbox has to say out loud (TODO §40).
+// src/modules/common/sandboxDialogs.js — the things the sandbox has to say out loud.
 //
-// Single responsibility: the offer to rebuild a sandbox that has gone flat (§40.4), the same offer
+// Single responsibility: the offer to rebuild a sandbox that has gone flat, the same offer
 // made deliberately from the menu, and the card that names a timer which finished back in the
-// trainer's own work while they are in here (§40.11). Each is one question with two answers, and
+// trainer's own work while they are in here. Each is one question with two answers, and
 // each is ABOUT the sandbox — so they share a module rather than being scattered next to whatever
 // raised them.
 //
@@ -19,8 +19,8 @@
 // action rather than "OK".
 //
 // **Neither dialog ever touches storage.** The caller performs the reset, the navigation and the
-// discard; this module asks and reports the answer. That is what lets the whole of §40.4's timing be
-// tested without a browser.
+// discard; this module asks and reports the answer. That is what lets the whole rebuild-timing flow
+// be tested without a browser.
 //
 // Injected dependencies: `t` (per call).
 
@@ -110,7 +110,7 @@ function fill(id, text) {
 }
 
 /**
- * Offer to rebuild a sandbox whose seeded day has passed (TODO §40.4).
+ * Offer to rebuild a sandbox whose seeded day has passed.
  *
  * `onConfirm` throws the sandbox away and builds a fresh one; `onDecline` starts the three-hour
  * cooldown. Closing the dialog any other way counts as declining — a question dismissed is not a
@@ -146,8 +146,7 @@ export function openStaleSandboxDialog({ t, onConfirm, onDecline }) {
 }
 
 /**
- * Throw the sandbox away and build a fresh one, asked for from the menu rather than offered
- * (TODO §40.4).
+ * Throw the sandbox away and build a fresh one, asked for from the menu rather than offered.
  *
  * Dismissing it is a NO and nothing else: unlike the stale offer, nobody interrupted the trainer, so
  * there is no cooldown to start and no answer to remember. It shares the stale dialog's confirm
@@ -175,7 +174,7 @@ export function openResetSandboxDialog({ t, onConfirm }) {
 }
 
 /**
- * Say that a timer finished in the trainer's own work while they are in the sandbox (TODO §40.11),
+ * Say that a timer finished in the trainer's own work while they are in the sandbox,
  * and name whose it was — "a timer somewhere finished" is not something anybody can act on.
  *
  * Two ways on, neither of them a trap: go back to that work, or ignore this timer and stay. A

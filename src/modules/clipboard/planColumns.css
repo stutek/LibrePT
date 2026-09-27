@@ -1,5 +1,5 @@
 /* modules/clipboard/planColumns.css — several participants' programmes edited side by side while
-   PLANNING (TODO §41.0).
+   PLANNING.
 
    Only the layout AROUND the editor. Everything inside a column is clipboardEditor.css, unchanged
    and unaware that it is one of several — which is what keeps this file small and what keeps a
@@ -34,7 +34,7 @@
   border-color: color-mix(in srgb, var(--primary) 45%, transparent);
 }
 
-/* The one place the app's single-column cap is lifted (TODO §41.0). Set by activeSessionBoard.js
+/* The one place the app's single-column cap is lifted. Set by activeSessionBoard.js
    only while several programmes are actually being edited side by side, and taken off again on a
    live session, a phone or a session of one — a clipboard stretched across a desk with one
    programme in it is worse than the narrow one it replaced.

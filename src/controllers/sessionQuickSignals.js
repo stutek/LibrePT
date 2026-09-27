@@ -1,7 +1,7 @@
 // src/controllers/sessionQuickSignals.js — one-tap "too easy / too hard / note" marks on a live
 // exercise. Single responsibility: MUTATE the session's feedback and the app's plan-adjustment queue
 // in step; the RULES (what supersedes what, which colour a card takes) are pure and live in
-// domain/quickSignals.js — exactly the split TODO §24.4 drew. Injected dependencies: `state`,
+// domain/quickSignals.js. Injected dependencies: `state`,
 // `saveToLocalStorage` and `renderPendingPlanAdjustments` arrive through activeSessionStore.js.
 //
 // The (clientId, exerciseName, tag) signatures are kept because exerciseDeckOfCards.js and feedbackModal.js
@@ -36,8 +36,8 @@ function removeQuickSignal(clientId, exerciseName, tag, state) {
 // feedbackModal.js, which offers the same "Too Easy"/"Too Hard" tags as its own radio choices and
 // writes activeSession.feedback directly rather than through logQuickSignal. Without this, a PT
 // submitting the modal with the (default-checked) opposite tag while a quick-tap was already
-// active left BOTH plain and "active" simultaneously — found 2026-07-27, the exact bug §8.7's
-// mutual-exclusivity fix was meant to close everywhere, not just on the quick-tap path itself.
+// active left BOTH plain and "active" simultaneously — found 2026-07-27, the exact bug this
+// mutual-exclusivity check is meant to close everywhere, not just on the quick-tap path itself.
 export function enforceQuickSignalExclusivity(clientId, exerciseName, tag) {
   if (!getActiveSession()) return;
   const { state } = getAppDeps();

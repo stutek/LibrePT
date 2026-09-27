@@ -3,7 +3,7 @@
 //
 // Pure: every input arrives as an argument and nothing here touches the DOM, storage, or the
 // active session. That is what makes it `domain/` rather than part of the controller it came out
-// of (TODO §24.4) — the plan's SHAPE is a training rule, while deciding when to build one is
+// of — the plan's SHAPE is a training rule, while deciding when to build one is
 // orchestration.
 //
 // The `clientState` shape it produces:
@@ -85,7 +85,7 @@ function historyRestItemToPlanItem(item) {
 
 // One performed-exercise record from a history/planning snapshot, rebuilt into a live plan item
 // plus its logs. `catalogEntry` is the movement if it still exists in the catalog (falls back to
-// the snapshot's own fields for a renamed/deleted or anonymized movement — TODO §17.1).
+// the snapshot's own fields for a renamed/deleted or anonymized movement).
 function historyExerciseItemToPlanItem(item, exercises) {
   const catalogEntry = exercises.find((e) => e.id === item.id || e.name === item.name);
   const sets = Array.isArray(item.sets) ? item.sets : [];
@@ -117,8 +117,8 @@ function historyExerciseItemToPlanItem(item, exercises) {
 }
 
 // Rebuild the live plan from a stored history/planning snapshot, restoring rests and circuit
-// grouping — not just the performed exercises (TODO §17.1). Read in the record's OWN program order
-// (TODO §17.5): the array it arrives in is a storage detail.
+// grouping — not just the performed exercises. Read in the record's OWN program order: the array
+// it arrives in is a storage detail.
 export function buildClientStateFromHistoryLog(log, exercises) {
   const clientState = {
     routineId: log.routineId || "",
@@ -190,7 +190,7 @@ export function buildClientStateFromRoutine({ routineId, routines, exercises, em
 }
 
 // A library circuit is a reusable prescription, never a shared live log. Give every occurrence
-// its own slot, including when the same movement appears twice in one circuit (TODO §45.5).
+// its own slot, including when the same movement appears twice in one circuit.
 export function buildClientStateFromLibraryCircuit(circuit, exercises) {
   const entries = circuit?.exercises || [];
   const catalog = new Map(exercises.map((exercise) => [exercise.id, exercise]));

@@ -102,8 +102,8 @@ export function setupRoutineForms({
 
   const hideRoutinePicker = () => pickerEl?.classList.add("hidden");
 
-  // Mount a fresh filtered picker; each tap drops a configured row into the template
-  // (TODO §13.2 Scenario A). Stays open for rapid multi-add.
+  // Mount a fresh filtered picker; each tap drops a configured row into the template.
+  // Stays open for rapid multi-add.
   const openRoutinePicker = () => {
     if (!pickerEl) return;
     mountExercisePicker(pickerEl, {
@@ -145,7 +145,7 @@ export function setupRoutineForms({
   // ✕ keeps what was typed, like Save; only Cancel undoes it (liveRecordForm.js).
   if (closeBtn) closeBtn.addEventListener("click", () => closeModal("dialog-routine"));
 
-  // Every change goes into the routine record, so a reload loses nothing (TODO §50.2). An empty name
+  // Every change goes into the routine record, so a reload loses nothing. An empty name
   // or set count is written as a placeholder; a row without a movement has nothing to stand in for
   // it and is left out.
   const live = keepRecordLive({

@@ -3,7 +3,7 @@
 // Single responsibility: assemble that list, and say where each entry comes from. Pure — no DOM, no
 // storage.
 //
-// **The catalog is read from code, never stored** (TODO §45.5, ruled 2026-09-23). A working database
+// **The catalog is read from code, never stored** (ruled 2026-09-23). A working database
 // starts with no exercises, and the catalog used to reach only the sandbox, so outside it a trainer
 // had an empty library. Storing it on first boot would put forty rows into every database and every
 // backup, and would freeze them there: a correction to the catalog would never reach a trainer who
@@ -22,7 +22,7 @@
 import { DEFAULT_EXERCISES } from "./exercises.js";
 
 /** Where an exercise comes from. These two are the filter's values, never shown to the trainer; an
- * imported exercise's source is the name it was imported under (TODO §45.5 — any number of them,
+ * imported exercise's source is the name it was imported under (any number of them,
  * because trainers exchange catalogs), and that name IS shown. */
 export const CATALOG_SOURCE = "librept";
 export const OWN_SOURCE = "own";

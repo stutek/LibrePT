@@ -1,5 +1,4 @@
-// src/modules/demo/demoNarratorCard.js — the card the demo narrates with, in all of its kinds
-// (TODO §35.1, §38.10).
+// src/modules/demo/demoNarratorCard.js — the card the demo narrates with, in all of its kinds.
 //
 // Single responsibility: what the viewer READS while the demo plays. It owns no steps and no timing
 // — demoTourPlayer.js taps, domain/demoStory.js decides which steps run, and this draws the words
@@ -19,7 +18,7 @@
 // shipped script demanding a class for every kind it names — the layering rules keep the registry
 // out of `domain/`, so the script's own validator cannot ask, and a test is what asks instead.
 //
-// **The paper track is TEXT on a paper-textured card, never a picture of a form** (§35.1). Parts of
+// **The paper track is TEXT on a paper-textured card, never a picture of a form.** Parts of
 // the story happen on paper — a printed consent signed and filed — and the temptation is to draw the
 // form. Everything else in this demo is the live app, so a drawn surface among them reads as a real
 // screen, and the first viewer who goes looking for it in the app has been misled. The card SAYS
@@ -40,14 +39,14 @@
 // there is no panel, which is how it can be mounted and tested on its own.
 //
 // **The persona label is permanent while a persona is on screen.** One persona at a time was the
-// ruling (§35.1) — no split screen — so the only thing telling a viewer whose phone they are looking
+// ruling — no split screen — so the only thing telling a viewer whose phone they are looking
 // at is this label. The app looks the same on both sides of a handover.
 //
 // **Built with createElement, never innerHTML**, like demoHand.js: nothing here is interpolated into
 // markup, so there is no escaping question for build/frontend_audit.py to reason about and no CSP
 // exposure. Every string arrives through `t`.
 //
-// **The last card is where the story hands the app over** (TODO §30.2, wanted 2026-08-18): a thank
+// **The last card is where the story hands the app over** (wanted 2026-08-18): a thank
 // you, and the two ways onward that already exist — keep exploring, or clear the demo data. Both are
 // reused rather than rebuilt: closing the guide IS "play around", and the cleanup dialog is the one
 // the demo notice in the feed already opens.
@@ -112,7 +111,7 @@ export class DemoNarratorCard {
   }
 
   /** Whether this card may offer to clear the demo out. Only the closing card is entitled to make
-   *  that offer; anywhere earlier it reads as the demo asking to be stopped (§30.2). */
+   *  that offer; anywhere earlier it reads as the demo asking to be stopped. */
   offersWayOnward(narration) {
     return Boolean(narration?.onward);
   }
@@ -161,10 +160,10 @@ export class InvitationNarratorCard extends MessageNarratorCard {
 }
 
 /** A SCREENSHOT of the app the file arrived in — the trainer's messaging app, with Ana's message and
- * her attachment in it (TODO §38.22).
+ * her attachment in it.
  *
  * Asked for 2026-08-30: "zunanjo aplikacijo simuliraj z zaslonsko sliko in kartico razlage". It is
- * drawn rather than photographed for the same reason the paper track is text (§35.1): a picture goes
+ * drawn rather than photographed for the same reason the paper track is text: a picture goes
  * stale the day either app changes, and nobody notices. And it does not break that rule's other half
  * — never draw a surface that could be mistaken for a screen of THIS app — because it is deliberately
  * somebody else's chrome, sitting inside a card that says so.
@@ -195,14 +194,14 @@ export class ScreenshotNarratorCard extends DemoNarratorCard {
   }
 }
 
-/** Something that happens on PAPER — a printed consent signed and filed (§35.1). Its texture is its
+/** Something that happens on PAPER — a printed consent signed and filed. Its texture is its
  * declaration: warm ground, a ruled margin, no app chrome, so it cannot be mistaken for a screen of
  * this app. */
 export class PaperNarratorCard extends DemoNarratorCard {
   static kind = "paper";
 }
 
-/** The guide saying the trainer has wandered off the demo's place in the app (§38.5).
+/** The guide saying the trainer has wandered off the demo's place in the app.
  *
  * Its words are the GUIDE's, not the script's — the step's own instruction names a control that is
  * not on screen, so repeating it would be a lie. It is a card like every other because it is the

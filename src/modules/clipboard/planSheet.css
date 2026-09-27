@@ -1,4 +1,4 @@
-/* planSheet.css — the read-only plan sheet drawn under the live clipboard (TODO §52.2 step 2).
+/* planSheet.css — the read-only plan sheet drawn under the live clipboard.
    Dense on purpose: these rows are never tapped, so they trade the deck's 40px touch targets for
    fitting a whole session on screen at once while the current plan is held aside.
    Colours come only from theme tokens (docs/ARCHITECTURE.md "Themes and styling"), never a

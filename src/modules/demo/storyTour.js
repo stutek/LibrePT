@@ -1,10 +1,10 @@
-// src/modules/demo/storyTour.js — the long demo's script: a scenario in chapters (TODO §35).
+// src/modules/demo/storyTour.js — the long demo's script: a scenario in chapters.
 //
 // Single responsibility: the CONTENT of the story. The chapter rules are domain/demoStory.js, the
 // pass-fail rule is domain/demoTour.js, the engine is demoTourPlayer.js and the words are drawn by
 // demoNarratorCard.js — this file is data, and adding a step is a data change.
 //
-// **This is the other artifact, not a longer wedge** (§35). `gymFloorTour.js` is four taps that show
+// **This is the other artifact, not a longer wedge.** `gymFloorTour.js` is four taps that show
 // a stranger a working clipboard in three seconds; the story follows three friends from a leaflet to
 // their second session and shows what a wedge cannot — intake, consent, an injury caught mid-set,
 // the feedback loop closing. Both exist and stay separate: a stranger gets the wedge, someone who
@@ -16,9 +16,10 @@
 // both loudly, in company — the same reason the wedge was built on selectors the e2e suite already
 // relies on.
 //
-// **Chapters are built in the order §35.3 sets out**: the gym chapter first, because it is the chapter
-// closest to what already runs. The events that need unbuilt product — the recurrence model, the
-// net-vs-slot meter, shared binding across participants — are absent rather than mocked. A demo
+// **Chapters are built in the order the story's build plan sets out**: the gym chapter first,
+// because it is the chapter closest to what already runs. The events that need unbuilt product —
+// the recurrence model, the net-vs-slot meter, shared binding across participants — are absent
+// rather than mocked. A demo
 // step that pretends is the failure mode a scripted demo exists to avoid.
 //
 // Injected dependencies: none — a plain data module.
@@ -33,7 +34,7 @@ import {
 
 const wedge = Object.fromEntries(GYM_FLOOR_TOUR.steps.map((step) => [step.id, step]));
 
-// Whose phone the viewer is looking at. One persona at a time was the ruling (§35.1) — no split
+// Whose phone the viewer is looking at. One persona at a time was the ruling — no split
 // screen — so this label is the only thing saying which side of a handover is on screen.
 const TRAINER = "story_persona_trainer";
 
@@ -48,7 +49,7 @@ const CARD_TARGET = "#demo-narrator-card";
 function narration(id, kind, titleKey, bodyKey, extra = {}) {
   // `attachment` belongs to the CARD, not to the step: it is something the card draws, and the card
   // is handed its narration and nothing else. Left on the step it was simply never seen — the
-  // screenshot rendered without the file under the message (found the first time §38.22's step was
+  // screenshot rendered without the file under the message (found the first time this step was
   // driven in a browser).
   const { onward, attachment, ...step } = extra;
   return {
@@ -91,7 +92,7 @@ function narration(id, kind, titleKey, bodyKey, extra = {}) {
  * happens on, and until 2026-08-29 the fold copied `narrate` and dropped everything else, so the
  * evening chapter began wherever the gym chapter had left the app — deep inside the plan editor.
  * Two steps later the guide greyed out every button for five seconds and then complained that the
- * trainer was on the wrong screen, while standing on the right one (TODO §38.13).
+ * trainer was on the wrong screen, while standing on the right one.
  *
  * Only when the step does not name a route of its own: the step is the more specific of the two, and
  * a card must never move a step off its own screen.
@@ -131,9 +132,9 @@ const WELCOME_CHAPTER = {
   id: "welcome",
   titleKey: "story_welcome_title",
   steps: foldCards([
-    // The story's front door (TODO §38.21): what the app is, what this run is a story OF, and that
+    // The story's front door: what the app is, what this run is a story OF, and that
     // it all happens in the sandbox — which is why it no longer has to offer to delete the demo data
-    // afterwards (TODO §40).
+    // afterwards.
     //
     // It keeps its OWN step, and that is not a flag to work around the fold — its instruction is
     // "press Next", so there is no tap for it to ride on.
@@ -207,7 +208,7 @@ const TRAINER_DETAILS_CHAPTER = {
     },
     {
       // The form is modal. Left open, it covers the ☰ the next chapter starts from, and the guide
-      // stops there with nothing a viewer can tap (found 2026-09-17, the gate for §50.2).
+      // stops there with nothing a viewer can tap (found 2026-09-17).
       id: "trainer-details-close",
       persona: TRAINER,
       target: "#trainer-details-cancel",
@@ -225,7 +226,7 @@ const TRAINER_DETAILS_CHAPTER = {
   ]),
 };
 
-// Chapter C — in the gym. §35.3's build order starts here: it is the chapter that needs the least
+// Chapter C — in the gym. The build order starts here: it is the chapter that needs the least
 // that does not exist, and the one whose steps the wedge already proves.
 const GYM_CHAPTER = {
   id: "gym",
@@ -292,7 +293,7 @@ const GYM_CHAPTER = {
       expect: { selector: "#feedback-custom-note", hasValueKey: "story_typed_note" },
     },
     {
-      // §35.3c: this is the step that makes the note outlive the session. Without it the twinge is
+      // This is the step that makes the note outlive the session. Without it the twinge is
       // an alert that gets resolved away within the week.
       id: "capture-keep",
       persona: TRAINER,
@@ -351,23 +352,23 @@ const GYM_CHAPTER = {
       // the editor's own Swapped badge is the visible fact.
       // The badge the editor puts on a swapped movement, asked for by WHAT IT IS rather than by what
       // it says: its word is translated, and reading that word back was one of the four expectations
-      // that made the story impossible to finish in Slovenian (TODO §38.19).
+      // that made the story impossible to finish in Slovenian.
       expect: { selector: ".editor-added-badge[data-callout='swap']", visible: true },
     },
     // Not the end any more — the evening chapter is — so this one just closes the session and hands
-    // over to it. The way out (§30.2) belongs on the LAST card, or a viewer is offered the exit
+    // over to it. The way out belongs on the LAST card, or a viewer is offered the exit
     // twice and takes it before the story is done.
     narration("gym-close", "chapter", "story_gym_close_title", "story_gym_close_body"),
   ]),
 };
 
-// Whose phone the viewer is looking at once the story hands over (§35.1's one-persona-at-a-time
+// Whose phone the viewer is looking at once the story hands over (the one-persona-at-a-time
 // ruling): the label is the only thing distinguishing the two sides, because the app looks the same
 // on both.
 const CLIENT = "story_persona_client";
 
 // Chapter A — three friends arrive. The trainer's half ends by handing the browser to the page a
-// client would really open: the client's screens are the REAL ones (§35.1), and `/intake` is a
+// client would really open: the client's screens are the REAL ones, and `/intake` is a
 // separate boot on purpose — a stranger's phone gets no database, no seed and no terms modal — so
 // the story crosses to it by navigating, exactly as a person following a link would.
 const ARRIVE_CHAPTER = {
@@ -403,7 +404,7 @@ const ARRIVE_CHAPTER = {
     },
     {
       // Nothing is created here, and that is the point: a person exists in the register only once
-      // they have sent their own details and the trainer has accepted them (§26.5).
+      // they have sent their own details and the trainer has accepted them.
       id: "arrive-invite",
       persona: TRAINER,
       target: "#btn-invite-client",
@@ -482,7 +483,8 @@ const ARRIVE_CHAPTER = {
       // the thing reported.
       // The STORY, not the chapter: naming a chapter would make the client's page count inside that
       // chapter (domain/demoStory.js), and the crossing is the one place where a restarting count
-      // is the §38.9 defect. Her page is the only client chapter there is, so the surface filter
+      // would bring back the counter defect fixed earlier. Her page is the only client chapter
+      // there is, so the surface filter
       // finds it without being told.
       advanceTo: "intake?demo=story&theme=midnight",
       nextLabelKey: "story_open_client_phone",
@@ -502,7 +504,7 @@ const INTAKE_CHAPTER = {
   surface: "client",
   steps: foldCards([
     // What Ana actually receives, drawn as the message it is — the trainer's text with the link in
-    // it. The paper track's rule holds (§35.1): a step that happens OUTSIDE this app is narrated on
+    // it. The paper track's rule holds: a step that happens OUTSIDE this app is narrated on
     // a card that could never be mistaken for one of its screens. A message is not our surface at
     // all, so nobody goes looking for it in the app; what matters is that the viewer sees the thing
     // Ana taps, rather than being teleported onto a form (asked for 2026-08-23).
@@ -532,7 +534,7 @@ const INTAKE_CHAPTER = {
       expect: { selector: "#intake-email", hasValue: "@" },
     },
     {
-      // Offered, never demanded (§1.7's ruling) — the copy beside the field says where the answer
+      // Offered, never demanded — the copy beside the field says where the answer
       // goes, and the demo fills it in because a client who trusts the trainer usually does.
       id: "intake-injury",
       persona: CLIENT,
@@ -586,7 +588,7 @@ const INTAKE_CHAPTER = {
 // messages before he ever opens the app again.
 const REVIEW_STEPS = [
   // Her file, where it actually is: in the trainer's messaging app, as an attachment under her
-  // message. Drawn as a screenshot with the attachment as a real button (§38.22, asked for as
+  // message. Drawn as a screenshot with the attachment as a real button (asked for as
   // "zunanjo aplikacijo simuliraj z zaslonsko sliko in kartico razlage"), and tapping it does what
   // tapping it on a phone does — LibrePT opens with the submission in the review dialog.
   //
@@ -623,7 +625,7 @@ const REVIEW_STEPS = [
 const REVIEW_CHAPTER = {
   id: "review",
   titleKey: "story_chapter_review",
-  // NOT a place the story can be joined, so no table of contents offers it (§35, measured
+  // NOT a place the story can be joined, so no table of contents offers it (measured
   // 2026-09-21). Ana's submission reaches the store from HER phone, in the client chapter's own
   // boot. A trainer's sandbox that has played none of the earlier chapters holds nothing to review,
   // and the crossing to her phone is not something this boot can perform.
@@ -631,7 +633,7 @@ const REVIEW_CHAPTER = {
   steps: foldCards(REVIEW_STEPS),
 };
 
-// Chapter B — the programme. It comes AFTER the gym chapter in the story's order of build (§35.3),
+// Chapter B — the programme. It comes AFTER the gym chapter in the story's order of build,
 // because it needed the two features the floor chapter did not: a plan that says whether it fits its
 // slot, and one plan bound to several people.
 const PROGRAMME_CHAPTER = {
@@ -715,7 +717,7 @@ const PROGRAMME_CHAPTER = {
 };
 
 // Chapter D — the evening after. The trainer is at home; this is where the notes taken on the floor
-// turn into next week's plan, and where the theme step finally earns its place (§35.2 event 19):
+// turn into next week's plan, and where the theme step finally earns its place:
 // an evening at home is genuinely what dark mode is for.
 const EVENING_CHAPTER = {
   id: "evening",

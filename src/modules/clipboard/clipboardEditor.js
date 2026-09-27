@@ -76,7 +76,7 @@ function mountLibraryCircuitPicker(bar, deps, insert) {
   bar.append(select);
 }
 
-/** How long this plan runs, against the slot it has to fit in (TODO §35.3b).
+/** How long this plan runs, against the slot it has to fit in.
  *
  * Beside the plan while it is still being built, because that is the only moment the answer can
  * change anything: after the session, "it overran" is history. Shown as minutes, never seconds — a
@@ -93,7 +93,7 @@ function planFitMeterHTML(deps, tr) {
   // A CLOCK and a word, not a number in a pill. Reported 2026-09-01: "there is a 65 / 60 min button
   // like element that I don't know what it does" — it was a 999px-radius tinted pill sitting in a
   // toolbar beside a real button, so it read as a control, and the only thing saying otherwise was
-  // a `title` attribute. A phone has no hover: meaning may not live there (§7.2).
+  // a `title` attribute. A phone has no hover: meaning may not live there.
   //
   // THREE states, and each says its own word (ruled 2026-09-01: warning past 75%, error at 100%).
   // The state was in the colour alone before, which is the half a colour-blind trainer cannot read
@@ -189,7 +189,7 @@ export function renderClipboardEditor(container, deps) {
     callout,
     markNewItem,
     // An exercise-name list owned by the CALLER. One editor renders its own; several side by side
-    // must not (TODO §41.0) — N identical ids in one document, and `list=` then resolves to whichever
+    // must not — N identical ids in one document, and `list=` then resolves to whichever
     // came first. planColumns.js renders one list above the columns and passes its id here.
     sharedDatalistId,
   } = deps;
@@ -197,7 +197,7 @@ export function renderClipboardEditor(container, deps) {
   const tr = (key, fallback) => t(key) || fallback;
   // Falls back to the shared generator rather than an inline one: an ad-hoc Date.now()+Math.random()
   // id would be both collision-prone and time-leaking, and it would be the one place in the app
-  // minting ids the rest of the system does not recognise (TODO §18.2).
+  // minting ids the rest of the system does not recognise.
   const newId = () => (genId ? genId() : newRecordId());
 
   // A long plan means every row's full editable field set (name, sets, reps, load, circuit picker)
@@ -254,9 +254,9 @@ export function renderClipboardEditor(container, deps) {
   // narrow row. A row the catalog filled in (injected or swapped) takes no focus and reads as
   // ordinary, so it keeps a label saying what just happened to it. A row restored from the URL after
   // a reload gets neither: nothing just happened to it, and calling it New would be a lie.
-  // A movement the catalogue does not have is ALLOWED, and MARKED (TODO §29.1). Marked because
+  // A movement the catalogue does not have is ALLOWED, and MARKED. Marked because
   // silently adopting whatever the catalogue has nearest is how it becomes forty spellings of
-  // "Bench Press" under forty ids — the failure §13's taxonomy exists to prevent. In WORDS beside a
+  // "Bench Press" under forty ids — the failure the taxonomy exists to prevent. In WORDS beside a
   // glyph, never a glyph alone: this is read on a phone, where a tooltip is unreachable.
   const customBadge = (it) =>
     it.custom

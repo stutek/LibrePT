@@ -1,4 +1,4 @@
-// A structural guard for TODO §14.8: app.js used to sequence ~10 renderXShell()/renderXDialog()
+// A structural guard: app.js used to sequence ~10 renderXShell()/renderXDialog()
 // calls by hand-ordering them in source, which let a module querying another module's element land
 // above that element's own render call with no error — silently a no-op. Each shell registers its
 // name, its render function, and what it depends on existing first; runShellRenders() computes a

@@ -19,7 +19,7 @@ export class RestDeckCard extends DeckCard {
     return `exercise-deck-card rest-card${this.isInFocus ? " in-focus" : ""}${this.ctx.isFutureSession ? " future-session" : ""}`;
   }
 
-  // The card, in every state (TODO §42.3). The focused rest used to throw this row away and draw
+  // The card, in every state. The focused rest used to throw this row away and draw
   // the duration again at 42px with a Start button under it — a very tall card saying the one thing
   // the row already said.
   renderCard(card) {

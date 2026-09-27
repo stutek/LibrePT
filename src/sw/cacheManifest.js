@@ -30,7 +30,7 @@ self.swCacheManifest = (() => {
     "./consent-form-de.html",
     "./privacy-notice-de.html",
     "./docs.css",
-    // Per-module stylesheets (TODO §14.5 / §18.10) — index.css's shared foundation is loaded
+    // Per-module stylesheets — index.css's shared foundation is loaded
     // first; these add only what their module owns.
     "./modules/clipboard/activeSessionOverlay.css",
     "./modules/clipboard/clipboardEditor.css",
@@ -317,18 +317,18 @@ self.swCacheManifest = (() => {
     "./fonts/jetbrainsmono-normal-latin-ext.woff2",
     "./fonts/jetbrainsmono-italic-latin.woff2",
     "./fonts/jetbrainsmono-italic-latin-ext.woff2",
-    // Font Awesome, vendored 2026-08-05 (TODO §12.6 / §21) — same-origin now, so it joins the
+    // Font Awesome, vendored 2026-08-05 — same-origin now, so it joins the
     // atomic, integrity-verified shell instead of being a best-effort external fetch.
     "./fonts/fontawesome.css",
     "./fonts/librept-icons.woff2",
     "./fonts/librept-icons-brands.woff2",
-    // The symbols and emoji the app writes into its own sentences (TODO §74.4). Offline like
+    // The symbols and emoji the app writes into its own sentences. Offline like
     // everything else here: a trainer with no signal must still see the ☰ the sandbox card names.
     "./fonts/librept-symbols.woff2",
     "./fonts/librept-emoji.woff2",
   ];
 
-  // Every asset is same-origin since Font Awesome was vendored (TODO §12.6), so the whole list IS
+  // Every asset is same-origin since Font Awesome was vendored, so the whole list IS
   // the version-coherent module graph and precaches as one atomic, integrity-verified unit. The old
   // best-effort EXTERNAL_ASSETS split is gone with the last cross-origin asset: an empty escape
   // hatch invites a future CDN entry to slip past integrity verification unnoticed.
@@ -342,7 +342,7 @@ self.swCacheManifest = (() => {
   // old, version-skewed files behind to be picked up piecemeal.
   // Caches that are not a VERSION of the app shell, and so are not obsolete when the version moves.
   // The shared inbox holds a submission a client sent that the trainer has not read yet; deploying
-  // while it sat there would have thrown their file away (TODO §38.22).
+  // while it sat there would have thrown their file away.
   const KEPT_CACHES = ["librept-shared-inbox"];
 
   async function deleteObsoleteCaches() {

@@ -10,7 +10,7 @@
 //     touches `state.sessions` — it produces only the meta the clipboard opens with, and persists
 //     through the planning-draft path in `sessionHistoryRecord.js` instead.
 //
-// Pure (TODO §24.7): dates and labels in, records out. Writing them anywhere, prompting the
+// Pure: dates and labels in, records out. Writing them anywhere, prompting the
 // trainer, and firing invites stay with the form controller.
 
 // The label a session shows wherever its slot is named. An end with no start is not a range, and a
@@ -128,7 +128,7 @@ export function buildRealSessionMeta({ sessionId, sessionName, sessionDate, time
 
 // Who is being invited: the participants this save ADDS. Diffed against the session's participants
 // as they stood before it, so re-saving an unchanged assignment never re-invites somebody who was
-// already on the list (TODO §1.1).
+// already on the list.
 export function newlyAssignedParticipantIds(previousParticipants, clientRoutines) {
   const previous = previousParticipants || [];
   return clientRoutines

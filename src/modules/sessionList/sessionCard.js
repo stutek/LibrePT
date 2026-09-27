@@ -184,13 +184,13 @@ function buildTimerSpan(timing, b, escapeHTML) {
   return timerText ? `<span${timerAttrs} class="${timerCls}">${escapeHTML(timerText)}</span>` : "";
 }
 
-/** ONE design, always whole (TODO §45.16, reported 2026-09-11 from a screenshot).
+/** ONE design, always whole (reported 2026-09-11 from a screenshot).
  *
  * What it dropped, and why each was costing more than it said:
  *
  * - **The participants' NAMES.** They were the only thing the card hid, and hiding them is what the
  *   expand control existed for. A name is also the slowest thing on the card to read and the least
- *   useful at a glance — the count says whether the session is full, and §45.6's client filter now
+ *   useful at a glance — the count says whether the session is full, and the client filter now
  *   answers "which sessions is Ana in" far better than reading every card. An injury among them is
  *   NOT dropped: it becomes one mark, because that is a warning rather than a detail.
  * - **The routine name when it repeats the title.** The screenshot showed "Strength & Longevity
@@ -273,7 +273,7 @@ function buildSessionCardStatusBarHTML({
     };
   }
   if (pastElapsedSeconds != null) {
-    // A finished session says so HERE rather than in the heading row (§45.16). The bar already
+    // A finished session says so HERE rather than in the heading row. The bar already
     // exists, already reports the time, and has room for a word the heading row did not.
     const tag = isCompleted
       ? `<span class="session-live-tag"><i class="fa-solid fa-circle-check"></i> ${escapeHTML(t("session_completed"))}</span>`
@@ -331,7 +331,7 @@ export function renderSessionCard(b, colContainer, deps) {
   const clients = b.participants
     .map((pId) => state.clients.find((c) => c.id === pId))
     .filter(Boolean);
-  // One mark for the whole card rather than one per name: the names are gone (§45.16) and an injury
+  // One mark for the whole card rather than one per name: the names are gone and an injury
   // is a warning, not a detail — what the trainer needs at a glance is that SOMEBODY in this session
   // has one, and whose is a tap away on the session itself.
   const anyInjury = clients.some((c) => c.hasInjury);
@@ -343,7 +343,7 @@ export function renderSessionCard(b, colContainer, deps) {
   const warningHTML = buildReadinessWarningsHTML(routineName, clients.length, t);
 
   // A finished session is de-emphasised rather than shown as launchable. The badge that used to say
-  // so moved into the status bar at the foot (§45.16): in the heading row it pushed the edit button
+  // so moved into the status bar at the foot: in the heading row it pushed the edit button
   // onto a line of its own, and the foot already reports how long the session ran.
   if (b.completed) card.classList.add("session-completed");
 
@@ -365,7 +365,7 @@ export function renderSessionCard(b, colContainer, deps) {
     editBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       // Through `storeSession` first: an evening that exists only as a repeating rule has no
-      // record to edit yet, and editing is exactly the act that makes it one (TODO §35.3a). The
+      // record to edit yet, and editing is exactly the act that makes it one. The
       // board owns that conversion; the card just says which evening was tapped.
       deps.navigateToPath?.(
         deps.urlFor("session.setup", { sessionId: deps.storeSession?.(b.id) ?? b.id }),

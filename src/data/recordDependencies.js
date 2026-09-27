@@ -45,7 +45,7 @@ export function dependenciesOf(collection, record) {
       return dependencies;
     }
 
-    // A circuit (TODO §45.5) holds its exercises exactly as a routine does.
+    // A circuit holds its exercises exactly as a routine does.
     case "circuits":
     case "routines": {
       // `exercises` is an array of prescription objects, each carrying the exercise id as `id` —

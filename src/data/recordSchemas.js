@@ -1,14 +1,14 @@
-// src/data/recordSchemas.js — declared record shapes, per collection, per live schema major
-// (TODO §18.1 / §18.4). Pure data: no domain knowledge, no IndexedDB, no migration logic.
+// src/data/recordSchemas.js — declared record shapes, per collection, per live schema major.
+// Pure data: no domain knowledge, no IndexedDB, no migration logic.
 //
 // Until this module existed, "schema N" had no existence except as whatever migrationSteps.js
 // happened to produce as a side effect of running the v1→v2 step — there was nothing a projection
-// could target, and nothing for §18.4's staging guard to check either side against. This is that
+// could target, and nothing for the staging guard to check either side against. This is that
 // declaration: for every schema major this build still writes, the field set every collection's
 // records must carry.
 //
 // Kept next to migrationSteps.js deliberately: a schema bump (a field's storage starts existing)
-// and a migration step (data moves into that field) are always a matched pair under §18.4's
+// and a migration step (data moves into that field) are always a matched pair under the
 // expand-first rule — a field lands in a schema N release before the UI that writes it. Since
 // 2026-09-21 the pair is mandatory in one direction too: a numbered shape is frozen, so a field
 // change mints the next number and brings a migration step with it, even one that does nothing.
@@ -22,8 +22,8 @@
 // JS type here be an outright error", not full validation — logging fields, tags and notes are
 // free-form text the PT types, and holding them to a closed vocabulary here would be false rigor.
 
-// Every SESSION_ITEM carries these on the CURRENT write path (TODO §17.1's flat typed array,
-// TODO §17.5's explicit position). `exercise`-typed items additionally carry the exercise-only
+// Every SESSION_ITEM carries these on the CURRENT write path — a flat typed array with an
+// explicit position on every item. `exercise`-typed items additionally carry the exercise-only
 // fields below; `rest`-typed items never do — but a shared shape validates cheaply as "field
 // present or absent", and `type` is exactly the discriminator that already exists for readers to
 // switch on.
@@ -38,7 +38,7 @@
 const SESSION_ITEM_SHAPE = {
   id: { required: false, type: "string" },
   type: { required: false, type: "string" }, // "exercise" | "rest"
-  position: { required: false, type: "number" }, // TODO §17.5 — dense 0..n-1, never array index
+  position: { required: false, type: "number" }, // dense 0..n-1, never array index
   circuitId: { required: false, type: "string" },
   circuitTitle: { required: false, type: "string" },
   circuitSeries: { required: false, type: "number" },
@@ -59,13 +59,13 @@ const SESSION_ITEM_SHAPE = {
 // and of a session alike and belongs to no one collection.
 export const COMMON_RECORD_FIELDS = ["testData", "seededDemo"];
 
-// **FROZEN. Do not add, remove, retype or re-require a field here** (TODO §60, ruled 2026-09-21 by
+// **FROZEN. Do not add, remove, retype or re-require a field here** (ruled 2026-09-21 by
 // the maintainer). A numbered shape does not move: any change to one mints the NEXT schema number
 // and is declared there, with a migration step that is allowed to do nothing. That is what makes
 // "two files declaring the same numbered schema have the same shape" true rather than aspirational —
-// it was false four times over before the ruling (`alias`, §61's session fields, §62's `completed`,
-// `duration`, `titles` and `icon`), each one an optional field slipped into a shape already on
-// trainers' devices.
+// it was false four times over before the ruling (`alias`, the session fields added for invites and
+// repeating sessions, and `completed`, `duration`, `titles` and `icon`), each one an optional field
+// slipped into a shape already on trainers' devices.
 //
 // A field that is not ready for a number goes into SCHEMA_PREVIEW below, which is unnumbered and
 // free to change on any commit.
@@ -126,15 +126,15 @@ export const SCHEMA_4 = {
     // Legacy, from before `bookings` was renamed to `sessions` (migrationSteps.js's 1 → 2): those
     // rows carried a `titles` array instead of a single `title`. Nothing reads it now, and it is
     // declared rather than dropped because a migration that deletes a trainer's own words to tidy a
-    // shape is worse than a field nobody uses (§62, 2026-09-19).
+    // shape is worse than a field nobody uses.
     titles: { required: false, type: "array" },
     // The four fields below and the two collections at the end of this shape were declared only in
-    // P until 2026-09-17, while every install already wrote them (TODO §61). Ruled that day
+    // P until 2026-09-17, while every install already wrote them. Ruled that day
     // (Simon): schema 4 is the live schema and takes them, accepting that "4" then names a wider
     // shape than it did — no install or backup may lose them. `startDate` stays optional HERE only
     // because a schema-4 file written before it existed is still restored as schema 4.
     startDate: { required: false, type: "string" },
-    // Which evening of which series this row SPEAKS FOR (TODO §35.3a). `occurrenceDate` is the date
+    // Which evening of which series this row SPEAKS FOR. `occurrenceDate` is the date
     // the series originally scheduled, never the date the session was moved to: that is what makes
     // a second invitation a change to the same evening rather than a new one, and what lets the
     // board show a moved evening once instead of twice.
@@ -143,7 +143,7 @@ export const SCHEMA_4 = {
     // A cancelled evening is a RECORD, not a deletion — the rule would simply produce it again.
     cancelled: { required: false, type: "boolean" },
     // Stamped when a session is finished (domain/sessionRecord.js) — how long it ran, in seconds,
-    // beside the flag. Declared 2026-09-19 (TODO §62): the app had been writing both into a shape
+    // beside the flag. Declared 2026-09-19: the app had been writing both into a shape
     // that did not know them.
     completed: { required: false, type: "boolean" },
     duration: { required: false, type: "number" },
@@ -153,10 +153,10 @@ export const SCHEMA_4 = {
     clientId: { required: true, type: "string" },
     clientName: { required: false, type: "string" },
     routineId: { required: false, type: "string" },
-    routineName: { required: false, type: "string" }, // soft ref, deliberately not an FK — §4
+    routineName: { required: false, type: "string" }, // soft ref, deliberately not an FK
     date: { required: false, type: "string" },
     duration: { required: false, type: "number" },
-    // The frozen program snapshot (TODO §17.1) — a flat typed array, every entry SESSION_ITEM-shaped.
+    // The frozen program snapshot — a flat typed array, every entry SESSION_ITEM-shaped.
     exercises: { required: true, type: "array", items: SESSION_ITEM_SHAPE },
     feedback: { required: false, type: "array" },
     isPlanning: { required: false, type: "boolean" },
@@ -183,10 +183,10 @@ export const SCHEMA_4 = {
     titleKey: { required: false, type: "string" },
     descKey: { required: false, type: "string" },
     actions: { required: false, type: "array" },
-    // The glyph the feed draws beside the message (data/messages.js). Declared 2026-09-19 (§62).
+    // The glyph the feed draws beside the message (data/messages.js). Declared 2026-09-19.
     icon: { required: false, type: "string" },
   },
-  // Invitations (TODO §1.6, decided 2026-08-17): an RSVP is a fact about an invitation — it was
+  // Invitations (decided 2026-08-17): an RSVP is a fact about an invitation — it was
   // sent, and this came back — not a property of a person or of a session. `sessions.participants`
   // stays the authoritative attendee list, and an attendee the trainer added by hand simply has no
   // invitation here.
@@ -197,7 +197,7 @@ export const SCHEMA_4 = {
   //
   // Declared first in P alone (Simon, 2026-08-17: "not modifying [schema 4] would actually test our
   // rollout plans"), which exposed that staging was a convention nobody enforced; it is enforced now
-  // (stateStore.js's starWrite, backupFile.js). Moved into schema 4 on 2026-09-17 (TODO §61): installs
+  // (stateStore.js's starWrite, backupFile.js). Moved into schema 4 on 2026-09-17: installs
   // held it in the P store alone, so no backup carried an RSVP. previewTransfer.js brings over what
   // was written before.
   //
@@ -214,12 +214,12 @@ export const SCHEMA_4 = {
     answer: { required: false, type: "string" },
     answeredAt: { required: false, type: "string" },
   },
-  // A session that repeats (TODO §35.3a): the RULE, not the evenings it produces. Fifty stored rows
+  // A session that repeats: the RULE, not the evenings it produces. Fifty stored rows
   // for "Tuesdays and Thursdays at six" would make every later edit a fifty-row migration and would
   // make moving one evening indistinguishable from re-timing the lot, so occurrences are derived
   // (domain/sessionSeries.js) and only an evening something happened to becomes a `sessions` row.
   //
-  // Moved from P into schema 4 with `invites` above, for the same reason (TODO §61).
+  // Moved from P into schema 4 with `invites` above, for the same reason.
   //
   // `weekdays` is JavaScript's own numbering (0 = Sunday), the same `getDay()` returns.
   sessionSeries: {
@@ -239,7 +239,7 @@ export const SCHEMA_4 = {
 
 // **FROZEN, like SCHEMA_4 above**, and held still by tests/fixtures/schemas/schema_5.json.
 //
-// Schema 4 plus what importing a trainer's own library needs (TODO §45.5, ruled 2026-09-23):
+// Schema 4 plus what importing a trainer's own library needs (ruled 2026-09-23):
 //   - `exercises.source` — who the exercise came from, as the trainer names it ("Ana Novak").
 //     Trainers exchange catalogues, so any number of sources exist; absent on the trainer's own.
 //   - `circuits` — a block of exercises the trainer reuses when building a plan. Offered only there,
@@ -265,7 +265,7 @@ export const SCHEMA_5 = {
   },
 };
 
-// The PREVIEW shape (TODO §61): for CI and for previewing an upcoming version, never a step in the
+// The PREVIEW shape: for CI and for previewing an upcoming version, never a step in the
 // migration chain. It is provisioned and written like any live schema — Simon, 2026-09-17: PREVIEW
 // uses the same mechanism as released schemas — and rebuilt from the stable schema when the build
 // changes. It replaced "P", whose fields and collections moved into schema 4 the same day. Built on
@@ -286,17 +286,17 @@ export const SCHEMA_PREVIEW = {
 };
 
 // Every schema major this build still knows how to write. A build can only write schemas it knows
-// how to project (TODO §18.1) — grows only when a schema is cut; never grows retroactively.
+// how to project — grows only when a schema is cut; never grows retroactively.
 // ONE numbering across both axes. These used to be 2 and 3 on a "record schema" axis independent of
 // `schemaVersion`'s migration axis — two systems using small integers for different things, which
 // cost real time in review before it was collapsed. `4` here is the SAME 4 the migration chain ends
 // at.
 //
 // Three shapes are live, and they do different jobs:
-//   - **5** is the active schema (TODO §76): what this build reads and stamps, what a backup is
+//   - **5** is the active schema: what this build reads and stamps, what a backup is
 //     written at, and the copy PREVIEW is rebuilt FROM when the build changes.
 //   - **4** stays written for the build a phone may still have cached, which reads only store 4
-//     (TODO §18's reason for the star write), and for the app version that behaves as 4 did.
+//     (the reason for the star write), and for the app version that behaves as 4 did.
 //   - **PREVIEW** is the preview shape for CI and previews, written like any live schema and rebuilt
 //     from 5 when the build changes. Disposable by design: never a source of truth for anything that
 //     has to outlive the build, and never a step in the migration chain.
@@ -330,13 +330,13 @@ export const BACKUP_SCHEMA = STABLE_SCHEMA;
  * nothing in the diff saying so.
  *
  * **Every install reads the newest numbered schema, whatever app version the trainer runs**
- * (TODO §76). The app version decides how the app BEHAVES; it never narrows what is read. Reading an
+ * The app version decides how the app BEHAVES; it never narrows what is read. Reading an
  * older, narrower store would leave the data it cannot hold out of memory, and memory is what a save,
  * a backup and a Drive sync are built from — so a backup would lose it and a restore would delete it.
  * A per-install choice (data/readSchema.js) remains for the test passes that read PREVIEW or pin the
  * released shape; nothing offers it to a trainer.
  */
-// Schema 5 since 2026-09-23 (TODO §76). Schema 4 from 2026-09-17 (TODO §61); before that "P".
+// Schema 5 since 2026-09-23. Schema 4 from 2026-09-17; before that "P".
 export const DEFAULT_READ_SCHEMA = 5;
 
 function typeOf(value) {
@@ -347,7 +347,7 @@ function typeOf(value) {
 
 /**
  * Fields on `record` that `shape` does not declare — what a feature writing ahead of its schema looks
- * like (TODO §62, ruled 2026-09-17: the schema ships before or with the code that uses it).
+ * like (ruled 2026-09-17: the schema ships before or with the code that uses it).
  *
  * `collection` is the routing key the store adds, not a field of the record, and the common fields
  * above belong to every shape, so neither counts as undeclared.
@@ -358,13 +358,13 @@ export function undeclaredFields(record, shape) {
 
 /**
  * `record` as the store of live schema `schema` holds it: without the fields some OTHER live schema
- * declares for `collection` and this one does not (TODO §58's first step, needed by §45.5).
+ * declares for `collection` and this one does not.
  *
  * Without it every record went into every store whole, so schema 4's store received
  * `exercises.source`, a field only schema 5 declares — a field staged in a newer shape leaked into
  * the frozen one. Only a field KNOWN to a newer live schema is dropped: a field no live schema
  * declares is still written whole, because dropping it from every store would lose it for good.
- * §71's per-schema projector (renames, retypes) is the full version of this.
+ * A per-schema projector that also renames and retypes fields is the fuller version of this.
  */
 export function narrowToSchema(record, collection, schema) {
   const newer = fieldsOnlyOthersDeclare(collection, schema);
@@ -374,7 +374,7 @@ export function narrowToSchema(record, collection, schema) {
 
 /**
  * The fields `target`'s store holds for `collection` that the schema being READ does not declare —
- * so memory, built from the read store, never has them (TODO §70). A save must carry them over from
+ * so memory, built from the read store, never has them. A save must carry them over from
  * the row `target` already holds, or reading an older schema and saving once wipes them.
  */
 export function fieldsHiddenFrom(readSchema, target, collection) {
@@ -406,7 +406,7 @@ function undeclaredFieldsOf(record, shape) {
 // Structural problems for one record against one collection's field shape — empty means the
 // record is acceptable. Checks presence of required fields and the JS type of whatever is present;
 // says nothing about fields the record carries that the shape does not declare, because the store
-// round-trips the whole object (§16.3's invariant) — an undeclared field is forward-compatible
+// round-trips the whole object — an undeclared field is forward-compatible
 // data, not an error.
 export function fieldIssues(record, shape) {
   if (!record || typeof record !== "object" || Array.isArray(record)) {
@@ -440,7 +440,7 @@ export function isRecordValid(record, shape) {
 }
 
 // Every field name this shape declares, required or not — the input a staging-guard comparison
-// (TODO §18.4) needs from BOTH the schema a field is proposed for and every currently-live schema.
+// needs from BOTH the schema a field is proposed for and every currently-live schema.
 export function fieldNamesOf(shape) {
   return Object.keys(shape);
 }

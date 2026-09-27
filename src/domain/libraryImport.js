@@ -1,4 +1,4 @@
-// src/domain/libraryImport.js — read a trainer's exercise library, and plan what it adds (TODO §45.5).
+// src/domain/libraryImport.js — read a trainer's exercise library, and plan what it adds.
 //
 // Single responsibility: text in, new exercise and circuit records out. Pure — no DOM, no storage.
 //
@@ -10,7 +10,8 @@
 //
 // **An exercise the library already has is not added again.** Same id, or the same name after case
 // and spacing are folded (catalogMatch.js's rule) — a second "Bench Press" under a new id is the
-// failure §13's taxonomy exists to prevent. The trainer is told which ones were skipped.
+// failure the exercise library's taxonomy exists to prevent. The trainer is told which ones were
+// skipped.
 //
 // **A circuit and a routine point at exercises by id.** In the file they name them; a name the library
 // does not know becomes a new exercise of the same import, so neither ever refers to nothing. A
@@ -241,7 +242,7 @@ function readRoutines(rawRoutines, unreadable) {
  *
  * `takenIds` are the ids every other record already holds (recordProjections.js's
  * `recordIdsInUse`). All records of one schema share one key in the store, so an exercise kept under
- * a client's id would replace that client (TODO §77.1). A file's id is kept only when nothing holds it.
+ * a client's id would replace that client. A file's id is kept only when nothing holds it.
  */
 export function planLibraryImport(
   parsed,

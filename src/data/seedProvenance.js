@@ -128,8 +128,8 @@ export function seedOriginOf(record) {
 /**
  * The same state with every seeded record removed — "what of this is the trainer's own work?".
  *
- * Both counters that answer a question ABOUT THE TRAINER read state through this (TODO §28.5,
- * §28.6): §3.9's ahead count ("records not on Drive") and §3.8's unbacked-data warning ("this
+ * Both counters that answer a question ABOUT THE TRAINER read state through this: the sync badge's
+ * ahead count ("records not on Drive") and backupHealth.js's unbacked-data warning ("this
  * exists in one evictable place"). Loading the demo tripped both, which was true about the records
  * and wrong about the person — a sales demo is not work to protect, and an indicator that fires
  * over one is an indicator a trainer learns to ignore.
@@ -138,7 +138,7 @@ export function seedOriginOf(record) {
  * be handed to anything that reads a whole state.
  */
 /**
- * Whether this store is the demo and nothing else — the header badge's question (TODO §28.9).
+ * Whether this store is the demo and nothing else — the header badge's question.
  *
  * "Only the demo" rather than "any demo", because the badge names ONE state and PREVIEW is the
  * other candidate: a build that may lose data. Both are true after `?init=demo` on a fresh device,
@@ -162,7 +162,7 @@ export function isDemoOnlyStore(state) {
 }
 
 /**
- * Test rows sitting in the trainer's own database — the safety valve (TODO §46.7).
+ * Test rows sitting in the trainer's own database — the safety valve.
  *
  * Returns `{ count, collections }`, both empty when the store is clean. A row counts only when its
  * stamp says `test`: those are written by `?init=demo_data_load` and belong to a test run and

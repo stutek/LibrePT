@@ -1,5 +1,4 @@
-// src/modules/intake/intakeView.js — the page a prospective client fills in on their own phone
-// (TODO §1.7/§26).
+// src/modules/intake/intakeView.js — the page a prospective client fills in on their own phone.
 //
 // Single responsibility: the form and its two send buttons. What a submission IS is
 // data/clientSignup.js, the artifact is data/signupFile.js, and handing it over is
@@ -8,12 +7,12 @@
 // **This is the only surface in LibrePT whose user is not the trainer.** Everything about it follows
 // from that:
 //
-// - **It is stateless by design** (§26.1). The client's phone gets no database, no demo seed, no
+// - **It is stateless by design.** The client's phone gets no database, no demo seed, no
 //   service worker and no first-run agreement — appBoot's `bootIntake` is a separate boot path
 //   precisely so none of that runs. Nothing the client types is persisted anywhere; it exists in the
 //   form until they send it, and then in the file they sent. A stranger who fills this in and walks
 //   away leaves nothing behind on their own device. What they type is held for the life of the TAB
-//   (sessionStorage, §38.12), so a reload does not cost them the form; closing the page ends it.
+//   (sessionStorage), so a reload does not cost them the form; closing the page ends it.
 // - **The client chooses their own language**, because it is the language their consent is given in
 //   (`formLang`) and the one the notice they are agreeing to is written in. It is not inherited from
 //   whatever the trainer's device was set to.
@@ -140,7 +139,7 @@ export function renderIntakeViewShell() {
         </div>
 
         <p id="intake-status" class="intake-status" role="status" hidden></p>
-        <!-- What the BROWSER said, when a share was refused (TODO §45.4). Kept apart from the
+        <!-- What the BROWSER said, when a share was refused. Kept apart from the
              sentence above because it is not addressed to the same reader: the status line tells the
              client what to do, this tells whoever is helping them WHY, and without it a refusal
              arriving from a stranger's phone carries nothing back at all. Hidden unless there is
@@ -370,7 +369,7 @@ export function setupIntakeForm(deps) {
   }
 
   // What she has typed survives a reload — a locked phone, a browser reclaiming memory, a mis-tap on
-  // the address bar — and dies with the tab (TODO §38.12). This form is longer than anything else a
+  // the address bar — and dies with the tab. This form is longer than anything else a
   // stranger is asked to fill in on their own phone, and there is no second copy of it anywhere: a
   // reload used to take the name, the email, the phone number and both paragraphs with it. The
   // consent tick is the one field that does NOT come back — agreement is given, not restored.

@@ -1,11 +1,11 @@
-// src/data/driveAppData.js — Google Drive `appDataFolder` REST client (TODO §1.5/§3.3).
+// src/data/driveAppData.js — Google Drive `appDataFolder` REST client.
 // Single responsibility: read and write the one JSON file this app keeps in its hidden per-app Drive
 // space. Knows nothing about merging or auth — driveSyncService.js orchestrates those; this module is
 // just the wire format for four Drive v3 endpoints.
 //
 // `appDataFolder` is a virtual, always-present folder id scoped to this app's own OAuth grant — it is
 // invisible in the trainer's normal Drive UI/file picker and unreachable by any other app's token
-// (TODO §1.5's PII-isolation point), which is why every request below scopes its query to
+// which is why every request below scopes its query to
 // `spaces=appDataFolder` rather than searching the whole Drive.
 //
 // Injected dependencies: `fetchImpl` (defaults to the global `fetch`) so tests can supply a stub
@@ -19,7 +19,7 @@ const UPLOAD_BASE = "https://www.googleapis.com/upload/drive/v3";
 export const SYNC_FILENAME = "librept_sync.json";
 export const SANDBOX_SYNC_FILENAME = "librept_sandbox_sync.json";
 
-/** The snapshot file for a workspace (TODO §40.6). The sandbox syncs to its OWN file: keeping both
+/** The snapshot file for a workspace. The sandbox syncs to its OWN file: keeping both
  * in one would let sample data land in the snapshot a trainer restores from, and the merge ancestor
  * for one workspace is meaningless for the other. Two files in `appDataFolder` is the visible cost,
  * and it is the reason the sync card says which one it is writing. */

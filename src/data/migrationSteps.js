@@ -1,4 +1,4 @@
-// src/data/migrationSteps.js — the ordered schema-migration chain (TODO §16.2).
+// src/data/migrationSteps.js — the ordered schema-migration chain.
 // Single responsibility: WHAT changes between two adjacent schema versions. The runner that walks
 // this chain, validates each step's output and reports a summary lives in data/schemaMigrations.js.
 //
@@ -18,8 +18,8 @@
 // own small transform again, which is what lets the import banner tell a trainer what actually
 // moved rather than "upgraded from the floor".
 //
-// **Schema 5 is the active schema** (TODO §76, 2026-09-23): the shape this build reads, writes and
-// stamps. Schema 4 was, from 2026-09-17 (Simon, TODO §61); before that the build read and stamped the
+// **Schema 5 is the active schema** (2026-09-23): the shape this build reads, writes and
+// stamps. Schema 4 was, from 2026-09-17 (Simon); before that the build read and stamped the
 // preview schema "P". Everything P held beyond 4 was moved into schema 4 that day, so a stored "P"
 // means schema 4 and ranks as 4 — neither refused as newer nor walked back through the chain from
 // the floor.
@@ -37,7 +37,7 @@ export const CURRENT_SCHEMA_VERSION = 5;
 // The preview schema installs were stamped with before schema 4 became active. Read, never written.
 export const LEGACY_PREVIEW_VERSION = "P";
 
-// The preview schema for CI and for previewing an upcoming version (TODO §61). Not "P" renamed: P is
+// The preview schema for CI and for previewing an upcoming version. Not "P" renamed: P is
 // the legacy store data was moved out of, PREVIEW the dead branch a live build never migrates.
 export const PREVIEW_VERSION = "PREVIEW";
 
@@ -98,7 +98,7 @@ export const MIGRATION_STEPS = [
     to: 3,
     description: "Give every session a real absolute `startDate` timestamp",
     // Sessions carried only a 4-value `day` bucket (yesterday/today/tomorrow/upcoming) plus a
-    // free-text `time` range string — no way to place one on a real timeline (TODO §7.3 item 8).
+    // free-text `time` range string — no way to place one on a real timeline.
     // `day` is untouched: overlap detection and card styling still key off it. This derives a
     // one-time absolute anchor from the bucket + parsed start time, at the moment of migration —
     // it does not track wall-clock time afterwards, same as history's frozen `date` field.
@@ -161,8 +161,8 @@ export const MIGRATION_STEPS = [
     from: 4,
     to: 5,
     description: "Make room for an exercise's source and for circuits",
-    // A step that does nothing, and a real one (TODO §60): schema 5 only ADDS — `exercises.source`
-    // and the `circuits` collection, both for importing a trainer's own library (TODO §45.5) — so a
+    // A step that does nothing, and a real one: schema 5 only ADDS — `exercises.source`
+    // and the `circuits` collection, both for importing a trainer's own exercise library — so a
     // schema-4 database is already a valid schema-5 one. The step is what gives 5 a place in the
     // chain, so a schema-4 file is read as 4 and stamped 5 with its history complete.
     apply(state) {

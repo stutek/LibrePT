@@ -1,9 +1,9 @@
-// src/data/syncMerge.js — three-way merge for Google Drive appDataFolder sync (TODO §1.5, §3.3).
+// src/data/syncMerge.js — three-way merge for Google Drive appDataFolder sync.
 // Single responsibility: given a common-ancestor snapshot and two descendants (this device's local
 // state, the state just downloaded from Drive), produce the merged state plus the list of conflicts
 // that could not be resolved automatically.
 //
-// Per TODO §1.5: NOT wall-clock last-write-wins (DATA_MODEL.md's invariants already establish the
+// Deliberately NOT wall-clock last-write-wins (DATA_MODEL.md's invariants already establish the
 // device clock is not trustworthy for ordering). This is a per-record-id three-way merge against the
 // last-synced snapshot as the common ancestor instead — deterministic, clock-free, and same-record
 // conflicts are always surfaced rather than silently guessed.

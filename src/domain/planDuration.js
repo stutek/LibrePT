@@ -1,4 +1,4 @@
-// src/domain/planDuration.js — how long a programme takes, against the slot it has to fit (TODO §35.3b).
+// src/domain/planDuration.js — how long a programme takes, against the slot it has to fit.
 //
 // Single responsibility: the arithmetic. No DOM — the meter that shows this sits in the clipboard's
 // plan editor, where a trainer is still adding exercises and can still take one out.

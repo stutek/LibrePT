@@ -7,7 +7,7 @@
 //
 // Record id generation deliberately does NOT live here — see modules/common/recordId.js. It was the
 // one helper in this file whose correctness the stored data depends on, and it earned its own module
-// when it became UUIDv7 (TODO §18.2).
+// when it became UUIDv7.
 //
 // deps: none
 
@@ -35,11 +35,12 @@ export function truncateString(str, num) {
 
 /** A date for the screen, as ISO — "2026-07-18". Empty for a missing or unparseable date.
  *
- * ISO because that is the app's own written form of a date, in every language (TODO §54). This
+ * ISO because that is the app's own written form of a date, in every language. This
  * function used to build "Jul 18, 2026" from a hardcoded list of English month abbreviations, so the
  * client profile's "Joined" line and every row of the history view read the month in English and the
- * day before the year in US order, whatever language the trainer had chosen. §54 fixed the clipboard's
- * past cards and left this one, which is the other two screens (reported 2026-09-26, TODO §80.4).
+ * day before the year in US order, whatever language the trainer had chosen. An earlier fix
+ * covered the clipboard's past cards and left this one, which covers the other two screens
+ * (reported 2026-09-26).
  *
  * The guard for an empty or unparseable date stays HERE rather than moving into `getISODateString`:
  * nineteen call sites pass that one a date they already have, and a guard added there would quietly
@@ -126,7 +127,7 @@ export function formatClockFromEpoch(epochMs) {
 // Escape HTML characters to prevent rendering attacks/unexpected HTML injection.
 //
 // THE app's escaper — there is deliberately no second one. exerciseAndRestTimer.js carried a
-// private copy until TODO §24.2, which is worse than ordinary duplication here: build/
+// private copy until it was removed, which is worse than ordinary duplication here: build/
 // frontend_audit.py recognises the NAME, so a local copy passes the audit while being free to
 // drift from the escaping this one does.
 //

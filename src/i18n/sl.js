@@ -2,7 +2,7 @@
 // Keep keys in parity with every other locale in this folder.
 //
 // TWO RULES FOR EVERY STRING IN THIS FILE, both settled 2026-09-11 after the first trainer to use
-// the app read it (TODO §45.7). Neither is a matter of taste, and both were half-applied before,
+// the app read it. Neither is a matter of taste, and both were half-applied before,
 // which is how a reader met them: as an app that could not keep its own wording straight.
 //
 // 1. **A training session is a "trening", never a "seja".** In Slovenian "seja" reads first as a
@@ -205,7 +205,7 @@ export const sl = {
   modality_stretch: "Raztezanje",
   modality_balance: "Ravnotežje",
   modality_agility: "Agilnost",
-  // The Custom Exercise dialog (controllers/exerciseFormsController.js), TODO §38.20.
+  // The Custom Exercise dialog (controllers/exerciseFormsController.js).
   modality_label: "Kako se beleži *",
   modality_option_strength: "Moč — serije × ponovitve × breme",
   modality_option_isometric: "Izometrija — čas zadrževanja + breme",
@@ -216,7 +216,7 @@ export const sl = {
   metric_label: "Merilo",
   exercise_name_placeholder: "npr. bolgarski počep",
   instructions_placeholder: "Namigi za izvedbo ...",
-  // The Apply Program Adjustment dialog (modules/plans/planAdjustments.js), TODO §38.20.
+  // The Apply Program Adjustment dialog (modules/plans/planAdjustments.js).
   adjust_title: "Uveljavi spremembo programa",
   adjust_client: "Stranka:",
   adjust_feedback: "Povratna informacija:",
@@ -232,8 +232,8 @@ export const sl = {
   adjust_replacement: "Nadomestna vaja",
   adjust_replacement_hint: "— ista mišična skupina ohrani sledenje obsegu",
   adjust_apply: "Uveljavi in razreši",
-  // The encrypted-file reader a CLIENT opens (modules/common/encryptedFileReader.js), TODO §38.20.
-  // The Routine Template dialog and its rows (routineFormsController.js, plansView.js), TODO §38.20.
+  // The encrypted-file reader a CLIENT opens (modules/common/encryptedFileReader.js).
+  // The Routine Template dialog and its rows (routineFormsController.js, plansView.js).
   routine_name_placeholder: "npr. Zgornji del telesa A",
   routine_desc_placeholder: "npr. poudarek na osnovnih vajah za moč",
   routine_exercises_heading: "Vaje v rutini",
@@ -243,10 +243,10 @@ export const sl = {
   routine_row_rest: "Premor",
   routine_row_rest_label: "Premor v sekundah",
   routine_row_remove: "Odstrani vajo iz rutine",
-  // The exercise picker (modules/exercises/exercisePicker.js), TODO §38.20.
+  // The exercise picker (modules/exercises/exercisePicker.js).
   picker_count: "Vaje: {count}",
   picker_empty: "Temu filtru ne ustreza nobena vaja.",
-  // The session setup form (modules/session/editSessionView.js), TODO §38.20.
+  // The session setup form (modules/session/editSessionView.js).
   session_name_placeholder: "Izberi ali vpiši ime treninga ...",
   location_placeholder: "Izberi ali vpiši lokacijo ...",
   encrypted_title: "Odpri šifrirano datoteko",
@@ -499,7 +499,7 @@ export const sl = {
   splash_start_empty: "Začni s prazno aplikacijo",
   menu_trainer_details: "Moji podatki",
   trainer_details_title: "Tvoji podatki",
-  // Verzija aplikacije na tej napravi (TODO §76).
+  // Verzija aplikacije na tej napravi.
   menu_app_version: "Verzija aplikacije",
   app_version_button_label: "Verzija aplikacije — tapni za podrobnosti",
   app_version_title: "Verzija aplikacije",
@@ -851,7 +851,7 @@ export const sl = {
     "Google tega računa še ni odobril za sinhronizacijo. Tvoji podatki so varni na tej napravi.",
   drive_sync_status_declined: "Ni povezano — povežete se lahko kadar koli.",
   drive_sync_review_conflicts: "Preglej konflikte",
-  // The Sync & Backup dialog's own markup (modules/common/backupRestore.js), TODO §38.20.
+  // The Sync & Backup dialog's own markup (modules/common/backupRestore.js).
   drive_sync_title: "Varnostna kopija v oblaku (Google Drive)",
   drive_sync_disconnect: "Prekini povezavo",
   drive_sync_interval_label: "Sinhroniziraj vsakih",
@@ -949,7 +949,7 @@ export const sl = {
   custom_empty_plan: "Poljuben / Prazen načrt",
   plan_program_title: "Načrtuj prihodnji program",
   planned_program: "Načrtovan program",
-  // Stranski kup načrtov stranke na odložišču (TODO §52.2, korak 4).
+  // Stranski kup načrtov stranke na odložišču.
   plan_peek_previous: "Prejšnji načrt",
   plan_peek_next: "Naslednji načrt",
   plan_peek_release_open: "Spusti za odprtje",
@@ -965,7 +965,7 @@ export const sl = {
   unbacked_urgent: "OGROŽENO — NAREDI KOPIJO",
   offline_cached_desc:
     "Strežnik HTTP ni dosegljiv. Zagon iz predpomnjene kode; preverjanje posodobitev ni mogoče.",
-  // The two data-subject-request dialogs (modules/clients/clientDataRights.js), TODO §38.20.
+  // The two data-subject-request dialogs (modules/clients/clientDataRights.js).
   rights_export_title: "Izvozi podatke te stranke",
   rights_export_scope:
     "Opravljeni treningi: {logged}, termini: {sessions}, spremembe plana: {updates}. Podatki drugih strank niso nikoli vključeni: skupinski trening je naveden le s številom udeležencev.",
@@ -995,7 +995,7 @@ export const sl = {
   rights_erase_requested: "Datum zahteve",
   rights_copy_receipt: "Kopiraj potrdilo",
   rights_erase_confirm: "Izbriši dokončno",
-  // The client detail view (modules/clients/clientsView.js), TODO §38.20.
+  // The client detail view (modules/clients/clientsView.js).
   view_grabber_home: "Nazaj na začetek",
   view_grabber_clipboard: "Odpri podlogo treninga",
   view_grabber_close_session: "Zapri trening in se vrni na začetek",

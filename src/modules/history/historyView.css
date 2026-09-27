@@ -93,7 +93,7 @@
   color: var(--text-muted);
 }
 
-/* Structured history rows (TODO §17.1): exercise rows, greyed skips, first-class rest chips, and
+/* Structured history rows: exercise rows, greyed skips, first-class rest chips, and
    circuit groups. A completed record renders its whole program, not just performed sets. */
 .history-ex-row {
   display: flex;

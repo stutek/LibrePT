@@ -2,11 +2,12 @@
 // the client tab bar, the injury banner, the client focus panel, the title bar's edit-mode chrome,
 // the Start/Complete visibility, and the deck-or-editor body.
 //
-// It lived in controllers/activeSessionController.js until TODO §24.3. Everything else in
-// controllers/ orchestrates; this paints, and 250 lines of rendering inside a 1,668-line controller
-// is also why tests/medium/ could not mount the board without dragging the whole session lifecycle
-// in with it. Extracted the way agent_tools/import_layers.py requires — by injection, never by
-// importing back up into controllers/ — so the board stays independently mountable.
+// It lived in controllers/activeSessionController.js until this file was split out. Everything
+// else in controllers/ orchestrates; this paints, and 250 lines of rendering inside a 1,668-line
+// controller is also why tests/medium/ could not mount the board without dragging the whole
+// session lifecycle in with it. Extracted the way agent_tools/import_layers.py requires — by
+// injection, never by importing back up into controllers/ — so the board stays independently
+// mountable.
 //
 // deps (via initActiveSessionBoard):
 //   getActiveSession()      — accessor, because the controller REASSIGNS its activeSession
@@ -74,7 +75,7 @@ function renderInjuryAlertBanner(activeClient) {
 // end of; the rest stay one tap away on the Pending Review screen, which is where they already are.
 const GYM_NOTES_SHOWN = 4;
 
-// What the gym already said about this client (TODO §35.3d). Text goes in with textContent, never
+// What the gym already said about this client. Text goes in with textContent, never
 // markup: a tag carries whatever the trainer typed into the feedback note.
 function renderGymNotes(activeClient, activeClientState) {
   const block = document.getElementById("client-focus-gym");
@@ -296,8 +297,8 @@ function editorDepsFor(clientId, clientState, callout) {
   };
 }
 
-/** One programme per participant, side by side, while PLANNING at a width that fits them
- *  (TODO §41.0). Returns null when this is not that case, so the caller falls through to the single
+/** One programme per participant, side by side, while PLANNING at a width that fits them.
+ *  Returns null when this is not that case, so the caller falls through to the single
  *  editor it has always rendered — the live clipboard is deliberately never given columns.
  *
  *  The CALLOUT goes to the focused client alone: it announces a row the trainer just inserted or
@@ -351,7 +352,7 @@ function renderPlanEditor(deckContainer, activeClientId, activeClientState, call
     libraryExercises: libraryExercises(state),
     libraryCircuits: hasBehaviour("libraryImport") ? state.circuits || [] : [],
     clientName: editClient ? editClient.name : "",
-    // The slot the plan has to fit in (TODO §35.3b). Read from the session the clipboard is running,
+    // The slot the plan has to fit in. Read from the session the clipboard is running,
     // which is also the only place that knows whether there IS one — a planning programme has none.
     slotLabel: deps.getActiveSession()?.sourceSession?.timeLabel || "",
     allExerciseNames: libraryExercises(state).map((e) => e.name),
@@ -461,7 +462,7 @@ export function renderActiveSessionBoard() {
 
   const started = !!activeSession.started;
   // A reopened finished session is a record being read, not a workout waiting to begin: Start would
-  // offer to run a session that already happened (TODO §55.1).
+  // offer to run a session that already happened.
   const canStartSession =
     !isClipboardEditMode() &&
     deps.currentPlanMode() !== "planning" &&

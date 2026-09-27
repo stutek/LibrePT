@@ -1,12 +1,12 @@
-// src/data/calendarFreeBusy.js — Google Calendar `freeBusy.query` REST client (TODO §1.3/§1.5).
+// src/data/calendarFreeBusy.js — Google Calendar `freeBusy.query` REST client.
 // Single responsibility: ask Google which intervals a set of calendars is BUSY in, and say plainly
-// which of them it could not read. Knows nothing about rendering, rooms, or sessions — §1.3's
+// which of them it could not read. Knows nothing about rendering, rooms, or sessions — the
 // occupancy view maps these intervals to block geometry; this module is just the wire format.
 //
 // **freeBusy, never events, and that is the privacy design rather than a convention.** The scope
 // below is the narrowest Google publishes for this: it authorises this one endpoint, so a token
-// minted with it CANNOT read an event's summary, attendees or location even if asked. That is
-// §1.5's "no PT's session detail leaks to another" enforced by Google rather than by our restraint —
+// minted with it CANNOT read an event's summary, attendees or location even if asked. So
+// "no PT's session detail leaks to another" is enforced by Google rather than by our restraint —
 // tests/live/calendarFreeBusy.live.test.mjs asserts an `events.list` call is actually REFUSED, which
 // is the only way that claim is worth anything. Never widen this to `calendar` or `calendar.events`.
 //
@@ -24,10 +24,10 @@ import { GoogleApiError } from "./googleApiError.js";
 const FREEBUSY_ENDPOINT = "https://www.googleapis.com/calendar/v3/freeBusy";
 
 // The narrowest scope Google publishes for occupancy reads. Deliberately NOT yet added to the grant
-// googleAuth.js requests: §1.5 adds each scope in the change that ships its feature, because an
-// unused scope is a verification-review rejection risk and widening the grant forces every existing
-// trainer to re-consent. This constant exists so that when occupancy ships, the scope it asks for
-// and the scope the live suite checks are the same string.
+// googleAuth.js requests: each scope is added only in the change that ships the feature using it,
+// because an unused scope is a verification-review rejection risk and widening the grant forces
+// every existing trainer to re-consent. This constant exists so that when occupancy ships, the
+// scope it asks for and the scope the live suite checks are the same string.
 export const GOOGLE_CALENDAR_FREEBUSY_SCOPE = "https://www.googleapis.com/auth/calendar.freebusy";
 
 /** A failed Calendar call. Status semantics and the reconnect/retry question are shared with the

@@ -149,7 +149,7 @@ function applyCardState(state) {
     el.textContent = state.statusText;
     el.className = state.statusClass;
   });
-  // Which database this card is about (TODO §40.6). The badge above says which workspace the app is
+  // Which database this card is about. The badge above says which workspace the app is
   // in; this says what a sync from here would actually write, which is the thing a trainer could
   // otherwise read as a promise about their own work.
   set("drive-sync-sandbox-note", (el) => {
@@ -356,7 +356,7 @@ export function driveSyncFailureNotice() {
 /** Handles a tap on the header cloud (#backup-btn), returning true when it took the tap.
  *
  * Connected, this is "sync now" — the dialog is one extra tap nobody needed, and stays reachable
- * from the ☰ menu (TODO §3.11). Not connected, it declines the tap so backupRestore.js's listener
+ * from the ☰ menu. Not connected, it declines the tap so backupRestore.js's listener
  * opens the dialog, which is where connecting actually happens.
  *
  * Two outcomes still open UI, and both are deliberate: conflicts open the review modal, because the

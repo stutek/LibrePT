@@ -1,5 +1,5 @@
 /* activeUsersList.css — the active-session participant tabs, which wrap onto multiple rows
-   for a merged group session. Extracted from index.css 2026-07-27 (TODO §14.5 / §18.10).
+   for a merged group session. Extracted from index.css 2026-07-27.
    Inherits design tokens, glass-card/button/flex foundations and color scheme from
    index.css, loaded first — this file adds only what activeUsersList.js owns. */
 

@@ -1,5 +1,5 @@
 // src/modules/sessionList/sessionFilterBar.js — the board's filters: a date range, a client, a
-// location (TODO §45.6).
+// location.
 //
 // Single responsibility: the controls and what they currently say. The RULES are
 // domain/sessionFilters.js — what a tap on a day does to a range lives there, with its own tests and
@@ -149,7 +149,7 @@ function dateChipLabel() {
 }
 
 /** One day button. `state` carries the three things it can be at once: an end, inside the range, or
- *  today — and the ends are drawn strongest, which is the documented convention (§45.6) and what
+ *  today — and the ends are drawn strongest, which is the documented convention and what
  *  makes "tap an end" a thing a person can aim at. */
 function dayCellHTML(iso, inMonth, label) {
   const isEnd = iso === filters.from || iso === filters.to;
@@ -192,7 +192,7 @@ function calendarHTML() {
   //
   // Today lives here too (asked 2026-09-21). It is the one control that means a day, and this is
   // where days are chosen — the same argument that took the old "jump to date" button out of the
-  // title row in §45.6.
+  // title row.
   return `
     <div class="filter-calendar-head">
       <button type="button" class="filter-month-nav" data-month="-1" aria-label="${escapeHTML(t("filter_prev_month"))}"><i class="fa-solid fa-chevron-left"></i></button>
@@ -332,7 +332,7 @@ function wire() {
     button.addEventListener("click", () => {
       const todayIso = isoOf(new Date());
       visibleMonth = monthStart(todayIso);
-      // A date filter that leaves today out would keep today's sessions off the board (TODO §77.7),
+      // A date filter that leaves today out would keep today's sessions off the board,
       // so the filters change first. Then the board moves to today BEFORE it is drawn again: the
       // redraw settles the list on the day the address names, and onToday is what moves the address.
       filters = filtersIncludingDay(filters, todayIso);

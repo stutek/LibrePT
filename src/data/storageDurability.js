@@ -1,6 +1,6 @@
 // src/data/storageDurability.js — is this device's storage safe to trust with a PT's only copy?
-// (TODO §18.6, §18.8). Single responsibility: ask the browser to make storage persistent, and report
-// honestly when it is not.
+// Single responsibility: ask the browser to make storage persistent, and report honestly when it
+// is not.
 //
 // **Why this is mandatory rather than nice to have.** LibrePT is local-first by design: there is no
 // server holding a second copy, so an eviction is not a cache miss, it is a business losing its
@@ -10,7 +10,7 @@
 // Installing to the home screen (which the app already promotes) exempts you from that cap, and
 // `persist()` covers the rest.
 //
-// **Detect the CONSEQUENCE, not the mode (§18.8).** It is tempting to detect private browsing and
+// **Detect the CONSEQUENCE, not the mode.** It is tempting to detect private browsing and
 // warn about it, but every such detection is a heuristic that browsers actively break, and it answers
 // the wrong question. What matters is "can this device be trusted to still hold the data tomorrow",
 // which `persisted()` and `estimate()` answer directly — and which also catches the cases private-mode
@@ -21,7 +21,7 @@
 // Injected dependencies: `storage` (defaults to navigator.storage) so every branch is testable.
 
 // Below this, a "successful" write is likely to fail or be evicted shortly: a very busy PT reaches
-// ~16.6 MiB/yr in a single bucket (§18.6's sizing), so a quota in the low tens of MB is not a working
+// ~16.6 MiB/yr in a single bucket, so a quota in the low tens of MB is not a working
 // device — it is a private window or a device that is already full.
 export const MINIMUM_WORKABLE_QUOTA_BYTES = 50 * 1024 * 1024;
 

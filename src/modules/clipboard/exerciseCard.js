@@ -31,7 +31,7 @@ export class ExerciseDeckCard extends DeckCard {
     return `exercise-deck-card ${checkedClass}${this.ctx.isFutureSession ? " future-session" : ""}`;
   }
 
-  // The card, in every state (TODO §42.3). There is no second, taller template: the block of three
+  // The card, in every state. There is no second, taller template: the block of three
   // big stat tiles the focused card used to draw said the same sets/reps/load this one line already
   // says, in a different design and 52px further down the card, so opening a card replaced what the
   // trainer was reading instead of adding to it.
@@ -58,7 +58,7 @@ export class ExerciseDeckCard extends DeckCard {
 
     // The target is labelled S(ets) × R(eps) × weight so one line reads unambiguously, with a load
     // axis only for load-bearing modalities — see compactTargetString's own doc for the examples.
-    // Shared with the read-only plan sheet (planSheet.js, TODO §52.2 step 2) so the wording can
+    // Shared with the read-only plan sheet (planSheet.js) so the wording can
     // never drift between the live card and the sheet drawn under it.
     const compactTarget = escapeHTML(
       compactTargetString({
@@ -81,7 +81,7 @@ export class ExerciseDeckCard extends DeckCard {
     `;
   }
 
-  // What focus adds: the timer at the end of the head row — the slot §42.5 keeps for a card's own
+  // What focus adds: the timer at the end of the head row — the slot kept for a card's own
   // control — and the logging row under it.
   addFocusElements(card) {
     const { activeClientId, hasQuickSignal, t } = this.ctx;

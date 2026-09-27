@@ -1,11 +1,11 @@
-// src/data/crashReport.js — what a crash report contains, and what it must never contain (TODO §12.4).
+// src/data/crashReport.js — what a crash report contains, and what it must never contain.
 //
 // Single responsibility: turn a thrown thing into a payload that is safe to publish, keep a bounded log
 // of them, and build the prefilled issue link. Installing the listeners is
 // controllers/appLifecycleController.js; showing the offer is the notification feed.
 //
 // **The issue tracker is public, and that decides the whole design.** A stack is safe; the state around
-// it is not — a client's name, their notes, their injuries (§17.3). So the payload is non-identifying
+// it is not — a client's name, their notes, their injuries. So the payload is non-identifying
 // **by construction**: it is built from a fixed list of safe fields, and anything else a caller hands
 // over is dropped. A redaction pass that strips known-bad keys is the alternative, and it fails the
 // first time someone adds a field nobody remembered to strip.
@@ -28,8 +28,8 @@
 // the same place. Re-exported so existing callers keep one import (data/publicUrls.js is the declaration).
 export { ISSUE_TRACKER_URL } from "./publicUrls.js";
 
-/** Small on purpose: this is a diagnostic aid, not a log file, and it must never grow into the storage
- *  budget (§18.6). */
+/** Small on purpose: this is a diagnostic aid, not a log file, and it must never grow into the
+ *  device's IndexedDB storage budget. */
 export const MAX_KEPT_CRASHES = 5;
 
 // A URL has a length limit and an issue body has a human reader. The top of a stack is the part that

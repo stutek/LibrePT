@@ -77,7 +77,7 @@ import { focusSessionsColumn, initSessionTimeline } from "./modules/sessionList/
 import { dismissSplashWhenReady } from "./modules/splash/splashScreen.js";
 import { BUILD_INFO } from "./version.js";
 
-// Global error capture (TODO §12.4). Its own step, called before every other one: the crash worth
+// Global error capture. Its own step, called before every other one: the crash worth
 // catching most is the one that happens while the app is still starting.
 export function bootCrashCapture(deps) {
   captureUncaughtErrors(deps);
@@ -123,7 +123,7 @@ export function bootEncryptedFileReader(deps) {
   setupEncryptedFileReader(deps);
 }
 
-// The review dialog for a submission a client sent in (TODO §26.5). Boots with the client feature
+// The review dialog for a submission a client sent in. Boots with the client feature
 // rather than with intake: the person using it is the trainer, and what it produces is a client record.
 export function bootSignupReview(deps) {
   initSignupReview(deps);
@@ -131,7 +131,7 @@ export function bootSignupReview(deps) {
 }
 
 // The two ways a submission arrives without anybody going looking for it: shared into the app from
-// the messaging app it came in, or opened by tapping the file itself (§38.22).
+// the messaging app it came in, or opened by tapping the file itself.
 //
 // AFTER the splash, not during boot. A `<dialog>` opened with showModal() makes the rest of the page
 // inert — including the splash's own dismiss button — so a submission that opened during boot left
@@ -168,7 +168,7 @@ export function bootRestTimer(deps) {
   setupRestTimer();
 }
 
-/** Re-read both workspaces' timers after a switch (TODO §40.11). Re-exported here so app.js reaches
+/** Re-read both workspaces' timers after a switch. Re-exported here so app.js reaches
  * the timer stack the same way it reaches everything else it boots. */
 export function rebindTimers() {
   rebindTimersToWorkspace();
@@ -197,7 +197,7 @@ export function bootHeader(deps) {
   });
 
   // The feedback route rides along with the header because that is where its menu entry lives, and
-  // it needs nothing else booted (TODO §23.5).
+  // it needs nothing else booted.
   initFeedbackRouteDialog({
     t: deps.t,
     getState: deps.getState,
@@ -205,10 +205,10 @@ export function bootHeader(deps) {
     route: () => window.location.pathname + window.location.search,
     repoUrl: ISSUE_TRACKER_URL,
   });
-  // The trainer's own name, phone and address (TODO §45.2) — another menu item with no other
+  // The trainer's own name, phone and address — another menu item with no other
   // prerequisite, and its store is plain localStorage rather than anything that has to be booted.
   initTrainerDetailsDialog({ t: deps.t });
-  // Which app version runs (TODO §76). Needs to know whether a session is running, because it
+  // Which app version runs. Needs to know whether a session is running, because it
   // refuses to reload the app in front of a client.
   initAppVersionDialog({
     t: deps.t,
@@ -227,13 +227,13 @@ export function bootHeader(deps) {
 export function bootSessionTimeline(deps) {
   initSessionTimeline(deps);
   // The filter row rides with the timeline: both are chrome around the same board, both are
-  // rendered by renderSessions(), and neither needs anything else booted first (TODO §45.6).
+  // rendered by renderSessions(), and neither needs anything else booted first.
   initSessionFilterBar({
     t: deps.t,
     lang: () => resolveLang(deps.getState().lang),
     clients: () => deps.getState().clients || [],
     onChange: () => deps.rerenderSessions(),
-    // Today, from inside the calendar (TODO §74.2). Injected rather than imported for the reason
+    // Today, from inside the calendar. Injected rather than imported for the reason
     // every other act in this row is: the filter row decides nothing about the board, it says what
     // was tapped.
     onToday: () => focusSessionsColumn("today"),
@@ -276,7 +276,7 @@ export function bootSplashScreen(deps) {
   return dismissSplashWhenReady(deps);
 }
 
-// The scripted demo tour (TODO §23.5). LAST boot step by construction: it drives the real controls,
+// The scripted demo tour. LAST boot step by construction: it drives the real controls,
 // so every one of them has to be wired and rendered first — and unlike the other steps it is inert
 // unless the URL asked for it, so ordering it late costs nothing on a normal boot.
 //
@@ -308,7 +308,7 @@ export async function whenDemoCanBeWatched(splashDown) {
   await splashDown;
 }
 
-// The long demo (TODO §35) — the chaptered story, DRIVEN BY THE TRAINER with narration cards
+// The long demo — the chaptered story, DRIVEN BY THE TRAINER with narration cards
 // between the steps.
 //
 // **It is guided, not played** (decided 2026-08-22, Simon: "autoplay reduces the effect, a person
@@ -352,13 +352,13 @@ export async function bootDemoStory({
     return null;
   }
 
-  // The way onward the last card offers (§30.2): the SAME dialog the demo notice in the feed
+  // The way onward the last card offers: the SAME dialog the demo notice in the feed
   // opens, not a second cleanup path that could drift from it.
   const narrator = mountDemoNarrator({
     t,
     onClearDemoData: openDemoCleanupDialog,
     // Tapping the attachment on the story's screenshot of the trainer's messages does what tapping
-    // it on a phone does: LibrePT opens with the submission in the review dialog (§38.22). The same
+    // it on a phone does: LibrePT opens with the submission in the review dialog. The same
     // entry point the share target uses — the demo cannot summon the operating system, but it must
     // not invent a path of its own either.
     onAttachment: (attachment) => {
@@ -372,12 +372,12 @@ export async function bootDemoStory({
     tour: { id: DEMO_STORY.id, steps },
     t,
     // The guide narrates through the surface the story already owns, so the card that says "you
-    // have wandered off" is the same card as every other one the viewer has been reading (§38.10).
+    // have wandered off" is the same card as every other one the viewer has been reading.
     narrator,
     navigate: goHome && ((path) => goHome(path)),
     startAtStepId: shareStep,
     // So the crossing to the client's phone takes the trainer's language with it: her page is a
-    // separate boot with nothing to read a choice from (§39.2).
+    // separate boot with nothing to read a choice from.
     getLang,
     // Each step names itself in the URL, so a reload — or a link sent to a colleague mid-story —
     // lands on the step being watched instead of restarting the tour (reported 2026-08-23: a reload
@@ -390,13 +390,13 @@ export async function bootDemoStory({
   });
 }
 
-// The client intake page (TODO §1.7/§26) — the ONE boot path whose user is not the trainer.
+// The client intake page — the ONE boot path whose user is not the trainer.
 //
-// **A separate boot, not a flag threaded through the normal one.** §26.1's constraint is that intake
+// **A separate boot, not a flag threaded through the normal one.** The constraint is that intake
 // renders on a stock, cold browser: no state load, no demo seed, no service worker, no first-run
 // agreement, no splash hold, and nothing written that outlives the tab — a stranger who fills this
 // in and walks away leaves nothing on their own phone. What they type is held in sessionStorage
-// while the tab is open, so a reload does not throw their work away (TODO §38.12); closing it takes
+// while the tab is open, so a reload does not throw their work away; closing it takes
 // the lot with it, which is what the page promises them in as many words. Every one of those is something the trainer's boot deliberately
 // does, so the two paths share the document and nothing else. Written as a branch inside `init()`
 // instead, each of those steps would need its own "unless this is a client" condition, and the day
@@ -417,7 +417,7 @@ export function bootIntake(deps) {
   return view;
 }
 
-// The long story's client-side chapter, played on the client's own page (TODO §35.3e).
+// The long story's client-side chapter, played on the client's own page.
 //
 // It runs HERE rather than being folded into the trainer's walk because this is a different boot on
 // a different device in the story — and because the client's screens are the real ones, which is the
@@ -455,9 +455,10 @@ async function bootIntakeStoryChapter({ shareDemo, shareChapter, t, lang } = {})
   });
 }
 
-// The invite-reply page (TODO §1.6's confirm link) — the second CLIENT-facing boot, and stateless for
-// the same reason as bootIntake: this is not the trainer's device. Separate from bootIntake because the
-// two share only the document; one collects a person's details, the other answers a session invite.
+// The invite-reply page — reached from a session invite's confirm link — the second CLIENT-facing
+// boot, stateless for the same reason as bootIntake: this is not the trainer's device. Separate
+// from bootIntake because the two share only the document; one collects a person's details, the
+// other answers a session invite.
 export function bootRsvpReply(deps) {
   const splash = document.getElementById("app-splash");
   if (splash) splash.hidden = true;
@@ -467,7 +468,7 @@ export function bootRsvpReply(deps) {
   return setupRsvpReply(deps);
 }
 
-// The guided walkthrough (TODO §9.5) — the same script as bootDemoTour, driven by the trainer.
+// The guided walkthrough — the same script as bootDemoTour, driven by the trainer.
 //
 // Its own boot step rather than a mode inside the one above: they share the script and the tap, and
 // nothing else. One reads a URL value and plays; the other mounts a panel that outlives init() and
@@ -486,7 +487,7 @@ export async function bootWalkthrough({ shareDemo, hasData, t, goHome } = {}) {
       import("./modules/demo/demoTourPlayer.js"),
     ]);
 
-  // Put the app where the SCRIPT begins, not where the URL happened to point (TODO §30.3, reported
+  // Put the app where the SCRIPT begins, not where the URL happened to point (reported
   // as "refreshing deep link starts demo at wrong step"). A pasted or refreshed `?demo=` link can
   // carry any route — a clipboard, a client — and step 1 asking the trainer to open a session that
   // is already open in front of them reads as a guide that has lost its place.

@@ -1,11 +1,11 @@
 // src/modules/clipboard/planColumns.js — how many participants' programmes are edited side by side,
-// and the rendering of those columns (TODO §41.0).
+// and the rendering of those columns.
 //
 // Single responsibility: the COLUMN LAYOUT around the plan editor. It decides how many columns the
 // width allows and paints one editor per column; what an editor is remains clipboardEditor.js's
 // business, unchanged and called once per column rather than taken apart.
 //
-// **Planning only, and that is the whole point of §41.0.** The live clipboard stays one participant
+// **Planning only, and that is the whole point.** The live clipboard stays one participant
 // at a time: it is where sets and quick signals are WRITTEN, and one person per screen with
 // thumb-sized targets is what keeps a mis-tap from logging against the wrong client. A plan is not a
 // log — a wrong drop in here is visible and undone before anybody trains. Planning is also the

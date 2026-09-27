@@ -13,7 +13,7 @@
 // Synthetic items lead the feed for that reason: outstanding work outranks FYI. The ONE exception
 // is the demo-mode notice — see DEMO_NOTICE_TYPE below.
 //
-// Pure (TODO §24.7): state in, item list out. Rendering it, persisting which items have been read,
+// Pure: state in, item list out. Rendering it, persisting which items have been read,
 // and reacting to a tap all belong to the module that owns the DOM.
 
 import { crashIssueUrl } from "../data/crashReport.js";
@@ -21,7 +21,7 @@ import { escapedTestRecords } from "../data/seedProvenance.js";
 import { walkthroughDataPresent } from "./walkthroughReadiness.js";
 
 /**
- * Test data in the trainer's own database — the loudest item in the feed (TODO §46.7).
+ * Test data in the trainer's own database — the loudest item in the feed.
  *
  * The rows the browser suite seeds through `?init=demo_data_load` are stamped `test`
  * (data/seedProvenance.js). Finding one on a boot that carries no such switch means it is not a
@@ -130,7 +130,7 @@ function resolveStoredItem(notification, t, readIds) {
   };
 }
 
-// A failed sync needs a home OUTSIDE the Sync & Backup dialog (TODO §3.11): once tapping the header
+// A failed sync needs a home OUTSIDE the Sync & Backup dialog: once tapping the header
 // cloud syncs directly instead of opening that dialog, a failure reported only inside it would be a
 // failure nobody sees, and "tap to sync" would become "tap and hope". The header glyph turns into a
 // warning triangle, but a triangle cannot say WHY — that is this item's job.
@@ -153,7 +153,7 @@ export function buildSyncFailureItem(syncFailure, t) {
   };
 }
 
-// Answers that came back (TODO §1.6). Synthetic for the same reason the two above are: the answer
+// Answers that came back. Synthetic for the same reason the two above are: the answer
 // already lives on the invitation, and a stored copy would ride into the backup and the Drive
 // snapshot as a second source of truth for one fact.
 //
@@ -161,7 +161,7 @@ export function buildSyncFailureItem(syncFailure, t) {
 // the app writes a record, and nothing on screen says so. This is what says so.
 //
 // An answer from a client no longer in the register is still reported: they may have been erased
-// (§27.2) between answering and the trainer opening the link, and the answer is a fact about an
+// between answering and the trainer opening the link, and the answer is a fact about an
 // invitation rather than about a row that has to still exist.
 export function buildRsvpAnswersItem(state, t) {
   const answered = (state?.invites || []).filter((invite) => invite.answer);
@@ -188,12 +188,12 @@ export function buildRsvpAnswersItem(state, t) {
   };
 }
 
-// A crash the trainer can report (TODO §12.4). Offered, never sent: there is no server, an issue is
+// A crash the trainer can report. Offered, never sent: there is no server, an issue is
 // public, and automatic reporting would be an unannounced egress of a trainer's data. The action is a
 // link to a PREFILLED issue the trainer reads on GitHub before submitting — the review happens on the
 // page that shows them exactly what they are about to publish.
 //
-// It lives in the feed rather than in a dialog because of §12.4's own warning: a handler that renders a
+// It lives in the feed rather than in a dialog: a handler that renders a
 // modal over a live session mid-set is worse than the original bug. The feed waits.
 //
 // Null with nowhere to report to, so a build with no tracker configured renders no control rather than
@@ -220,7 +220,7 @@ export function buildCrashReportItem(crashes, t, repoUrl) {
 }
 
 // The two stored types that report the same kind of news — who is coming and who is not — and so
-// belong on one card rather than one each (TODO §28.10). An evening where three clients rearrange
+// belong on one card rather than one each. An evening where three clients rearrange
 // used to push everything else off a phone screen.
 const SCHEDULE_CHURN_TYPES = new Set(["reservation", "cancellation"]);
 
@@ -267,7 +267,7 @@ function groupScheduleChurn(resolved) {
 }
 
 /**
- * The demo notice, rewritten for the sandbox (TODO §42.10).
+ * The demo notice, rewritten for the sandbox.
  *
  * The stored record was written when sample data lived in the trainer's own database: it tells them
  * to clear it before doing real work, and offers a button that does. In the sandbox both are wrong.
@@ -299,7 +299,7 @@ function forSandbox(item, t) {
  * on it. Resolving is the one place that sees both.
  *
  * No chapters where the walkthrough cannot run: on a store missing what its steps need the guide
- * stops on its first one, in front of the person being shown the product (TODO §28.14), and a list
+ * stops on its first one, in front of the person being shown the product, and a list
  * of chapters would be several offers the app cannot honour instead of one.
  */
 function withChapterIndex(item, chapters, canWalkThrough) {
@@ -333,7 +333,7 @@ export function resolveNotificationItems(
     .map((item) => ({ ...item, read: readIds.includes(item.id) }));
   // An offer the store cannot honour is worse than no offer: the guided demo drives real controls,
   // so on a database missing what its steps need it stops on the first one, in front of the person
-  // being shown the product (TODO §28.14).
+  // being shown the product.
   const canWalkThrough = walkthroughDataPresent(state);
   const stored = groupScheduleChurn(
     (state.notifications || []).map((notification) => resolveStoredItem(notification, t, readIds)),

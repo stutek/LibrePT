@@ -1,4 +1,4 @@
-// src/data/sessionEventPayload.js — the thing that travels between two phones (TODO §1.6).
+// src/data/sessionEventPayload.js — the thing that travels between two phones.
 //
 // One canonical event shape, and the codec that puts it in a URL. Everything about HOW it gets
 // there — a text message, a mail compose, a share sheet, a scanned code — belongs to a transport
@@ -46,8 +46,8 @@ const INVITE_FIELDS = {
   l: "location",
   o: "organizerEmail",
   n: "organizerName",
-  // The trainer's phone, so a reply can be a TEXT and not only an email (§1.6's confirm link, SMS
-  // ruled in 2026-08-17). It is here rather than derived at reply time because the client's device
+  // The trainer's phone, so a reply can be a TEXT and not only an email (SMS confirm link ruled in
+  // 2026-08-17). It is here rather than derived at reply time because the client's device
   // knows nothing about the trainer except what the invite told it — an invite carrying only an email
   // address can only ever be answered by email, whatever the client would rather use.
   p: "organizerPhone",
@@ -150,7 +150,7 @@ export function decodeSessionEvent(encoded) {
 }
 
 /**
- * The answer to an invite, ready to travel back (TODO §1.6's confirm link).
+ * The answer to an invite, ready to travel back over the confirm link.
  *
  * **It carries ids and one word, and that is a privacy decision rather than a size one.** A reply
  * crosses a carrier and comes to rest in two message histories, so it names no client, no session

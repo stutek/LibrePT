@@ -5,7 +5,7 @@
 // INDEX cannot survive any of those trips — the plan gets edited, reordered, rebuilt from a
 // snapshot — so the thing that is addressable has to be the item's identity, not its position.
 //
-// The two directions are a matched PAIR and belong in one module (TODO §24.4):
+// The two directions are a matched PAIR and belong in one module:
 //
 //   focusRefForItem(item)               plan item → ref     (what a URL or timer records)
 //   focusIndexFromRef(clientState, ref) ref → plan index     (what a reload or tap resolves)

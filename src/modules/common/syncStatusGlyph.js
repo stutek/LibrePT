@@ -1,7 +1,6 @@
 // src/modules/common/syncStatusGlyph.js
 // Single responsibility: turn a Drive sync status into the header cloud icon's vocabulary — which
-// glyph sits over the cloud, which state class it carries, and what that state is CALLED
-// (TODO §3.11).
+// glyph sits over the cloud, which state class it carries, and what that state is CALLED.
 //
 // **Pure on purpose.** It touches no DOM, so the four states can be pinned in tests/unit_js/ without
 // a browser, and applicationHeader.js is left with nothing but the rendering. The four are
@@ -9,7 +8,7 @@
 // a failure outranks "not connected" because a trainer who connected and then failed needs the
 // fault, not the invitation.
 //
-// **"Not connected" now reads as unhealthy** (TODO §28.8, the maintainer's ruling on 2026-08-18).
+// **"Not connected" now reads as unhealthy** (the maintainer's ruling on 2026-08-18).
 // It used to be deliberately muted: PRIVACY.md makes local-first a supported choice, so declining
 // cloud sync is no fault. In practice that produced a line nobody read as a problem, while the state
 // it described — every client record in one evictable place — is worth seeing across a gym. The

@@ -1,10 +1,10 @@
-// src/modules/common/liveRecordForm.js — a dialog that writes into its record as it is typed (TODO §50.2).
+// src/modules/common/liveRecordForm.js — a dialog that writes into its record as it is typed.
 //
 // Single responsibility: the lifecycle every record form shares — create the record on the first
 // typed character, write each change into it, put it back on Cancel, and finish it when the dialog is
 // left. What the fields ARE, and what a new record starts with, stays with the form that owns them.
 //
-// **Why it exists.** A reload used to throw away a half-filled form (§50.1), and a draft kept beside
+// **Why it exists.** A reload used to throw away a half-filled form, and a draft kept beside
 // the record was a second copy of the same data with its own lifetime to decide. Ruled 2026-09-17
 // (Simon): the form writes straight into the database instead. Also ruled that day:
 //

@@ -1,10 +1,10 @@
-// src/data/feedbackRoute.js — where a trainer's feedback goes, and what travels with it (TODO §23.5).
+// src/data/feedbackRoute.js — where a trainer's feedback goes, and what travels with it.
 //
 // Single responsibility: the address, and the two messages built for it. No DOM — the dialog that
 // shows this is modules/common/feedbackRouteDialog.js.
 //
 // **Why this exists at all.** The only route out of this app was a GitHub issue, and to a personal
-// trainer that is a wall: an account, a login, a form written for developers. §23.5 called it the
+// trainer that is a wall: an account, a login, a form written for developers. This was ruled the
 // last launch prerequisite. An email address is the route that needs nothing from them.
 //
 // **Bugs still belong in an issue, and the dialog says so.** An email thread about a bug has no

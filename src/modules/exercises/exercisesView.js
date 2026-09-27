@@ -12,7 +12,7 @@ import { libraryTabsHtml } from "../common/libraryTabs.js";
 import { escapeHTML } from "../common/utils.js";
 import { sourceBadge, sourceLabels } from "./exercisePicker.js";
 
-// Only in an app version that imports a library (TODO §76). Choosing a version reloads the page, so
+// Only in an app version that imports a library. Choosing a version reloads the page, so
 // deciding it once, when the shell is drawn, is enough.
 const IMPORT_BUTTON = `<button id="btn-import-library" type="button" class="btn secondary-btn btn-sm">
           <i class="fa-solid fa-file-import"></i> <span data-i18n="library_import_button">Import</span>

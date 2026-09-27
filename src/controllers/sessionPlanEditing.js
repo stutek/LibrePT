@@ -195,7 +195,7 @@ export function wireAddExerciseAndCatalogDialogs() {
   const catalogCloseBtn = catalogModal?.querySelector(".modal-close-btn");
   if (catalogCloseBtn) catalogCloseBtn.addEventListener("click", () => catalogModal.close());
 
-  // The state is read WHEN THE FORM IS SUBMITTED, not when the dialog was wired (TODO §40.3): the
+  // The state is read WHEN THE FORM IS SUBMITTED, not when the dialog was wired: the
   // whole state object is replaced by a restore, a Drive merge or a workspace switch, and a copy
   // captured at boot would add the exercise to the database the trainer had already left.
   addExForm.addEventListener("submit", (e) =>

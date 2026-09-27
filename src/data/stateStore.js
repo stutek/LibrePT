@@ -80,15 +80,15 @@ export function emptyState() {
     history: [],
     planUpdates: [],
     sessions: [],
-    // Invitations sent, and the answers that came back (TODO §1.6). Separate from `sessions` because
+    // Invitations sent, and the answers that came back. Separate from `sessions` because
     // an RSVP is a fact about a message, and separate from `clients` because the same person answers
     // differently per session.
     invites: [],
-    // Repeating sessions (TODO §35.3a): the RULE only. The evenings it produces are derived at read
+    // Repeating sessions: the RULE only. The evenings it produces are derived at read
     // time (domain/sessionSeries.js), and an evening the trainer moved, cancelled or ran is a row in
     // `sessions` above that speaks for it.
     sessionSeries: [],
-    // Reusable blocks of exercises, offered when a plan is built (TODO §45.5). Schema 5 only.
+    // Reusable blocks of exercises, offered when a plan is built. Schema 5 only.
     circuits: [],
     notifications: [],
     // null, not "en": the language nobody has chosen yet must stay distinguishable from a chosen
@@ -115,7 +115,7 @@ export function stateHasData(s = state) {
 // mutates: DEFAULT_* are module singletons, and marking them in place would leave the seed arrays
 // flagged for the lifetime of the page.
 export function seedMockData({ origin = DEMO_ORIGIN } = {}) {
-  // The demo is written in the language that is set RIGHT NOW, and stays in it (TODO §46.4). It is
+  // The demo is written in the language that is set RIGHT NOW, and stays in it. It is
   // a snapshot, not a live translation: from here on these are ordinary records the trainer may
   // edit, and rewriting them on a later language switch would throw that away. `lang` may still be
   // null here — nobody has chosen yet — and the seed's own English is then what gets written.
@@ -158,7 +158,7 @@ export function removeDemoData(options = {}) {
 }
 
 // The plain localStorage key every build before this engine wrote (data/storageNamespace.js — no
-// release-tag axis any more, TODO §16.5). It is the IMPORT SOURCE for the one-time move onto
+// release-tag axis any more). It is the IMPORT SOURCE for the one-time move onto
 // IndexedDB below — once imported it is never written to again, which is what keeps it a valid
 // rollback snapshot for a build revert.
 const DB_KEY = "librept_db";
@@ -171,7 +171,7 @@ const SCHEMAS = liveSchemas();
 const IMPORTED_META_KEY = "imported";
 const LANG_META_KEY = "lang";
 
-// The chosen language is the PERSON's, not a workspace's (TODO §40.1) — the same reasoning that
+// The chosen language is the PERSON's, not a workspace's — the same reasoning that
 // already puts the theme and the accepted terms in plain, unscoped localStorage
 // (storageNamespace.js's ORIGIN_GLOBAL_KEYS). It used to live only in each database's meta store,
 // which was invisible until there were two databases: stepping into the sandbox produced a store
@@ -211,7 +211,7 @@ function indexedDbSupported() {
 }
 
 function getDb() {
-  // Named for the ACTIVE workspace (TODO §40.2). The working workspace resolves to `librept`, which
+  // Named for the ACTIVE workspace. The working workspace resolves to `librept`, which
   // is what every install already has — the sandbox is a second database that does not exist until
   // somebody enters it.
   if (!dbPromise) dbPromise = openDatabase({ schemas: SCHEMAS, name: databaseNameFor() });
@@ -245,9 +245,9 @@ async function readMeta(db, key) {
 // from the newest schema store — every live schema shares the same id set by construction, so one
 // read suffices for all of them — then star-writes the fan-out (put every current record) and the
 // delete set (every id no longer present) into every live schema store plus meta bookkeeping, in
-// one transaction (TODO §18's fan-out).
+// one transaction.
 // What each store already holds that the schema being read cannot see, keyed `${schema}|${id}`
-// (TODO §70). Empty — and no read at all — while the install reads the newest shape, which is every
+// Empty — and no read at all — while the install reads the newest shape, which is every
 // install today; it matters the moment one reads an older schema, where a save would otherwise put
 // a record into the newer store without the fields the older schema never loaded.
 async function fieldsTheReadSchemaCannotSee(db) {
@@ -293,8 +293,8 @@ async function starWrite(db, currentState) {
   const storeNames = [...SCHEMAS.map(storeNameForSchema), META_STORE];
   await withTransaction(db, storeNames, "readwrite", ({ store }) => {
     for (const collection of COLLECTIONS) {
-      // Only into stores whose schema DECLARES this collection (TODO §18.4's staging, enforced
-      // 2026-08-17). Without this the fan-out wrote everything everywhere, so a preview-only
+      // Only into stores whose schema DECLARES this collection (staging enforced 2026-08-17).
+      // Without this the fan-out wrote everything everywhere, so a preview-only
       // collection was preview-only in name and durable in fact — and nothing said so.
       const targets = SCHEMAS.filter((schema) =>
         schemaAcceptsCollection(LIVE_SCHEMAS[schema], collection),
@@ -430,7 +430,7 @@ export async function loadSavedState() {
   }
 
   // Before anything reads or refills a store: what an older build wrote into the P store alone
-  // (invitations, repeating-session rules) comes into schema 4 first, once (TODO §61).
+  // (invitations, repeating-session rules) comes into schema 4 first, once.
   await transferRecordsOnlyInPreview(db);
 
   // Pre-emptive, before the trainer opts into anything (docs/DATA_MODEL.md §4): a store this build
@@ -440,7 +440,7 @@ export async function loadSavedState() {
   await ensureLiveSchemasBackfilled(db);
 
   // AFTER the backfill, so a freshly provisioned stable store is populated before PREVIEW could be
-  // filled from it. The PREVIEW store is emptied when the build changes (TODO §61): its shape can
+  // filled from it. The PREVIEW store is emptied when the build changes: its shape can
   // change on any commit, and preview-only records are for testing and demonstrations, never
   // something to carry forward. Refilled only where it is read; otherwise filled at activation.
   await refreshPreviewStoreIfBuildChanged(db, BUILD_INFO?.commit ?? null);
@@ -449,7 +449,7 @@ export async function loadSavedState() {
   return state;
 }
 
-// TODO §3.9's actual fix: a listener registered ONCE (app.js, at boot) rather than a callback each
+// The actual fix: a listener registered ONCE (app.js, at boot) rather than a callback each
 // of the ~60 call sites across the app must remember to pass. `saveToLocalStorage()` is the one seam
 // every write already goes through — some via this exact function imported directly, some via
 // app.js's `saveState()` wrapper — so notifying here is notifying for all of them, unconditionally.
@@ -457,10 +457,11 @@ export async function loadSavedState() {
 // reason a call-site-by-call-site convention always does: most callers didn't pass it.
 // **A list, not a single slot, and that distinction cost a shipped feature once.** This was
 // `stateSavedListener = listener` — an assignment — while the doc above describes it as "a listener
-// registered ONCE". Both were true with one consumer. When TODO §3.8's unbacked warning registered a
-// second, it silently REPLACED the ahead/behind badge's, so the badge stopped updating on every
-// write and simply showed whatever it last rendered. Nothing errored; a subscribe call just did not
-// subscribe. Registering is now additive, so the next consumer cannot unsubscribe the previous one.
+// registered ONCE". Both were true with one consumer. When the unbacked-data warning banner's
+// listener registered a second, it silently REPLACED the ahead/behind badge's, so the badge stopped
+// updating on every write and simply showed whatever it last rendered. Nothing errored; a subscribe
+// call just did not subscribe. Registering is now additive, so the next consumer cannot unsubscribe
+// the previous one.
 const stateSavedListeners = [];
 
 export function onStateSaved(listener) {
@@ -485,11 +486,11 @@ export function saveToLocalStorage() {
   for (const listener of stateSavedListeners) listener();
 }
 
-// Google Drive sync's own bookkeeping (TODO §1.5/§3.3): the Drive file id and the merge ancestor
+// Google Drive sync's own bookkeeping: the Drive file id and the merge ancestor
 // snapshot (the state as of the last successful sync, used as the common ancestor for the next
 // three-way merge — see syncMerge.js). Lives in META_STORE, not localStorage: the ancestor is a full
 // domain snapshot, the same size class as the main database, and localStorage's ~5-10MB origin cap is
-// exactly what IndexedDB was adopted to get away from (§18.6).
+// exactly what IndexedDB was adopted to get away from.
 const DRIVE_SYNC_META_KEY = "driveSync";
 
 export async function readDriveSyncMeta() {
@@ -508,7 +509,7 @@ export async function writeDriveSyncMeta(meta) {
 }
 
 // "When was this device's data last captured anywhere it could survive the browser evicting
-// IndexedDB" — written by BOTH a completed Drive sync and a downloaded JSON backup (TODO §3.8).
+// IndexedDB" — written by BOTH a completed Drive sync and a downloaded JSON backup.
 //
 // **Deliberately its own key, not a field on `driveSync` above.** That meta holds the merge
 // ancestor, and a three-way merge is only correct if the ancestor is exactly the state Drive last
@@ -530,7 +531,8 @@ export async function readBackupHistory() {
 /** Record that the data reached durable storage. `kind` is "drive" or "file".
  *
  * Stores a FINGERPRINT of what was captured, not just when — `{id, h}` per record, which is what
- * lets TODO §3.8 count "changes since the last backup" without per-record timestamps and without
+ * lets the unbacked-data warning count "changes since the last backup" without per-record
+ * timestamps and without
  * keeping a second full snapshot beside the Drive ancestor. See backupHealth.js for why the cheap
  * shape matters: a warning about storage eviction should not itself be a significant consumer.
  */
@@ -548,8 +550,9 @@ export async function recordBackupTaken(kind) {
 }
 
 // A third single-listener seam, alongside onStateSaved above and driveSyncService's
-// onSyncCountsChanged — same reasoning, a different event. TODO §3.8's badge has to clear the
-// moment a backup lands, and a downloaded FILE never touches state, so `onStateSaved` cannot see it:
+// onSyncCountsChanged — same reasoning, a different event. The unbacked-data badge has to
+// clear the moment a backup lands, and a downloaded FILE never touches state, so `onStateSaved`
+// cannot see it:
 // without this the badge would keep warning until the trainer's next unrelated edit, which is
 // exactly the "warning that ignores what you just did" that teaches people to ignore warnings.
 let backupRecordedListener = null;
@@ -558,7 +561,7 @@ export function onBackupRecorded(listener) {
   backupRecordedListener = listener;
 }
 
-// The sandbox's own bookkeeping (TODO §40.4): when it was seeded, and when the trainer last declined
+// The sandbox's own bookkeeping: when it was seeded, and when the trainer last declined
 // the offer to reseed it. Both are facts about ONE workspace, so they live in that workspace's own
 // meta store — which is also why a reset needs to remember neither: deleting the database takes them
 // with it, and after a reset there is nothing to decline.
@@ -581,7 +584,7 @@ async function writeSandboxMeta(patch) {
   });
 }
 
-/** Record that the trainer said no to reseeding a stale sandbox, starting the cooldown (§40.4). */
+/** Record that the trainer said no to reseeding a stale sandbox, starting the cooldown. */
 export async function recordSandboxOfferDeclined(now = Date.now()) {
   await writeSandboxMeta({ staleOfferDeclinedAt: now });
 }
@@ -595,7 +598,7 @@ async function seedSandbox(now = Date.now()) {
 }
 
 /**
- * Choose the workspace BOOT will load, before it loads (TODO §40.9).
+ * Choose the workspace BOOT will load, before it loads.
  *
  * Separate from `switchWorkspace` below, which is the mid-session move and has a database open to
  * drain and close. At boot there is nothing open yet, so a deep link asking for the sandbox is one
@@ -607,15 +610,15 @@ export function prepareWorkspaceForBoot(name) {
   setActiveWorkspace(name);
 }
 
-/** Fill the sandbox the first time anybody opens it (TODO §40.4). A no-op anywhere else — the
- * working workspace is seeded only by an explicit `?init=demo_data_load` (§40.7). */
+/** Fill the sandbox the first time anybody opens it. A no-op anywhere else — the
+ * working workspace is seeded only by an explicit `?init=demo_data_load`. */
 export async function ensureSandboxSeeded({ now = Date.now() } = {}) {
   if (activeWorkspace() !== SANDBOX || stateHasData()) return;
   await seedSandbox(now);
 }
 
 /**
- * Point the app at another workspace and load it (TODO §40.3).
+ * Point the app at another workspace and load it.
  *
  * Re-renders rather than reloading the page: a reload costs the splash hold, the open view and any
  * half-filled dialog, and it puts a service-worker fetch in the path of a switch that may happen mid
@@ -632,14 +635,14 @@ export async function switchWorkspace(name, { now = Date.now() } = {}) {
   lastMigrationSummary = null;
   await loadSavedState();
   // An empty sandbox is one nobody has entered yet. The working workspace is never seeded here: it
-  // is seeded only by an explicit `?init=demo_data_load` (§40.7), which is what keeps the existing
+  // is seeded only by an explicit `?init=demo_data_load`, which is what keeps the existing
   // e2e suite testing the app the trainer will actually use.
   if (name === SANDBOX && !stateHasData()) await seedSandbox(now);
   return getState();
 }
 
 /** Delete the sandbox database and its keys outright, leaving nothing to build back — what a
- * support wipe removes (TODO §40). Safe from either workspace: it names the sandbox's database
+ * support wipe removes. Safe from either workspace: it names the sandbox's database
  * explicitly and never touches the working one. */
 export async function deleteSandboxDatabase() {
   if (activeWorkspace() === SANDBOX) await closeDb();
@@ -653,7 +656,7 @@ export async function deleteSandboxDatabase() {
 }
 
 /**
- * Throw away the sandbox and build a fresh one (TODO §40.4).
+ * Throw away the sandbox and build a fresh one.
  *
  * Deleting the whole database is the point: it is one call that CANNOT reach the trainer's own
  * records, where clearing by record or by name pattern inside a shared database could. Only ever
@@ -677,7 +680,7 @@ export async function resetLibrePTData(options = {}) {
   }
   if (indexedDbSupported()) {
     await closeDb();
-    // BOTH databases (TODO §40). The key sweep above already takes the sandbox's suffixed keys and
+    // BOTH databases. The key sweep above already takes the sandbox's suffixed keys and
     // the workspace pointer with it, so a reset that left the sandbox database standing would leave
     // a database nothing points at — and a trainer who was told everything was removed.
     for (const name of [DATABASE_NAME, databaseNameFor(SANDBOX)]) {

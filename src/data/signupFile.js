@@ -1,4 +1,4 @@
-// src/data/signupFile.js — the submission as a FILE, which is how it travels (TODO §1.7).
+// src/data/signupFile.js — the submission as a FILE, which is how it travels.
 //
 // Single responsibility: bytes and a filename in, a submission out, and back. What a submission
 // *contains* is [clientSignup.js](clientSignup.js); who it is handed to is a transport
@@ -12,7 +12,7 @@
 // budget, so a signature or a photo becomes possible later without redesigning the format.
 //
 // **A media type AND a distinctive extension, because the mechanisms key off different things**
-// (decided 2026-08-17, §1.7): an Android share intent routes on the MIME type, an OS file association
+// (decided 2026-08-17): an Android share intent routes on the MIME type, an OS file association
 // routes on the extension, and email frequently relabels the type to `application/octet-stream` — so
 // only the extension survives that hop. Declaring both is not redundancy. One media type per handling
 // surface rather than one generic type with a `kind` field inside.
@@ -20,7 +20,7 @@
 // **The file is plain, readable JSON on purpose.** It is a person's own data about themselves, in
 // transit between their phone and their trainer's; a format they cannot open would make the artifact
 // less trustworthy, not more. Encryption here would need a key exchange, which needs the server this
-// project does not have (§26.8), and the review dialog is the trust boundary instead.
+// project does not have, and the review dialog is the trust boundary instead.
 //
 // deps: none — strings and plain objects. The caller builds the `File`/`Blob`, so this stays testable
 // without a browser.
@@ -36,7 +36,7 @@ export const SIGNUP_FILE_EXTENSION = ".json.librept-signup";
 // Double-suffixed, and the ORDER changed on 2026-08-30 (Simon: "daj na konec, json pred tem je namig
 // uporabniku"). It was `.librept-signup.json` from 2026-08-17, when the trailing `.json` was what
 // kept the file openable where no association existed. Registering the app as a file handler
-// (§38.22) made that the wrong way round: an operating system matches the LAST suffix, so a
+// made that the wrong way round: an operating system matches the LAST suffix, so a
 // distinctive part in the middle associates with nothing, and claiming `.json` instead would hand
 // LibrePT every JSON file on the phone. `.librept-signup` last is the association; the `.json`
 // before it stays as a hint to the person looking at the file about what is inside.

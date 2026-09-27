@@ -1,5 +1,5 @@
 // src/modules/clients/signupInbox.js — the ways a client's submission reaches the trainer without a
-// file picker (TODO §38.22).
+// file picker.
 //
 // Single responsibility: notice that a file arrived, get its text, and hand it to the review dialog.
 // Reading the file is data/signupFile.js, deciding what to do with it is signupReviewDialog.js, and
@@ -22,17 +22,17 @@
 //
 // Both are Chromium's, and both need the app INSTALLED: on iOS neither exists. So the menu and its
 // file picker stay exactly where they are — not as the main road any more, but as the one that works
-// everywhere (§38.22 records that trade).
+// everywhere.
 //
 // **What the app claims is its own file, not JSON.** The manifest names the pair data/signupFile.js
 // declares — `application/vnd.librept.signup+json` and `.json.librept-signup` — because a share
 // target that accepted `application/json` would offer LibrePT for every JSON file on the phone.
 // Whether an OS matches the whole compound suffix or only the trailing `.json` is untested here and
-// decides the TAP path alone; a share carries the media type either way (§38.22).
+// decides the TAP path alone; a share carries the media type either way.
 //
 // **Nothing is imported without a person.** A share target accepts a file from any app on the phone,
 // which changes nothing about the trust boundary: the submission lands in the review dialog, where a
-// human reads every field before a record is written (§26.5). What this saves is the fetching, not
+// human reads every field before a record is written. What this saves is the fetching, not
 // the reading.
 //
 // Injected dependencies: `openReview` and `reviewText` (the dialog's own two seams), plus `doc` and

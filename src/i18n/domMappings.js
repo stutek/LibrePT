@@ -9,7 +9,7 @@
 // **The attribute did nothing until 2026-08-30.** Twenty-seven elements carried one — the whole
 // session editor, the client register's invite button, the clipboard's plan menu — and every one of
 // them shipped its English placeholder text in every language, because no code ever read the
-// attribute (reported as "na slovenski strani se včasih pojavlja angleški tekst", TODO §38.20). The
+// attribute (reported as "na slovenski strani se včasih pojavlja angleški tekst"). The
 // keys were all there and all translated; nothing was asking for them.
 
 /** Every element whose own markup names its translation key.
@@ -96,7 +96,7 @@ export function applyStaticDOMMappings(tDict) {
     // Active session clipboard overlay
     "#btn-add-exercise-to-session": "btn_inject_exercise",
     "#btn-delete-session": "btn_delete_session",
-    // NOT #btn-start-session: it is a glyph now (TODO §39.6), and its words live in `aria-label`
+    // NOT #btn-start-session: it is a glyph now, and its words live in `aria-label`
     // through `data-i18n-label`. It used to be wired through BOTH mechanisms at once — this table,
     // which keeps an icon and appends the label after it, and a `data-i18n` on the button, which
     // replaces the whole content. They disagreed on every boot and the second one won, so the play
@@ -125,7 +125,7 @@ export function applyStaticDOMMappings(tDict) {
     // The client dialog is not here any more: since 2026-08-30 its markup carries its own keys
     // (data-i18n), and an element named in both places is an element two files disagree about —
     // this table said `client_name` where the label reads "Full Name *", and won, because it runs
-    // second. One home each (§38.20).
+    // second. One home each.
 
     // GDPR consent block inside the client modal, and its archiving-reminder dialog. The two
     // delivery buttons are deliberately absent: their labels swap between "send" and "no address on

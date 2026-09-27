@@ -1,4 +1,4 @@
-// src/data/inviteRecord.js — the invitation, which is where an RSVP lives (TODO §1.6).
+// src/data/inviteRecord.js — the invitation, which is where an RSVP lives.
 //
 // Single responsibility: what an invitation IS, and what happens to it when an answer comes back.
 // The event that travels is data/sessionEventPayload.js; who sends it is the invite dialog.

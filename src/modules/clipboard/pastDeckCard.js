@@ -26,7 +26,7 @@ export class PastDeckCard extends DeckCard {
     return `exercise-deck-card past-session${this.isInFocus ? " past-expanded" : ""}`;
   }
 
-  // The card, in every state (TODO §42.3): the tag, the name and what was lifted, on one row.
+  // The card, in every state: the tag, the name and what was lifted, on one row.
   renderCard(card) {
     const { escapeHTML, formatLoad, formatReps, t } = this.ctx;
     const item = this.item;
@@ -73,7 +73,7 @@ export class PastDeckCard extends DeckCard {
         </div>`;
       })
       .join("");
-    // Added to the head row the card already drew (TODO §42.5), never a second head row of its own:
+    // Added to the head row the card already drew, never a second head row of its own:
     // reported by a trainer — opening this card used to move its Past tag onto a line above the
     // name, so one card read as two different designs depending on how open it was.
     card

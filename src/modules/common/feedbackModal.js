@@ -82,7 +82,7 @@ export function renderFeedbackDialog() {
       
       <div class="form-group">
         <!-- The two names are filled on every open (openFeedbackModal). The feedback choices below
-             are stored in English and shown so on other screens; see TODO §38.20. -->
+             are stored in English and shown so on other screens. -->
         <label><span data-i18n="feedback_for">Feedback for</span> <span id="feedback-client-display-name" class="text-emerald font-semibold"></span> <span data-i18n="feedback_on">on</span> <span id="feedback-ex-display-name" class="text-emerald font-semibold"></span></label>
         
         <div class="feedback-chips-selector">
@@ -145,7 +145,7 @@ export function renderFeedbackDialog() {
         <input type="text" id="feedback-custom-note" data-i18n-placeholder="feedback_note_placeholder" placeholder="e.g. Left knee clicks, reduced load..." class="form-control">
       </div>
 
-      <!-- Mid-session capture that OUTLIVES the session (TODO §35.3c). A twinge mentioned between
+      <!-- Mid-session capture that OUTLIVES the session. A twinge mentioned between
            rounds changes how this person is programmed for months; logged only as an alert it waits
            on the Pending Review screen and is resolved away. Ticking this appends it to the client's
            own record, which is the text every future plan is written against. Off by default: most
@@ -302,7 +302,7 @@ export function setupFeedbackForms() {
 
       state.planUpdates.push(newFeedback);
 
-      // Kept on the person, not only on the session (TODO §35.3c). A twinge mentioned between
+      // Kept on the person, not only on the session. A twinge mentioned between
       // rounds is the kind of thing that changes programming for months, and an alert on the
       // Pending Review screen is resolved away within the week. Appended to the notes the trainer
       // already writes by hand — the same text the client focus panel shows while their next plan

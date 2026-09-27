@@ -117,8 +117,8 @@ function showReplaceConfirmation(replacing, migrationSummary) {
   );
   // Preview-only collections are named SEPARATELY, because they are worse off than the rest: every
   // other collection is replaced by whatever the file holds, while these are simply gone — a file
-  // written at the stable schema has nowhere to put them (§18.4's staging, recordSchemas.js). This is
-  // the warning DATA_MODEL §1 says a preview shape needs; it had none until 2026-08-17.
+  // written at the stable schema has nowhere to put them (the staging area in recordSchemas.js).
+  // This is the warning DATA_MODEL §1 says a preview shape needs; it had none until 2026-08-17.
   const lost = (replacing.notCarried || []).map(
     (collection) => `${replacing.counts[collection]} ${collection}`,
   );
@@ -165,7 +165,7 @@ export function renderBackupDialog() {
           <strong data-i18n="restore_replaces_all">Restoring replaces everything on this device.</strong>
           <span data-i18n="restore_you_would_lose">You would lose:</span> <span id="restore-confirm-detail"></span>.
         </p>
-        <!-- The other half of the consent (TODO §18.7): what the import does to the FILE. Bringing an
+        <!-- The other half of the consent: what the import does to the FILE. Bringing an
              older backup forward means it stops being openable by an older build the trainer may still
              have on a second phone — a one-way door, and one they should be told about before walking
              through it rather than after. Shown independently of the replace warning, because a restore
@@ -218,7 +218,7 @@ export function renderBackupDialog() {
             <span id="drive-sync-interval-unit" data-i18n="drive_sync_interval_unit">min</span>
           </div>
           <p id="drive-sync-status" class="status-msg"></p>
-          <!-- TODO §40.6: syncing FROM the sandbox writes its own file in the same Drive
+          <!-- Syncing FROM the sandbox writes its own file in the same Drive
                folder and spends the same grant. Said here, or a trainer reads "synced" and
                believes their own work is safe. Hidden outside the sandbox. -->
           <p id="drive-sync-sandbox-note" class="status-msg" data-i18n="sync_sandbox_note" hidden></p>
@@ -259,7 +259,7 @@ export function renderBackupDialog() {
 }
 
 // The dialog's "Sync Data" button. It lived in sessionsView.js's setupCalendarSessions until
-// 2026-08-05 (TODO §22) — the sessions dashboard wiring a button whose markup belongs to this
+// 2026-08-05 — the sessions dashboard wiring a button whose markup belongs to this
 // dialog, which is why a test of the offline signal had to boot a sessions-module function to reach
 // a backup-dialog button. import_layers.py cannot catch that: both sides were legal cross-feature
 // imports and the problem was ownership, not direction.
@@ -300,7 +300,7 @@ function setupCalendarSync() {
 
       // saveToLocalStorage() (deps.saveToLocalStorage — app.js's saveState()) fires
       // onStateSaved's listener on its own now, which re-renders the header badge with a real
-      // ahead count — no separate reset call needed (TODO §3.9).
+      // ahead count — no separate reset call needed.
       saveToLocalStorage();
       renderSessions();
 
@@ -334,7 +334,7 @@ export function setupBackupRestore() {
   // ONE listener on the header cloud, not two. driveSyncUi.js used to add its own alongside this
   // one, so a connected tap both synced and opened the dialog — each listener correct on its own and
   // neither aware of the other. It now answers first, and this opens the dialog only for the taps it
-  // declines (TODO §3.11: connected means sync directly; the dialog stays in the ☰ menu).
+  // declines: connected means sync directly; the dialog stays in the ☰ menu.
   const backupBtn = document.getElementById("backup-btn");
   if (backupBtn) {
     backupBtn.addEventListener("click", () => {
@@ -393,7 +393,7 @@ export function setupBackupRestore() {
       // Built at the newest NUMBERED schema, not at the runtime one (data/backupFile.js): a file
       // written at the unstable preview shape is restorable only by the build that wrote it.
       const payload = buildBackupPayload(deps.getState(), {
-        // Stamped by the writer, so a restore never has to guess where a file came from (§40.10).
+        // Stamped by the writer, so a restore never has to guess where a file came from.
         workspace: activeWorkspace(),
         buildSha: typeof BUILD_INFO?.commit === "string" ? BUILD_INFO.commit : null,
         // Carried so the erasure register survives a reinstall — see erasureSuppression.js.
@@ -405,10 +405,10 @@ export function setupBackupRestore() {
         `librept_backup_${new Date().toISOString().substring(0, 10)}.json`,
         "application/json",
       );
-      // A downloaded file is a real backup, so it answers TODO §3.8's "is this data anywhere
-      // durable" exactly as a Drive sync does. Recording it is what keeps the coming unbacked
-      // warning honest — a trainer who exports weekly must be able to clear it WITHOUT connecting
-      // Google, or a safety indicator becomes a prompt to enable an integration.
+      // A downloaded file is a real backup, so it answers the unbacked-data warning's "is this
+      // data anywhere durable" exactly as a Drive sync does. Recording it is what keeps the
+      // coming unbacked warning honest — a trainer who exports weekly must be able to clear it
+      // WITHOUT connecting Google, or a safety indicator becomes a prompt to enable an integration.
       recordBackupTaken("file");
     });
   }
@@ -438,7 +438,7 @@ export function setupBackupRestore() {
             Array.isArray(importedData.clients) &&
             Array.isArray(importedData.exercises)
           ) {
-            // The envelope is read BEFORE anything else touches the file (TODO §18.7). A version
+            // The envelope is read BEFORE anything else touches the file. A version
             // this build does not know may be compressed or encrypted, and the collection check
             // above would then see no arrays and this reader would import an empty database over
             // the trainer's real one. Refusing is the only safe answer to "I cannot open this".
@@ -449,7 +449,7 @@ export function setupBackupRestore() {
               );
             }
 
-            // Refused WHOLE, and here rather than at the button (TODO §40.10): this is the seam
+            // Refused WHOLE, and here rather than at the button: this is the seam
             // every file comes in through, and the erasure register is already filtered one line
             // further on for the same class of reason — something that must not come back in.
             // Sample data must never enter the trainer's own database; the other direction is fine.
@@ -476,7 +476,7 @@ export function setupBackupRestore() {
             // that names what it is about to overwrite.
             // Consent is needed for either consequence: losing what is on this device, OR taking the
             // file through a one-way door. The second is why an empty device is no longer a silent
-            // restore — it was the case that skipped the prompt entirely (TODO §18.7).
+            // restore — it was the case that skipped the prompt entirely.
             const replacing = summarizeReplacement(deps.getState());
             if ((replacing.total > 0 || bringsDataForward(summary)) && !confirmedRestore) {
               pendingRestore = restored;

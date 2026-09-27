@@ -1,4 +1,4 @@
-// src/domain/contactChannel.js — which way a typed contact can be reached (TODO §26.3).
+// src/domain/contactChannel.js — which way a typed contact can be reached.
 //
 // Single responsibility: read one line a trainer typed and say whether it is an email address, a
 // phone number, or neither. No DOM, no links, no sending — modules/clients/intakeInvite.js builds

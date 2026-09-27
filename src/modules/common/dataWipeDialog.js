@@ -1,5 +1,5 @@
 // src/modules/common/dataWipeDialog.js — the support data-wipe, and the only thing that authorises
-// it (TODO §31).
+// it.
 //
 // Single responsibility: show a trainer exactly what is about to be removed from THIS device, and
 // remove it if they say so. What would be removed is planned by data/dataWipe.js, which is pure; the
@@ -23,7 +23,7 @@
 // Drive copy, an export already in somebody's mailbox: the app erases what it holds and nothing
 // more, and a support wipe that implied otherwise would be worse than none.
 //
-// **The sandbox goes with the device's own bookkeeping, not as a target of its own** (TODO §40).
+// **The sandbox goes with the device's own bookkeeping, not as a target of its own.**
 // Its stores carry the same names as the trainer's (`schema4` in both databases), so listing them
 // beside each other would ask somebody on a support call to tell two identical rows apart. It holds
 // sample data and nothing else, so there is nothing in it worth keeping back — it is removed

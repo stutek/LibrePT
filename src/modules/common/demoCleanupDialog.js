@@ -132,7 +132,7 @@ function refresh() {
           "Your own clients, sessions and logs are never touched. The movement catalog is kept so your programmes keep working.";
   }
   // Written here with the description, on every open: the dialog is built after the boot
-  // translation pass. Both keys existed and nothing applied them (TODO §38.20).
+  // translation pass. Both keys existed and nothing applied them.
   const title = document.getElementById("demo-cleanup-title");
   if (title) title.textContent = deps.t("demo_cleanup_title") || "Clear demo data";
   const cancelBtn = document.getElementById("btn-demo-cleanup-cancel");

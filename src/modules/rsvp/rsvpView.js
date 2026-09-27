@@ -1,5 +1,5 @@
-// src/modules/rsvp/rsvpView.js — the page a client lands on from an invite, where they answer it
-// (TODO §1.6's confirm link).
+// src/modules/rsvp/rsvpView.js — the page a client lands on from an invite's confirm link, where
+// they answer it.
 //
 // Single responsibility: show the invite and turn a tapped answer into a message addressed to the
 // trainer. What an event IS is data/sessionEventPayload.js; how a message leaves the device is
@@ -15,7 +15,7 @@
 // no working confirm route at all. Both invite channels can carry a plain `https` link, so the reply
 // URI is built here, at tap time, once the client has chosen a channel.
 //
-// **Client-facing, therefore stateless** — the same rule as `/intake` (§26.1): no store, no seed, no
+// **Client-facing, therefore stateless** — the same rule as `/intake`: no store, no seed, no
 // service worker, no first-run agreement, and nothing written to a phone that is not the trainer's.
 // Answering an invite is not a reason to put a database on someone's device.
 //
@@ -147,7 +147,7 @@ export function setupRsvpReply({ encodedEvent, t, appUrl, platform, lang = "en" 
   //
   // Advisory, and the copy says so rather than claiming a guarantee — two devices, two clocks, and no
   // server to arbitrate. A late answer that reaches the trainer anyway is still recorded, with its
-  // response time (§1.6: record the time, do not mark the reply).
+  // response time: record the time, do not mark the reply.
   const expired = isInviteExpired(invite.expiresAt, Date.now());
   if (expired) {
     const notice = $id("rsvp-expired");

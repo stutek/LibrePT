@@ -1,4 +1,4 @@
-// src/modules/demo/demoPace.js — how fast the scripted demo moves (TODO §23.5, §34).
+// src/modules/demo/demoPace.js — how fast the scripted demo moves.
 //
 // Single responsibility: turn "does this viewer want reduced motion?" into the four waits a step
 // takes. Pure — no DOM, no timers — so the pacing can be reasoned about and tested without a browser.
@@ -6,7 +6,7 @@
 // **The tap's rings are timed here too**, though demoHand.js draws them and demoTour.css animates
 // them: the player waits one whole ring out before it clicks the real control, so the ring's
 // duration and that wait are the same decision. Split across a module and a stylesheet, they drifted
-// (TODO §38.7) and the mark ended up playing over the view the tap had already opened.
+// and the mark ended up playing over the view the tap had already opened.
 //
 // **Every full-motion pause exists for an eye, not for the app.** A viewer has to find the control,
 // watch the hand reach it, register that something changed, and read the caption; raised 2026-08-18

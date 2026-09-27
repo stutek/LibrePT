@@ -1,10 +1,10 @@
 /* themes/spreadsheet.css - Spreadsheet — a white sheet, thin grid lines, petrol blue-green */
-/* Modelled on the spreadsheet a trainer runs her sessions from (TODO §49.2, 2026-09-13): cells
+/* Modelled on the spreadsheet a trainer runs her sessions from (2026-09-13): cells
    that touch, one grid line between them, a tinted row for each round, a highlighted cell for where
    she is. Colours are NOT the sheet's: its amber and yellow would recall the sandbox's orange marks.
    Petrol sits between blue and green, the two colours named first worldwide, without blue's lean to
    one sex (YouGov: blue 40 % of men against 24 % of women in the US). Every contrast below was
-   measured; the reasoning is in TODO_ARCHIVE.md, §49.2.
+   measured against the theme's own backgrounds.
 
    A theme is a stylesheet, not a palette (docs/ARCHITECTURE.md#themes-and-styling): the tokens set
    the colours, the rules under them draw the grid. This file loads after every module stylesheet.
@@ -85,7 +85,7 @@ html.spreadsheet-theme .exercise-deck-card.past-session.past-expanded {
    between sections. A circuit is one block; an exercise or a rest outside a circuit is a block of
    its own. A past card is one movement pulled out of an old session, not a block, so past cards
    stay joined by the thin grid line.
-   It was a 2px dark border until 2026-09-14 (§52.1): Simon found it drowned the active card, whose
+   It was a 2px dark border until 2026-09-14: Simon found it drowned the active card, whose
    own mark is a line too. With thin lines everywhere else, the active card is the one heavy edge.
    4px, measured on a 390px phone against 3px and 6px: a circuit reads as its own block already at
    3px, because its grey name row starts it, but an exercise outside a circuit has no such row and
@@ -94,7 +94,7 @@ html.spreadsheet-theme .exercise-deck-card:not(.past-session):not(.in-focus),
 html.spreadsheet-theme .exercise-deck-card:not(.past-session).in-focus {
   margin-bottom: 4px;
 }
-/* The active card (§48.1) and the open card: a 2px petrol edge, the only heavy line on the sheet. */
+/* The active card and the open card: a 2px petrol edge, the only heavy line on the sheet. */
 html.spreadsheet-theme .exercise-deck-card.is-active {
   outline-width: 2px;
   outline-offset: -2px;

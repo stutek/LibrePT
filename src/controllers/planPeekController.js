@@ -1,4 +1,4 @@
-// src/controllers/planPeekController.js — wires the plan-peek blanket gesture (TODO §52.2 step 3)
+// src/controllers/planPeekController.js — wires the plan-peek blanket gesture (step 3)
 // to the active session: works out the active client's previous and next plan, draws each with
 // renderPlanSheet into the under-layer elements activeSessionOverlayView.js reserves for them, and
 // hands the DOM-only gesture in modules/clipboard/planPeek.js the two elements plus an edit-mode

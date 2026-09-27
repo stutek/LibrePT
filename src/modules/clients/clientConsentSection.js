@@ -8,7 +8,7 @@
 // instead of being spliced through the save handler.
 //
 // Two decisions worth not re-deriving:
-//   * The DATE is a real field, not the write timestamp. Consent lives on paper (TODO §3.5) and the
+//   * The DATE is a real field, not the write timestamp. Consent lives on paper and the
 //     paper is routinely signed before anyone opens the app — at the first session, on a clipboard
 //     at the desk. An invisible `timestamp` of when a checkbox got ticked is not the date the
 //     client consented, and it is the client's date a supervisory authority asks about.
@@ -274,8 +274,8 @@ export function readConsentFromSection(previousConsent) {
   if (!consented) {
     // Unticking a client who HAD consent is how a trainer honours a withdrawal, so it records one
     // rather than blanking the record: Art. 7(1) asks them to demonstrate consent was obtained, and
-    // the old blank-everything branch destroyed that proof at exactly the moment it was needed
-    // (TODO §27.7). A client who never consented still has nothing on file.
+    // the old blank-everything branch destroyed that proof at exactly the moment it was needed.
+    // A client who never consented still has nothing on file.
     if (isConsentActive(previousConsent)) {
       return withdrawConsent(previousConsent, withdrawalDateFromSection());
     }

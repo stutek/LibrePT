@@ -1,9 +1,9 @@
 // src/data/erasureSuppression.js — the record of who has been erased, so a restored backup cannot
-// resurrect them (TODO §18.11).
+// resurrect them.
 //
 // The gap this closes: erasure rewrites the live database, and a backup taken the day before still
 // contains "Jane Doe". Restore that file and the erasure is undone — silently, by a trainer doing a
-// perfectly ordinary recovery. §18.7 wants backups restorable indefinitely, so "old backups rotate
+// perfectly ordinary recovery. Backups must stay restorable indefinitely, so "old backups rotate
 // away" is not available as a defence here. Something has to outlive the restore and re-apply the
 // erasure on the way in.
 //
@@ -29,7 +29,7 @@
 // gets their erasures back; one who restores a file predating an erasure has the client re-erased
 // on the way in. What is NOT covered yet is a Drive-only recovery with no local list and no file —
 // the synced snapshot is already anonymised, so the data is right, but the list itself does not
-// ride along (TODO §18.11).
+// ride along.
 //
 // Injected dependencies: a WebCrypto-shaped `subtle` (browser `crypto.subtle`, Node's
 // `webcrypto.subtle` in tests) — passed in rather than reached for, so the hashing is testable

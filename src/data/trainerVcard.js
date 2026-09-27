@@ -1,5 +1,5 @@
 // src/data/trainerVcard.js — the trainer's own contact as an RFC 6350 vCard the client's phone can
-// save (TODO §26.3).
+// save.
 //
 // Single responsibility: turn the three strings an intake link carries (domain/intakeSender.js) into
 // the bytes of a `.vcf`. No DOM, no download — modules/intake/intakeView.js offers the button.
@@ -23,12 +23,12 @@
 
 export const VCARD_MEDIA_TYPE = "text/vcard";
 
-// §3.2: a content line is folded at 75 OCTETS, not characters, and continues with a leading space.
+// RFC 6350 §3.2: a content line is folded at 75 OCTETS, not characters, and continues with a leading space.
 // Slovene letters are two octets each, which is why the count below is of bytes.
 const MAX_LINE_OCTETS = 75;
 const UTF8 = new TextEncoder();
 
-/** §3.4 TEXT escaping: backslash, semicolon, comma and newline. Unescaped, a comma in "Novak, Sam"
+/** RFC 6350 §3.4 TEXT escaping: backslash, semicolon, comma and newline. Unescaped, a comma in "Novak, Sam"
  *  turns one value into two and a newline ends the property with the rest of the card as debris.
  *
  *  Deliberately NOT shared with the calendar file's identical-looking escape (data/calendarInvite.js):
@@ -82,7 +82,7 @@ export function buildTrainerVcard({ name, phone, email } = {}) {
   if ((email || "").trim()) lines.push(`EMAIL;TYPE=INTERNET:${escapeVcardText(email.trim())}`);
   lines.push("END:VCARD");
 
-  // §3.2: CRLF, and a trailing one. Bare newlines are the commonest reason a `.vcf` imports as one
+  // RFC 6350 §3.2: CRLF, and a trailing one. Bare newlines are the commonest reason a `.vcf` imports as one
   // garbled contact or as nothing at all.
   return `${lines.map(foldLine).join("\r\n")}\r\n`;
 }

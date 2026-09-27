@@ -1,5 +1,5 @@
-/* src/modules/demo/demoNarratorCard.css — the long demo's narration: cards, persona label, captions
-   (TODO §35).
+/* src/modules/demo/demoNarratorCard.css — the long demo's narration: cards, persona label,
+   captions.
 
    The app underneath keeps its own appearance, like every other demo surface here: the story is the
    live app being used, and a demo that restyled what it demonstrates would be showing a different
@@ -26,7 +26,7 @@
      flex child that may shrink, the card takes whatever is left after the step number, the
      instruction and the buttons have their own height. A 32vh cap of its own was a second number
      saying the same thing in different units, and on a short phone the two disagreed — the card
-     obeyed its cap while the panel it was in came to 53% of the screen (§38.15). */
+     obeyed its cap while the panel it was in came to 53% of the screen. */
   flex: 1 1 auto;
   min-height: 0;
   /* The last line fades out, which is how a reader knows the paragraph carries on below the fold.
@@ -98,7 +98,7 @@
   color: var(--text-muted);
 }
 
-/* Real touch targets, because the hand taps them and a viewer may too (no-hover rule, §7.1). Under
+/* Real touch targets, because the hand taps them and a viewer may too (no-hover rule). Under
    the words, and quieter than the guide's own Next: the story's ending is "keep tapping around",
    and emptying the demo out is the deliberate act. */
 .demo-narrator-cleanup {
@@ -108,7 +108,7 @@
   margin-top: 0.5rem;
 }
 
-/* The PAPER track (§35.1): what happens off-screen, on a printed form — narrated as text on a
+/* The PAPER track: what happens off-screen, on a printed form — narrated as text on a
    paper-textured card, never drawn as a form. Everything else in this demo is the live app, so a
    drawn surface among them reads as a real screen and misleads the first viewer who looks for it.
    The texture is what says "this step is not a screen": warm ground, a ruled left margin, no app
@@ -141,7 +141,7 @@
 /* The MESSAGE track: a step that happens in a messaging app, not in this one — the link arriving on
    the client's phone, and her file arriving on the trainer's. Drawn as a bubble because that is what
    the viewer is being told to picture, and because it could never be mistaken for a screen of this
-   app, which is the whole rule the paper track exists for (§35.1). */
+   app, which is the whole rule the paper track exists for. */
 .demo-narrator-card--message,
 .demo-narrator-card--invitation {
   background: color-mix(in srgb, #22c55e 12%, var(--card-bg));
@@ -157,7 +157,7 @@
 }
 
 /* The message itself is somebody's words, so it is set apart from the story's narrating voice. It
-   is a real `blockquote` since 2026-08-27 (§38.10) — the italics said "not our words" to a reader
+   is a real `blockquote` since 2026-08-27 — the italics said "not our words" to a reader
    and nothing at all to a screen reader — which brings a browser indent this puts back. */
 .demo-narrator-card--message .demo-narrator-body,
 .demo-narrator-card--invitation .demo-narrator-body {
@@ -175,7 +175,7 @@
 /* Full strength on this card, not the muted grey the narrating voice uses. Two reasons, and the
    second is the one that failed a measurement: its body IS the thing being read — the message
    itself, not an aside about it — and the muted grey over this card's green tint measured 4.28:1 on
-   Daylight and 4.37:1 on Blossom, under the bar for a paragraph (§38.10). The muted tokens sit near
+   Daylight and 4.37:1 on Blossom, under the bar for a paragraph. The muted tokens sit near
    that bar on the light palettes to begin with, so any tinted surface eats the margin; a card that
    tints itself owns its own text colours. */
 .demo-narrator-card--message .demo-narrator-body,
@@ -187,11 +187,11 @@
   color: var(--text-main);
 }
 
-/* The SCREENSHOT track: the app the file arrived in, drawn rather than photographed (§38.22). A
+/* The SCREENSHOT track: the app the file arrived in, drawn rather than photographed. A
    picture would go stale the day either app changes and nobody would notice; this cannot, because it
    is made of the same words the story is. Deliberately somebody ELSE's chrome — a title bar and a
    bubble — so it can never be read as a screen of this app, which is the rule the paper track exists
-   for (§35.1). */
+   for. */
 .demo-narrator-card--screenshot {
   background: color-mix(in srgb, var(--text-main) 6%, var(--card-bg));
   border-color: var(--card-border);
@@ -221,7 +221,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  /* A real touch target on a gym floor (§7.1's no-hover rule). */
+  /* A real touch target on a gym floor (no-hover rule). */
   min-height: 44px;
   margin-top: 0.35rem;
   padding: 0 0.9rem;
@@ -241,7 +241,7 @@
 /* The guide's own card: the trainer has walked away from where the step happens, and the step's
    instruction is not what is on screen. Nothing decorative — it is the same card, and the two
    buttons under it are the panel's own — but it is not the story speaking, so it carries the
-   guide's accent rather than a track's colour (§38.10). */
+   guide's accent rather than a track's colour. */
 .demo-narrator-card--off-track {
   border-left: 3px solid var(--primary);
 }
@@ -265,7 +265,7 @@
 }
 
 /* Standing on its own — mounted without a guide around it, which is how it is tested alone. One
-   persona at a time was the ruling (§35.1), so this label is the only thing distinguishing the
+   persona at a time was the ruling, so this label is the only thing distinguishing the
    trainer's app from a client's: they look the same. */
 .demo-narrator-persona {
   position: fixed;

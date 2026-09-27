@@ -13,7 +13,7 @@
 // Keyed by the text, a missing translation simply leaves the English standing, which is what a
 // demo should do rather than show a raw key on a card.
 //
-// **It is a SNAPSHOT, not a live translation** (TODO §46.4, ruled 2026-09-12). The demo is written
+// **It is a SNAPSHOT, not a live translation** (ruled 2026-09-12). The demo is written
 // into the database in the language selected when it is loaded, and switching language afterwards
 // does not rewrite it — those rows are the trainer's to edit by then, and rewriting them would
 // throw away whatever they changed. Reloading the demo in the other language is the way to get it

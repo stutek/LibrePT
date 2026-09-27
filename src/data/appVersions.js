@@ -1,8 +1,8 @@
-// src/data/appVersions.js — the versions of the app a trainer can choose to run (TODO §76).
+// src/data/appVersions.js — the versions of the app a trainer can choose to run.
 //
 // Single responsibility: say which app versions this build supports, which one this device runs,
-// and whether a named behaviour is on in it. One build carries every supported version (§16, §18),
-// so a fix lands once and every version has it.
+// and whether a named behaviour is on in it. One build carries every supported version, so a fix
+// lands once and every version has it.
 //
 // **A version decides how the app BEHAVES, never what is read.** Every install reads the newest
 // numbered schema whatever version runs (recordSchemas.js, DEFAULT_READ_SCHEMA): memory, and so every
@@ -37,7 +37,7 @@ export const APP_VERSIONS = [
     schema: 5,
     status: "default",
     descriptionKey: "app_version_2026_10_desc",
-    // Importing a trainer's own exercise library and circuits (TODO §45.5).
+    // Importing a trainer's own exercise library and circuits.
     behaviours: ["libraryImport"],
   },
 ];

@@ -1,9 +1,9 @@
 // src/domain/clientNameWords.js — the words that name a client, and finding them in trainer-typed
-// text (TODO §66). Pure: takes clients and a string, returns words. No DOM, no storage.
+// text. Pure: takes clients and a string, returns words. No DOM, no storage.
 //
 // **Why it exists.** A session's name and location are free text, and the fastest thing to type is
 // the person: "Ana 1:1", "at Jane's flat". That puts a client's name in a field the app cannot
-// erase later — scrubbing prose needs the name, and after an erasure the name is gone (§65). So the
+// erase later — scrubbing prose needs the name, and after an erasure the name is gone. So the
 // name is kept out at the moment it is typed, not chased afterwards.
 //
 // Ruled 2026-09-18 (Simon): match WHOLE WORDS only, from every client's name, surname and alias,

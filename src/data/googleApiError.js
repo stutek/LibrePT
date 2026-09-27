@@ -1,5 +1,5 @@
-// src/data/googleApiError.js — the failure shape shared by every Google REST client here
-// (TODO §1.5). Single responsibility: carry the HTTP status alongside the message, and answer the one
+// src/data/googleApiError.js — the failure shape shared by every Google REST client here.
+// Single responsibility: carry the HTTP status alongside the message, and answer the one
 // question every caller actually asks — "is the GRANT gone, or was this request merely bad?"
 //
 // Extracted when calendarFreeBusy.js became the second such client. The predicate below is not

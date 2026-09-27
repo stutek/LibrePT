@@ -1,8 +1,8 @@
-// src/data/clientSignup.js — what a client's own introduction of themselves IS (TODO §1.7/§26).
+// src/data/clientSignup.js — what a client's own introduction of themselves IS.
 //
 // Single responsibility: the submission record a prospective client produces on their own phone, and
 // the sanitising read of one that arrives from somewhere else. **How it travels is deliberately not
-// here** — that is a transport's job (modules/common/eventTransports.js), the seam §1.6 established
+// here** — that is a transport's job (modules/common/eventTransports.js), a seam established
 // on 2026-08-17: a new channel is then a new entry in one list rather than a new payload format.
 //
 // **Goals and injuries are the client's to offer, never required** (Simon, 2026-08-17: "customer
@@ -10,7 +10,7 @@
 // things hold them in place. They are optional at every level — a submission with neither is
 // complete, and a blank field is absent from the record rather than stored as an empty string, so the
 // trainer can tell "chose not to say" from "said nothing yet". And they travel **only inside the
-// shared file** (§1.7's share transport, ruled 2026-08-17), never in a URL: a link's payload would sit
+// shared file** (the share transport, ruled 2026-08-17), never in a URL: a link's payload would sit
 // in a carrier's logs and in two phones' message histories, which is not somewhere health data may
 // rest. A transport that cannot carry them privately must not carry them at all.
 //
@@ -25,7 +25,7 @@
 // **Reading one is parsing hostile input.** Anyone who photographs a gym-wall code can craft a
 // submission, so `parseClientSignup` returns null for anything it does not fully recognise and copies
 // field by field — an unknown key is dropped rather than reflected onward into whatever the review
-// dialog is about to write. The review dialog is the trust boundary (§26.5); this is the part of it
+// dialog is about to write. The review dialog is the trust boundary; this is the part of it
 // that cannot be forgotten at a call site.
 //
 // deps: none — pure functions over plain objects.
@@ -78,9 +78,9 @@ function readConsent(raw) {
  * The submission a filled-in intake form becomes, or null when it is not one.
  *
  * Refuses without a name AND at least one way to reach the person: those two are what the trainer
- * reviewing it needs in order to recognise who this is, and email/phone is also the key §26.5's
- * dedupe and [UC4](../../use_cases/uc4_client_self_subscription.md) both reconcile on. A nameless,
- * contactless submission is a row nobody can act on.
+ * reviewing it needs in order to recognise who this is, and email/phone is also the key the review
+ * dialog's dedupe and [UC4](../../use_cases/uc4_client_self_subscription.md) both reconcile on.
+ * A nameless, contactless submission is a row nobody can act on.
  */
 export function buildClientSignup(input) {
   const name = readText(input?.name, MAX_NAME_LENGTH);

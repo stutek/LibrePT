@@ -1,4 +1,4 @@
-// src/domain/inviteExpiry.js — when an invitation stops being answerable (TODO §1.6).
+// src/domain/inviteExpiry.js — when an invitation stops being answerable.
 //
 // Single responsibility: the cutoff, and whether it has passed. No DOM, no storage, no knowledge of
 // how an invitation travels — the payload carries the number this produces, and the reply page reads
@@ -36,7 +36,7 @@ const MS_PER_HOUR = 60 * MS_PER_MINUTE;
  *
  * Null for a padding of zero (the trainer has not asked for expiry, and inventing a deadline would
  * start refusing answers they wanted) and for a session with no start (an unscheduled draft has
- * nothing to count back from — see §17.1's planning sessions).
+ * nothing to count back from).
  */
 export function inviteExpiresAt(startsAt, paddingHours) {
   if (!Number.isFinite(startsAt)) return null;

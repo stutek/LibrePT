@@ -1,5 +1,5 @@
-// src/modules/clipboard/planPeek.js — the "blanket" gesture on the live clipboard (TODO §52.2
-// step 3): press-and-hold shrinks the current plan by itself, a sideways drag pulls it aside to
+// src/modules/clipboard/planPeek.js — the "blanket" gesture on the live clipboard: press-and-hold
+// shrinks the current plan by itself, a sideways drag pulls it aside to
 // show the previous or next plan drawn underneath. Behaviour lives in the prototype
 // .private/prototypes/odeja.html (approved 2026-09-14) — this is that prototype's pointer handling,
 // adapted to the real overlay.

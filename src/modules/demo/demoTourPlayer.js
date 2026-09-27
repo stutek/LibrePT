@@ -1,4 +1,4 @@
-// src/modules/demo/demoTourPlayer.js — runs a scripted tour against the REAL app (TODO §23.5).
+// src/modules/demo/demoTourPlayer.js — runs a scripted tour against the REAL app.
 //
 // Single responsibility: for each step, put the hand on the target, tap the actual control, then
 // check the step's expectation and record what happened. The pass-fail rule is pure and lives in
@@ -18,7 +18,7 @@
 // makes sense, and would let the e2e suite report the later steps as passing on top of a broken
 // one. The recorded results say which step failed and why.
 //
-// **One step is performable on its own** (`performStep`), because the guided walkthrough (TODO §9.5)
+// **One step is performable on its own** (`performStep`), because the guided walkthrough
 // runs the same script one tap at a time and must reach the control, the pointer and the pass-fail
 // check by the same route the automatic tour does. A walkthrough with its own copy of "resolve,
 // scroll, tap, check" would be a second definition of what the demo means.
@@ -97,7 +97,7 @@ function isOnScreen(element) {
  * property the demo should depend on, and the first attempt at this tour broke precisely because it
  * did. Falls back to the first match when no text is given.
  *
- * **Only ever a control that is VISIBLE** (TODO §28.13). A selector as ordinary as `.session-card`
+ * **Only ever a control that is VISIBLE.** A selector as ordinary as `.session-card`
  * matches cards in views nobody is looking at, and a document query returns them in DOM order — so
  * a walkthrough reloaded onto a different route (`guidedDemoUrl()` keeps whatever path was open)
  * put its spotlight on an element belonging to another view. With nothing visible this returns null
@@ -122,7 +122,7 @@ export function resolveTarget(doc, step) {
 }
 
 /** Whether the app is where a step expects to find it, BEFORE anything is asked of the trainer
- * (TODO §30.3). Steps with no `requires` are always ready — most of a script's steps are only
+ * Steps with no `requires` are always ready — most of a script's steps are only
  * reachable in order anyway, and demanding a declaration for each would be ceremony.
  *
  * Checked when the step's card loads rather than when Show me is tapped: a guide asking someone to

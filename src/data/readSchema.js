@@ -1,7 +1,7 @@
 // src/data/readSchema.js — which live schema THIS INSTALL reads from, and keeping every other one
 // ready to be read.
 //
-// Every install reads the newest numbered schema, whatever app version the trainer runs (TODO §76);
+// Every install reads the newest numbered schema, whatever app version the trainer runs;
 // the per-install choice kept here is for the test passes that read PREVIEW or pin the released
 // shape, and nothing offers it to a trainer. Moving between stores is a read re-point: the star-write
 // fan-out writes every live schema on every save (stateStore.js), so every filled store is current.
@@ -13,8 +13,8 @@
 // than copying rows, so the day a schema change needs a genuine transform, there is one place it
 // lands and no second transform to drift from the write path.
 //
-// ONE TRANSACTION, not a resumable cursor. §4 describes a resumable backfill with the meta store
-// holding a cursor; measured, this database does not need one — a full fan-out of the 90-record demo
+// ONE TRANSACTION, not a resumable cursor kept in the meta store; measured, this database does not
+// need one — a full fan-out of the 90-record demo
 // dataset takes ~22ms, and ~3,000 records (a busy trainer after several years) lands near 400ms.
 // A single transaction is atomic, so an interruption commits nothing and the boot after it simply
 // runs the backfill again. Revisit if a real install ever approaches ~50k records, where a single
@@ -133,8 +133,8 @@ async function backfillSchema(db, schema, sourceSchema) {
  * given schema, costing one meta read each.
  *
  * **The source is the schema BELOW, never the schema being read.** The two were the same thing while
- * every install read the lowest schema. The day a build reads a NEW schema (TODO §76: every install
- * reads the newest), the schema being read is the empty one — taking it as the source copied nothing
+ * every install read the lowest schema. The day a build reads a NEW schema (every install now reads
+ * the newest), the schema being read is the empty one — taking it as the source copied nothing
  * into it, marked the older store as filled from it, and the trainer saw an empty app. The schema
  * below is complete on every install that ran the build before this one, because that build's star
  * write kept every live store current. Ascending order carries a jump of two numbers: 5 is filled
@@ -160,7 +160,7 @@ const PREVIEW_BUILD_KEY = "previewBuild";
  * Throw the PREVIEW store away when the build has changed, and refill it only for an install that
  * reads it.
  *
- * Ruled 2026-09-17/18 (Simon, TODO §61): PREVIEW is for CI and for previewing an upcoming version,
+ * Ruled 2026-09-17/18 (Simon): PREVIEW is for CI and for previewing an upcoming version,
  * never live for a client, and it is emptied when the build number changes. Within one build it is
  * kept, because a preview session spans reloads — CI's second pass reads it across every navigation,
  * and emptying at every start left it reading an empty store.
@@ -202,14 +202,14 @@ export async function refreshPreviewStoreIfBuildChanged(db, currentBuildSha) {
   // Fill it whenever this install READS preview and the store is not ready — emptied a moment ago,
   // or provisioned empty by this very boot. Without the second case an install already on PREVIEW
   // came up reading an empty store the first time this build gave it one (found 2026-09-19 by the
-  // PREVIEW pass of §62, on the frozen P-era device database).
+  // second browser-test pass that reads PREVIEW, on the frozen P-era device database).
   if (await isBackfilled(db, PREVIEW_VERSION)) return { cleared: stale, filled: false };
   await backfillSchema(db, PREVIEW_VERSION, STABLE_SCHEMA);
   return { cleared: stale, filled: true };
 }
 
 /**
- * Move this install onto `schema` — the ACTIVATION a preview schema is filled by (TODO §61). Backfills
+ * Move this install onto `schema` — the ACTIVATION a preview schema is filled by. Backfills
  * first if the boot pass has not already — so the switch cannot land on a store that is not ready —
  * then persists the choice. Reversible: the schema being
  * left is still written by every save, so switching back is the same operation in reverse and needs

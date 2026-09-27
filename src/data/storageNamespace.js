@@ -1,19 +1,20 @@
-// src/data/storageNamespace.js — the app's plain localStorage keys (TODO §16.5/§16.3).
+// src/data/storageNamespace.js — the app's plain localStorage keys.
 // Single responsibility: read/write the handful of localStorage keys the app still uses now that
-// the live store is IndexedDB (TODO §18.6 part 4).
+// the live store is IndexedDB.
 //
 // There is no bucket-keying scheme left to build here. Multi-version hosting (per-release-tag
-// buckets, `librept_db@v1.2.0`) was dropped outright (TODO §16/§18: no release tags — one build
-// carries every supported behaviour concurrently). The schema axis that would otherwise replace it
-// (TODO §16.3, "key storage buckets on the data schema, not the release tag") already lives
-// elsewhere: IndexedDB's per-schema object stores (`schema2`, `schema3`, ...,
-// data/indexedDb.js's `storeNameForSchema`) ARE that keying scheme. localStorage's `librept_db` is
-// no longer a live, multi-bucket store at all — it is read exactly once, as the legacy import
-// source for the one-time move onto IndexedDB, and left untouched afterwards as the rollback
-// snapshot. A build with no IndexedDB falls back to this same plain key as its only store, which
-// also needs no bucket axis: a browser lacking IndexedDB never had multiple schemas to keep apart.
+// buckets, `librept_db@v1.2.0`) was dropped outright — no release tags; one build carries every
+// supported behaviour concurrently. The schema axis that would otherwise replace it — keying
+// storage buckets on the data schema, not the release tag — already lives elsewhere: IndexedDB's
+// per-schema object stores (`schema2`, `schema3`, ..., data/indexedDb.js's `storeNameForSchema`)
+// ARE that keying scheme. localStorage's `librept_db` is no longer a live, multi-bucket store at
+// all — it is read exactly once, as the legacy import source for the one-time move onto
+// IndexedDB, and left untouched afterwards as the rollback snapshot. A build with no IndexedDB
+// falls back to
+// this same plain key as its only store, which also needs no bucket axis: a browser lacking
+// IndexedDB never had multiple schemas to keep apart.
 //
-// **The axis that DOES exist here is the workspace** (TODO §40.1, data/workspace.js): a fact about
+// **The axis that DOES exist here is the workspace** (data/workspace.js): a fact about
 // the DATA is scoped to the workspace holding it, a fact about the PERSON or the device is shared by
 // both. That is the same split the two lists below already drew, so the workspace suffix is applied
 // by the version-scoped accessors and by nothing else — the sandbox cannot pick up the trainer's live
@@ -25,7 +26,7 @@ import { scopedKey } from "./workspace.js";
 
 // Data whose SHAPE belongs to the app's current build: written by this build's schema and not
 // interchangeable with an incompatible one without going through the schema-migration chain first.
-// These are also exactly the keys that belong to ONE workspace (§40.1) — a live session, its timers,
+// These are also exactly the keys that belong to ONE workspace — a live session, its timers,
 // a half-filled setup, which messages have been read.
 export const VERSION_SCOPED_KEYS = [
   "librept_db",
@@ -43,7 +44,7 @@ export const ORIGIN_GLOBAL_KEYS = [
   "librept_terms_accepted",
   "librept-theme",
   "librept_lang",
-  // Two retired "expand all" settings (§42.14, §45.16). The module that wrote them is gone — every
+  // Two retired "expand all" settings. The module that wrote them is gone — every
   // card became one design with nothing left to open — but the KEYS stay listed: an install that
   // still holds one must go on being read and wiped unscoped, and moving a leftover value into a
   // workspace scope would be a migration performed by accident.
@@ -64,8 +65,8 @@ export function removeVersionScoped(baseKey) {
 }
 
 /** Read/write a per-workspace key belonging to a NAMED workspace rather than the active one — what
- * the timer stack needs to watch the clocks of the workspace the trainer is not looking at
- * (TODO §40.11). Kept here so localStorage key construction has one home. */
+ * the timer stack needs to watch the clocks of the workspace the trainer is not looking at.
+ * Kept here so localStorage key construction has one home. */
 export function readForWorkspace(baseKey, name) {
   return localStorage.getItem(scopedKey(baseKey, name));
 }
@@ -75,7 +76,7 @@ export function writeForWorkspace(baseKey, name, value) {
 }
 
 /** Drop every per-workspace key belonging to `name` — what a sandbox reset clears alongside the
- * database (TODO §40.4). Total by construction: it walks the declared list rather than matching a
+ * database. Total by construction: it walks the declared list rather than matching a
  * pattern, so a key added to `VERSION_SCOPED_KEYS` is swept without anybody remembering to add it
  * here too. */
 export function clearWorkspaceKeys(name) {

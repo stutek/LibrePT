@@ -378,7 +378,7 @@ export function openAdjustmentWizardComponent(updateId, ctx) {
   wireDialogCloseButtons(dialog);
 
   // Swap picker — pre-filtered to the same muscle group so the replacement inherits the correct
-  // volume bucket (TODO §13.2 Scenario B). The chosen id lands in the hidden #adjust-exercise-swap.
+  // volume bucket. The chosen id lands in the hidden #adjust-exercise-swap.
   const swapSelect = document.getElementById("adjust-exercise-swap");
   swapSelect.value = "";
   mountExercisePicker(document.getElementById("adjust-swap-picker"), {

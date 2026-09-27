@@ -50,12 +50,12 @@ function renderSyncCloudIcon(status) {
   overlay.className = glyph.overlayIcon;
 
   const stateLabel = deps?.t ? deps.t(glyph.labelKey) || glyph.labelFallback : glyph.labelFallback;
-  // The base in the chosen language too (TODO §38.20); only the state half was translated.
+  // The base in the chosen language too; only the state half was translated.
   const baseLabel = deps?.t?.("backup_center") || SYNC_BUTTON_BASE_LABEL;
   document.getElementById("backup-btn")?.setAttribute("aria-label", `${baseLabel} — ${stateLabel}`);
 }
 
-/** The unbacked-data warning (TODO §3.8), driven by backupHealthController's assessment.
+/** The unbacked-data warning, driven by backupHealthController's assessment.
  *
  * **Spelled out, never an icon alone**, for the same reason the PREVIEW badge spells itself out: a
  * bare coloured triangle is an unexplained warning whose meaning lives only in an aria-label, which
@@ -104,16 +104,16 @@ export function renderBackupBadge(health) {
 
 /**
  * Names the build state the trainer is actually in: DEMO while the store holds nothing but the
- * seeded demo, PREVIEW otherwise (TODO §28.9).
+ * seeded demo, PREVIEW otherwise.
  *
  * One slot, two competing claims, and `isDemoOnlyStore` is where the ordering is argued. The badge
  * keeps its link to the data-loss notice in both of THOSE states — it is still a preview build
  * either way, and that notice is the only place the risk is explained without signal.
  *
- * **In the sandbox it is a marker and nothing else** (TODO §42.12, ruled 2026-09-10): a notice about
+ * **In the sandbox it is a marker and nothing else** (ruled 2026-09-10): a notice about
  * losing the trainer's data is the wrong destination from a workspace whose contents are sample
- * data, and what a trainer in there needs to read is one tap away in the feed's leading card
- * (§42.10). The `href` is removed rather than pointed somewhere else — an `<a>` without one is not
+ * data, and what a trainer in there needs to read is one tap away in the feed's leading card.
+ * The `href` is removed rather than pointed somewhere else — an `<a>` without one is not
  * focusable and not clickable, so the badge stops offering what it cannot honour — and it is put
  * back on the way out, because the same element serves every state.
  *
@@ -124,7 +124,7 @@ export function renderBuildStateBadge(state) {
   const badge = document.getElementById("preview-badge");
   if (!badge) return;
 
-  // The SANDBOX claim outranks both (TODO §40.5), and unlike the other two it is a fact rather than
+  // The SANDBOX claim outranks both, and unlike the other two it is a fact rather than
   // a reading of the records: the workspace either is the sandbox or it is not. `isDemoOnlyStore`
   // still answers for the working workspace, which a `?init=demo_data_load` link can fill with
   // sample data without any workspace being involved.
@@ -160,7 +160,7 @@ export function renderBuildStateBadge(state) {
 }
 
 /**
- * Everything on the shell that says WHICH workspace the trainer is in (TODO §40.5): the tint on the
+ * Everything on the shell that says WHICH workspace the trainer is in: the tint on the
  * whole header, and the menu item's words.
  *
  * **The tint, not only the badge.** A badge read at arm's length, one-handed, between sets is not
@@ -174,7 +174,7 @@ export function renderWorkspaceChrome() {
   const sandbox = isSandbox();
   document.body?.classList.toggle("in-sandbox", sandbox);
 
-  // Rebuilding is offered only from inside (TODO §40.4). Toggled HERE rather than at the two call
+  // Rebuilding is offered only from inside. Toggled HERE rather than at the two call
   // sites that switch workspaces, so an item that must never be reachable from the trainer's own
   // work cannot be left behind by a path that forgot: this is the one function that repaints on
   // every switch.
@@ -209,7 +209,7 @@ export function renderSyncBadge() {
     return;
   }
 
-  // Real counts (TODO §3.9/§3.3/§19, no longer a mock): `local` is how many of THIS device's own
+  // Real counts, no longer a mock: `local` is how many of THIS device's own
   // records differ from the last Drive-synced ancestor (0 with no Drive target configured — see
   // driveSyncService.js's getAheadCount doc comment); `remote` is a read-only diff against the same
   // ancestor, kept fresh by periodic/resume counter refreshes rather than a background sync (syncing
@@ -227,7 +227,7 @@ export function renderSyncBadge() {
   const isUnreachable = !isCloudConfigured || !isCloudReachable;
 
   // Past 9 the digit is dropped so the pill stays narrow, and the two directions use DIFFERENT
-  // stand-ins on purpose (TODO §3.11). Ahead gets `↑!`: those edits exist only on this device, so
+  // stand-ins on purpose. Ahead gets `↑!`: those edits exist only on this device, so
   // "many" is the point. Behind keeps `↓↓`, because behind means Drive holds changes not pulled yet
   // — nothing is at risk — and an alarm glyph there would flatten the distinction that makes the
   // ahead one mean anything.
@@ -436,7 +436,7 @@ export function renderHeaderShell() {
           <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
           <span id="preview-badge-label" class="preview-badge-label">PREVIEW</span>
         </a>
-        <!-- TODO §3.8. Hidden until there is unbacked work worth naming; filled by
+        <!-- Hidden until there is unbacked work worth naming; filled by
              renderBackupBadge(). A BUTTON, not a link to an explainer: the remedy is the Sync &
              Backup dialog, which offers both a downloaded file and a Drive sync, so tapping the
              warning lands on the two things that resolve it rather than on prose about them. -->
@@ -460,7 +460,7 @@ export function renderHeaderShell() {
               <i class="fa-solid fa-cloud"></i>
               <i id="sync-cloud-overlay" class="fa-solid fa-arrows-rotate"></i>
             </span>
-            <!-- GitHub-style ahead/behind counters, real (driveSyncService.js, TODO §3.9): local
+            <!-- GitHub-style ahead/behind counters, real (driveSyncService.js): local
                  edits since the last Drive sync / remote changes not yet pulled, filled in by
                  renderSyncBadge(). -->
             <span id="sync-badge" class="sync-badge hidden"></span>
@@ -663,9 +663,9 @@ function setupAppMenu() {
   on("menu-data", () => goto(deps.urlFor("backup")));
   on("menu-settings", () => goto(deps.urlFor("settings")));
   // The warning's remedy, one tap away: the dialog holds both a downloaded backup and a Drive sync,
-  // and §3.8 turns on either being available — not on connecting Google.
+  // and the warning turns on either being available — not on connecting Google.
   on("unbacked-badge", () => goto(deps.urlFor("backup")));
-  // One control, both directions — the menu item says which one it is (TODO §40.5), so there is no
+  // One control, both directions — the menu item says which one it is, so there is no
   // second item to leave behind in the wrong state.
   on("menu-sandbox", () => {
     closeMenu();
@@ -678,7 +678,7 @@ function setupAppMenu() {
     if (isSandbox()) deps.onSwitchWorkspace?.(WORKING);
   });
   // Guarded here as well as hidden: the item is in the markup either way, and a hidden control is a
-  // styling fact, not a promise about what a click can do (TODO §40.4).
+  // styling fact, not a promise about what a click can do.
   on("menu-sandbox-reset", () => {
     closeMenu();
     if (isSandbox()) deps.onResetSandbox?.();

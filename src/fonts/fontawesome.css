@@ -13,7 +13,7 @@
  * request in the shell, it could not be covered by the service worker's SHA-256 integrity
  * catalog (which hashes what is served out of src/), and it blocked every page load on
  * cdnjs.cloudflare.com — measured at a 1948ms median and a 35233ms worst case under a
- * parallel test run, the single largest cause of the Page.goto stalls in TODO §21.
+ * parallel test run, the single largest cause of the Page.goto stalls.
  * To regenerate: download css/all.min.css and webfonts/fa-*.woff2 for the target version,
  * drop the .ttf fallback from each src, and rewrite each url() to the local ./filename.
  * The upstream license banner below is retained for attribution (Icons CC BY 4.0, Fonts

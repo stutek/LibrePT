@@ -1,5 +1,5 @@
-// src/modules/sessionList/sessionTimeline.js — the dashboard's continuous, time-ordered session timeline
-// (TODO §7.3 item 8): one vertical scroll, sessions grouped under sticky per-day headers, replacing
+// src/modules/sessionList/sessionTimeline.js — the dashboard's continuous, time-ordered session
+// timeline: one vertical scroll, sessions grouped under sticky per-day headers, replacing
 // the old four fixed yesterday/today/tomorrow/upcoming day-columns and their horizontal swipe-deck.
 //
 // deps: {
@@ -29,7 +29,7 @@ let focusedSessionDate = todayISODate();
 // settle: open the dashboard and immediately swipe — the single most common gym-floor gesture —
 // and the sticky header silently stopped following your finger until the timer expired. It also
 // made the behaviour a function of how long the page took to load, which is how it survived so
-// long: a slow Font Awesome CDN fetch (TODO §12.6) padded every load past the window, and the bug
+// long: a slow Font Awesome CDN fetch padded every load past the window, and the bug
 // only surfaced once that request was vendored away and the app got fast.
 let sessionsProgrammaticScrollActive = false;
 let sessionsProgrammaticScrollUntil = 0;
@@ -283,10 +283,10 @@ export function syncSessionTimelineAfterRender() {
 
 /** The title row's controls — all three of which have now moved or gone, so it renders nothing.
  *
- * Today moved into the date filter's calendar on 2026-09-21 (§74.2): it is the one control that
+ * Today moved into the date filter's calendar on 2026-09-21: it is the one control that
  * means a day, and the calendar is where days are chosen. The jump-to-date button went the same way
- * on 2026-09-11 (§45.6) — the date chip filters to a day, which says the same thing more strongly —
- * and the expand-all control went with §45.16, when session cards became one design that shows
+ * on 2026-09-11 — the date chip filters to a day, which says the same thing more strongly —
+ * and the expand-all control went when session cards became one design that shows
  * everything they have.
  *
  * Kept as an empty render rather than deleted: the slot is where a control belonging to the TITLE

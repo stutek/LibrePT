@@ -1,5 +1,5 @@
 // src/domain/clientSessionNeighbours.js — the previous and next plan for ONE client, from
-// wherever the trainer is currently looking (TODO §52.2).
+// wherever the trainer is currently looking.
 //
 // Ruling (Simon, 2026-09-14): stepping back and forward between sessions moves through THIS
 // client's own history and schedule, not through every trainer's sessions in calendar order. A
@@ -96,7 +96,7 @@ export function clientSessionNeighbours(state, clientId, anchor) {
 
 /**
  * The client's session TODAY, or null — what the clipboard's Today control returns to after the
- * trainer has pulled their way to another plan (TODO §52.2 step 4). Derived from the same history and
+ * trainer has pulled their way to another plan. Derived from the same history and
  * schedule as the neighbours, so there is no second record of "the session launched today" to keep
  * in step: a finished day answers with its history record, an unfinished one with its scheduled row.
  *

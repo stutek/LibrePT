@@ -1,4 +1,4 @@
-// src/data/recordReferences.js — the domain's cross-collection reference graph (TODO §18.5).
+// src/data/recordReferences.js — the domain's cross-collection reference graph.
 // Single responsibility: declare which collection fields are STRUCTURAL references to another
 // collection (the record depends on that collection's row existing), and detect cycles in the
 // graph those references form — migration replay order means correct order of foreign-key
@@ -9,9 +9,8 @@
 // `routineName`/`clientName`/`exerciseName` (see recordSchemas.js) is a denormalised label, not a
 // dependency — the record stays valid even if the label is stale or the referenced row is gone.
 // Only add a field here when losing the referenced row should be treated as breaking the record,
-// not just staling a label. §17.4 (saving a past session as a routine template) is flagged in
-// TODO §18.5 as the first realistic risk of introducing an actual cycle — check this graph when
-// building it.
+// not just staling a label. Saving a past session as a routine template is the first realistic
+// risk of introducing an actual cycle — check this graph when building it.
 
 export const REFERENCES = {
   history: { clientId: "clients" },

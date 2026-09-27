@@ -1,4 +1,4 @@
-// src/domain/catalogMatch.js — which imported movements does the catalog already know? (TODO §29.1)
+// src/domain/catalogMatch.js — which imported movements does the catalog already know?
 //
 // Single responsibility: attach a catalog id to the movements that have one, and mark the rest as
 // custom. Pure — no DOM, no storage.
@@ -6,8 +6,9 @@
 // **The ruling this implements, and both halves matter.** A movement the catalog does not have is
 // ALLOWED: refusing it would throw away the trainer's programme over a naming difference. But it is
 // MARKED, because silently adopting whatever the catalog has nearest is how a catalog becomes forty
-// spellings of "Bench Press" under forty ids — the exact failure §13's taxonomy work exists to
-// prevent. The tag is what keeps a custom movement visibly distinct rather than quietly canonical.
+// spellings of "Bench Press" under forty ids — the exact failure the exercise library's taxonomy
+// work exists to prevent. The tag is what keeps a custom movement visibly distinct rather than
+// quietly canonical.
 //
 // **Matching is exact after normalisation, deliberately.** Case and spacing differences are the same
 // movement; anything else is not. "Incline Barbell Bench Press" is not "Barbell Bench Press", and a

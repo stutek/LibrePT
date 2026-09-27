@@ -207,7 +207,7 @@ export const de = {
   modality_stretch: "Dehnen",
   modality_balance: "Gleichgewicht",
   modality_agility: "Beweglichkeit",
-  // The Custom Exercise dialog (controllers/exerciseFormsController.js), TODO §38.20.
+  // The Custom Exercise dialog (controllers/exerciseFormsController.js).
   modality_label: "Wie sie aufgezeichnet wird *",
   modality_option_strength: "Kraft — Sätze × Wiederholungen × Last",
   modality_option_isometric: "Isometrisch — Haltezeit + Last",
@@ -218,7 +218,7 @@ export const de = {
   metric_label: "Messgröße",
   exercise_name_placeholder: "z. B. Bulgarian Split Squat",
   instructions_placeholder: "Hinweise zur Technik...",
-  // The Apply Program Adjustment dialog (modules/plans/planAdjustments.js), TODO §38.20.
+  // The Apply Program Adjustment dialog (modules/plans/planAdjustments.js).
   adjust_title: "Programmänderung übernehmen",
   adjust_client: "Kunde:",
   adjust_feedback: "Rückmeldung:",
@@ -235,8 +235,8 @@ export const de = {
   adjust_replacement_hint:
     "— dieselbe Muskelgruppe, damit das Trainingsvolumen weiter gezählt wird",
   adjust_apply: "Übernehmen und erledigen",
-  // The encrypted-file reader a CLIENT opens (modules/common/encryptedFileReader.js), TODO §38.20.
-  // The Routine Template dialog and its rows (routineFormsController.js, plansView.js), TODO §38.20.
+  // The encrypted-file reader a CLIENT opens (modules/common/encryptedFileReader.js).
+  // The Routine Template dialog and its rows (routineFormsController.js, plansView.js).
   routine_name_placeholder: "z. B. Oberkörper A",
   routine_desc_placeholder: "z. B. Schwerpunkt Grundübungen",
   routine_exercises_heading: "Übungen der Routine",
@@ -246,10 +246,10 @@ export const de = {
   routine_row_rest: "Pause",
   routine_row_rest_label: "Pausendauer in Sekunden",
   routine_row_remove: "Übung aus der Routine entfernen",
-  // The exercise picker (modules/exercises/exercisePicker.js), TODO §38.20.
+  // The exercise picker (modules/exercises/exercisePicker.js).
   picker_count: "Übungen: {count}",
   picker_empty: "Keine Übung passt zu diesem Filter.",
-  // The session setup form (modules/session/editSessionView.js), TODO §38.20.
+  // The session setup form (modules/session/editSessionView.js).
   session_name_placeholder: "Namen des Trainings wählen oder eingeben...",
   location_placeholder: "Ort wählen oder eingeben...",
   encrypted_title: "Verschlüsselte Datei öffnen",
@@ -332,7 +332,7 @@ export const de = {
   btn_launch_clipboard_short: "Im Klemmbrett öffnen",
   syncing_calendar: "Wird synchronisiert...",
   calendar_synced: "Kalender erfolgreich synchronisiert.",
-  // The board's filters (TODO §45.6). Each chip says what it filters by when nothing is chosen, and
+  // The board's filters. Each chip says what it filters by when nothing is chosen, and
   // its value once something is — the chip IS the readout, which is why there is no modal.
   filter_dates: "Daten",
   filter_client: "Kunde",
@@ -369,7 +369,7 @@ export const de = {
   session_invite_title: "Kalendereinladungen senden",
   session_invite_desc:
     "Neu eingetragene Teilnehmer können eine Kalendereinladung für dieses Training bekommen.",
-  // The client intake page (TODO §1.7/§26) — the only screen in the app written FOR the client, so
+  // The client intake page — the only screen in the app written FOR the client, so
   // the voice is theirs and not the trainer's: "dein Trainer", never "der Kunde".
   intake_title: "Stell dich deinem Trainer vor",
   intake_lede:
@@ -383,7 +383,7 @@ export const de = {
   intake_health_hint:
     "Nur wenn du willst. Es steht in der Datei, die du deinem Trainer schickst, und nirgendwo sonst — nicht in einer SMS und in keinem Link.",
   // Informed consent (see en.js): the line a client ticks says what the linked notice says, and it
-  // names no storage vendor (§39.3).
+  // names no storage vendor.
   intake_consent:
     "Ich willige ein, dass mein Trainer diese Angaben speichert und nutzt, um mein Training zu planen und aufzuzeichnen. Sie bleiben auf dem eigenen Gerät meines Trainers und können zusätzlich als Sicherungskopie im eigenen privaten Cloud-Speicher meines Trainers liegen — kein anderer Dienst erhält sie. Ich kann diese Einwilligung jederzeit widerrufen, indem ich es meinem Trainer sage.",
   intake_sender_for: "Du füllst das für {who} aus.",
@@ -407,7 +407,7 @@ export const de = {
   intake_send_to_body: "Hallo, hier sind meine Angaben für das Training.",
   intake_send_to_hint:
     "Häng die Datei {file} an diese Nachricht an. Dein Telefon hat sie bei deinen Downloads gespeichert.",
-  // Precedes the browser's own untranslated message (TODO §45.4).
+  // Precedes the browser's own untranslated message.
   intake_send_failed_detail: "Das braucht dein Trainer vielleicht:",
   intake_send_failed_saved:
     "Das Teilen hat nicht geklappt, deshalb hat dein Telefon die Datei {file} bei deinen Downloads gespeichert. Schick sie selbst: Öffne eine Nachricht an deinen Trainer, füge einen Anhang hinzu und wähle diese Datei.",
@@ -415,7 +415,7 @@ export const de = {
     "Gib deinen Namen an und entweder eine E-Mail-Adresse oder eine Telefonnummer.",
   intake_err_consent:
     "Setz das Häkchen bei der Einwilligung — ohne sie darf dein Trainer deine Angaben nicht speichern.",
-  // Reviewing a submission a client sent in (TODO §26.5).
+  // Reviewing a submission a client sent in.
   signup_review_lede:
     "Öffne die Datei, die dir dein Kunde geschickt hat. Nichts wird zu deinen Kunden hinzugefügt, bevor du sie annimmst — die Datei wurde auf dem Telefon des Kunden erstellt, und jeder könnte dir eine schicken.",
   signup_review_title: "Angaben eines Kunden prüfen",
@@ -433,7 +433,7 @@ export const de = {
   signup_review_save: "Zu meinen Kunden hinzufügen",
   signup_review_unreadable:
     "Diese Datei ist keine Kundenvorstellung aus LibrePT — prüfe, ob du den richtigen Anhang gewählt hast.",
-  // The invite-reply page (TODO §1.6). Written FOR the client, like the intake page.
+  // The invite-reply page. Written FOR the client, like the intake page.
   rsvp_unreadable:
     "Dieser Einladungslink ist unvollständig — bitte deinen Trainer, ihn noch einmal zu schicken.",
   rsvp_expired:
@@ -521,10 +521,10 @@ export const de = {
   splash_dismiss: "Schließen und zur App",
   splash_load_demo: "Mit Demodaten ausprobieren",
   splash_start_empty: "Mit leerer App beginnen",
-  // The trainer's own details (TODO §45.2).
+  // The trainer's own details.
   menu_trainer_details: "Meine Angaben",
   trainer_details_title: "Deine Angaben",
-  // The app version this device runs (TODO §76).
+  // The app version this device runs.
   menu_app_version: "App-Version",
   app_version_title: "App-Version",
   app_version_button_label: "Build-Version — tippen für Details",
@@ -552,7 +552,7 @@ export const de = {
     "Dein Name unterschreibt die Einladungen an deine Kunden, und über Telefon und E-Mail antworten sie dir. Alle vier Felder sind Pflicht. Die Angaben bleiben auf diesem Gerät, und du kannst sie später im Menü ändern.",
   splash_theme_prompt: "Wähle ein Design",
   splash_continue: "Weiter",
-  // The guided walkthrough (TODO §9.5) and the captions of the automatic demo
+  // The guided walkthrough and the captions of the automatic demo
   // (modules/demo/gymFloorTour.js). Each caption names the control by what it DOES.
   walkthrough_title: "Geführte Tour",
   walkthrough_chapters_heading: "Geführte Tour: Wähle ein Kapitel",
@@ -582,7 +582,7 @@ export const de = {
     "Markiere die Runde als Zu leicht. Ein Tipp zeichnet es auf und hinterlässt eine Notiz für den Plan.",
   tour_step_next_participant:
     "Wechsle zum nächsten Teilnehmer — dasselbe Training, sein eigener Plan.",
-  // The long demo (TODO §35): chapter titles, the narration cards' bodies, and the labels the
+  // The long demo: chapter titles, the narration cards' bodies, and the labels the
   // narration surface itself needs.
   gym_notes_label: "Im Studio",
   label_repeats: "Wiederholt sich jede Woche",
@@ -814,7 +814,7 @@ export const de = {
   story_step_capture_tag: "Tippe auf 🔥 Joint Pain / Discomfort — Gelenkschmerzen.",
   story_step_capture_note:
     "Gib in das Notizfeld ein, was er gesagt hat: linkes Knie, dritte Runde.",
-  // What the demo TYPES, not what it says about typing (TODO §38.19): the words a person enters are
+  // What the demo TYPES, not what it says about typing: the words a person enters are
   // translated like everything else they read.
   story_typed_note: "linkes Knie, dritte Runde",
   story_typed_injury: "Schulter, vor zwei Jahren",
@@ -878,7 +878,7 @@ export const de = {
   drive_sync_connect: "Google Drive verbinden",
   drive_sync_now: "Jetzt synchronisieren",
   drive_sync_syncing: "Wird synchronisiert…",
-  // What the header cloud's overlay glyph MEANS, spoken (TODO §3.11).
+  // What the header cloud's overlay glyph MEANS, spoken.
   drive_sync_glyph_failed: "Letzte Synchronisierung fehlgeschlagen",
   drive_sync_glyph_disconnected: "Cloud-Synchronisierung nicht verbunden",
   drive_sync_glyph_idle: "Cloud-Synchronisierung verbunden",
@@ -902,7 +902,7 @@ export const de = {
     "Google hat dieses Konto noch nicht für die Synchronisierung freigegeben. Deine Daten sind auf diesem Gerät sicher.",
   drive_sync_status_declined: "Nicht verbunden — du kannst jederzeit verbinden.",
   drive_sync_review_conflicts: "Konflikte prüfen",
-  // The Sync & Backup dialog's own markup (modules/common/backupRestore.js), TODO §38.20.
+  // The Sync & Backup dialog's own markup (modules/common/backupRestore.js).
   drive_sync_title: "Cloud-Sicherung (Google Drive)",
   drive_sync_disconnect: "Trennen",
   drive_sync_interval_label: "Synchronisieren alle",
@@ -1000,7 +1000,7 @@ export const de = {
   custom_empty_plan: "Eigener / leerer Plan",
   plan_program_title: "Kommendes Programm planen",
   planned_program: "Geplantes Programm",
-  // The sideways deck of a client's plans on the clipboard (TODO §52.2 step 4).
+  // The sideways deck of a client's plans on the clipboard.
   plan_peek_previous: "Vorheriger Plan",
   plan_peek_next: "Nächster Plan",
   plan_peek_release_open: "Loslassen zum Öffnen",
@@ -1016,7 +1016,7 @@ export const de = {
   unbacked_urgent: "GEFÄHRDET — JETZT SICHERN",
   offline_cached_desc:
     "HTTP-Server nicht erreichbar. Die App läuft mit dem zwischengespeicherten Code und kann nicht nach Updates suchen.",
-  // The two data-subject-request dialogs (modules/clients/clientDataRights.js), TODO §38.20.
+  // The two data-subject-request dialogs (modules/clients/clientDataRights.js).
   rights_export_title: "Daten dieses Kunden exportieren",
   rights_export_scope:
     "Aufgezeichnete Trainings: {logged}, Buchungen: {sessions}, Planänderungen: {updates}. Daten anderer Kunden sind nie enthalten: Ein Gruppentraining erscheint nur mit seiner Größe.",
@@ -1047,7 +1047,7 @@ export const de = {
   rights_erase_requested: "Datum des Antrags",
   rights_copy_receipt: "Bestätigung kopieren",
   rights_erase_confirm: "Endgültig löschen",
-  // The client detail view (modules/clients/clientsView.js), TODO §38.20.
+  // The client detail view (modules/clients/clientsView.js).
   view_grabber_home: "Zur Startseite",
   view_grabber_clipboard: "Klemmbrett des Trainings öffnen",
   view_grabber_close_session: "Training schließen und zur Startseite",

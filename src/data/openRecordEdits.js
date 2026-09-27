@@ -1,4 +1,4 @@
-// src/data/openRecordEdits.js — the records a form is writing into right now (TODO §50.2).
+// src/data/openRecordEdits.js — the records a form is writing into right now.
 //
 // Single responsibility: remember, for every record open in a form, what it was before the form
 // opened, and answer two questions with it — what Cancel puts back, and what the counts may see.

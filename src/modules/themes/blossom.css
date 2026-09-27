@@ -15,7 +15,7 @@ body.blossom-theme {
   /* Deepened twice, same hue each time, because it is the colour EVERY muted line in the app takes
      here. #9d6b8a measured 4.28:1 on this palette's card (2026-08-27), under the 4.5:1 a paragraph
      needs; #96617f cleared the card at 4.84:1 but still read 4.46:1 on the page field, so it failed
-     wherever a muted line sits outside a card (2026-09-10, TODO §38.11). This one reads 6.98:1 on
+     wherever a muted line sits outside a card (2026-09-10). This one reads 6.98:1 on
      the card and 6.43:1 on the field. tests/unit/test_theme_contrast.py holds it there. */
   --text-muted: #7a4a64;
   --border-color: #f6d6e6;
@@ -41,7 +41,7 @@ body.blossom-theme {
      pink primary; future was a muddy amber-brown that clashed with the soft pink/lavender palette.
      Both are read as TEXT (planSheet.css, planPeek.css colour exercise names with them), so both
      carry the 4.5:1 a line of text needs — measured on the card and on the page field behind it.
-     The rose-400 #fb7185 that stood here read 2.68:1 and 2.46:1 (TODO §55.2): a pastel that looked
+     The rose-400 #fb7185 that stood here read 2.68:1 and 2.46:1: a pastel that looked
      right beside the pink primary and could not be read on either surface. */
   --temporal-past: #9333ea; /* 5.35:1 card, 4.93:1 field */
   --temporal-future: #be123c; /* rose-700 — 6.25:1 card, 5.76:1 field */

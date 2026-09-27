@@ -1,5 +1,4 @@
-/* modules/sessionList/sessionFilterBar.css — the board's filter chips and the range calendar
-   (TODO §45.6).
+/* modules/sessionList/sessionFilterBar.css — the board's filter chips and the range calendar.
 
    Deliberately small: the chips themselves are `.chip` / `.filter-chips` from index.css, already
    worn by the exercise library, and the two selects borrow the same class rather than getting a
@@ -203,7 +202,7 @@
 }
 
 /* The two ENDS are the strongest thing in the grid, and the days between them are a wash. That is
-   the documented convention (§45.6) and it is what makes "tap an end" something a person can aim at:
+   the documented convention and it is what makes "tap an end" something a person can aim at:
    an end is a target, a day inside the range is merely covered by it. */
 .filter-day-inside {
   background: var(--primary-light);

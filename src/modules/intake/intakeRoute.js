@@ -1,12 +1,12 @@
 // src/modules/intake/intakeRoute.js — is this visitor a prospective client, and what language do they
-// read? (TODO §1.7/§26)
+// read?
 //
 // Single responsibility: the two pure questions app.js asks before it decides which boot to run. Kept
 // out of the router deliberately — the router is part of the trainer's app, and the whole point of the
 // intake path is that none of that has started yet.
 //
 // **Matched on the path, not a query parameter.** `/intake` is a URL a trainer prints on a leaflet or
-// puts behind a QR code on a gym wall (§1.7), so it has to be short, typeable, and obviously about
+// puts behind a QR code on a gym wall, so it has to be short, typeable, and obviously about
 // signing up. A `?intake=1` on the app's root would be neither, and would also boot the trainer's app
 // first and the form second.
 //

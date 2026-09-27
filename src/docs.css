@@ -9,7 +9,7 @@
    from prefers-color-scheme, which needs no JavaScript. No @font-face either: system fonts render a
    legal document perfectly well and save every reader a font download on a page they visit once.
 
-   Kept small and token-driven so a future theme redesign (TODO §4.1) can restyle it without
+   Kept small and token-driven so a future theme redesign can restyle it without
    touching the generator. */
 
 :root {

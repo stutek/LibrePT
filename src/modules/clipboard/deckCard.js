@@ -28,8 +28,8 @@ export class DeckCard {
     return !!this.item.isInFocus;
   }
 
-  // Whether this is the ACTIVE card: the one the trainer is looking at, marked but not opened
-  // (TODO §48.1). An open card is always the active one; an active card is open only after a tap.
+  // Whether this is the ACTIVE card: the one the trainer is looking at, marked but not opened.
+  // An open card is always the active one; an active card is open only after a tap.
   get isActive() {
     return !!this.item.isActive;
   }
@@ -45,15 +45,15 @@ export class DeckCard {
 
   // The fixed skeleton — subclasses never override this, only the three hooks below.
   //
-  // **One design, opened up — never a second design swapped in** (ruled 2026-09-10, TODO §42.3).
+  // **One design, opened up — never a second design swapped in** (ruled 2026-09-10).
   // Every card draws the SAME markup in every state; focus then ADDS its controls to that markup.
   // Until then each card type carried two full templates, and they drifted: the collapsed exercise
   // row said "S4 × R6 × 60kg" on one line while the focused card threw that line away and said the
   // same three numbers again as a block of big tiles. Tapping a card therefore replaced what the
   // trainer was reading instead of opening it, and the two templates had to be kept in agreement by
-  // hand — which is how the status tag ended up in a different place in each (§42.5).
+  // hand — which is how the status tag ended up in a different place in each.
   //
-  // TWO states now, not three (§42.14). "Open every card" was removed once there was nothing left
+  // TWO states now, not three. "Open every card" was removed once there was nothing left
   // for it to open: the stack already shows each card whole, so the setting only stopped the cards
   // overlapping. A card is either the one being worked, or one of the rest.
   //

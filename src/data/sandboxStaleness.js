@@ -1,5 +1,5 @@
 // src/data/sandboxStaleness.js — has the sandbox gone flat, and may the trainer be asked about it?
-// (TODO §40.4). Pure: takes the sandbox's own bookkeeping and a clock reading, returns a decision.
+// Pure: takes the sandbox's own bookkeeping and a clock reading, returns a decision.
 // No storage, no DOM, no `Date.now()` of its own.
 //
 // **Why it goes flat at all.** The seed generates its sessions relative to "now"

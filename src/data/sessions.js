@@ -63,7 +63,7 @@ export const DEFAULT_SESSIONS = (() => {
     };
   };
 
-  // The one real, absolute timestamp on a session (TODO §7.3 item 8) — `day` stays a coarse bucket
+  // The one real, absolute timestamp on a session — `day` stays a coarse bucket
   // for the other systems that already key off it (overlap detection, temporal card styling), but
   // the continuous time-ordered dashboard axis sorts and positions purely on this. `offsetDays` is
   // relative to today at midnight; `hour` is local, matching the same hour baked into `time` above.

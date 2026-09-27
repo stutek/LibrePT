@@ -1,11 +1,11 @@
-// src/modules/common/appVersionDialog.js — where the trainer chooses which app version runs (TODO §76).
+// src/modules/common/appVersionDialog.js — where the trainer chooses which app version runs.
 //
 // Single responsibility: list the supported versions (data/appVersions.js), mark the one in use, and
 // on a tap store the choice and reload. The reload is the whole switch: every screen is drawn again
 // under the new version's behaviours, and nothing about which data is read changes.
 //
 // **Refused while a session is running**, with the reason on the screen: a reload in front of a client
-// is the one moment the switch must not happen (TODO §18.12).
+// is the one moment the switch must not happen.
 //
 // Injected dependencies: `t` (translate), `isSessionRunning`, and `reload`, so a test can see a switch
 // without the page going away.

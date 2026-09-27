@@ -1,5 +1,5 @@
 // src/modules/clients/signupReviewDialog.js — the trainer reading a submission a client sent them,
-// and deciding what to do with it (TODO §26.5).
+// and deciding what to do with it.
 //
 // Single responsibility: show one submission, offer the match if there is one, and write the record on
 // accept. What a submission IS and how it maps to client fields are data/clientSignup.js; reading the
@@ -7,7 +7,7 @@
 //
 // **This dialog is the trust boundary of the whole self-onboarding feature.** There is no signature to
 // verify and deliberately never will be — signing needs a key exchange, which needs the server this
-// project does not have (§26.8) — so anyone who photographs the QR on a gym wall can craft a file.
+// project does not have — so anyone who photographs the QR on a gym wall can craft a file.
 // What makes that acceptable is not cryptography; it is that a human being looks at one record before
 // it enters their register. Hence: no auto-import, no "trust files from this sender", and every field
 // on screen before Save is reachable.
@@ -39,7 +39,7 @@ const DIALOG_ID = "dialog-signup-review";
 
 let deps = null;
 // The submission currently under review. Cleared on close, so a declined file is GONE rather than left
-// primed for a later stray tap on Save — the same rule §18.7's restore flow follows.
+// primed for a later stray tap on Save — the same rule the restore flow follows.
 let reviewed = null;
 let matchedClient = null;
 

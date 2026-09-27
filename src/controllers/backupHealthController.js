@@ -1,5 +1,5 @@
-// src/controllers/backupHealthController.js — keeps the header's unbacked-data warning current
-// (TODO §3.8). Single responsibility: hold the two ASYNC inputs the assessment needs, so the
+// src/controllers/backupHealthController.js — keeps the header's unbacked-data warning current.
+// Single responsibility: hold the two ASYNC inputs the assessment needs, so the
 // assessment itself can run synchronously on every write.
 //
 // **Why a cache rather than reading on demand.** `assessBackupHealth` is pure and fast, but its
@@ -36,7 +36,7 @@ export function refreshBackupBadge() {
   renderBackupBadge(
     assessBackupHealth({
       history: withoutSeededHistory(cachedHistory),
-      // A record still open in its form is not counted until the form is left (TODO §50.2).
+      // A record still open in its form is not counted until the form is left.
       currentFingerprint: fingerprintState(withoutSeedRecords(withoutOpenEdits(getState()))),
       durability: cachedDurability,
     }),
@@ -44,7 +44,7 @@ export function refreshBackupBadge() {
 }
 
 /**
- * The stored fingerprint with the demo dropped from it too (TODO §28.5).
+ * The stored fingerprint with the demo dropped from it too.
  *
  * Filtering only the live state would turn every seeded record in an older backup's fingerprint
  * into a phantom REMOVAL, so the warning this change exists to silence would fire even harder. The

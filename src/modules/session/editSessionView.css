@@ -40,7 +40,7 @@
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-cyan) 25%, transparent);
   outline: none;
 }
-/* Who is training (TODO §46.2). The form shows the people CHOSEN, not the whole client base, so
+/* Who is training. The form shows the people CHOSEN, not the whole client base, so
    this list is short by construction; the search above it is what a trainer with a hundred clients
    actually uses. Touch targets are sized for a thumb, because a wrong tap here books the wrong
    person into the session. */
@@ -186,7 +186,7 @@
   cursor: pointer;
 }
 
-/* The repeating slot (TODO §35.3a). Off by default and quiet when off: a one-off session is still
+/* The repeating slot. Off by default and quiet when off: a one-off session is still
    what a trainer creates most often, so this must not read as a decision they owe an answer to. */
 .setup-repeat-toggle {
   display: flex;

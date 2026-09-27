@@ -1,14 +1,14 @@
 // src/domain/exerciseModality.js — the exercise MODALITY axis: how a movement is LOGGED.
 //
 // Orthogonal to the structural item type (exercise / rest / circuit) and to equipment-derived
-// load. Modality decides which TARGET a movement is programmed and logged against (TODO §13.3 / §17.1):
+// load. Modality decides which TARGET a movement is programmed and logged against:
 //   • strength  — sets × reps × load                        (the default; every legacy exercise)
 //   • isometric — a hold under load: hold-time + load        (weighted plank, wall sit, carry hold)
 //   • cardio    — a conditioning effort: time | distance | calories | watts | pace | heartrate
 //   • stretch   — a mobility hold measured in hold-time      (optionally per side)
 //   • balance   — a stability hold measured in hold-time     (single-leg / BOSU work)
 //   • agility   — a speed/coordination drill: time | distance | reps  (shuttle, ladder, cone drills)
-// (hiit is reserved by §17.1 but has no distinct logging surface yet, so it is not a value here.)
+// (hiit is reserved for later work but has no distinct logging surface yet, so it is not a value here.)
 //
 // Like reps/load, the raw authored magnitude stays on the item (in its polymorphic `reps` field) and
 // its MEANING is derived here at render time from the movement's modality + metric. No per-item unit is
@@ -82,8 +82,8 @@ export function toSeconds(raw) {
 // Compact "M:SS" (or "H:MM:SS") duration for a stat tile / compact row — minutes UNPADDED, so a
 // short effort reads as "5:02", not "05:02". Deliberately not utils.js's formatDuration, which pads
 // to a fixed width because it drives a live countdown that must not jitter as the digits change.
-// Both were called formatDuration until TODO §24.2; two same-named exports differing only in
-// padding is exactly the pair a reader picks the wrong one from.
+// Both were called formatDuration until a module-boundary cleanup split them apart; two same-named
+// exports differing only in padding is exactly the pair a reader picks the wrong one from.
 export function formatCompactDuration(totalSeconds) {
   const sec = Math.max(0, Math.round(totalSeconds));
   const h = Math.floor(sec / 3600);
@@ -126,7 +126,7 @@ export function formatMetricValue(rawValue, metric) {
 // The plan item's target, labelled S(ets) × R(eps) × weight, on one line: "S4 × R6 × 60kg" for
 // strength, "S3 × 0:45 × 20kg" for isometric, "S1 × 20 cal" for cardio, "S2 × 0:30" for
 // stretch/balance, with a load axis only for load-bearing modalities. Single source of truth for
-// this wording (TODO §52.2 step 2): exerciseCard.js's collapsed card and the read-only plan sheet
+// this wording: exerciseCard.js's collapsed card and the read-only plan sheet
 // both build the same phrase for the same item and must never drift apart. Returns a plain string —
 // callers escape it for their own markup context (exerciseCard.js innerHTML; planSheet.js textContent).
 export function compactTargetString({

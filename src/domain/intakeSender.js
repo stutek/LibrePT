@@ -1,4 +1,4 @@
-// src/domain/intakeSender.js — who an intake link says it came from (TODO §26.3).
+// src/domain/intakeSender.js — who an intake link says it came from.
 //
 // Single responsibility: put the trainer's own name, number and address into an intake link, and read
 // them back out on the other side. No DOM, no sending — modules/clients/intakeInvite.js builds the link,

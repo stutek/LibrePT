@@ -1,5 +1,4 @@
-// src/modules/plans/programImportDialog.js — bringing in a programme written somewhere else
-// (TODO §29).
+// src/modules/plans/programImportDialog.js — bringing in a programme written somewhere else.
 //
 // Single responsibility: the surface. The parser is domain/programImport.js, the catalog match is
 // domain/catalogMatch.js, and the write is the editor's own save — there is deliberately no

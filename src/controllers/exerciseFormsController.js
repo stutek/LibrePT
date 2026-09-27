@@ -193,9 +193,9 @@ export function setupExerciseForms({
   // ✕ keeps what was typed, like Save; only Cancel undoes it (liveRecordForm.js).
   if (closeBtn) closeBtn.addEventListener("click", () => closeModal("dialog-exercise"));
 
-  // Every change goes into the exercise record, so a reload loses nothing (TODO §50.2). The
-  // selects start on a value, so a new movement always has its muscle group, equipment and pattern
-  // (TODO §13.2 Scenario C); an empty name is written as the placeholder.
+  // Every change goes into the exercise record, so a reload loses nothing. The
+  // selects start on a value, so a new movement always has its muscle group, equipment and pattern;
+  // an empty name is written as the placeholder.
   const live = keepRecordLive({
     dialog,
     form,

@@ -3,14 +3,14 @@
 // long-term volume analytics: `category` (primary muscle group), `equipment`, `pattern`
 // (biomechanical movement pattern), and `modality` (HOW it is logged — see exerciseModality.js).
 // `instructions` is retained for the live deck but deprecated in the catalog view — a certified PT
-// does not need how-to text (TODO §13.1).
+// does not need how-to text.
 //
 // Controlled vocabularies (keep values stable — history and analytics bucket on them):
 //   category: Chest | Back | Legs | Shoulders | Arms | Core | Recovery | Cardio
 //   equipment: Barbell | Dumbbell | Cable | Machine | Bodyweight
 //   pattern: Horizontal Push | Horizontal Pull | Vertical Push | Vertical Pull |
 //            Squat | Hinge | Lunge | Isolation | Core | Mobility | Conditioning | Balance | Agility
-//   modality (TODO §13.3 / §17.1): strength (default, omitted) | isometric | cardio | stretch |
+//   modality: strength (default, omitted) | isometric | cardio | stretch |
 //            balance | agility
 //     - cardio entries carry `metric`: time | distance | calories | watts | pace | heartrate.
 //     - agility entries carry `metric`: time | distance | reps.

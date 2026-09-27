@@ -1,9 +1,9 @@
-// src/modules/demo/gymFloorTour.js — the script: one real set, logged one-handed (TODO §23.5).
+// src/modules/demo/gymFloorTour.js — the script: one real set, logged one-handed.
 //
 // Single responsibility: the CONTENT of the demo. The engine that runs it is demoTourPlayer.js and
 // the pass-fail rule is domain/demoTour.js — this file is data, and adding a step is a data change.
 //
-// **Why this flow and not a feature tour.** §23.4 settled the positioning: do not pitch "replace
+// **Why this flow and not a feature tour.** The ruled positioning is: do not pitch "replace
 // your PT software", pitch the clipboard — the one job trainers hate. So the script is the thing
 // the app is actually for: open a session, put an exercise in focus, register that it was too easy,
 // move to the next participant. Four taps, no typing, no menus. A tour of settings screens would
@@ -32,11 +32,11 @@ export const GYM_FLOOR_TOUR = {
       // By its id, never its title: the demo writes the title in the language it was loaded in, and
       // the English one stopped every Slovenian walk here (found 2026-09-25).
       target: `.session-card[data-session-id="${DEMO_GROUP_SESSION_ID}"]`,
-      // What has to be TRUE before this step can be asked (TODO §30.3): the board, with cards on
+      // What has to be TRUE before this step can be asked: the board, with cards on
       // it. A pasted or refreshed `?demo=` link can open the app anywhere, and a step asking the
       // trainer to open a session that is already open reads as a broken guide.
       // Where this step LIVES. The overlay navigates here when the app is somewhere else — walking
-      // Back out of the clipboard, or arriving on a refreshed deep link (TODO §30.3). Only the steps
+      // Back out of the clipboard, or arriving on a refreshed deep link. Only the steps
       // that own a view need it: 2-4 are inside the clipboard step 1 opens, so they follow from it.
       route: "/",
       requires: [
@@ -56,7 +56,7 @@ export const GYM_FLOOR_TOUR = {
       // A CIRCUIT card specifically. The seeded session is circuits end to end — Jane's plan holds
       // no standalone exercise at all — which the first e2e run reported rather than leaving the
       // demo to fail in front of a viewer. It is also the better story: one clipboard driving a
-      // group through a circuit is the thing no competitor makes easy (§23.4).
+      // group through a circuit is the thing no competitor makes easy.
       // The clipboard has to be open: its deck does not exist on the board.
       requires: [{ selector: "#active-exercise-scroll-deck", visible: true }],
       target: "#active-exercise-scroll-deck .exercise-deck-card.circuit-card",
@@ -70,7 +70,7 @@ export const GYM_FLOOR_TOUR = {
       requires: [{ selector: ".circuit-sig.easy", visible: true }],
       target: ".circuit-sig.easy",
       caption: "tour_step_signal",
-      // Proves the tap REGISTERED, not merely that it was clickable: §7.2's active state is what a
+      // Proves the tap REGISTERED, not merely that it was clickable: the active state is what a
       // trainer reads to know they do not need to tap again.
       expect: { selector: ".circuit-sig.easy.active", visible: true },
     },

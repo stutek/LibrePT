@@ -1,4 +1,4 @@
-// src/domain/participantBinding.js — several participants training ONE programme (TODO §8.1).
+// src/domain/participantBinding.js — several participants training ONE programme.
 //
 // Single responsibility: who is bound to whom, and what that means for their plans. No DOM, no
 // storage — the clipboard paints it and the controller persists it.

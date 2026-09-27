@@ -1,4 +1,4 @@
-// src/modules/common/eventTransports.js — how an event LEAVES this device (TODO §1.6).
+// src/modules/common/eventTransports.js — how an event LEAVES this device.
 //
 // A transport is one way to hand a link to a person: a text message, a mail compose, the system
 // share sheet, the clipboard. Each one knows two things and nothing else — whether it can be used

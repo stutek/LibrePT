@@ -1,4 +1,4 @@
-// src/domain/sessionSeries.js — a session that repeats, and the evenings it stands for (TODO §35.3a).
+// src/domain/sessionSeries.js — a session that repeats, and the evenings it stands for.
 //
 // Single responsibility: the recurrence rule and its exceptions. No DOM, no storage — the board that
 // draws these is modules/sessionList/, and an occurrence a trainer has touched is an ordinary
@@ -162,7 +162,7 @@ export function scheduledStartFor(series, occurrenceDate) {
   return start;
 }
 
-/** What a calendar file has to say about a session that belongs to a series (TODO §35.3a).
+/** What a calendar file has to say about a session that belongs to a series.
  *
  * Two cases, and they are mutually exclusive:
  *   • the evening is still where the rule put it — the file carries the RULE, so the client's
@@ -185,7 +185,7 @@ export function occurrenceCalendarFields(series, session) {
   };
 }
 
-/** What removing an evening MEANS, given whether it belongs to a series (TODO §35.3a).
+/** What removing an evening MEANS, given whether it belongs to a series.
  *
  * A one-off is deleted: the row was the only thing saying that evening existed. An evening of a
  * repeating session cannot be, because the rule would simply produce it again on the next render —
@@ -201,8 +201,7 @@ export function sessionsAfterRemoving(sessions, removedIds) {
   });
 }
 
-/** The series after a trainer edited one of its evenings and asked for it to apply to all of them
- * (TODO §35.3a).
+/** The series after a trainer edited one of its evenings and asked for it to apply to all of them.
  *
  * What travels is what the rule DESCRIBES — the title, the slot, the place, who is in it — and not
  * the date: a date belongs to one evening, and "we are moving to Wednesdays" is a change to

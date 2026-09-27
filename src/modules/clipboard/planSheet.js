@@ -1,5 +1,5 @@
-// src/modules/clipboard/planSheet.js — the read-only plan sheet drawn UNDER the live clipboard
-// (TODO §52.2 step 2): one client's plan for one session, dense and unopenable, revealed while the
+// src/modules/clipboard/planSheet.js — the read-only plan sheet drawn UNDER the live clipboard:
+// one client's plan for one session, dense and unopenable, revealed while the
 // trainer holds the current plan aside (the drag itself is step 3 — this module only draws).
 //
 // Built with document.createElement + textContent throughout: exercise names, circuit titles and

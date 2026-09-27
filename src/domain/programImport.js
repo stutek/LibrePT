@@ -1,15 +1,15 @@
-// src/domain/programImport.js — read a programme somebody wrote somewhere else (TODO §29).
+// src/domain/programImport.js — read a programme somebody wrote somewhere else.
 //
 // Single responsibility: text in, plan items out. Pure — no DOM, no storage, no network.
 //
 // **Why this can be forgiving: the result lands in the session EDITOR, not in the database.** That
-// decision (§29.1) turns "parse correctly" into "parse usefully". A wrong guess is a field the
+// decision turns "parse correctly" into "parse usefully". A wrong guess is a field the
 // trainer retypes; the failure that actually costs them an evening is losing eleven good rows
 // because the twelfth was unreadable. So every item is parsed on its own and an unreadable one
 // survives as a row that SAYS it is unreadable, carrying its raw text — something to fix, rather
 // than a blank or an exception.
 //
-// **Liberal at the edges, strict at the centre** (§29.2). Markdown fences, prose around the JSON, a
+// **Liberal at the edges, strict at the centre.** Markdown fences, prose around the JSON, a
 // bare array instead of the envelope, numbers as strings, `"3x10"` — all understood. Field names are
 // matched against a NAMED alias table, never by fuzzy similarity: an explicit list can be read,
 // tested and argued with, while a similarity score fails unpredictably and nobody can say why
@@ -108,7 +108,7 @@ export function programTemplate() {
   )}\n`;
 }
 
-/** A first-class rest, the same shape the deck and editor already use (TODO §8.6). */
+/** A first-class rest, the same shape the deck and editor already use. */
 function restItem(seconds, newId) {
   return { id: newId(), type: "rest", rest: seconds };
 }

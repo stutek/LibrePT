@@ -2,9 +2,9 @@
 // functions that inject the full-screen active-session overlay shell, the "add exercise to plan"
 // dialog, and the exercise-catalog picker dialog. Pure DOM-injection (idempotent existence-guard,
 // static HTML string, no closures over `activeSession`/`appDeps`), so it has no reason to share a
-// file with active-session STATE and BEHAVIOR. TODO §14.9: the shell split (§14.5) grew
-// activeSessionController.js by adding markup ownership on top of its existing behavior logic
-// instead of extracting a companion view file — this is that extraction, unchanged in content.
+// file with active-session STATE and BEHAVIOR. The shell split grew activeSessionController.js by
+// adding markup ownership on top of its existing behavior logic instead of extracting a companion
+// view file — this is that extraction, unchanged in content.
 
 import { renderMarkupOnce } from "../common/dom.js";
 
@@ -81,7 +81,7 @@ export function renderActiveSessionOverlayShell() {
     "active-session-overlay",
     (root) => root.querySelector(".session-title-bar"),
     `
-    <!-- The "blanket" that TODO §52.2 step 3 drags aside: the title bar, client tabs and body all
+    <!-- The "blanket" that a press-and-hold drags aside: the title bar, client tabs and body all
          move together, which is why they are wrapped in one element rather than left as three
          separate overlay children. The two siblings after it (plan-peek-under-past/-future) sit
          BEHIND it and draw the neighbouring plan the drag reveals — planPeekController.js renders
@@ -94,16 +94,17 @@ export function renderActiveSessionOverlayShell() {
       <!-- The title OPENS THE MENU too (asked 2026-08-31: "maybe make the ... menu open (edit,
            copy, delete) on session name click instead of separate button"). Added to the ⋯ rather
            than replacing it: that menu holds Delete Session, and a destructive action reachable
-           only by tapping a title with no affordance is the ✕ mistake of §38.16 again. The ⋯ stays
-           as the one visible mark saying there is more here; this buys the big target the request
-           was after. Not a <button> because it holds an h3 and a two-line block; the role, the
+           only by tapping a title with no affordance repeats a known mistake: a glyph that looks
+           reversible but is final. The ⋯ stays as the one visible mark saying there is more here;
+           this buys the big target the request was after. Not a <button> because it holds an h3
+           and a two-line block; the role, the
            name and the expanded state are what a screen reader and a keyboard need. -->
       <div class="session-title-block" role="button" tabindex="0" aria-haspopup="true"
            aria-expanded="false" data-i18n-label="session_options" aria-label="Session options">
         <h3 id="session-title-text">Clipboard</h3>
       </div>
       <div class="session-title-actions">
-        <!-- Today (TODO §52.2 step 4): after a pull has opened another of this client's plans, the
+        <!-- Today: after a pull has opened another of this client's plans, the
              way back to today's session. A calendar glyph WITH the word, because it is the only
              control that says where the trainer is in time; planPeekController.js shows it only
              when the client has a session today and the clipboard is showing a different one. -->
@@ -112,7 +113,7 @@ export function renderActiveSessionOverlayShell() {
           <i class="fa-solid fa-calendar-day"></i> <span data-i18n="today">Today</span>
         </button>
         <div class="session-timer-block">
-          <!-- Staged-but-not-started: Start lives here (not on the dashboard card, TODO §2.3) so
+          <!-- Staged-but-not-started: Start lives here, not on the dashboard card, so
                tapping it is the one explicit "begin the workout" action. Once tapped it's replaced
                by the live countdown-to-end (updateOverlaySessionTimer), which is what earns the
                clock icon back — a clock ticking down means something once a clock is actually
@@ -157,14 +158,14 @@ export function renderActiveSessionOverlayShell() {
             <button id="btn-edit-plan" class="session-menu-item" role="menuitem" aria-label="Edit plan">
               <i class="fa-solid fa-pen-to-square"></i> <span data-i18n="edit_plan">Edit plan</span>
             </button>
-            <!-- Everybody on the same plan (TODO §8.1). Two or three people doing the identical
+            <!-- Everybody on the same plan. Two or three people doing the identical
                  circuit in lockstep should cost the trainer ONE tap per set, not one per person —
                  and what each of them thought of it stays their own, because feedback is not part
                  of the plan. -->
             <button id="btn-bind-participants" class="session-menu-item" role="menuitem">
               <i class="fa-solid fa-link"></i> <span data-i18n="bind_participants">Everyone on this plan</span>
             </button>
-            <!-- Give someone else tonight's plan (TODO §8.8) — the walk-in who joins a session
+            <!-- Give someone else tonight's plan — the walk-in who joins a session
                  already underway. A COPY, not a binding: it diverges the moment either plan is
                  edited, which is what a trainer wants when two people do the same session at their
                  own loads. The participants are listed by name, because "copy to whom" is the whole
@@ -212,7 +213,7 @@ export function renderActiveSessionOverlayShell() {
           </span>
           <p id="client-focus-notes"></p>
         </div>
-        <!-- What the gym already said about this client (TODO §35.3d): the signals and notes
+        <!-- What the gym already said about this client: the signals and notes
              taken one-handed mid-circuit, waiting where they are finally useful — the moment their
              next plan is being shaped. The ones about movements in THIS plan come first, or the
              ordering reads as arbitrary. Hidden when there is nothing, since an empty block on a

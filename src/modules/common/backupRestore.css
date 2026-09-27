@@ -124,7 +124,7 @@
   padding: 0 16px;
 }
 
-/* The support data-wipe (TODO §31). Rows a person reads under pressure, on the phone to someone who
+/* The support data-wipe. Rows a person reads under pressure, on the phone to someone who
    is helping them: real targets, real tick boxes, nothing decorative. */
 .data-wipe-targets {
   display: flex;

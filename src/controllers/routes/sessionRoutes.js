@@ -4,8 +4,8 @@
 
 import { Route } from "./route.js";
 
-// `/sessions/:isoDate` — the continuous session timeline. Sessions now carry a real `startDate`
-// (TODO §7.3 item 8), so the URL's date is a literal scroll target, not a bucket-name proxy.
+// `/sessions/:isoDate` — the continuous session timeline. Sessions now carry a real `startDate`,
+// so the URL's date is a literal scroll target, not a bucket-name proxy.
 export class SessionsDayRoute extends Route {
   enter(ctx) {
     super.enter(ctx);

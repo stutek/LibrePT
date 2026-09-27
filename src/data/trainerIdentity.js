@@ -1,5 +1,5 @@
 // src/data/trainerIdentity.js — who the trainer is, for the one purpose the app has ever needed it:
-// being the ORGANIZER of a calendar invite so replies have somewhere to go (TODO §1.1/§1.6).
+// being the ORGANIZER of a calendar invite so replies have somewhere to go.
 //
 // **Not a profile, and deliberately not one.** LibrePT stores clients, not trainers — there is one
 // trainer per install. These are the strings that sign what a client receives: an `.ics` without an
@@ -22,13 +22,13 @@ const LAST_NAME_KEY = "librept_trainer_last_name";
 // as the full name while nothing replaces it, so invitations keep their signature; retired the first
 // time the trainer saves a first or last name.
 const LEGACY_NAME_KEY = "librept_trainer_name";
-// The trainer's phone, kept for one reason (TODO §1.6, SMS ruled in 2026-08-17): an invite has to
+// The trainer's phone, kept for one reason (SMS ruled in 2026-08-17): an invite has to
 // CARRY it, or the client's reply can only ever be an email — their device knows nothing about the
 // trainer beyond what the invite told it. Not validated: phone numbers are written a dozen ways and
 // the app never dials it, it only hands it to the client's own messaging app.
 const PHONE_KEY = "librept_trainer_phone";
-// How long before a session an invitation stops being answerable, in hours (TODO §1.6, asked for
-// 2026-08-17). A SETTING, like the two above: it belongs to the install, is stamped onto each invite at
+// How long before a session an invitation stops being answerable, in hours (asked for 2026-08-17).
+// A SETTING, like the two above: it belongs to the install, is stamped onto each invite at
 // send time so the cutoff can travel, and is never a per-record field. 0 means "never expires" and is a
 // real choice, which is why absence and zero are told apart below.
 const EXPIRY_PADDING_KEY = "librept_invite_expiry_hours";

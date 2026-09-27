@@ -1,13 +1,13 @@
 // src/modules/common/feedbackRouteDialog.js — the way out of the app for a trainer with something to
-// say (TODO §23.5).
+// say.
 //
 // Single responsibility: the dialog. The address and the two prefilled messages are
 // data/feedbackRoute.js, so what leaves the device is decided in one place and testable without a
 // browser.
 //
 // **Two routes, split by KIND rather than by preference.** An idea, a question or "this is awkward"
-// goes to an email address, because a GitHub account is a wall to a personal trainer and §23.5 named
-// that the last launch prerequisite. Something BROKEN goes to an issue: an email thread about a bug
+// goes to an email address, because a GitHub account is a wall to a personal trainer, and this was
+// ruled a launch prerequisite. Something BROKEN goes to an issue: an email thread about a bug
 // has no version, no page and no way for the next person who hits it to find it, and an issue has
 // all three.
 //
@@ -18,7 +18,7 @@
 // anybody. So the app fills in everything it CAN know and says the rest plainly.
 //
 // **Nothing is sent from here.** Both buttons open something the trainer then reads and submits
-// themselves — the same rule the crash reporter follows (§12.4).
+// themselves — the same rule the crash reporter follows.
 //
 // Injected dependencies: `t`, `getState`, `buildSha`, `route`, `repoUrl`.
 

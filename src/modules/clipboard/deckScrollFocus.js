@@ -1,5 +1,5 @@
 // src/modules/clipboard/deckScrollFocus.js — the trainer's own scrolling picks the ACTIVE card on
-// the live clipboard (TODO §48.1). Single responsibility: work out which card the scroll has
+// the live clipboard. Single responsibility: work out which card the scroll has
 // reached, mark it, and report it — and give the deck enough room to scroll that every card can be
 // reached. What the report DOES to the session (close the open card, save, write the URL) is the
 // controller's: `onScrollActivate(index)`.
@@ -75,7 +75,7 @@ function fitScrollRoom(deckContainer) {
 function onScroll(deckContainer) {
   const entry = tracked.get(deckContainer);
   if (!entry || Date.now() > entry.userScrollUntil || !deckContainer.isConnected) return;
-  // The plan held or pulled aside (TODO §52.2, planPeek.js) changes shape under the finger: its rows
+  // The plan held or pulled aside (planPeek.js) changes shape under the finger: its rows
   // shrink, then grow back on release, and the browser answers both with a scroll of its own. On a
   // phone the touchmove of that same press has just opened the window above, so the reflow would pick
   // another active card although the trainer never scrolled. Closing the window here also covers the

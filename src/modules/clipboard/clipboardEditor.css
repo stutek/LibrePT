@@ -1,5 +1,5 @@
 /* clipboardEditor.css — the inline on-the-fly plan editor: row/circuit/rest editing, the
-   reorder control, and the insert bar. Extracted from index.css 2026-07-27 (TODO §14.5 / §18.10).
+   reorder control, and the insert bar. Extracted from index.css 2026-07-27.
    Inherits design tokens, glass-card/button/flex foundations and color scheme from index.css,
    loaded first — this file adds only what clipboardEditor.js owns. */
 
@@ -56,7 +56,7 @@
   line-height: 1.45;
   color: var(--text-main);
 }
-/* What the gym already said about this client (TODO §35.3d). Rows, not prose: each is one signal
+/* What the gym already said about this client. Rows, not prose: each is one signal
    about one movement, and a trainer scans them while their other hand is on a barbell. */
 .gym-note-list {
   display: flex;
@@ -122,7 +122,7 @@
   font-size: 12px;
   opacity: 0.72;
 }
-/* One line per session in a merged clipboard (TODO §47.1). A column beside the ✎, so a second
+/* One line per session in a merged clipboard. A column beside the ✎, so a second
    name starts under the first rather than under the icon; the row aligns on the first line's
    baseline, which a column container takes from its first item. */
 .edit-mode-row:has(.edit-mode-names) {
@@ -666,7 +666,7 @@
 
 /* Mobile responsive scaling */
 
-/* How long the plan runs against its slot (TODO §35.3b). Beside the plan being built, because that
+/* How long the plan runs against its slot. Beside the plan being built, because that
    is the only moment the answer can still change. Quiet while it fits — a trainer is reading the
    plan, not the meter — and marked when it does not, since "over" is the whole message. */
 /* A READING, not a control. It sat in this toolbar as a 999px pill beside a real button and was
@@ -703,7 +703,7 @@
   background: color-mix(in srgb, var(--danger, #dc2626) 14%, transparent);
 }
 
-/* A movement that came in with an imported programme and is not in the catalogue (TODO §29.1). The
+/* A movement that came in with an imported programme and is not in the catalogue. The
    word carries the meaning and the glyph decorates it — on a phone a tooltip is unreachable, so an
    icon alone would be a mark nobody can read. */
 .editor-custom-badge {

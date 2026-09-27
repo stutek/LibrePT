@@ -1,4 +1,4 @@
-// src/data/previewTransfer.js — the one-time move of records only a P store holds into schema 4 (TODO §61).
+// src/data/previewTransfer.js — the one-time move of records only a P store holds into schema 4.
 //
 // Single responsibility: on an install that still has a `schemaP` store, copy into `schema4` every
 // record the P store has and `schema4` does not, once, and remember that it was done.

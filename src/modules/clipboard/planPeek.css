@@ -1,4 +1,4 @@
-/* planPeek.css — the blanket drag (TODO §52.2 step 3): press-and-hold narrows and densifies the
+/* planPeek.css — the blanket drag: press-and-hold narrows and densifies the
    current plan, a sideways drag pulls it aside to reveal the previous/next plan drawn underneath.
    Behaviour lives in modules/clipboard/planPeek.js and controllers/planPeekController.js; this file
    owns only what the classes they toggle LOOK like (docs/ARCHITECTURE.md "look and layout live
@@ -59,7 +59,7 @@
   transition: margin 0.2s ease, padding 0.2s ease;
 }
 /* Denser by the cards' own padding, not by a larger stack overlap: a collapsed card's peeking row
-   needs 29px of its 37 to be read (exerciseDeckOfCards.css, TODO §28.4), and the Spreadsheet theme
+   needs 29px of its 37 to be read (exerciseDeckOfCards.css), and the Spreadsheet theme
    sets its own overlap anyway, so a deeper overlap hid rows in one theme and did nothing in another. */
 .plan-peek-blanket.is-held .exercise-deck-card {
   padding-block: 3px;
@@ -72,7 +72,7 @@
 
 /* The neighbour plans, drawn behind the blanket. Each owns its own vertical scroll — the plan
    underneath shows from its top; aligning it with the deck's scroll position would be comparing two
-   scrolls that share no rows (chosen 2026-09-14, TODO §52.2). */
+   scrolls that share no rows (chosen 2026-09-14). */
 .plan-peek-under {
   position: absolute;
   inset: 0;

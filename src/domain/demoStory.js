@@ -1,10 +1,10 @@
-// src/domain/demoStory.js — what a chaptered demo story IS, and which steps a link asks for (TODO §35).
+// src/domain/demoStory.js — what a chaptered demo story IS, and which steps a link asks for.
 //
 // Single responsibility: the chapter vocabulary and its validation. No DOM, no timing, no narration
 // surface — modules/demo/storyTour.js is the content, modules/demo/demoNarratorCard.js draws the cards,
 // and modules/demo/demoTourPlayer.js plays the steps, unchanged.
 //
-// **Why chapters, when the wedge tour needed none.** The gym-floor tour (§23.5) is four taps and
+// **Why chapters, when the wedge tour needed none.** The gym-floor tour is four taps and
 // three seconds; this one is ~23 events and 4-6 minutes, and nobody watches five unbroken minutes of
 // software they do not yet use. So a chapter is the unit that gets shared, linked and watched:
 // `?demo=story` plays the lot, `?demo=story&chapter=floor` plays one, and each ends somewhere
@@ -58,8 +58,8 @@ export function storyChapterIndex(story, { surface = "trainer" } = {}) {
 /** A step with the words it TYPES resolved into the viewer's language.
  *
  * What a demo enters into a field is CONTENT, not a selector: Ana writing up her shoulder is Ana
- * writing, and on a Slovenian phone she was writing it in English (reported 2026-08-30, TODO
- * §38.19). A step says which words with `enterKey`, and the expectation that reads them back says
+ * writing, and on a Slovenian phone she was writing it in English (reported 2026-08-30). A step
+ * says which words with `enterKey`, and the expectation that reads them back says
  * `hasValueKey` — the same key, so the two cannot drift into different languages.
  *
  * Names, addresses, phone numbers and times stay literal: they are the same in every language, and a
@@ -85,7 +85,7 @@ export function storyStepsFor(
   // hands the browser to the client's own page half way through and takes it back four steps later,
   // and each side is a separate boot with its own step list — so a run that numbered itself made the
   // viewer watch "step 10 of 41" become "step 1 of 8" and then "step 11 of 41", as if they had
-  // wandered into something else (reported 2026-08-27, TODO §38.9). A place in the story is the one
+  // wandered into something else (reported 2026-08-27). A place in the story is the one
   // number both boots can agree on while sharing no state at all: it is a property of the script,
   // which both of them have. Keyed by step id, which `validateStory` already requires to be unique.
   const everyStep = chapters.flatMap((chapter) => chapter.steps || []);
@@ -93,8 +93,8 @@ export function storyStepsFor(
   // session and adjusting it" is watching a nine-step chapter, and telling them they are on step 18
   // of 41 measures them against four minutes they did not ask for (reported 2026-09-21).
   //
-  // The whole story still counts across its own length, handover included — that is §38.9 and it has
-  // not changed: the story crosses to the client's own page half way through, each side is a
+  // The whole story still counts across its own length, handover included — that rule has not
+  // changed: the story crosses to the client's own page half way through, each side is a
   // separate boot, and a count that restarted there made the viewer watch "step 10 of 41" become
   // "step 1 of 8". What decides is which of the two is playing, and nothing else.
   const counted = wanted ? wanted.steps || [] : everyStep;

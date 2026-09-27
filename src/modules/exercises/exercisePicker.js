@@ -1,6 +1,6 @@
 // src/modules/exercises/exercisePicker.js — reusable, low-friction exercise picker.
 // Renders muscle-group + equipment filter chips over a single-tap list of movements (name +
-// taxonomy badges). Powers the fast-selection flows called for in TODO §13.2: Scenario A
+// taxonomy badges). Powers the fast-selection flows called for: Scenario A
 // (routine builder — filter then drop standardized IDs into a template) and Scenario B (gym-floor
 // swap — pre-filtered to the same muscle group so the substitute inherits the correct volume bucket).
 import {
@@ -44,7 +44,7 @@ export function sourceLabels(t) {
 }
 
 /** Every word the picker shows, from the app's dictionary. One place, so the three screens that
- *  mount the picker cannot drift apart (TODO §38.20). */
+ *  mount the picker cannot drift apart. */
 export function pickerLabels(t) {
   return {
     searchLabel: t("search_movements") || "Search movements",
@@ -57,7 +57,7 @@ export function pickerLabels(t) {
 }
 
 /**
- * The mark on an exercise that is not LibrePT's (TODO §45.5): a glyph AND a word, because a glyph
+ * The mark on an exercise that is not LibrePT's: a glyph AND a word, because a glyph
  * alone means nothing to a reader who has not been told, and a hover cannot tell them on a phone.
  * The trainer's own gets a pencil and "Mine"; an imported one the import glyph and the name it came
  * under. LibrePT's own catalog carries no mark — it is the standard the others differ from.

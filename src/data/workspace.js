@@ -1,9 +1,9 @@
-// src/data/workspace.js — which of the two databases this app is looking at (TODO §40).
+// src/data/workspace.js — which of the two databases this app is looking at.
 // Single responsibility: name the active workspace, and turn that name into the storage identifiers
 // everything else keys on — a database name and a localStorage key. Reads and writes one plain key;
 // knows nothing about records, schemas or the UI.
 //
-// **Two workspaces, not many** (§40.1): the trainer's own work, and a sandbox to learn and
+// **Two workspaces, not many**: the trainer's own work, and a sandbox to learn and
 // experiment in. More would need naming, a list and a choice at boot; two keep the switch to one
 // control.
 //
@@ -49,7 +49,7 @@ export function activeWorkspace() {
   }
 }
 
-/** Point the app at `name`. Storage only — the caller reloads state and re-renders (§40.3). */
+/** Point the app at `name`. Storage only — the caller reloads state and re-renders. */
 export function setActiveWorkspace(name) {
   if (!isWorkspace(name)) return;
   if (name === WORKING) localStorage.removeItem(ACTIVE_WORKSPACE_KEY);
@@ -63,7 +63,7 @@ export function isSandbox(name = activeWorkspace()) {
 /**
  * The IndexedDB database holding `name`'s records.
  *
- * A separate DATABASE, not a store-name prefix inside the shared one (§40.2). Three reasons, and the
+ * A separate DATABASE, not a store-name prefix inside the shared one. Three reasons, and the
  * third is the one that keeps a mistake from being possible: an object store can only be created
  * inside `onupgradeneeded`, so a prefix would drag `indexedDb.js`'s version derivation onto a second
  * axis; resetting the sandbox is a recurring operation and here it is one `deleteDatabase` call that

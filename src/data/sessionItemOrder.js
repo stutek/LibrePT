@@ -1,14 +1,14 @@
-// src/data/sessionItemOrder.js — explicit ordering for a session's item list (TODO §17.5).
+// src/data/sessionItemOrder.js — explicit ordering for a session's item list.
 //
-// In data/ rather than domain/ (TODO §24.6) because `position` is a stored FIELD and this is the
+// In data/ rather than domain/ because `position` is a stored FIELD and this is the
 // logic that keeps it well-formed — the same family as recordSchemas.js and recordProjections.js.
 // sessionCache.js, itself a data/ module, needs it, and data/ may not import upward.
 //
 // Order is DATA, carried on the record — never implied by array index. On the localStorage JSON
-// store sequence rode along free inside an array; the move to IndexedDB (TODO §18.6) retires that,
+// store sequence rode along free inside an array; the move to IndexedDB retires that,
 // because a key order is not a program order. Unless order is a field, a projection or a per-row
-// store loses it with nothing left to rebuild from, and §18.3's completeness check would not
-// notice: every id is still present, only the sequence is wrong. A scrambled program that passes
+// store loses it with nothing left to rebuild from, and the migration's completeness check would
+// not notice: every id is still present, only the sequence is wrong. A scrambled program that passes
 // every integrity test we have.
 //
 // The invariant everything rests on — one session's positions are dense, unique and gapless:

@@ -132,8 +132,8 @@
   }
 }
 
-/* Keeping a note on the client's record (TODO §35.3c). The whole row is the target — a 16px tick
-   box is not something a trainer hits one-handed with the other hand on a barbell (§7.1). */
+/* Keeping a note on the client's record. The whole row is the target — a 16px tick
+   box is not something a trainer hits one-handed with the other hand on a barbell. */
 .feedback-keep-row {
   display: flex;
   align-items: center;
@@ -147,7 +147,7 @@
   flex: 0 0 auto;
 }
 
-/* The way out of the app for someone with something to say (TODO §23.5). Full-width buttons, because
+/* The way out of the app for someone with something to say. Full-width buttons, because
    this is read once and acted on once — and the diagnostics are SHOWN rather than merely attached:
    sending something about a person's own app without showing them what it contains would be the
    opposite of what this app is for. */

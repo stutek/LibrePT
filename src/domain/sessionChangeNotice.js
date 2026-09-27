@@ -1,5 +1,5 @@
 // src/domain/sessionChangeNotice.js — which session edits a client needs to hear about, and who was
-// actually invited (TODO §1.6).
+// actually invited.
 //
 // Single responsibility: the two pure questions behind "should the trainer be asked to resend?". The
 // asking is modules/session/, the sending is the invite dialog.

@@ -15,15 +15,15 @@
 //          (modules/demo/). Both need demo data, so both are ignored unless the app has something
 //          to demonstrate.
 //            gym_floor    plays itself: drives the real controls with a visible pointer — the
-//                         automated replacement for the screen recording §23.5 asked for, and the
-//                         same script the e2e suite replays.
+//                         automated replacement for a screen recording that was originally asked
+//                         for, and the same script the e2e suite replays.
 //            walkthrough  the trainer drives, one step at a time, with the guided panel over the
-//                         real app (§9.5). Same script; who taps is the only difference.
-//            story        the long demo (§35): a chaptered scenario that plays itself, narrated by
+//                         real app. Same script; who taps is the only difference.
+//            story        the long demo: a chaptered scenario that plays itself, narrated by
 //                         cards between the taps. `chapter` names one chapter to play alone.
 //   chapter  which chapter of ?demo=story to play, e.g. floor. Absent or unknown plays the whole
 //            story — a mistyped chapter in a pasted link should still show a stranger the demo.
-//   workspace  which of the two databases to open (TODO §40): `sandbox` opens the sandbox, seeding
+//   workspace  which of the two databases to open: `sandbox` opens the sandbox, seeding
 //          it on first entry. This is what the app's own "show me around" offers carry — sample
 //          people belong in the sandbox, not in the database the trainer is about to work in.
 //          Anything else opens the trainer's own work, which is also what an absent param means.
@@ -42,8 +42,8 @@ export const SHARE_CHAPTER_PARAM = "chapter";
 /** The step a demo link lands on. A story is watched in interruptions — a reload, a phone that
  * locked, a link sent to a colleague mid-way — and without this the viewer starts again. */
 export const SHARE_STEP_PARAM = "step";
-/** Which workspace to open (TODO §40.9). Deliberately NOT folded into `?init=`: that parameter keeps
- * meaning "seed the workspace I am in", which is what the whole e2e suite runs on (§40.7), and one
+/** Which workspace to open. Deliberately NOT folded into `?init=`: that parameter keeps
+ * meaning "seed the workspace I am in", which is what the whole e2e suite runs on, and one
  * parameter carrying two decisions is how the tests would have quietly moved off the app the trainer
  * uses. */
 export const SHARE_WORKSPACE_PARAM = "workspace";

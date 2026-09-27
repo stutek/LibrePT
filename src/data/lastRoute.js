@@ -1,4 +1,4 @@
-// src/data/lastRoute.js — where the trainer was, in the workspace they left (TODO §40.3).
+// src/data/lastRoute.js — where the trainer was, in the workspace they left.
 // Single responsibility: remember one path per workspace, and hand it back. No router, no DOM: it
 // is handed a path and returns one, so what counts as a valid route stays the router's question.
 //

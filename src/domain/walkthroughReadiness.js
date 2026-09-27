@@ -3,7 +3,7 @@
 // Single responsibility: answer that from the data alone. Pure — no DOM, no storage, no import of
 // the tour script itself (which lives a layer up in modules/demo/).
 //
-// **Why it exists** (TODO §28.14): the walkthrough drives the app's own real controls — open the
+// **Why it exists.** The walkthrough drives the app's own real controls — open the
 // group session, focus a CIRCUIT card, signal it too easy, switch to the second participant. Offered
 // on a database that cannot satisfy those, it stops on its first step in front of the person being
 // shown the product, which is worse than not offering it at all.
@@ -12,7 +12,7 @@
 // perfectly well; one who cleared half the demo cannot. Keying on the seeded ids would get both
 // backwards.
 //
-// Since 2026-08-25 the offer it gates starts the STORY (§35), whose gym chapter replays exactly
+// Since 2026-08-25 the offer it gates starts the STORY, whose gym chapter replays exactly
 // these steps — so the same shape still decides, and the check stayed as it is.
 //
 // Injected dependencies: none.

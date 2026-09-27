@@ -1,5 +1,5 @@
-// src/data/sessionSeriesSeed.js — the demo's one REPEATING session (TODO §35.3a), and the evenings
-// it has already held.
+// src/data/sessionSeriesSeed.js — the demo's one REPEATING session, and the evenings it has already
+// held.
 //
 // Single responsibility: seed data for a series, kept out of sessions.js because that file is a list
 // of individual evenings and this is a rule that produces them.

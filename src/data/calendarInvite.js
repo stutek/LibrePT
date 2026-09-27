@@ -1,6 +1,6 @@
 // src/data/calendarInvite.js
 // Builds an RFC 5545 .ics VEVENT for a PT-assigned session. LibrePT has no backend/SMTP relay to
-// send mail itself (TODO §1.5's "no backend of our own" stance), so the invite is a downloadable
+// send mail itself, so the invite is a downloadable
 // file the trainer attaches to a prefilled mailto compose — see sessionInviteDialog.js.
 //
 // **ORGANIZER is what makes a reply possible at all.** An RSVP is not a web request: the recipient's
@@ -9,7 +9,7 @@
 // emitted `ATTENDEE;RSVP=TRUE` with no organizer at first — an invitation with no return address, so
 // a well-behaved client had nothing to reply to and most simply did not. The reply still lands in
 // the trainer's MAILBOX rather than in the app, which no `.ics` can change; what it buys is that the
-// trainer finds out at all (TODO §1.6).
+// trainer finds out at all.
 
 function formatIcsDateUTC(date) {
   return `${date.toISOString().replace(/[-:]/g, "").split(".")[0]}Z`;
@@ -42,7 +42,7 @@ function icsDisplayNameParam(value) {
   return cleaned ? `;CN="${cleaned}"` : "";
 }
 
-/** The `RRULE` line for a repeating session, or nothing for a one-off (TODO §35.3a).
+/** The `RRULE` line for a repeating session, or nothing for a one-off.
  *
  * Weekdays arrive as JavaScript day numbers (0 = Sunday) — the app's one convention — and leave as
  * the two-letter codes RFC 5545 uses, which is the only place the two vocabularies meet.
@@ -91,8 +91,8 @@ export function buildIcsContent({
     `DTEND:${formatIcsDateUTC(endDate)}`,
     `SUMMARY:${escapeIcsText(title)}`,
   ];
-  // ONE evening of a repeating session, addressed by the instant it was ORIGINALLY scheduled for
-  // (TODO §35.3a). This is what makes a second file a change to that evening rather than a new
+  // ONE evening of a repeating session, addressed by the instant it was ORIGINALLY scheduled for.
+  // This is what makes a second file a change to that evening rather than a new
   // event beside it — and why a moved session keeps the date the series gave it. `SEQUENCE` is how
   // a calendar knows which of two files about the same evening is the newer one; without it an
   // update is silently ignored by most clients.

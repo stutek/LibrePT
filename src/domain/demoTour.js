@@ -1,15 +1,15 @@
-// src/domain/demoTour.js — what a scripted demo step IS, and whether it succeeded (TODO §23.5).
+// src/domain/demoTour.js — what a scripted demo step IS, and whether it succeeded.
 //
 // Single responsibility: the step/expectation vocabulary and the pass-fail rule. No DOM, no timing,
 // no hand — modules/demo/demoTourPlayer.js owns those, and tests/e2e/test_demo_tour.py replays the
 // same script through Playwright.
 //
-// **Why the demo is a test, and not a recording.** §23.5 called for a 20-30s video of a real set
-// being logged. A video is stale the first time a control moves, and nothing tells you it went
-// stale — the asset keeps playing, showing an app that no longer exists, to exactly the people being
-// asked to trust it. A scripted tour that drives the REAL controls cannot drift: if a selector or a
-// flow changes, the tour stops working, and because the same script runs in the e2e suite, the
-// build goes red rather than the marketing going quietly wrong.
+// **Why the demo is a test, and not a recording.** The launch plan called for a 20-30s video of a
+// real set being logged. A video is stale the first time a control moves, and nothing tells you it
+// went stale — the asset keeps playing, showing an app that no longer exists, to exactly the
+// people being asked to trust it. A scripted tour that drives the REAL controls cannot drift: if a
+// selector or a flow changes, the tour stops working, and because the same script runs in the e2e
+// suite, the build goes red rather than the marketing going quietly wrong.
 //
 // **Every step carries an expectation, and that is not decoration.** A tour that only taps things is
 // a puppet show: it would keep "succeeding" against a broken app, tapping a button that no longer

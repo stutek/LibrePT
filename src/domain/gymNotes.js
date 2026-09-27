@@ -1,5 +1,5 @@
 // src/domain/gymNotes.js — what the gym already said about one client, ordered for the plan the
-// trainer is looking at (TODO §35.3c/d).
+// trainer is looking at.
 //
 // Single responsibility: the selection and the order. No DOM, no storage — the panel that shows
 // this is modules/clipboard/activeSessionBoard.js's client focus panel.
@@ -7,7 +7,7 @@
 // **Why this exists at all.** Signals and notes are captured one-handed mid-circuit and land in
 // `state.planUpdates`, where they wait on the Pending Review screen — a place a trainer visits when
 // they think of it. The moment they actually need them is the one they are never on: shaping this
-// client's next plan. §35's story is built around that payoff, and the capture steps are short
+// client's next plan. The demo story is built around that payoff, and the capture steps are short
 // precisely because the pane is the point.
 //
 // **In-plan first, then newest.** Ordering by date alone buries the deadlift note under an
@@ -36,7 +36,7 @@ export function gymNotesForPlan({ planUpdates, clientId, planExerciseNames } = {
     });
 }
 
-/** The client-record line a kept gym note becomes (TODO §35.3c).
+/** The client-record line a kept gym note becomes.
  *
  * A dated sentence appended to the notes the trainer already writes by hand, rather than a new
  * field: this is the text every future plan is written against, it is durable in the stable schema,

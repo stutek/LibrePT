@@ -18,6 +18,6 @@
 /** Where the app is deployed. Used by anything a person opens somewhere other than in the app. */
 export const PUBLIC_SITE_URL = "https://stutek.github.io/LibrePT";
 
-/** Where a bug report goes. Not everyone has an account here — see TODO §23.5, which is about the
- *  people who do not. */
+/** Where a bug report goes. Not everyone has an account here — feedbackRoute.js is the route for
+ *  the people who do not. */
 export const ISSUE_TRACKER_URL = "https://github.com/stutek/LibrePT";

@@ -1,5 +1,5 @@
 // src/modules/common/qrCode.js — a QR code as geometry, for a phone screen somebody else is about to
-// point a camera at (TODO §26.3 step 3, §26.4).
+// point a camera at.
 //
 // Single responsibility: turn a short string into the squares of a QR symbol. No DOM and no styling
 // — the caller draws it, which is what keeps this testable at all: a picture that does not scan is

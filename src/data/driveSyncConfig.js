@@ -1,5 +1,5 @@
 // src/data/driveSyncConfig.js — the one piece of Google Drive sync setup that is a deployment
-// constant, not runtime state (TODO §1.5/§3.3).
+// constant, not runtime state.
 //
 // **Set 2026-08-12.** The OAuth app is in Google's *Testing* publishing status, so only accounts on
 // its test-user list (≤100) can complete a grant — everyone else gets `403: access_denied` and the
@@ -7,7 +7,7 @@
 // Production (even unverified) drops the list while keeping the cap. Nothing here changes either way.
 //
 // **`CLIENT_ID` must be filled in by whoever deploys this build.** Google Calendar/Drive API access
-// requires a GCP project registered once by the developer (TODO §1.5's "GCP note") — this is a public
+// requires a GCP project registered once by the developer — this is a public
 // OAuth client id for a browser app, not a secret (Google's own installed/SPA OAuth flows are
 // designed to ship it in client code; the security boundary is the redirect-URI allowlist configured
 // server-side in the GCP console, not secrecy of this string). Leaving it blank is a valid, supported
@@ -24,8 +24,8 @@ export const GOOGLE_DRIVE_CLIENT_ID =
   "1086102516858-5afm8ulvv1508pv36gaaqf1qtsdh92v7.apps.googleusercontent.com";
 
 // drive.appdata: access limited to this app's own hidden per-app folder — invisible in the trainer's
-// normal Drive UI/picker, inaccessible to any other app's OAuth grant (TODO §1.5's PII-isolation
-// point). Never widen this to `drive.file` or `drive`; that would ask for far more than sync needs.
+// normal Drive UI/picker, inaccessible to any other app's OAuth grant. Never widen this to
+// `drive.file` or `drive`; that would ask for far more than sync needs.
 export const GOOGLE_DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.appdata";
 
 export function isDriveSyncConfigured() {

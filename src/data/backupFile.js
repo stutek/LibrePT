@@ -16,7 +16,7 @@
 // SCHEMA_4 plus `startDate`), so the newest is a strict superset of the rest and older copies would
 // store strictly less information at full size. Restore re-derives every live store anyway.
 //
-// **ONE version number, on the envelope, shared by the container and the records (TODO §18.7).**
+// **ONE version number, on the envelope, shared by the container and the records.**
 // `formatVersion` sits outside any future compression or encryption, so it is the first thing
 // readable — it answers "can I open this box?" — and it is the SAME integer as `schemaVersion`, so
 // it also answers "how do I read what is inside?". A container change and a record change both bump
@@ -26,8 +26,8 @@
 // objections to sharing both fall down on this architecture:
 //   * "A container-only change forces a record-schema bump with no migration to run." True, and the
 //     cost is one no-op step in the chain. That is cheap, and it keeps the chain's history complete.
-//   * "An older build then refuses a file whose container it understands." It should. §18.7's
-//     guarantee is retain READERS forever — new builds open old files — and that is unaffected. Old
+//   * "An older build then refuses a file whose container it understands." It should. The guarantee
+//     here is retain READERS forever — new builds open old files — and that is unaffected. Old
 //     builds opening NEW files was never promised, and refusing is already what the restore path
 //     does, because a newer file may hold records this build cannot faithfully represent.
 // What sharing buys is that there is no way to express, or accidentally ship, a file whose two
@@ -52,11 +52,11 @@ const SETTINGS_KEYS = ["lang"];
  * permanent, so the row is the only record of what that version promised.
  *
  * Keyed by the shared version integer, which is also the record schema: version 4 is schema 4 in a
- * plain-JSON container. §18.8's encryption becomes version 5 with `container: "aes-gcm"`, and a
+ * plain-JSON container. Adding encryption becomes version 5 with `container: "aes-gcm"`, and a
  * no-op 4→5 step in the migration chain, since the records will not have changed. */
 export const BACKUP_FORMATS = {
   4: { container: "json" },
-  // Schema 5 (TODO §76): the same plain-JSON container; the records gained `exercises.source` and
+  // Schema 5: the same plain-JSON container; the records gained `exercises.source` and
   // the `circuits` collection. A build that knows only 4 refuses a file at 5 — the stated price.
   5: { container: "json" },
 };
@@ -115,7 +115,7 @@ export function buildBackupPayload(
     // What the app was actually RUNNING when this was written — reporting only. A restore keys off
     // `schemaVersion` above; this is here so "which preview produced this file" is answerable.
     runtimeSchema: CURRENT_SCHEMA_VERSION,
-    // Which workspace this file was written in (TODO §40.10). It is what lets a restore refuse to
+    // Which workspace this file was written in. It is what lets a restore refuse to
     // put sample data into the trainer's own database — one exact test, made by the writer, rather
     // than a reader guessing from the records. A file written before this existed carries nothing
     // here, and is restored as it always was.
@@ -132,7 +132,7 @@ export function buildBackupPayload(
   for (const key of SETTINGS_KEYS) payload[key] = state?.[key] ?? null;
 
   // The collections of the schema this file is WRITTEN AT, not everything the build can project. A
-  // preview-only collection is excluded by construction rather than by convention — see §18.4 and
+  // preview-only collection is excluded by construction rather than by convention — see
   // recordProjections.collectionsForSchema. The cost is stated where it is chosen (recordSchemas.js):
   // a preview-only collection does not survive a restore until it graduates to a numbered shape.
   for (const collection of collectionsForSchema(LIVE_SCHEMAS[BACKUP_SCHEMA])) {
@@ -153,14 +153,14 @@ export function isBackupPayload(parsed) {
   return Boolean(parsed) && typeof parsed === "object" && !Array.isArray(parsed);
 }
 
-/** The workspace a file says it came from, or null for one written before files said (TODO §40.10). */
+/** The workspace a file says it came from, or null for one written before files said. */
 export function backupWorkspace(parsed) {
   const named = parsed?.workspace;
   return typeof named === "string" && named ? named : null;
 }
 
 /**
- * Whether restoring `parsed` into workspace `target` must be refused (TODO §40.10).
+ * Whether restoring `parsed` into workspace `target` must be refused.
  *
  * One rule, one direction: **nothing that was written in the sandbox may enter the trainer's own
  * work.** The other direction is free — the sandbox is where sample data belongs, and a real backup
@@ -181,10 +181,10 @@ export function refusesRestoreInto(parsed, target) {
  * databases without a common ancestor is guesswork (that ancestor is exactly what Drive sync's
  * three-way merge has and a file import does not). Replacing is right; replacing silently is not.
  *
- * Counts every LIVE collection, not only the ones a file can carry, plus `notCarried`: the preview-only
- * collections that a file written at the stable schema has no room for (§18.4's staging). Those are the
- * records a restore destroys and cannot bring back, which makes them the ones most worth naming — the
- * warning DATA_MODEL §1 says a preview shape needs and did not have.
+ * Counts every LIVE collection, not only the ones a file can carry, plus `notCarried`: the
+ * preview-only collections that a file written at the stable schema has no room for. Those are the
+ * records a restore destroys and cannot bring back, which makes them the ones most worth naming —
+ * the warning DATA_MODEL §1 says a preview shape needs and did not have.
  */
 export function summarizeReplacement(currentState) {
   const counts = {};

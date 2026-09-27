@@ -1,10 +1,10 @@
-// src/sw/sharedInbox.js — receiving a client's submission straight from the phone's share sheet
-// (TODO §38.22). Loaded via importScripts after cacheManifest; exposes its API on self.swSharedInbox.
+// src/sw/sharedInbox.js — receiving a client's submission straight from the phone's share sheet.
+// Loaded via importScripts after cacheManifest; exposes its API on self.swSharedInbox.
 //
 // Single responsibility: catch the POST the operating system makes when somebody shares a file INTO
 // LibrePT, put the file where the app can pick it up, and send the browser to the app. It decides
 // nothing about the submission — modules/clients/signupReviewDialog.js is still the human being who
-// reads it before anything enters the register (§26.5).
+// reads it before anything enters the register.
 //
 // **Why the service worker has to be involved at all.** A share target is declared in the manifest as
 // a URL the OS POSTs to, and there is no server here to receive it — the whole app is a folder of

@@ -1,5 +1,5 @@
 // src/modules/intake/signupDelivery.js — how a filled-in introduction leaves the client's phone
-// (TODO §1.7, transport ruled 2026-08-17: "use shares").
+// (transport ruled 2026-08-17: "use shares").
 //
 // Single responsibility: hand the file to whatever app the client already uses. What the file
 // contains and how it is written are data/clientSignup.js and data/signupFile.js; this module knows
@@ -46,7 +46,7 @@ export function browserSignupPlatform() {
   };
 }
 
-/** The platform the guided STORY runs on, in place of the browser's own (TODO §35.3e).
+/** The platform the guided STORY runs on, in place of the browser's own.
  *
  * **A demo must not put a file on a stranger's phone.** The real routes are a share sheet, which a
  * scripted demonstration cannot drive, and a download, which would drop a `.librept-signup` file
@@ -99,7 +99,7 @@ export async function shareSignupFile(file, { title, text, platform }) {
     // NAME as well as message: a browser refusing a share throws a DOMException whose name
     // ("NotAllowedError", "DataError", "AbortError") says which rule was hit, while the message is
     // often empty or a sentence for a developer. Both are reported because either alone has, in
-    // practice, been the half that was missing (TODO §45.4).
+    // practice, been the half that was missing.
     return {
       delivered: false,
       cancelled: false,
@@ -113,7 +113,7 @@ export async function shareSignupFile(file, { title, text, platform }) {
  *
  * **A refusal is not the end of the client's errand.** Android Chrome hands the share sheet only
  * file types on a list of its own, and `.json.librept-signup` is not on one of them — nor would
- * `.json` be (TODO §45.4, read out of Chromium's `ShareServiceImpl.java`). Until now that left a
+ * `.json` be (read out of Chromium's `ShareServiceImpl.java`). Until now that left a
  * stranger looking at "that didn't share" with nothing in their hands, on a phone they may never
  * open this page on again. So the refusal SAVES the file, and the page goes straight to telling them
  * how to attach it themselves.

@@ -6,7 +6,7 @@
 // when, how long, and which feedback travels with it.
 //
 // It exists because that record was being built in two places with two slightly different sets of
-// fields (TODO §24.4) — once when a session is completed, and once every time a PLANNING draft is
+// fields — once when a session is completed, and once every time a PLANNING draft is
 // cached. They agree on everything that matters and always did, but only by hand, and the planning
 // path is the one that runs on every keystroke, so a field added to the finish path alone would
 // have gone unnoticed until a draft was reopened and found to be missing it.
@@ -38,7 +38,7 @@ export function buildSessionHistoryRecord({
   if (!client || !clientState) return null;
 
   // The WHOLE program as an immutable snapshot — rests, circuit grouping and prescribed-but-skipped
-  // exercises included — rather than flattening to performed sets only (TODO §17.1).
+  // exercises included — rather than flattening to performed sets only.
   const program = buildProgramSnapshot(clientState, { isPlanning });
   if (!isWorthRecording(program, isPlanning)) return null;
 

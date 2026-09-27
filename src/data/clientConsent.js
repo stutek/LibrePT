@@ -1,5 +1,5 @@
 // src/data/clientConsent.js — the state a stored GDPR consent record can be in, and the one
-// transition that must not lose anything (TODO §27.4/§27.7).
+// transition that must not lose anything.
 //
 // Single responsibility: answer "may this client's data be processed?" and "what happened, and
 // when?" from the `gdprConsent` object, so the badge, the export and the form all read one rule
@@ -20,7 +20,7 @@
 //
 // **Withdrawal is not erasure.** It halts further processing; it does not by itself delete
 // anything. Art. 17(1)(b) gives a *right* to erasure once consent is withdrawn and no other basis
-// applies, but that is a separate request the client makes and §27.2's flow serves — and the client
+// applies, but that is a separate request the client makes, served by its own flow — and the client
 // may well want their training history kept. Conflating the two deletes records nobody asked to
 // lose, along with the withdrawal record itself.
 //

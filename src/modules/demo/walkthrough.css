@@ -1,4 +1,4 @@
-/* src/modules/demo/walkthrough.css — the guided walkthrough's panel and spotlight (TODO §9.5).
+/* src/modules/demo/walkthrough.css — the guided walkthrough's panel and spotlight.
    The app underneath keeps its own appearance and stays fully usable: the whole point is that the
    trainer performs the step on the real control, so nothing here may cover or restyle it.
    The pointer is styled in demoTour.css — shared with the automatic demo, which is the same tap. */
@@ -50,7 +50,7 @@
   opacity: 1;
 }
 
-/* A breathing GLOW around the ring (TODO §28.12), asked for directly: the static ring said "this
+/* A breathing GLOW around the ring, asked for directly: the static ring said "this
    one" and nothing said "now". The pulse is on the outer halo only — the inner 3px ring stays put,
    so the control's own edge never appears to move while a trainer is aiming at it with a thumb.
    Dropped entirely under prefers-reduced-motion below. */
@@ -82,7 +82,7 @@
      chapter's opening card rides on the first real step, so the panel carries a paragraph AND an
      instruction, and that came to 63% of an iPhone SE at the story's own first step: docked low it
      covered a control in the middle of the board, and flipping it high covered the same control
-     (measured 2026-08-30, TODO §38.15). The prose scrolls inside the panel now instead of pushing
+     (measured 2026-08-30). The prose scrolls inside the panel now instead of pushing
      it taller.
      A column, so the card is the part that gives: everything else — the step number, the
      instruction, the buttons — keeps its own height and stays where a thumb expects it. */

@@ -1,12 +1,12 @@
-// src/data/recordProjections.js — domain object → IndexedDB record, one schema (TODO §18.1).
+// src/data/recordProjections.js — domain object → IndexedDB record, one schema.
 //
 // The star-write model projects a live domain object DIRECTLY into every live schema, never through
 // a chain (see docs/DATA_MODEL.md §4). Today there is exactly one live schema (recordSchemas.js's
 // SCHEMA_4), so each projection here is necessarily small — pick the record's collection and stamp
 // the IndexedDB routing fields (`collection`, and `clientId` where the collection is owned by a
-// client) onto the domain object. That triviality is not a shortcut: §18.1 predicts it directly — a
-// "downgrade" is just a projection that was already being written all along, and the day a second
-// schema is cut, ITS projection is where the real transform work lands, not here.
+// client) onto the domain object. That triviality is not a shortcut: the star write model predicts
+// it directly — a "downgrade" is just a projection that was already being written all along, and
+// the day a second schema is cut, ITS projection is where the real transform work lands, not here.
 //
 // Record shape matches indexedDb.js exactly: `{ id, collection, ...domain fields, spread flat }` —
 // not nested under a `payload` key. `collection` is applied last so it always wins over any
@@ -28,14 +28,14 @@ export const projectSession = (session) => toRecord("sessions", session);
 export const projectHistory = (historyEntry) => toRecord("history", historyEntry);
 export const projectPlanUpdate = (update) => toRecord("planUpdates", update);
 export const projectNotification = (notification) => toRecord("notifications", notification);
-// An invitation, and with it the RSVP that came back (TODO §1.6). Declaring it here is what makes it
+// An invitation, and with it the RSVP that came back. Declaring it here is what makes it
 // persist at all: COLLECTIONS is derived from this table, and the fan-out and the backup file both
 // walk that list.
 export const projectInvite = (invite) => toRecord("invites", invite);
-// A repeating session (TODO §35.3a). Declared here for the same reason invitations are: COLLECTIONS
+// A repeating session. Declared here for the same reason invitations are: COLLECTIONS
 // is derived from this table, and a collection missing from it does not persist at all.
 export const projectSessionSeries = (series) => toRecord("sessionSeries", series);
-// A reusable block of exercises for building a plan (TODO §45.5). Schema 5 declares it and schema 4
+// A reusable block of exercises for building a plan. Schema 5 declares it and schema 4
 // does not, so the fan-out writes it into store 5 alone.
 export const projectCircuit = (circuit) => toRecord("circuits", circuit);
 export const projectPreviewProbe = (probe) => toRecord("previewProbe", probe);
@@ -60,8 +60,8 @@ export function projectCollection(collection, domainObject) {
   return projector(domainObject);
 }
 
-// Structural problems in a projected record against a schema — empty means clean. This is §18.4's
-// "projections must be pure and total" made checkable: every record this build actually produces
+// Structural problems in a projected record against a schema — empty means clean. This makes the
+// rule "projections must be pure and total" checkable: every record this build actually produces
 // must conform to the schema it targets, and this is what a CI fixture or a fuzz corpus calls.
 export function projectionIssues(collection, domainObject, schema = SCHEMA_4) {
   const shape = schema[collection];
@@ -69,13 +69,14 @@ export function projectionIssues(collection, domainObject, schema = SCHEMA_4) {
   return fieldIssues(projectCollection(collection, domainObject), shape);
 }
 
-// Every collection this build projects — the boot-time read (TODO §18.6 part 4) groups a flat
+// Every collection this build projects — the boot-time read groups a flat
 // IndexedDB record list back into this shape, so it needs the same set PROJECTORS was built from.
 export const COLLECTIONS = Object.keys(PROJECTORS);
 
 /** Every id a record in `state` holds, across all the collections the store writes. One schema's
  *  records share one key in IndexedDB, so a new record must not take an id from ANY collection —
- *  an import checking only its own collection overwrote a client (TODO §77.1). */
+ *  an import once overwrote a client this way, by checking id collisions only within its own
+ *  collection. */
 export function recordIdsInUse(state) {
   const ids = new Set();
   for (const collection of COLLECTIONS) {
@@ -87,7 +88,7 @@ export function recordIdsInUse(state) {
 }
 
 /**
- * Whether a schema declares this collection at all — the staging boundary, made checkable (§18.4).
+ * Whether a schema declares this collection at all — the staging boundary, made checkable.
  *
  * Until 2026-08-17 nothing asked this question: the fan-out wrote every projected record into every
  * live store, and the backup file walked the projector table, which knows nothing about schemas. So

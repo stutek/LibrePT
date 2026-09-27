@@ -25,7 +25,7 @@
   <!-- Font Awesome, vendored for the same reason as the webfonts above — plus two this one made
        unavoidable: a CDN asset cannot be covered by the service worker's SHA-256 integrity catalog
        (it hashes what is served out of src/), and blocking every page load on cdnjs measured a
-       1948ms median / 35233ms worst case under a parallel test run (TODO §21). -->
+       1948ms median / 35233ms worst case under a parallel test run. -->
   <link rel="stylesheet" href="fonts/fontawesome.css">
   
   <!-- Favicon: the whistle alone, not the full clipboard mark the launcher icons use. At tab size
@@ -35,11 +35,11 @@
 
   <!-- Custom Styles: index.css carries shared design tokens, glass-card/button/flex foundations
        and color scheme, loaded first. Per-module stylesheets below add only what that module owns
-       (TODO §14.5 / §18.10 — a monolithic stylesheet cannot be shared/toggled per behaviour).
+       (a monolithic stylesheet cannot be shared/toggled per behaviour).
        Multiple requests, no build-time concatenation, by deliberate choice: this mirrors how the
-       app already treats JS (~89 native ES module requests, not bundled, TODO §12.7) rather than
+       app already treats JS (~89 native ES module requests, not bundled) rather than
        introduce this project's first source-to-shipped-bytes transformation — dist/ stays a
-       verbatim copy of src/ (TODO §16). -->
+       verbatim copy of src/. -->
   <link rel="stylesheet" href="index.css">
   <link rel="stylesheet" href="modules/clipboard/activeSessionOverlay.css">
   <link rel="stylesheet" href="modules/clipboard/clipboardEditor.css">
@@ -122,7 +122,7 @@
     <!-- The English in the markup is what FIRST PAINT shows, and there is no way around that: this
          line is on screen before i18n/index.js has loaded, so there is no dictionary to ask. The key
          is what happens next — applyTranslations() rewrites it the moment one exists, which is
-         before the language step hands over to the onboarding offer below (TODO §45.1). Without the
+         before the language step hands over to the onboarding offer below. Without the
          key it stayed English under Slovenian buttons for the rest of the hold. -->
     <p class="app-splash-tagline" data-i18n="splash_tagline">A lightweight, free app for your clipboard, sessions and training programmes.</p>
     <div id="app-splash-progress" class="app-splash-progress" aria-hidden="true"></div>

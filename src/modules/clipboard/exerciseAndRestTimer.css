@@ -1,6 +1,6 @@
 /* exerciseAndRestTimer.css — the floating per-client timer stack: compact labelled countdown
-   cards (overtime/stopped/flash states). Extracted from index.css 2026-07-27
-   (TODO §14.5 / §18.10). Inherits design tokens, glass-card/button/flex foundations and
+   cards (overtime/stopped/flash states). Extracted from index.css 2026-07-27.
+   Inherits design tokens, glass-card/button/flex foundations and
    color scheme from index.css, loaded first — this file adds only what
    exerciseAndRestTimer.js owns. */
 

@@ -1,5 +1,4 @@
-// src/domain/sessionFilters.js — what the board is filtered to, and what one tap on a day does to it
-// (TODO §45.6).
+// src/domain/sessionFilters.js — what the board is filtered to, and what one tap on a day does to it.
 //
 // Single responsibility: the RULES. No DOM, no storage, no rendering — a filter is four strings and
 // a function that narrows a list, so both can be read and tested without a browser.
@@ -8,7 +7,7 @@
 // filter at all is two empty strings. There is no third "mode" field, because a mode is a thing that
 // can disagree with what is on screen.
 //
-// **The click rule follows documented practice rather than our own invention** (§45.6, checked
+// **The click rule follows documented practice rather than our own invention** (checked
 // 2026-09-11 against eBay's design system, Syncfusion's component and Airbnb's react-dates): first
 // tap sets the start, second sets the end, and a tap once a RANGE exists starts over from that day —
 // the one behaviour somebody arrives already knowing. A tap on a day earlier than the start makes a
@@ -36,7 +35,7 @@ export function hasDateFilter({ from, to } = {}) {
   return Boolean(from && to);
 }
 
-/** The filters Today leaves behind (TODO §77.7): a date range that does not hold `dayIso` is
+/** The filters Today leaves behind: a date range that does not hold `dayIso` is
  *  dropped, because Today has to show today; a range that holds it, and the client and place
  *  filters, are the trainer's choice and stay. ISO dates compare correctly as strings. */
 export function filtersIncludingDay(filters, dayIso) {

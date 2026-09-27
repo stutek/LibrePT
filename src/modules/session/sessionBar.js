@@ -107,7 +107,7 @@ export function updateSessionBarTimer() {
   if (!activeSession) return;
   const durationEl = document.getElementById("clipboard-bar-duration");
   // This bar keeps second-level precision (a separate surface from the dashboard's session-card
-  // status lines, TODO 2.3); .session-card-timer is that dashboard card's own live timer and must
+  // status lines); .session-card-timer is that dashboard card's own live timer and must
   // render "01h 32m", same as its non-launched countdown states.
   let text = "";
   let cardText = "";

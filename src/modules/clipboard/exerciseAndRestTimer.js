@@ -15,8 +15,8 @@
 //     still counts (and can already be negative).
 //   • The only control is dismiss (✕); there is no pause / ±15s — a running timer just runs.
 //
-//   • A timer belongs to a WORKSPACE, and the clocks do not stop when the trainer steps out of one
-//     (TODO §40.11). One rule covers it: **the trainer's own work always beeps, wherever they are;
+//   • A timer belongs to a WORKSPACE, and the clocks do not stop when the trainer steps out of one.
+//     One rule covers it: **the trainer's own work always beeps, wherever they are;
 //     the sandbox beeps only in the sandbox.** So a rest period does not pass unheard because
 //     somebody went to look something up in the demo — that being exactly when they would — and a
 //     demonstration never interrupts real work. A timer that finishes in the trainer's own work
@@ -37,7 +37,7 @@ import { openSandboxTimerDialog } from "../common/sandboxDialogs.js";
 import { escapeHTML } from "../common/utils.js";
 
 // Version-scoped: a persisted timer carries the running build's session/focus shape. Also
-// workspace-scoped (TODO §40.1), which is what lets the two sets of clocks exist side by side.
+// workspace-scoped, which is what lets the two sets of clocks exist side by side.
 const STORE_KEY = "librept_active_timers";
 
 let deps = {};
@@ -55,7 +55,7 @@ let deps = {};
 let timers = {};
 // The OTHER workspace's timers: ticked, never drawn. They are what makes a rest period survive the
 // trainer stepping into the sandbox — the stack shows the workspace they are looking at, while the
-// clocks of the one they left keep running underneath (TODO §40.11).
+// clocks of the one they left keep running underneath.
 let otherTimers = {};
 let tickIntervalId = null;
 // Set once per expiry, so the card that names an expired timer is not reopened every second while
@@ -157,7 +157,7 @@ export function clearAllTimers() {
   persist();
   renderStack();
   // Only THIS workspace's timers were cleared. A session starting in the sandbox must not silence a
-  // rest period running in the trainer's own work (TODO §40.11).
+  // rest period running in the trainer's own work.
   if (allTimers().length === 0) stopTicking();
 }
 
@@ -207,7 +207,7 @@ function parseTimers(raw, workspace) {
   return parsed;
 }
 
-/** Re-read both sets after the workspace changed under us (TODO §40.3): what was the other
+/** Re-read both sets after the workspace changed under us: what was the other
  * workspace's is now the stack, and what was the stack is now ticking underneath. The interval is
  * deliberately NOT stopped — a running rest period must survive the switch that caused this. */
 export function rebindTimersToWorkspace() {
@@ -219,7 +219,7 @@ function closeTimer(clientId) {
   persist();
   renderStack();
   // The other workspace's clocks count here too: dismissing the last card on screen must not stop a
-  // rest period still running in the work the trainer stepped away from (TODO §40.11).
+  // rest period still running in the work the trainer stepped away from.
   if (allTimers().length === 0) stopTicking();
 }
 
@@ -300,7 +300,7 @@ function tick() {
   updateTimes();
 }
 
-// The workspace the trainer is not looking at. One rule decides what they hear (TODO §40.11): the
+// The workspace the trainer is not looking at. One rule decides what they hear: the
 // trainer's OWN work beeps wherever they are and says whose rest is over; the sandbox's timers
 // expire in silence while they are back at work. Either way the crossing is recorded, so returning
 // does not replay an alert for a timer that finished an hour ago.

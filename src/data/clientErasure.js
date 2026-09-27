@@ -1,11 +1,11 @@
 // src/data/clientErasure.js — honouring an Art. 17 erasure request without destroying the training
 // record. Pure: takes a state, returns a new one. No DOM, no storage, no clock of its own.
 //
-// **Erasure is anonymization, not deletion** (TODO §17.3, [DATA_MODEL §5](../../docs/DATA_MODEL.md)).
+// **Erasure is anonymization, not deletion** ([DATA_MODEL §5](../../docs/DATA_MODEL.md)).
 // Every identifying field is replaced or cleared; the execution records — what was lifted, when, for
 // how long — stay, keyed to an opaque id that no longer resolves to a person.
 //
-// **It is irreversible, and that is the decision §17.3 left open.** A reversible scheme needs a
+// **It is irreversible.** A reversible scheme was considered and rejected: it needs a
 // mapping from pseudonym back to person, and with no server that mapping would sit in the same local
 // database it is meant to protect — one file that un-erases everyone. So nothing is kept: no name,
 // no contact, no mapping table, no "recently erased" cache. The pseudonym is derived from the
@@ -35,7 +35,7 @@
 // weight is a measurement of the human being, not of the work performed, so it goes with the name.
 // Session loads stay because they describe what was lifted, not who lifted it.
 //
-// `alias` was missing until 2026-09-18 (TODO §59), and an erasure without it was not an
+// `alias` was missing until 2026-09-18, and an erasure without it was not an
 // anonymisation: the alias is the trainer's own label for telling two same-named people apart, and
 // the form suggests exactly the words that identify one — "Novak", "with the knee". It rides beside
 // the name on every screen that shows a client (utils.js's `getClientDisplayNameHTML`), so a kept
@@ -155,8 +155,8 @@ function scrubName(text, name, pseudonym) {
   return { text: next, hit: next !== text };
 }
 
-/** The mark a name leaves behind in prose: the record's own id, in brackets (TODO §65, ruled
- * 2026-09-19 by Simon). The id is opaque and already in the record, so the text says WHICH client
+/** The mark a name leaves behind in prose: the record's own id, in brackets (ruled 2026-09-19 by
+ * Simon). The id is opaque and already in the record, so the text says WHICH client
  * was taken out without saying anything about them — and two erased clients in one sentence stay
  * two. The client record itself keeps the short pseudonym, which is what a trainer reads in a list. */
 function textMarkerFor(clientId) {
@@ -204,7 +204,7 @@ function eraseHistoryRecord(record, name, pseudonym, marker, counters) {
  * erasure a trainer cannot describe is one they cannot prove they performed when asked.
  */
 /**
- * What an erasure does to ONE repeating-session rule (TODO §65, ruled 2026-09-19 by Simon).
+ * What an erasure does to ONE repeating-session rule (ruled 2026-09-19 by Simon).
  *
  * **A rule for this client alone goes.** It exists only to keep producing their evenings, and a
  * person who asked to be forgotten must not still be scheduled every Tuesday. Its trainer-typed
@@ -256,7 +256,7 @@ export function eraseClientInState(state, clientId, { requestedOn = "", now = ne
     // hand, and they can only do that if they are told which sessions to open.
     reviewSessionIds: [],
     // Repeating rules: how many were dropped because they existed for this client alone, how many
-    // stayed for the others in them, and which of those still say the name (TODO §65).
+    // stayed for the others in them, and which of those still say the name.
     seriesRemoved: 0,
     seriesKept: 0,
     reviewSeriesIds: [],
@@ -332,7 +332,7 @@ export function eraseClientInState(state, clientId, { requestedOn = "", now = ne
 const SWEPT_COLLECTIONS = ["clients", "history", "planUpdates", "sessions", "sessionSeries"];
 
 /**
- * Run every erasure again (TODO §65, ruled 2026-09-18 by Simon: after every migration and at every
+ * Run every erasure again (ruled 2026-09-18 by Simon: after every migration and at every
  * start). It finishes what an older build or an older sweep left behind — an alias, a repeating rule
  * still scheduling the person — and needs no name to do it. Prose it cannot repair: the name is gone.
  */

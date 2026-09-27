@@ -1,19 +1,19 @@
 // src/modules/session/sessionInviteDialog.js
-// Dialog shown after a PT assigns new participants to a session (TODO §1.1) — the PT-side
+// Dialog shown after a PT assigns new participants to a session — the PT-side
 // counterpart to a client self-subscribing via the Google-hosted booking page
 // (use_cases/uc4_client_self_subscription.md). Offers each newly-assigned client a calendar
 // invite: a downloadable .ics plus a prefilled mailto compose to send it in. LibrePT has no
-// backend/SMTP relay (TODO §1.5), so this is the honest, no-network equivalent of Google
+// backend/SMTP relay, so this is the honest, no-network equivalent of Google
 // Calendar's own invite email.
 //
-// **The invite also carries a link the client can actually answer** (TODO §1.6's confirm link). An
+// **The invite also carries a link the client can actually answer** (a confirm link). An
 // `.ics` only collects an acceptance from a calendar client that speaks iMIP, which is not what a gym
 // client has — so every invite carries a LibrePT reply link too, and the client taps one of three
 // answers on a page rather than replying in prose. SMS is offered beside email where the client has a
 // number (ruled 2026-08-17): a text cannot carry the `.ics`, so email keeps the calendar file and the
 // text carries the link. Both, never one instead of the other.
 //
-// **Sending records an invitation** (TODO §1.6): a row in `invites` saying this session was offered
+// **Sending records an invitation**: a row in `invites` saying this session was offered
 // to this client, on which channel, when. That is what an RSVP later lands on. It is recorded on the
 // tap that opens the mail or messaging app rather than on some later confirmation, because there is
 // no confirmation to wait for — the app hands the message to another app and never hears back.
@@ -263,7 +263,7 @@ function buildEmailInviteButton(client, sessionInfo, replyLink, t) {
         organizerEmail: currentOrganizer(),
         // If this evening belongs to a repeating session, the file says so — the whole rule while
         // the evening is where the rule put it, and the id of the evening it REPLACES once it has
-        // been moved (TODO §35.3a). Resolved here rather than passed in, because every caller of
+        // been moved. Resolved here rather than passed in, because every caller of
         // this dialog would otherwise have to know what a series is.
         ...recurrenceFieldsFor(sessionInfo),
       }),
@@ -276,7 +276,7 @@ function buildEmailInviteButton(client, sessionInfo, replyLink, t) {
   return btn;
 }
 
-/** What this session's calendar file has to say about repeating, if anything (TODO §35.3a).
+/** What this session's calendar file has to say about repeating, if anything.
  *
  * Empty for a one-off, which is most sessions — the rule and the exception are the two cases a
  * repeating one can be in, and domain/sessionSeries.js owns which.
@@ -289,7 +289,7 @@ function recurrenceFieldsFor(sessionInfo) {
   return occurrenceCalendarFields(series, session);
 }
 
-/** The text channel, beside email rather than instead of it (TODO §1.6, SMS ruled in 2026-08-17): an
+/** The text channel, beside email rather than instead of it (SMS ruled in 2026-08-17): an
  *  SMS cannot carry the .ics, so email keeps the calendar file and the text carries the link a client
  *  is far more likely to answer. Returns null where the client has no number, so most rows stay a
  *  single button rather than growing a dead one. */
@@ -354,7 +354,7 @@ function renderDialogChrome(t) {
     ],
     ["session-invite-organizer-label", t("session_invite_organizer") || "Replies come back to"],
     // Both keys existed in every language and nothing applied them, so the label stayed English
-    // and the hint under the field was always empty (TODO §38.20).
+    // and the hint under the field was always empty.
     [
       "session-invite-expiry-label",
       t("session_invite_expiry") || "Close replies this many hours before",

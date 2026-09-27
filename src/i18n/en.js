@@ -190,7 +190,7 @@ export const en = {
   modality_stretch: "Stretch",
   modality_balance: "Balance",
   modality_agility: "Agility",
-  // The Custom Exercise dialog (controllers/exerciseFormsController.js), TODO §38.20.
+  // The Custom Exercise dialog (controllers/exerciseFormsController.js).
   modality_label: "How it's logged *",
   modality_option_strength: "Strength — sets × reps × load",
   modality_option_isometric: "Isometric — hold time + load",
@@ -201,7 +201,7 @@ export const en = {
   metric_label: "Metric",
   exercise_name_placeholder: "e.g. Bulgarian Split Squat",
   instructions_placeholder: "Form cues...",
-  // The Apply Program Adjustment dialog (modules/plans/planAdjustments.js), TODO §38.20.
+  // The Apply Program Adjustment dialog (modules/plans/planAdjustments.js).
   adjust_title: "Apply Program Adjustment",
   adjust_client: "Client:",
   adjust_feedback: "Feedback:",
@@ -217,8 +217,8 @@ export const en = {
   adjust_replacement: "Replacement Exercise",
   adjust_replacement_hint: "— same muscle group keeps volume tracking intact",
   adjust_apply: "Apply & Resolve",
-  // The encrypted-file reader a CLIENT opens (modules/common/encryptedFileReader.js), TODO §38.20.
-  // The Routine Template dialog and its rows (routineFormsController.js, plansView.js), TODO §38.20.
+  // The encrypted-file reader a CLIENT opens (modules/common/encryptedFileReader.js).
+  // The Routine Template dialog and its rows (routineFormsController.js, plansView.js).
   routine_name_placeholder: "e.g. Upper Body A",
   routine_desc_placeholder: "e.g. Strength compound focus",
   routine_exercises_heading: "Routine Exercises",
@@ -228,10 +228,10 @@ export const en = {
   routine_row_rest: "Rest",
   routine_row_rest_label: "Rest duration in seconds",
   routine_row_remove: "Remove exercise from routine",
-  // The exercise picker (modules/exercises/exercisePicker.js), TODO §38.20.
+  // The exercise picker (modules/exercises/exercisePicker.js).
   picker_count: "Movements: {count}",
   picker_empty: "No movements match this filter.",
-  // The session setup form (modules/session/editSessionView.js), TODO §38.20.
+  // The session setup form (modules/session/editSessionView.js).
   session_name_placeholder: "Select or type session name...",
   location_placeholder: "Select or type location...",
   encrypted_title: "Open an encrypted file",
@@ -312,7 +312,7 @@ export const en = {
   btn_launch_clipboard_short: "Open in Clipboard",
   syncing_calendar: "Syncing...",
   calendar_synced: "Calendar synchronized successfully!",
-  // The board's filters (TODO §45.6). Each chip says what it filters by when nothing is chosen, and
+  // The board's filters. Each chip says what it filters by when nothing is chosen, and
   // its value once something is — the chip IS the readout, which is why there is no modal.
   filter_dates: "Dates",
   filter_client: "Client",
@@ -348,7 +348,7 @@ export const en = {
   session_invite_title: "Send calendar invites",
   session_invite_desc:
     "Newly assigned participants can be sent a calendar invite for this session.",
-  // The client intake page (TODO §1.7/§26) — the only screen in the app written FOR the client, so
+  // The client intake page — the only screen in the app written FOR the client, so
   // the voice is theirs and not the trainer's: "your trainer", never "the client". It says where each
   // answer goes, because someone disclosing an injury to a person they have not trained with yet is
   // entitled to know that before they type it.
@@ -368,7 +368,7 @@ export const en = {
   // optional backup in their own private cloud storage, nobody else, and the right to withdraw. The
   // links stay for the detail; they are not where the substance is allowed to hide.
   //
-  // The VENDOR is not named here (§39.3, 2026-08-31). It used to say "Google Drive", while the
+  // The VENDOR is not named here. It used to say "Google Drive", while the
   // consent letter this line summarises says "my personal cloud storage" and names nobody — two
   // texts about one promise, disagreeing, and the shorter one is the one a client actually ticks.
   // Nothing is hidden by dropping it: the privacy notice this line links to names Google Drive in
@@ -398,7 +398,7 @@ export const en = {
   intake_send_to_body: "Hello, here are my details for training.",
   intake_send_to_hint:
     "Attach the file {file} to that message. Your phone saved it with your downloads.",
-  // Precedes the browser's own untranslated message (TODO §45.4). Says who the line is for, so
+  // Precedes the browser's own untranslated message. Says who the line is for, so
   // nobody reads a developer's error text as an instruction to them.
   intake_send_failed_detail: "Your trainer may need this:",
   // A share the browser refused has already saved the file (modules/intake/signupDelivery.js), so
@@ -408,7 +408,7 @@ export const en = {
   intake_err_identity: "Please add your name, and either an email or a phone number.",
   intake_err_consent:
     "Please tick the consent box — your trainer cannot store your details without it.",
-  // Reviewing a submission a client sent in (TODO §26.5). The labels name the FIELD, and the consent
+  // Reviewing a submission a client sent in. The labels name the FIELD, and the consent
   // rows show the three things that make consent demonstrable under Art. 7(1) rather than a tick.
   signup_review_lede:
     "Open the file your client sent you. Nothing is added to your clients until you accept it — the file was written on their phone and anyone could send you one.",
@@ -427,7 +427,7 @@ export const en = {
   signup_review_save: "Add to my clients",
   signup_review_unreadable:
     "That file is not a LibrePT client introduction — check you picked the right attachment.",
-  // The invite-reply page (TODO §1.6). Written FOR the client, like the intake page: "your trainer",
+  // The invite-reply page. Written FOR the client, like the intake page: "your trainer",
   // and no jargon about payloads or deep links — they tap an answer and send a message.
   rsvp_unreadable: "This invite link is incomplete — ask your trainer to send it again.",
   rsvp_expired:
@@ -512,18 +512,18 @@ export const en = {
   // The cold-start splash (index.html). These are the first words a new trainer reads, and until
   // 2026-09-11 they were the only ones a language choice could not reach: the markup carried the
   // English text and no key, so choosing Slovenian left the invitation into the demo in English
-  // (reported by the first trainer to use the app, TODO §45.1). The walkthrough button reuses
+  // (reported by the first trainer to use the app). The walkthrough button reuses
   // `walkthrough_title` rather than adding a second spelling of the same name.
   splash_tagline: "A lightweight, free app for your clipboard, sessions and training programmes.",
   splash_dismiss: "Dismiss and continue to the app",
   splash_load_demo: "Explore with demo data",
   splash_start_empty: "Start with an empty app",
-  // The trainer's own details (TODO §45.2). The lede says what they are FOR, because nothing in the
+  // The trainer's own details. The lede says what they are FOR, because nothing in the
   // app shows the trainer their own name back — it is only ever read by an invitation on its way to
   // somebody else, and a form whose purpose is invisible gets filled in wrongly or not at all.
   menu_trainer_details: "My details",
   trainer_details_title: "Your details",
-  // The app version this device runs (TODO §76).
+  // The app version this device runs.
   menu_app_version: "App version",
   app_version_title: "App version",
   app_version_button_label: "Build version — tap for details",
@@ -551,7 +551,7 @@ export const en = {
     "Your name signs the invitations you send clients, and your phone and email are how they answer. All four are required. They stay on this device, and you can change them later in the menu.",
   splash_theme_prompt: "Choose a theme",
   splash_continue: "Continue",
-  // The guided walkthrough (TODO §9.5) and the captions of the script it shares with the automatic
+  // The guided walkthrough and the captions of the script it shares with the automatic
   // demo (modules/demo/gymFloorTour.js). Each caption names the control by what it DOES, never by
   // where it is on screen — the panel is read on a phone whose layout is not the one this was
   // written on.
@@ -581,7 +581,7 @@ export const en = {
     "Tap the circuit to bring it into focus. Its controls come within thumb reach.",
   tour_step_signal: "Mark the round Too Easy. One tap logs it and leaves a note for the plan.",
   tour_step_next_participant: "Switch to the next participant — same session, their own plan.",
-  // The long demo (TODO §35): chapter titles, the narration cards' bodies, and the labels the
+  // The long demo: chapter titles, the narration cards' bodies, and the labels the
   // narration surface itself needs. Captions for taps that the story shares with the wedge stay
   // under tour_step_* — the same step, said once.
   gym_notes_label: "In the gym",
@@ -696,7 +696,7 @@ export const en = {
   // The demo's front door, and the only card a stranger reads standing still rather than mid-tap:
   // it says what the app is, what this run is a story OF, and that none of it can reach their own
   // records. The sandbox line replaces the offer to delete the demo data afterwards — with a
-  // separate database (TODO §40) there is nothing to clear, which is the stronger promise.
+  // separate database there is nothing to clear, which is the stronger promise.
   story_welcome_title: "Welcome to LibrePT",
   story_welcome_body:
     "LibrePT is an app for personal trainers: appointments, training plans, and a notebook during the workout. In this walkthrough you invite three new clients, prepare Tuesday's session and adjust it while it runs. It all happens in the sandbox, a separate copy with made-up clients. It does not change your real clients, appointments or workouts.",
@@ -826,7 +826,7 @@ export const en = {
   story_step_capture_tag: "Tap 🔥 Joint Pain / Discomfort.",
   story_step_capture_note: "In the note box, type what he said: left knee, third round.",
   // What the demo TYPES, not what it says about typing: a Slovenian viewer watched Ana write her
-  // shoulder up in English (reported 2026-08-30, TODO §38.19). The words a person enters belong to
+  // shoulder up in English (reported 2026-08-30). The words a person enters belong to
   // that person, so they are translated like everything else they read.
   story_typed_note: "left knee, third round",
   story_typed_injury: "shoulder, two years ago",
@@ -893,7 +893,7 @@ export const en = {
   drive_sync_connect: "Connect Google Drive",
   drive_sync_now: "Sync Now",
   drive_sync_syncing: "Syncing…",
-  // What the header cloud's overlay glyph MEANS, spoken (TODO §3.11) — a shape alone is a hover
+  // What the header cloud's overlay glyph MEANS, spoken — a shape alone is a hover
   // tooltip's problem in another costume: unreachable on touch, silent to a screen reader.
   drive_sync_glyph_failed: "Last sync failed",
   drive_sync_glyph_disconnected: "Cloud sync not connected",
@@ -917,7 +917,7 @@ export const en = {
     "Google hasn't approved this account for sync yet. Your data is safe on this device.",
   drive_sync_status_declined: "Not connected — you can connect any time.",
   drive_sync_review_conflicts: "Review conflicts",
-  // The Sync & Backup dialog's own markup (modules/common/backupRestore.js), TODO §38.20.
+  // The Sync & Backup dialog's own markup (modules/common/backupRestore.js).
   drive_sync_title: "Cloud Backup (Google Drive)",
   drive_sync_disconnect: "Disconnect",
   drive_sync_interval_label: "Sync every",
@@ -1015,7 +1015,7 @@ export const en = {
   custom_empty_plan: "Custom / Empty Plan",
   plan_program_title: "Plan Upcoming Program",
   planned_program: "Planned Program",
-  // The sideways deck of a client's plans on the clipboard (TODO §52.2 step 4).
+  // The sideways deck of a client's plans on the clipboard.
   plan_peek_previous: "Previous plan",
   plan_peek_next: "Next plan",
   plan_peek_release_open: "Release to open",
@@ -1031,7 +1031,7 @@ export const en = {
   unbacked_urgent: "AT RISK — BACK UP",
   offline_cached_desc:
     "HTTP server unreachable. Running off cached code; unable to check for updates.",
-  // The two data-subject-request dialogs (modules/clients/clientDataRights.js), TODO §38.20.
+  // The two data-subject-request dialogs (modules/clients/clientDataRights.js).
   rights_export_title: "Export this client's data",
   rights_export_scope:
     "{logged} logged session(s), {sessions} booking(s), {updates} plan update(s). Other clients' data is never included: a group session appears only as its size.",
@@ -1060,7 +1060,7 @@ export const en = {
   rights_erase_requested: "Date they asked",
   rights_copy_receipt: "Copy receipt",
   rights_erase_confirm: "Erase permanently",
-  // The client detail view (modules/clients/clientsView.js), TODO §38.20.
+  // The client detail view (modules/clients/clientsView.js).
   view_grabber_home: "Return to home",
   view_grabber_clipboard: "Open session clipboard",
   view_grabber_close_session: "Close session and return to home",

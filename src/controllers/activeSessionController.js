@@ -107,7 +107,7 @@ export {
 // circuit fields so a rest inside a circuit stays grouped with it. Exercise items have no `type`.
 //
 // Rests are first-class: `activeExerciseIndex` may point at one exactly like any exercise or
-// circuit member (TODO §8.6). The plan's shape, and everything that builds one, lives in
+// circuit member. The plan's shape, and everything that builds one, lives in
 // domain/sessionPlanFactory.js.
 
 // `newItemId` names a plan item the caller just created (the live deck's +Exercise/+Circuit/+Rest
@@ -191,7 +191,7 @@ initActiveSessionBoard({
   newRecordId,
 });
 
-// The board render itself lives in modules/clipboard/activeSessionBoard.js (TODO §24.3). Kept as a
+// The board render itself lives in modules/clipboard/activeSessionBoard.js. Kept as a
 // named export here because app.js and the router already call renderActiveGroupBoard() — the seam
 // moved, the entry point did not.
 export function renderActiveGroupBoard() {
@@ -241,7 +241,7 @@ function wireSessionMenuAndActions(t) {
     // already unfolded from last time reads as the app having remembered a decision nobody made.
     document.getElementById("copy-plan-targets")?.classList.add("hidden");
   };
-  // The title block opens the same menu (TODO §39.6). Both openers report the same state, so a
+  // The title block opens the same menu. Both openers report the same state, so a
   // screen reader is never told the menu is closed by the control the user did not use.
   const titleBlock = document.querySelector(".session-title-block");
   const toggleSessionMenu = () => {
@@ -281,7 +281,7 @@ function wireSessionMenuAndActions(t) {
     });
   }
 
-  /** Puts every participant on the plan currently on screen — or gives them their own back (TODO §8.1).
+  /** Puts every participant on the plan currently on screen — or gives them their own back.
    *
    * Applied to the live session immediately, so the very next set logged counts for the whole group:
    * bound participants SHARE one plan object (domain/participantBinding.js), which is what makes one
@@ -316,7 +316,7 @@ function wireSessionMenuAndActions(t) {
     renderActiveGroupBoard();
   }
 
-  /** Lists who tonight's plan can be given to, inside the ⋯ menu (TODO §8.8).
+  /** Lists who tonight's plan can be given to, inside the ⋯ menu.
    *
    * Names rather than a single "copy" action, because *to whom* is the entire question — the common
    * case is a walk-in joining a session already underway, and a menu item that guessed would be
@@ -358,7 +358,7 @@ function wireSessionMenuAndActions(t) {
   /** Gives another participant a copy of the plan on screen.
    *
    * A COPY, never a share: the two diverge from this moment on (domain/planCopy.js), which is the
-   * difference from binding them (§8.1) and the reason both controls exist. What travels is the
+   * difference from binding them and the reason both controls exist. What travels is the
    * prescription; what stays behind is what anybody did.
    */
   function copyPlanTo(clientId) {
@@ -393,7 +393,7 @@ function wireSessionMenuAndActions(t) {
     enterClipboardEditMode();
   });
 
-  // Everyone on one plan, and back again (TODO §8.1). One control rather than two: the trainer is
+  // Everyone on one plan, and back again. One control rather than two: the trainer is
   // answering a single question — are these people doing the same thing right now — and a menu that
   // offers both directions at once makes them read which one applies before they can answer it.
   document.getElementById("btn-bind-participants")?.addEventListener("click", () => {

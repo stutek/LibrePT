@@ -171,7 +171,7 @@ function keepSessionLengthWhenStartMoves() {
   });
 }
 
-// ── Double-booking readout (TODO §1.6) ─────────────────────────────────────────────────────────
+// ── Double-booking readout ──────────────────────────────────────────────────────────────────────
 // The trainer sees this WHILE typing a time, not after saving: a clash the app only mentions on
 // submit is one they have already committed to in their head, and on a phone the submit button is
 // usually off-screen from the time fields anyway.
@@ -255,7 +255,7 @@ function confirmParticipantRemovalIfNeeded(sessionId, deps, clientRoutines) {
 }
 
 // Diffs against the session's participants as they stood before this save, so re-saving an
-// unchanged assignment never re-prompts an invite for someone already assigned (TODO §1.1).
+// unchanged assignment never re-prompts an invite for someone already assigned.
 function notifyNewlyAssignedParticipants(
   deps,
   {
@@ -329,8 +329,9 @@ function offerResendAfterChange(deps, { asTold, now, identity, startTime, t }) {
   if (invited.length === 0) return;
 
   const what = changes.map((change) => t(`session_change_${change}`) || change).join(", ");
-  // A confirm() is the right weight here, unlike §9.3's per-record cleanup: this is one yes/no about one
-  // session, and the alternative is a dialog stacked on top of the dialog the trainer just submitted.
+  // A confirm() is the right weight here, unlike per-record cleanup elsewhere: this is one yes/no
+  // about one session, and the alternative is a dialog stacked on top of the dialog the trainer
+  // just submitted.
   if (!window.confirm(`${t("session_changed_resend") || "This session changed"} (${what}).`))
     return;
 
@@ -351,7 +352,7 @@ function offerResendAfterChange(deps, { asTold, now, identity, startTime, t }) {
 // here: startWorkoutSession only stashes sessionMeta into the ephemeral active-session cache, it
 // never writes to state.sessions, so without this the new session launches the clipboard but never
 // appears on the homepage list.
-/** Writes the repeating RULE the form describes, when the trainer ticked "repeats" (TODO §35.3a).
+/** Writes the repeating RULE the form describes, when the trainer ticked "repeats".
  *
  * Returns the series, or null when this is an ordinary one-off — which is most sessions, and why
  * the control is off by default.
@@ -390,7 +391,7 @@ function commitSeriesIfRepeating(
   return series;
 }
 
-/** Applies this evening's edit to the RULE, when the trainer asked for it (TODO §35.3a).
+/** Applies this evening's edit to the RULE, when the trainer asked for it.
  *
  * The exception row is dropped afterwards: it existed to say "this evening is different", and the
  * trainer has just said it is not. Leaving it would show the old values on the one evening they
@@ -432,7 +433,7 @@ function commitRealSession(
   const identity = { sessionId, sessionName: title, sessionDate, timeLabel, location };
 
   // Snapshot BEFORE the upsert, because it edits in place: the resend prompt below compares what the
-  // clients were told against what the session is now (TODO §1.6, asked for 2026-08-17 — "when a session
+  // clients were told against what the session is now (asked for 2026-08-17 — "when a session
   // gets changed, PT should be asked if they want to resend invitations").
   //
   // The snapshot carries the session's KIND alongside its fields, because "leg strength became cardio"
@@ -481,9 +482,9 @@ function readSessionFormFields(t) {
 // An untitled planning draft still needs something a trainer can recognise in the feed.
 const plannedProgramLabel = (t) => t("planned_program") || "Planned Program";
 
-// A client's name may not be typed into a session's name or location (TODO §66, ruled 2026-09-18).
+// A client's name may not be typed into a session's name or location (ruled 2026-09-18).
 // Refused at the moment of saving, not scrubbed afterwards: prose can only be scrubbed while the name
-// is still known, and after an erasure it is gone (§65). The sentence under the field carries the
+// is still known, and after an erasure it is gone. The sentence under the field carries the
 // reason and quotes the word back, bold, so the trainer can see which part of their own title it
 // means; the field itself is outlined so they can see WHICH field without reading anything.
 function showNameWordProblem(field, message, word, t) {
@@ -576,7 +577,7 @@ export function setupEditSessionControl() {
     e.preventDefault();
 
     // Before the participant checks: a field problem is shown ON the field, and a trainer should see
-    // that rather than a dialog about something else (TODO §66).
+    // that rather than a dialog about something else.
     if (!sessionTextNamesNobody(deps)) return;
 
     const clientRoutines = collectSelectedClientRoutines();
@@ -601,13 +602,13 @@ export function setupEditSessionControl() {
     const sessionId = editingSessionId || newRecordId();
 
     // Captured before commitRealSession mutates state.sessions: the diff against this is what
-    // decides who's a *newly* assigned participant (TODO §1.1) — re-saving an unchanged session
+    // decides who's a *newly* assigned participant — re-saving an unchanged session
     // must not re-prompt an invite for someone already assigned.
     const previousParticipants = editingSessionId
       ? (deps.getState().sessions || []).find((s) => s.id === editingSessionId)?.participants || []
       : [];
 
-    // A repeating slot is saved as the RULE (TODO §35.3a), and the board derives its evenings — so
+    // A repeating slot is saved as the RULE, and the board derives its evenings — so
     // there is nothing to write into `sessions` for the weeks ahead, and editing "Tuesdays at six"
     // later is one record rather than a sweep. The session in front of the trainer is still created
     // and still launches, because they filled this form in to run something now.
@@ -620,7 +621,7 @@ export function setupEditSessionControl() {
       t,
     });
 
-    // "Change every evening of this session" (TODO §35.3a): the rule takes the edit, and this
+    // "Change every evening of this session": the rule takes the edit, and this
     // evening stops being an exception so it follows the rule again like the others.
     applyEditToSeriesIfAsked(deps, {
       sessionId,
@@ -903,7 +904,7 @@ function buildParticipantRow(client, ctx) {
   return row;
 }
 
-// ── Finding a client among a hundred (TODO §46.2) ──────────────────────────────────────────────
+// ── Finding a client among a hundred ────────────────────────────────────────────────────────────
 // The context the search needs to build a row, kept from the last time the form was opened: the
 // listener is bound once at init, and the draft, the session being edited and the routine list all
 // belong to the current opening.
@@ -1012,7 +1013,7 @@ function setupParticipantSearch() {
   });
 }
 
-/** The form's repeating half, set for whichever session it was opened on (TODO §35.3a).
+/** The form's repeating half, set for whichever session it was opened on.
  *
  * Which evening of a repeating session this is gets said OUT LOUD, because the alternative is a
  * trainer changing next Tuesday and finding out later that every Tuesday moved — or, worse,

@@ -36,7 +36,7 @@ export function renderClientDirectoryViewShell() {
       <div class="view-header view-titlebar">
         <button class="view-grabber" type="button" data-i18n-label="view_grabber_home" aria-label="Return to home"></button>
         <h2 data-i18n="clients_title">Client Directory</h2>
-        <!-- Let the person fill their own details in (TODO §26.3). Beside Add Client rather than
+        <!-- Let the person fill their own details in. Beside Add Client rather than
              replacing it: a trainer standing with someone at the desk still types the two fields
              themselves, and a trainer who has just been asked about training sends a link. It opens
              the sending dialog, which is where the contact detail and the copy-by-hand fallback

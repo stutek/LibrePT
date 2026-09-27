@@ -1,7 +1,7 @@
 // src/modules/session/sessionTitleBar.js
 // Renders the header / title block of the Active Session Overlay: which session, then when and where.
 //
-// **Two lines, because one could not say which session this is** (TODO §39.6). It used to be a
+// **Two lines, because one could not say which session this is.** It used to be a
 // single 22px line reading `2026-09-01 11:30 playground outside` — no session name anywhere in the
 // clipboard, and on a desktop window that line still lost 90px to an ellipsis (reported 2026-08-31:
 // "this one clips on desktop"). The bar's height is set by the 44px touch row its buttons need,
@@ -58,13 +58,13 @@ export function renderSessionTitle() {
   // overlapping ones, so `titles` is an array. Reading `[0]` made two merged sessions look like one,
   // named after whichever sorted first (raised 2026-08-31).
   //
-  // Each on its OWN line, each cut with "…" on its own (ruled 2026-09-13, TODO §47.1). Joined with
+  // Each on its OWN line, each cut with "…" on its own (ruled 2026-09-13). Joined with
   // " + " on one line, the joined name was cut at 390px after "Group Strength & Conditioning + ",
   // and the second session was not named at all.
   //
   // A finished session reopened from History or from the deck has no booked slot behind it, so its
   // name is on the record itself (`finishedRecord`, openSessionFromHistory). Without this it read
-  // "Untitled Session" even when the trainer had named it (TODO §55.1); a record that truly has no
+  // "Untitled Session" even when the trainer had named it; a record that truly has no
   // name says what it is instead, since "Untitled Session" describes nothing a trainer can act on.
   const finished = activeSession.finishedRecord;
   const titles = sourceSession?.titles?.length

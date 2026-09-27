@@ -73,9 +73,9 @@ export function openSessionFromHistory(log) {
           location: "",
         }
       : null,
-    // A finished session is REOPENED here, not staged to be run: from the History view, and since
-    // §52.2 far more often by pulling the plan aside on the clipboard. It carries its own name and
-    // must not offer Start — it already happened (TODO §55.1). This is deliberately not a
+    // A finished session is REOPENED here, not staged to be run: from the History view, and, far
+    // more often, by pulling the plan aside on the clipboard. It carries its own name and
+    // must not offer Start — it already happened. This is deliberately not a
     // `sourceSession`: that means "the booked slot this clipboard was launched from", and every
     // reader of it (the clipboard strip, the schedule-drift offer, the timers) would then be
     // handed a slot that was never booked.
@@ -124,7 +124,7 @@ export function startWorkoutSession(clientRoutines, sessionMeta = null, deps = {
       exercises: libraryExercises(state),
       emptyPlanName: t("custom_empty_plan") || "Custom / Empty Plan",
     });
-    // An IMPORTED programme arrives as plan items rather than as a routine (TODO §29), so it
+    // An IMPORTED programme arrives as plan items rather than as a routine, so it
     // replaces what the routine would have supplied. Handled here, at the one place a plan is built,
     // rather than by writing over the session afterwards — an import that patched a session the
     // moment after it was created would be a second way to construct one.
@@ -236,7 +236,7 @@ export function deleteScheduledSession() {
 
   // Deleting an evening of a REPEATING session cannot mean removing the row: the rule would produce
   // that evening again on the next render, and the trainer would watch a session they just deleted
-  // come back (TODO §35.3a). It is kept as cancelled, which is the only way to say "not this
+  // come back. It is kept as cancelled, which is the only way to say "not this
   // Tuesday" to a rule that says "every Tuesday". A one-off is deleted, as it always was.
   state.sessions = sessionsAfterRemoving(
     state.sessions || [],
@@ -356,8 +356,8 @@ export function recoverActiveSession() {
   try {
     setActiveSession(parsed);
     const activeSession = parsed;
-    // Bound participants SHARE one plan object, and object identity does not survive JSON (TODO
-    // §8.1) — so a session restored from the cache would come back silently unbound, logging each
+    // Bound participants SHARE one plan object, and object identity does not survive JSON — so a
+    // session restored from the cache would come back silently unbound, logging each
     // set for one person. The list of bindings is what does survive; the sharing is re-applied from
     // it here, at the one place a cached session becomes a live one again.
     activeSession.clientRoutines = boundClientRoutines(

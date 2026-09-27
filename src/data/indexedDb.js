@@ -1,23 +1,24 @@
-// src/data/indexedDb.js — the low-level IndexedDB adapter (TODO §18.6).
+// src/data/indexedDb.js — the low-level IndexedDB adapter.
 // Single responsibility: open the database with the right shape, and wrap IndexedDB's event-based
 // API in promises. It knows nothing about clients, sessions or schemas' MEANING — only that a schema
 // major names an object store.
 //
-// **Why IndexedDB.** §3.7 deferred a real engine until "the 5 MB cap looms"; §17.1 shipped the full
-// structured program record and it now does — a very busy PT reaches ~16.6 MiB/yr in a single bucket
-// (§18.6's sizing), and §18's star writes multiply that by the number of live schemas. IndexedDB adds
+// **Why IndexedDB.** A real storage engine was deferred until "the 5 MB cap looms"; storing the
+// full structured session-history record now reaches that scale — a very busy PT hits ~16.6 MiB/yr
+// in a single bucket, and star writes (fanning each record out to every live schema) multiply that
+// by the number of live schemas. IndexedDB adds
 // **zero bytes** to the install (it is the platform, present in every browser and mobile webview),
 // works offline and inside the Service Worker, and its quota is orders of magnitude clear of those
 // figures. SQLite-in-wasm was rejected: it would roughly double a 1,040 KB `src/`, and it brings the
 // binary/VFS/header configuration this design is specifically trying not to have.
 //
-// **The layout is a correctness constraint, not a preference (§18.6).** ONE database, with one object
+// **The layout is a correctness constraint, not a preference.** ONE database, with one object
 // store per schema major. IndexedDB transactions cannot span *databases* — so giving each schema its
 // own database would make an atomic star write impossible by construction, and that is expensive to
 // discover later. One database means a single transaction can write every live schema at once, which
 // is what makes the fan-out crash-safe when the phone locks mid-session.
 //
-// **The transaction gotcha, stated once here because it is silent when you get it wrong (§18.9):** an
+// **The transaction gotcha, stated once here because it is silent when you get it wrong:** an
 // IndexedDB transaction auto-closes as soon as the event loop yields to anything that is not one of
 // its own requests. `await`ing a fetch, a timer, or any non-IDB promise inside a transaction ends it,
 // and the writes that follow throw `TransactionInactiveError` — or worse, were never going to run.
@@ -32,9 +33,10 @@ export const DATABASE_NAME = "librept";
 // Records carry their collection and owner alongside the payload so one store per schema can serve
 // three distinct query shapes without a second store per collection:
 //   - COLLECTION_INDEX  "the whole exercise catalog" — no client dimension at all.
-//   - CLIENT_INDEX      "everything about client X, any collection" — §17.3 erasure/anonymization
-//                        needs exactly this: every record type touched for one client, unnarrowed.
-//   - CLIENT_COLLECTION_INDEX  "client X's HISTORY specifically" — §17.1's actual stated need.
+//   - CLIENT_INDEX      "everything about client X, any collection" — erasure/anonymization needs
+//                        exactly this: every record type touched for one client, unnarrowed.
+//   - CLIENT_COLLECTION_INDEX  "client X's HISTORY specifically" — what storing session history
+//     as its own collection actually needs.
 //     CLIENT_INDEX alone cannot serve this: a client with both history and planUpdates records
 //     returns both collections interleaved, so isolating one would cost deserialising and then
 //     filtering out records the caller never wanted. The compound index answers it as one exact
@@ -44,8 +46,8 @@ export const COLLECTION_INDEX = "byCollection";
 export const CLIENT_INDEX = "byClient";
 export const CLIENT_COLLECTION_INDEX = "byClientAndCollection";
 
-// Bookkeeping that belongs to no single schema: the migration id mapping (§18.2), and per-bucket
-// counters. Kept in its own store so a schema store holds only records.
+// Bookkeeping that belongs to no single schema: per-schema migration-completion flags, and
+// per-bucket counters. Kept in its own store so a schema store holds only records.
 export const META_STORE = "meta";
 
 export function storeNameForSchema(schema) {
@@ -78,10 +80,10 @@ function createSchemaStore(db, schema) {
  *
  * Provisioning is additive and idempotent: stores for schemas that already exist are left untouched,
  * so opening with a longer list only ever adds. Retired schemas are NOT dropped here — deleting a
- * bucket is a deliberate act with its own confirmation (§16.2's per-version discard), never a side
+ * bucket is a deliberate act with its own confirmation, never a side
  * effect of an app that happens to boot with a shorter list.
  *
- * **The database version is not a schema number** (changed 2026-09-17, TODO §61). It used to be the
+ * **The database version is not a schema number** (changed 2026-09-17). It used to be the
  * highest numbered schema, which left no way to add a store for the PREVIEW schema — a name, not a
  * number — and would have LOWERED the version the day a preview was removed, and IndexedDB refuses to
  * open a database at a lower version than it holds (VersionError, measured in 59bebf0). Instead the
@@ -180,13 +182,13 @@ export function getAllFromIndex(store, indexName, key) {
 
 // Keys only, no deserialization — cheap enough to compute "what's currently in this collection" on
 // every save, which is what lets a save RECONCILE (delete records no longer present) rather than
-// only ever add/update (TODO §18.6 part 4's star write must remove, not just append).
+// only ever add/update (the star write must remove stale records, not just append them).
 export function getAllKeysFromIndex(store, indexName, key) {
   return requestToPromise(store.index(indexName).getAllKeys(key));
 }
 
 // Every record in a store, unfiltered — the boot-time read that reassembles the in-memory `state`
-// object from the newest schema's bucket (TODO §18.6 part 4). Safe to await outside a transaction
+// object from the newest schema's bucket. Safe to await outside a transaction
 // callback, same as the other request helpers in this section.
 export function getAll(store) {
   return requestToPromise(store.getAll());
@@ -207,9 +209,9 @@ export function deleteDatabase(name = DATABASE_NAME, factory = globalThis.indexe
 /** Every object store this database actually holds, INCLUDING ones this build has never heard of.
  *
  * Read from the database rather than derived from the current schema list, because that difference
- * is the whole point at the one place it is used (TODO §31): a long-lived install accumulates stores
- * from builds that came before, and a support wipe that only cleared the ones this build knows about
- * would leave a trainer's data behind while telling them it was gone.
+ * is the whole point at the one place it is used, the support data-wipe link: a long-lived install
+ * accumulates stores from builds that came before, and a support wipe that only cleared the ones
+ * this build knows about would leave a trainer's data behind while telling them it was gone.
  */
 export async function listDatabaseStores(name = DATABASE_NAME) {
   const db = await requestToPromise(globalThis.indexedDB.open(name));

@@ -90,7 +90,7 @@ function renderCaughtUpState(container, t, escapeHTML, summaryEls) {
 /** The only card an empty app has, and therefore the only thing it can say for itself.
  *
  * It used to offer ONE button, which seeded thirty sample people into the database the trainer was
- * about to start working in. The sandbox ended that (TODO §40): there is now a separate copy of the
+ * about to start working in. The sandbox ended that: there is now a separate copy of the
  * app to try things in, so sample records never have to touch the trainer's own. Asked 2026-09-11 —
  * the empty app should invite somebody to the walkthrough and to the sandbox — and the offer is
  * those two, in that order: being shown the app is the smaller ask, trying it yourself is the
@@ -171,7 +171,7 @@ function buildChapterIndexHTML(chapters, t, escapeHTML) {
         </div>`;
 }
 
-/** Start the guided story at one named chapter (TODO §28.14, §73.1).
+/** Start the guided story at one named chapter.
  *
  * `startWalkthrough` is injected rather than imported: the guide reloads the app with its own deep
  * link, and that URL is built in modules/splash — which this module may not reach across.
@@ -326,10 +326,10 @@ export function renderNotificationArea() {
   const items = resolveNotificationItems(state, t, readIds, deps.getSyncFailure?.() || null, {
     crashes: deps.getCrashes?.() || [],
     repoUrl: deps.repoUrl || "",
-    // In the sandbox this card says what the sandbox is and where the way out is (TODO §42.10).
+    // In the sandbox this card says what the sandbox is and where the way out is.
     sandbox: isSandbox(),
     // Whether THIS boot carries the seeding switch — not whether a test is running, which no page
-    // can know (TODO §46.7). The browser suite puts the switch on every navigation, so the escaped
+    // can know. The browser suite puts the switch on every navigation, so the escaped
     // test-data alarm stays silent there and speaks on a trainer's install, where it never appears.
     testRun: getShareParams().init === INIT_DEMO_DATA,
     // The guided story's chapters, so the sandbox card can offer any one of them rather than only

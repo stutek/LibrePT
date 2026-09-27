@@ -1,13 +1,13 @@
 // src/modules/clients/intakeInvite.js — the link a trainer sends someone so they can fill in their
-// own details (TODO §26.3).
+// own details.
 //
 // Single responsibility: build that link and get it out of the app. No records are created here —
 // nothing exists until the person sends their details back and the trainer accepts them
-// (modules/clients/signupReviewDialog.js), which is the trust boundary §26.5 is built around.
+// (modules/clients/signupReviewDialog.js), which is the trust boundary.
 //
-// **Why a link at all, when §26 planned a QR.** The QR is the leaflet-on-the-wall case and is still
-// unbuilt; a link is the case that happens far more often — a trainer texting someone who just asked
-// about training. Both land on the same page, and neither needs a server.
+// **Why a link at all, when a QR was the original plan.** The QR is the leaflet-on-the-wall case
+// and is still unbuilt; a link is the case that happens far more often — a trainer texting someone
+// who just asked about training. Both land on the same page, and neither needs a server.
 //
 // **The message says what the link is for.** A bare URL in a text message is indistinguishable from
 // a phishing attempt, and the person receiving it has usually just met the trainer once.
@@ -101,7 +101,7 @@ export async function sendIntakeInvite({ platform, t, lang, trainer } = {}) {
   }
 }
 
-/** The link ready to send to one person, by the channel their contact implies (TODO §26.3 step 2).
+/** The link ready to send to one person, by the channel their contact implies.
  *
  * Returns `null` when there is nothing to send to yet, so a caller has one thing to check before
  * offering the control — an anchor with no href is the shape the consent section already uses for

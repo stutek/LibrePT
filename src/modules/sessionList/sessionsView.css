@@ -238,7 +238,7 @@
    title on the left; the Today and expand controls (rendered by sessionTimeline.js into
    #sessions-date-picker) sit on the right. The flush, flat-bar look + grab handle come from
    .view-titlebar; override .section-title's 24px top margin. */
-/* Two rows in one sticky header (TODO §45.6): the title with the day controls, then the filters.
+/* Two rows in one sticky header: the title with the day controls, then the filters.
    The bar itself is therefore a COLUMN — .section-title makes it a flex row, and that row moved
    down into .sessions-title-row. */
 .sessions-title-bar {
@@ -262,7 +262,7 @@
    and the three filters — sits on a single row (asked 2026-09-11). Below this it stacks, because
    measured at 390px the one-row version wrapped into three.
 
-   Measured against THE HEADER'S OWN WIDTH, not the window's (§74.1, fixed 2026-09-21). This was a
+   Measured against THE HEADER'S OWN WIDTH, not the window's (fixed 2026-09-21). This was a
    `@media (min-width: 600px)` query, and on a desktop the board is a 480px column beside the other
    views: the window was 1440px, the header said "plenty of room", and the three chips landed on two
    rows — Datumi and Stranka at y=75, Lokacija at y=112, in a header grown to 99px. A component
@@ -345,7 +345,7 @@
   opacity: 0.25;
   cursor: default;
 }
-/* --- SESSIONS TIMELINE (continuous, time-ordered — TODO §7.3 item 8) --- */
+/* --- SESSIONS TIMELINE (continuous, time-ordered) --- */
 .sessions-timeline {
   display: flex;
   flex-direction: column;

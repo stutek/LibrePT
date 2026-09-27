@@ -4,7 +4,7 @@
 // each other. Injected dependencies: none — this is the bottom of the session controller stack;
 // everything above it imports from here and nothing here imports back.
 //
-// Accessors rather than exported bindings (§5.3): `activeSession` is REASSIGNED — a session starts,
+// Accessors rather than exported bindings: `activeSession` is REASSIGNED — a session starts,
 // is recovered from cache, is cancelled to null — and a module that imported the binding directly
 // would be reading whatever value it held at import time.
 
@@ -23,7 +23,7 @@ export function setActiveSession(session) {
 // setupActiveSession) all merge rather than replace: each knows about a different slice of the app,
 // and a replace would drop whatever an earlier caller had already wired.
 //
-// **`deps.state` is a live read, not the object handed in** (TODO §40.3). Callers pass `getState`
+// **`deps.state` is a live read, not the object handed in.** Callers pass `getState`
 // and every consumer keeps writing `deps.state` as it always has. The same reasoning as the header's
 // note about `activeSession`, one level up: the whole state object is REPLACED — by a restore, by a
 // Drive merge, by a workspace switch — and a value captured when the app was wired would leave this

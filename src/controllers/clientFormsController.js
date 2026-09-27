@@ -131,7 +131,7 @@ export function setupClientForms({
     }
   };
 
-  // Every keystroke goes into the client record, so a reload loses nothing (TODO §50.2). A new
+  // Every keystroke goes into the client record, so a reload loses nothing. A new
   // client exists from the first character; an empty name is written as the placeholder.
   const live = keepRecordLive({
     dialog,
@@ -171,7 +171,7 @@ export function setupClientForms({
     onChange: repaint,
   });
 
-  // The link that lets someone fill their own details in (TODO §26.3). The button OPENS the
+  // The link that lets someone fill their own details in. The button OPENS the
   // sending dialog rather than sending: since 2026-08-23 the trainer can address the invitation to
   // the number or the email they were just given, which is the ordinary case — they are standing in
   // front of the person. The share sheet is still in there, one tap further in, for every channel a

@@ -82,7 +82,7 @@ export function buildRouteTable() {
   // `superset` is the pre-rename spelling of the circuit segment. It stays matched forever: links are
   // shared and bookmarked, and a URL that once worked must not start showing an error page. Patterns
   // are additive — removing one is a breaking change that needs a redirect left in its place.
-  // The ACTIVE card while no card is open (TODO §48.1): the trainer scrolled past what they had
+  // The ACTIVE card while no card is open: the trainer scrolled past what they had
   // opened. Its own address, so a reload marks the same card without opening it.
   registry.register(
     new SessionRoute({
@@ -114,7 +114,7 @@ export function buildRouteTable() {
   //
   // `#dialog-add-session-exercise` is deliberately NOT routed: its only button lives in a
   // `display: none !important` container and the editor never calls its opener, so the dialog is
-  // unreachable and a route for it would be dead code (see TODO §19).
+  // unreachable and a route for it would be dead code.
   registry.register(
     new DialogRoute({
       name: "session.catalog",
@@ -219,7 +219,7 @@ export function buildRouteTable() {
     registry.register(new GlobalDialogRoute({ name, segment, dialogId, open, home: sessionsDay }));
   }
 
-  // The support data-wipe (TODO §31). Routed like any dialog, and deliberately linked from NOWHERE:
+  // The support data-wipe. Routed like any dialog, and deliberately linked from NOWHERE:
   // support sends this address by SMS or email, and opening it can only ever OPEN the dialog. The
   // link carries no authority — the trainer's confirmation is the whole of it.
   registry.register(

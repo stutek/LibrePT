@@ -1,5 +1,4 @@
-// src/modules/session/sessionRepeatControls.js — the "repeats every week" half of the session form
-// (TODO §35.3a).
+// src/modules/session/sessionRepeatControls.js — the "repeats every week" half of the session form.
 //
 // Single responsibility: the weekday toggles, the reveal, and reading the form back as a series.
 // The rule itself is domain/sessionSeries.js, and writing anything is the form controller's job —

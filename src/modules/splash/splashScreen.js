@@ -126,13 +126,13 @@ export function remainingHoldMs(minimumVisibleMs, elapsedMs) {
   return Math.max(0, minimumVisibleMs - elapsedMs);
 }
 
-/** The URL that opens the sandbox: `?workspace=sandbox` (TODO §40.9), with the splash suppressed so
+/** The URL that opens the sandbox: `?workspace=sandbox`, with the splash suppressed so
  *  the reload lands straight on a populated app.
  *
  *  It used to carry `?init=demo_data_load`, which seeded the sample people into the database the
- *  trainer was about to start working in — the very thing §40 exists to end. The parameter itself
- *  still means what it always did and is still what the e2e suite runs on; only where this OFFER
- *  leads has changed.
+ *  trainer was about to start working in — the very thing the sandbox exists to end. The
+ *  parameter itself still means what it always did and is still what the e2e suite runs on; only
+ *  where this OFFER leads has changed.
  *
  *  Reloading rather than seeding in place is deliberate. app.js seeds during init(), before the
  *  router and the views are wired, so calling seedMockData() from here would leave the app
@@ -156,7 +156,7 @@ export function demoDataUrl(href = window.location.href, rootPath = appRootPathn
 /** The URL behind every "show me around" offer — the splash's and the message feed's: the demo
  *  dataset, plus the `?demo=` value app.js's boot step reads.
  *
- *  It starts the STORY (§35), not the four-step gym-floor tour (`?demo=walkthrough`) these buttons
+ *  It starts the STORY, not the four-step gym-floor tour (`?demo=walkthrough`) these buttons
  *  started until 2026-08-25. Both run in the same guided panel, so the mistake was invisible from
  *  the code and plain on screen: a trainer who accepted the offer was counted "1 / 4" through the
  *  wedge that predates the story, and never saw the 31 steps the demo now IS. The old tour keeps
@@ -171,7 +171,7 @@ export function guidedDemoUrl(href = window.location.href, rootPath = appRootPat
   return url.toString();
 }
 
-/** The same guided link, aimed at ONE chapter of the story (§35's `?demo=story&chapter=…`).
+/** The same guided link, aimed at ONE chapter of the story (`?demo=story&chapter=…`).
  *
  *  This is what a table of contents links to: the story is six chapters and four to six minutes, and
  *  a trainer who wants to see the evening after a session should not have to watch the morning
@@ -320,7 +320,8 @@ function askFirstRunSteps(steps, options, afterAll) {
 }
 
 /**
- * Fill the walkthrough's table of contents, and show it, open (§35's chapters, asked 2026-09-21).
+ * Fill the walkthrough's table of contents, and show it, open (the story's chapters, asked
+ * 2026-09-21).
  *
  * The chapters are HANDED IN as `{ id, titleKey }`, in playing order — the splash may not import the
  * story any more than it may import the identity store, and the story is a quarter of a megabyte of

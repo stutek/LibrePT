@@ -550,7 +550,7 @@ h6 {
   color: #f59e0b;
   border: 1px solid rgba(245, 158, 11, 0.35);
 }
-/* Double-booking readout under the session setup form's time fields (TODO §1.6). The two states are
+/* Double-booking readout under the session setup form's time fields. The two states are
    deliberately different colours rather than one styled list: a clash is a warning about something
    impossible, while the merged-clipboard line is confirmation that the app understood two
    simultaneous sessions as one. Rendering them alike would teach the trainer to skim past both. */
@@ -772,7 +772,7 @@ h6 {
 .form-control:focus {
   border-color: var(--primary);
 }
-/* A field the app refused to save, and the word it refused it for (TODO §66). The border says WHICH
+/* A field the app refused to save, and the word it refused it for. The border says WHICH
    field without reading, the word says WHICH part of what was typed — the sentence under the field
    still carries the reason, because a red edge on its own explains nothing. */
 .form-control.is-invalid,

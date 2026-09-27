@@ -1,10 +1,10 @@
-// src/modules/exercises/libraryImportDialog.js — bringing a trainer's exercise library into the app
-// (TODO §45.5).
+// src/modules/exercises/libraryImportDialog.js — bringing a trainer's exercise library into the
+// app.
 //
 // Single responsibility: the surface. Reading and planning are domain/libraryImport.js; this shows
 // the trainer what the text holds and, on their word, writes it.
 //
-// **A review before the write, and all of it at once** — the rule §29 set for a programme. The
+// **A review before the write, and all of it at once** — the same rule set for a programme. The
 // trainer sees how many exercises, circuits and routines are new, which ones the library already has
 // (and so will not get twice), and every entry that could not be read, with its position. Nothing is written
 // until they press Add to library.
@@ -13,8 +13,8 @@
 // `source` or `author`), else from the file's name. It applies to entries that do not already name
 // their source; a colleague's export can carry several sources, which must survive another hop.
 // Once the trainer types in the field, a later read leaves it alone. The file's name is kept from
-// the moment the file is read, so every later read of the box — Add to library's too — still has it
-// (TODO §77.4).
+// the moment the file is read, so every later read of the box — Add to library's too — still has
+// it.
 //
 // Injected dependencies: `t`, `getState`, `saveToLocalStorage`, `newId`, `readFileText(file)`,
 // `onImported(source)`.

@@ -1,6 +1,6 @@
 // src/domain/exerciseStandard.js — crosswalk from LibrePT's movement taxonomy to an
 // established open standard (the wger Workout Manager dataset), so the catalog exports are
-// universally interchangeable with external research / coaching tools (TODO §13.1, UC6 §6).
+// universally interchangeable with external research / coaching tools (UC6 §6).
 //
 // Why wger and not ExRx: wger is genuinely open (AGPL, open dataset) and interchange-friendly,
 // whereas ExRx is a proprietary reference. The one honest interchange KEY is the canonical *name*

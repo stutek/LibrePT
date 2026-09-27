@@ -1,13 +1,13 @@
 // src/domain/sessionItemRecord.js — the immutable program snapshot stored in history.
 //
-// TODO §17.1: a finished session must persist the WHOLE structured program, not just the performed
+// A finished session must persist the WHOLE structured program, not just the performed
 // sets. Previously finishWorkoutSession flattened a session to completed exercises only, dropping
 // rests, circuit grouping, and prescribed-but-skipped exercises — so re-opening a past session lost
 // its structure and it could not seed a faithful template.
 //
 // Shape — a history record's `exercises` array is an ordered list of typed items, EVERY item
-// carrying an id (TODO §18.2 treats a record's `id` as its lineageId — an item with none cannot be
-// individually addressed once items stop living only inside their parent's array):
+// carrying an id (its lineageId — an item with none cannot be individually addressed once items
+// stop living only inside their parent's array):
 //   • exercise: { type:'exercise', id, name, loadUnit, modality, metric, completed, sets:[…],
 //                 circuitId, circuitTitle, circuitSeries }
 //   • rest:     { type:'rest', id, rest:<seconds>, circuitId, circuitTitle, circuitSeries }
@@ -34,7 +34,7 @@ export const isSkippedRecord = (item) => isExerciseRecord(item) && item.complete
 // Exercise leaves only (rests filtered out) — for analytics, last-performance, feedback matching and
 // the backup round-trip, which all care about movements, not the rest/circuit scaffolding.
 // Reads in program order, not array order: a record that has been through a projection or a per-row
-// store arrives keyed, not sequenced (TODO §17.5). Legacy rows with no position keep arrival order.
+// store arrives keyed, not sequenced. Legacy rows with no position keep arrival order.
 export function exerciseRecordsOf(items) {
   return orderedItems(items).filter(isExerciseRecord);
 }
@@ -105,6 +105,6 @@ export function buildProgramSnapshot(clientState, { isPlanning = false } = {}) {
     items.push(buildExerciseSnapshotItem(it, clientState.logs[it.id] || [], isPlanning));
   }
   // The record is frozen from here on, so its order must be carried in it — this is the one write
-  // whose output outlives every array it was ever held in (TODO §17.5).
+  // whose output outlives every array it was ever held in.
   return assignPositions(items);
 }

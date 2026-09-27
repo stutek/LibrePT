@@ -21,8 +21,8 @@ export function resizeToPhoneViewport() {
   }
 }
 
-// The stamp shows the COMMIT, not a release tag — there are no release tags any more (TODO §16/§18:
-// one build carries every supported schema concurrently). The commit is the better identifier for
+// The stamp shows the COMMIT, not a release tag — there are no release tags any more (one build
+// carries every supported schema concurrently). The commit is the better identifier for
 // support regardless: it is exact and exists for EVERY build. The full detail (commit, data schema,
 // build time) is one tap away in the build-info dialog (the `title` is a desktop nicety only; a
 // phone cannot reach it).
@@ -142,7 +142,7 @@ export function setupOnlineOfflineListeners(basePath, setOfflineCachedState) {
   });
 }
 
-// Poll-on-resume (TODO §1.5/§3.10): Drive sync has no push channel (`changes.watch` needs a webhook
+// Poll-on-resume: Drive sync has no push channel (`changes.watch` needs a webhook
 // endpoint this app deliberately doesn't run), so the next best trigger is "the trainer came back to
 // the tab" — a real device switch is exactly when a phone's tab was backgrounded and is now visible
 // again. Only refreshes the ahead/behind counters (syncing itself is manual-only, see
@@ -157,12 +157,12 @@ export function setupDriveSyncOnResume() {
   });
 }
 
-// Crashes the trainer can report (TODO §12.4). Nothing installed `window.onerror` before this, so a
+// Crashes the trainer can report. Nothing installed `window.onerror` before this, so a
 // thrown error died in a console a PT will never open — while docs/BUG_REPORTING.md asked them to
 // retype the build stamp by hand.
 //
 // **In memory only, and never rendered from here.** The feed decides when to mention it
-// (domain/notificationItems.js), because §12.4's own warning is that a handler rendering a modal over a
+// (domain/notificationItems.js), because a handler rendering a modal over a
 // live session mid-set is worse than the original bug. Nothing steals focus and nothing blocks.
 //
 // **The handler cannot be allowed to throw**, so everything inside it is wrapped: a reporter that fails

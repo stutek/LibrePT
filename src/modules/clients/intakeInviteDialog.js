@@ -1,5 +1,4 @@
-// src/modules/clients/intakeInviteDialog.js — sending the intake link to one particular person
-// (TODO §26.3 step 2).
+// src/modules/clients/intakeInviteDialog.js — sending the intake link to one particular person.
 //
 // Single responsibility: take the one thing the trainer has — a number or an address — and put the
 // invitation into the phone's own composer, addressed. What the link says is intakeInvite.js; which
@@ -15,12 +14,12 @@
 // no mail server — the same arrangement the consent letter uses, for the same reason.
 //
 // **The share sheet stays** as the second way out: it reaches WhatsApp, Viber, Signal and everything
-// else the phone has, and it is the only route that needs no contact detail at all. The order is
-// §26.3's — the addressed send first now that there is somewhere to address it, the sheet behind it.
+// else the phone has, and it is the only route that needs no contact detail at all. The addressed
+// send comes first, now that there is somewhere to address it, and the sheet stays behind it.
 //
 // **Nothing is stored.** The contact typed here is used to build one link and is gone when the
 // dialog closes: a person exists in the register only once they have sent their own details and the
-// trainer has accepted them (§26.5), and a half-remembered phone number sitting in storage would be
+// trainer has accepted them, and a half-remembered phone number sitting in storage would be
 // a client record nobody consented to.
 //
 // Injected dependencies: `t`, `getLang()`, `getTrainer()` (who signs the invitation) and `onShare()`
@@ -58,7 +57,7 @@ export function renderIntakeInviteDialog() {
     </div>
     <input type="text" id="intake-invite-link" class="form-input hidden" readonly />
     <!-- The code the trainer holds up, for the person standing in front of them: no number typed,
-         no address spelled out, no channel at all (TODO §26.3 step 3). White ground and black
+         no address spelled out, no channel at all. White ground and black
          modules whatever the theme is set to - this is a picture for somebody else's camera, not a
          surface of this app.
          DRAWN ON OPEN, with nothing to tap first (asked 2026-09-11). It was behind a button until
@@ -82,7 +81,7 @@ export function renderIntakeInviteDialog() {
  *
  * A disabled-looking anchor rather than a hidden one, and a line under the field saying which way it
  * will go: "there is a way to send this, you have just not given me somewhere to send it" is the
- * useful message, and on a phone it has to be on screen rather than in a tooltip (§7.2).
+ * useful message, and on a phone it has to be on screen rather than in a tooltip.
  */
 function syncSendControl() {
   const { t } = deps;
@@ -101,7 +100,7 @@ function syncSendControl() {
   // WHICH channel, said in a way that is not a sentence. The button's words change with the contact
   // the trainer typed — a number gets a text message, an address gets an email — and until
   // 2026-08-30 the demo asserted that by reading those words, so the story could not be completed in
-  // any language but English (TODO §38.19). What the app chose is a fact about the app, not a
+  // any language but English. What the app chose is a fact about the app, not a
   // translation of one.
   if (anchor) anchor.dataset.channel = ready ? ready.channel : "";
   if (ready) anchor?.setAttribute("href", ready.href);
@@ -154,7 +153,7 @@ export function openIntakeInviteDialog() {
   field.focus();
 }
 
-/** The code on the trainer's own screen, as the alternative to typing anything at all (§26.4).
+/** The code on the trainer's own screen, as the alternative to typing anything at all.
  *
  * **Drawn here rather than printed on a leaflet.** A static QR is the same file for every install,
  * so it can carry no `#from=` — it would name nobody, which is the state the intake page was
@@ -174,7 +173,7 @@ function showCode() {
 
 /** The way out that needs no contact detail: the phone's own share sheet, the clipboard behind it,
  * and the link on screen when a browser refuses both — a trainer standing in front of somebody is
- * never left with nothing (§26.3). */
+ * never left with nothing. */
 async function shareAnyWay() {
   const outcome = await deps.onShare();
   const said = {

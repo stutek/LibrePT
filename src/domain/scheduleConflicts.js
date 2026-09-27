@@ -1,5 +1,5 @@
 // src/domain/scheduleConflicts.js — is this slot a clash, or is it the normal gym-floor case?
-// (TODO §1.6). Single responsibility: given one slot the trainer is about to save, say which
+// Single responsibility: given one slot the trainer is about to save, say which
 // already-known commitments it collides with and WHICH KIND of collision each one is. Pure — the
 // form owns the warning, and the calendar client owns fetching the busy intervals.
 //

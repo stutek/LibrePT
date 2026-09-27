@@ -1,5 +1,5 @@
 // src/modules/demo/walkthroughOverlay.js — the guided walkthrough: one step explained at a time,
-// over the real app (TODO §9.5).
+// over the real app.
 //
 // Single responsibility: the panel and the spotlight. Which controls are offered is
 // domain/walkthrough.js, whether a step succeeded is domain/demoTour.js, the tap itself is
@@ -197,7 +197,7 @@ function buildOverlay(doc, t) {
 }
 
 // The guide that is running, if one is. Kept at module level so a caller with no handle can end it —
-// leaving the sandbox is that caller (TODO §42.15): the story's steps drive the sandbox's seeded
+// leaving the sandbox is that caller: the story's steps drive the sandbox's seeded
 // records, so it cannot mean anything in the trainer's own work, and a parked bar left behind would
 // sit over their real session pointing at controls for records that are not there.
 let running = null;
@@ -231,7 +231,7 @@ export function startGuidedWalkthrough({
   const el = buildOverlay(doc, t);
   const hand = mountDemoHand(doc);
   // The guide always has a card surface, whether or not a story is being told through it: the "you
-  // have wandered off" message is a card like every other (§38.10), and a guide that showed it as a
+  // have wandered off" message is a card like every other, and a guide that showed it as a
   // bare line of text would change what the demo LOOKS like at the one moment the viewer is already
   // unsure where they are. The long story mounts its own and hands it in, because it also narrates
   // through it; anything else gets one from here and it is torn down with the guide.
@@ -298,7 +298,7 @@ export function startGuidedWalkthrough({
 
   function positionSpotlight(target) {
     // Off the demo's path the ring points at a control nobody is being asked to use — and after a
-    // stray tap it would be lit over whatever that tap opened (reported 2026-09-13, §51).
+    // stray tap it would be lit over whatever that tap opened (reported 2026-09-13).
     if (!target || offTrack) {
       el.spotlight.classList.remove("is-visible");
       return;
@@ -337,7 +337,7 @@ export function startGuidedWalkthrough({
   }
 
   /** Move the panel to the top of the screen if it would cover the step's control, and back down
-   * when it would not (TODO §28.15).
+   * when it would not.
    *
    * **Asked on every poll tick, not once per step.** It used to run only in `enterStep`, immediately
    * after `scrollIntoView` — which measures the layout as it was BEFORE the scroll settled, so the
@@ -352,8 +352,8 @@ export function startGuidedWalkthrough({
    */
   /** THE CARD FOLLOWS THE APP: a step completed while the trainer is watching carries them on.
    *
-   * One rule for both ways a step gets done — their own thumb, or Show me doing it for them (TODO
-   * §38.18). It used to be two, laid down three days apart and quietly contradicting: Show me was
+   * One rule for both ways a step gets done — their own thumb, or Show me doing it for them.
+   * It used to be two, laid down three days apart and quietly contradicting: Show me was
    * written never to move the guide (2026-08-23), and then the card was made to follow the app
    * whenever a step completed in front of the viewer (2026-08-26). Show me completes a step in front
    * of the viewer, so whether it advanced came down to whether the step's expectation happened to be
@@ -426,8 +426,8 @@ export function startGuidedWalkthrough({
     moveTargetOutFromUnderPanel(target);
   }
 
-  /** When neither end of the screen clears the control, something has to give way to it (TODO
-   * §38.15). A control in the middle band is covered by a panel docked low AND by the same panel
+  /** When neither end of the screen clears the control, something has to give way to it.
+   * A control in the middle band is covered by a panel docked low AND by the same panel
    * docked high — measured on an iPhone SE at the openings of two chapters, where the panel carries
    * a paragraph as well as an instruction.
    *
@@ -476,7 +476,7 @@ export function startGuidedWalkthrough({
    *
    * Some pages cannot scroll. The client's intake form on a 667px phone is one — measured
    * `scrollHeight === clientHeight`, so asking the control to move does nothing at all, and the name
-   * field sits in the middle band where a panel docked at either end still reaches it (TODO §38.15).
+   * field sits in the middle band where a panel docked at either end still reaches it.
    * Something has to give, and it is the prose: the card scrolls inside the panel, so the words are
    * all still there, one thumb-flick further.
    *
@@ -746,7 +746,7 @@ export function startGuidedWalkthrough({
     // OUT OF VIEW is not COVERED, and the two used to be answered the same way: the centre was
     // clamped into the viewport before the question was asked, so a control above the fold was
     // reported as covered by whatever sits at the top of the screen — the app header. Measured
-    // 2026-08-30 at the evening's session move (TODO §38.17): the card was on the board from the
+    // 2026-08-30 at the evening's session move: the card was on the board from the
     // first paint, 650px up, and the guide waited out its whole settle budget for a control nothing
     // was going to uncover, said the app was on the wrong screen, and THEN scrolled to it. Bringing
     // a control into view is the guide's own job — `enterStep` scrolls to it, and
@@ -912,7 +912,7 @@ export function startGuidedWalkthrough({
     // WHATEVER the step's own readiness says, because at this instant that answer is about geometry
     // the app has not settled yet: the control may still be off screen, with the board about to
     // scroll to it and a menu the replay re-opened waiting over where it lands. Guarding this on
-    // `stepIsReady` leaned on an off-screen control reading as covered — the reading §38.17 removed
+    // `stepIsReady` leaned on an off-screen control reading as covered — a reading later removed
     // — and left the ☰ menu standing over the evening's session card.
     dismissStaleOverlays(step);
     // A step that CAN be performed is not a problem to report, whatever the rebuild made of the
@@ -957,7 +957,7 @@ export function startGuidedWalkthrough({
     // BEFORE the precondition and the target lookup: a narrated step's own control is the card the
     // narration puts on screen, so it has to exist before anything goes looking for it.
     onStep?.(step);
-    // Asserted as the card loads (TODO §30.3): a step whose control cannot exist yet would otherwise
+    // Asserted as the card loads: a step whose control cannot exist yet would otherwise
     // fail confusingly the moment anyone tapped Show me, and the trainer would have read a whole
     // caption first. What follows from the assertion is a REPAIR, not a complaint — see
     // restoreGroundFor.
@@ -1007,7 +1007,7 @@ export function startGuidedWalkthrough({
     // symptom. A step whose expectation arrives true is marked done by the very next poll, so by the
     // time Show me is tapped the two are indistinguishable from the state alone — and telling them
     // apart is what decides whether being shown it carries the card on (a step never seen) or
-    // re-explains where they are (a step walked back to). §38.18.
+    // re-explains where they are (a step walked back to).
     enteredDone = Boolean(step) && isWalkthroughStepDone(state, step.id);
     // A step re-entered from Back — or one the trainer completed before reading the panel — is
     // already satisfied, and must not be asked for again.
@@ -1101,7 +1101,7 @@ export function startGuidedWalkthrough({
     // A REPLAY: the trainer walked back to a step they have already been past, and being shown it
     // again re-explains where they are. Carrying them on from here would skip the step they came
     // back for. `enteredDone`, not the live state: a step that arrives already true is marked done
-    // by the next poll, and that is not the same thing at all (§38.18).
+    // by the next poll, and that is not the same thing at all.
     if (enteredDone) {
       if (!outcome.ok) reportProblem(outcome.reason);
       return render();
@@ -1114,7 +1114,7 @@ export function startGuidedWalkthrough({
     state = completeWalkthroughStep(state, step.id);
     // Asking to be shown a step is watching it happen, so the card follows exactly as it does when
     // the trainer taps the control themselves — one rule, `carryCardOn`, and no way for the same
-    // completed step to behave two ways depending on who did it (§38.18).
+    // completed step to behave two ways depending on who did it.
     if (!carryCardOn()) render();
   });
 
@@ -1127,10 +1127,10 @@ export function startGuidedWalkthrough({
       // `/sessions/2026-08-23` when it crosses, and a plain relative jump would land beside that.
       const there = new URL(step.advanceTo, doc.baseURI);
       // The LANGUAGE rides along, because on the other side there may be nothing to read it from.
-      // The client's page is a separate boot with no database and no saved choice (§35.1), so the
+      // The client's page is a separate boot with no database and no saved choice, so the
       // address is its only source — and the story's own crossing named the theme and forgot this,
       // which had a Slovenian viewer watch Ana fill in an English form and send back a consent
-      // recorded in a language she never chose (reported 2026-08-31, §39.2). Written here rather
+      // recorded in a language she never chose (reported 2026-08-31). Written here rather
       // than into each `advanceTo` so a crossing added later cannot forget it; a step that names a
       // language of its own is left alone.
       const lang = getLang?.();
@@ -1218,7 +1218,7 @@ export function startGuidedWalkthrough({
    *
    * The card is redrawn here, so doing it on every tick would put back a card the trainer had tapped
    * away and restart its live region for a screen reader several times a second. Going off swaps the
-   * step's card for the guide's own (§38.10); coming back puts the step's card in its place.
+   * step's card for the guide's own; coming back puts the step's card in its place.
    */
   function noticeWandering(step) {
     const wandered = interrupted || offTrackTicks >= OFF_TRACK_TICKS;
@@ -1229,7 +1229,7 @@ export function startGuidedWalkthrough({
     render();
   }
 
-  /** A tap the step did not ask for INTERRUPTS the guide (wanted 2026-09-13, §51).
+  /** A tap the step did not ask for INTERRUPTS the guide (wanted 2026-09-13).
    *
    * Until then the guide only noticed the trainer leaving when the step's control vanished from the
    * screen. The ☰ menu drops down while that control is still there, so the ring stayed lit over a

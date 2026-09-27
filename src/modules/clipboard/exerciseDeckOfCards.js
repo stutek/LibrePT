@@ -60,7 +60,7 @@ function buildRestDeckItem(ex, idx, currentExIdx, activeIdx) {
     circuitTitle: ex.circuitTitle || "",
     circuitSeries: ex.circuitSeries || 1,
     // Rest is a first-class plan item: isInFocus is computed the SAME way for every item type —
-    // idx === currentExIdx — no more hardcoded exception for rests (TODO §8.6).
+    // idx === currentExIdx — no more hardcoded exception for rests.
     isInFocus: idx === currentExIdx,
     isActive: idx === activeIdx,
     // Still true regardless of focus: keeps a rest from blocking a circuit's "all members
@@ -266,13 +266,13 @@ export function renderExerciseDeck(deckContainer, deps) {
   // collapses too, so exactly one card is ever expanded (the active-exercise pointer is
   // untouched, so it re-expands the moment the past card is closed).
   const pastExpanded = !!activeSession.expandedPastId;
-  // The date on a past card is ISO, like every other date in the app (TODO §54). It used to be
+  // The date on a past card is ISO, like every other date in the app. It used to be
   // `toLocaleDateString(..., { month: "short", day: "numeric" })`, which asked the DEVICE how to
   // write it and dropped the year: a Slovenian screen read "20. jul." and an English one "Jul 20",
   // neither of them saying which year the set was lifted in.
   //
-  // §54 wrote that guard here because `utils.js`'s shared `formatDateStr` was still building
-  // "Jul 20, 2026" and could not be called. It is ISO now (TODO §80.4), so this file uses it.
+  // That guard was written here because `utils.js`'s shared `formatDateStr` was still building
+  // "Jul 20, 2026" and could not be called. It is ISO now, so this file uses it.
 
   // Past session exercises. Excludes isPlanning drafts (syncPlanningSnapshotToHistory writes them
   // with an ever-fresh `date` on every save) — a drafted-but-unrun plan is not a performed session,
@@ -288,7 +288,7 @@ export function renderExerciseDeck(deckContainer, deps) {
       : [];
 
   // Current routine exercises. activeExerciseIndex is the ACTIVE card, always marked; deckAllCollapsed
-  // says no card is OPEN (TODO §48.1). A fresh open starts collapsed (startWorkoutSession /
+  // says no card is OPEN. A fresh open starts collapsed (startWorkoutSession /
   // openSessionFromHistory), a tap opens (focusExerciseByIndex), a scroll by the trainer closes
   // (activateExerciseByScroll) — -1 matches nothing, so `isInFocus: idx === currentExIdx` is false
   // for every item below without touching activeExerciseIndex itself.
@@ -393,7 +393,7 @@ export function renderExerciseDeck(deckContainer, deps) {
 
   // Bring whatever the trainer just acted on into view: a freshly expanded past card if
   // there is one, otherwise the open card, otherwise the active one — which is what a switch back
-  // to this client returns to when nothing was open (TODO §48.1).
+  // to this client returns to when nothing was open.
   setTimeout(() => {
     const focusEl =
       deckContainer.querySelector(".exercise-deck-card.past-expanded") ||

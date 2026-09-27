@@ -14,7 +14,7 @@
 //      counter stays within 1..series — a counter left pointing at round 5 of a circuit that is
 //      now 3 rounds long can never be completed.
 //
-// Extracted from clipboardEditor.js (TODO §24.5), where it was reachable only by mounting the
+// Extracted from clipboardEditor.js, where it was reachable only by mounting the
 // editor in a browser. These are exactly the rules a unit test should pin: every one of them is a
 // property of an array, and every one of them is invisible until a plan is reopened and found
 // scrambled.

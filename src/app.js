@@ -207,7 +207,7 @@ function saveState() {
   saveToLocalStorage();
 }
 
-// Every erasure runs again at start, which also covers the start after a migration (TODO §65).
+// Every erasure runs again at start, which also covers the start after a migration.
 // Saved only when it changed something, because every save counts as not yet backed up.
 function finishErasures(state) {
   const swept = resweepErasedClients(state);
@@ -216,8 +216,8 @@ function finishErasures(state) {
   saveState();
 }
 
-// The header's ahead/behind badge re-renders itself off these TWO seams (TODO §3.9's actual fix —
-// see stateStore.js's onStateSaved doc comment) rather than needing every write call site to
+// The header's ahead/behind badge re-renders itself off these TWO seams — see stateStore.js's
+// onStateSaved doc comment — rather than needing every write call site to
 // remember to refresh it: onStateSaved covers the "ahead" half (any local write), and
 // onSyncCountsChanged covers the "behind" half (a read-only Drive counter refresh never touches
 // local state, so it never fires onStateSaved on its own — see driveSyncService.js). Both registered
@@ -226,7 +226,7 @@ function finishErasures(state) {
 onStateSaved(renderSyncBadge);
 onSyncCountsChanged(renderSyncBadge);
 
-// TODO §3.8's unbacked warning rides the same seams, plus one of its own. onStateSaved covers "the
+// The unbacked-changes warning rides the same seams, plus one of its own. onStateSaved covers "the
 // trainer just made another change that exists nowhere else"; onBackupRecorded covers the moment
 // that stops being true — and it is needed separately because a downloaded FILE never touches state,
 // so onStateSaved cannot see it. Without it the badge would keep warning after the very action that
@@ -234,7 +234,7 @@ onSyncCountsChanged(renderSyncBadge);
 onStateSaved(refreshBackupBadge);
 onBackupRecorded(primeBackupHealth);
 
-// TODO §28.9's build-state badge rides the SAME write seam, for a reason the two above share: what
+// The build-state badge rides the SAME write seam, for a reason the two above share: what
 // it names changes the moment the store stops being only the demo — the trainer's first real client
 // — and that is a write like any other, arriving through call sites app.js never sees.
 onStateSaved(() => renderBuildStateBadge(getState()));
@@ -294,7 +294,7 @@ function shippedLanguages() {
 }
 
 /** Whether this arrival was FURNISHED by its link: the demo seed, the walkthrough, or an invitation
- * being answered. Those links get exactly the boot they asked for, first run or not (TODO §28.11).
+ * being answered. Those links get exactly the boot they asked for, first run or not.
  */
 function linkFurnishesTheApp({ shareInit, shareDemo, inboundEvent }) {
   return Boolean(shareInit || shareDemo || inboundEvent);
@@ -302,15 +302,15 @@ function linkFurnishesTheApp({ shareInit, shareDemo, inboundEvent }) {
 
 async function init() {
   // FIRST, before anything else can throw: a crash during boot is exactly the one a trainer is least
-  // able to describe, and §12.4's whole point is that it currently dies in a console nobody opens.
-  // Re-renders the feed rather than interrupting — nothing steals focus (TODO §12.4).
+  // able to describe, and it currently dies in a console nobody opens.
+  // Re-renders the feed rather than interrupting — nothing steals focus.
   appBoot.bootCrashCapture({ onCaptured: () => renderNotificationArea() });
 
   // The intake page is a different app for a different person, and it returns before any of the
-  // trainer's boot happens (TODO §1.7/§26.1). No state load, no seed, no service worker, no terms
+  // trainer's boot happens. No state load, no seed, no service worker, no terms
   // modal, no splash hold — and crucially NO WRITE: a prospective client who fills this in and walks
   // away leaves nothing on their own phone (their half-typed form lives in sessionStorage until the
-  // tab closes — §38.12). The theme is put on screen with `persist: false` for the same reason;
+  // tab closes). The theme is put on screen with `persist: false` for the same reason;
   // theme-boot.js has already put the right class on <html> before paint, and it writes nothing.
   // An invite link is the app's own root with `?evt=` (eventTransports.buildEventLink), so WHO is
   // holding the phone is decided by what the payload turns out to be — not by a path. An INVITE means
@@ -346,7 +346,7 @@ async function init() {
     // The theme the link named, on screen only: `theme-boot.js` put it on <html> before paint, but
     // every theme stylesheet declares its tokens against `html.X, body.X` and <body> still wears the
     // light class from the document. Applied without persisting, because this phone belongs to a
-    // stranger and the whole boot writes nothing (§26.1).
+    // stranger and the whole boot writes nothing.
     applyTheme(getInitialTheme(), { persist: false });
     appBoot.bootIntake({
       // A dictionary read straight from the chosen language, never through `state.lang` — there is no
@@ -365,7 +365,7 @@ async function init() {
       consentVersion: CONSENT_FORM_VERSION,
       noticeUrlFor: clientPrivacyNoticeUrl,
       formUrlFor: clientConsentFormUrl,
-      // The story's client-side chapter, when the handover sent them here (TODO §35.3e). Read from
+      // The story's client-side chapter, when the handover sent them here. Read from
       // the link like everything else on this path; it writes nothing either.
       shareDemo: getShareParams().demo,
       shareChapter: getShareParams().chapter,
@@ -394,10 +394,10 @@ async function init() {
   } = getShareParams();
 
   // A link asking for the sandbox picks the workspace BEFORE the load, so boot reads one database
-  // rather than two (TODO §40.9). This is where the app's own "show me around" offers land.
+  // rather than two. This is where the app's own "show me around" offers land.
   prepareWorkspaceForBoot(shareWorkspace);
 
-  // Loading is IndexedDB-backed (TODO §18.6 part 4): everything below still assumes `state` is
+  // Loading is IndexedDB-backed: everything below still assumes `state` is
   // fully populated once this resolves, exactly as when the call was synchronous.
   const state = await loadSavedState();
   if (isSupportedLang(shareLang)) state.lang = shareLang;
@@ -407,7 +407,7 @@ async function init() {
   // First entry fills the sandbox. Before the `?init=` branch below, or an unseeded sandbox reads as
   // an empty app and has its open-session key cleared out from under it. `?init=` itself is left
   // alone by all of this: it still seeds whichever workspace is open, which is what the whole e2e
-  // suite runs on (TODO §40.7).
+  // suite runs on.
   await ensureSandboxSeeded();
 
   // The demo story's table of contents. Read once here, because both surfaces that draw it — the
@@ -415,7 +415,7 @@ async function init() {
   storyChapters = await loadStoryChapters(state);
 
   if (shareInit === INIT_DEMO_DATA && !stateHasData(state)) {
-    // Stamped as TEST rather than demo (TODO §46.7). `?init=` is the switch the browser suite puts
+    // Stamped as TEST rather than demo. `?init=` is the switch the browser suite puts
     // on every navigation, and it is the only way anything reaches the WORKING database — the
     // trainer's own. Rows written here therefore have to be identifiable afterwards: finding one on
     // a boot without the switch is test data that escaped into the trainer's records.
@@ -425,7 +425,7 @@ async function init() {
     localStorage.removeItem("librept_active_session");
   }
 
-  // A reply the trainer just tapped (TODO §1.6). The answer lands on the INVITATION — decided
+  // A reply the trainer just tapped. The answer lands on the INVITATION — decided
   // 2026-08-17: sessions host attendees, invites host the RSVP — so `participants` is deliberately
   // untouched. A "no" is an answer, not a withdrawal, and a client's reply must not silently remove
   // someone the trainer put in the session.
@@ -462,7 +462,7 @@ async function init() {
     setHeaderState,
     prepareBackupDialog,
     prepareDriveSyncCard,
-    // The support data-wipe (TODO §31): reachable only by the address support sends, and even then
+    // The support data-wipe: reachable only by the address support sends, and even then
     // only as far as its confirmation.
     openDataWipe: openDataWipeDialog,
     renderBuildInfo,
@@ -479,7 +479,7 @@ async function init() {
 
   // Every view's shell markup is injected here, before any per-view setup step queries an element
   // inside it — index.html only owns the empty #main-content canvas, each view module owns its own
-  // <section>, the same way the dialogs above own their own <dialog>. TODO.md §14.8: rather than a
+  // <section>, the same way the dialogs above own their own <dialog>. Rather than a
   // hand-maintained call order (which already produced two silent no-op bugs — a module's render
   // landing above the element it queries), each shell registers itself plus what it depends on
   // existing first, and runShellRenders() computes a valid order via topological sort.
@@ -534,7 +534,7 @@ async function init() {
     removeKeys: (keys) => {
       for (const key of keys) localStorage.removeItem(key);
     },
-    // The sandbox database, deleted whole rather than emptied store by store (TODO §40): it holds
+    // The sandbox database, deleted whole rather than emptied store by store: it holds
     // sample data only, and a wipe that left a second database standing would be a wipe that left
     // something behind.
     removeSandbox: () => deleteSandboxDatabase(),
@@ -555,7 +555,7 @@ async function init() {
   appBoot.bootRestTimer({
     t,
     // A timer that finishes in the trainer's own work while they are in the sandbox offers the way
-    // back (TODO §40.11); this is that way back.
+    // back; this is that way back.
     onReturnToWork: (name) => switchToWorkspace(name),
     onFocusTimer: (timer) => {
       if (!timer.sessionId || !timer.clientId) return;
@@ -588,7 +588,7 @@ async function init() {
     getState,
     t,
     onSwitchWorkspace: (name) => switchToWorkspace(name),
-    // Asked for from the menu, where the stale offer is raised at us (TODO §40.4). Same act,
+    // Asked for from the menu, where the stale offer is raised at us. Same act,
     // same `resetSandbox` — which is guarded to the sandbox in stateStore.js, so the menu item
     // being hidden is the second lock rather than the only one.
     onResetSandbox: () =>
@@ -599,7 +599,7 @@ async function init() {
           renderEverything();
         },
       }),
-    // An imported programme lands in the ordinary plan editor (TODO §29): the same clipboard a
+    // An imported programme lands in the ordinary plan editor: the same clipboard a
     // trainer builds a session in, so its save is the write and there is no import-specific
     // persistence to keep correct.
     onProgramImported: openImportedProgramme,
@@ -631,14 +631,14 @@ async function init() {
 
   appBoot.bootNotificationArea({
     // The crash log lives in the lifecycle controller (in memory only) and the tracker URL is a
-    // constant — the feed decides IF and WHEN to mention a crash, which is what keeps §12.4's handler
-    // from interrupting a live session.
+    // constant — the feed decides IF and WHEN to mention a crash, which is what keeps the crash
+    // handler from interrupting a live session.
     getCrashes: appBoot.crashLog,
     repoUrl: ISSUE_TRACKER_URL,
     getState,
     getActiveSession: () => getActiveSession(),
     t,
-    // A failed sync's home outside the Sync & Backup dialog (TODO §3.11) — the header glyph turns
+    // A failed sync's home outside the Sync & Backup dialog — the header glyph turns
     // into a warning triangle, and this is what says why.
     getSyncFailure: driveSyncFailureNotice,
     escapeHTML,
@@ -647,14 +647,15 @@ async function init() {
     removeDemoData,
     // A full re-render rather than a targeted patch: clearing the demo touches every collection, so
     // every view showing one is stale at once. It used to reload the page for that, which is a
-    // heavy way to repaint and loses the trainer's place (TODO §40.3a).
+    // heavy way to repaint and loses the trainer's place.
     onRemoved: () => renderEverything(),
     // The empty app's second offer (asked 2026-09-11): the sandbox, where trying things out cannot
     // touch the records the trainer is about to start keeping. It replaced an offer to seed sample
-    // people straight into those records, which is the thing TODO §40 exists to end.
+    // people straight into those records, which is what having two separate workspaces was
+    // built to end.
     enterSandbox: () => switchToWorkspace(SANDBOX),
     // The guided demo runs from a deep link and a reload, exactly as the splash's own offer does
-    // (TODO §28.14) — the same URL builder, so the two entry points cannot drift into starting
+    // — the same URL builder, so the two entry points cannot drift into starting
     // different things.
     startWalkthrough: (chapterId) =>
       window.location.assign(chapterId ? guidedChapterUrl(chapterId) : guidedDemoUrl()),
@@ -807,8 +808,7 @@ function renderExercisesList(filterQuery, categoryFilter) {
 }
 
 /**
- * Repaint every view that reads the database, after the whole database was replaced under them
- * (TODO §40.3a).
+ * Repaint every view that reads the database, after the whole database was replaced under them.
  *
  * Four things replace it wholesale — a backup restore, a Drive merge, clearing the demo, and now a
  * workspace switch — and until this existed each of them re-rendered its own subset. Two got it
@@ -845,14 +845,14 @@ function changeLanguage(lang) {
 }
 
 /**
- * Move between the trainer's own work and the sandbox (TODO §40.3), without reloading the page.
+ * Move between the trainer's own work and the sandbox, without reloading the page.
  *
  * The route goes home rather than staying put: a path like `/client/<id>` names a record that the
  * workspace being entered does not have, and repainting a detail view for a record that is not
  * there is a worse answer than the dashboard.
  */
 async function switchToWorkspace(name) {
-  // The guide goes with the workspace it was running in (TODO §42.15). Its steps drive the sandbox's
+  // The guide goes with the workspace it was running in. Its steps drive the sandbox's
   // seeded records, so in the trainer's own work it would point at controls for records that are not
   // there — and parked, it would sit over their real session as a bar they did not ask for. The
   // module is imported only when one is actually on screen, so the demo never loads on a switch.
@@ -860,19 +860,19 @@ async function switchToWorkspace(name) {
     const { stopGuidedWalkthrough } = await import("./modules/demo/walkthroughOverlay.js");
     stopGuidedWalkthrough();
   }
-  // Where they are NOW, stored against the workspace being left (TODO §40.3).
+  // Where they are NOW, stored against the workspace being left.
   rememberRoute(window.location.pathname);
   await switchWorkspace(name);
   renderEverything();
   // The clocks do not stop: what was ticking underneath becomes the visible stack and the other way
-  // round (TODO §40.11). Deliberately not a teardown — a rest period must survive the switch.
+  // round. Deliberately not a teardown — a rest period must survive the switch.
   appBoot.rebindTimers();
   returnToLastView();
   if (isSandbox()) await offerFreshSandboxIfStale();
 }
 
 /**
- * Put the trainer back where they were in the workspace they are entering (TODO §40.3).
+ * Put the trainer back where they were in the workspace they are entering.
  *
  * Ruled 2026-09-10: coming back means coming back to the VIEW — the live session, the client, the
  * exercise in focus — not to the dashboard. Stepping out to look something up and having to find
@@ -899,8 +899,8 @@ function returnToLastView() {
   handlePathChange();
 }
 
-// Asked on ENTRY, never at boot: at boot it is a question about a workspace the trainer is not in
-// (TODO §40.4). Declining starts the cooldown, which is what keeps the answer answered.
+// Asked on ENTRY, never at boot: at boot it is a question about a workspace the trainer is not in.
+// Declining starts the cooldown, which is what keeps the answer answered.
 async function offerFreshSandboxIfStale() {
   const { ask } = sandboxStaleness(await readSandboxMeta());
   if (!ask) return;
@@ -1037,7 +1037,7 @@ function startSplash({ linkBringsContent } = {}) {
     appBoot
       .bootSplashScreen({
         offerOnboarding: !stateHasData(getState()),
-        // `?lang=` still ANSWERS this, deliberately (TODO §28.11). The first attempt made a URL
+        // `?lang=` still ANSWERS this, deliberately. The first attempt made a URL
         // parameter a mere preselection that the step would ask about anyway — which is a defensible
         // rule and breaks a shipped promise: a share link naming a language must open in it, pinned by
         // tests/e2e/test_share_deeplink.py. `?splash=off` is different, and that is the half kept: it
@@ -1070,7 +1070,7 @@ function startSplash({ linkBringsContent } = {}) {
         t,
       })
       // Only once the splash is actually gone: a submission shared into the app opens a modal, and a
-      // modal makes the page under it inert — splash included (§38.22).
+      // modal makes the page under it inert — splash included.
       .then(() => appBoot.bootSharedSubmissions())
   );
 }
@@ -1126,7 +1126,7 @@ function renderActiveGroupBoard() {
 }
 
 // The client's planning form — what the client card's "Plan Program" button opens
-// (clientsView.js) — reached from the clipboard's create-a-plan card (TODO §52.2 step 4). The route
+// (clientsView.js) — reached from the clipboard's create-a-plan card. The route
 // goes first: `session.new` is the setup view's own address and hides the clipboard overlay, and the
 // call after it re-opens the same form in planning mode with the client chosen, which that route
 // alone cannot say.
@@ -1140,7 +1140,7 @@ function launchClipboardDirectly(arg, options = {}) {
   sessionsViewLaunchClipboard({ sessionId, state: getState(), startWorkoutSession }, options);
 }
 
-/** Opens an imported programme in the plan editor (TODO §29).
+/** Opens an imported programme in the plan editor.
  *
  * As a PLANNING session when no session was named: a programme written at a desk has no slot yet,
  * and planning mode is exactly the mode this app already has for a plan with no clock — no
@@ -1183,7 +1183,7 @@ function renderSessions() {
     urlFor,
     focusSessionsColumn,
     // What an evening from a repeating series is given when the trainer first acts on it and it
-    // stops being a rule (TODO §35.3a).
+    // stops being a rule.
     newRecordId,
   });
 }

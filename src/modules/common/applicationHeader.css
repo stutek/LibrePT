@@ -148,7 +148,7 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav {
   white-space: nowrap;
   border: 0;
 }
-/* Pre-release PREVIEW marker (see index.html / TODO 16.2). Amber is a warning cue, so it stays
+/* Pre-release PREVIEW marker (see index.html). Amber is a warning cue, so it stays
    theme-independent by design — a warning that changed colour per theme would read as decoration.
    A pill in the header's flex flow that spells the word out: an icon-only version of this was
    tried, and a lone pulsing triangle is an unexplained warning (see the comment in
@@ -177,7 +177,7 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav {
 .preview-badge-label {
   white-space: nowrap;
 }
-/* TODO §28.9: the same pill, naming the demo instead. A demo is a FACT, not a hazard — so it drops
+/* The same pill, naming the demo instead. A demo is a FACT, not a hazard — so it drops
    the amber and the pulse (the animation block below is scoped away from it) and takes a calm
    informational blue. Same size, same word-first treatment, same link to the data-loss notice: the
    build is still a preview, only the more urgent of the two claims has changed. */
@@ -190,7 +190,7 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav {
 .preview-badge.is-demo:focus-visible {
   box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.9), 0 3px 10px rgba(99, 102, 241, 0.6);
 }
-/* TODO §3.8's unbacked-data warning. Sits beside the PREVIEW badge and must not be mistaken for it:
+/* The unbacked-data warning. Sits beside the PREVIEW badge and must not be mistaken for it:
    PREVIEW is solid amber and permanent, so `due` here is OUTLINED — present, legible, clearly a
    different kind of statement — and only `urgent` fills in, which happens solely when the browser
    reports this origin's storage as evictable. Escalation is carried by weight and colour; there is
@@ -371,7 +371,7 @@ select.menu-select {
   font-size: 18px;
   color: var(--cloud-icon-color, #0284c7);
 }
-/* One rule for whichever overlay glyph the state calls for (TODO §3.11) — arrows, warning triangle
+/* One rule for whichever overlay glyph the state calls for — arrows, warning triangle
    or slash all sit in the same place over the cloud, so only the colour changes between states. */
 .cloud-sync-icon .fa-arrows-rotate,
 .cloud-sync-icon .fa-triangle-exclamation,
@@ -389,7 +389,7 @@ select.menu-select {
 .cloud-sync-icon.is-failed .fa-triangle-exclamation {
   color: var(--danger, #ef4444);
 }
-/* Not connected reads as UNHEALTHY (TODO §28.8), which reverses the earlier treatment on the
+/* Not connected reads as UNHEALTHY, which reverses the earlier treatment on the
    maintainer's ruling. It used to be muted grey, reasoning that PRIVACY.md makes local-first a
    supported choice and painting it as a fault would spend the warning vocabulary. What that
    produced was a line nobody read as a problem — reported in exactly those words. Declining cloud
@@ -411,9 +411,10 @@ select.menu-select {
    a sync that cannot happen. Grey says "facts about something you have not set up", which is what
    they are.
 
-   The slash above keeps its warning colour deliberately (TODO §28.8): it is the one part reporting
-   a state worth acting on. Greying the cloud around it also restores what §3.11 always had and
-   §28.8 dropped by accident — a bright cloud under a grey slash reads as connected. */
+   The slash above keeps its warning colour deliberately: it is the one part reporting
+   a state worth acting on. Greying the cloud around it also restores what an earlier version
+   always had and a later change dropped by accident — a bright cloud under a grey slash reads
+   as connected. */
 .cloud-sync-icon.is-disconnected .fa-cloud,
 .sync-badge.is-disconnected .sync-ahead,
 .sync-badge.is-disconnected .sync-behind {

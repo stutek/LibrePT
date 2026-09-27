@@ -71,7 +71,7 @@ export function renderEditSessionView(targetElement) {
             </div>
           </div>
 
-          <!-- Repeating slot (TODO §35.3a). A trainer's week is mostly the same week: "Tuesdays and
+          <!-- Repeating slot. A trainer's week is mostly the same week: "Tuesdays and
                Thursdays at six" is ONE thing to set up, and the board owes every evening it
                produces. Off by default, because a one-off is still the thing being created most
                often and a repeat left ticked by accident fills eight weeks. -->
@@ -88,7 +88,7 @@ export function renderEditSessionView(targetElement) {
             </div>
           </div>
 
-          <!-- Which evening of a repeating session is being edited (TODO §35.3a). Shown only when
+          <!-- Which evening of a repeating session is being edited. Shown only when
                the answer is "one of them", because that is when a trainer needs to know that what
                they change here does not touch next week. -->
           <div id="setup-occurrence-scope" class="setup-occurrence-note mb-3" hidden>
@@ -99,12 +99,12 @@ export function renderEditSessionView(targetElement) {
             </label>
           </div>
 
-          <!-- Live double-booking readout for the slot above (TODO §1.6). aria-live because it
+          <!-- Live double-booking readout for the slot above. aria-live because it
                appears in response to typing elsewhere in the form, with no focus change to
                announce it, and it is the one thing here that can make a save wrong. -->
           <ul id="setup-schedule-conflicts" class="setup-conflict-list mb-3" role="status" aria-live="polite" hidden></ul>
 
-          <!-- Who is on this session (TODO §46.2). A trainer with a hundred clients in the base is
+          <!-- Who is on this session. A trainer with a hundred clients in the base is
                choosing two of them, so the list shows the two: the search field finds a person by
                name and a tap puts them on the session, and only the chosen ones get a row with a
                programme to assign. The old form listed EVERY client with a checkbox and a

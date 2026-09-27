@@ -1,4 +1,4 @@
-/* src/modules/intake/intake.css — the client-facing intake page (TODO §1.7/§26).
+/* src/modules/intake/intake.css — the client-facing intake page.
    Its own stylesheet because its user is not the trainer: no header chrome, no bottom nav, and a
    single column read once on a phone that has never seen this app before. It reuses index.css's form
    controls and buttons rather than restyling them — a client filling this in and a trainer editing a
@@ -185,7 +185,7 @@
   color: var(--danger);
 }
 
-/* A share the browser refused, with the file saved instead (TODO §45.4, ruled 2026-09-17). Neither
+/* A share the browser refused, with the file saved instead (ruled 2026-09-17). Neither
    red nor green: nothing is broken and nothing is finished — the client is holding the file and has
    one step left. The bar down the side is what makes it noticeable without shouting, and the text
    keeps the ordinary colour so it stays readable on every theme. */

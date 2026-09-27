@@ -53,7 +53,7 @@ export function renderClientsViewShell() {
       </div>
 
       <!-- One continuous, time-ordered scroll: sessions render grouped under sticky per-day
-           headers instead of fixed yesterday/today/tomorrow/upcoming columns (TODO §7.3 item 8). -->
+           headers instead of fixed yesterday/today/tomorrow/upcoming columns. -->
       <div class="sessions-timeline mb-6" id="sessions-categories-grid" role="region" aria-label="Sessions"></div>
 
       <!-- Floating "Create Session" button: stays visible while scrolling the sessions list -->
@@ -271,8 +271,8 @@ export function renderSessions({
   });
   const activeSession = getActiveSession();
 
-  // An evening that exists only as a rule becomes a RECORD the moment the trainer acts on it
-  // (TODO §35.3a). Done here, at the board, because this is where every tap on a derived evening
+  // An evening that exists only as a rule becomes a RECORD the moment the trainer acts on it.
+  // Done here, at the board, because this is where every tap on a derived evening
   // starts — the alternative is every downstream lookup learning what a series is.
   const store = (sessionId) => {
     if ((state.sessions || []).some((session) => session.id === sessionId)) return sessionId;
@@ -313,7 +313,7 @@ export function renderSessions({
     container.innerHTML = `<div class="card glassmorphic text-center text-muted">${escapeHTML(empty)}</div>`;
   } else {
     // One continuous, strictly time-ordered pass — grouped under a sticky per-day header rather
-    // than split into four fixed yesterday/today/tomorrow/upcoming containers (TODO §7.3 item 8).
+    // than split into four fixed yesterday/today/tomorrow/upcoming containers.
     const sorted = [...sessions].sort(compareByStartDate);
     let currentKey = null;
     let currentList = null;

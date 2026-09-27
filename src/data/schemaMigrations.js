@@ -1,4 +1,4 @@
-// src/data/schemaMigrations.js — walks the schema-migration chain and reports what it did (§16.2).
+// src/data/schemaMigrations.js — walks the schema-migration chain and reports what it did.
 // Single responsibility: take a stored database of ANY known schema version and produce one at the
 // current version, or refuse and say why. The individual transforms live in data/migrationSteps.js.
 //
@@ -94,14 +94,14 @@ function clone(state) {
 
 /** Why this version must not be migrated at all, or null when it may be. */
 function refusalFor(fromVersion) {
-  // Preview data is never migrated, into the active schema or any later one (TODO §61, §63). Refused
+  // Preview data is never migrated, into the active schema or any later one. Refused
   // by WHAT THE VERSION IS — not by where it ranks: ranked against a later active schema a preview
   // version would sort below it, walk past the steps it skipped, and be stamped as current.
   if (isPreviewVersion(fromVersion)) {
     return `the data is from the preview schema ${fromVersion}, which is for testing and demonstrations and is never migrated`;
   }
-  // Data written by a NEWER build than this one. This is the rollback case, and it is exactly what
-  // §16.2's data-loss warning is about: the old build has no forward transform and must not guess.
+  // Data written by a NEWER build than this one. This is the rollback case: the old build has no
+  // forward transform and must not guess.
   if (schemaRank(fromVersion) > schemaRank(CURRENT_SCHEMA_VERSION)) {
     return `this build reads schema ${CURRENT_SCHEMA_VERSION} but the data is schema ${fromVersion} — it was written by a newer version`;
   }
@@ -183,8 +183,8 @@ export function migrateState(rawState) {
 /**
  * Whether importing this file will bring its data FORWARD — i.e. whether any step actually applied.
  *
- * The restore prompt has always said what a trainer loses from this DEVICE; this is the other half
- * (TODO §18.7): what the import does to the FILE. A schema-3 backup brought forward stops being
+ * The restore prompt has always said what a trainer loses from this DEVICE; this is the other half:
+ * what the import does to the FILE. A schema-3 backup brought forward stops being
  * openable by an older build the trainer may still have on a second phone, and that is a one-way door
  * they are entitled to be told about first.
  *

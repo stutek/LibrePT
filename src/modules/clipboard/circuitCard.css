@@ -1,6 +1,6 @@
 /* circuitCard.css — the circuit/giant-set card: round badge, per-movement rows, the feedback
-   trio, rest rows, complete-round button. Extracted from index.css 2026-07-27
-   (TODO §14.5 / §18.10). Inherits design tokens, glass-card/button/flex foundations, the
+   trio, rest rows, complete-round button. Extracted from index.css 2026-07-27.
+   Inherits design tokens, glass-card/button/flex foundations, the
    shared deck-card chrome (exerciseDeckOfCards.css) and color scheme from index.css, loaded first —
    this file adds only what circuitCard.js exclusively owns. */
 
@@ -20,7 +20,7 @@
   letter-spacing: 0.5px;
 }
 
-/* ONE LINE PER MOVEMENT, name and target in the same phrase (TODO §42.6).
+/* ONE LINE PER MOVEMENT, name and target in the same phrase.
    Three shapes were tried in front of the maintainer. Right-aligned targets left short names a
    hand's width from their own numbers ("hard to read … kadar so tako daleč odmaknjeni od imena
    vaje"). Columns sized to the longest name closed that gap but made every card start its numbers
@@ -75,9 +75,9 @@
   font-size: 11px;
 }
 
-/* THE CARD IN FOCUS IS THIS SAME LIST, grown to be read at arm's length mid-set (TODO §42.3): size
+/* THE CARD IN FOCUS IS THIS SAME LIST, grown to be read at arm's length mid-set: size
    is the only thing that changes between the states, the way the head row's name already grows and
-   nothing else moves (§42.5). It used to be a second template — a title bar of its own, rows in
+   nothing else moves. It used to be a second template — a title bar of its own, rows in
    another size, the movements written out again — so a circuit looked like two different cards
    depending on whether the trainer was standing on it. */
 .exercise-deck-card.in-focus .circuit-ex-name {
@@ -124,7 +124,7 @@
 .circuit-ex-rest .circuit-ex-name > i {
   color: var(--primary);
 }
-/* The control that starts THIS rest, added to the row on the focused card (TODO §42.3). The whole
+/* The control that starts THIS rest, added to the row on the focused card. The whole
    row used to be that button, which is a live control on a card the trainer may only be reading. */
 .circuit-break-play {
   margin-left: auto;

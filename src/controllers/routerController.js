@@ -205,7 +205,7 @@ export function switchView(viewId, { focusSessionsColumn } = {}) {
   if (mainContent) mainContent.scrollTop = 0;
 
   // The messages drawer covers everything below the header when expanded, so a view revealed under
-  // it is a view nobody sees (TODO §28.7). Reported as "the ☰ menu does not work while the messages
+  // it is a view nobody sees. Reported as "the ☰ menu does not work while the messages
   // pane is expanded" — the menu worked, the route changed, and the screen did not move, which is
   // indistinguishable from a dead button.
   //
@@ -356,7 +356,7 @@ function enterActiveSessionFocus(currentActive, clientId, focusRef, opts) {
     const idx = routerDeps?.focusIndexFromRef?.(cs, focusRef);
     // A deep link naming a specific card makes it the active card, and opens it — same as a tap —
     // unless the link ends in /closed: then the trainer had scrolled past what was open, and a
-    // reload must not open it again (TODO §48.1).
+    // reload must not open it again.
     if (idx >= 0) {
       cs.activeExerciseIndex = idx;
       cs.deckAllCollapsed = opts.closed === true;

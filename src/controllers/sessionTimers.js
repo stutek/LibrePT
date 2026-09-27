@@ -72,7 +72,7 @@ export function startClientTimer(seconds, type = "rest", label = "") {
   const cs = activeSession.clientRoutines[clientId];
   // The SAME ref builder the URL uses: this one used to spell a standalone rest as an "exercise",
   // which focusIndexFromRef refuses to resolve, so tapping the timer card never landed on the rest
-  // it was counting down (TODO §24.4).
+  // it was counting down.
   const focusRef = focusRefForItem(cs?.exercises?.[cs.activeExerciseIndex]);
   startTimer({
     clientId,

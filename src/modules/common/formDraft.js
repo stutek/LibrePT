@@ -1,4 +1,4 @@
-// src/modules/common/formDraft.js — what a half-filled form remembers across a reload (TODO §38.12).
+// src/modules/common/formDraft.js — what a half-filled form remembers across a reload.
 //
 // Single responsibility: hold one form's typed values while the page is open, put them back when the
 // same form comes up again, and forget them the moment the form is submitted. It knows nothing about
@@ -10,7 +10,7 @@
 // a rare accident — it is a locked phone, a browser reclaiming memory, a mis-tap on the address bar.
 // Losing a long form to any of those is the app throwing away work somebody did by hand.
 //
-// **sessionStorage, never localStorage, and that distinction is the product decision** (§38.12). The
+// **sessionStorage, never localStorage, and that distinction is the product decision.** The
 // client's intake page is the one surface whose user is not the trainer, and it promises that
 // nothing is kept on their phone. A draft that outlived the tab would break that promise outright; a
 // draft that dies with the tab keeps its substance — close the page and it is gone — while surviving
@@ -28,7 +28,7 @@
 // would be worse than one that came back empty — the person cannot see what is missing.
 //
 // **Only the client's intake page uses this since 2026-09-17.** The trainer's client, exercise and
-// routine dialogs write straight into the record instead (liveRecordForm.js, TODO §50.2); the intake
+// routine dialogs write straight into the record instead (liveRecordForm.js); the intake
 // page has no trainer database to write into. Whether it keeps a draft at all is still open there.
 //
 // Injected dependencies: `storage` (defaults to `sessionStorage`) so tests can hand it a plain

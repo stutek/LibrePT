@@ -1,4 +1,4 @@
-// src/domain/planCopy.js — giving another participant tonight's plan (TODO §8.8).
+// src/domain/planCopy.js — giving another participant tonight's plan.
 //
 // Single responsibility: what a copied plan contains. No DOM, no session — the clipboard's ⋯ menu
 // offers it and the controller writes it.
@@ -9,7 +9,7 @@
 // numbers into this person's history, and the history is the thing this app promises to keep
 // honest.
 //
-// **A copy is NOT a binding** (§8.1), and keeping the two distinguishable is why both exist. Bound
+// **A copy is NOT a binding**, and keeping the two distinguishable is why both exist. Bound
 // participants share one plan object and stay identical for as long as they are bound; a copy is
 // separate from the moment it is made, which is what a trainer wants when someone is doing the same
 // session but at their own loads. Every item therefore gets a fresh id — including the circuits,

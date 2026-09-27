@@ -1,5 +1,4 @@
-// src/domain/walkthrough.js — where a guided walkthrough is, and which of its controls are offered
-// (TODO §9.5).
+// src/domain/walkthrough.js — where a guided walkthrough is, and which of its controls are offered.
 //
 // Single responsibility: the cursor over a tour's steps and the availability rule for Back / Show me
 // / Next. No DOM, no timers, no tour content — modules/demo/walkthroughOverlay.js owns those, and
@@ -8,7 +7,7 @@
 // **The same script the scripted demo plays** (modules/demo/gymFloorTour.js). The demo taps for the
 // viewer; the walkthrough waits for the trainer and taps only when asked. Splitting the two into
 // separate scripts would double the thing that has to stay true of the real app, which is exactly
-// what §23.5 chose a script over a recording to avoid.
+// what choosing a script over a recording was meant to avoid.
 //
 // **A step cannot be skipped, and that is a property of the app rather than a teaching choice.** The
 // walkthrough drives real controls, and each one only exists because the previous tap created it —
@@ -103,7 +102,7 @@ class TourNumbering {
  * The story hands the browser to the client's own page half way through and takes it back four steps
  * later, and each of those is a separate boot with its own step list. Counting the run made the
  * viewer watch "step 10 of 41" become "step 1 of 8" and then "step 11 of 41" — one story, three
- * numberings, and nothing on screen saying why (reported 2026-08-27, TODO §38.9). Each step carries
+ * numberings, and nothing on screen saying why (reported 2026-08-27). Each step carries
  * where it belongs (`storyPosition`, from domain/demoStory.js), so both boots say the same thing
  * without sharing any state.
  */
@@ -129,8 +128,8 @@ export function walkthroughNumbering(tour) {
  *   `{ stepNumber, stepCount, canGoBack, canShowMe, canAdvance, isLastStep, isFinished }`
  *
  * One place decides this so the buttons and the keyboard/automation paths cannot disagree about
- * whether Next is available — a Next that works but looks disabled is the same defect §7.2 fixed on
- * the gym floor, one step further up the stack.
+ * whether Next is available — a Next that works but looks disabled is the same defect a control
+ * that gives no visible sign of its own state has, one step further up the stack.
  */
 export function walkthroughControls(tour, state) {
   // Two different questions, deliberately answered by two different numbers. What the viewer READS

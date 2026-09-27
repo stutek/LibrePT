@@ -11,7 +11,7 @@
 //
 // The items are NOT all the same kind of unreachable, and conflating them would misplan the
 // roadmap. The **gym calendar** is reachable — it sits on the same Google grant the app already
-// asks for, and only waits on Calendar integration (TODO §1.5), at which point erasure must fan out
+// asks for, and only waits on Calendar integration, at which point erasure must fan out
 // to it automatically and the item disappears from this list. **Mail and SMS never are**: a
 // `mailto:`/`sms:` hands a draft to the trainer's own client and forgets it, by design, so no
 // version of this app will ever reach into a sent folder. Each item says which it is.
@@ -26,7 +26,7 @@
  *
  *   `reach` is the roadmap fact rather than the user-facing one: "app" — already done for you;
  *   "planned" — reachable on a grant the app already asks for and simply not built yet (the gym
- *   calendar, TODO §1.5); "never" — no software could do it, because it lives in the trainer's own
+ *   calendar); "never" — no software could do it, because it lives in the trainer's own
  *   mail or messaging app or in a file already written; "paper" — the item that must deliberately
  *   NOT be erased.
  */
@@ -42,10 +42,10 @@ export function externalErasureChecklist(state, client, { driveConfigured = fals
       surface: "The gym calendar",
       action: `Open the ${sessions.length} event${sessions.length === 1 ? "" : "s"} for this client and remove their name from the title and guest list.`,
       // NOT a permanent limitation, and the distinction matters for planning: the gym/room calendar
-      // is reached through the trainer's OWN OAuth grant (TODO §1.5), so once Calendar integration
+      // is reached through the trainer's OWN OAuth grant, so once Calendar integration
       // lands this fan-out becomes the app's job and this item disappears. Today LibrePT only hands
       // the trainer an .ics to send themselves (sessionInviteDialog.js), so it is manual.
-      why: "The gym calendar is reachable on the same Google grant the app already asks for — but LibrePT does not write to Calendar yet (TODO §1.5), so today this is manual.",
+      why: "The gym calendar is reachable on the same Google grant the app already asks for — but LibrePT does not write to Calendar yet, so today this is manual.",
       reach: "planned",
       blocking: true,
     });
@@ -133,7 +133,7 @@ export function renderErasureReceipt(summary, checklist, client) {
   ];
 
   // A rule for this client alone is removed outright, so nothing goes on scheduling them; a rule
-  // shared with others keeps running without them (TODO §65, ruled 2026-09-19).
+  // shared with others keeps running without them (ruled 2026-09-19).
   if (summary.seriesRemoved > 0 || summary.seriesKept > 0) {
     lines.push(
       `- ${summary.seriesRemoved} repeating session(s) removed, ${summary.seriesKept} kept for the other people in them`,

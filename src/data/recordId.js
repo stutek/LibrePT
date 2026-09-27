@@ -1,22 +1,22 @@
-// src/data/recordId.js — the identity primitive every stored record is keyed on (TODO §18.2).
-// Moved out of modules/common/ in TODO §24.6: it is what storage keys on, as the note below says.
+// src/data/recordId.js — the identity primitive every stored record is keyed on.
+// Moved out of modules/common/: it is what storage keys on, as the note below says.
 // Single responsibility: mint a new record id, and read back the creation time encoded inside one.
 //
 // Why this exists as its own module rather than another helper in utils.js: record identity is the
-// one value the whole persistence design rests on (§18) — the migration mapping, the suppression list
-// that makes anonymization irreversible (§18.11), and deep links (§18.10) are all keyed on it. It
+// one value the whole persistence design rests on — the migration mapping, the suppression list
+// that makes anonymization irreversible, and deep links are all keyed on it. It
 // deserves a file whose only job is to be correct about it.
 //
 // **UUIDv7 (RFC 9562)**, rendered as fixed-width base62. Two properties are load-bearing:
 //
 //   1. **Collision resistance.** The generator this replaces was `Math.random().toString(36)` sliced
 //      to 8 characters — 41.4 bits, from a non-cryptographic source. At the ~280k ids a very busy PT
-//      accumulates over five years (§18.6's sizing) that is a **1.4% chance of at least one
+//      accumulates over five years that is a **1.4% chance of at least one
 //      collision**, i.e. a coin-flip-scale defect over the life of a business's records rather than a
 //      theoretical one. UUIDv7 carries 122 random bits from `crypto.getRandomValues`, which puts the
 //      same figure at 1e-26.
 //   2. **Time ordering.** v7 puts a millisecond timestamp in the high 48 bits, so ids sort
-//      chronologically. Migration order is topological, not chronological (§18.5) — this is not a
+//      chronologically. Migration order is topological, not chronological — this is not a
 //      substitute for that — but it gives a stable, clock-free-to-compare tiebreak *within* a
 //      topological layer, and it makes stored data legible when debugging without a separate field.
 //
@@ -142,7 +142,7 @@ export function isRecordId(id) {
  * Returns null rather than throwing for ids minted by older builds (8-char base36, no timestamp) —
  * those stay perfectly valid keys, they simply carry no time. Callers must treat the time as a
  * debugging affordance, never as the authoritative record date: that is a stored field, because the
- * device clock at write time is not trustworthy (§18.5).
+ * device clock at write time is not trustworthy.
  */
 export function recordIdTime(id) {
   if (!isRecordId(id)) return null;

@@ -1,4 +1,4 @@
-// src/modules/demo/storySignupFile.js — the file Ana sends, as the trainer receives it (TODO §35).
+// src/modules/demo/storySignupFile.js — the file Ana sends, as the trainer receives it.
 //
 // Single responsibility: hold the ONE submission the story's client chapter produces, in the exact
 // shape the intake page writes, so the trainer's chapter can open it.
@@ -26,7 +26,7 @@ import { CONSENT_FORM_VERSION } from "../common/consentForm.js";
 export const STORY_SIGNUP_NAME = "Ana Novak";
 // What the file is CALLED when it lands in the trainer's messages. Written beside the file it
 // names, so the screenshot the story draws of that message cannot drift from the artifact
-// signupDelivery.js produces (§38.22).
+// signupDelivery.js produces.
 export const STORY_SIGNUP_FILENAME = "ana-novak.json.librept-signup";
 export const STORY_SIGNUP_EMAIL = "ana.novak@example.com";
 export const STORY_SIGNUP_INJURY = "shoulder, two years ago";

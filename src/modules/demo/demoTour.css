@@ -1,4 +1,4 @@
-/* src/modules/demo/demoTour.css — the scripted demo's pointer (TODO §23.5).
+/* src/modules/demo/demoTour.css — the scripted demo's pointer.
    Only the hand is styled here; the tour drives the app's own real controls, which keep their own
    appearance. A demo that restyled what it was demonstrating would be showing a different app. */
 

@@ -1,10 +1,10 @@
-// src/data/driveSyncService.js — orchestrates Google Drive appDataFolder sync (TODO §1.5/§3.3/§3.10).
+// src/data/driveSyncService.js — orchestrates Google Drive appDataFolder sync.
 // Single responsibility: connect/disconnect the OAuth grant, and run one sync pass (download → merge
 // → apply locally → upload). Delegates auth to googleAuth.js, the wire format to driveAppData.js, and
 // the actual merge decision to the pure functions in syncMerge.js — this module is the glue between
 // them and stateStore.js's `getState`/`setState`/`saveToLocalStorage`.
 //
-// **Manual-only syncing (TODO §3.10)**: `syncNow()` is the only function that merges, applies, or
+// **Manual-only syncing**: `syncNow()` is the only function that merges, applies, or
 // uploads anything, and it only ever runs from an explicit trainer tap — the dialog's "Sync Now"
 // button, the first-connect flow, or the header cloud icon (driveSyncUi.js). The periodic timer and
 // tab-resume hook (below, and appLifecycleController.js) never call it; they call the read-only
@@ -13,9 +13,9 @@
 //
 // **Scope of what syncs**: the collections `recordProjections.js` projects (clients, exercises,
 // routines, sessions, history, planUpdates, notifications) — i.e. everything a backup export already
-// carries. `schemaVersion` and `lang` are per-device/per-build, not synced. TODO §1.5 frames the long
-//-run target more narrowly ("app-only data with no Calendar equivalent") once Calendar integration
-// exists as the source of truth for scheduling facts; until then there is no Calendar-sourced overlap
+// carries. `schemaVersion` and `lang` are per-device/per-build, not synced. Once Google Calendar
+// integration exists as the source of truth for scheduling facts, this scope should narrow to
+// app-only data with no Calendar equivalent; until then there is no Calendar-sourced overlap
 // to exclude, so the full domain snapshot is what a PT actually needs mirrored across their devices.
 //
 // **Not built in this slice**: incremental sync via the Drive Changes API (`changes.list` +
@@ -32,12 +32,12 @@
 // down. The next sync pass uploads that choice like any other local edit — there's no separate
 // "resolution" concept on the wire, which is what keeps this override safe to skip entirely.
 //
-// **Why no Lamport (deviceId, seq) pair**, despite TODO §18.5 flagging it as something concurrent
-// writers would eventually need: the three-way merge here never tries to ORDER two edits — it detects
-// "changed on both sides since the shared ancestor" and reports a conflict rather than picking a
-// winner by time. A Lamport pair only matters to a scheme that still wants a deterministic "which
-// edit happened later"; this one deliberately never asks that question, so it never needed the clock
-// substitute either.
+// **Why no Lamport (deviceId, seq) pair**, even though concurrent writers might eventually need
+// one to order edits deterministically: the three-way merge here never tries to ORDER two edits —
+// it detects "changed on both sides since the shared ancestor" and reports a conflict rather than
+// picking a winner by time. A Lamport pair only matters to a scheme that still wants a
+// deterministic "which edit happened later"; this one deliberately never asks that question, so
+// it never needed the clock substitute either.
 //
 // Injected dependencies: none at the module level — call sites are the UI layer (driveSyncUi.js) and
 // app.js's lifecycle hook.
@@ -79,7 +79,7 @@ import { countChangedRecords, mergeState } from "./syncMerge.js";
 let syncing = false;
 let lastSyncResult = null;
 
-// The real ahead/behind counters (replaces the header badge's former hardcoded mock, TODO §3.9).
+// The real ahead/behind counters (replaces the header badge's former hardcoded mock).
 // `cachedAncestor` is the last-synced snapshot, kept in memory so `getAheadCount()` can be
 // synchronous (every render-badge call site is sync) without re-reading IndexedDB each time. `null`
 // until `primeAheadCache()` resolves at boot or a sync completes — and while it is null every local
@@ -109,20 +109,20 @@ export async function primeAheadCache() {
  *
  * Note this is a DRIVE-relative fact — "not on Drive" — so a downloaded JSON backup does not reduce
  * it, and should not: the data really is absent from Drive either way. What a file backup does clear
- * is the *escalation* (TODO §3.8's warning), which reads `readBackupHistory()` rather than this
- * count, because that question is "is this data anywhere durable at all". Keeping the two separate is
- * what stops a safety indicator from quietly becoming a prompt to enable Google.
+ * is the *escalation* (the unbacked-data warning banner), which reads `readBackupHistory()` rather
+ * than this count, because that question is "is this data anywhere durable at all". Keeping the
+ * two separate is what stops a safety indicator from quietly becoming a prompt to enable Google.
  */
 export function getAheadCount() {
   // An empty ancestor makes countChangedRecords see every record as an addition — the honest
   // reading of "none of this has ever been pushed".
   //
-  // Seeded demo records are excluded from BOTH sides (TODO §28.6): the count is about work the
-  // trainer would lose, and a sales demo is not that. Filtering the ancestor too keeps the diff
-  // symmetric, so a demo record that reached Drive before this rule shipped cannot come back as a
-  // phantom deletion.
+  // Seeded demo records are excluded from BOTH sides, so loading the demo never inflates this
+  // count: the count is about work the trainer would lose, and a sales demo is not that. Filtering
+  // the ancestor too keeps the diff symmetric, so a demo record that reached Drive before this rule
+  // shipped cannot come back as a phantom deletion.
   //
-  // A record still open in its form counts as it was before the form opened (TODO §50.2).
+  // A record still open in its form counts as it was before the form opened.
   return countChangedRecords(
     COLLECTIONS,
     withoutSeedRecords(cachedAncestor || {}),
@@ -131,7 +131,7 @@ export function getAheadCount() {
 }
 
 // "Remote changes not yet pulled" — kept live by refreshSyncCounts() below, not by a sync pass:
-// syncing is now manual-only (TODO §3.10), so a trainer who hasn't tapped "Sync Now" in a while still
+// syncing is manual-only, so a trainer who hasn't tapped "Sync Now" in a while still
 // needs an honest count of what's waiting on Drive. `cachedBehind` is 0 until the first counter
 // refresh resolves (boot, periodic tick, or tab resume), same "no data yet" convention as
 // `cachedAncestor`/`getAheadCount()`.
@@ -169,7 +169,7 @@ export function driveSyncStatus() {
 }
 
 /**
- * Read-only counter refresh (TODO §3.10: Drive syncing is manual-only — a trainer must tap "Sync Now"
+ * Read-only counter refresh (Drive syncing is manual-only — a trainer must tap "Sync Now"
  * or the header cloud icon for any merge/upload to happen). Unlike syncNow(), this NEVER merges,
  * applies, or uploads anything: it downloads the remote file purely to diff it against the last
  * synced ancestor via `countChangedRecords()`, so the header badge's ahead/behind counts stay
@@ -200,7 +200,7 @@ export async function refreshSyncCounts() {
 
 // Periodic counter refresh (in addition to refresh-on-resume): a PT-configurable "how often" for
 // devices left open on the gym floor rather than backgrounded/resumed. Only ever calls
-// refreshSyncCounts() below (TODO §3.10: manual-only syncing) — this interval governs how fresh the
+// refreshSyncCounts() below (syncing is manual-only) — this interval governs how fresh the
 // header badge's numbers are, never how often an actual merge/upload happens. A plain localStorage
 // key, not IndexedDB — this is a per-device preference (like the theme choice), not domain data any
 // schema/star-write covers.
@@ -360,8 +360,8 @@ export async function syncNow() {
     if (fileId) await updateSyncFile(token, fileId, mergedState);
     await writeDriveSyncMeta({ fileId: writtenFileId, ancestor: mergedState });
     cachedAncestor = mergedState;
-    // The data now exists somewhere the browser cannot evict — the other half of TODO §3.8's
-    // question, which a downloaded backup file answers equally well.
+    // The data now exists somewhere the browser cannot evict — the other half of what the
+    // unbacked-data warning banner asks about, which a downloaded backup file answers equally well.
     await recordBackupTaken("drive");
 
     const result = { ok: true, at: Date.now(), conflicts, reErased: reErasedOnSync };

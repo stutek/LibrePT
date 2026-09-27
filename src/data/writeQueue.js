@@ -1,5 +1,5 @@
-// src/data/writeQueue.js — serialises asynchronous persistence behind a synchronous-looking call
-// (TODO §18.6). Single responsibility: run write tasks strictly in the order they were enqueued,
+// src/data/writeQueue.js — serialises asynchronous persistence behind a synchronous-looking call.
+// Single responsibility: run write tasks strictly in the order they were enqueued,
 // never concurrently, and make failures visible instead of swallowing them.
 //
 // **Why this exists at all.** Moving the store from localStorage to IndexedDB changes persistence
@@ -83,7 +83,7 @@ async function drain() {
  *
  * `readsLiveState` says the task reads what it writes when it RUNS, not when it was queued. Such a
  * task still waiting at the end of the queue already covers this call, so the call adds nothing.
- * Without this, a form that writes as it is typed (TODO §50.2) queued one write of every record per
+ * Without this, a form that writes as it is typed queued one write of every record per
  * keystroke. Only the LAST queued task is checked, so nothing ever moves ahead of a different write.
  */
 export function enqueueWrite(task, label = "write", { readsLiveState = false } = {}) {

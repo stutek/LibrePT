@@ -1,5 +1,5 @@
 // src/data/googleAuth.js — Google Identity Services (GIS) token client wrapper for the
-// Drive appDataFolder sync feature (TODO §1.5/§3.3).
+// Drive appDataFolder sync feature.
 // Single responsibility: get and hold a short-lived OAuth access token for `GOOGLE_DRIVE_SCOPE`,
 // nothing else. It knows nothing about Drive's REST API or sync/merge — see driveAppData.js and
 // driveSyncService.js for those.

@@ -355,7 +355,7 @@
   word-break: break-word;
 }
 
-/* Reviewing a submission a client sent in (signupReviewDialog.js, TODO §26.5). Lives with the client
+/* Reviewing a submission a client sent in (signupReviewDialog.js). Lives with the client
    styles because what it produces is a client record; the person using it is the trainer. */
 .signup-review-lede {
   margin: 0 0 14px 0;
@@ -434,7 +434,7 @@
   accent-color: var(--primary);
 }
 
-/* The invitation as a code on the trainer's own screen (TODO §26.4). Black on white whatever the
+/* The invitation as a code on the trainer's own screen. Black on white whatever the
    theme is: this is a picture for somebody else's camera, and a themed ground turns a symbol a
    phone reads in one pass into one it hunts for. The white padding is the quiet zone's paper. */
 .intake-invite-qr {

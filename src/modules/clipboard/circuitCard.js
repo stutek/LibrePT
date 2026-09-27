@@ -22,7 +22,7 @@ import { DeckCard } from "./deckCard.js";
 
 // One line for a rest inside the circuit. A rest is a member like any other and has no name or
 // reps, so it says what it is instead — asking it for a name printed `undefined` under every
-// circuit in the deck (TODO §42.6).
+// circuit in the deck.
 function buildCircuitRestRowHTML(ex, t, escapeHTML) {
   return `
         <div class="circuit-ex-row circuit-ex-rest" data-rest="${escapeHTML(String(ex.rest))}">
@@ -34,7 +34,7 @@ function buildCircuitRestRowHTML(ex, t, escapeHTML) {
         </div>`;
 }
 
-// One line per movement, name and target in the same phrase (TODO §42.6): the target follows the
+// One line per movement, name and target in the same phrase: the target follows the
 // name the way the collapsed exercise card writes its own ("S4 × R6 × 60kg"), so nothing has to be
 // aligned with anything.
 function buildCircuitExerciseRowHTML(ex, ctx) {
@@ -71,7 +71,7 @@ function buildFailureRepsHTML(exId, activeClientState, round, escapeHTML, t) {
 }
 
 // The feedback trio for one member row. The same three actions as a standalone exercise card, with
-// the same lookups, the same glyph swap and the same note mark (TODO §7.2) — or the trainer learns
+// the same lookups, the same glyph swap and the same note mark — or the trainer learns
 // one vocabulary and meets another mid-session.
 function buildCircuitActionsHTML(ex, ctx, isFirstExercise) {
   const { activeClientId, t, hasQuickSignal } = ctx;
@@ -107,8 +107,8 @@ export class CircuitDeckCard extends DeckCard {
     return `exercise-deck-card circuit-card ${checkedClass}${this.ctx.isFutureSession ? " future-session" : ""}`;
   }
 
-  // The card, in every state (TODO §42.3). One head row, the same one every other card draws
-  // (§42.5) — the focused card used to open with a title bar of its own instead, so a circuit
+  // The card, in every state. One head row, the same one every other card draws — the focused
+  // card used to open with a title bar of its own instead, so a circuit
   // looked like two different cards depending on whether the trainer was on it.
   renderCard(card) {
     const { round, t, escapeHTML } = this.ctx;

@@ -270,7 +270,7 @@ function renderReceipt(summary, checklist, client) {
   // Left for the trainer, and named as such: a title only a person can judge (a namesake in the
   // book, or several people in the session) stays exactly as typed — a rewrite could edit the wrong
   // client's schedule. Repeating rules are counted beside sessions, since the trainer opens them in
-  // a different place (TODO §65).
+  // a different place.
   const leftAlone = summary.reviewSessionIds.length + summary.reviewSeriesIds.length;
   const warning =
     leftAlone > 0

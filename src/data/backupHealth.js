@@ -1,13 +1,13 @@
 // src/data/backupHealth.js — "is any of this data anywhere it would survive losing this browser?"
-// (TODO §3.8). Pure functions over plain objects; no DOM, no storage, no clock of its own.
+// Pure functions over plain objects; no DOM, no storage, no clock of its own.
 //
-// **A different question from the sync badge, and the distinction is the whole point.** §3.9's ↑
-// counts records not on Drive, so a downloaded backup does not reduce it and should not — the data
-// really is absent from Drive either way. This module asks whether the data is anywhere DURABLE, so
-// a downloaded file answers it exactly as a completed sync does. Keeping the two separate is what
-// lets the count stay factual while the warning stays honest: if only a Drive sync could clear a
-// safety warning, the warning would be a prompt to enable Google wearing a warning colour, and
-// trainers can tell the difference.
+// **A different question from the sync badge, and the distinction is the whole point.** The sync
+// badge's ↑ counts records not on Drive, so a downloaded backup does not reduce it and should
+// not — the data really is absent from Drive either way. This module asks whether the data is
+// anywhere DURABLE, so a downloaded file answers it exactly as a completed sync does. Keeping the
+// two separate is what lets the count stay factual while the warning stays honest: if only a
+// Drive sync could clear a safety warning, the warning would be a prompt to enable Google
+// wearing a warning colour, and trainers can tell the difference.
 //
 // **Why a fingerprint rather than a snapshot or a timestamp.** Counting "changes since the last
 // backup" needs a reference point, and records carry no per-record `updatedAt` to compare against.

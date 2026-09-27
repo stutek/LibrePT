@@ -1,4 +1,4 @@
-/* src/modules/rsvp/rsvp.css — the invite-reply page (TODO §1.6's confirm link).
+/* src/modules/rsvp/rsvp.css — the invite-reply page, opened from an invite's confirm link.
    Client-facing, like the intake page: no header chrome, no bottom nav, one screen read once on a
    phone from a message. Reuses index.css's buttons rather than restyling them. */
 

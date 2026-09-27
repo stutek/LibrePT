@@ -31,7 +31,7 @@ export function sessionFocusPath() {
   const cs = activeSession.clientRoutines[clientId];
   const focusRef = focusRefForItem(cs?.exercises?.[cs.activeExerciseIndex]);
   if (!focusRef) return urlFor("session.client", ids);
-  // An active card with nothing open has its own address, so a reload does not open it (§48.1).
+  // An active card with nothing open has its own address, so a reload does not open it.
   const focusRoute = cs.deckAllCollapsed ? "session.focus.closed" : "session.focus";
   // Built, never spelled: the focus segment was renamed once already (superset → circuit), and a
   // hand-written path is what quietly survives the next rename as a dead link. The segment comes
@@ -92,7 +92,7 @@ export function focusExerciseByIndex(index) {
 }
 
 // The trainer scrolled a different card to the focus line (deckScrollFocus.js): that card becomes
-// active and whatever was open closes (TODO §48.1). Re-render only when a card was open — the mark
+// active and whatever was open closes. Re-render only when a card was open — the mark
 // itself is already on the card, and rebuilding the deck under a moving finger would stall the scroll.
 export function activateExerciseByScroll(index) {
   const activeSession = getActiveSession();

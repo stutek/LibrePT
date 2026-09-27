@@ -57,7 +57,7 @@ export function renderActiveUsersList(tabsContainer, activeSession, ctx) {
   if (!tabsContainer) return;
   tabsContainer.innerHTML = "";
 
-  // People training ONE plan read as ONE tab (TODO §8.1): the trainer is looking at a single
+  // People training ONE plan read as ONE tab: the trainer is looking at a single
   // programme, and three tabs that always show the same thing invite three taps to check. The
   // members are still named on it, because a tab that says "group" tells nobody who is in it.
   const bound = boundGroupTab(activeSession, ctx);

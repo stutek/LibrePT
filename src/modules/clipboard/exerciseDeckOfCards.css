@@ -2,7 +2,7 @@
    every card type it renders (exerciseCard.js, circuitCard.js, and its own rest/past cards):
    compact/top/timer/counter/status/name. Component-exclusive additions live in that
    component's own file (exerciseCard.css, circuitCard.css). Extracted from index.css
-   2026-07-27 (TODO §14.5 / §18.10). Inherits design tokens, glass-card/button/flex
+   2026-07-27. Inherits design tokens, glass-card/button/flex
    foundations and color scheme from index.css, loaded first. */
 
 /* Standalone rest marker card in the live deck. Dashed/faded look is deliberately scoped to the
@@ -25,9 +25,9 @@
 .rest-card-inner .deck-card-counter {
   color: var(--primary);
 }
-/* The focused rest card ADDS this button to the row it already draws (TODO §42.3) — it does not
+/* The focused rest card ADDS this button to the row it already draws — it does not
    redraw the duration at 42px underneath, which made a very tall card out of the one line the row
-   had already said. Starting the timer is reachable from here and nowhere else (§8.6's fix). */
+   had already said. Starting the timer is reachable from here and nowhere else. */
 .rest-card-start {
   width: 100%;
   justify-content: center;
@@ -166,8 +166,8 @@
   flex-direction: column;
   padding: 8px 6px 14px;
   perspective: 1400px;
-  /* How far each collapsed card slides up over the one before it. ONE value for every viewport
-     (TODO §28.4): the peeking row exists to be read, and the compact row needs 29px of a 37px
+  /* How far each collapsed card slides up over the one before it. ONE value for every viewport:
+     the peeking row exists to be read, and the compact row needs 29px of a 37px
      card, so anything tighter than this hides the thing the stack is for. It was -28px on a phone
      until 2026-08-18 on the reasoning that vertical space is scarcer there — true, and it bought
      20px per card by showing 11px of a row that needs 29. The only card a trainer could read was
@@ -219,7 +219,7 @@
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35), 0 0 16px var(--primary-light);
   animation: cardFocusIn 0.34s cubic-bezier(0.22, 1, 0.36, 1);
 }
-/* The ACTIVE card (TODO §48.1): the one the trainer is looking at, which a client switch and a
+/* The ACTIVE card: the one the trainer is looking at, which a client switch and a
    reload come back to. A thin outline and a coloured left edge, and nothing else — no button, no
    change of size, so the stack does not move when the mark moves. Outline and ::before take no
    layout room and leave box-shadow to the open card and to the themes. */
@@ -253,8 +253,8 @@
 .exercise-deck-card.completed:not(.in-focus) {
   border-color: rgba(16, 185, 129, 0.3);
 }
-/* A past card takes its colour from the THEME's own past token, not from a violet written in here
-   (TODO §42.7). The hardcoded #8b5cf6 was nebula's primary spelled out: in midnight it painted
+/* A past card takes its colour from the THEME's own past token, not from a violet written in here.
+   The hardcoded #8b5cf6 was nebula's primary spelled out: in midnight it painted
    nebula's violet over an emerald app, and in nebula itself it painted the accent — so the session
    the trainer is running and the session they ran in July wore the same colour. The badge in the
    corner already read `--temporal-past`; now the card it sits on agrees with it. */
@@ -337,7 +337,7 @@
   margin: 0;
   font-size: 12px;
 }
-/* One head row for every state (TODO §42.5), so a card looks like itself however open it is. The
+/* One head row for every state, so a card looks like itself however open it is. The
    FOCUSED card still has to be read at arm's length mid-set, so its name grows — the row, the order
    and the tag's place stay put, which is what makes the three states one design. */
 .exercise-deck-card.in-focus .deck-card-name-inline {
@@ -353,7 +353,7 @@
 }
 /* The focused card is read at arm's length mid-set, so its target line grows with its name — the
    same treatment, on the same row, rather than a block of stat tiles further down the card that
-   said these numbers a second time (TODO §42.3). */
+   said these numbers a second time. */
 .exercise-deck-card.in-focus .deck-card-compact-target {
   font-size: 15px;
 }

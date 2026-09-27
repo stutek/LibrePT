@@ -1,11 +1,11 @@
-// src/data/dataWipe.js — what a support data wipe would remove from THIS device (TODO §31).
+// src/data/dataWipe.js — what a support data wipe would remove from THIS device.
 //
 // Single responsibility: turn what the device actually holds into a plan a dialog can show and a
 // caller can execute. Pure — it is handed the store names and the browser keys rather than reading
 // them, so the whole thing is testable without a database.
 //
 // **Why it plans instead of just deleting.** The wipe is reached by a link support sends over SMS or
-// email (§31.1), and the link carries no authority: opening it can only ever open a dialog. That
+// email, and the link carries no authority: opening it can only ever open a dialog. That
 // makes the dialog the entire security boundary, and a dialog can only be honest if it is told the
 // truth about this device — including a store from a schema this build has never heard of, which is
 // exactly what a long-lived install accumulates and exactly what "wipe my data" must not leave

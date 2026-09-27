@@ -36,7 +36,7 @@ export const THEME_META_COLOR = {
   nebula: "#0b0a1f",
 };
 
-// Themes renamed or replaced — Red became Spreadsheet on 2026-09-13 (TODO §49.2). A saved preference
+// Themes renamed or replaced — Red became Spreadsheet on 2026-09-13. A saved preference
 // or a shared link minted before the change must still resolve to the theme it named, not silently
 // fall back to the default.
 export const LEGACY_THEME_MAP = {
@@ -117,7 +117,7 @@ export function getInitialTheme() {
 // whole attribute would silently drop any other class a feature had put there.
 /** Puts a theme on screen. `persist: false` puts it on screen and NOWHERE else — which is what the
  * client's intake page needs: a link may name a theme, and a stranger's phone must come away with
- * nothing written on it (§26.1). It is also why that page could not simply call this before: the
+ * nothing written on it. It is also why that page could not simply call this before: the
  * write was not optional, so the page applied no theme at all and `<body>` kept the light class
  * while `<html>` wore the one the link asked for. */
 export function applyTheme(themeKey, { persist = true } = {}) {
