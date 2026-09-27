@@ -145,11 +145,8 @@ export const de = {
   backup_export_desc:
     "Deine Kunden, Routinen und Trainingsaufzeichnungen als eine JSON-Datei herunterladen.",
   btn_export_json: "JSON exportieren",
-  catalog_export_title: "Übungskatalog exportieren",
-  catalog_export_desc:
-    "Exportiere deinen Übungskatalog, zugeordnet zur offenen wger-Taxonomie, damit er mit anderen Programmen austauschbar bleibt.",
-  btn_export_catalog_json: "Katalog als JSON exportieren",
-  btn_export_catalog_csv: "Katalog als CSV exportieren",
+  btn_export_catalog_json: "Bibliothek exportieren (JSON)",
+  btn_export_catalog_csv: "Übungen exportieren (CSV)",
   restore_brings_forward:
     "die Daten der Datei werden auf das neue Format gebracht und lassen sich danach in älteren Versionen von LibrePT nicht mehr öffnen",
   restore_preview_only_lost: "diese sind nicht in der Datei und können nicht zurückkommen",
@@ -317,7 +314,8 @@ export const de = {
   library_import_template: "Beispiel zeigen",
   library_import_source: "Name der Quelle — für Einträge ohne eigene Quelle",
   library_import_source_placeholder: "zum Beispiel Anna Müller",
-  library_import_read: "Neue Übungen: {exercises}. Neue Zirkel: {circuits}.",
+  library_import_read:
+    "Neue Übungen: {exercises}. Neue Zirkel: {circuits}. Neue Routinen: {routines}.",
   library_import_duplicates: "Schon in deiner Bibliothek, daher nicht erneut hinzugefügt: {count}",
   library_import_unreadable: "Einträge, die nicht gelesen werden konnten: {count}",
   library_import_add: "Zur Bibliothek hinzufügen",

@@ -141,11 +141,8 @@ export const sl = {
   backup_export_title: "Izvozi varnostno kopijo",
   backup_export_desc: "Prenesi svoje stranke, rutine in dnevnike vadb kot eno JSON datoteko.",
   btn_export_json: "Izvozi JSON",
-  catalog_export_title: "Izvozi katalog vaj",
-  catalog_export_desc:
-    "Izvozi svoj katalog gibov, preslikan v odprto taksonomijo wger, da ostane izmenljiv z zunanjimi orodji.",
-  btn_export_catalog_json: "Izvozi katalog JSON",
-  btn_export_catalog_csv: "Izvozi katalog CSV",
+  btn_export_catalog_json: "Izvozi knjižnico (JSON)",
+  btn_export_catalog_csv: "Izvozi vaje (CSV)",
   restore_brings_forward:
     "s tem se podatki datoteke posodobijo in se ne bodo več odprli v starejših različicah LibrePT",
   restore_preview_only_lost: "teh datoteka ne vsebuje in se ne morejo vrniti",
@@ -312,7 +309,8 @@ export const sl = {
   library_import_template: "Pokaži primer",
   library_import_source: "Ime vira — za vnose brez lastnega vira",
   library_import_source_placeholder: "na primer Ana Novak",
-  library_import_read: "Novih vaj: {exercises}. Novih sklopov: {circuits}.",
+  library_import_read:
+    "Novih vaj: {exercises}. Novih sklopov: {circuits}. Novih rutin: {routines}.",
   library_import_duplicates: "Že v tvoji knjižnici, zato ne bodo dodane še enkrat: {count}",
   library_import_unreadable: "Vnosi, ki jih ni mogoče prebrati: {count}",
   library_import_add: "Dodaj v knjižnico",

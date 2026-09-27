@@ -5,8 +5,8 @@
 // the trainer what the text holds and, on their word, writes it.
 //
 // **A review before the write, and all of it at once** — the rule §29 set for a programme. The
-// trainer sees how many exercises and circuits are new, which ones the library already has (and so
-// will not get twice), and every entry that could not be read, with its position. Nothing is written
+// trainer sees how many exercises, circuits and routines are new, which ones the library already has
+// (and so will not get twice), and every entry that could not be read, with its position. Nothing is written
 // until they press Add to library.
 //
 // **The source name is theirs to set.** It is taken from the file when the file names one (its
@@ -26,6 +26,7 @@ import {
   sourcesOf,
 } from "../../data/exerciseLibrary.js";
 import { recordIdsInUse } from "../../data/recordProjections.js";
+import { normalise } from "../../domain/catalogMatch.js";
 import { libraryTemplate, planLibraryImport, readLibrary } from "../../domain/libraryImport.js";
 import { closeModal, openModal, renderMarkupOnce } from "../common/dom.js";
 
@@ -118,7 +119,8 @@ function renderReport(parsed, plan) {
       "m-0",
       t("library_import_read")
         .replace("{exercises}", String(plan.exercises.length))
-        .replace("{circuits}", String(plan.circuits.length)),
+        .replace("{circuits}", String(plan.circuits.length))
+        .replace("{routines}", String(plan.routines.length)),
     ),
   );
   if (plan.duplicates.length > 0) {
@@ -161,10 +163,13 @@ function readCurrent() {
         newId,
         circuitWord: t("circuit"),
         takenIds: recordIdsInUse(getState()),
+        routineNames: (getState().routines || []).map((routine) => normalise(routine.name)),
       })
     : null;
   renderReport(parsed, plan);
-  const hasNew = Boolean(plan && plan.exercises.length + plan.circuits.length > 0);
+  const hasNew = Boolean(
+    plan && plan.exercises.length + plan.circuits.length + plan.routines.length > 0,
+  );
   byId("library-import-add").disabled = !hasNew;
   return hasNew ? { plan, source } : null;
 }

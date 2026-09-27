@@ -128,11 +128,8 @@ export const en = {
   backup_export_title: "Export Data Backup",
   backup_export_desc: "Download your clients, routines, and workout logs as a single JSON file.",
   btn_export_json: "Export JSON",
-  catalog_export_title: "Export Exercise Catalog",
-  catalog_export_desc:
-    "Export your movement catalog mapped to the open wger taxonomy, so it stays interchangeable with external tools.",
-  btn_export_catalog_json: "Export Catalog JSON",
-  btn_export_catalog_csv: "Export Catalog CSV",
+  btn_export_catalog_json: "Export the library (JSON)",
+  btn_export_catalog_csv: "Export exercises (CSV)",
   restore_brings_forward:
     "this brings the file's data forward, and it will no longer open in older builds of LibrePT",
   restore_preview_only_lost: "these are not in the file and cannot come back",
@@ -297,7 +294,8 @@ export const en = {
   library_import_template: "Show an example",
   library_import_source: "Source name — for entries without their own source",
   library_import_source_placeholder: "for example Ana Novak",
-  library_import_read: "New exercises: {exercises}. New circuits: {circuits}.",
+  library_import_read:
+    "New exercises: {exercises}. New circuits: {circuits}. New routines: {routines}.",
   library_import_duplicates: "Already in your library, so not added again: {count}",
   library_import_unreadable: "Entries that could not be read: {count}",
   library_import_add: "Add to library",

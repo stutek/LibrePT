@@ -45,6 +45,64 @@ test("exchanging a library preserves multiple sources, circuits and their target
   );
 });
 
+test("a routine travels in the library file and comes back with its structure", () => {
+  const exercises = [
+    { id: "squat", name: "Squat" },
+    { id: "lunge", name: "Lunge" },
+  ];
+  const routines = [
+    {
+      id: "r1",
+      name: "Leg day",
+      description: "Two movements.",
+      exercises: [
+        {
+          id: "squat",
+          sets: 3,
+          reps: 8,
+          weight: 20,
+          rest: 60,
+          circuitId: "z1",
+          circuitTitle: "Main",
+          circuitSeries: 3,
+        },
+        { id: "lunge", sets: 3, reps: 12, rest: 0, circuitId: "z1", circuitTitle: "Main" },
+      ],
+    },
+  ];
+  const parsed = readLibrary(JSON.stringify(catalogToInterchange(exercises, [], routines)));
+  assert.deepEqual(parsed.unreadable, []);
+  const plan = planLibraryImport(parsed, [], { newId: counter() });
+  assert.deepEqual(
+    plan.routines.map(({ id, ...record }) => record),
+    routines.map(({ id, ...record }) => record),
+  );
+});
+
+test("a routine whose name the trainer already has is not added twice", () => {
+  const parsed = readLibrary(
+    JSON.stringify({
+      format: LIBRARY_FORMAT,
+      routines: [{ name: "Leg Day", exercises: ["Squat"] }],
+    }),
+  );
+  const plan = planLibraryImport(parsed, [{ id: "squat", name: "Squat" }], {
+    newId: counter(),
+    routineNames: ["leg day"],
+  });
+  assert.deepEqual(plan.routines, []);
+  assert.deepEqual(plan.duplicates, ["Leg Day"]);
+});
+
+test("a routine naming an exercise the library does not have adds it", () => {
+  const parsed = readLibrary(
+    JSON.stringify({ format: LIBRARY_FORMAT, routines: [{ name: "Push", exercises: ["Dips"] }] }),
+  );
+  const plan = planLibraryImport(parsed, [], { newId: counter() });
+  assert.deepEqual(plan.exercises, [{ id: "id1", name: "Dips" }]);
+  assert.equal(plan.routines[0].exercises[0].id, "id1");
+});
+
 test("the template the app offers reads back without a failure", () => {
   const result = readLibrary(libraryTemplate());
   assert.equal(result.ok, true);

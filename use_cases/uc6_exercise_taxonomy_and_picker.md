@@ -204,12 +204,13 @@ where ExRx is proprietary
   equivalent** — wger has no Cardio/flexibility category, and no Cable/Machine equipment — the mapping
   is an explicit **null**, never a wrong best-fit. `unmappedTerms()` surfaces those gaps as a testable
   fact.
-- **Two export shapes** from the Sync & Backup dialog, both over the trainer's **live** catalog
+- **Two export shapes** on the exercise library's screen, beside its Import, both over the trainer's **live** catalog
   (custom movements included): a self-describing **interchange JSON** envelope
   (`catalogToInterchange`) naming its `format`/`version`, and an interchange **CSV** (`catalogToCsv`)
   that puts the wger-mapped and raw-LibrePT columns side by side for spreadsheet inspection.
-  The JSON also carries per-entry sources and reusable circuits, so another trainer can import the
-  whole library; CSV remains the movement table for spreadsheet inspection.
+  The JSON also carries per-entry sources, reusable circuits and the trainer's routines (each naming
+  its exercises), so another trainer can import the whole library; CSV remains the movement table for
+  spreadsheet inspection.
 
 Delivers TODO §13.1's last bullet (adopt an open standard for interchangeable exports).
 
@@ -244,7 +245,7 @@ Delivers TODO §13.1's last bullet (adopt an open standard for interchangeable e
 | Routine builder authors metric per modality (relabel primary, hide load) | [../tests/medium/test_routine_builder.py](../tests/medium/test_routine_builder.py) · `test_routine_builder_row_is_modality_aware` |
 | Open-standard crosswalk: category/equipment → wger canonical names, honest nulls | [../src/domain/exerciseStandard.js](../src/domain/exerciseStandard.js) · `wgerCategoryOf` / `wgerEquipmentOf` / `unmappedTerms` |
 | Interchange record preserves LibrePT axes under `x_librept`; CSV crosswalk | [../tests/unit_js/domain/exerciseStandard.test.mjs](../tests/unit_js/domain/exerciseStandard.test.mjs) · `interchange record preserves librept axes and flags gaps` / `csv export has header and quotes cells` |
-| Backup dialog "Export Catalog" downloads a self-describing interchange file | [../tests/e2e/test_exercise_standard.py](../tests/e2e/test_exercise_standard.py) · `test_catalog_export_button_downloads_interchange_json` |
+| The library's "Export the library (JSON)" downloads a self-describing interchange file, routines included | [../tests/e2e/test_exercise_standard.py](../tests/e2e/test_exercise_standard.py) · `test_catalog_export_button_downloads_interchange_json` |
 | **Security** — a movement name cannot execute as a spreadsheet formula in the exported CSV (CWE-1236) | [../tests/unit_js/security/csvInjection.test.mjs](../tests/unit_js/security/csvInjection.test.mjs) · gated by the `security-tests` CI job, not by ZAP (its baseline scan is passive and this never crosses the network) |
 
 ---

@@ -38,6 +38,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 - **Pending review** has no menu row. Its status message in the notification area leads to it.
 - **History is shown only on a client's page.** The view that listed every client's sessions
   together is gone, and finishing a session now returns to the sessions list.
+- **The library's export and import sit together, and carry routines.** *Export the library (JSON)*
+  and *Export exercises (CSV)* moved from the Sync & Backup dialog to the exercise library, beside
+  *Import*. The JSON file now holds the trainer's routines as well as exercises and circuits, and
+  *Import* adds them; a routine whose name the trainer already has is not added twice.
 
 ### Fixed
 

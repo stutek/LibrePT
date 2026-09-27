@@ -5,9 +5,12 @@
 // Split 2026-08-01 out of the old formsController.js, which bundled Client, Routine, and Exercise
 // forms in one file despite the three sharing nothing but boilerplate.
 
+import { libraryExercises } from "../data/exerciseLibrary.js";
 import { newRecordId } from "../data/recordId.js";
 import { metricOptionsFor } from "../domain/exerciseModality.js";
+import { catalogToCsv, catalogToInterchange } from "../domain/exerciseStandard.js";
 import { $id, closeModal, openModal, renderMarkupOnce } from "../modules/common/dom.js";
+import { downloadFile } from "../modules/common/download.js";
 import { wireLibraryTabs } from "../modules/common/libraryTabs.js";
 import { keepRecordLive } from "../modules/common/liveRecordForm.js";
 import { renderExercisesList } from "../modules/exercises/exercisesView.js";
@@ -120,11 +123,34 @@ export function renderExerciseDialog() {
   );
 }
 
+function libraryFilename(extension) {
+  return `librept_catalog_${new Date().toISOString().substring(0, 10)}.${extension}`;
+}
+
+/** The library export, beside its import. The JSON is the whole library — exercises mapped to the
+ *  open wger taxonomy, circuits and routines — and reads back through Import; the CSV is the
+ *  exercises, for a spreadsheet. The LIVE library, custom movements included, not just the seed. */
+function wireLibraryExport(getState) {
+  $id("btn-export-catalog-json")?.addEventListener("click", () => {
+    const state = getState();
+    const payload = catalogToInterchange(
+      libraryExercises(state),
+      state.circuits || [],
+      state.routines || [],
+    );
+    downloadFile(JSON.stringify(payload, null, 2), libraryFilename("json"), "application/json");
+  });
+  $id("btn-export-catalog-csv")?.addEventListener("click", () => {
+    downloadFile(catalogToCsv(libraryExercises(getState())), libraryFilename("csv"), "text/csv");
+  });
+}
+
 export function setupExerciseForms({
   getState,
   t,
   saveToLocalStorage,
   populateDropdownSelectors,
+  renderRoutinesList,
   navigateToPath,
   urlFor,
 }) {
@@ -150,10 +176,13 @@ export function setupExerciseForms({
     readFileText: (file) => file.text(),
     onImported: (source) => {
       renderExercisesList({ state: getState(), t, sourceFilter: source });
+      // An import may bring routines as well.
+      renderRoutinesList?.();
       populateDropdownSelectors();
     },
   });
   $id("btn-import-library")?.addEventListener("click", openLibraryImportDialog);
+  wireLibraryExport(getState);
 
   const btnAddExercise = $id("btn-add-exercise");
   if (btnAddExercise) {

@@ -12,8 +12,11 @@
 // and spacing are folded (catalogMatch.js's rule) — a second "Bench Press" under a new id is the
 // failure §13's taxonomy exists to prevent. The trainer is told which ones were skipped.
 //
-// **A circuit points at exercises by id**, like a routine does. A name the library does not know
-// becomes a new exercise of the same import, so a circuit never refers to nothing.
+// **A circuit and a routine point at exercises by id.** In the file they name them; a name the library
+// does not know becomes a new exercise of the same import, so neither ever refers to nothing. A
+// routine keeps its entries' grouping (circuitId, circuitTitle, circuitSeries, comboGroupId), and a
+// routine whose name the trainer already has is a duplicate. Routines carry no source: schema 5 gives
+// a routine no such field, so an imported routine is the trainer's own.
 //
 // **A circuit with no name is given one** (ruled 2026-09-23): the word for circuit and its first two
 // exercises, in the app's language at the moment of import. A stored circuit always has a name
@@ -30,6 +33,8 @@ const INTERCHANGE_FORMAT = "wger-exercise-interchange";
 const ALIASES = {
   exercises: ["exercises", "movements", "library"],
   circuits: ["circuits", "blocks"],
+  routines: ["routines", "templates"],
+  description: ["description", "notes"],
   source: ["source", "author", "from"],
   name: ["name", "exercise", "movement", "title"],
   category: ["category", "muscle", "muscleGroup", "group"],
@@ -47,6 +52,9 @@ const ALIASES = {
 
 const EXERCISE_FIELDS = ["category", "equipment", "pattern", "modality", "metric", "source"];
 const ITEM_NUMBERS = ["sets", "reps", "weight", "rest"];
+// How a routine's entries are grouped. Kept as they are: they are tokens local to the routine's own
+// entries, not ids of other records.
+const ROUTINE_GROUPING = ["circuitId", "circuitTitle", "comboGroupId"];
 
 function pick(raw, field) {
   for (const key of ALIASES[field]) {
@@ -97,6 +105,7 @@ const refused = (reason, detail = "") => ({
   source: "",
   exercises: [],
   circuits: [],
+  routines: [],
   unreadable: [],
 });
 
@@ -113,8 +122,12 @@ export function readLibrary(input) {
 
   const rawExercises = isList ? parsed : pick(parsed, "exercises") || [];
   const rawCircuits = isList ? [] : pick(parsed, "circuits") || [];
-  if (!Array.isArray(rawExercises) || !Array.isArray(rawCircuits)) return refused("no_exercises");
-  if (rawExercises.length === 0 && rawCircuits.length === 0) return refused("no_exercises");
+  const rawRoutines = isList ? [] : pick(parsed, "routines") || [];
+  if (![rawExercises, rawCircuits, rawRoutines].every(Array.isArray))
+    return refused("no_exercises");
+  if (rawExercises.length + rawCircuits.length + rawRoutines.length === 0) {
+    return refused("no_exercises");
+  }
 
   const unreadable = [];
   return {
@@ -124,6 +137,7 @@ export function readLibrary(input) {
     source: isList ? "" : text(pick(parsed, "source")) || "",
     exercises: readExercises(rawExercises, unreadable),
     circuits: readCircuits(rawCircuits, unreadable),
+    routines: readRoutines(rawRoutines, unreadable),
     unreadable,
   };
 }
@@ -183,6 +197,43 @@ function readCircuits(rawCircuits, unreadable) {
   return circuits;
 }
 
+/** A routine's entry: an item, plus how it is grouped within the routine. */
+function readRoutineEntry(raw) {
+  const item = readItem(raw);
+  if (!item || typeof raw !== "object") return item;
+  for (const field of ROUTINE_GROUPING) {
+    const value = text(raw[field]);
+    if (value) item[field] = value;
+  }
+  const series = toNumber(raw.circuitSeries);
+  if (series !== undefined) item.circuitSeries = series;
+  return item;
+}
+
+function readRoutines(rawRoutines, unreadable) {
+  const routines = [];
+  rawRoutines.forEach((raw, index) => {
+    const name = text(pick(raw, "name"));
+    const rawItems = pick(raw, "items");
+    const items = [];
+    (Array.isArray(rawItems) ? rawItems : []).forEach((rawItem, itemIndex) => {
+      const item = readRoutineEntry(rawItem);
+      if (item) items.push(item);
+      else unreadable.push({ position: `routine ${index + 1} · ${itemIndex + 1}`, raw: rawItem });
+    });
+    // A routine needs a name to be found again, and something in it to be worth adding.
+    if (!name || items.length === 0) {
+      unreadable.push({ position: `routine ${index + 1}`, raw });
+      return;
+    }
+    const routine = { name, items };
+    const description = text(pick(raw, "description"));
+    if (description) routine.description = description;
+    routines.push(routine);
+  });
+  return routines;
+}
+
 /**
  * The new records a read library adds to `library` (the trainer's whole library, catalog included):
  * `{ exercises, circuits, duplicates }`. `source` is written on every new record, or left off when
@@ -195,7 +246,7 @@ function readCircuits(rawCircuits, unreadable) {
 export function planLibraryImport(
   parsed,
   library,
-  { source, newId, circuitWord = "Circuit", takenIds = new Set() },
+  { source, newId, circuitWord = "Circuit", takenIds = new Set(), routineNames = [] },
 ) {
   const byName = new Map(
     (library || []).map((exercise) => [normalise(exercise.name), exercise.id]),
@@ -242,7 +293,30 @@ export function planLibraryImport(
     return withSource({ ...record, exercises: entries });
   });
 
-  return { exercises, circuits, duplicates };
+  // `routineNames` are the names of the trainer's routines, already folded with catalogMatch's rule.
+  const knownRoutines = new Set(routineNames);
+  const routines = [];
+  for (const routine of parsed.routines || []) {
+    const key = normalise(routine.name);
+    if (knownRoutines.has(key)) {
+      duplicates.push(routine.name);
+      continue;
+    }
+    knownRoutines.add(key);
+    // Entries first, as a circuit's are: an exercise the routine adds takes its id before the routine.
+    const entries = routine.items.map(({ name, ...entry }) => ({
+      id: byName.get(normalise(name)) ?? add({ name }),
+      ...entry,
+    }));
+    routines.push({
+      id: newId(),
+      name: routine.name,
+      ...(routine.description ? { description: routine.description } : {}),
+      exercises: entries,
+    });
+  }
+
+  return { exercises, circuits, routines, duplicates };
 }
 
 /**
@@ -270,6 +344,16 @@ export function libraryTemplate() {
           exercises: [
             { name: "Sled Push", reps: 20 },
             { name: "Push-Ups", reps: 15, rest: 60 },
+          ],
+        },
+      ],
+      routines: [
+        {
+          name: "Upper body",
+          description: "Presses and rows.",
+          exercises: [
+            { name: "Landmine Press", sets: 3, reps: 10, weight: 20, rest: 90 },
+            { name: "Push-Ups", sets: 3, reps: 15, rest: 60 },
           ],
         },
       ],

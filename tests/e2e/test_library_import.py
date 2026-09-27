@@ -8,7 +8,8 @@ LIBRARY_FILE = """{
   "format": "librept.library/1",
   "source": "Ana Novak",
   "exercises": [{"name": "Sled Push", "muscle": "Legs", "equipment": "Machine"}],
-  "circuits": [{"name": "Finisher", "rounds": 3, "exercises": ["Sled Push", "Push-Ups"]}]
+  "circuits": [{"name": "Finisher", "rounds": 3, "exercises": ["Sled Push", "Push-Ups"]}],
+  "routines": [{"name": "Imported push day", "exercises": [{"name": "Sled Push", "sets": 3}]}]
 }"""
 
 
@@ -33,6 +34,11 @@ def test_an_imported_library_is_still_there_after_a_reload(page, local_server):
         ".getState().circuits.map((c) => c.name)"
     )
     assert circuits == ["Finisher"]
+    routines = page.evaluate(
+        "async () => (await import(new URL('data/stateStore.js', document.baseURI).href))"
+        ".getState().routines.map((r) => r.name)"
+    )
+    assert "Imported push day" in routines
 
 
 STORE = "(await import(new URL('data/stateStore.js', document.baseURI).href))"

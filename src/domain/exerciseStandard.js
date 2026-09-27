@@ -113,10 +113,21 @@ export function toInterchangeExercise(ex) {
   };
 }
 
-// The whole catalog wrapped in a self-describing interchange envelope. The envelope names the format
-// and version so an external importer can recognise it, and states plainly where LibrePT extends
-// beyond wger — no magic, the mapping is legible in the file itself.
-export function catalogToInterchange(exercises, circuits = []) {
+/** A routine's or circuit's entries, each naming its exercise instead of pointing at an id: ids are
+ *  this device's, and the file is read on another. */
+function entriesByName(entries, exercises, owner) {
+  return entries.map(({ id, ...targets }) => {
+    const exercise = exercises.find((entry) => entry.id === id);
+    if (!exercise) throw new Error(`${owner} refers to missing exercise ${id}`);
+    return { name: exercise.name, ...targets };
+  });
+}
+
+// The whole library wrapped in a self-describing interchange envelope: the exercises, the circuits
+// and the routines, so one file moves a trainer's whole library. The envelope names the format and
+// version so an external importer can recognise it, and states plainly where LibrePT extends beyond
+// wger — no magic, the mapping is legible in the file itself.
+export function catalogToInterchange(exercises, circuits = [], routines = []) {
   return {
     format: "wger-exercise-interchange",
     version: 1,
@@ -128,11 +139,11 @@ export function catalogToInterchange(exercises, circuits = []) {
     exercises: exercises.map(toInterchangeExercise),
     circuits: circuits.map(({ exercises: entries, ...circuit }) => ({
       ...circuit,
-      exercises: entries.map(({ id, ...targets }) => {
-        const exercise = exercises.find((entry) => entry.id === id);
-        if (!exercise) throw new Error(`Circuit ${circuit.name} refers to missing exercise ${id}`);
-        return { name: exercise.name, ...targets };
-      }),
+      exercises: entriesByName(entries, exercises, `Circuit ${circuit.name}`),
+    })),
+    routines: routines.map(({ id, exercises: entries, ...routine }) => ({
+      ...routine,
+      exercises: entriesByName(entries || [], exercises, `Routine ${routine.name}`),
     })),
   };
 }

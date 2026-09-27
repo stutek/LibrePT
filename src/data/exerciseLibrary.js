@@ -40,11 +40,12 @@ export function libraryExercises(state) {
   return [...stored, ...CATALOG.filter((exercise) => !storedIds.has(exercise.id))];
 }
 
-/** Add imported exercises and circuits to the stored library (TODO §45.5). New arrays rather than a
+/** Add imported exercises, circuits and routines to the stored library. New arrays rather than a
  * push, so a caller holding the previous list does not see it change underneath it. */
-export function addToLibrary(state, { exercises = [], circuits = [] }) {
+export function addToLibrary(state, { exercises = [], circuits = [], routines = [] }) {
   state.exercises = [...(state.exercises || []), ...exercises];
   state.circuits = [...(state.circuits || []), ...circuits];
+  state.routines = [...(state.routines || []), ...routines];
 }
 
 /** The library entry with this id, or undefined. */

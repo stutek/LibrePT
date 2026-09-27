@@ -32,6 +32,17 @@ export function renderExercisesViewShell() {
           <i class="fa-solid fa-plus"></i> Add Exercise
         </button>
       </div>
+      <!-- The export, beside the import it is the other half of: the JSON carries the whole library
+           (exercises, circuits, routines) and reads back through Import; the CSV is the exercises,
+           for reading in a spreadsheet. Their own row, because they do not fit beside the title. -->
+      <div class="view-subactions">
+        <button id="btn-export-catalog-json" type="button" class="btn secondary-btn btn-sm">
+          <i class="fa-solid fa-file-export"></i> <span data-i18n="btn_export_catalog_json">Export the library (JSON)</span>
+        </button>
+        <button id="btn-export-catalog-csv" type="button" class="btn secondary-btn btn-sm">
+          <i class="fa-solid fa-file-export"></i> <span data-i18n="btn_export_catalog_csv">Export exercises (CSV)</span>
+        </button>
+      </div>
       ${libraryTabsHtml("exercises")}
       
       <div class="search-bar-container">

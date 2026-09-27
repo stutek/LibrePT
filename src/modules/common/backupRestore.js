@@ -26,12 +26,10 @@ import {
   readSuppressionList,
   writeSuppressionList,
 } from "../../data/erasureSuppression.js";
-import { libraryExercises } from "../../data/exerciseLibrary.js";
 import { DEFAULT_SESSIONS } from "../../data/index.js";
 import { bringsDataForward, describeMigration, migrateState } from "../../data/schemaMigrations.js";
 import { recordBackupTaken } from "../../data/stateStore.js";
 import { activeWorkspace } from "../../data/workspace.js";
-import { catalogToCsv, catalogToInterchange } from "../../domain/exerciseStandard.js";
 import { BUILD_INFO } from "../../version.js";
 import { isOfflineCachedActive } from "./applicationHeader.js";
 import { renderMarkupOnce } from "./dom.js";
@@ -128,10 +126,6 @@ function showReplaceConfirmation(replacing, migrationSummary) {
     ? `${parts.join(", ")} — ${deps.t("restore_preview_only_lost") || "and these are not in the file and cannot come back"}: ${lost.join(", ")}`
     : parts.join(", ");
   box.hidden = false;
-}
-
-function catalogFilename(extension) {
-  return `librept_catalog_${new Date().toISOString().substring(0, 10)}.${extension}`;
 }
 
 export function initBackupRestore(d) {
@@ -236,14 +230,6 @@ export function renderBackupDialog() {
           <h4 id="backup-export-title" data-i18n="backup_export_title">Export Data Backup</h4>
           <p id="backup-export-desc" data-i18n="backup_export_desc">Download your clients, routines, and workout logs as a single JSON file.</p>
           <button id="btn-export-db" class="btn primary-btn w-full" data-i18n="btn_export_json">Export JSON</button>
-        </div>
-
-        <div class="action-card card">
-          <i class="fa-solid fa-arrow-right-arrow-left backup-icon-large text-cyan"></i>
-          <h4 id="catalog-export-title" data-i18n="catalog_export_title">Export Exercise Catalog</h4>
-          <p id="catalog-export-desc" data-i18n="catalog_export_desc">Export your movement catalog mapped to the open wger taxonomy, so it stays interchangeable with external tools.</p>
-          <button id="btn-export-catalog-json" class="btn secondary-btn w-full" data-i18n="btn_export_catalog_json">Export Catalog JSON</button>
-          <button id="btn-export-catalog-csv" class="btn secondary-btn w-full" data-i18n="btn_export_catalog_csv">Export Catalog CSV</button>
         </div>
 
         <div class="action-card card">
@@ -424,30 +410,6 @@ export function setupBackupRestore() {
       // warning honest — a trainer who exports weekly must be able to clear it WITHOUT connecting
       // Google, or a safety indicator becomes a prompt to enable an integration.
       recordBackupTaken("file");
-    });
-  }
-
-  // Export the exercise catalog mapped to the open wger taxonomy, so it stays interchangeable with
-  // external research / coaching tools (TODO §13.1). Exports the trainer's LIVE catalog — custom
-  // movements included — not just the seed set.
-  const exportCatalogJsonBtn = document.getElementById("btn-export-catalog-json");
-  if (exportCatalogJsonBtn) {
-    exportCatalogJsonBtn.addEventListener("click", () => {
-      const exercises = libraryExercises(deps.getState());
-      const payload = JSON.stringify(
-        catalogToInterchange(exercises, deps.getState().circuits || []),
-        null,
-        2,
-      );
-      downloadFile(payload, catalogFilename("json"), "application/json");
-    });
-  }
-
-  const exportCatalogCsvBtn = document.getElementById("btn-export-catalog-csv");
-  if (exportCatalogCsvBtn) {
-    exportCatalogCsvBtn.addEventListener("click", () => {
-      const exercises = libraryExercises(deps.getState());
-      downloadFile(catalogToCsv(exercises), catalogFilename("csv"), "text/csv");
     });
   }
 

@@ -967,6 +967,7 @@ function setupExerciseForms() {
     t,
     saveToLocalStorage: saveState,
     populateDropdownSelectors,
+    renderRoutinesList,
     navigateToPath,
     urlFor,
   });
