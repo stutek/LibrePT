@@ -53,7 +53,6 @@ export function applyStaticDOMMappings(tDict) {
   // Map of selector to translation key
   const staticMappings = {
     ".logo-area h1": "logo_title",
-    "#preview-badge-label": "preview_badge",
     "#build-info-preview-text": "preview_warning",
     // Application (☰) header menu + About / Terms modals
     "#menu-label-lang": "menu_language",

@@ -75,3 +75,18 @@ def test_the_trainers_own_work_takes_the_slot_back(page, local_server):
     assert badge.inner_text().strip() == "PREVIEW"
     assert "preview.html" in (badge.get_attribute("href") or "")
     assert "demo" not in (badge.get_attribute("aria-label") or "").lower()
+
+
+def test_the_badge_speaks_the_chosen_language_in_every_state(page, local_server):
+    """It used to write "DEMO" and "PREVIEW" whatever the language."""
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#app-header")
+    page.locator("#btn-app-menu").click()
+    page.locator("#menu-settings").click()
+    page.locator("#lang-switcher").select_option("sl")
+
+    label = page.locator("#preview-badge-label")
+    page.evaluate("window.showBuildState('own')")
+    assert label.inner_text().strip() == "PREDOGLED"
+    page.evaluate("window.showBuildState('demo')")
+    assert label.inner_text().strip() == "PRIKAZ"

@@ -3,7 +3,11 @@
 // tests/unit/test_i18n_parity.py, which iterates the registry in ./index.js).
 export const en = {
   logo_title: "LibrePT",
-  preview_badge: "Preview",
+  preview_badge: "PREVIEW",
+  demo_badge: "DEMO",
+  preview_badge_desc:
+    "Preview build — pre-release, may lose data. Open the risks & data-loss notice.",
+  demo_badge_desc: "Demo data — nothing here is your own work. Open the risks & data-loss notice.",
   preview_warning:
     "This is a preview build — pre-release and under active development. Features change without notice and your data can be lost. Keep backups, and do not rely on it for real client records yet.",
   tab_clients: "Clients",

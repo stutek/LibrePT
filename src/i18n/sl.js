@@ -18,7 +18,12 @@
 //    in `story_welcome_title` below.
 export const sl = {
   logo_title: "LibrePT",
-  preview_badge: "Predogled",
+  preview_badge: "PREDOGLED",
+  demo_badge: "PRIKAZ",
+  preview_badge_desc:
+    "Predogledna različica — še ni izdana in lahko izgubi podatke. Odpri obvestilo o tveganjih in izgubi podatkov.",
+  demo_badge_desc:
+    "Vzorčni podatki — nič tukaj ni tvoje delo. Odpri obvestilo o tveganjih in izgubi podatkov.",
   preview_warning:
     "To je predogledna različica — pred izdajo in v aktivnem razvoju. Funkcije se spreminjajo brez obvestila in podatki se lahko izgubijo. Redno delaj varnostne kopije in se nanjo še ne zanašaj za resnične podatke strank.",
   tab_clients: "Stranke",

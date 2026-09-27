@@ -142,21 +142,19 @@ export function renderBuildStateBadge(state) {
     badge.setAttribute("target", "_blank");
     badge.removeAttribute("role");
   }
-  badge.querySelector(".preview-badge-label").textContent = sandbox
-    ? deps?.t?.("sandbox_badge") || "SANDBOX"
-    : showingDemo
-      ? "DEMO"
-      : "PREVIEW";
+  // The one place the label is written, in every state and every language: a second writer (the
+  // static translation pass used to map `preview_badge` here too) would put "Preview" back over the
+  // sandbox or the demo on the next language change.
+  const t = deps?.t || ((key) => key);
+  badge.querySelector(".preview-badge-label").textContent = t(
+    sandbox ? "sandbox_badge" : showingDemo ? "demo_badge" : "preview_badge",
+  );
   badge.querySelector("i").className = showingDemo
     ? "fa-solid fa-flask"
     : "fa-solid fa-triangle-exclamation";
   badge.setAttribute(
     "aria-label",
-    sandbox
-      ? deps?.t?.("sandbox_badge_desc") || "Sandbox — nothing here is your own work."
-      : showingDemo
-        ? "Demo data — nothing here is your own work. Open the risks & data-loss notice."
-        : "Preview build — pre-release, may lose data. Open the risks & data-loss notice.",
+    t(sandbox ? "sandbox_badge_desc" : showingDemo ? "demo_badge_desc" : "preview_badge_desc"),
   );
 }
 

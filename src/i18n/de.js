@@ -18,7 +18,12 @@
 // Times are 24-hour and dates ISO (AGENT_RULES "Product constraints"), as in every language.
 export const de = {
   logo_title: "LibrePT",
-  preview_badge: "Vorschau",
+  preview_badge: "VORSCHAU",
+  demo_badge: "DEMO",
+  preview_badge_desc:
+    "Vorschauversion — noch nicht veröffentlicht, Datenverlust möglich. Hinweis zu Risiken und Datenverlust öffnen.",
+  demo_badge_desc:
+    "Demodaten — nichts hier ist deine eigene Arbeit. Hinweis zu Risiken und Datenverlust öffnen.",
   preview_warning:
     "Dies ist eine Vorschauversion — vor der Veröffentlichung und in aktiver Entwicklung. Funktionen ändern sich ohne Ankündigung, und deine Daten können verloren gehen. Mach regelmäßig Sicherungskopien und verlass dich für echte Kundendaten noch nicht darauf.",
   tab_clients: "Kunden",
