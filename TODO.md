@@ -5980,6 +5980,32 @@ besedo ali ga odpreti v okno s stanjem. `aria-label` sestaviti prek `t(...)` s k
 [applicationHeader.js](src/modules/common/applicationHeader.js), funkcija, ki sestavi
 `sync-badge`, vpisuje oba angleška stavka dobesedno.
 
+### 80.12 [ ] P2 — Zamujen trening na plošči pokaže samo številko, besede »Zamuja« ni nikoli
+
+**Scenarij in koraki:** trener ob 09:45 pogleda ploščo treningov v peskovniku. Na njej stoji
+trening »Skupinska moč in kondicija«, 08:00–10:00, ki se še ni začel.
+
+**Opaženo:** kartica kaže samo »01h 43m« na oranžni podlagi, brez ene same besede. Ne pove,
+ali je to pretekli čas, preostali čas ali zamuda. Obe oznaki sta v HTML — »Se začne čez« in
+»Zamuja« — a obe imata `display: none`, izmerjeno v brskalniku.
+
+**Težava in vpliv:** trener na plošči ne vidi, da trening zamuja; vidi številko, ki je enaka
+tisti pri treningih, ki se šele začnejo. Beseda »Zamuja« (`overdue` v [sl.js](src/i18n/sl.js))
+se ne pokaže nikoli, v nobenem jeziku. To zadeva vsako kartico, ki ji je napovedani začetek
+že ušel.
+
+**Vzrok, potrjen v kodi na `main`:** v [sessionsView.css](src/modules/sessionList/sessionsView.css)
+sta obe pravili v enem seznamu selektorjev:
+`.session-live-bar.upcoming .when-overdue, .session-live-bar.upcoming.overtime .when-upcoming { display: none }`.
+Vrstica z zamudo nosi oba razreda, `upcoming` in `overtime`, zato jo zadene tudi prvi
+selektor — skrita sta oba napisa. Prvi selektor mora zamudo izvzeti
+(`.upcoming:not(.overtime) .when-overdue`).
+
+**Predlog in preverjanje:** popraviti selektor in pripeti besedo v test plošče: kartica pred
+začetkom kaže »Se začne čez«, kartica po zapadlem začetku »Zamuja«. Danes tega ne preverja
+noben test — iskanje po `tests/` ne najde ne razreda `when-overdue` ne besede »Zamuja«.
+Opaženo na objavljeni različici `0625bd6`; pravilo na `main` je nespremenjeno.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
