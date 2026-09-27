@@ -6270,6 +6270,31 @@ dodajati ročnega izpisa. Preizkus naj v slovenskem vmesniku odpre okno za vabil
 na gumbu piše »Končano«. Isto primerjavo (`data-i18n` proti slovarju) je vredno pognati kot
 preizkus čez vsa okna, ki nastanejo pozneje.
 
+### 80.23 [ ] P2 — Prazna podloga veli pritisniti ikono (✎), ki je na zaslonu ni
+
+**Scenarij in koraki:** trener shrani prvi trening s prazim načrtom in zapre okno za vabila.
+Podloga je prazna in pod naslovom piše: »Ni vstavljenih vaj. Tapni ikono za urejanje (✎)
+zgoraj, da načrtuješ in dodaš vaje za to stranko.«
+
+**Opaženo:** na zaslonu sta samo dva znaka, krog s puščico (»Začni trening«) in tri navpične
+pike (»Možnosti treninga«). Svinčnika ni. Urejanje je skrito pod tremi pikami, kot vrstica
+»Uredi načrt«. Trener, ki bere navodilo, išče znak, ki ga ni.
+
+**Težava in vpliv:** to je edino navodilo na prvi prazni podlogi, torej prvi korak, ki ga nov
+trener naredi po shranitvi prvega treninga. Napačno ime kontrole ga ustavi prav tam.
+
+**Vzrok, potrjen v kodi na `main`:** gumb `#btn-edit-plan` je danes vrstica menija
+(`session-menu-item` s pisalom) v [activeSessionBoard.js](src/modules/clipboard/activeSessionBoard.js),
+napotek pa je ostal iz časa, ko je znak stal v naslovni vrstici — enako v vseh treh jezikih
+([sl.js](src/i18n/sl.js), [en.js](src/i18n/en.js), [de.js](src/i18n/de.js)). Isti gumb ima
+`aria-label="Edit plan"` v angleščini, čeprav vrstica kaže »Uredi načrt«.
+
+**Predlog in preverjanje:** napotek naj imenuje pot, ki obstaja: »Pritisni tri pike (⋮) zgoraj
+desno in izberi Uredi načrt.« Popraviti v vseh treh jezikih in `aria-label` peljati prek
+`t(...)`. Preizkus naj zahteva, da se vsako ime kontrole iz napotka ujema z napisom kontrole,
+ki je takrat na zaslonu. Opaženo na objavljeni različici `0625bd6`; koda in zapisi na `main`
+so isti.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
