@@ -4494,3 +4494,370 @@ render check pins that no rendered page contains `&lt;!--`. Every page render_do
 same exposure, not only this one.
 
 **Fixed 2026-09-27 (Claude), commit `7c6ccc7`.** `render_docs.strip_comments` drops every HTML comment outside a code block before rendering; `tests/unit/test_render_docs.py` pins that and that no rendered page shows `&lt;!--`.
+
+### 80.13 [x] P2 — Opozorilo o poškodbi stranke je samo v opisu ob dotiku miške, in v angleščini — popravljeno 2026-09-27
+
+**Scenarij in koraki:** trener v peskovniku pritisne kartico skupinskega treninga
+»Skupinska moč in kondicija« (08:00–10:00). Odpre se podloga z zavihki udeleženk in
+udeležencev; pri imenih »Jane« in »John« stoji oranžen trikotnik z klicajem.
+
+**Opaženo:** kaj trikotnik pomeni, ne piše nikjer na zaslonu. Edino besedilo je atribut
+`title`, ki se pokaže samo ob dotiku miške, in se glasi »Has recorded injury: Rahla napetost
+v levi rami pri dvigih nad glavo« — angleška uvodna beseda pred slovenskim zapisom.
+
+**Težava in vpliv:** na telefonu dotika miške ni, torej je na telovadnici opis poškodbe
+nedosegljiv. Trener vidi znak za nevarnost in ne more prebrati, katera poškodba je to, prav
+ko izbira obremenitev. Angleški uvod je poleg tega v slovenski aplikaciji.
+
+**Vzrok, potrjen v kodi na `main`:** [utils.js](src/modules/common/utils.js), funkcija, ki
+sestavi ime z znakom poškodbe, vpisuje niz »Has recorded injury: « dobesedno. Isti razred
+napake sta še dva kraja: gumb za nov trening v
+[sessionsView.js](src/modules/sessionList/sessionsView.js) nosi `aria-label` in `title`
+»Create Session«, pika neprebranega obvestila v
+[notificationArea.js](src/modules/common/notificationArea.js) pa `title="Unread"` — oboje
+angleško v slovenskem in nemškem vmesniku.
+
+**Predlog in preverjanje:** opis poškodbe mora biti dosegljiv s pritiskom, ne z dotikom miške
+— na primer znak odpre kratko sporočilo z zapisom. Vsak `title` in `aria-label` naj gre prek
+`t(...)`; ključe dodati v `en`, `sl` in `de`. Preveriti s preizkusom, ki v slovenskem vmesniku
+prebere vsak `title` in `aria-label` na zaslonu podloge in zahteva, da noben ni angleški niz
+iz kode. Opaženo na objavljeni različici `0625bd6`; vsi trije kraji na `main` so isti.
+
+**Fixed 2026-09-27 (Claude Opus 5.5), commit `455a399`.** The injury mark and the unread dot carry a translated name instead of an English hover title; the Create Session button lost the English aria-label that hid its text.
+
+### 80.14 [x] P3 — V slovenskem vzorčnem treningu je stolpec z navodilom vaje angleški — popravljeno 2026-09-27
+
+**Scenarij in koraki:** trener odpre peskovnik v slovenščini in v podlogi skupinskega
+treninga bere, kaj naj kdo naredi.
+
+**Opaženo:** naslovi krogov so slovenski (»Dinamično ogrevanje«, »Metabolni krog v trojkah«),
+navodilo pri vsaki vaji pa angleško: »10 reps (light)«, »10 per arm«, »Max«, »45 seconds«,
+»30s hold«, »20 per side«. V vzorčnih programih je deset različnih takih zapisov in nobenega
+ni v prevajalni tabeli. Angleščina tudi ni enotna: hkrati »45s« in »45 seconds«, »30s hold«
+in »60s hold«.
+
+**Težava in vpliv:** to je prav tisti stolpec, ki ga trener bere med serijo. Vzorčni podatki
+so prvo, kar slovenski trener vidi, in zgledajo kot na pol preveden izdelek. Ni P2, ker
+trener svoje programe piše sam in ga to pri njegovem delu ne ustavi.
+
+**Vzrok, potrjen v kodi na `main`:** [demoText.js](src/data/demoText.js) prevaja besedila
+vzorčnih podatkov in v uvodni opombi našteje, kaj ostane angleško namenoma — imena vaj, imena
+ljudi, ime telovadnice. Navodila vaj v tem seznamu ni, v tabeli `sl` pa jih ni; polje `reps` v
+[routines.js](src/data/routines.js) je prosto besedilo, ki se izriše, kakor je zapisano.
+
+**Predlog in preverjanje:** deset zapisov dodati v `sl` in `de`, hkrati poenotiti angleško
+obliko. Preizkus naj vzorčne programe naloži v slovenščini in zahteva, da noben zapis
+`reps` ni angleški niz iz `routines.js`. Opaženo na objavljeni različici `0625bd6`; tabela na
+`main` je ista.
+
+**Fixed 2026-09-27 (Claude Opus 5.5), commit `dd312f3`.** The ten reps phrases of the sample routines have Slovenian and German forms; the demo text test walks each routine entry's reps and circuit title.
+
+### 80.15 [x] P3 — Oznaka v glavi piše »PREVIEW« in »DEMO«, čeprav prevod obstaja — popravljeno 2026-09-27
+
+**Scenarij in koraki:** trener v slovenskem vmesniku zapre peskovnik prek menija ☰ z
+»Zapusti peskovnik« in pogleda oznako levo od številke različice.
+
+**Opaženo:** oznaka se glasi »PREVIEW«. V peskovniku je pisala »PESKOVNIK«, torej je prevod
+tam upoštevan, tu pa ne. Z naloženimi vzorčnimi podatki piše »DEMO«.
+
+**Težava in vpliv:** dve angleški besedi v glavi slovenske aplikacije, in prav ob mestu, ki
+naj bi povedalo, da to še ni končni izdelek. Slovenski trener »PREVIEW« ne prebere nujno kot
+»predogled«.
+
+**Vzrok, potrjen v kodi na `main`:** [applicationHeader.js](src/modules/common/applicationHeader.js)
+vpiše oznako z `textContent`: za peskovnik prek `t("sandbox_badge")`, za drugi dve stanji pa
+dobesedno »DEMO« in »PREVIEW«. Ključ `preview_badge` je preveden v `en`, `sl` in `de` in je v
+[domMappings.js](src/i18n/domMappings.js) pripet na `#preview-badge-label`, tako da prevod
+nastane in ga ta vrstica takoj prepiše; za »DEMO« ključa ni nikjer.
+
+**Predlog in preverjanje:** obe stanji peljati prek `t(...)`, dodati ključ za »DEMO« v vse tri
+jezike in v preizkusu glave zahtevati, da oznaka v slovenščini ni angleška beseda. Opaženo na
+objavljeni različici `0625bd6`; koda na `main` je ista.
+
+**Fixed 2026-09-27 (Claude Opus 5.5), commit `651900e`.** The badge label and description have one writer that reads the dictionary; the static pass no longer writes `preview_badge` over it.
+
+### 80.17 [x] P3 — Slovenska števila: »3 strank«, »3 stranka(-e/-k) ima« — popravljeno 2026-09-27
+
+**Scenarij in koraki:** trener odpre peskovnik, pogleda vrstico odprtega treninga nad dnom
+zaslona in nato predal obvestil.
+
+**Opaženo:** vrstica pravi »3 strank«, obvestilo pa »3 stranka(-e/-k) ima nerešene povratne
+signale iz treninga.« Pravilno slovensko je »3 stranke« in »3 stranke imajo«. Enako je pri
+programih: »{count} program(-i/-ov) je zasnovanih«.
+
+**Težava in vpliv:** aplikacija zveni kot strojni prevod prav v napisih, ki jih trener vidi
+najpogosteje. Angleščina in nemščina te napake nimata, ker imata eno množinsko obliko.
+
+**Vzrok, potrjen v kodi na `main`:** [sl.js](src/i18n/sl.js) ima `bar_clients_label: "strank"`
+— ena sama oblika za vsa števila — ter dva zapisa z oklepajem, `notif_pending_sessions_desc` in
+`notif_unscheduled_plans_desc`. Oblike z oklepajem, ki povedo spol bralca (»Dobrodošel(-la)«),
+so nekaj drugega in ostanejo: tam aplikacija spola ne ve, števila pa vedno ve.
+Pripomočka za množino v `src/` ni; opomba v
+[exercisePicker.js](src/modules/exercises/exercisePicker.js) že pravi, da ima slovenščina štiri
+oblike, in se jim je ta napis izognil z drugačno ubeseditvijo.
+
+**Predlog in preverjanje:** dodati pripomoček na `Intl.PluralRules` (»one«, »two«, »few«,
+»other«) in mu dati te tri napise; jezik, ki ima eno obliko, zapiše eno. Preizkus naj za 1, 2,
+3 in 5 zahteva pravilno slovensko obliko in ujemanje glagola. Opaženo na objavljeni različici
+`0625bd6`; zapisi na `main` so isti.
+
+**Fixed 2026-09-27 (Claude Opus 5.5), commit `5e7874c`.** `src/i18n/plural.js` picks the _one/_two/_few/_other form with Intl.PluralRules; used for the session bar, both notification counts and the name-collision hint.
+
+### 80.20 [x] P3 — Prazen imenik strank govori o neuspelem iskanju in veli »Klikni« — popravljeno 2026-09-27
+
+**Scenarij in koraki:** trener v prazni aplikaciji odpre meni ☰ in »Seznam strank (klientov)«.
+
+**Opaženo:** na zaslonu piše »Strank ni mogoče najti. Klikni "Dodaj stranko", da jo ustvariš.«
+Trener ni ničesar iskal; imenik je prazen, ker je aplikacija nova.
+
+**Težava in vpliv:** napis zveni kot sporočilo o napaki tam, kjer je stanje povsem običajno.
+Beseda »Klikni« je poleg tega z namizja; aplikacija se uporablja z eno roko na telefonu in v
+triinštiridesetih drugih napisih pravi »Pritisni«. Nemščina že govori »Tippe auf«, torej je
+slovenščina edina, ki tu veli klikanje.
+
+**Obseg, potrjen v kodi na `main`:** v [sl.js](src/i18n/sl.js) sta taka zapisa dva,
+`no_clients_found` in `no_routines_found`; enako v [en.js](src/i18n/en.js) (»Click«).
+Za isto dejanje so v slovenščini tri besede: »Pritisni« triinštiridesetkrat, »Tapni«
+šestkrat, »Klikni« dvakrat. Zapis `edit_exit_hint` uporabi dve v enem stavku: »Tapni Končano,
+pritisni Esc ali tapni zunaj za zaključek.«
+
+**Predlog in preverjanje:** oba napisa prepisati v stanje, ne v neuspeh — »Strank še ni.
+Pritisni "Dodaj stranko" in vpiši prvo.« — in besedo »Klikni« odpraviti iz slovenščine ter
+»Click« iz angleščine. Preizkus naj v slovenskih napisih prepove »klikn«. Opaženo na objavljeni
+različici `0625bd6`; zapisa na `main` sta ista.
+
+**Fixed 2026-09-27 (Claude Opus 5.5), commit `97686a1`.** An empty directory says `clients_empty`, a search with no match says `no_clients_found`; »Pritisni« in place of »Klikni« and »Tapni«.
+
+### 80.22 [x] P3 — Gumb »Done« v oknu za vabila ostane angleški — popravljeno 2026-09-27
+
+**Scenarij in koraki:** trener shrani nov trening z eno stranko. Odpre se okno »Pošlji vabila
+v koledar«.
+
+**Opaženo:** okno je v slovenščini, zadnji gumb pa se glasi »Done«. Prevod obstaja:
+`done: "Končano"` v [sl.js](src/i18n/sl.js), in gumb ima `data-i18n="done"`.
+
+**Obseg, izmerjen v brskalniku:** primerjava vseh 847 ključev slovenskega slovarja z vsemi
+elementi na zaslonu, ki nosijo `data-i18n`, najde natanko eno neskladje — ta gumb. Drugih
+takih ni.
+
+**Vzrok:** okno se sestavi šele, ko je potrebno, prevajanje pa je čez `data-i18n` teklo prej.
+Druga besedila v tem oknu se izrišejo po lastnih ključih ob odprtju in so zato slovenska; ta
+gumb ostane pri besedilu iz predloge. [sessionInviteDialog.js](src/modules/session/sessionInviteDialog.js),
+vrstica z `data-i18n="done"`; datoteka se od objavljene gradnje ni vsebinsko spremenila, torej
+velja tudi na `main`.
+
+**Predlog in preverjanje:** ob vsakem sestavljanju okna pognati prevajanje še enkrat, ne
+dodajati ročnega izpisa. Preizkus naj v slovenskem vmesniku odpre okno za vabila in zahteva, da
+na gumbu piše »Končano«. Isto primerjavo (`data-i18n` proti slovarju) je vredno pognati kot
+preizkus čez vsa okna, ki nastanejo pozneje.
+
+**Fixed 2026-09-27 (Claude Opus 5.5), commit `a5b76e1`.** `translateMarkup` runs on the invite dialog when it is drawn; a test opens it in Slovenian and reads »Končano«.
+
+### 80.23 [x] P2 — Prazna podloga veli pritisniti ikono (✎), ki je na zaslonu ni — popravljeno 2026-09-27
+
+**Scenarij in koraki:** trener shrani prvi trening s prazim načrtom in zapre okno za vabila.
+Podloga je prazna in pod naslovom piše: »Ni vstavljenih vaj. Tapni ikono za urejanje (✎)
+zgoraj, da načrtuješ in dodaš vaje za to stranko.«
+
+**Opaženo:** na zaslonu sta samo dva znaka, krog s puščico (»Začni trening«) in tri navpične
+pike (»Možnosti treninga«). Svinčnika ni. Urejanje je skrito pod tremi pikami, kot vrstica
+»Uredi načrt«. Trener, ki bere navodilo, išče znak, ki ga ni.
+
+**Težava in vpliv:** to je edino navodilo na prvi prazni podlogi, torej prvi korak, ki ga nov
+trener naredi po shranitvi prvega treninga. Napačno ime kontrole ga ustavi prav tam.
+
+**Vzrok, potrjen v kodi na `main`:** gumb `#btn-edit-plan` je danes vrstica menija
+(`session-menu-item` s pisalom) v [activeSessionBoard.js](src/modules/clipboard/activeSessionBoard.js),
+napotek pa je ostal iz časa, ko je znak stal v naslovni vrstici — enako v vseh treh jezikih
+([sl.js](src/i18n/sl.js), [en.js](src/i18n/en.js), [de.js](src/i18n/de.js)). Isti gumb ima
+`aria-label="Edit plan"` v angleščini, čeprav vrstica kaže »Uredi načrt«.
+
+**Predlog in preverjanje:** napotek naj imenuje pot, ki obstaja: »Pritisni tri pike (⋮) zgoraj
+desno in izberi Uredi načrt.« Popraviti v vseh treh jezikih in `aria-label` peljati prek
+`t(...)`. Preizkus naj zahteva, da se vsako ime kontrole iz napotka ujema z napisom kontrole,
+ki je takrat na zaslonu. Opaženo na objavljeni različici `0625bd6`; koda in zapisi na `main`
+so isti.
+
+**Fixed 2026-09-27 (Claude Opus 5.5), commit `12b86c5`.** The empty plan names the three dots (⋮) and Edit plan; the English aria-label is gone.
+
+### 80.24 [x] P3 — Vabilo stranki govori o stranki kot o moškem, njena lastna stran pa kot o ženski — popravljeno 2026-09-27
+
+**Scenarij in koraki:** trener v imeniku strank pritisne »Povabi stranko«.
+
+**Opaženo:** okno pravi »Svoje podatke in privolitev izpolni sam na svojem telefonu in ti jih
+pošlje nazaj«, polje se imenuje »Njegova telefonska številka ali e-naslov«, spodaj pa piše
+»Pokaži mu to kodo in ga prosi, naj vanjo usmeri kamero telefona«. Stran, ki jo stranka nato
+odpre, isto osebo nagovori v ženski obliki: »komu jo daš, pa izbereš sama«.
+
+**In še tretjič, spet drugače:** okno »Preglej podatke stranke«, ki prebere datoteko, ki jo je
+stranka poslala, govori v ženski obliki — »NJENI CILJI«, »Poškodbe in opombe, ki jih je
+navedla«, »JEZIK, V KATEREM JE BRALA«. Ista oseba je torej v vabilu moški, na svojem obrazcu
+ženska in ob prevzemu spet ženska.
+
+**Težava in vpliv:** ena oseba je na trenerjevem zaslonu moški in na svojem ženska. Aplikacija
+je pri trenerju dosledno previdna (»Dobrodošel(-la)«), pri stranki pa ne, čeprav so med
+strankami v vzorčnih podatkih večinoma ženske.
+
+**Obseg, potrjen v kodi na `main`:** [sl.js](src/i18n/sl.js) — `intake_invite_body`,
+`intake_invite_contact_label`, `intake_invite_qr_hint` in `switch_participant_hint` (»njegov
+lasten načrt«) proti `intake_disclaimer` (»izbereš sama«). Isto je v profilu stranke: `joined`
+se glasi »Pridružil se«, torej piše »Ana Kovač — Pridružil se …«. Brez spola: »V imeniku od«.
+
+**Predlog in preverjanje:** te zapise ubesediti brez spola. Slovenščina to tu dopušča prek
+besede »stranka«: »Pokaži stranki to kodo in jo prosi …«, »Telefonska številka ali e-naslov
+stranke«, »Podatke in privolitev izpolni stranka na svojem telefonu«. Preizkus naj v slovenskih
+zapisih o stranki prepove »mu«, »ga«, »njegov« in »sam«. Opaženo na objavljeni različici
+`0625bd6`; zapisi na `main` so isti.
+
+**Fixed 2026-09-27 (Claude Opus 5.5), commit `9bb101e`.** The intake, tour and joined texts name the client (»stranka«) instead of »he«.
+
+### 80.26 [x] P2 — Trenerjev lastni signal se v pregledu pokaže kot »Too Easy - Increase Load« — popravljeno 2026-09-27
+
+**Scenarij in koraki:** trener izvede svoj trening in pri vaji pritisne gumb »Prelahko«. Po
+zaključku odpre meni ☰ in »Čakajoče na pregled«.
+
+**Opaženo:** vrstica se glasi »Ana Kovač — Too Easy - Increase Load — Vaja: Barbell Back
+Squat«. Gumb, ki ga je pritisnil, piše »Prelahko«; pregled pokaže angleški zapis.
+
+**Zakaj tega ni nihče opazil:** v vzorčnih podatkih je ta zapis preveden. [demoText.js](src/data/demoText.js)
+ima vrstico »Too Easy - Increase Load« → »Prelahko – povečaj težo« (in nemško »Zu leicht – Last
+erhöhen«), zato je peskovnik videti pravilno. Angleščina se pokaže šele, ko signal zapiše
+trener sam.
+
+**Vzrok, potrjen v kodi na `main`:** oznaka signala je v zapisu shranjena kot angleški niz —
+[quickSignals.js](src/domain/quickSignals.js), `OPPOSITE_QUICK_SIGNAL` — in to je prav, ker je
+to ključ, po katerem se signal prepozna in izklopi. Napaka je, da se ta ključ izpiše
+neposredno: [planAdjustments.js](src/modules/plans/planAdjustments.js) postavi `u.tag` v značko
+in `update.tag` v besedilo okna.
+
+**Širše, kot je videti:** okno »Zabeleži povratne informacije«, ki se odpre z gumbom »Opombe«
+na kartici vaje, ponuja pet oznak in vse so angleške: »🚀 Too Easy - Increase Load«,
+»⚠️ Too Hard - Reduce Load«, »🔬 Form Break - Focus Required«, »🔥 Joint Pain / Discomfort«,
+»💪 Good Progression«. Vpisane so dobesedno v
+[feedbackModal.js](src/modules/common/feedbackModal.js), brez prevajalnega ključa. Pri tretji
+se napis in shranjena vrednost celo razlikujeta: trener pritisne »Form Break - Focus
+Required«, shrani pa se »Form Break - Watch Position«, in prav to pozneje prebere v pregledu.
+
+**Predlog in preverjanje:** ključ naj v zapisu ostane, izpisuje pa naj se prek slovarja — pet
+novih ključev v `en`, `sl` in `de`, in napis naj se ujema s shranjeno vrednostjo. Paziti na
+[historyView.js](src/modules/history/historyView.js), ki iz iste oznake bere `Too Hard` in
+`Reduce Load`, da ugane barvo; tudi to naj bere ključ, ne besedila. Preizkus naj v slovenskem
+vmesniku pritisne »Prelahko« in zahteva, da v pregledu ni angleškega niza. Opaženo na objavljeni
+različici `0625bd6`; koda na `main` je ista.
+
+**Fixed 2026-09-27 (Claude Opus 5.5), commit `ead921d`.** `src/domain/feedbackTags.js` maps the stored key to dictionary words for the review list, its dialog, history icons and clipboard notes; the chips are built from the same list; demo tags stay keys.
+
+### 80.30 [x] P2 — Nepovratni izbris stranke se potrdi z angleškim navodilom in angleško besedo — popravljeno 2026-09-27
+
+**Scenarij in koraki:** trener odpre profil stranke »Ana Kovač« in pritisne »Izbriši stranko
+(GDPR)«.
+
+**Opaženo:** okno je slovensko in jasno pove, kaj se zgodi, dve stvari v njem pa nista: vrstica
+s podatki stranke se glasi »Ana Kovač — +386 40 111 222 · **joined** 2026-09-27 · id …XsD94l«,
+navodilo nad poljem pa »**Type ERASE to confirm**«. Gumb »Izbriši dokončno« se odklene šele,
+ko trener vpiše angleško besedo »ERASE«.
+
+**Težava in vpliv:** to je edino dejanje v aplikaciji, ki ga ni mogoče razveljaviti, in njegova
+zadnja varovalka je napisana v jeziku, ki ga uporabnik morda ne bere. Slovenski trener mora
+uganiti, kaj naj vpiše. Beseda za potrditev naj bo v jeziku vmesnika.
+
+**Vzrok, potrjen v kodi na `main`:** [clientDataRights.js](src/modules/clients/clientDataRights.js)
+ima `ERASE_CONFIRMATION_WORD = "ERASE"` in oznako polja vpisano dobesedno v angleščini;
+[clientErasure.js](src/data/clientErasure.js) sestavi vrstico s podatki z besedo `joined`.
+
+**Predlog in preverjanje:** oznako polja in besedo za potrditev peljati prek `t(...)` — v
+slovenščini »IZBRIŠI«, v nemščini »LÖSCHEN« — in vrstico s podatki sestaviti iz ključev, ne iz
+angleških besed. Paziti, da preverjanje primerja vpisano besedo z besedo TRENUTNEGA jezika.
+Preizkus naj v vseh treh jezikih zahteva, da se gumb odklene z besedo tistega jezika. Opaženo na
+objavljeni različici `0625bd6`; koda na `main` je ista.
+
+**Fixed 2026-09-27 (Claude Opus 5.5), commit `2519c5b`.** The instruction and the word to type (IZBRIŠI, LÖSCHEN) come from the dictionary; the input is compared with the word on screen.
+
+### 80.33 [x] P3 — Dva prevajalna ključa ne obstajata, zato se uporabniku pokaže ključ sam — popravljeno 2026-09-27
+
+**Scenarij in koraki:** trener na plošči pogleda kartico treninga; ob imenu je svinčnik. Bralnik
+zaslona in opis ob dotiku miške se glasita »edit«, z malo začetnico in v angleščini.
+
+**Izmerjeno:** v `src/` je uporabljenih 341 različnih prevajalnih ključev, v
+[en.js](src/i18n/en.js) jih je zapisanih 867 — in dva uporabljena ključa ne obstajata nikjer:
+`edit` v [sessionCard.js](src/modules/sessionList/sessionCard.js) in `voice_processing` v
+[feedbackModal.js](src/modules/common/feedbackModal.js), kjer se izpiše kot stanje med obdelavo
+glasovne opombe. Ko ključa ni, `t(...)` vrne kar ključ, zato ga uporabnik bere na zaslonu.
+
+**Težava in vpliv:** v angleščini je »edit« videti skoraj pravilno, zato tega nihče ne opazi; v
+slovenščini in nemščini je to angleška beseda z malo začetnico. Pri glasovni opombi se med
+obdelavo izpiše »voice_processing«, kar je videti kot napaka programa.
+
+**Predlog in preverjanje:** dodati oba ključa v vse tri jezike. Ker tega nihče ne ujame,
+naj ta primerjava postane preizkus: vsak `t("ključ")` v `src/` mora obstajati v `en.js`. To je
+ista vrsta preverbe, kot jo že dela [ui_strings.py](agent_tools/ui_strings.py), in sodi zraven.
+Opaženo na objavljeni različici `0625bd6`; koda na `main` je ista.
+
+**Fixed 2026-09-27 (Claude Opus 5.5), commit `170a358`.** `edit` and `voice_processing` exist in every language; tests/unit/test_translation_keys_exist.py fails the build on a key the code names and en.js lacks.
+
+### 80.34 [x] P3 — »Glasovna opomba (zasebnost-prva)« je izmišljen izraz — popravljeno 2026-09-27
+
+**Scenarij in koraki:** trener na kartici vaje pritisne »Opombe«; v oknu je razdelek za glasovno
+opombo.
+
+**Opaženo:** naslov razdelka se glasi »Glasovna opomba (zasebnost-prva)«. »Zasebnost-prva« ni
+slovenska besedna zveza; nastala je s prevodom angleškega »privacy-first«. Pod njo že piše
+»Samo na napravi«, kar isto stvar pove razumljivo.
+
+**Težava in vpliv:** bralec obstane pri besedi, ki je ne pozna, na mestu, kjer gre za zaupanje —
+kam gre posnetek njegove stranke.
+
+**Predlog in preverjanje:** oklepaj izpustiti; naslov naj bo »Glasovna opomba«, pojasnilo pa
+ostane »Samo na napravi«. `voice_note_label` v [sl.js](src/i18n/sl.js); preveriti tudi nemško
+ustreznico. Opaženo na objavljeni različici `0625bd6`.
+
+**Fixed 2026-09-27 (Claude Opus 5.5), commit `f0ee646`.** »Glasovna opomba«, »Voice note, on this device only«.
+
+### 80.37 [x] P2 — Pred nepovratno zamenjavo podatkov piše, kaj bo izgubljeno, v angleščini — popravljeno 2026-09-27
+
+**Scenarij in koraki:** trener v »Središče za sinhronizacijo in varnostne kopije« izbere
+»Izberi JSON datoteko« in naloži staro varnostno kopijo, medtem ko ima na napravi dve stranki,
+eno rutino in en trening.
+
+**Opaženo:** aplikacija pravilno vpraša za potrditev: »Obnovitev zamenja vse na tej napravi.
+Izgubljeno bo: **2 clients, 1 routines, 1 sessions, 1 planUpdates**.« Naštevanje je angleško, in
+zadnje ime je celo notranje ime polja v kodi (`planUpdates`). Gumba sta slovenska: »Obdrži, kar
+imam« in »Zamenjaj«.
+
+**Težava in vpliv:** to je stavek, ob katerem se trener odloči, ali bo izgubil delo. Prav ta del
+stavka — kaj izgubi — je v jeziku, ki ga morda ne bere, in z besedo, ki je ne pozna nihče razen
+programerja.
+
+**Vzrok, potrjen v kodi na `main`:** [backupRestore.js](src/modules/common/backupRestore.js)
+sestavi naštevanje kot `${count} ${collection}`, kjer je `collection` ključ zbirke iz
+[backupFile.js](src/data/backupFile.js). Okvirni stavek ima prevod, vsebina ne.
+
+**Predlog in preverjanje:** vsaka zbirka dobi svoje ime v vseh treh jezikih, in številke naj gredo
+skozi pravilo za množino (§80.17): »2 stranki, 1 program, 1 trening, 1 čakajoča sprememba«.
+Preizkus naj v slovenskem vmesniku sproži to potrditev in zahteva, da v njej ni angleških imen
+zbirk. Opaženo na objavljeni različici `0625bd6`; koda na `main` je ista.
+
+**Fixed 2026-09-27 (Claude Opus 5.5), commit `d19785b`.** Each collection in the replace warning has counted forms in every language.
+
+### 80.38 [x] P2 — Uvoz pravi »združilo ali prepisalo«, v resnici vedno zamenja — popravljeno 2026-09-27
+
+**Scenarij in koraki:** trener v istem oknu bere, kaj uvoz naredi, preden izbere datoteko.
+
+**Opaženo:** »Naloži obstoječo .json datoteko. To bo združilo ali prepisalo trenutno bazo.«
+
+**Kaj se zgodi v resnici:** uvoz vedno **zamenja** celotno bazo. To je zapisano tudi v kodi, z
+utemeljitvijo: združevanje dveh baz brez skupnega izhodišča je ugibanje, zato ga uvoz iz
+datoteke ne dela ([backupRestore.js](src/modules/common/backupRestore.js)). Združevanje zna
+samo sinhronizacija z Google Drive, ki skupno izhodišče ima.
+
+**Težava in vpliv:** stavek pred nepovratnim dejanjem ponuja dve možnosti, od katerih ena ne
+obstaja. Trener, ki prebere »združilo«, lahko sklene, da bo uvoz njegove nove stranke pustil pri
+miru — pa jih ne bo. Potrditveno okno pozneje pove pravo stvar, a šele potem, ko je datoteko že
+izbral.
+
+**Predlog in preverjanje:** zapis naj se glasi, da uvoz zamenja vse na tej napravi s
+tistim, kar je v datoteki. Ključ `backup_import_desc` v `en`, `sl` in `de`. Preizkus naj zahteva,
+da opis uvoza ne vsebuje besede za združevanje. Opaženo na objavljeni različici `0625bd6`; zapis
+na `main` je isti.
+
+**Fixed 2026-09-27 (Claude Opus 5.5), commit `5d9c541`.** The import text says it replaces everything; success and re-erased messages are translated.
