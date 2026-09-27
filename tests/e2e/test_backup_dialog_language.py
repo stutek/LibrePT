@@ -4,6 +4,8 @@
 # pass (i18n/domMappings.js), which a mounted dialog does not run.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
+import json
+
 from playwright.sync_api import expect
 
 from tests.e2e.test_backup_restore import LEGACY_BACKUP, _import
@@ -37,3 +39,28 @@ def test_a_declined_restore_says_so_in_slovenian(page, local_server):
 
     [nothing_changed] = _slovenian(page, ["restore_nothing_changed"])
     expect(page.locator("#import-status")).to_have_text(nothing_changed)
+
+
+def test_what_a_restore_would_replace_is_named_in_slovenian(page, local_server):
+    """The part of the prompt a trainer decides on — what they lose — was the English collection
+    keys of the code: "2 clients, 1 routines, 1 planUpdates"."""
+    page.goto(local_server + "?lang=sl")
+    page.wait_for_selector(".session-card")
+    page.click("#backup-btn")
+    page.wait_for_selector("#dialog-backup[open]")
+    page.set_input_files(
+        "#import-db-file",
+        files=[
+            {
+                "name": "librept_backup.json",
+                "mimeType": "application/json",
+                "buffer": json.dumps(LEGACY_BACKUP).encode(),
+            }
+        ],
+    )
+    detail = page.locator("#restore-confirm-detail")
+    detail.wait_for(state="visible")
+    text = detail.inner_text()
+    for english in ["clients", "routines", "sessions", "planUpdates", "history"]:
+        assert english not in text, text
+    assert "strank" in text

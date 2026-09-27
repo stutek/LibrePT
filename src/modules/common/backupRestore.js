@@ -30,6 +30,7 @@ import { DEFAULT_SESSIONS } from "../../data/index.js";
 import { bringsDataForward, describeMigration, migrateState } from "../../data/schemaMigrations.js";
 import { recordBackupTaken } from "../../data/stateStore.js";
 import { activeWorkspace } from "../../data/workspace.js";
+import { countedText } from "../../i18n/plural.js";
 import { BUILD_INFO } from "../../version.js";
 import { isOfflineCachedActive } from "./applicationHeader.js";
 import { renderMarkupOnce } from "./dom.js";
@@ -87,6 +88,14 @@ function renderImportSuccess(summary, reErased) {
   importStatus.className = "status-msg text-emerald";
 }
 
+/** "12 clients", "3 stranke": a collection's count in the trainer's language. A collection with
+ *  no name of its own in the dictionary keeps its key, so nothing is hidden from the trainer. */
+function collectionCount(collection, count) {
+  const key = `restore_count_${collection}`;
+  const text = countedText(deps.t, document.documentElement.lang, key, count);
+  return text.startsWith(key) ? `${count} ${collection}` : text;
+}
+
 // Names what is about to be overwritten, per collection. "Replace 12 clients and 40 sessions?" is a
 // sentence a trainer can weigh; "Are you sure?" is not.
 function showReplaceConfirmation(replacing, migrationSummary) {
@@ -112,15 +121,15 @@ function showReplaceConfirmation(replacing, migrationSummary) {
   // The replace half is only about THIS device, so it hides when there is nothing here to lose.
   const replaceLine = document.getElementById("restore-confirm-replace");
   if (replaceLine) replaceLine.hidden = replacing.total === 0;
-  const parts = Object.entries(replacing.counts).map(
-    ([collection, count]) => `${count} ${collection}`,
+  const parts = Object.entries(replacing.counts).map(([collection, count]) =>
+    collectionCount(collection, count),
   );
   // Preview-only collections are named SEPARATELY, because they are worse off than the rest: every
   // other collection is replaced by whatever the file holds, while these are simply gone — a file
   // written at the stable schema has nowhere to put them (the staging area in recordSchemas.js).
   // This is the warning DATA_MODEL §1 says a preview shape needs; it had none until 2026-08-17.
-  const lost = (replacing.notCarried || []).map(
-    (collection) => `${replacing.counts[collection]} ${collection}`,
+  const lost = (replacing.notCarried || []).map((collection) =>
+    collectionCount(collection, replacing.counts[collection]),
   );
   detail.textContent = lost.length
     ? `${parts.join(", ")} — ${deps.t("restore_preview_only_lost") || "and these are not in the file and cannot come back"}: ${lost.join(", ")}`
