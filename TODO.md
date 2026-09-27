@@ -6189,6 +6189,26 @@ dokler nanju nihče ne odgovori, se zavihek ne premakne.
 slovarja. Preizkus naj v slovenskem vmesniku prehodi te poti in zahteva, da se ne odpre nobeno
 okno brskalnika. Opaženo na objavljeni različici `0625bd6`; klici na `main` so isti.
 
+### 80.20 [ ] P3 — Prazen imenik strank govori o neuspelem iskanju in veli »Klikni«
+
+**Scenarij in koraki:** trener v prazni aplikaciji odpre meni ☰ in »Seznam strank (klientov)«.
+
+**Opaženo:** na zaslonu piše »Strank ni mogoče najti. Klikni "Dodaj stranko", da jo ustvariš.«
+Trener ni ničesar iskal; imenik je prazen, ker je aplikacija nova.
+
+**Težava in vpliv:** napis zveni kot sporočilo o napaki tam, kjer je stanje povsem običajno.
+Beseda »Klikni« je poleg tega z namizja; aplikacija se uporablja z eno roko na telefonu in v
+triinštiridesetih drugih napisih pravi »Pritisni«. Nemščina že govori »Tippe auf«, torej je
+slovenščina edina, ki tu veli klikanje.
+
+**Obseg, potrjen v kodi na `main`:** v [sl.js](src/i18n/sl.js) sta taka zapisa dva,
+`no_clients_found` in `no_routines_found`; enako v [en.js](src/i18n/en.js) (»Click«).
+
+**Predlog in preverjanje:** oba napisa prepisati v stanje, ne v neuspeh — »Strank še ni.
+Pritisni "Dodaj stranko" in vpiši prvo.« — in besedo »Klikni« odpraviti iz slovenščine ter
+»Click« iz angleščine. Preizkus naj v slovenskih napisih prepove »klikn«. Opaženo na objavljeni
+različici `0625bd6`; zapisa na `main` sta ista.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
