@@ -5908,6 +5908,17 @@ pošiljanjem vabil. Uskladiti prvi izris glave z datumom shranjenega termina in
 preveriti pred ponovnim odpiranjem. Napačna rezervacija ali vsebina vabila nista
 dokazani. Objavljena različica `0625bd6`, razvoj ni pregledan.
 
+**Ponovljeno 2026-09-27 (Claude) in vzrok najden:** ista pot, s stranko »Ana Kovač« in
+praznim načrtom, glava »1970-01-01 · 10:00 - 11:00 · Telovadnica Center«. V tistem trenutku
+so vsa tri polja, iz katerih glava bere dan, prazna — izmerjeno v brskalniku: `startTime`
+odprtega treninga, `sourceSession.startDate` in `sourceSession.day` so `null`. V
+[sessionTitleBar.js](src/modules/session/sessionTitleBar.js) `whenAndWhere` naredi
+`new Date(null)`, kar je 1. januar 1970, in ga izpiše kot dan, ker `day` ni nastavljen.
+Datoteka se od objavljene gradnje ni vsebinsko spremenila (razlika sta samo komentarja), torej
+**napaka stoji tudi na `main`**. Popravek ni nov izračun datuma, ampak da glava ne izriše
+dneva, ki ga ni: ko so vsa tri polja prazna, prevzame datum iz shranjenega termina, sicer pa
+dneva ne pokaže. Preizkus naj tik po shranitvi prebere glavo in zahteva današnji datum.
+
 ### 80.8 [ ] P1 — Prosta opomba brez izbrane ocene postane priporočilo za večjo težo
 
 **Scenarij:** na vaji izbrati »Opombe«, vnesti samo prosto besedilo in potrditi
