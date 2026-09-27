@@ -121,6 +121,20 @@ def test_the_text_option_is_hidden_when_the_invite_carried_no_number(
     expect(page.locator("#rsvp-send-email")).to_be_visible()
 
 
+def test_the_time_is_24_hour_and_the_date_is_iso_whatever_the_phone_says(
+    page, local_server
+):
+    """It read "Thursday, October 8 at 12:00 PM" — the phone's format, not the app's — on the page
+    where a wrong reading means arriving at the wrong hour. 1789200000000 is 2026-09-12 08:00 UTC."""
+    _mount(page, local_server)
+
+    body = page.locator("#view-rsvp").inner_text()
+    assert "2026-09-12" in body, body
+    assert "AM" not in body and "PM" not in body, body
+
+
+
+
 def test_a_channel_is_offered_only_after_an_answer_is_chosen(page, local_server):
     """Otherwise the client sends "here is my reply" with no reply in it — the trainer receives a
     message that says nothing and has to ask again."""

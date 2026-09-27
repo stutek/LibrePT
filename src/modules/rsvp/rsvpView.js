@@ -35,6 +35,7 @@ import {
 import { isInviteExpired, minutesUntilExpiry } from "../../domain/inviteExpiry.js";
 import { $id, renderMarkupOnce } from "../common/dom.js";
 import { buildEventLink } from "../common/eventTransports.js";
+import { formatClockFromEpoch, getISODateString } from "../common/utils.js";
 
 export function renderRsvpViewShell() {
   renderMarkupOnce(
@@ -96,16 +97,14 @@ function showDetail(labelId, valueId, label, value) {
 
 /** The slot in the client's own locale and timezone — they are deciding whether they can be somewhere
  *  at a time, so the one thing that must not be shown is the trainer's clock. */
+// ISO date and the 24-hour clock, whatever the phone is set to: `toLocaleString` asked the phone,
+// and a client read "Thursday, October 8 at 12:00 PM" on the page where a wrong reading means
+// arriving at the wrong hour. The weekday is named in the page's language, which is the app's.
 function formatWhen(startsAt, durationMinutes, lang) {
   if (!startsAt) return "";
   const start = new Date(startsAt);
-  const when = start.toLocaleString(lang, {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const weekday = start.toLocaleDateString(lang, { weekday: "long" });
+  const when = `${weekday}, ${getISODateString(start)}, ${formatClockFromEpoch(start.getTime())}`;
   return durationMinutes ? `${when} (${durationMinutes} min)` : when;
 }
 

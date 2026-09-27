@@ -198,6 +198,15 @@ function appUrl() {
   return new URL(".", new URL("../../", import.meta.url)).toString();
 }
 
+// The reply page speaks the language of the invitation that carried the link, which is the app's.
+// Without it the page followed the client's phone, and a Slovenian invite opened an English page.
+function replyPageUrl() {
+  const url = new URL(appUrl());
+  const lang = document.documentElement.lang;
+  if (lang) url.searchParams.set("lang", lang);
+  return url.toString();
+}
+
 function renderOrganizerHint(t) {
   const hint = document.getElementById("session-invite-organizer-hint");
   if (!hint) return;
@@ -312,7 +321,7 @@ function buildSmsInviteButton(client, sessionInfo, replyLink, t) {
 }
 
 function buildInviteRow(client, sessionInfo, t) {
-  const replyLink = buildEventLink(inviteEventFor(client, sessionInfo), appUrl());
+  const replyLink = buildEventLink(inviteEventFor(client, sessionInfo), replyPageUrl());
   const row = document.createElement("div");
   row.className = "session-invite-row card";
 

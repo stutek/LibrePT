@@ -112,6 +112,20 @@ def test_the_invite_email_carries_a_link_the_client_can_answer(page, local_serve
     )
 
 
+def test_the_reply_link_carries_the_language_of_the_invitation(page, local_server):
+    """The reply page followed the client's phone, so a Slovenian invitation opened an English page;
+    the link now says which language the invitation was written in."""
+    load_with_stub(page, local_server, INVITE_WITH_PHONE_STUB)
+    page.fill("#session-invite-organizer", "pt@librept.test")
+    page.dispatch_event("#session-invite-organizer", "input")
+
+    href = page.locator(".session-invite-send-btn").first.get_attribute("href")
+    page_lang = page.evaluate("() => document.documentElement.lang")
+
+    assert page_lang
+    assert f"lang={page_lang}" in urllib.parse.unquote(href)
+
+
 def _payload_in(href):
     """The event carried by a reply link, decoded from the link itself.
 
