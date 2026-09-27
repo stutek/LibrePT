@@ -189,6 +189,34 @@ def strip_frontmatter(text):
     return text[closing + 5 :], metadata
 
 
+FENCE_LINE = re.compile(r"^\s*(```|~~~)")
+COMMENT = re.compile(r"<!--.*?-->[ \t]*\n?", re.DOTALL)
+
+
+def strip_comments(body):
+    """Drop every `<!-- … -->` outside a code block.
+
+    A comment in a source document is a note to whoever edits it, never text for the reader. The
+    renderer escapes raw HTML rather than passing it through (build_renderer), which turned such a
+    note into a visible paragraph: the landing page showed every visitor why its demo links are
+    absolute. Inside a fenced code block a comment is an example, so it stays.
+    """
+    kept, prose, in_fence = [], [], False
+    for line in body.splitlines(keepends=True):
+        if FENCE_LINE.match(line):
+            if not in_fence:
+                kept.append(COMMENT.sub("", "".join(prose)))
+                prose = []
+            in_fence = not in_fence
+            kept.append(line)
+        elif in_fence:
+            kept.append(line)
+        else:
+            prose.append(line)
+    kept.append(COMMENT.sub("", "".join(prose)))
+    return "".join(kept)
+
+
 def rewrite_link(href, source_name):
     """Point one Markdown link at something that resolves from a shipped page.
 
@@ -286,7 +314,7 @@ def render_page(markdown_text, title, source_name="PRIVACY.md"):
     # first and its own test proved it could never fire; an unreachable branch that looks like a
     # safety net is worse than none, because it invites trusting a check that does nothing.
     # test_no_relative_link_survives_rewriting pins the property instead.
-    content = rewrite_links(build_renderer().render(body), source_name)
+    content = rewrite_links(build_renderer().render(strip_comments(body)), source_name)
     return (
         "<!doctype html>\n"
         f'<html lang="{lang}">\n'

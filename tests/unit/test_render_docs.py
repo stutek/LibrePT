@@ -28,6 +28,27 @@ def test_raw_html_is_escaped_not_passed_through():
     assert "&lt;b&gt;" in rendered
 
 
+def test_an_authors_comment_is_left_out_of_the_page():
+    """A `<!-- … -->` in a source document is a note to whoever edits it. Escaped like other raw
+    HTML, it reached every visitor of the landing page as a paragraph of developer prose."""
+    page = render_docs.render_page(
+        "# Title\n\n<!-- A note for the editor,\nover two lines. -->\n\nText.\n", "T"
+    )
+    assert "&lt;!--" not in page
+    assert "note for the editor" not in page
+    assert "Text." in page
+
+
+def test_a_comment_inside_a_code_block_is_content_and_stays():
+    page = render_docs.render_page("# Title\n\n```html\n<!-- shown -->\n```\n", "T")
+    assert "shown" in page
+
+
+def test_no_rendered_page_shows_a_comment_as_text():
+    for page in sorted((REPO_ROOT / "src").glob("*.html")):
+        assert "&lt;!--" not in page.read_text(encoding="utf-8"), page.name
+
+
 def test_dangerous_link_schemes_are_neutralised():
     """markdown-it validates link destinations; confirm that survives our configuration.
 
