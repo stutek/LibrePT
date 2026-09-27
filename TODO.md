@@ -30,6 +30,62 @@ Canonical context: [README.md](README.md) (architecture & features), [use_cases/
 (workflows), [CONTRIBUTING.md](CONTRIBUTING.md) (conventions). Durable engineering lessons live
 with the agent operating rules, not here — this file records *work*, not process.
 
+## Resume point — state as at 2026-09-26 12:06
+
+Read this and `.private/AGENT_SYNC/` before touching anything.
+
+Written when Simon stopped every agent at 2026-09-26 12:06, and committed at 2026-09-27 03:01, when
+he told them to carry on. The machine slept between the two, so **everything below describes the tree
+as it was fifteen hours earlier** — re-read `git log` and `git status --short` rather than trusting
+the commit list here. What is ruled, refuted and measured does not go stale; what is in the tree
+does.
+
+**The tree.** `librept-39` parked its unfinished §81.2 with `git stash push -u`, named
+"claude-opus §81.2 WIP", so `main` is clean; §81.2 says what is missing. Shipped today: §79 German,
+§79.3, §79.4, §81.1 (`f847eb4`), §82.1 (`964539d`), and the ISO date in `3461d92`.
+
+**Two stale claim notes are still in `.private/AGENT_SYNC/`.** `gpt-6-trainer-review.md` belongs to a
+Codex session that ran out of tokens and is not coming back. `claude-opus-card-copy.md` (2026-09-23)
+waits on a note that no longer exists. Both lock nothing and nobody owns them. Simon decides whether
+they go.
+
+**§80, the trainer's first-use review, is ruled and needs no re-checking.** Codex tested the
+published build `0625bd6`, fourteen commits behind, so every finding was re-verified in the code on
+`main`. §80.1 is refuted — it is §66 working as ruled. §80.2's terms modal is fixed in §81.1. §80.4
+was three defects: its date is closed, its language-change seam is in §81.1, its two unkeyed menu
+rows in §81.2. **§80.3 is the one finding nobody has taken**: the exercise catalogue's 48 English
+names carry no search synonyms, so "počep" matches nothing, and localised names are refused by
+§46.4. It needs Simon's Slovenian and German search terms, which an agent must not invent by
+translating. Codex's own scenario §80.1 is also unfinished: running a session, logging sets, fixing a
+wrong entry and closing it were never tested, and the requested five hours were not spent.
+
+**§83 waits on Simon's ruling** — §66's client-name check looks only forward, which breaks editing
+old sessions and leaves the GDPR hole §66 exists to close.
+
+**Two TODO entries Simon asked for on 2026-09-26 were never written.** They take the next free
+numbers; §84 is taken by the legacy-session boot crash. Their content, measured rather than guessed,
+so it is not lost:
+
+1. **Better detection of a client's name in a field.** Run against the real `clientNamesIn` with
+   clients "Ana Novak" and "Jože Kovačič", **nine of thirteen phrases pass through**: *Anin trening*,
+   *trening za Novaka*, *pri Novaku*, *Vadba z Ano*, *Ano peljem ven*, *Anini zgibi*, *Kovačičev
+   program*, *pri Jožetu*, *Novakova garaža*. Only *Ana 1:1*, *NOVAK doma* and *Telovadnica Novak*
+   are blocked — and the last of those is a real gym name, so the rule is wrong in both directions.
+   It matches the nominative only, which is the form a Slovenian trainer is least likely to type in a
+   title. "Whole words only" was ruled on 2026-09-18 against an English-shaped assumption; the first
+   market is inflected. Only two fields are checked at all, `setup-session-name` and
+   `setup-location`, while [clientErasure.js](src/data/clientErasure.js) itself names three prose
+   surfaces erasure cannot reach — session titles, draft titles and feedback notes — and the feedback
+   note (`feedback_note_placeholder`) is unchecked.
+2. **Offer the trainer a way out of the conflict: change the name, or change the field values.**
+   Simon's words, 2026-09-26. Today the refusal is a dead end: retyping the field is the only exit,
+   there is no way to change the client's name or alias from there, and no way to say the word is a
+   coincidence.
+
+**These two are ordered, and the order is the point.** A stricter matcher is safe only once the
+conflict has an exit; while the refusal is a dead end, every improvement to detection costs more than
+it buys.
+
 ## Where to start (ranked 2026-08-22)
 
 The governing fact is [docs/PREVIEW.md](docs/PREVIEW.md): the app tells its own users it can wipe
