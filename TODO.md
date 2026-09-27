@@ -6910,6 +6910,30 @@ Poskusi jo lahko le tako, da pritisne isto vrstico, ki pravi nasprotno od tega, 
 očitno bilo mišljeno. Preizkus naj po združitvi zahteva, da vrstica menija ne pravi več »Vsi na
 ta načrt«. Opaženo na objavljeni različici `0625bd6`; koda na `main` je ista.
 
+### 80.48 [ ] P3 — Trening, ki se konča pred svojim začetkom, se shrani brez besede
+
+**Scenarij in koraki:** trener v obrazcu za nov trening vpiše začetek 18:00 in konec 09:00 —
+ura, ki jo je zgrešil, ali popravek, pri katerem je pozabil na drugo polje. Doda stranko in
+shrani.
+
+**Opaženo:** aplikacija shrani brez pripombe. Kartica na plošči se glasi »18:00 - 09:00 …
+Se začne čez 06h 39m«, podloga pa »1970-01-01 · 18:00 - 09:00« (datum je §80.7). Trening torej
+traja minus devet ur.
+
+**Težava in vpliv:** iz takega zapisa se izračuna odštevanje, podaljšek in trajanje vadbe ob
+zaključku; vse to je od tod naprej narobe in trener tega ne izve, dokler mu številke ne
+zaškripajo. Napaka pri vnosu ure je na telefonu z eno roko običajna, zato jo je vredno ujeti
+takoj.
+
+**Preverjeno v kodi na `main`:** preverbe razmerja med začetkom in koncem v
+[editSessionControl.js](src/modules/session/editSessionControl.js) ni; v slovarjih ni ključa za
+tako napako.
+
+**Predlog in preverjanje:** ob shranjevanju preveriti, da je konec za začetkom, in to povedati
+pri polju, ne v oknu brskalnika (§80.19). Trening čez polnoč, če je mišljen, naj bo izbira in ne
+tiha posledica. Preizkus naj poskusi shraniti 18:00–09:00 in zahteva, da aplikacija to zavrne s
+sporočilom ob polju. Opaženo na objavljeni različici `0625bd6`.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
