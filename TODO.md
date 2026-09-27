@@ -6626,6 +6626,51 @@ naj pove, kaj je odstranjeno. Preizkus naj zahteva, da kopija bodisi ne vsebuje 
 besedilom bodisi da jih sporočilo poimensko napove. Opaženo na objavljeni različici `0625bd6`;
 koda na `main` je ista. Povezano z §67.
 
+### 80.37 [ ] P2 — Pred nepovratno zamenjavo podatkov piše, kaj bo izgubljeno, v angleščini
+
+**Scenarij in koraki:** trener v »Središče za sinhronizacijo in varnostne kopije« izbere
+»Izberi JSON datoteko« in naloži staro varnostno kopijo, medtem ko ima na napravi dve stranki,
+eno rutino in en trening.
+
+**Opaženo:** aplikacija pravilno vpraša za potrditev: »Obnovitev zamenja vse na tej napravi.
+Izgubljeno bo: **2 clients, 1 routines, 1 sessions, 1 planUpdates**.« Naštevanje je angleško, in
+zadnje ime je celo notranje ime polja v kodi (`planUpdates`). Gumba sta slovenska: »Obdrži, kar
+imam« in »Zamenjaj«.
+
+**Težava in vpliv:** to je stavek, ob katerem se trener odloči, ali bo izgubil delo. Prav ta del
+stavka — kaj izgubi — je v jeziku, ki ga morda ne bere, in z besedo, ki je ne pozna nihče razen
+programerja.
+
+**Vzrok, potrjen v kodi na `main`:** [backupRestore.js](src/modules/common/backupRestore.js)
+sestavi naštevanje kot `${count} ${collection}`, kjer je `collection` ključ zbirke iz
+[backupFile.js](src/data/backupFile.js). Okvirni stavek ima prevod, vsebina ne.
+
+**Predlog in preverjanje:** vsaka zbirka dobi svoje ime v vseh treh jezikih, in številke naj gredo
+skozi pravilo za množino (§80.17): »2 stranki, 1 program, 1 trening, 1 čakajoča sprememba«.
+Preizkus naj v slovenskem vmesniku sproži to potrditev in zahteva, da v njej ni angleških imen
+zbirk. Opaženo na objavljeni različici `0625bd6`; koda na `main` je ista.
+
+### 80.38 [ ] P2 — Uvoz pravi »združilo ali prepisalo«, v resnici vedno zamenja
+
+**Scenarij in koraki:** trener v istem oknu bere, kaj uvoz naredi, preden izbere datoteko.
+
+**Opaženo:** »Naloži obstoječo .json datoteko. To bo združilo ali prepisalo trenutno bazo.«
+
+**Kaj se zgodi v resnici:** uvoz vedno **zamenja** celotno bazo. To je zapisano tudi v kodi, z
+utemeljitvijo: združevanje dveh baz brez skupnega izhodišča je ugibanje, zato ga uvoz iz
+datoteke ne dela ([backupRestore.js](src/modules/common/backupRestore.js)). Združevanje zna
+samo sinhronizacija z Google Drive, ki skupno izhodišče ima.
+
+**Težava in vpliv:** stavek pred nepovratnim dejanjem ponuja dve možnosti, od katerih ena ne
+obstaja. Trener, ki prebere »združilo«, lahko sklene, da bo uvoz njegove nove stranke pustil pri
+miru — pa jih ne bo. Potrditveno okno pozneje pove pravo stvar, a šele potem, ko je datoteko že
+izbral.
+
+**Predlog in preverjanje:** zapis naj se glasi, da uvoz zamenja vse na tej napravi s
+tistim, kar je v datoteki. Ključ `backup_import_desc` v `en`, `sl` in `de`. Preizkus naj zahteva,
+da opis uvoza ne vsebuje besede za združevanje. Opaženo na objavljeni različici `0625bd6`; zapis
+na `main` je isti.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
