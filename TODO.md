@@ -6248,9 +6248,13 @@ napolni prvo možnost s ključem `select_exercise` (»Izberi vajo«, »Select Ex
 »Übung auswählen«), čeprav seznam gradi iz `state.routines`. Sporočilo napake uporablja
 `err_assign_routine`, bralnikov opis pa `select_routine_for`.
 
+**Imen je v resnici pet.** Vrstica v meniju ☰ se glasi »Rutine«, naslov strani, ki jo odpre,
+pa »Predloge rutine« z gumbom »Ustvari rutino«. Skupaj z izrazi na zaslonu za nov trening je to
+pet imen za eno stvar: vaja, program, rutina, predloga rutine, načrt.
+
 **Predlog in preverjanje:** izbrati eno ime za to stvar v vsakem jeziku in ga uporabiti v vseh
-treh zapisih; prva možnost dobi svoj ključ, ne ključa za vaje. Preveriti tudi, da se ime ujema
-z imenom vrstice v meniju (»Rutine«). Preizkus naj zahteva, da se v tem obrazcu ne pojavi ključ
+zapisih; prva možnost dobi svoj ključ, ne ključa za vaje. Preveriti tudi, da se ime ujema
+z imenom vrstice v meniju in z naslovom strani. Preizkus naj zahteva, da se v tem obrazcu ne pojavi ključ
 `select_exercise`. Opaženo na objavljeni različici `0625bd6`; koda na `main` je ista.
 
 ### 80.22 [ ] P3 — Gumb »Done« v oknu za vabila ostane angleški
