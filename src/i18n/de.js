@@ -933,6 +933,7 @@ export const de = {
   feedback_tag_form_break: "Technik lässt nach – auf die Haltung achten",
   feedback_tag_joint_pain: "Gelenkschmerz oder Beschwerden",
   feedback_tag_progression: "Guter Fortschritt",
+  feedback_tag_note: "Nur Notiz, ohne Bewertung",
   feedback_short: "Notizen",
   feedback_has_note: "Rückmeldung (mit Notiz)",
   round_label: "Runde",

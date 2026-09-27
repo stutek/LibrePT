@@ -68,6 +68,7 @@ export function openFeedbackModal(exId) {
 }
 
 const CHIP_EMOJI = {
+  note: "📝",
   too_easy: "🚀",
   too_hard: "⚠️",
   form_break: "🔬",

@@ -881,6 +881,7 @@ export const sl = {
   feedback_tag_form_break: "Tehnika popušča – pazi na položaj",
   feedback_tag_joint_pain: "Bolečina ali nelagodje v sklepu",
   feedback_tag_progression: "Dober napredek",
+  feedback_tag_note: "Samo opomba, brez ocene",
   feedback_short: "Opombe",
   feedback_has_note: "Povratna informacija (opomba priložena)",
   round_label: "Krog",

@@ -1,7 +1,7 @@
 # tests/e2e/test_feedback_modal_exclusivity.py
 # Too Easy / Too Hard are mutually exclusive, and the Notes modal must honour that rule even though
 # it does not go through logQuickSignal: it offers the SAME two tags as its own radio choices
-# (default-checked to Too Easy) and writes activeSession.feedback directly, so a quick-tapped signal
+# and writes activeSession.feedback directly, so a quick-tapped signal
 # and a modal submission are two separate write paths onto one exclusive pair.
 #
 # This is the seam between two components — the clipboard deck and #dialog-feedback — driven through
@@ -61,7 +61,10 @@ def test_modal_submission_of_opposite_tag_clears_the_quick_tapped_signal(
 
     page.locator("#btn-log-feedback").click()
     page.wait_for_selector("#dialog-feedback[open]")
-    # Leave the default radio (Too Easy - Increase Load) and the custom-note field empty.
+    # Choose Too Easy on purpose (the default is the neutral "Note only") and leave the note empty.
+    page.locator(
+        '#form-feedback input[name="feedback-tag"][value="Too Easy - Increase Load"]'
+    ).check()
     page.locator("#form-feedback button[type=submit]").click()
     page.wait_for_timeout(300)
 
@@ -133,3 +136,29 @@ def test_modal_submission_the_other_direction_also_clears(page, local_server):
     assert state["feedback"][0]["tag"] == "Too Hard - Reduce Load"
     assert state["easyActive"] is False
     assert state["hardActive"] is True
+
+
+def test_a_note_written_without_choosing_a_rating_stays_neutral(page, local_server):
+    """A free note saved without touching the chips became "Too Easy - Increase Load", because that
+    chip was checked by default: the next plan then suggested a heavier load nobody asked for."""
+    _open_session_with_one_exercise(page, local_server, log_id="feedback-modal-log-3")
+
+    page.locator("#btn-log-feedback").click()
+    page.wait_for_selector("#dialog-feedback[open]")
+    page.locator("#feedback-custom-note").fill("plank 30 s, 25 s, 20 s")
+    page.locator("#form-feedback button[type=submit]").click()
+    page.wait_for_timeout(300)
+
+    tags = page.evaluate(
+        """async () => {
+            const m = await import(new URL('controllers/activeSessionController.js', document.baseURI).href);
+            const store = await import(new URL('data/stateStore.js', document.baseURI).href);
+            return {
+                session: m.getActiveSession().feedback.map((f) => f.tag),
+                review: store.getState().planUpdates
+                    .filter((u) => u.exerciseName === 'Barbell Row').map((u) => u.tag),
+            };
+        }"""
+    )
+    assert tags["session"] == ["Note"]
+    assert tags["review"] == ["Note - plank 30 s, 25 s, 20 s"]

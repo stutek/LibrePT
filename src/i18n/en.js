@@ -944,6 +944,7 @@ export const en = {
   feedback_tag_form_break: "Form breaks – watch the position",
   feedback_tag_joint_pain: "Joint pain or discomfort",
   feedback_tag_progression: "Good progression",
+  feedback_tag_note: "Note only, no rating",
   feedback_short: "Notes",
   feedback_has_note: "Feedback (note attached)",
   round_label: "Round",

@@ -37,7 +37,7 @@ test("a tag from an older version is shown as it was stored", () => {
 
 test("every tag has its words in every language", () => {
   for (const [lang, table] of Object.entries(TRANSLATIONS)) {
-    for (const id of ["too_easy", "too_hard", "form_break", "joint_pain", "progression"]) {
+    for (const id of ["note", "too_easy", "too_hard", "form_break", "joint_pain", "progression"]) {
       assert.ok(table[`feedback_tag_${id}`], `${lang} feedback_tag_${id}`);
     }
   }

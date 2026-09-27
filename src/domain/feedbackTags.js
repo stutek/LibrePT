@@ -1,5 +1,5 @@
-// src/domain/feedbackTags.js — the five feedback tags a trainer can give an exercise, and how a
-// stored tag is read back.
+// src/domain/feedbackTags.js — the feedback tags a trainer can give an exercise, and how a stored
+// tag is read back.
 //
 // **The stored tag is an English key, and it is never shown.** A record keeps the English string
 // ("Too Easy - Increase Load") because the quick-signal toggle recognises and un-taps a signal by
@@ -16,7 +16,11 @@
 //
 // Pure: no DOM, no storage.
 
+// The first entry is the dialog's default, and it is the neutral one. A free note saved without
+// touching the chips used to be stored as "Too Easy - Increase Load", the old default, so the next
+// plan suggested a heavier load nobody had asked for.
 export const FEEDBACK_TAGS = [
+  { id: "note", tag: "Note", key: "feedback_tag_note" },
   { id: "too_easy", tag: "Too Easy - Increase Load", key: "feedback_tag_too_easy" },
   { id: "too_hard", tag: "Too Hard - Reduce Load", key: "feedback_tag_too_hard" },
   { id: "form_break", tag: "Form Break - Watch Position", key: "feedback_tag_form_break" },
