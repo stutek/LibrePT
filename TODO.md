@@ -6141,35 +6141,9 @@ nobenemu.
 **Preverjanje:** ko bo odločeno, naj preizkus zahteva, da je pripravljeno besedilo v enem jeziku.
 Opaženo na objavljeni različici `0625bd6`.
 
-### 80.40 [ ] P1 — Dva odprta zavihka: tisti, ki shrani pozneje, izbriše delo drugega
+### 80.40 [x] P1 — Dva odprta zavihka: tisti, ki shrani pozneje, izbriše delo drugega — popravljeno 2026-09-27
 
-**Scenarij in koraki:** aplikacija je odprta v dveh zavihkih (trener odpre povezavo, medtem ko
-jo že ima odprto — ali pusti star zavihek odprt).
-1. V zavihku A doda stranko »Test A«.
-2. V zavihku B (odprtem po tem) doda stranko »Test B«. Zavihek B vidi obe.
-3. V zavihku A, ki od koraka 1 ni bil osvežen, doda stranko »Test C«.
-
-**Opaženo:** po osvežitvi obeh zavihkov sta v imeniku »Test A« in »Test C«. **»Test B« je
-izginila** — brez vprašanja, brez opozorila, brez sledi. Preverjeno v obeh zavihkih in v
-shrambi.
-
-**Vzrok, potrjen v kodi na `main`:** stanje se prebere ob zagonu v pomnilnik, vsako shranjevanje
-pa zapiše **celotno** stanje ([stateStore.js](src/data/stateStore.js), `saveToLocalStorage`).
-Zavihek A shrani svojo sliko sveta, v kateri »Test B« nikoli ni bilo. V `src/` ni ne
-`BroadcastChannel` ne poslušalca dogodka `storage`, torej zavihka drug za drugega ne vesta.
-
-**Težava in vpliv:** to je tiha izguba podatkov pri ravnanju, ki ga nihče ne bi imel za
-nevarno — dva odprta zavihka. Trener ne izve nič; stranka, trening ali zapisana vadba preprosto
-ni več tam. Aplikacija, ki obljublja, da podatki živijo na napravi, mora to znati preživeti.
-
-**Predlog:** ob vsakem pisanju preveriti, ali je zapis v shrambi novejši od tistega, ki ga ima
-zavihek v pomnilniku, in takrat ne pisati čez, ampak brati znova (ali združiti). Najmanjši
-popravek, ki odpravi tiho izgubo: zavihek, ki ugotovi, da je shramba novejša, se osveži in
-trenerju pove, da je aplikacija odprta še nekje. `BroadcastChannel` je za to dovolj.
-
-**Preverjanje:** preizkus naj v dveh straneh iste izvorne točke naredi zaporedje zgoraj in
-zahteva, da po koncu obstajajo vse tri stranke. Opaženo na objavljeni različici `0625bd6`; koda
-na `main` je ista.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8040-x-p1--dva-odprta-zavihka-tisti-ki-shrani-pozneje-izbriše-delo-drugega--popravljeno-2026-09-27).
 
 ### 80.41 [ ] P2 — Trije izhodi iz obrazca za stranko, dva izida: »Prekliči« zavrže, ✕ in Esc obdržita
 
@@ -6199,6 +6173,12 @@ gre za vse tri obrazce, ki pišejo sproti, ne le za stranke.
 vpraša, kaj naj stori z vpisanim. Tiho ohranjanje je najslabša od treh možnosti, ker trener ne
 izve, da je stranka nastala. Preizkus naj vse tri izhode preveri z vpisanim imenom in zahteva
 isti izid. Opaženo na objavljeni različici `0625bd6`; koda na `main` je ista.
+
+**Čaka na Simona — predlog nasprotuje njegovi odločitvi.** 2026-09-17 je odločil, da »Prekliči«
+razveljavi, vsak drug izhod — Shrani, ✕, Esc, Nazaj, menjava pogleda — pa zapis dokonča (zapisano v
+[liveRecordForm.js](src/modules/common/liveRecordForm.js)). Ta razdelek predlaga, naj ✕ in Esc
+razveljavita. Odločitev: ali ✕ in Esc preideta k »Prekliči«, ali obrazec ob njiju vpraša, ali ostane,
+kot je, in se samo pokaže, da je stranka nastala.
 
 ### 80.42 [ ] P2 — Izvoz podatkov, ki ga prebere stranka, je v celoti angleški
 

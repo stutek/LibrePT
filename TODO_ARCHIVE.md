@@ -5275,3 +5275,35 @@ besedilom bodisi da jih sporočilo poimensko napove. Opaženo na objavljeni razl
 koda na `main` je ista. Povezano z §67.
 
 **Fixed 2026-09-27 (Claude Opus 5.5), commit `1b38205`.** src/domain/aiClientSummary.js copies the client's ID and the performed sessions set by set; no name, contact details, goals or notes. The message says what was left out and no longer calls it safe. The workouts had never reached the copy: it read `completedExercises`, a field workout records do not have.
+
+### 80.40 [x] P1 — Dva odprta zavihka: tisti, ki shrani pozneje, izbriše delo drugega — popravljeno 2026-09-27
+
+**Scenarij in koraki:** aplikacija je odprta v dveh zavihkih (trener odpre povezavo, medtem ko
+jo že ima odprto — ali pusti star zavihek odprt).
+1. V zavihku A doda stranko »Test A«.
+2. V zavihku B (odprtem po tem) doda stranko »Test B«. Zavihek B vidi obe.
+3. V zavihku A, ki od koraka 1 ni bil osvežen, doda stranko »Test C«.
+
+**Opaženo:** po osvežitvi obeh zavihkov sta v imeniku »Test A« in »Test C«. **»Test B« je
+izginila** — brez vprašanja, brez opozorila, brez sledi. Preverjeno v obeh zavihkih in v
+shrambi.
+
+**Vzrok, potrjen v kodi na `main`:** stanje se prebere ob zagonu v pomnilnik, vsako shranjevanje
+pa zapiše **celotno** stanje ([stateStore.js](src/data/stateStore.js), `saveToLocalStorage`).
+Zavihek A shrani svojo sliko sveta, v kateri »Test B« nikoli ni bilo. V `src/` ni ne
+`BroadcastChannel` ne poslušalca dogodka `storage`, torej zavihka drug za drugega ne vesta.
+
+**Težava in vpliv:** to je tiha izguba podatkov pri ravnanju, ki ga nihče ne bi imel za
+nevarno — dva odprta zavihka. Trener ne izve nič; stranka, trening ali zapisana vadba preprosto
+ni več tam. Aplikacija, ki obljublja, da podatki živijo na napravi, mora to znati preživeti.
+
+**Predlog:** ob vsakem pisanju preveriti, ali je zapis v shrambi novejši od tistega, ki ga ima
+zavihek v pomnilniku, in takrat ne pisati čez, ampak brati znova (ali združiti). Najmanjši
+popravek, ki odpravi tiho izgubo: zavihek, ki ugotovi, da je shramba novejša, se osveži in
+trenerju pove, da je aplikacija odprta še nekje. `BroadcastChannel` je za to dovolj.
+
+**Preverjanje:** preizkus naj v dveh straneh iste izvorne točke naredi zaporedje zgoraj in
+zahteva, da po koncu obstajajo vse tri stranke. Opaženo na objavljeni različici `0625bd6`; koda
+na `main` je ista.
+
+**Fixed 2026-09-27 (Claude Opus 5.5), commit `4b17230`.** One tab saves at a time (src/data/tabOwnership.js): the newest tab to boot claims the turn before it reads, every other tab stops saving and shows »LibrePT je odprt v drugem zavihku« with »Uporabi tukaj«, which reloads it. tests/e2e/test_two_tabs.py runs the scenario above and requires all three clients at the end.
