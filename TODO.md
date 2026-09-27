@@ -5985,6 +5985,12 @@ podatki. Pomen je samo v nevidnem besedilu, kar projektno pravilo prepoveduje, i
 besedilo je v tujem jeziku. Znak »?« brez razlage vzbuja skrb pri uporabniku, ki oblaka
 sploh ni priklopil.
 
+**Natančneje, izmerjeno v brskalniku:** gumb sam (`#backup-btn`) ima slovenski opis
+»Središče za sinhronizacijo in varnostne kopije — Sinhronizacija v oblak ni povezana«, znotraj
+njega pa je števec (`span.sync-badge`) z angleškim opisom »4 local changes to push, cloud
+status unknown«. Slovenščina in angleščina sta torej v istem gumbu, ena v drugi. Število
+narašča ob delu — po prvem shranjenem treningu je bilo 4 — in trener nikjer ne izve, kaj šteje.
+
 **Predlog in preverjanje:** ko oblak ni nastavljen, števca ne kazati; ko je, mu dati vidno
 besedo ali ga odpreti v okno s stanjem. `aria-label` sestaviti prek `t(...)` s ključi v
 `en`, `sl` in `de`. Preverjeno na objavljeni različici `0625bd6`; koda na `main` je ista —
