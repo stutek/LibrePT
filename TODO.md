@@ -6247,6 +6247,29 @@ treh zapisih; prva možnost dobi svoj ključ, ne ključa za vaje. Preveriti tudi
 z imenom vrstice v meniju (»Rutine«). Preizkus naj zahteva, da se v tem obrazcu ne pojavi ključ
 `select_exercise`. Opaženo na objavljeni različici `0625bd6`; koda na `main` je ista.
 
+### 80.22 [ ] P3 — Gumb »Done« v oknu za vabila ostane angleški
+
+**Scenarij in koraki:** trener shrani nov trening z eno stranko. Odpre se okno »Pošlji vabila
+v koledar«.
+
+**Opaženo:** okno je v slovenščini, zadnji gumb pa se glasi »Done«. Prevod obstaja:
+`done: "Končano"` v [sl.js](src/i18n/sl.js), in gumb ima `data-i18n="done"`.
+
+**Obseg, izmerjen v brskalniku:** primerjava vseh 847 ključev slovenskega slovarja z vsemi
+elementi na zaslonu, ki nosijo `data-i18n`, najde natanko eno neskladje — ta gumb. Drugih
+takih ni.
+
+**Vzrok:** okno se sestavi šele, ko je potrebno, prevajanje pa je čez `data-i18n` teklo prej.
+Druga besedila v tem oknu se izrišejo po lastnih ključih ob odprtju in so zato slovenska; ta
+gumb ostane pri besedilu iz predloge. [sessionInviteDialog.js](src/modules/session/sessionInviteDialog.js),
+vrstica z `data-i18n="done"`; datoteka se od objavljene gradnje ni vsebinsko spremenila, torej
+velja tudi na `main`.
+
+**Predlog in preverjanje:** ob vsakem sestavljanju okna pognati prevajanje še enkrat, ne
+dodajati ročnega izpisa. Preizkus naj v slovenskem vmesniku odpre okno za vabila in zahteva, da
+na gumbu piše »Končano«. Isto primerjavo (`data-i18n` proti slovarju) je vredno pognati kot
+preizkus čez vsa okna, ki nastanejo pozneje.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
