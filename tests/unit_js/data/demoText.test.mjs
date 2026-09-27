@@ -52,7 +52,15 @@ for (const lang of Object.keys(TRANSLATIONS).filter((code) => code !== "en")) {
       need(session.title);
       need(session.location);
     }
-    for (const routine of DEFAULT_ROUTINES) need(routine.name);
+    for (const routine of DEFAULT_ROUTINES) {
+      need(routine.name);
+      // What each exercise asks for is the column a trainer reads during a set; a number is
+      // language-free, a phrase like "10 per arm" is not.
+      for (const entry of routine.exercises || []) {
+        need(entry.reps);
+        need(entry.circuitTitle);
+      }
+    }
     for (const client of DEFAULT_CLIENTS) {
       need(client.goals);
       need(client.notes);

@@ -150,6 +150,17 @@ export const DEMO_TEXT = {
     // ── Plan adjustments the demo already carries (data/planUpdates.js) ───────────────────────
     "Too Easy - Increase Load": "Prelahko – povečaj težo",
     "Form Break - Depth Alert": "Tehnika popušča – pozor na globino",
+    // ── What each exercise asks for, the column read during a set (data/routines.js) ─────────
+    "10 per arm": "10 na roko",
+    "10 reps": "10 ponovitev",
+    "10 reps (light)": "10 ponovitev (lahko)",
+    "12 reps": "12 ponovitev",
+    "20 per side": "20 na stran",
+    "30s hold": "30 s drže",
+    "45 seconds": "45 s",
+    "45s": "45 s",
+    "60s hold": "60 s drže",
+    Max: "Največ",
   },
 
   // German. Machine translation, not yet reviewed by a German speaker (see src/i18n/de.js). Two of
@@ -280,6 +291,17 @@ export const DEMO_TEXT = {
     // ── Plan adjustments the demo already carries (data/planUpdates.js) ───────────────────────
     "Too Easy - Increase Load": "Zu leicht – Last erhöhen",
     "Form Break - Depth Alert": "Technik lässt nach – auf die Tiefe achten",
+    // ── What each exercise asks for, the column read during a set (data/routines.js) ─────────
+    "10 per arm": "10 pro Arm",
+    "10 reps": "10 Wdh.",
+    "10 reps (light)": "10 Wdh. (leicht)",
+    "12 reps": "12 Wdh.",
+    "20 per side": "20 pro Seite",
+    "30s hold": "30 s halten",
+    "45 seconds": "45 s",
+    "45s": "45 s",
+    "60s hold": "60 s halten",
+    Max: "Max.",
   },
 };
 
