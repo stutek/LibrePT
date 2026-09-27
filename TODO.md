@@ -179,22 +179,19 @@ programme. Relates to [uc1_gym_floor_clipboard.md](use_cases/uc1_gym_floor_clipb
   glanceable without reading. `renderSessionTitle()` shows only `titles[0]` today, so this is new UI.
 - **Decided — de-duplication**: identical titles collapse to one line, not repeated ones.
 
-### 1.3 [ ] Session list must model partial overlaps and other PTs' room usage
+### 1.3 [ ] Session list must model partial overlaps
+
+**Narrowed 2026-09-27: the room half left this app.** Other trainers' room occupancy was read from
+one Google resource calendar per room, and every Google Calendar integration is now a paid
+capability — the ruling and its reasoning are in the private `~/Projects/EnterprisePT` project,
+`TODO.md` §19, and what has to leave this repository is §68.3 below. What stays here is the trainer's
+own sessions overlapping, which needs no calendar at all.
+
 - **Partial overlaps** (10:00–11:00 vs 10:30–11:30) must both render, showing the overlap rather than
   stacking as if sequential. Render it the way calendar apps do: a vertical time grid, blocks whose
   top/height map to start/end, overlapping blocks side by side in columns.
-- **Other PTs' bookings for the same room** render read-only and shaded — occupancy only, not
-  launchable, no participant detail.
-- Implies a **room/resource** dimension the data model lacks. Source decided in §1.5: a per-room
-  Google resource calendar read via `freebusy.query`, not a backend of our own. **The read half is
-  built** — [src/data/calendarFreeBusy.js](src/data/calendarFreeBusy.js) batches every room into one
-  request and is exercised against the real endpoint by the canary. What remains here is the room
-  dimension in the data model, and the renderer.
-- **An unreadable room must never draw as free.** Google reports a calendar it could not read inside
-  an HTTP 200, per-calendar, so the shape that ignores it turns "we don't know" into "available" —
-  and on a gym floor that is a trainer booking a room someone else is already in. `queryFreeBusy`
-  therefore returns `unreadable` alongside `busyByCalendar`, and the renderer owes that list a
-  visibly distinct state (hatched, "can't see this room") rather than blank space.
+- The lane arithmetic is built and tested — [src/domain/overlapLanes.js](src/domain/overlapLanes.js)
+  decides which column a block takes and how many it shares width with. What remains is the renderer.
 - Must be legible inside the continuous timeline §4.3 shipped.
 
 ### 1.4 [ ] Calendar preferences — holidays and non-working days
@@ -202,20 +199,19 @@ Import a holiday calendar (public holidays, gym closures) and colour-code off da
 picker and the timeline's day lines. Needs a per-region feed and a per-PT toggle — a gym's actual
 closures do not match a public holiday list. Distinct from the existing temporal tinting
 (`--temporal-past`/`--temporal-future`), which is about session recency, not whether the day is open.
+**This one stays in the free app** despite the 2026-09-27 ruling above: a holiday list is a published
+feed anyone may subscribe to, not a read of the trainer's own Google account.
 
-### 1.5 [ ] [Brainstorm] Google Calendar integration — source of truth, occupancy, and data-processor exposure
+### 1.5 [ ] [Brainstorm] The Google grant this app asks for, and the data-processor exposure it avoids
 **Raised 2026-08-01 (Simon).** Settles the "shared calendar or backend" question left open in §1.3.
 Cross-referenced from [PRIVACY.md](PRIVACY.md).
 
-- **Source of truth splits by data type.** Google Calendar is the sole authority for scheduling facts
-  — event time, room, attendee RSVP — because that is where they originate. App-only data (clipboard
-  state, logged sets, per-participant tags) is the one thing the local store is authoritative for.
-- **Facility occupancy**: one Google resource calendar per room, read via `freebusy.query` for §1.3's
-  shading — free/busy only, never the event body, so no PT's session detail leaks to another. Tag
-  workout vs. maintenance via `extendedProperties.private` at creation (Calendar's native `eventType`
-  does not cover it) so maintenance can render as a hard block.
-- **The PT's own private calendar** is read only by that PT, only via their own `freebusy.query`, for
-  a self-double-booking warning. Never surfaced to others, never mixed into the room calendar.
+**Narrowed 2026-09-27: the Calendar half left this app.** Google Calendar as the authority for
+scheduling facts, room occupancy read per room, and the trainer's own calendar read for a clash
+warning are all paid capabilities now — the ruling is in the private `~/Projects/EnterprisePT`
+project, `TODO.md` §19, and §68.3 below lists what leaves this repository. So this app's Google grant
+is Drive and nothing else, which is what the rest of this section is about.
+
 - **No backend of our own.** Cross-device sync goes through Drive `appDataFolder` on the same OAuth
   grant — **built, see §3.3**, which also supersedes this section's original merge sketch.
 - **PII on Drive**: `appDataFolder` gives TLS, Google's at-rest AES-256, and app-scoped access
@@ -224,10 +220,10 @@ Cross-referenced from [PRIVACY.md](PRIVACY.md).
   arrangement. Optional hardening (client-side encrypt before upload) needs a recovery-code story
   first, because a lost key makes that copy unrecoverable — a direct tension with §3.8.
 - **Firestore was rejected as the default**: it would make the maintainer a GDPR **processor** (DPA,
-  subprocessor disclosure, residency choice, breach duties), none of which applies to Calendar+Drive.
-  Reconsider only for true sub-second push or server-side compute. **Open**: is either ever needed,
-  or is poll-on-resume enough?
-- **GCP dependency, independent of the above**: Calendar access needs a developer-registered OAuth
+  subprocessor disclosure, residency choice, breach duties), none of which applies to Drive
+  `appDataFolder`. Reconsider only for true sub-second push or server-side compute. **Open**: is
+  either ever needed, or is poll-on-resume enough?
+- **GCP dependency, independent of the above**: Drive access needs a developer-registered OAuth
   client. Public distribution beyond ~100 test users requires Google's consent-screen **verification**
   (privacy policy, homepage, review lead time) — a real launch dependency to plan for.
   **`github.io` is a live risk here**: it sits on the Public Suffix List, so proving domain ownership
@@ -352,11 +348,12 @@ committed to, and on a phone the submit button is nowhere near the time inputs.
   location and the names to differ; a blank location is never read as "somewhere else".
 - **A warning, never a block.** The trainer knows things the app does not — the other booking was
   cancelled, someone is covering — so a clash is a confirm, not a refusal.
-- **Still open**: the external half. `busy` intervals are already a first-class input to the rules,
-  but nothing supplies them yet; that needs `calendar.freebusy` added to the grant
-  ([googleAuth.js](src/data/googleAuth.js) requests Drive's scope only today) and the trainer's own
-  primary calendar read via `queryFreeBusy`. Room calendars are §1.3; this one is the PT's own, and
-  §1.5 is explicit that it is never mixed into the room read.
+- **The external half left this app on 2026-09-27**, with every other Google Calendar integration
+  (§1.5, and §68.3 for what leaves the repository). It would have read the trainer's own Google
+  calendar to warn that they are already committed elsewhere, and that now belongs to the paid tier
+  (`~/Projects/EnterprisePT` `TODO.md` §19). The rules keep taking `busy` intervals as a first-class
+  input, because they cost nothing and the paid overlay supplies them — but in this app nothing ever
+  will, so the warning sees only what the app itself recorded.
 **Shipped alongside it — the invite has a return address now.** An `.ics` carrying
 `ATTENDEE;RSVP=TRUE` and no `ORGANIZER` is an invitation with nowhere to reply to (RFC 5546 requires
 the property for a `METHOD:REQUEST`), so acceptances were not merely unread by the app — most
@@ -4250,26 +4247,19 @@ around sets, reps and load.
 Worth noting as a reason it matters commercially: a re-test is the only thing in a trainer's work
 that demonstrates progress in a number, which is what a client renews on.
 
-### 45.12 [ ] Published slots a client picks from an INVITATION
+### 45.12 [CLOSED 2026-09-27] Published slots a client picks from an INVITATION, moved to PRO
 
-**Wanted (Simon, 2026-09-11).** A training session with published times, where the client chooses one
-themselves, having been invited.
-
-**Adjacent to, but not the same as, what exists.**
-[uc3_publish_slots.md](use_cases/uc3_publish_slots.md) and
-[uc4_client_self_subscription.md](use_cases/uc4_client_self_subscription.md) both stand on Google
-Calendar's appointment schedules — deliberately, to avoid hosting anything. This one starts from an
-invitation the trainer sends and has to work for a trainer with no Google account, which is the
-difference that makes it a separate use case rather than a variation.
-
-Where it connects: [§26](TODO.md)'s self-onboarding already sends a client a link and gets a file
-back, and the RSVP page ([rsvpView.js](src/modules/rsvp/rsvpView.js)) is already an answer coming
-back from a client. The open question is whether choosing a slot is another answer of the same kind.
+Closed — a client choosing from published times is a paid feature (`~/Projects/EnterprisePT`
+`TODO.md` §11 and §19). The reasoning is in
+[TODO_ARCHIVE.md](TODO_ARCHIVE.md#4512-closed-2026-09-27-published-slots-a-client-picks-from-an-invitation-moved-to-pro).
 
 ### 45.13 [ ] An appointment already agreed — just send the client an ICS
 
 **Wanted (Simon, 2026-09-11).** The time is agreed, nothing needs deciding, and all the client needs
 is a calendar entry.
+
+**This is the whole of client-facing booking in the free app, as of 2026-09-27.** The trainer names
+the time and sends the entry; a client never picks from a list of times here (§45.12).
 
 **Most of this is built.** [calendarInvite.js](src/data/calendarInvite.js) writes the ICS, and
 [sessionInviteDialog.js](src/modules/session/sessionInviteDialog.js) already hands it to a client by
@@ -4715,6 +4705,48 @@ has to be ruled, not styled:
   not get to skip.
 - **Open:** does a free-tier tag belong in an app whose licence and pitch are "free and complete"?
   The honest version names the paid tier without implying the free one is crippled.
+
+### 68.3 [ ] Google Calendar leaves this repository — ruled 2026-09-27 (Simon)
+
+**The ruling and all of its reasoning are in the private `~/Projects/EnterprisePT` project,
+`TODO.md` §19.** In one line: every Google Calendar integration is a paid capability, and this app
+keeps only the `.ics` invitation for one named session, because an `.ics` is a file the app writes
+itself — no Google account, no scope, no network. What the trainer buys with PRO is not having to
+type a session into the app and into Google Calendar both, plus a session that keeps itself in step
+with the client.
+
+**Nothing running changes.** No file in the app imports
+[calendarFreeBusy.js](src/data/calendarFreeBusy.js), and
+[googleAuth.js](src/data/googleAuth.js) asks Google for the Drive scope alone. So this is a removal,
+not a rewrite, and the plan entries went with it already: §1.3 lost its room half, §1.5 lost the
+Calendar half, §1.6 lost its external half, §45.12 closed.
+
+**What still has to leave, and in this order:**
+
+1. **The two sentences that are now untrue**, in [PRIVACY.md](PRIVACY.md) and
+   [src/privacy.html](src/privacy.html): *scheduling data is planned to live in your own Google
+   Calendar*. A trainer reads those. They are the only user-visible casualty of the ruling, and they
+   go first.
+2. **`src/data/calendarFreeBusy.js`**, its unit test, its line in
+   [src/sw/cacheManifest.js](src/sw/cacheManifest.js) and its row in
+   [docs/SRC_MODULES.md](docs/SRC_MODULES.md).
+3. **The live calendar tests**: `tests/live/calendarFreeBusy.live.test.mjs`, and the calendar scope
+   `tests/live/tokenScopes.live.test.mjs` and `tests/unit/test_google_credential.py` expect.
+4. **`use_cases/uc3_publish_slots.md` and `uc4_client_self_subscription.md`**, their rows in
+   [use_cases/INDEX.md](use_cases/INDEX.md) and [INDEX.md](INDEX.md), and every sentence pointing at
+   them — [uc5](use_cases/uc5_session_day_deck_and_deep_links.md) names UC4 three times,
+   [clientSignup.js](src/data/clientSignup.js) and
+   [sessionInviteDialog.js](src/modules/session/sessionInviteDialog.js) once each. A dead
+   cross-reference fails the build, so this is one change, not four.
+5. **Comments naming the calendar as a coming source**, in
+   [scheduleConflicts.js](src/domain/scheduleConflicts.js),
+   [overlapLanes.js](src/domain/overlapLanes.js),
+   [erasureChecklist.js](src/data/erasureChecklist.js) and
+   [docs/GOOGLE_CLOUD_SETUP.md](docs/GOOGLE_CLOUD_SETUP.md).
+
+**Not part of this, deliberately**: the canary credential is granted `calendar.freebusy` beside
+`drive.appdata` (§1.5.1). Narrowing it means running the consent flow again, so it waits for the
+rotation that is due anyway.
 
 ## 78. [ ] Measurements, and a client's progress over time
 

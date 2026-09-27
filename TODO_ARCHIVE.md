@@ -4432,3 +4432,25 @@ tests and the overflow walk entry that name it.
   one file moves a trainer's whole library.
 
 **Done 2026-09-27 (Claude), commit `8f0f808`; `build check` green 04:18–04:30.** The export moved to the library screen beside Import; the JSON carries routines, which Import reads back. A routine carries no source, because schema 5 gives it no such field.
+
+### 45.12 [CLOSED 2026-09-27] Published slots a client picks from an INVITATION, moved to PRO
+
+**Wanted (Simon, 2026-09-11).** A training session with published times, where the client chooses one
+themselves, having been invited.
+
+**Adjacent to, but not the same as, what exists.** `use_cases/uc3_publish_slots.md` and
+`use_cases/uc4_client_self_subscription.md` both stand on Google Calendar's appointment schedules —
+deliberately, to avoid hosting anything. This one starts from an invitation the trainer sends and has
+to work for a trainer with no Google account, which is the difference that makes it a separate use
+case rather than a variation.
+
+Where it connects: §26's self-onboarding already sends a client a link and gets a file back, and the
+RSVP page ([rsvpView.js](src/modules/rsvp/rsvpView.js)) is already an answer coming back from a
+client. The open question is whether choosing a slot is another answer of the same kind.
+
+**Closed 2026-09-27 (Simon): it is a paid feature, wanted there.** Every Google Calendar integration
+moved to PRO the same day, and a menu of times the client picks from moved with it — including this
+shape, which needs no Google account. The reason it survives at all is that a seat count several
+strangers change at once needs a place where state lives outside one phone, and that place is the
+paid tier's, not this app's. It continues in the private `~/Projects/EnterprisePT` project, `TODO.md`
+§11 and §19. What stays here is §45.13: the trainer names the time and sends the client an `.ics`.
