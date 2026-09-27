@@ -72,7 +72,9 @@
   border: 1px solid var(--card-border);
   border-radius: var(--border-radius-sm, 6px);
 }
-.participant-match {
+/* The offer to add the typed name as a new client looks like a match, and is not one. */
+.participant-match,
+.participant-add-new {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -89,8 +91,14 @@
   cursor: pointer;
 }
 .participant-match:hover,
-.participant-match:focus-visible {
+.participant-match:focus-visible,
+.participant-add-new:hover,
+.participant-add-new:focus-visible {
   background: color-mix(in srgb, var(--primary) 14%, transparent);
+}
+.participant-add-new {
+  color: var(--primary);
+  font-weight: 600;
 }
 .participant-match-empty {
   padding: 10px 12px;

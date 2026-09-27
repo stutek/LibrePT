@@ -23,6 +23,7 @@ import {
   syncSessionFocusUrl,
 } from "./controllers/activeSessionController.js";
 import { primeBackupHealth, refreshBackupBadge } from "./controllers/backupHealthController.js";
+import { openNewClient } from "./controllers/clientFormsController.js";
 import {
   openExerciseCreateDialog,
   setupExerciseForms as setupExerciseFormsController,
@@ -523,6 +524,7 @@ async function init() {
     saveToLocalStorage: saveState,
     rerenderSessions: renderSessions,
     openSessionInviteDialog,
+    openNewClient,
   });
   setupActiveSession();
 

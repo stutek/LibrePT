@@ -960,10 +960,30 @@ function renderParticipantMatches(query) {
 
   const matches = matchingClients(query);
   if (matches.length === 0) {
+    // An empty directory is said as such, and either way the name typed can become a client here:
+    // the search used to end at "No client of that name", with the ☰ menu the only way on.
+    const directoryEmpty = (participantRowContext?.state?.clients || []).length === 0;
     const none = document.createElement("li");
     none.className = "participant-match-empty";
-    none.textContent = t("no_matching_clients") || "No matching clients";
+    none.textContent = t(directoryEmpty ? "no_clients_yet" : "no_matching_clients");
     list.appendChild(none);
+    const name = query.trim();
+    const offerItem = document.createElement("li");
+    const offer = document.createElement("button");
+    offer.type = "button";
+    offer.className = "participant-add-new";
+    offer.textContent = t("participant_add_new").replace("{name}", name);
+    offer.addEventListener("click", () => {
+      deps.openNewClient?.({
+        name,
+        onCreated: (client) => {
+          if (client) addParticipant(client);
+          clearParticipantSearch();
+        },
+      });
+    });
+    offerItem.appendChild(offer);
+    list.appendChild(offerItem);
     return;
   }
   for (const client of matches) {

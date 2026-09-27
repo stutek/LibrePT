@@ -105,6 +105,15 @@ function renderNameCollisionHint(state, client, t) {
   ).replace("{others}", others);
 }
 
+let openNewClientDialog = null;
+
+/** Opens the new-client dialog from another screen: `name` is filled in, and `onCreated(client)`
+ *  is called when the dialog is left with the client kept (null when nothing was kept). The session
+ *  form uses it when a search finds nobody of that name. */
+export function openNewClient(options) {
+  openNewClientDialog?.(options);
+}
+
 export function setupClientForms({
   getState,
   t,
@@ -201,15 +210,21 @@ export function setupClientForms({
 
   $id("btn-review-signup")?.addEventListener("click", () => openSignupReview());
 
-  $id("btn-add-client").addEventListener("click", () => {
+  openNewClientDialog = ({ name = "", onCreated = null } = {}) => {
     $id("client-modal-title").textContent = t("add_new_client");
     $id("client-form-id").value = "";
     openModal("dialog-client", { resetForm: true, formId: "form-client" });
     // After the reset, never before: reset() would otherwise wipe the date the block just derived.
     fillConsentSection(null);
+    live.openNew(onCreated);
+    if (name) {
+      // A name handed over by the opener is written like a typed one, so Save alone keeps it.
+      $id("client-name").value = name;
+      form.dispatchEvent(new Event("recordchange"));
+    }
     renderNameCollisionHint(getState(), null, t);
-    live.openNew();
-  });
+  };
+  $id("btn-add-client").addEventListener("click", () => openNewClientDialog());
 
   $id("btn-edit-client").addEventListener("click", () => {
     const activeId = getActiveDetailClientId();

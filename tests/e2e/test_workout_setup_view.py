@@ -7,6 +7,30 @@ auto-persist across page reloads via localStorage.
 from playwright.sync_api import expect
 
 
+def test_a_name_nobody_has_can_be_added_as_a_client_from_the_form(page, local_server):
+    """A search for a client who does not exist ended at "No client of that name", and the only way
+    on was the ☰ menu, the client directory, and starting the session again. The form now offers to
+    add that name, and the client added comes back onto the session."""
+    page.goto(f"{local_server}session/new")
+    page.wait_for_selector("#setup-participant-search")
+    page.fill("#setup-participant-search", "Zala Novak")
+
+    offer = page.locator("#setup-participant-matches .participant-add-new")
+    expect(offer).to_have_text('Add "Zala Novak" as a new client')
+    offer.click()
+
+    expect(page.locator("#dialog-client")).to_be_visible()
+    expect(page.locator("#client-name")).to_have_value("Zala Novak")
+    page.locator("#dialog-client button[type='submit']").click()
+
+    expect(page.locator("#dialog-client")).to_be_hidden()
+    expect(
+        page.locator("#setup-participants-assignment-list .participant-setup-row")
+    ).to_contain_text("Zala Novak")
+
+
+
+
 def test_workout_setup_view_route_loads(page, local_server):
     """Directly visiting /session/new loads the workout setup view."""
     page.goto(f"{local_server}session/new")

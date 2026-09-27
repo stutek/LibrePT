@@ -122,6 +122,8 @@ export const sl = {
   participants_chosen: "Izbrani",
   no_participants_chosen: "Na tem treningu še ni nikogar. Stranko poišči v polju zgoraj.",
   no_matching_clients: "Stranke s tem imenom ni",
+  no_clients_yet: "V imeniku še ni strank",
+  participant_add_new: "Dodaj »{name}« kot novo stranko",
   remove_participant: "Odstrani s tega treninga:",
   select_routine_for: "Rutina za to stranko",
   btn_launch_clipboard: "Odpri v beležki",

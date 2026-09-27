@@ -122,6 +122,8 @@ export const de = {
   participants_chosen: "Ausgewählt",
   no_participants_chosen: "Noch niemand ist in diesem Training. Suche einen Kunden im Feld oben.",
   no_matching_clients: "Kein Kunde mit diesem Namen",
+  no_clients_yet: "Noch keine Kunden im Verzeichnis",
+  participant_add_new: "„{name}“ als neuen Kunden anlegen",
   remove_participant: "Aus diesem Training nehmen:",
   select_routine_for: "Routine für diesen Kunden",
   btn_launch_clipboard: "Im Klemmbrett öffnen",

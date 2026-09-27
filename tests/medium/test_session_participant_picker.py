@@ -90,6 +90,22 @@ def test_the_picker_names_a_routine_by_one_name(page, local_server):
     assert select.get_attribute("aria-label") == "Routine for this client"
 
 
+def test_an_empty_directory_says_so_and_offers_to_add_the_name(page, local_server):
+    """On a new app the search answered "No client of that name", as if the name were the problem.
+    The directory is empty, and the typed name can become the first client from here."""
+    empty = STUB.replace("clients: structuredClone(DEFAULT_CLIENTS),", "clients: [],")
+    assert empty != STUB
+    load_with_stub(page, local_server, empty)
+    page.fill("#setup-participant-search", "Ana")
+
+    expect(page.locator(f"{MATCHES} .participant-match-empty")).to_have_text(
+        "No clients in the directory yet"
+    )
+    expect(page.locator(f"{MATCHES} .participant-add-new")).to_have_text(
+        'Add "Ana" as a new client'
+    )
+
+
 def test_a_name_nobody_has_says_so_rather_than_showing_nothing(page, local_server):
     load_with_stub(page, local_server, STUB)
     page.fill("#setup-participant-search", "Zzz")

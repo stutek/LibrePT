@@ -25,7 +25,8 @@ import { beginRecordEdit, endRecordEdit, recordBeforeEdit } from "../../data/ope
 /**
  * Wires `dialog` and its `form` to one collection. Returns `{ openNew, openExisting }`; each is called
  * AFTER the opener has filled the form, because filling a field from code fires no event and must not
- * count as typing.
+ * count as typing. `openNew(onFinished)` may take a callback, called once when the dialog is left
+ * with the finished record, or with null when nothing was kept.
  *
  * Options: `collection`, `getState`, `saveToLocalStorage`, `createRecord()` (a new record with its id
  * and starting fields), `writeFields(record, before)` (form → record; `before` is the record as the
@@ -47,6 +48,7 @@ export function keepRecordLive({
   let record = null;
   let adding = false;
   let open = false;
+  let onFinished = null;
 
   const records = () => {
     const state = getState();
@@ -80,6 +82,9 @@ export function keepRecordLive({
   const finish = () => {
     if (!open) return;
     open = false;
+    const done = onFinished;
+    onFinished = null;
+    let kept = null;
     if (record) {
       const abandoned = adding && isBlank();
       if (abandoned) remove(record.id);
@@ -87,8 +92,10 @@ export function keepRecordLive({
       // The counts changed although the data did not: this save is what repaints them.
       saveToLocalStorage();
       onChange(abandoned ? null : record);
+      kept = abandoned ? null : record;
     }
     record = null;
+    done?.(kept);
   };
   // The browser fires `close` a moment AFTER the dialog closes. By then the dialog may already be
   // open again on another record, and that record is not finished.
@@ -122,11 +129,12 @@ export function keepRecordLive({
   });
 
   return {
-    openNew() {
+    openNew(finished = null) {
       finish();
       record = null;
       adding = true;
       open = true;
+      onFinished = finished;
     },
     openExisting(existing) {
       finish();

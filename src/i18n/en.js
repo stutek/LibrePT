@@ -106,6 +106,8 @@ export const en = {
   participants_chosen: "Chosen",
   no_participants_chosen: "Nobody is on this session yet. Find a client in the field above.",
   no_matching_clients: "No client of that name",
+  no_clients_yet: "No clients in the directory yet",
+  participant_add_new: 'Add "{name}" as a new client',
   remove_participant: "Take off this session:",
   select_routine_for: "Routine for this client",
   btn_launch_clipboard: "Open in Clipboard",
