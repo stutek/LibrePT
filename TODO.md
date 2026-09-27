@@ -5999,6 +5999,8 @@ sploh ni priklopil.
 njega pa je števec (`span.sync-badge`) z angleškim opisom »4 local changes to push, cloud
 status unknown«. Slovenščina in angleščina sta torej v istem gumbu, ena v drugi. Število
 narašča ob delu — po prvem shranjenem treningu je bilo 4 — in trener nikjer ne izve, kaj šteje.
+Nad devet se številka umakne klicaju: v glavi piše »↑!«, kar je videti kot opozorilo na napako,
+pomeni pa samo, da je sprememb veliko.
 
 **Predlog in preverjanje:** ko oblak ni nastavljen, števca ne kazati; ko je, mu dati vidno
 besedo ali ga odpreti v okno s stanjem. `aria-label` sestaviti prek `t(...)` s ključi v
