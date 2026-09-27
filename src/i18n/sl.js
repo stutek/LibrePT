@@ -607,8 +607,9 @@ export const sl = {
   walkthrough_exit: "Končaj demo",
   walkthrough_collapse: "Pospravi kartico demota",
   walkthrough_expand: "Nazaj na kartico demota",
-  walkthrough_off_track_title: "Zašel(-la) si drugam",
-  walkthrough_off_track: "Zapustil(-a) si mesto, kjer se demo odvija. Vrni ga ali ga ustavi.",
+  walkthrough_off_track_title: "Ta zaslon ni del demota",
+  walkthrough_off_track:
+    "Demo se odvija drugje v aplikaciji. Pritisni Nazaj v demo ali Ustavi demo.",
   walkthrough_return: "Nazaj v demo",
   walkthrough_leave: "Ustavi demo",
   walkthrough_finished: "To je celoten krog — en trening, ena podloga, štirje dotiki.",
@@ -629,7 +630,7 @@ export const sl = {
   intake_invite_message:
     "{trainer} te vabi, da izpolniš svoje podatke za trening, prek aplikacije LibrePT. Vzame minuto:",
   intake_invite_message_unsigned:
-    "Vabljen(-a) si, da izpolniš svoje podatke za trening, prek aplikacije LibrePT. Vzame minuto:",
+    "Vabim te, da prek aplikacije LibrePT izpolniš svoje podatke za trening. Vzame minuto:",
   intake_invite_privacy: "Kaj se zgodi s tvojimi podatki:",
   intake_invite_ready: "Povezava pripravljena — kopiraj jo spodaj",
   intake_invite_title: "Povabi stranko",
@@ -664,7 +665,7 @@ export const sl = {
   menu_sandbox_enter: "Vstopi v peskovnik",
   notif_sandbox_title: "🧪 Peskovnik — prostor za učenje in preizkušanje",
   notif_sandbox_desc:
-    "Te stranke, načrti in treningi so vzorčna telovadnica. Preizkusi karkoli: nič, kar narediš tukaj, ne more doseči tvojih poslovnih podatkov. Za vrnitev k svojemu delu odpri meni ☰ zgoraj desno in izberi Zapusti peskovnik — pristaneš tam, kjer si ostal(-a). Za vodeni ogled aplikacije po korakih pritisni poglavje v spodnjem seznamu: ogled se začne pri poglavju, ki ga pritisneš.",
+    "Te stranke, načrti in treningi so vzorčna telovadnica. Preizkusi karkoli: nič, kar narediš tukaj, ne more doseči tvojih poslovnih podatkov. Za vrnitev k svojemu delu odpri meni ☰ zgoraj desno in izberi Zapusti peskovnik — vrneš se na isto mesto. Za vodeni ogled aplikacije po korakih pritisni poglavje v spodnjem seznamu: ogled se začne pri poglavju, ki ga pritisneš.",
   sync_sandbox_note: "V peskovniku si: to sinhronizira peskovnikovo kopijo, ne tvojega dela.",
   restore_refused_sandbox_file:
     "Ta datoteka je nastala v peskovniku, zato je ni mogoče obnoviti v tvoje delo. Odpri peskovnik in jo obnovi tam.",
@@ -729,7 +730,7 @@ export const sl = {
   // Vodeni ogled, ne demo — tako se ta tek imenuje v walkthrough_title.
   // Pozdrav v obeh oblikah, kot že walkthrough_off_track_title in intake_invite_message_unsigned:
   // aplikacija tika, tikanje pa je v slovenščini spolsko določeno, zato "(-la)" in ne množina.
-  story_welcome_title: "Dobrodošel(-la) v LibrePT",
+  story_welcome_title: "LibrePT te pozdravlja",
   story_welcome_body:
     "LibrePT je aplikacija za osebne trenerje: termini, načrti treningov in beležka med vadbo. V tem ogledu povabiš tri nove stranke, pripraviš torkov trening in ga med vadbo prilagodiš. Vse se dogaja v peskovniku, ločeni kopiji z izmišljenimi strankami. Tvojih pravih strank, terminov in vadb ne spremeni.",
   story_step_welcome:
@@ -737,7 +738,7 @@ export const sl = {
   story_persona_trainer: "Tvoj telefon",
   story_chapter_trainer_details: "Vnesi svoje podatke",
   story_trainer_details_open_body:
-    "Povabila podpišeš s podatki, ki si jih vpisal(-a) ob prvem zagonu: ime, telefon in e-pošta. Tukaj jih spremeniš. So tvoji, ne podatki peskovnika, zato kar shraniš, ostane tudi po ogledu.",
+    "Povabila podpišeš s podatki, vpisanimi ob prvem zagonu: ime, telefon in e-pošta. Tukaj jih spremeniš. So tvoji, ne podatki peskovnika, zato kar shraniš, ostane tudi po ogledu.",
   story_step_trainer_details_menu:
     "Pritisni ☰ — tri vodoravne črtice zgoraj desno v temni vrstici. Odpre se meni.",
   story_step_trainer_details_settings:
@@ -1020,9 +1021,9 @@ export const sl = {
   notif_summary_title: "Obvestila in pregled stanja",
   notif_empty_title: "Ni obvestil",
   notif_empty_desc: "Vse je pregledano — trenutno tukaj ni ničesar.",
-  notif_seed_demo_title: "👋 Dobrodošel(-la) v LibrePT",
+  notif_seed_demo_title: "👋 LibrePT te pozdravlja",
   notif_seed_demo_desc:
-    "Tukaj še ni ničesar shranjenega. Če želiš videti, kaj aplikacija zna, pritisni poglavje v spodnjem seznamu: to je vodeni ogled, ki pelje skozi zgodbo treh novih strank, od prvega povabila do treninga v telovadnici, in se začne pri poglavju, ki ga pritisneš. Če želiš preizkušati sam(-a), pritisni Vstopi v peskovnik — to je ločena kopija aplikacije, kjer nič, kar narediš, ne spremeni zapisov, ki jih hraniš tukaj.",
+    "Tukaj še ni ničesar shranjenega. Če želiš videti, kaj aplikacija zna, pritisni poglavje v spodnjem seznamu: to je vodeni ogled, ki pelje skozi zgodbo treh novih strank, od prvega povabila do treninga v telovadnici, in se začne pri poglavju, ki ga pritisneš. Če želiš preizkušati brez vodenja, pritisni Vstopi v peskovnik — to je ločena kopija aplikacije, kjer nič, kar narediš, ne spremeni zapisov, ki jih hraniš tukaj.",
   notif_demo_mode_title: "⚠️ Predstavitveni način — naloženi vzorčni podatki",
   notif_demo_mode_desc:
     "Aplikacija deluje na vzorčnih strankah, rutinah in treningih. Počisti jih, preden jo uporabiš za resnično delo: čiščenje natančno našteje, kaj odstrani, in ohrani katalog vaj, tako da vse, kar si zgradil na njem, še naprej deluje.",

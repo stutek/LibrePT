@@ -393,7 +393,7 @@ the demo is where they became visible.
 
 ### Shipped — Slovenian (rewritten 2026-09-11, `story_welcome_title` / `_body` / `story_step_welcome`)
 
-- **naslov:** Dobrodošel(-la) v LibrePT
+- **naslov:** LibrePT te pozdravlja (was »Dobrodošel(-la) v LibrePT« until 2026-09-27, when bracketed gender endings were removed)
 - **opis:** LibrePT je aplikacija za osebne trenerje. Z njo upravljaš termine in sestavljaš
   individualne in skupinske treninge, med vadbo pa ti služi kot digitalna beležnica. Ta vodeni ogled
   pelje skozi zgodbo treh novih strank: od odločitve za skupen trening in prvega povabila do
