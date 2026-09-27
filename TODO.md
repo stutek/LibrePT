@@ -6349,6 +6349,32 @@ izbrano vrednost, je sprememba Simonova odločitev, ne popravek. Preizkus naj na
 zahteva, da nobena kontrola na tem zaslonu ni nižja od 44 pik. Izmerjeno na objavljeni
 različici `0625bd6`; pravila na `main` so ista.
 
+### 80.26 [ ] P2 — Trenerjev lastni signal se v pregledu pokaže kot »Too Easy - Increase Load«
+
+**Scenarij in koraki:** trener izvede svoj trening in pri vaji pritisne gumb »Prelahko«. Po
+zaključku odpre meni ☰ in »Čakajoče na pregled«.
+
+**Opaženo:** vrstica se glasi »Ana Kovač — Too Easy - Increase Load — Vaja: Barbell Back
+Squat«. Gumb, ki ga je pritisnil, piše »Prelahko«; pregled pokaže angleški zapis.
+
+**Zakaj tega ni nihče opazil:** v vzorčnih podatkih je ta zapis preveden. [demoText.js](src/data/demoText.js)
+ima vrstico »Too Easy - Increase Load« → »Prelahko – povečaj težo« (in nemško »Zu leicht – Last
+erhöhen«), zato je peskovnik videti pravilno. Angleščina se pokaže šele, ko signal zapiše
+trener sam.
+
+**Vzrok, potrjen v kodi na `main`:** oznaka signala je v zapisu shranjena kot angleški niz —
+[quickSignals.js](src/domain/quickSignals.js), `OPPOSITE_QUICK_SIGNAL` — in to je prav, ker je
+to ključ, po katerem se signal prepozna in izklopi. Napaka je, da se ta ključ izpiše
+neposredno: [planAdjustments.js](src/modules/plans/planAdjustments.js) postavi `u.tag` v značko
+in `update.tag` v besedilo okna.
+
+**Predlog in preverjanje:** ključ naj v zapisu ostane, izpisuje pa naj se prek slovarja — dva
+nova ključa v `en`, `sl` in `de`. Paziti na
+[historyView.js](src/modules/history/historyView.js), ki iz iste oznake bere `Too Hard` in
+`Reduce Load`, da ugane barvo; tudi to naj bere ključ, ne besedila. Preizkus naj v slovenskem
+vmesniku pritisne »Prelahko« in zahteva, da v pregledu ni angleškega niza. Opaženo na objavljeni
+različici `0625bd6`; koda na `main` je ista.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
