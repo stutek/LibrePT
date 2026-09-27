@@ -6806,3 +6806,18 @@ in da ga `SCHEMA_4` in `SCHEMA_5` še imata. Merila `tests/fixtures/schemas/sche
 
 **Izvedba:** `src/` in `tests/` v tem trenutku drži seja `claude-opus-exploratory-fixes`; sprememba
 je predana njej, skupaj z zgornjim.
+
+**Ustavljeno 2026-09-27, čaka na Simona — sprememba krši dve pravili, ki podreta gradnjo.**
+Poskusno izvedena in umaknjena, nič ni v commitu:
+- **»Shema se samo širi«** ([starWriteInvariants.test.mjs](tests/unit_js/data/starWriteInvariants.test.mjs),
+  »schema evolution is additive never drops a field«): polje, ki ga deklarira SCHEMA_4, mora ostati v
+  vsaki novejši živi obliki, PREVIEW vključno. Razlog, zapisan v preizkusu: starejša gradnja, ki je
+  še na telefonu, polje še piše, in izginotje bi jo potiho zlomilo. Tu to drži dobesedno — gradnja
+  pred `ff15fff` piše `hasVoiceNote` v vsako živo shrambo, PREVIEW vključno.
+- **»PREVIEW je nadmnožica stabilne oblike«** ([backupFile.test.mjs](tests/unit_js/data/backupFile.test.mjs)):
+  vsako polje sheme 5 mora biti v PREVIEW, da ponovna izgradnja PREVIEW iz 5 ne izgubi stabilnega polja.
+
+**Odločitev, ki jo to zahteva:** ali se uvede postopek za **umik** polja (zadnja faza »expand /
+contract«): kdaj je polje sme izginiti iz PREVIEW in iz naslednje številke — na primer šele, ko
+nobena gradnja, ki ga piše, ni več v obtoku —, in katero od obeh pravil se za to omili. Do takrat
+`hasVoiceNote` ostane v vseh oblikah; **nič ga ne piše več** (`ff15fff`) in nič ga ne izriše.
