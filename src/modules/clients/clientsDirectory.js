@@ -30,7 +30,9 @@ export function renderClientsDirectory(container, deps) {
   );
 
   if (filtered.length === 0) {
-    container.innerHTML = `<div class="card glassmorphic text-center text-muted clients-empty-state">${t("no_clients_found")}</div>`;
+    // An empty directory is the ordinary state of a new app, not a failed search: two messages.
+    const key = clients.length === 0 ? "clients_empty" : "no_clients_found";
+    container.innerHTML = `<div class="card glassmorphic text-center text-muted clients-empty-state">${t(key)}</div>`;
     return;
   }
 
