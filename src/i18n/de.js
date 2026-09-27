@@ -733,6 +733,13 @@ export const de = {
   program_import_text: "Programm hier einfügen",
   program_import_file: "Datei lesen",
   program_import_template: "Format zeigen",
+  program_import_refused_empty:
+    "Es gibt nichts zu lesen. Füge ein Programm ein oder wähle eine Datei.",
+  program_import_refused_no_data: "In diesem Text wurde kein Programm gefunden.",
+  program_import_refused_unreadable: "Dieser Text lässt sich nicht als Programm lesen.",
+  program_import_refused_other_format: "Diese Datei hat das Format {found}, nicht {expected}.",
+  program_import_refused_no_items: "Dieses Programm nennt keine Übungen.",
+  program_import_next_step: "Drücke „{button}“ und vergleiche.",
   program_import_prompt: "Prompt kopieren",
   program_import_prompt_copied: "Prompt kopiert",
   program_import_prompt_text:

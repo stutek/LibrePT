@@ -128,7 +128,8 @@ test("text that is not a programme is refused with a reason, never half-imported
   for (const junk of ["", "   ", "hello", "{ not json", "{}", "[]"]) {
     const result = readProgram(junk);
     assert.equal(result.ok, false, JSON.stringify(junk));
-    assert.ok(result.reason, `expected a stated reason for ${JSON.stringify(junk)}`);
+    // A dictionary key, not words: the dialog says it in the trainer's language.
+    assert.match(result.reason, /^program_import_refused_\w+$/, JSON.stringify(junk));
     assert.deepEqual(result.items, []);
   }
 });
@@ -148,8 +149,8 @@ test("the format marker distinguishes 'not ours' from 'ours, one field wrong'", 
   assert.equal(result.ok, false);
   // The refusal names BOTH — what the file claims to be and what was expected — because "wrong
   // format" alone leaves a trainer with nothing to do next.
-  assert.ok(result.reason.includes("some.other.tool/2"), result.reason);
-  assert.ok(result.reason.includes(PROGRAM_FORMAT), result.reason);
+  assert.equal(result.reason, "program_import_refused_other_format");
+  assert.deepEqual(result.reasonParams, { found: "some.other.tool/2", expected: PROGRAM_FORMAT });
 });
 
 // ── What the trainer is shown before the editor opens ──────────────────────────────────────────

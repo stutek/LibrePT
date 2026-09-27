@@ -693,6 +693,12 @@ export const sl = {
   program_import_text: "Prilepi program sem",
   program_import_file: "Preberi datoteko",
   program_import_template: "Pokaži obliko",
+  program_import_refused_empty: "Ni ničesar za prebrati. Prilepi program ali izberi datoteko.",
+  program_import_refused_no_data: "V tem besedilu ni programa.",
+  program_import_refused_unreadable: "Tega besedila ni mogoče prebrati kot program.",
+  program_import_refused_other_format: "Datoteka je v obliki {found}, ne {expected}.",
+  program_import_refused_no_items: "Ta program ne navaja nobene vaje.",
+  program_import_next_step: "Pritisni »{button}« in primerjaj.",
   program_import_prompt: "Kopiraj navodilo",
   program_import_prompt_copied: "Navodilo kopirano",
   program_import_prompt_text:

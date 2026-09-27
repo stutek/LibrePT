@@ -737,6 +737,12 @@ export const en = {
   program_import_text: "Paste the programme here",
   program_import_file: "Read a file",
   program_import_template: "Show me the format",
+  program_import_refused_empty: "There is nothing to read. Paste a programme or choose a file.",
+  program_import_refused_no_data: "No programme was found in that text.",
+  program_import_refused_unreadable: "That text cannot be read as a programme.",
+  program_import_refused_other_format: "That file is in the format {found}, not {expected}.",
+  program_import_refused_no_items: "That programme lists no exercises.",
+  program_import_next_step: "Press “{button}” and compare.",
   program_import_prompt: "Copy the prompt",
   program_import_prompt_copied: "Prompt copied",
   program_import_prompt_text:

@@ -153,7 +153,17 @@ function toItem(raw, newId) {
   return exerciseItem(raw, newId);
 }
 
-const refused = (reason) => ({ ok: false, reason, title: "", items: [], unreadable: [] });
+// A refusal is a dictionary key and its parameters, not words: this module has no dictionary, and
+// the English it used to return ("no programme data found in that text") was shown as-is on a
+// Slovenian screen. The dialog that shows it says it in the trainer's language.
+const refused = (reason, reasonParams = {}) => ({
+  ok: false,
+  reason: `program_import_refused_${reason}`,
+  reasonParams,
+  title: "",
+  items: [],
+  unreadable: [],
+});
 
 /**
  * Read pasted or uploaded text into `{ ok, reason, title, items }`.
@@ -163,26 +173,26 @@ const refused = (reason) => ({ ok: false, reason, title: "", items: [], unreadab
  * anything yet — a record that reaches storage is minted by the editor's own save.
  */
 export function readProgram(text, { newId = defaultIdMinter() } = {}) {
-  if (typeof text !== "string" || !text.trim()) return refused("nothing to read");
+  if (typeof text !== "string" || !text.trim()) return refused("empty");
 
   const span = jsonSpan(text);
-  if (!span) return refused("no programme data found in that text");
+  if (!span) return refused("no_data");
 
   let parsed;
   try {
     parsed = JSON.parse(span);
-  } catch (error) {
-    return refused(`that is not readable as a programme (${error.message})`);
+  } catch {
+    return refused("unreadable");
   }
 
   const isBareArray = Array.isArray(parsed);
   if (!isBareArray && parsed?.format && parsed.format !== PROGRAM_FORMAT) {
-    return refused(`that file says it is ${parsed.format}, not ${PROGRAM_FORMAT}`);
+    return refused("other_format", { found: parsed.format, expected: PROGRAM_FORMAT });
   }
 
   const rawItems = isBareArray ? parsed : parsed?.items;
   if (!Array.isArray(rawItems) || rawItems.length === 0) {
-    return refused("that programme lists no exercises");
+    return refused("no_items");
   }
 
   const items = rawItems.map((raw) => toItem(raw, newId));

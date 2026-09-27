@@ -114,7 +114,16 @@ function renderReport(result) {
   report.classList.remove("hidden");
 
   if (!result.ok) {
-    report.textContent = result.reason;
+    let text = t(result.reason);
+    for (const [name, value] of Object.entries(result.reasonParams || {})) {
+      text = text.replace(`{${name}}`, value);
+    }
+    // Where comparing with the working example is the way on, the message says so, naming the
+    // button by the words on it.
+    if (result.reason !== "program_import_refused_empty") {
+      text += ` ${t("program_import_next_step").replace("{button}", t("program_import_template"))}`;
+    }
+    report.textContent = text;
     return;
   }
 

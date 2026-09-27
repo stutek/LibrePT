@@ -100,8 +100,23 @@ def test_text_that_is_not_a_programme_is_refused_with_a_reason(page, local_serve
 
     _paste(page, "here is the plan: do some squats")
 
-    expect(page.locator("#program-import-report")).to_contain_text("no programme data")
+    expect(page.locator("#program-import-report")).to_have_text(
+        "No programme was found in that text. Press “Show me the format” and compare."
+    )
     expect(page.locator("#program-import-open")).to_be_disabled()
+
+
+def test_a_refusal_is_said_in_the_trainer_s_language(page, local_server):
+    """It answered "no programme data found in that text", in English and lower case, on an
+    otherwise Slovenian dialog — the likeliest result of a trainer's first try."""
+    page.add_init_script("globalThis.stubLanguage = 'sl'")
+    _open(page, local_server)
+
+    _paste(page, "Počep 3x8 60kg / Potisk s prsi 3x10 40kg / odmor 90s")
+
+    expect(page.locator("#program-import-report")).to_have_text(
+        "V tem besedilu ni programa. Pritisni »Pokaži obliko« in primerjaj."
+    )
 
 
 def test_the_lines_that_could_not_be_read_are_all_listed_with_their_position(
