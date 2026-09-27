@@ -6314,6 +6314,11 @@ pošlje nazaj«, polje se imenuje »Njegova telefonska številka ali e-naslov«,
 »Pokaži mu to kodo in ga prosi, naj vanjo usmeri kamero telefona«. Stran, ki jo stranka nato
 odpre, isto osebo nagovori v ženski obliki: »komu jo daš, pa izbereš sama«.
 
+**In še tretjič, spet drugače:** okno »Preglej podatke stranke«, ki prebere datoteko, ki jo je
+stranka poslala, govori v ženski obliki — »NJENI CILJI«, »Poškodbe in opombe, ki jih je
+navedla«, »JEZIK, V KATEREM JE BRALA«. Ista oseba je torej v vabilu moški, na svojem obrazcu
+ženska in ob prevzemu spet ženska.
+
 **Težava in vpliv:** ena oseba je na trenerjevem zaslonu moški in na svojem ženska. Aplikacija
 je pri trenerju dosledno previdna (»Dobrodošel(-la)«), pri stranki pa ne, čeprav so med
 strankami v vzorčnih podatkih večinoma ženske.
