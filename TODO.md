@@ -6517,6 +6517,26 @@ brskalnik, ki sprosti pomnilnik. Delo, vpisano v ta obrazec, takrat izgine brez 
 parametrom. Preizkus naj obrazec odpre iz rutine, osveži stran in zahteva, da je obrazec še
 odprt z vpisanim imenom. Opaženo na objavljeni različici `0625bd6`.
 
+### 80.33 [ ] P3 — Dva prevajalna ključa ne obstajata, zato se uporabniku pokaže ključ sam
+
+**Scenarij in koraki:** trener na plošči pogleda kartico treninga; ob imenu je svinčnik. Bralnik
+zaslona in opis ob dotiku miške se glasita »edit«, z malo začetnico in v angleščini.
+
+**Izmerjeno:** v `src/` je uporabljenih 341 različnih prevajalnih ključev, v
+[en.js](src/i18n/en.js) jih je zapisanih 867 — in dva uporabljena ključa ne obstajata nikjer:
+`edit` v [sessionCard.js](src/modules/sessionList/sessionCard.js) in `voice_processing` v
+[feedbackModal.js](src/modules/common/feedbackModal.js), kjer se izpiše kot stanje med obdelavo
+glasovne opombe. Ko ključa ni, `t(...)` vrne kar ključ, zato ga uporabnik bere na zaslonu.
+
+**Težava in vpliv:** v angleščini je »edit« videti skoraj pravilno, zato tega nihče ne opazi; v
+slovenščini in nemščini je to angleška beseda z malo začetnico. Pri glasovni opombi se med
+obdelavo izpiše »voice_processing«, kar je videti kot napaka programa.
+
+**Predlog in preverjanje:** dodati oba ključa v vse tri jezike. Ker tega nihče ne ujame,
+naj ta primerjava postane preizkus: vsak `t("ključ")` v `src/` mora obstajati v `en.js`. To je
+ista vrsta preverbe, kot jo že dela [ui_strings.py](agent_tools/ui_strings.py), in sodi zraven.
+Opaženo na objavljeni različici `0625bd6`; koda na `main` je ista.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
