@@ -6001,7 +6001,9 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#817-x-remove-th
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#814-x-import-and-export-of-exercises-routines-and-circuits-in-one-place--done-2026-09-27); what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-### 81.5 [ ] Every service credential the app holds can be cleared or revoked — ruled 2026-09-27
+### 81.5 [~] Every service credential the app holds can be cleared or revoked — Drive done, iCloud waits
+
+**Built 2026-09-27 (Claude), commit `af6cbaf`; `build check` green 09:29–09:37:** Settings → *Connected accounts* over `data/connectedAccounts.js`, with *Clear from this device* and *Revoke access* for Google Drive, and `revokeAccess` asking Google for a token first so a revoke after a reload reaches Google. **Open:** iCloud, one entry in that list once §3.13 decides to build it.
 
 **Ruled 2026-09-27 (Simon):** *"Shramba vseh api ključev v aplikaciji mora omogočiti, da se
 počistijo ali razveljavijo. GDrive in iCloud sta zaenkrat edina."*
