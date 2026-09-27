@@ -5221,3 +5221,57 @@ ocene postane priporočilo) in zapis v [TODO_ARCHIVE.md](TODO_ARCHIVE.md) o imen
 ki mock omenja, ne pa tega, da si izmisli vsebino.
 
 **Fixed 2026-09-27 (Claude Opus 5.5), commit `ff15fff`.** The voice-note path is removed from the whole app, the sandbox included: the »Preverjanje« line above still asked for an example text in the sandbox, but with no microphone anywhere nothing is left to label. The review card and dialog no longer draw a recording for old records that carry `hasVoiceNote`; the field stays in the schema and is still read by `isPlainQuickSignal`. This also removes the label from §80.34 and the key from §80.33.
+
+### 80.19 [x] P2 — Aplikacija sprašuje z okni brskalnika, ki jih ne oblikuje in ne prevaja — popravljeno 2026-09-27
+
+**Scenarij in koraki:** trener shrani trening brez stranke; med izvedbo treninga pritisne
+»Zaključi vadbo« prej, kot se je trening iztekel; v podlogi pritisne brisanje treninga.
+
+**Opaženo:** v vseh treh primerih se odpre okno brskalnika (`alert` oziroma `confirm`), ne okno
+aplikacije. Pri shranjevanju piše »Izbrati moraš vsaj eno stranko.« Besedilo je slovensko,
+gumba v oknu pa nista aplikacijina: napiše ju brskalnik v jeziku naprave, torej »OK« in
+»Cancel« na napravi, nastavljeni na angleščino.
+
+**Težava in vpliv:** trikrat se zalomi isto. Gumb, ki potrdi ali prekliče, je v tujem jeziku,
+čeprav stran pravi `lang="sl"`. Okna ne doseže nobena tema, ker ga ne riše aplikacija. In
+dokler okno stoji, stran ne dela ničesar drugega — prav to je najbrž vzrok zastoja, opisanega
+v §80.10: zaključek vadbe pred iztekom časa in zaključek brez zabeležene serije odpreta dve
+taki vprašanji zaporedoma ([sessionLifecycle.js](src/controllers/sessionLifecycle.js)), in
+dokler nanju nihče ne odgovori, se zavihek ne premakne.
+
+**Obseg, preštet v kodi na `main`:** deset klicev `alert` in `confirm` v petih datotekah —
+[editSessionControl.js](src/modules/session/editSessionControl.js) (pet),
+[sessionLifecycle.js](src/controllers/sessionLifecycle.js) (dva),
+[activeSessionController.js](src/controllers/activeSessionController.js),
+[sessionScheduleAdjustment.js](src/controllers/sessionScheduleAdjustment.js) in
+[clientsView.js](src/modules/clients/clientsView.js). Aplikacija ima svoja okna
+(`dialog-modal card glassmorphic`) in jih drugod uporablja.
+
+**Predlog in preverjanje:** vsa ta vprašanja preseliti v okno aplikacije, z gumboma iz
+slovarja. Preizkus naj v slovenskem vmesniku prehodi te poti in zahteva, da se ne odpre nobeno
+okno brskalnika. Opaženo na objavljeni različici `0625bd6`; klici na `main` so isti.
+
+**Fixed 2026-09-27 (Claude Opus 5.5), commit `f49f7e4`.** All eleven calls go through src/modules/common/appQuestion.js: a yes/no with the action on the confirm button and »Prekliči«, or a message with »V redu«, in the app's language and theme. tests/unit/test_no_browser_dialogs.py fails the build if alert(), confirm() or prompt() comes back.
+
+### 80.36 [x] P2 — »Anonimna kopija za AI« s seboj odnese cilje in zdravstvene opombe — popravljeno 2026-09-27
+
+**Scenarij in koraki:** trener v profilu stranke pritisne »Anonimna kopija za AI«.
+
+**Opaženo:** okno pravi »Anonimni povzetek stranke je kopiran. Varno ga lahko uporabiš z
+AI-pomočniki.« Kaj je v odložišču, pove koda:
+[clientsView.js](src/modules/clients/clientsView.js) sestavi zapis z vrsticami »Entity: Client
+#<id>«, »Goals: <cilji>«, »Health & Mobility Notes: <opombe>« in seznamom vadb.
+
+**Težava in vpliv:** ime je res zamenjano z oznako, cilji in opombe o poškodbah pa gredo zraven
+dobesedno. To je prosto besedilo, ki ga piše trener — in prav tja se ime stranke najpogosteje
+zapiše (»Ana ima občutljivo koleno«), kar je odprto vprašanje §67. Poleg tega so opombe o
+poškodbah zdravstveni podatek. Beseda »Varno« v sporočilu obljublja več, kot kopija naredi:
+trener to prilepi v AI-pomočnika, torej k tuji storitvi.
+
+**Predlog in preverjanje:** povedati, kaj kopija vsebuje, preden se ustvari, in dati trenerju
+izbiro, ali gre zraven tudi prosto besedilo; sporočilo naj ne trdi, da je uporaba varna, ampak
+naj pove, kaj je odstranjeno. Preizkus naj zahteva, da kopija bodisi ne vsebuje polj s prostim
+besedilom bodisi da jih sporočilo poimensko napove. Opaženo na objavljeni različici `0625bd6`;
+koda na `main` je ista. Povezano z §67.
+
+**Fixed 2026-09-27 (Claude Opus 5.5), commit `1b38205`.** src/domain/aiClientSummary.js copies the client's ID and the performed sessions set by set; no name, contact details, goals or notes. The message says what was left out and no longer calls it safe. The workouts had never reached the copy: it read `completedExercises`, a field workout records do not have.

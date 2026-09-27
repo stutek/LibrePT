@@ -5952,6 +5952,11 @@ napake v kodi. Preizkušeno v Chrome CDP na objavljeni različici `0625bd6`.
 ugotoviti vzrok neodzivnosti. Zaključek mora potrditi shranitev in po ponovnem odprtju
 pokazati zaključeno vadbo; preklic pa mora ohraniti odziven aktiven trening.
 
+**Stanje 2026-09-27:** verjetni vzrok je odstranjen. Zaključek pred iztekom in zaključek brez serij sta
+odprla dve okni brskalnika (`confirm`) zaporedoma, in dokler stojita, stran ne dela ničesar (§80.19).
+Od `f49f7e4` sprašuje okno aplikacije, ki strani ne ustavi. **Odprto:** ponoviti scenarij v brskalniku
+na objavljeni gradnji; zaprto šele, ko se zaključek odzove in shrani.
+
 ### 80.11 [ ] P2 — Števec sinhronizacije v glavi je brez besed in samo v angleščini
 
 **Scenarij in koraki:** trener prvič odpre objavljeno aplikacijo v slovenščini, ne poveže
@@ -6013,34 +6018,9 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8017-x-p3--slov
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8018-x-p2--prvi-trening-iskanje-udeleženca-je-slepa-ulica-ko-strank-še-ni--popravljeno-2026-09-27).
 
-### 80.19 [ ] P2 — Aplikacija sprašuje z okni brskalnika, ki jih ne oblikuje in ne prevaja
+### 80.19 [x] P2 — Aplikacija sprašuje z okni brskalnika, ki jih ne oblikuje in ne prevaja — popravljeno 2026-09-27
 
-**Scenarij in koraki:** trener shrani trening brez stranke; med izvedbo treninga pritisne
-»Zaključi vadbo« prej, kot se je trening iztekel; v podlogi pritisne brisanje treninga.
-
-**Opaženo:** v vseh treh primerih se odpre okno brskalnika (`alert` oziroma `confirm`), ne okno
-aplikacije. Pri shranjevanju piše »Izbrati moraš vsaj eno stranko.« Besedilo je slovensko,
-gumba v oknu pa nista aplikacijina: napiše ju brskalnik v jeziku naprave, torej »OK« in
-»Cancel« na napravi, nastavljeni na angleščino.
-
-**Težava in vpliv:** trikrat se zalomi isto. Gumb, ki potrdi ali prekliče, je v tujem jeziku,
-čeprav stran pravi `lang="sl"`. Okna ne doseže nobena tema, ker ga ne riše aplikacija. In
-dokler okno stoji, stran ne dela ničesar drugega — prav to je najbrž vzrok zastoja, opisanega
-v §80.10: zaključek vadbe pred iztekom časa in zaključek brez zabeležene serije odpreta dve
-taki vprašanji zaporedoma ([sessionLifecycle.js](src/controllers/sessionLifecycle.js)), in
-dokler nanju nihče ne odgovori, se zavihek ne premakne.
-
-**Obseg, preštet v kodi na `main`:** deset klicev `alert` in `confirm` v petih datotekah —
-[editSessionControl.js](src/modules/session/editSessionControl.js) (pet),
-[sessionLifecycle.js](src/controllers/sessionLifecycle.js) (dva),
-[activeSessionController.js](src/controllers/activeSessionController.js),
-[sessionScheduleAdjustment.js](src/controllers/sessionScheduleAdjustment.js) in
-[clientsView.js](src/modules/clients/clientsView.js). Aplikacija ima svoja okna
-(`dialog-modal card glassmorphic`) in jih drugod uporablja.
-
-**Predlog in preverjanje:** vsa ta vprašanja preseliti v okno aplikacije, z gumboma iz
-slovarja. Preizkus naj v slovenskem vmesniku prehodi te poti in zahteva, da se ne odpre nobeno
-okno brskalnika. Opaženo na objavljeni različici `0625bd6`; klici na `main` so isti.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8019-x-p2--aplikacija-sprašuje-z-okni-brskalnika-ki-jih-ne-oblikuje-in-ne-prevaja--popravljeno-2026-09-27).
 
 ### 80.20 [x] P3 — Prazen imenik strank govori o neuspelem iskanju in veli »Klikni« — popravljeno 2026-09-27
 
@@ -6127,26 +6107,9 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8034-x-p3--glas
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8035-x-p1--glasovna-opomba-si-izmisli-stavek-o-stranki-in-ga-zapiše-v-njeno-kartoteko--popravljeno-2026-09-27).
 
-### 80.36 [ ] P2 — »Anonimna kopija za AI« s seboj odnese cilje in zdravstvene opombe
+### 80.36 [x] P2 — »Anonimna kopija za AI« s seboj odnese cilje in zdravstvene opombe — popravljeno 2026-09-27
 
-**Scenarij in koraki:** trener v profilu stranke pritisne »Anonimna kopija za AI«.
-
-**Opaženo:** okno pravi »Anonimni povzetek stranke je kopiran. Varno ga lahko uporabiš z
-AI-pomočniki.« Kaj je v odložišču, pove koda:
-[clientsView.js](src/modules/clients/clientsView.js) sestavi zapis z vrsticami »Entity: Client
-#<id>«, »Goals: <cilji>«, »Health & Mobility Notes: <opombe>« in seznamom vadb.
-
-**Težava in vpliv:** ime je res zamenjano z oznako, cilji in opombe o poškodbah pa gredo zraven
-dobesedno. To je prosto besedilo, ki ga piše trener — in prav tja se ime stranke najpogosteje
-zapiše (»Ana ima občutljivo koleno«), kar je odprto vprašanje §67. Poleg tega so opombe o
-poškodbah zdravstveni podatek. Beseda »Varno« v sporočilu obljublja več, kot kopija naredi:
-trener to prilepi v AI-pomočnika, torej k tuji storitvi.
-
-**Predlog in preverjanje:** povedati, kaj kopija vsebuje, preden se ustvari, in dati trenerju
-izbiro, ali gre zraven tudi prosto besedilo; sporočilo naj ne trdi, da je uporaba varna, ampak
-naj pove, kaj je odstranjeno. Preizkus naj zahteva, da kopija bodisi ne vsebuje polj s prostim
-besedilom bodisi da jih sporočilo poimensko napove. Opaženo na objavljeni različici `0625bd6`;
-koda na `main` je ista. Povezano z §67.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8036-x-p2--anonimna-kopija-za-ai-s-seboj-odnese-cilje-in-zdravstvene-opombe--popravljeno-2026-09-27).
 
 ### 80.37 [x] P2 — Pred nepovratno zamenjavo podatkov piše, kaj bo izgubljeno, v angleščini — popravljeno 2026-09-27
 
