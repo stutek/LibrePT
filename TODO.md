@@ -6399,6 +6399,30 @@ oziroma do načrta tistega treninga in to povedati z besedo. Preizkus naj signal
 treningu brez programa in zahteva, da pritisk na ta gumb pripelje nekam. Opaženo na objavljeni
 različici `0625bd6`; koda na `main` je ista.
 
+### 80.28 [ ] P2 — Predlagana ciljna teža je 2,5 kg za vajo, ki jo je stranka delala s 40 kg
+
+**Scenarij in koraki:** trening brez programa, vaja »Barbell Back Squat« s 3 × 10 × 40 kg. Med
+vadbo trener pritisne »Prelahko«. Po treningu odpre »Čakajoče na pregled«, pritisne kljukico in
+v oknu »Uveljavi spremembo programa« pogleda polje »Ciljna teža (kg)«.
+
+**Opaženo:** v polju piše **2,5**. Ponovitve so 10 in serije 3, kar se ujema, teža pa ne: stranka
+je delala s 40 kg. Če trener pritisne »Uveljavi in razreši«, se kot cilj zapiše 2,5 kg.
+
+**Vzrok, potrjen v kodi na `main`:** [planAdjustments.js](src/modules/plans/planAdjustments.js),
+`prefillAdjustmentFields`: če vaja pripada programu, je predlog »trenutna teža + 2,5«; če
+programa ni, je predlog gola številka 2,5 (pri »Pretežko« pa 0). Trening iz praznega načrta
+nima programa, dejansko težo pa aplikacija ves čas pozna — zapisana je v treningu, ki je pravkar
+tekel.
+
+**Težava in vpliv:** okno predlaga breme, ki je šestnajstkrat prelahko, in to na poti, ki
+obljublja popravek programa. Trener, ki predlogu zaupa, stranki zapiše napačen cilj.
+
+**Predlog in preverjanje:** kadar programa ni, vzeti težo, ponovitve in serije iz zapisa
+treninga, iz katerega je signal prišel, in šele nanje prišteti 2,5. Če tudi tega ni, polja
+pustiti prazna in ne ponuditi številke. Preizkus naj signal ustvari pri 40 kg brez programa in
+zahteva, da predlog ni manjši od izvedene teže. Opaženo na objavljeni različici `0625bd6`; koda
+na `main` je ista.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
