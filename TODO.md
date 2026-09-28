@@ -6681,6 +6681,27 @@ stanja. Mešanje vikanja in tikanja v eni kartici deluje nedokončano.
 ki se ujema s ploščo; naslov naj bo v tikanju (»Raziskuješ z vzorčnimi podatki«). Opaženo na
 objavljeni `0625bd6`, sl, 390 × 844; brez napak v konzoli.
 
+### 80.66 [ ] P2 — Vrstica nad dnom pri prihodnjem treningu kaže stoječo številko za napačen dan
+
+**Scenarij in koraki:** v peskovniku z vzorčnimi podatki ob 23:51 (ponedeljek 2026-09-28) na
+plošči »Treningi« pritisniti petkov trening »HIIT kondicija« (2026-10-02, 10:00–11:00).
+Nato enako z »Moč nog« (sreda 2026-09-30, 08:00–09:30).
+
+**Opaženo:** vrstica nad dnom zaslona pokaže »HIIT kondicija 2 strank · 10:00 - 11:00
+35:07:25«. Kartica istega treninga na plošči pravi »Se začne čez 82h 07m«. 35 ur in 7 minut od
+23:52:37 je sreda ob 11:00, dva dni pred koncem petkovega treninga. Pri »Moč nog« vrstica
+pokaže »33:37:49«, kar je točno konec treninga v sredo ob 09:30. Pri obeh številka stoji:
+po 10 sekundah je enaka. Ob ponovnem odprtju je manjša za toliko, kolikor je minilo časa.
+Ob številki ni besede, ki bi povedala, do česa šteje.
+
+**Težava in vpliv:** trener ne ve, ali številka pomeni čas do začetka, do konca ali že
+pretečeni čas, in ob petkovem treningu kaže napačen dan. Številka, ki ne teče, je videti kot
+ustavljen trening.
+
+**Predlog:** pri treningu, ki se še ni začel, naj vrstica pove z besedo, kdaj se začne (kot
+kartica: »Se začne čez …«), in naj šteje od pravega dne; številka naj teče. Opaženo na
+objavljeni `0625bd6`, sl, 390 × 844; brez napak v konzoli.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
