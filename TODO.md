@@ -6386,26 +6386,9 @@ katerega koli drugega treninga. Popravek, ki drži, shrani načrt vsakega udele�
 samem. To je sprememba sheme podatkov in odločitev za Simona: ali načrt prihodnjega treninga postane
 del zapisa treninga. Do takrat §80.52 ostane odprta.
 
-### 80.53 [ ] P2 — Načrt treninga, vpisanega za nazaj, po osvežitvi izgine
+### 80.53 [x] P2 — Načrt treninga, vpisanega za nazaj, po osvežitvi izgine — popravljeno 2026-09-29
 
-**Scenarij in koraki:** trener popoldne odpre jutranji trening, ki ga ni začel v aplikaciji, v meniju ⋮
-izbere »Uredi načrt«, vpiše vaje in pritisne »Končano«. Nato osveži stran (ali mu telefon stran naloži
-znova).
-
-**Opaženo:** načrt je spet takšen, kot ga da rutina. Našel podagent v dnevu trenerja 02 (§88), ki je
-jutranje treninge vpisoval popoldne; ponovljeno na `main`: pri treningu, ki je minil pred več kot dvema
-urama, preimenovana vaja po osvežitvi izgine, pri prihodnjem treningu ostane.
-
-**Vzrok, potrjen v kodi na `main`:** `isCachedSessionStale` v
-[sessionClock.js](src/domain/sessionClock.js) šteje shranjen odprt trening za pozabljenega, ko je več kot
-dve uri čez načrtovani konec, in ga obnova zavrže. Merilo je konec termina, ne zadnja sprememba — tudi
-ko trener trening ureja prav zdaj.
-
-**Težava in vpliv:** vpis za nazaj je običajen (trener po jutranjem sklopu vpiše, kar je naredil), in
-prav tam se delo izgubi brez besede. P2, ker ga ne zadene vsak dan in ker trening ni izbrisan, le načrt.
-
-**Predlog in preverjanje:** zastarelost meriti od zadnje spremembe odprtega treninga, ne samo od konca
-termina. Preizkus naj uredi načrt treninga, ki je minil pred tremi urami, osveži in zahteva spremembo.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8053-x-p2--načrt-treninga-vpisanega-za-nazaj-po-osvežitvi-izgine--popravljeno-2026-09-29).
 
 ### 80.54 [ ] P3 — Filtri kataloga vaj so v slovenščini angleški: »Chest«, »Barbell«, »Bodyweight«
 
@@ -6426,20 +6409,9 @@ filtrira po tujih besedah. P3.
 **Predlog in preverjanje:** obe vrstici dobita besede iz slovarja, kot jih ima vrstica izvora; vrednost
 filtra ostane angleška. Preizkus naj v slovenščini zahteva, da noben gumb filtra ni angleški.
 
-### 80.55 [ ] P3 — Kartica treninga pravi samo »Nedoločen«, trener pa to bere kot stanje
+### 80.55 [x] P3 — Kartica treninga pravi samo »Nedoločen«, trener pa to bere kot stanje — popravljeno 2026-09-29
 
-**Scenarij in koraki:** trening brez izbrane rutine na plošči treningov.
-
-**Opaženo:** v vrstici kartice stoji »• Nedoločen« z ikono odložišča. Trenerka v dnevu trenerja 05 (§88)
-je to prebrala kot stanje udeležbe in iskala, kje ga spremeni v »prišla«.
-
-**Vzrok, potrjen v kodi na `main`:** [sessionCard.js](src/modules/sessionList/sessionCard.js) izpiše
-`t("undefined")` (»Nedoločen«, »Undefined«), ko trening nima rutine. Beseda ne pove, kaj je nedoločeno.
-
-**Težava in vpliv:** na plošči, ki jo trener bere med vadbami, beseda brez predmeta zavaja. P3.
-
-**Predlog in preverjanje:** napis naj pove, česa ni (»Rutina ni izbrana«), ali pa naj ga ni. Preizkus
-naj pri treningu brez rutine zahteva besedilo, ki imenuje rutino.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8055-x-p3--kartica-treninga-pravi-samo-nedoločen-trener-pa-to-bere-kot-stanje--popravljeno-2026-09-29).
 
 ### 80.52 [ ] P2 — Gumb »Shrani« je ob odprtju obrazca pod robom zaslona
 
@@ -6472,50 +6444,13 @@ kar ob vedno vidnem gumbu postane še bolj vidno neskladje.
 da je ta ob odprtju znotraj zaslona. To je ista vrsta meritve kot §80.25 (velikost tarč) in sodi v
 isti preizkus geometrije.
 
-### 80.56 [ ] P2 — Iskanje strank ne najde vidnega vzdevka
+### 80.56 [x] P2 — Iskanje strank ne najde vidnega vzdevka — popravljeno 2026-09-29
 
-**Scenarij in koraki:** trener vodi dve stranki z enakim imenom »TEST Luka Kovač«.
-Prvi v obrazcu doda vzdevek »jutranji«, drugi »večerni«, različna izmišljena e-naslova
-in različna cilja. Obe shrani. V imeniku poišče »Luka«, nato »jutranji« in »večerni«.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8056-x-p2--iskanje-strank-ne-najde-vidnega-vzdevka--popravljeno-2026-09-29).
 
-**Opaženo:** »Luka« pokaže obe kartici z ustreznima vzdevkoma in ciljema. Vsak vzdevek
-zase pokaže »Strank ni mogoče najti. Klikni "Dodaj stranko", da jo ustvariš.«
-Po izbrisu iskalnega niza sta obe stranki spet vidni. Prestreznik napak ni zabeležil napak.
-Preizkus: objavljena različica `0625bd6`, Chrome CDP, 390 × 844, slovenščina.
+### 80.57 [x] P1 — Decimalna vejica spremeni 2,5 kg v 25 kg brez opozorila — popravljeno 2026-09-29
 
-**Težava in vpliv:** trener ne more poiskati stranke po razlikovalnem podatku, ki ga je
-vnesel prav zaradi podvojenega imena. Sporočilo ga pri tem usmerja v ustvarjanje nove stranke.
-
-**Predlog in preverjanje:** iskanje naj upošteva tudi vzdevek. Pri nič zadetkih naj ponudi
-brisanje filtra. Ponoviti opisani scenarij: vsak vzdevek mora vrniti samo ustrezno stranko.
-Po izrecnem navodilu uporabnika gre za ugotovitev iz vmesnika; kode in stanja na `main`
-v tem nadaljevanju ne preverjamo.
-
-**Dopolnitev:** enako v nastavitvi treninga: »večerni« vrne »Stranke s tem imenom ni«,
-»Luka« pa obe pravilno označeni možnosti. Vzdevek naj upoštevata oba iskalnika.
-
-### 80.57 [ ] P1 — Decimalna vejica spremeni 2,5 kg v 25 kg brez opozorila
-
-**Scenarij in koraki:** slovenski trener v načrt »Par z vzdevkoma« doda ročno vajo
-»Dvig rok z lahkima utežema«. Polje KG označi v celoti in s tipkovnico vpiše »2,5«,
-pritisne Tab ter »Končano z urejanjem načrta«.
-
-**Opaženo:** polje po vnosu kaže »25«, nima validacijskega opozorila, v načrtu se
-izpiše »S3 × R10 × 25 kg«. Ponovno odprto urejanje še vedno kaže 25. Enak vnos s piko,
-»2.5«, ohrani pravilno vrednost in v načrtu pokaže »2.5 kg«. Testni načrt je popravljen
-na to vrednost. Zabeleženih napak brskalnika ni.
-
-**Okolje:** objavljena različica `0625bd6`, Chrome CDP, 390 × 844, jezik aplikacije
-slovenščina, `navigator.language` je `en-US`. Gre za tipkanje znakov, ne neposredno
-spreminjanje vrednosti prek JavaScripta. Preizkus drugega jezika brskalnika še ni izveden.
-
-**Težava in vpliv:** običajen slovenski decimalni zapis postane desetkrat večja
-obremenitev, ki je videti veljavna. Trener mora napako opaziti in vrednost popraviti.
-
-**Predlog in preverjanje:** sprejeti decimalno vejico in piko ali neustrezen ločilni
-znak jasno zavrniti; nikoli ga tiho izpustiti. Pri slovenski aplikaciji na brskalniku
-en-US preveriti vnose »2,5«, »0,5« in »2.5« ter prikaz ob ponovnem odprtju načrta.
-Ugotovitev temelji samo na objavljenem vmesniku, brez preverjanja kode.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8057-x-p1--decimalna-vejica-spremeni-25-kg-v-25-kg-brez-opozorila--popravljeno-2026-09-29).
 
 ### 80.58 [ ] P2 — Prvi termin tedenske serije ima dve enaki kartici
 

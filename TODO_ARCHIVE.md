@@ -5757,3 +5757,104 @@ so it cannot be the only way in.
   Data management as this note proposed. The state line that says whether backups are encrypted has to
   live where the backup is taken, and splitting the answer from the two acts that change it would put
   them in two places.
+
+### 80.57 [x] P1 — Decimalna vejica spremeni 2,5 kg v 25 kg brez opozorila — popravljeno 2026-09-29
+
+**Scenarij in koraki:** slovenski trener v načrt »Par z vzdevkoma« doda ročno vajo
+»Dvig rok z lahkima utežema«. Polje KG označi v celoti in s tipkovnico vpiše »2,5«,
+pritisne Tab ter »Končano z urejanjem načrta«.
+
+**Opaženo:** polje po vnosu kaže »25«, nima validacijskega opozorila, v načrtu se
+izpiše »S3 × R10 × 25 kg«. Ponovno odprto urejanje še vedno kaže 25. Enak vnos s piko,
+»2.5«, ohrani pravilno vrednost in v načrtu pokaže »2.5 kg«. Testni načrt je popravljen
+na to vrednost. Zabeleženih napak brskalnika ni.
+
+**Okolje:** objavljena različica `0625bd6`, Chrome CDP, 390 × 844, jezik aplikacije
+slovenščina, `navigator.language` je `en-US`. Gre za tipkanje znakov, ne neposredno
+spreminjanje vrednosti prek JavaScripta. Preizkus drugega jezika brskalnika še ni izveden.
+
+**Težava in vpliv:** običajen slovenski decimalni zapis postane desetkrat večja
+obremenitev, ki je videti veljavna. Trener mora napako opaziti in vrednost popraviti.
+
+**Predlog in preverjanje:** sprejeti decimalno vejico in piko ali neustrezen ločilni
+znak jasno zavrniti; nikoli ga tiho izpustiti. Pri slovenski aplikaciji na brskalniku
+en-US preveriti vnose »2,5«, »0,5« in »2.5« ter prikaz ob ponovnem odprtju načrta.
+Ugotovitev temelji samo na objavljenem vmesniku, brez preverjanja kode.
+
+**Popravljeno 2026-09-29 (`857bc6a`).** Polja za težo so besedilna polja z decimalno tipkovnico
+(`inputmode="decimal"`), ne `type="number"`, ki bere ločilo po jeziku telefona. En bralnik
+(`parseDecimal` v `repsAndLoad.js`) sprejme vejico in piko; vrednost, ki je ne zna prebrati, polje
+označi kot neveljavno. Velja za urejevalnik načrta, gradnik rutine, okno za dodajanje vaje in okno
+za prilagoditev. Test: `test_a_decimal_comma_is_the_same_load_as_a_decimal_point`.
+
+### 80.53 [x] P2 — Načrt treninga, vpisanega za nazaj, po osvežitvi izgine — popravljeno 2026-09-29
+
+**Scenarij in koraki:** trener popoldne odpre jutranji trening, ki ga ni začel v aplikaciji, v meniju ⋮
+izbere »Uredi načrt«, vpiše vaje in pritisne »Končano«. Nato osveži stran (ali mu telefon stran naloži
+znova).
+
+**Opaženo:** načrt je spet takšen, kot ga da rutina. Našel podagent v dnevu trenerja 02 (§88), ki je
+jutranje treninge vpisoval popoldne; ponovljeno na `main`: pri treningu, ki je minil pred več kot dvema
+urama, preimenovana vaja po osvežitvi izgine, pri prihodnjem treningu ostane.
+
+**Vzrok, potrjen v kodi na `main`:** `isCachedSessionStale` v
+[sessionClock.js](src/domain/sessionClock.js) šteje shranjen odprt trening za pozabljenega, ko je več kot
+dve uri čez načrtovani konec, in ga obnova zavrže. Merilo je konec termina, ne zadnja sprememba — tudi
+ko trener trening ureja prav zdaj.
+
+**Težava in vpliv:** vpis za nazaj je običajen (trener po jutranjem sklopu vpiše, kar je naredil), in
+prav tam se delo izgubi brez besede. P2, ker ga ne zadene vsak dan in ker trening ni izbrisan, le načrt.
+
+**Predlog in preverjanje:** zastarelost meriti od zadnje spremembe odprtega treninga, ne samo od konca
+termina. Preizkus naj uredi načrt treninga, ki je minil pred tremi urami, osveži in zahteva spremembo.
+
+**Popravljeno 2026-09-29 (`6011a11`).** Vsaka sprememba načrta zapiše `planEditedAt`, merilo
+zastarelosti pa šteje od najpoznejšega od konca termina, začetka in te spremembe. Sprememba rok le
+podaljša: podloga brez termina še vedno ne zastara. Testa:
+`test_a_plan_written_up_after_its_slot_survives_reload` in enotni test merila.
+
+### 80.55 [x] P3 — Kartica treninga pravi samo »Nedoločen«, trener pa to bere kot stanje — popravljeno 2026-09-29
+
+**Scenarij in koraki:** trening brez izbrane rutine na plošči treningov.
+
+**Opaženo:** v vrstici kartice stoji »• Nedoločen« z ikono odložišča. Trenerka v dnevu trenerja 05 (§88)
+je to prebrala kot stanje udeležbe in iskala, kje ga spremeni v »prišla«.
+
+**Vzrok, potrjen v kodi na `main`:** [sessionCard.js](src/modules/sessionList/sessionCard.js) izpiše
+`t("undefined")` (»Nedoločen«, »Undefined«), ko trening nima rutine. Beseda ne pove, kaj je nedoločeno.
+
+**Težava in vpliv:** na plošči, ki jo trener bere med vadbami, beseda brez predmeta zavaja. P3.
+
+**Predlog in preverjanje:** napis naj pove, česa ni (»Rutina ni izbrana«), ali pa naj ga ni. Preizkus
+naj pri treningu brez rutine zahteva besedilo, ki imenuje rutino.
+
+**Popravljeno 2026-09-29 (`e3cb306`).** Vrstica »Nedoločen« je odstranjena, skupaj s slogom in
+ključem `undefined`. Ista kartica ima že opozorilo »Program ni določen«, ki pove, kaj manjka. Test:
+`test_a_session_without_a_routine_says_which_thing_is_missing`.
+
+### 80.56 [x] P2 — Iskanje strank ne najde vidnega vzdevka — popravljeno 2026-09-29
+
+**Scenarij in koraki:** trener vodi dve stranki z enakim imenom »TEST Luka Kovač«.
+Prvi v obrazcu doda vzdevek »jutranji«, drugi »večerni«, različna izmišljena e-naslova
+in različna cilja. Obe shrani. V imeniku poišče »Luka«, nato »jutranji« in »večerni«.
+
+**Opaženo:** »Luka« pokaže obe kartici z ustreznima vzdevkoma in ciljema. Vsak vzdevek
+zase pokaže »Strank ni mogoče najti. Klikni "Dodaj stranko", da jo ustvariš.«
+Po izbrisu iskalnega niza sta obe stranki spet vidni. Prestreznik napak ni zabeležil napak.
+Preizkus: objavljena različica `0625bd6`, Chrome CDP, 390 × 844, slovenščina.
+
+**Težava in vpliv:** trener ne more poiskati stranke po razlikovalnem podatku, ki ga je
+vnesel prav zaradi podvojenega imena. Sporočilo ga pri tem usmerja v ustvarjanje nove stranke.
+
+**Predlog in preverjanje:** iskanje naj upošteva tudi vzdevek. Pri nič zadetkih naj ponudi
+brisanje filtra. Ponoviti opisani scenarij: vsak vzdevek mora vrniti samo ustrezno stranko.
+Po izrecnem navodilu uporabnika gre za ugotovitev iz vmesnika; kode in stanja na `main`
+v tem nadaljevanju ne preverjamo.
+
+**Dopolnitev:** enako v nastavitvi treninga: »večerni« vrne »Stranke s tem imenom ni«,
+»Luka« pa obe pravilno označeni možnosti. Vzdevek naj upoštevata oba iskalnika.
+
+**Popravljeno 2026-09-29 (`bdffa49`).** Obe iskanji, v imeniku in pri dodajanju udeleženca, iščeta
+po imenu in vzdevku (`clientNameMatches` v `utils.js`). Predlog, da prazen zadetek ponudi brisanje
+iskalnega niza, ni narejen. Testa v `test_clients_directory.py` in
+`test_session_participant_picker.py`.
