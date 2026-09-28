@@ -94,7 +94,7 @@ jobs:
         run: .venv/bin/python -c "from build import run_unit_tests; run_unit_tests()"
 
   javascript-unit-tests:
-    name: Stage 1 · JavaScript Unit Tests (node:test)
+    name: Stage 1 · JavaScript Unit Tests (node:test) and their coverage
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -104,6 +104,9 @@ jobs:
         # ensure_biome_binary() vendors Biome, so this stays on the same Python-only toolchain
         # every other job uses.
         run: .venv/bin/python -c "from build import run_javascript_unit_tests; run_javascript_unit_tests()"
+      - name: Unit coverage of pure logic
+        # Here rather than in structure-checks: it runs the same suite under Node's coverage.
+        run: .venv/bin/python -c "from build import run_unit_coverage_check; run_unit_coverage_check()"
 
   # Its own job, not folded into javascript-unit-tests, so a security regression is named as one on
   # the run page rather than reported as a generic unit-test failure. Covers the client-side classes
@@ -126,7 +129,7 @@ jobs:
   # are the repo's structural invariants: the module catalog matches the tree, imports flow one way,
   # every CI job gates the deploy, and no function has grown past the complexity ceiling.
   structure-checks:
-    name: Stage 1 · Structural Invariants (catalog, icons, layering, gating, complexity, test assertions)
+    name: Stage 1 · Structural Invariants (catalog, icons, layering, gating, complexity, test assertions, use cases)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -157,6 +160,8 @@ jobs:
         run: .venv/bin/python -c "from build import run_complexity_check; run_complexity_check()"
       - name: Test assertions pin behaviour
         run: .venv/bin/python -c "from build import run_test_assertion_check; run_test_assertion_check()"
+      - name: Use cases name their tests
+        run: .venv/bin/python -c "from build import run_use_case_test_check; run_use_case_test_check()"
       - name: Generated documentation pages
         run: .venv/bin/python -c "from build import run_docs_render_check; run_docs_render_check()"
 

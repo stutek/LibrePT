@@ -1137,6 +1137,34 @@ def run_test_assertion_check():
         sys.exit(1)
 
 
+def run_use_case_test_check():
+    """Verifies every use case points each promise at a test — see agent_tools/use_case_tests.py.
+
+    The four use cases without a traceability table were the ones furthest from the app: buttons
+    that do not exist, a Calendar permission the app does not hold. A row may say there is no test,
+    but it has to say why.
+    """
+    print("\n  Checking use-case traceability...")
+    from agent_tools import use_case_tests
+
+    if use_case_tests.main() != 0:
+        sys.exit(1)
+
+
+def run_unit_coverage_check():
+    """Holds pure logic in src/domain/ and src/data/ at its unit-test floor — see
+    agent_tools/unit_coverage.py.
+
+    Its own run of the unit suite under Node's coverage rather than a flag on
+    run_javascript_unit_tests, so that task's output and digest stay as they are; four seconds.
+    """
+    print("\n  Checking unit-test coverage of pure logic...")
+    from agent_tools import unit_coverage
+
+    if unit_coverage.main(ensure_node_binary()) != 0:
+        sys.exit(1)
+
+
 def run_frontend_lint():
     """Runs JS/CSS/JSON static analysis (Biome), applying the formatting it can fix itself.
 
@@ -2159,6 +2187,8 @@ def run_stage_1_parallel():
         "Python Version": run_python_version_check,
         "Cyclomatic Complexity": run_complexity_check,
         "Test Assertions": run_test_assertion_check,
+        "Use-Case Traceability": run_use_case_test_check,
+        "Unit Coverage": run_unit_coverage_check,
         "Rendered Docs": run_docs_render_check,
     }
 
