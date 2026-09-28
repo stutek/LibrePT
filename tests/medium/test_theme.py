@@ -18,14 +18,16 @@ from tests.medium._harness import HEADER_STUB, load_with_stub
 
 pytestmark = pytest.mark.clean_start
 
-# value in #theme-switcher -> the theme class applyTheme() sets (modules/common/theme.js)
-THEME_BODY_CLASS = {
-    "midnight": "midnight-theme",
-    "daylight": "daylight-theme",
-    "spreadsheet": "spreadsheet-theme",
-    "blossom": "blossom-theme",
-    "nebula": "nebula-theme",
-}
+
+def _theme_class(value):
+    """The class a theme's stylesheet (modules/themes/<value>.css) is written against."""
+    return f"{value}-theme"
+
+
+def _switcher_values(page):
+    return page.evaluate(
+        "() => Array.from(document.querySelectorAll('#theme-switcher option'), (o) => o.value)"
+    )
 
 
 def _body_classes(page):
@@ -55,13 +57,14 @@ def test_selecting_a_theme_swaps_the_single_body_class(page, local_server, value
     page.locator("#menu-settings").click()
     page.locator("#theme-switcher").select_option(value)
 
-    others = {c for c in THEME_BODY_CLASS.values() if c != THEME_BODY_CLASS[value]}
+    # Read from the switcher, so a theme added later is checked for lingering too.
+    others = {_theme_class(v) for v in _switcher_values(page) if v != value}
     # Exactly the chosen theme class is present on each element; no other theme class lingers.
     for element, classes in (
         ("body", _body_classes(page)),
         ("html", _root_classes(page)),
     ):
-        assert THEME_BODY_CLASS[value] in classes, (
+        assert _theme_class(value) in classes, (
             f"{element} missing the chosen theme class"
         )
         assert others.isdisjoint(classes), (

@@ -26,16 +26,11 @@
       violet: "nebula",
       red: "spreadsheet",
     };
-    const valid = {
-      midnight: "midnight-theme",
-      daylight: "daylight-theme",
-      spreadsheet: "spreadsheet-theme",
-      blossom: "blossom-theme",
-      nebula: "nebula-theme",
-    };
+    // A copy of THEMES and LEGACY_THEME_MAP in modules/common/theme.js, which this script cannot
+    // import; tests/unit_js/modules/themeBoot.test.mjs fails when the two resolve a name differently.
+    const themes = ["daylight", "midnight", "spreadsheet", "blossom", "nebula"];
     const resolved = map[t] || t;
-    const themeClass = valid[resolved] || "daylight-theme";
-    document.documentElement.className = themeClass;
+    document.documentElement.className = `${themes.includes(resolved) ? resolved : "daylight"}-theme`;
 
     // The splash's dismiss X is on screen from first paint, but the handler behind it is wired by
     // modules/splash/splashScreen.js at the END of app.js's init(). A tap before that lands on a

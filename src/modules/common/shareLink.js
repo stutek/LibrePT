@@ -8,9 +8,9 @@
 // shared — the intended way to promote the demo. All params are optional and independent.
 //
 //   lang   language code from i18n/index.js TRANSLATIONS (e.g. en, sl). Unknown → saved/default.
-//   theme  colour theme (daylight, midnight, red, blossom, nebula) or a legacy alias. Unknown or
-//          since-renamed → default theme. Validation lives at the point of application
-//          (applicationHeader resolveTheme for theme; app.js init for lang).
+//   theme  a colour theme from THEMES in modules/common/theme.js, or an old theme name, which opens
+//          the theme that replaced it. Unknown → default theme. Validation lives at the point of
+//          application (theme.js resolveTheme for theme; app.js init for lang).
 //   demo   what to do with the demo script once the app has booted, one of two explicit values
 //          (modules/demo/). Both need demo data, so both are ignored unless the app has something
 //          to demonstrate.

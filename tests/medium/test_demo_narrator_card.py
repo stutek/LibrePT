@@ -33,8 +33,8 @@ window.__showOffTrack = () => window.__narrator.showOffTrack(true);
 
 // Every palette the trainer can pick, read from the app rather than listed here: a sixth theme must
 // be readable too, and a test with its own copy of the list would not know it exists.
-import { THEME_BODY_CLASS, applyTheme } from './modules/common/theme.js';
-window.__themes = Object.keys(THEME_BODY_CLASS);
+import { THEMES, applyTheme } from './modules/common/theme.js';
+window.__themes = THEMES;
 window.__wearTheme = (key) => applyTheme(key, { persist: false });
 
 // Contrast of one element's text against the surface actually behind it — the first ancestor that

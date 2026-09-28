@@ -333,7 +333,7 @@ export function renderSettingsDialog() {
     </div>
     <div class="menu-control-row">
       <label class="menu-control-label" for="theme-switcher"><i class="fa-solid fa-palette" aria-hidden="true"></i> <span id="menu-label-theme">Theme</span></label>
-      <!-- Options come from THEME_SWITCHER_LABELS (theme.js), so a theme is named in one place. -->
+      <!-- Options come from THEMES (theme.js), so a theme is listed in one place. -->
       <select id="theme-switcher" class="form-control menu-select" aria-label="Theme / Tema"></select>
     </div>
     <!-- The trainer's own name, phone and address. With the settings rather than with the clients:

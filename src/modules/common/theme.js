@@ -10,23 +10,24 @@
 // gate cannot see a copy-paste; the fix is to put the callee in the layer its callers can reach.
 //
 // The <html> class is also set, earlier and independently, by the render-blocking src/theme-boot.js
-// — that script must stay import-free to run before first paint, so its small copy of the map is
-// deliberate and is the ONE duplication here that earns its keep. Everything after boot goes
-// through this module.
+// — that script must stay import-free to run before first paint, so its small copy of the theme list
+// and the old names is deliberate and is the ONE duplication here that earns its keep.
+// tests/unit_js/modules/themeBoot.test.mjs runs it against this module for every name. Everything
+// after boot goes through this module.
 //
 // deps: none — reads window.location / localStorage and writes the document directly.
 
+import { dictionaryFor } from "../../i18n/index.js";
 import { getShareParams } from "./shareLink.js";
 
 export const DEFAULT_THEME = "daylight";
 
-export const THEME_BODY_CLASS = {
-  midnight: "midnight-theme",
-  daylight: "daylight-theme",
-  spreadsheet: "spreadsheet-theme",
-  blossom: "blossom-theme",
-  nebula: "nebula-theme",
-};
+// Every theme, in the switcher's order, the default first. Each one's stylesheet is
+// modules/themes/<name>.css and styles the class `<name>-theme`; its name on screen is the dictionary
+// key `theme_name_<name>`, so every language has to name it.
+export const THEMES = ["daylight", "midnight", "spreadsheet", "blossom", "nebula"];
+
+export const themeClass = (theme) => `${theme}-theme`;
 
 export const THEME_META_COLOR = {
   midnight: "#09090b",
@@ -47,36 +48,11 @@ export const LEGACY_THEME_MAP = {
   red: "spreadsheet",
 };
 
-// Theme names are proper nouns, not UI copy, so they live here beside the theme table rather than
-// in the i18n dictionaries — a new theme is one edit, not two files. The #theme-switcher's options
-// are built from this table in this order (the default first), so the header's markup names none.
-export const THEME_SWITCHER_LABELS = {
-  en: {
-    daylight: "Daylight",
-    midnight: "Midnight",
-    spreadsheet: "Spreadsheet",
-    blossom: "Blossom",
-    nebula: "Nebula",
-  },
-  sl: {
-    daylight: "Dan",
-    midnight: "Polnoč",
-    spreadsheet: "Razpredelnica",
-    blossom: "Cvet",
-    nebula: "Nebula",
-  },
-  de: {
-    daylight: "Tageslicht",
-    midnight: "Mitternacht",
-    spreadsheet: "Tabelle",
-    blossom: "Blüte",
-    nebula: "Nebula",
-  },
-};
+const themeLabel = (theme, lang) => dictionaryFor(lang)[`theme_name_${theme}`];
 
 export function resolveTheme(requestedTheme) {
   const mapped = LEGACY_THEME_MAP[requestedTheme] || requestedTheme;
-  return THEME_BODY_CLASS[mapped] ? mapped : DEFAULT_THEME;
+  return THEMES.includes(mapped) ? mapped : DEFAULT_THEME;
 }
 
 const THEME_KEY = "librept-theme";
@@ -94,8 +70,7 @@ export function hasChosenTheme() {
 
 /** Every theme as `{ key, label }`, in the switcher's order, named in `lang`. */
 export function themeChoices(lang = "en") {
-  const labels = THEME_SWITCHER_LABELS[lang] || THEME_SWITCHER_LABELS.en;
-  return Object.keys(THEME_SWITCHER_LABELS.en).map((key) => ({ key, label: labels[key] }));
+  return THEMES.map((key) => ({ key, label: themeLabel(key, lang) }));
 }
 
 // A share link's ?theme= wins over the saved preference for this visit, so a recipient sees the app
@@ -123,12 +98,12 @@ export function getInitialTheme() {
 export function applyTheme(themeKey, { persist = true } = {}) {
   const resolved = resolveTheme(themeKey);
 
-  for (const themeClass of Object.values(THEME_BODY_CLASS)) {
-    document.documentElement.classList.remove(themeClass);
-    document.body?.classList.remove(themeClass);
+  for (const theme of THEMES) {
+    document.documentElement.classList.remove(themeClass(theme));
+    document.body?.classList.remove(themeClass(theme));
   }
-  document.documentElement.classList.add(THEME_BODY_CLASS[resolved]);
-  document.body?.classList.add(THEME_BODY_CLASS[resolved]);
+  document.documentElement.classList.add(themeClass(resolved));
+  document.body?.classList.add(themeClass(resolved));
 
   const metaThemeColor = document.querySelector('meta[name="theme-color"]');
   if (metaThemeColor && THEME_META_COLOR[resolved]) {
@@ -152,9 +127,9 @@ export function applyTheme(themeKey, { persist = true } = {}) {
 export function applyThemeSwitcherLabels(lang = "en") {
   const themeSwitcher = document.getElementById("theme-switcher");
   if (!themeSwitcher) return;
-  const labels = THEME_SWITCHER_LABELS[lang] || THEME_SWITCHER_LABELS.en;
   for (const option of themeSwitcher.options) {
-    if (labels[option.value]) option.textContent = labels[option.value];
+    const label = themeLabel(option.value, lang);
+    if (label) option.textContent = label;
   }
 }
 
@@ -164,8 +139,7 @@ export function setupThemeSwitcher(lang = "en") {
   const themeSwitcher = document.getElementById("theme-switcher");
   // Before applyTheme, which selects the resolved theme and needs its option to exist.
   if (themeSwitcher && themeSwitcher.options.length === 0) {
-    for (const key of Object.keys(THEME_SWITCHER_LABELS.en))
-      themeSwitcher.add(new Option(key, key));
+    for (const key of THEMES) themeSwitcher.add(new Option(key, key));
   }
   // Shown, not stored: only a choice writes the key, which is how `hasChosenTheme` can tell.
   applyTheme(getInitialTheme(), { persist: false });
