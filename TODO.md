@@ -1092,6 +1092,40 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#163-x-resolved-
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#165-x-retire-the-multi-version-hosting-machinery-from-the-code-done); what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
+### 16.6 [ ] The deployment shares one origin with everything else on that account
+
+**Found 2026-09-28 while answering Simon's question about the backup key.** The app is deployed at
+`https://stutek.github.io/LibrePT` ([publicUrls.js](src/data/publicUrls.js)). A browser separates
+storage by ORIGIN — scheme, host, port — so the path `/LibrePT` separates nothing. Every other page
+ever published on GitHub Pages under this account shares the origin, and therefore shares LibrePT's
+IndexedDB, localStorage and cookies.
+
+**Nothing is wrong today**: checked 2026-09-28, `~/Projects/EnterprisePT` is documents only — no HTML,
+no code, no git remote, not published. This is about the day a second page goes up there.
+
+**The exposure is the whole database, not the backup key.** A page on that origin can open the
+`librept` database and read clients, health notes and session history directly; they are stored in the
+clear, and encrypting them is refused for a stated reason (§18.8). It could also USE the backup key —
+non-extractable stops it being copied out, not being used — and so open any backup file it obtains.
+That is a smaller part of the same hole.
+
+**What has to be true for harm**: a second page on the origin, running hostile code (a bug, an XSS, or
+a third-party script it includes), AND the trainer opening it in the browser that holds LibrePT. Not
+remote access to every install — but a trainer opening the maintainer's other pages is exactly what a
+linked family of projects invites.
+
+**Decide before launch, not after.** Moving origin empties the app for everyone who already has data:
+IndexedDB does not travel, so every trainer would have to export on the old address and import on the
+new one by hand. The same move also needs Google's allowed JavaScript origins updated
+([GOOGLE_CLOUD_SETUP.md](docs/GOOGLE_CLOUD_SETUP.md)) and `PUBLIC_SITE_URL` changed.
+
+**Recommended**: a domain of LibrePT's own, in place before anybody's real data exists. The
+alternative — never publish anything else under this account — is a rule that has to hold forever and
+will be broken once, quietly, by the person who does not know it.
+
+**Blocks**: nothing in the code. It blocks the launch plan, because the cost of this decision is
+decided by whether any trainer has data yet.
+
 ## 17. Structured session/program history (`sessionItemRecord`)
 
 ### 17.1 [~] Persist the whole structured program into history, via a generic typed item record
