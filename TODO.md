@@ -6751,6 +6751,15 @@ mesec (4–5 na dan), večina ena na ena in dve manjši skupini, brez recepcije,
 | Čakalna vrsta za polno skupino               | zasedenost je vidna, vrste ni                                          | nikjer             | majhna pri 20 strankah, večja pri skupinah |
 | Uskladitev z lastnim koledarjem              | izvoz vabila v koledar (datoteka), sinhronizacija urnika prek oblaka   | delno izdelano     | ~0,5 h/mesec |
 
+**Dodaten scenarij iz objavljene `0625bd6`:** pri pretekli »Individualni vadbi« za
+TEST Ano Novak trener izbere »Začni trening« in v oknu »Trening se je začel izven
+urnika« pritisne »Ni se zgodila«. Termin izgine s plošče, program pa se pojavi med
+nedodeljenimi programi z imenom »Individualna vadba · TEST Ana Novak«. Oznaka gumba
+ne pojasni te posledice. To potrjuje razliko med odstranitvijo termina z ohranjenim
+načrtom in evidenco odpovedi; slednje ta pot ne pokaže. Predlog za obstoječi gumb:
+pojasniti odstranitev termina in ohranitev načrta. Preizkušeno samo v vmesniku,
+390 × 844, sl, brez prestreženih napak in brez pregleda kode.
+
 ### 86.4 Izvedba in stranka
 
 | Opravilo                                  | Kaj aplikacija dela danes                                   | Kje je že prevzeto | Ocena vrednosti |
