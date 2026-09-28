@@ -124,6 +124,26 @@ def test_an_end_before_the_start_is_refused_at_the_field(page, local_server):
     expect(page.locator("#form-workout-setup")).to_be_visible()
 
 
+def test_a_repeat_that_ends_before_it_starts_is_refused_at_the_field(
+    page, local_server
+):
+    """ "Until" 2026-11-03 on a session starting 2026-11-10 was saved as one session with no repeat,
+    and the form said nothing: the trainer believed a series had been set up."""
+    load_with_stub(
+        page, local_server, setup_stub(SCHEDULED_SESSION, target_session="'s-edit'")
+    )
+    page.fill("#setup-session-date", "2026-11-10")
+    page.check("#setup-repeat")
+    page.fill("#setup-repeat-until", "2026-11-03")
+    page.locator("#form-workout-setup button[type=submit]").click()
+
+    expect(page.locator("#setup-repeat-until")).to_have_class(re.compile("is-invalid"))
+    expect(page.locator("#setup-repeat-until-error")).to_have_text(
+        "The repeat ends before the first session. Choose a date on or after it."
+    )
+    expect(page.locator("#form-workout-setup")).to_be_visible()
+
+
 def fill_slot(page, start, end, location):
     page.fill("#setup-session-date", SESSION_DATE)
     page.fill("#setup-start-time", start)

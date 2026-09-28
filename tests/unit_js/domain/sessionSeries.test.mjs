@@ -130,6 +130,15 @@ test("a series nobody can act on is rejected before it reaches the board", () =>
   assert.match(validateSeries({ weekdays: [2], time: "18:00 - 19:00" }).join(" "), /id/);
 });
 
+test("a series that ends before it starts is rejected; ending on its first day is not", () => {
+  assert.match(
+    validateSeries({ ...SERIES, until: "2026-08-18" }).join(" "),
+    /end before it starts/,
+  );
+  assert.deepEqual(validateSeries({ ...SERIES, until: "2026-08-25" }), []);
+  assert.deepEqual(validateSeries({ ...SERIES, until: "" }), []);
+});
+
 test("touching an evening turns it into a session that the series still recognises", () => {
   const [first] = seriesOccurrences(SERIES, { from: "2026-08-24", to: "2026-08-26" });
 

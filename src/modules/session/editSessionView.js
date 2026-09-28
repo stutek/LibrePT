@@ -86,6 +86,7 @@ export function renderEditSessionView(targetElement) {
               <div id="setup-repeat-days" class="setup-repeat-days"></div>
               <label for="setup-repeat-until" class="text-sm" data-i18n="label_repeat_until">Until (optional)</label>
               <input type="text" id="setup-repeat-until" class="form-control">
+              <p class="form-error" id="setup-repeat-until-error" hidden></p>
             </div>
           </div>
 

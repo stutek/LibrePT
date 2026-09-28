@@ -32,7 +32,11 @@ import {
   sessionCalendarDate,
   upsertSessionRecord,
 } from "../../domain/sessionRecord.js";
-import { seriesWithEdit, validateSeries } from "../../domain/sessionSeries.js";
+import {
+  repeatEndsBeforeStart,
+  seriesWithEdit,
+  validateSeries,
+} from "../../domain/sessionSeries.js";
 import { clockToMinutes, parseTimeRange, timePlusMinutes } from "../../domain/timeRange.js";
 import { askInApp, tellInApp } from "../common/appQuestion.js";
 import { mountDateField } from "../common/dateField.js";
@@ -533,6 +537,26 @@ function endComesAfterStart(t) {
   return false;
 }
 
+/** True unless the form repeats and its "Until" date is before the session's own date. Such a rule
+ *  produces no evening at all, and it was dropped with only a console line, so the trainer believed
+ *  a series had been set up. Said at the field, like the end time. */
+function repeatEndsOnOrAfterStart(t) {
+  const field = document.getElementById("setup-repeat-until");
+  if (!field) return true;
+  clearNameWordProblem(field);
+  if (!document.getElementById("setup-repeat")?.checked) return true;
+  const startDate = document.getElementById("setup-session-date")?.value.trim() || "";
+  if (!repeatEndsBeforeStart({ startDate, until: field.value.trim() })) return true;
+  field.classList.add("is-invalid");
+  const line = document.getElementById("setup-repeat-until-error");
+  if (line) {
+    line.textContent = t("repeat_until_before_start");
+    line.hidden = false;
+  }
+  field.focus();
+  return false;
+}
+
 /** True when the form may be saved: neither the session's name nor its location names a client. */
 function sessionTextNamesNobody(deps) {
   const words = clientNameWords(deps.getState?.().clients || []);
@@ -602,6 +626,7 @@ export function setupEditSessionControl() {
     // that rather than a dialog about something else.
     if (!sessionTextNamesNobody(deps)) return;
     if (!endComesAfterStart(deps.t)) return;
+    if (!repeatEndsOnOrAfterStart(deps.t)) return;
 
     const clientRoutines = collectSelectedClientRoutines();
     const { t } = deps;

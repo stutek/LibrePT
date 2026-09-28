@@ -120,6 +120,8 @@ export const de = {
   label_start_time: "Beginn",
   label_end_time: "Ende",
   end_before_start: "Der Termin endet, bevor er beginnt. Prüfe die Endzeit.",
+  repeat_until_before_start:
+    "Die Wiederholung endet vor dem ersten Termin. Wähle den Tag des ersten Termins oder einen späteren.",
   time_field_later: "Fünf Minuten später",
   time_field_earlier: "Fünf Minuten früher",
   time_field_set: "{time} einstellen",

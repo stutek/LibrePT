@@ -120,6 +120,8 @@ export const sl = {
   label_start_time: "Začetni čas",
   label_end_time: "Končni čas",
   end_before_start: "Trening se konča, preden se začne. Preveri uro konca.",
+  repeat_until_before_start:
+    "Ponavljanje se konča pred prvim treningom. Izberi datum na dan prvega treninga ali pozneje.",
   time_field_later: "Pet minut pozneje",
   time_field_earlier: "Pet minut prej",
   time_field_set: "Nastavi {time}",

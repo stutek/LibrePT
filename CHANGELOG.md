@@ -43,6 +43,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 - **The dates filter writes its range as ISO dates**, with the year, like every other date.
 - **The sandbox's sample messages name people and sessions that are in the sandbox.** They named two
   clients who did not exist and a session at a time when there was none.
+- **A repeat that ends before the first session is refused at the "Until" field.** It was saved as
+  one session without a repeat, and the form said nothing.
 
 ---
 

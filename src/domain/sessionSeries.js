@@ -56,6 +56,12 @@ export function sessionOccurrenceKey(session) {
  *
  * A rule with no days produces nothing and a rule with no slot produces evenings nobody can be told
  * about — both are silent, which is the failure worth catching early. */
+/** True when the last day a series may run is before its first. Both are `YYYY-MM-DD`, so they
+ *  compare as text; no end at all is an open series, never an early one. */
+export function repeatEndsBeforeStart({ startDate, until } = {}) {
+  return !!(startDate && until && String(until).slice(0, 10) < String(startDate).slice(0, 10));
+}
+
 export function validateSeries(series) {
   const problems = [];
   if (!series?.id) problems.push("a series needs an id");
@@ -64,6 +70,7 @@ export function validateSeries(series) {
     problems.push("a series needs at least one weekday");
   }
   if (!parseTimeRange(series?.time)) problems.push("a series needs a time slot like 18:00 - 19:00");
+  if (repeatEndsBeforeStart(series)) problems.push("a series cannot end before it starts");
   return problems;
 }
 
