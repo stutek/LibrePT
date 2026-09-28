@@ -7252,15 +7252,17 @@ shape it does not declare.** Everything else on the list is screens and reading.
 | :--- | :--- | :--- |
 | **1. Fork** | Copy the repository, edit freely | A merge conflict on every release of this app, for ever. Rejected there, and still rejected |
 | **2. A separate app reading an export** | Two apps, a monthly import | Fails the invoice run: a month-end screen that needs re-importing a diary is the work the trainer already does. Invoices land outside this app's backup and sync |
-| **3. This app provides an empty function for ProPT to fill** | This app adds `registerExtensions()`, which does nothing here, and `appBoot.js` calls it at start-up. The paid build replaces that one file | Works, but the empty function exists in the free app for one reason only: so the paid product can use it. §68 forbids that — *"no paid features, no dead code for them"* — so the rule would have to change first |
-| **4. The paid build provides its own starting file** | `index.html` is the first file a browser loads, and it names the JavaScript file that starts the app. The paid build ships its own `index.html`, which starts its own file, which runs this app's `app.js` and then adds its own screens | **Recommended.** Nothing is added to this app for the paid product, so §68 stands as written |
+| **3. This app provides an empty function for ProPT to fill** | This app adds `registerExtensions()`, which does nothing here, and `appBoot.js` calls it at start-up. The paid build replaces that one file | One function in the free app whose only purpose is elsewhere. Against value 4 — the simplest thing that does the job, no layer without a concrete problem — but it is honest and testable, because the contract is named |
+| **4. The paid build provides its own starting file** | `index.html` is the first file a browser loads, and it names the JavaScript file that starts the app. The paid build GENERATES its own `index.html` from this one, substituting that single line | **Recommended.** Nothing is added to this app for the paid product, and generating rather than copying means every later change here — a new tag, a tightened `Content-Security-Policy` — reaches the paid build on its next rebuild |
 
 **Why 4 beats 3.** When the paid build replaces one of this app's files with its own copy, that copy
 stops receiving later changes to it — silently, with no error and no merge conflict. So which files it
 may replace is decided by how often each one changes, not by preference:
 
-- `index.html` changes almost never — **the paid build replaces it**, and that is how it starts, with
-  nothing added here.
+- `index.html` changes almost never, but when it does the change is often security-relevant (the
+  `Content-Security-Policy` lives there). So the paid build **generates** its copy from this one,
+  substituting the one line that names the starting script — a static copy would silently keep an old
+  policy.
 - `app.js` / `appBoot.js` change with every feature — **never replaced**; the paid build runs them.
 - `routeTable.js` gains a line per screen and `applicationHeader.js` one per menu entry — **neither**:
   replacing either would fall behind within weeks, so this app gains a list they can register into.
@@ -7273,8 +7275,21 @@ may replace is decided by how often each one changes, not by preference:
 `registerShellRender` in [renderRegistry.js](src/modules/common/renderRegistry.js), which exists
 because hand-ordering render calls failed silently. Routes and menu entries getting the same treatment
 is **this app's existing pattern used twice more**, by its own routes and its own menu — so it is not
-dead code, it is not there for a paid tier, and **§68's first bullet stands unchanged.** That bullet
-already allows the overlay to *"register itself into existing registries"*.
+code added for a paid tier, and **§68's first bullet stands unchanged.** That bullet already allows the
+overlay to *"register itself into existing registries"*.
+
+**A correction, 2026-09-28, and it is worth more than the paragraph it corrects.** An earlier version
+of this section argued that approach 3 is blocked because §68 forbids *"no paid features, no dead code
+for them"*, and that Simon would have to change that rule. **He never wrote that sentence.** It is
+`PROPT_IMPLEMENTATION.md` §2 in the other project, written by an agent on 2026-09-24, and §68 here does
+not contain it. So approach 3 is not blocked by any ruling, and the case for 4 has to stand on this
+app's own values instead: value 4, the simplest thing that does the job with no layer added without a
+concrete problem. It does stand — but it is a preference, not a prohibition, and Simon may pick 3.
+
+**The same reading applies to §68 itself.** It introduces its two bullets as *"two of its findings bind
+THIS repository"* — an agent declaring that a proposal in another project binds this one. Whether those
+two bullets are Simon's decisions or an agent's summary is worth settling, because this section and
+§90.7 both lean on them.
 
 **Is copying the source smart? Asked by Simon 2026-09-28.** It is cheap HERE, for a reason that is a
 property of this app rather than a general truth: **there is no bundler.** `python -m build` is
@@ -7296,7 +7311,8 @@ a security fix is a promise ProPT makes, and it belongs in that project rather t
 **Two alternatives, rejected with the reason:**
 
 - **Publish this app as an npm package.** There is no `package.json`, no `node_modules` and no bundler
-  here on purpose, and adding them for the benefit of a paid product is exactly what §68 forbids.
+  here on purpose, and adding a build system for the benefit of a paid product is what §68's first
+  bullet is about — *"nothing here changes shape for it"*.
 - **Load this app's modules at run time from the free site.** It breaks offline use, breaks the
   `script-src 'self'` policy in [index.html](src/index.html), breaks the integrity catalog, ties the
   paid product to the free site staying up, and tells the free site's host which trainers are paying.
@@ -7378,15 +7394,19 @@ which deliberately avoided one.
 
 **Answered by this design, needing no ruling:** how the overlay loads (it owns the entry), how it
 appears (the registry pattern this app already uses), how it stays offline (a generated list), and
-whether §68 has to change (**no** — approach 4 adds no hook for a paid tier).
+whether §68 has to change (**no** under approach 4, which adds nothing here for a paid tier).
 
 **His to decide:**
 
-1. **The origin fork of §16.6**, which §90.1 answers but cannot close.
-2. **Whether the collection is declared now or when the first invoice is built.** Declaring is cheap;
+1. **Whether §68's two bullets are his decisions at all.** They are introduced there as findings of
+   another project's proposal that *"bind THIS repository"* — written by an agent, not ruled by him.
+   Until that is settled, this section treats them as the best available reasoning rather than as
+   rules, and approach 3 stays open to him.
+2. **The origin fork of §16.6**, which §90.1 answers but cannot close.
+3. **Whether the collection is declared now or when the first invoice is built.** Declaring is cheap;
    the schema bump is the cost, and it buys nothing until something writes to it.
-3. **Whether erasure's "kept by law" behaviour is built now on its own merits**, ahead of any paid
+4. **Whether erasure's "kept by law" behaviour is built now on its own merits**, ahead of any paid
    tier. It is a correctness gap in this app today.
 
-**Blocks**: `PROPT_IMPLEMENTATION.md` §8 step 2 there. **Blocked on**: nothing here — decisions 2 and 3
+**Blocks**: `PROPT_IMPLEMENTATION.md` §8 step 2 there. **Blocked on**: nothing here — decisions 3 and 4
 set the order, not the design.
