@@ -7355,6 +7355,25 @@ a security fix is a promise ProPT makes, and it belongs in that project rather t
   `script-src 'self'` policy in [index.html](src/index.html), breaks the integrity catalog, ties the
   paid product to the free site staying up, and tells the free site's host which trainers are paying.
 
+**"Is this a plugin system with a custom loader?" Asked by Simon 2026-09-28: no, and it must not
+become one.** There is no loader: the browser loads one `index.html`, and static `import` statements do
+the rest, as they do today. Nothing is discovered and nothing is fetched at run time. What ProPT is, is
+**one product built once from two source trees that have the same owner** — a build variant, or a
+private fork regenerated on each new pin rather than maintained by hand.
+
+The distinction is not vocabulary. A plugin system means a published interface that outside code
+depends on, which brings versioning, deprecation and backwards compatibility — **a permanent cost
+carried by the free app for one paid consumer.** As a build variant, this app owes ProPT nothing: it
+changes whatever it likes, and ProPT's next build either works or ProPT fixes it. The cost falls on the
+side that benefits. Run-time loading would also break offline use, the `script-src 'self'` policy and
+the integrity catalog, which §90.3 already rejects for the same reason.
+
+**The honest caveat**: the two registration lists ARE a small interface, and once ProPT depends on
+them, reshaping them breaks it. They are defensible because both are justified by this app's own needs
+— a hand-maintained route table and hand-written menu markup have exactly the defect
+`registerShellRender` was introduced to remove. **The line to watch is a third party building on them**,
+at which point they become an API with every cost above.
+
 ### 90.4 [ ] The precache list becomes generated, and that pays for itself here
 
 A ProPT file missing from [cacheManifest.js](src/sw/cacheManifest.js) is not precached, and the app
