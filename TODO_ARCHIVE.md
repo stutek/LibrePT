@@ -5634,3 +5634,61 @@ odgovor in zahteva, da je na zaslonu pot naprej. Opaženo na objavljeni različi
 na `main` je ista.
 
 **Fixed 2026-09-27 (Claude Opus 5.5), commit `16af98c`.** With neither a phone nor an email on the invite, the page says »Odgovor sporoči trenerju tako, kot sta običajno v stiku.« New installs cannot reach this: the welcome screen writes the trainer's phone and email on every path, and the invite dialog fills them in.
+
+### 81.6 [x] The backup password is stored, safely — done 2026-09-28
+
+**Ruled 2026-09-27 (Simon):** *"geslo za varnostne kopije naj bo shranjeno in poiščiva varen način
+za shranjevanje gesel za varnostne kopije."*
+
+**What it depends on:** backups are not encrypted today (§18.8 decided to encrypt them and parked
+it). A stored backup password means encrypting backups — the file and Drive — with it.
+
+**Researched 2026-09-27, primary sources read:**
+
+- **A key the app can use but nobody can read out.** WebCrypto keeps a derived key as a `CryptoKey`
+  whose `extractable` flag decides *"whether or not the key may be extracted using exportKey() or
+  wrapKey()"* ([MDN](https://developer.mozilla.org/en-US/docs/Web/API/CryptoKey)). The interface is
+  `[Serializable]`, so it can be kept in IndexedDB, and serialising keeps the flag: *"Set
+  serialized.[[Extractable]] to the [[extractable]] internal slot of value"*
+  ([W3C Web Crypto](https://www.w3.org/TR/WebCryptoAPI/)). So the password is never stored — only a
+  key derived from it, with `extractable: false`.
+- **A key unlocked by fingerprint or face.** The WebAuthn `prf` extension gives a value per passkey
+  that *"can be used to generate a symmetric key for encrypting sensitive data, and that can only be
+  decrypted by a user who has the seed and the associated authenticator"*
+  ([MDN](https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API/WebAuthn_extensions)).
+  Nothing is stored at all. Support per [caniuse](https://caniuse.com/mdn-api_credentialscontainer_create_publickey_option_extensions_prf):
+  Chrome 116+, Safari and iOS 18+, Firefox 139+ (partial from 135), Samsung Internet 24+.
+
+**What neither protects against:** someone holding the unlocked phone can open the app and restore a
+backup. What they do protect: a backup file or Drive copy that leaves the phone, and the key itself
+from being copied out of the browser.
+
+**The risk a stored password creates:** the backup exists for a lost phone. If the password lives only
+on that phone, the backup on Drive cannot be opened on the new one. The trainer must keep it
+elsewhere as well, and the app must say so when it is set.
+
+**Recommended:** the non-extractable key in IndexedDB now — no prompt at each backup, works offline
+and in every browser the app supports — with *forget the password* in Data management, and PRF as a
+later option. **Blocks:** Simon's choice of the storage (non-extractable key, PRF, or both), then
+§18.8's encryption of the backup itself.
+
+**Done 2026-09-28 (Claude Opus 5), on Simon's *"prosim zagotovi, da bodo varnostne kopije kriptirane
+in šifrirni ključi varno shranjeni"*.** The recommendation above is what shipped: a non-extractable
+`CryptoKey` in the meta store, derived from the password with a fresh salt, and no copy of the password
+anywhere. The WebAuthn `prf` unlock stays a later option — Firefox and older Safari do not support it,
+so it cannot be the only way in.
+
+**What the research above did not settle, and building it did:**
+
+- **The key is derived from a password, not generated.** The note called this a risk to warn about; it
+  is the whole design. A random key living on one phone makes every Drive copy unreadable on the day
+  that phone is lost, which is the day a backup exists for. So the trainer keeps six readable words,
+  the device keeps a key derived from them, and the dialog says to write the words somewhere else.
+- **Changing the password does not re-encrypt old files**, because nothing can reach a file already on
+  Drive or in somebody's mailbox. The dialog says so when it is a change rather than a first setting.
+- **It is set at the first export, not in a settings screen.** The export is the moment the trainer is
+  thinking about the file. Declining cancels the export instead of quietly writing a plain one.
+- **Where *forget the password* went:** under *Export Data Backup* in the Sync & Backup dialog, not in
+  Data management as this note proposed. The state line that says whether backups are encrypted has to
+  live where the backup is taken, and splitting the answer from the two acts that change it would put
+  them in two places.

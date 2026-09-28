@@ -139,7 +139,7 @@ the thing that must happen first, not merely what it touches.
 | Theme | Open | Lead item | Blocked on |
 | :--- | :--- | :--- | :--- |
 | **Launch prerequisites** | — | Nothing left | §23.5 shipped 2026-08-22; what remains of a launch is §23.1's own decision |
-| **Data safety remainder** | §18.8, §18.9, §18.12 | Encrypt the backups, not the live DB | Nothing; decided on paper and parked |
+| **Data safety remainder** | §18.8, §18.9, §18.12 | Storage durability warning, and the desktop file handle | Nothing; the backup encryption shipped 2026-09-28 |
 | **Scheduling** | §1.2, §1.3, §1.4, §1.5 | Room occupancy via `freebusy.query` | §1.5's OAuth/verification path |
 | **Gym-floor UX** | §8.7, §8.8 | Copy-program icon on the clipboard | Nothing; §8.7 is a question, not work |
 | **History & templates** | §17.1, §17.2, §17.4, §17.5 | Modality into the history snapshot | Decided on paper, parked deliberately |
@@ -215,10 +215,13 @@ is Drive and nothing else, which is what the rest of this section is about.
 - **No backend of our own.** Cross-device sync goes through Drive `appDataFolder` on the same OAuth
   grant — **built, see §3.3**, which also supersedes this section's original merge sketch.
 - **PII on Drive**: `appDataFolder` gives TLS, Google's at-rest AES-256, and app-scoped access
-  isolation — but not zero-knowledge encryption. Since no server LibrePT operates touches the data,
-  the maintainer stays outside the controller/processor chain; PT-to-Google is the PT's own
-  arrangement. Optional hardening (client-side encrypt before upload) needs a recovery-code story
-  first, because a lost key makes that copy unrecoverable — a direct tension with §3.8.
+  isolation. Since no server LibrePT operates touches the data, the maintainer stays outside the
+  controller/processor chain; PT-to-Google is the PT's own arrangement. **Zero-knowledge encryption
+  shipped 2026-09-28** (§18.8): the snapshot is an AES-GCM envelope written on the device, and sync
+  does not run until the trainer has set the backup password, so Drive never held a readable copy. The
+  recovery story this was waiting on is the password itself — derived from words the trainer keeps on
+  paper rather than a random key that lives on one phone — plus the sentence that says so when it is
+  set.
 - **Firestore was rejected as the default**: it would make the maintainer a GDPR **processor** (DPA,
   subprocessor disclosure, residency choice, breach duties), none of which applies to Drive
   `appDataFolder`. Reconsider only for true sub-second push or server-side compute. **Open**: is
@@ -1299,11 +1302,31 @@ Quotas are orders of magnitude clear of that table, so sizing is not the constra
   opt-in and often off, extensions are common, the device is shared far more often. It is also where
   the better tools live — the File System Access API can put backups in a real user-chosen file and
   keep a handle for repeat exports.
-- **Recommended first step: encrypt the backups, not the live DB.** The backup is the artifact that
-  travels (Drive, email, USB) and is where a leak actually happens; the live store already has OS
-  encryption in the phone case; and a lost passphrase is *recoverable* because the live DB survives.
-  Encrypting the live store risks permanently destroying a solo PT's business records — a bigger
-  realistic risk than theft.
+- **[x] Encrypt the backups, not the live DB — shipped 2026-09-28** (Simon asked for it the same day;
+  what shipped is in [CHANGELOG.md](CHANGELOG.md)). The backup is the artifact that travels (Drive,
+  e-mail, USB) and is where a leak actually happens; the live store already has the phone's own
+  encryption when it is locked; and a forgotten password is survivable because the live database is
+  still there. Encrypting the live store risks permanently destroying a solo PT's business records —
+  a bigger realistic risk than theft.
+
+  **Three things were decided while building it, none of them in the plan above:**
+
+  - **A recorded decision changed.** §18.7 said the encrypted container would be schema 6 plus a no-op
+    5→6 record step. It is instead format version 6 whose row in `BACKUP_FORMATS` names schema 5,
+    because the star-write fan-out writes every record to every live schema: a schema 6 identical to
+    5 would have doubled every write on disk to record that the container had changed. One envelope
+    integer still answers both questions, through the table. The side effect is an improvement —
+    `schemaVersion` now sits under the ciphertext, where it cannot be altered.
+  - **Drive sync refuses to run without a password**, rather than syncing in the clear and encrypting
+    later. Drive keeps earlier versions of a file, so one plaintext upload leaves a readable copy that
+    setting a password afterwards does not reach.
+  - **The key is derived from a password, never random.** A random key kept only on the phone would
+    make every Drive copy unreadable on the day the phone was lost, which is the day a backup exists
+    for. The trainer keeps six readable words; the device keeps a non-extractable key derived from
+    them and no copy of the words. §81.6's storage question is answered by the same choice and closed.
+
+  **Still open from this bullet:** the WebAuthn `prf` unlock below, the desktop File System Access
+  handle, and the storage-durability warning.
 - **Biometrics: WebAuthn cannot decrypt.** It is authentication and returns a signature, never key
   material. The real primitive is the **WebAuthn PRF extension**, which derives a stable secret usable
   as an AES-GCM key (Chrome/Edge and Safari passkeys; good but not universal support). Portable
@@ -6571,42 +6594,9 @@ all of the scopes that the user granted to the app"*
 - One list of services, so iCloud is one entry more if it is ever built. **iCloud itself is not
   built here:** it waits on §3.13's decision.
 
-### 81.6 [ ] The backup password is stored, safely — ruled 2026-09-27, design to agree
+### 81.6 [x] The backup password is stored, safely — done 2026-09-28
 
-**Ruled 2026-09-27 (Simon):** *"geslo za varnostne kopije naj bo shranjeno in poiščiva varen način
-za shranjevanje gesel za varnostne kopije."*
-
-**What it depends on:** backups are not encrypted today (§18.8 decided to encrypt them and parked
-it). A stored backup password means encrypting backups — the file and Drive — with it.
-
-**Researched 2026-09-27, primary sources read:**
-
-- **A key the app can use but nobody can read out.** WebCrypto keeps a derived key as a `CryptoKey`
-  whose `extractable` flag decides *"whether or not the key may be extracted using exportKey() or
-  wrapKey()"* ([MDN](https://developer.mozilla.org/en-US/docs/Web/API/CryptoKey)). The interface is
-  `[Serializable]`, so it can be kept in IndexedDB, and serialising keeps the flag: *"Set
-  serialized.[[Extractable]] to the [[extractable]] internal slot of value"*
-  ([W3C Web Crypto](https://www.w3.org/TR/WebCryptoAPI/)). So the password is never stored — only a
-  key derived from it, with `extractable: false`.
-- **A key unlocked by fingerprint or face.** The WebAuthn `prf` extension gives a value per passkey
-  that *"can be used to generate a symmetric key for encrypting sensitive data, and that can only be
-  decrypted by a user who has the seed and the associated authenticator"*
-  ([MDN](https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API/WebAuthn_extensions)).
-  Nothing is stored at all. Support per [caniuse](https://caniuse.com/mdn-api_credentialscontainer_create_publickey_option_extensions_prf):
-  Chrome 116+, Safari and iOS 18+, Firefox 139+ (partial from 135), Samsung Internet 24+.
-
-**What neither protects against:** someone holding the unlocked phone can open the app and restore a
-backup. What they do protect: a backup file or Drive copy that leaves the phone, and the key itself
-from being copied out of the browser.
-
-**The risk a stored password creates:** the backup exists for a lost phone. If the password lives only
-on that phone, the backup on Drive cannot be opened on the new one. The trainer must keep it
-elsewhere as well, and the app must say so when it is set.
-
-**Recommended:** the non-extractable key in IndexedDB now — no prompt at each backup, works offline
-and in every browser the app supports — with *forget the password* in Data management, and PRF as a
-later option. **Blocks:** Simon's choice of the storage (non-extractable key, PRF, or both), then
-§18.8's encryption of the backup itself.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#816-x-the-backup-password-is-stored-safely--done-2026-09-28); what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ## 83. [ ] §66 gleda samo naprej: stranka, ki pride za besedilom
 
