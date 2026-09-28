@@ -102,6 +102,12 @@ This is covered automatically by `test_scrolling_the_timeline_updates_the_focuse
 
 ## 4. Code Conventions
 
+- **Nothing here is a public API.** Every module, function, registry and file layout is internal, and
+  it changes without notice or deprecation. Fork it, copy it, build on it — the licence invites all
+  three — but a fork that depends on internal structure keeps up with it by re-reading the code, not
+  by an obligation on this project. There is no stable interface, no versioned API and no promise of
+  backwards compatibility, and asking for one is asking this app to carry a cost for somebody else's
+  build.
 - **Vanilla only**: No frameworks, no bundlers, no CDN runtime dependencies on the critical path.
 - **State**: [`data/stateStore.js`](src/data/stateStore.js) is the single source of truth — read it with `getState()`, replace it with `setState()`, and persist with `saveToLocalStorage()`. Route all mutations through it. Despite its name, `saveToLocalStorage()` writes to **IndexedDB** (star-writing the state into every live schema store in one transaction) and only falls back to a plain `librept_db` `localStorage` key when IndexedDB is unavailable.
 - **Styling**: Use the CSS custom properties defined at the top of `index.css` (`--text-main`, `--text-muted`, `--border-color`, `--accent-cyan`, …). Do not hard-code theme colors — all five themes (Midnight, Daylight, Red, Blossom, Nebula) must work from the same properties.

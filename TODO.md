@@ -7404,11 +7404,17 @@ changes whatever it likes, and ProPT's next build either works or ProPT fixes it
 side that benefits. Run-time loading would also break offline use, the `script-src 'self'` policy and
 the integrity catalog, which §90.3 already rejects for the same reason.
 
-**The honest caveat**: the two registration lists ARE a small interface, and once ProPT depends on
-them, reshaping them breaks it. They are defensible because both are justified by this app's own needs
-— a hand-maintained route table and hand-written menu markup have exactly the defect
-`registerShellRender` was introduced to remove. **The line to watch is a third party building on them**,
-at which point they become an API with every cost above.
+**A caveat written here on 2026-09-28 was wrong, and Simon corrected it the same day.** It said the two
+registration lists become an API the day a third party builds on them. **They do not.** Somebody else's
+dependence creates no duty on this side: the licence gives no warranty, this project publishes no
+interface and has never promised backwards compatibility. A fork that leans on internal structure keeps
+up by re-reading the code.
+
+What a fork's dependence creates is pressure to keep something stable, and the answer to pressure is a
+sentence, not a design constraint. [CONTRIBUTING.md](CONTRIBUTING.md) §4 now carries it: *"Nothing here
+is a public API."* So the lists are judged only on whether this app needs them — a hand-maintained route
+table and hand-written menu markup have exactly the defect `registerShellRender` was introduced to
+remove — and ProPT gets no promise either. It re-pins and fixes itself, like any other fork.
 
 ### 90.4 [ ] The precache list becomes generated, and that pays for itself here
 
