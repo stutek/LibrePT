@@ -18,6 +18,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-09-29 — Offline start-up picture, damaged backups refused
+
+### Fixed
+
+- **The picture on the start-up screen is saved with the rest of the app**, so it shows without a
+  connection too. It was the one file of the app left out.
+- **A backup whose invitations or repeating sessions are damaged is refused** with the problem
+  named, like a backup with any other damaged list. Before, those two were not checked.
+
+---
+
 ## 2026-09-28 — A save survives closing the app
 
 ### Fixed
