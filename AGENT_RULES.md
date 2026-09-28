@@ -107,37 +107,20 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
   progress, and every file you take exclusively, TODO.md never among them. A file another note claims is not yours — take
   other work or ask. **Delete the note in the same turn as the commit**; a stale note locks files
   nobody holds.
-- **A gate needs a QUIET TREE for its whole run, not merely a free slot.** The dev server computes
-  the integrity catalog live from `src/`, so a file written mid-run changes its hash under the
-  service worker and the app comes up behind the blocking *App verification failed* overlay — which
-  then fails whatever tests happen to be running, naming none of the cause. Seven unrelated e2e
-  tests, 2026-09-12. Say in your note when a run starts, and hold edits to `src/` until it ends.
-- **`pgrep -f "python -m build"` DOES NOT detect a gate.** It matches any command line containing
-  that string — including the watcher that is looking for it, and the shell wrapping the `pgrep`
-  itself. On 2026-09-12 it reported a run in flight for twenty minutes while none existed: one
-  session held back, edited anyway on a false positive, apologised to a second session for spoiling
-  a run, and accused a third of owning it. Three sessions coordinated around a process that was the
-  watcher's own reflection. Ask the gate, not the process table — `build check` holds
-  `.build-reports/gate.lock` with its pid, and a probe that cannot name the pid it found has found
-  nothing.
+- **The working tree takes ONE writer at a time; research and planning run in parallel.** Claim
+  the tree in the note, write, verify, commit, release, and say so. A run proves a whole TREE, so
+  another session's write anywhere under `src/` or `tests/` voids it — per-file turn-taking is not
+  enough. `build check` holds `.build-reports/gate.lock` with its pid and refuses a second run, and
+  it fails a run during which `src/` or `tests/` changed. Either answer means wait, never commit
+  without a green run. Whether a gate is running is the lock's answer, not the process table's:
+  `pgrep -f "python -m build"` also matches the command that asks.
 - **A check whose result nothing acts on is not a check.** Putting the probe and the action in one
   shell line prints the warning and does the thing anyway. Guard it, or read the answer in one call
-  and act in the next. **And a probe before the run proves nothing about the run**: what makes a
-  green gate trustworthy in a shared tree is a snapshot of every path and mtime under `src/` taken
-  before AND after, compared — anything less is a green light for a tree that may not have existed.
-  **A snapshot that differs VOIDS the run; it does not annotate it.** On 2026-09-12 a session
-  reported "green on all four stages, the fingerprint differs by exactly one added path" — and that
-  path was a file whose own Stage 1 check fails deterministically. Stage 1 had simply finished before
-  it appeared. Green obtained before the tree moved is not a verdict on the tree after.
-- **The quiet tree includes `tests/`.** Deleting or renaming a test file mid-run changes what Stage 2
-  and Stage 3 collect, which is the same damage as moving a byte under `src/` and is equally outside
-  what the lock can see.
+  and act in the next.
 - **A window goes in the NOTE, not only in a message.** Announced by message, two of three sessions
   knew and the third wrote into that window in good faith — it had read the note, which said only
   that a window would be announced. A note is read by whoever arrives next; a message reaches only
   who was listening at the time.
-- **A refusal from the gate means WAIT, not proceed.** The lock exists to make a second run
-  impossible, not to give anyone a reason to commit without one.
 - **The note carries state, a message carries negotiation.** `ListAgents` and `SendMessage` reach a
   session that is alive and listening; the note reaches one that starts later, or one that died
   mid-edit. So on finding foreign changes, read the notes first and message second, and never let a
@@ -146,11 +129,6 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
   if the failing file is another session's, re-read `git status --short` and the notes every five
   minutes and judge whether the tree has settled. Say what you are waiting for. This is the one
   allowed re-run; a failure in a file you hold is yours.
-- **Research and planning run in parallel; WRITING THE TREE DOES NOT.** Several sessions reading,
-  planning and drafting at once is wanted. The working tree takes ONE writer at a time: claim it in
-  the note, write, verify, commit, release, and say so. Per-file turn-taking is not enough — three
-  sessions editing three different files broke three gate runs on 2026-09-12, because a run proves
-  a TREE and anyone else's write voids it while it is in flight.
 - Commit messages: `type(scope): imperative summary` (lowercase, ≤72 chars), blank line, body
   wrapped at 72 saying **why**, blank line, and last a line `Co-Authored-By: <model> <email>`
   naming the model actually running. **Write the message to a file and commit with
