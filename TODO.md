@@ -6421,6 +6421,26 @@ z načrtovanjem druge in vrnitev, tudi po osvežitvi. Vzrok in najmanjši nabor 
 korakov še nista ugotovljena. Objavljena `0625bd6`, Chrome CDP, 390 × 844, sl;
 brez zabeleženih napak brskalnika, brez pregleda kode.
 
+### 80.61 [ ] P2 — Konec ponavljanja pred začetkom se shrani brez opozorila
+
+**Scenarij in koraki:** trener ustvari »Serija z obrnjenim obdobjem« za TEST Luka
+Kovač (večerni), Studio, 2026-11-10 16:00–16:45. Označi »Ponovi vsak teden«, torek,
+in v »Do« vpiše 2026-11-03. Pritisne »Odpri v beležki«, zapre vabila in trening ter
+ponovno odpre urejanje kartice. Enako nastavitev ponavljanja preveri še ob urejanju.
+
+**Opaženo:** shranitev uspe brez opozorila na končni datum pred začetnim. Na seznamu
+je en termin, pri ponovnem urejanju ponavljanje ni označeno. Pri drugem poskusu sta
+bila pred shranitvijo izrecno preverjena označeni torek in »Ponovi vsak teden« ter
+datuma 2026-11-10 in 2026-11-03. Tudi ta poskus ne pokaže validacijskega sporočila.
+
+**Težava in vpliv:** tipkarska napaka v obdobju se spremeni v navidezno uspešno
+shranjevanje; trener lahko meni, da je pripravil serijo, čeprav vidi samo en termin.
+
+**Predlog:** ob koncu pred začetkom ustaviti shranitev in označiti polje »Do«, da
+trener popravi datum. Preveriti tako ustvarjanje kot urejanje serije. Opaženo na
+objavljeni `0625bd6`, sl, Chrome CDP, 390 × 844, brez branja kode. Med scenarijem ni
+novih prestreženih napak; ostaneta dve opozorili prejšnjega preizkusa brez povezave.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
