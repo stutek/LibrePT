@@ -579,8 +579,9 @@ export function onBackupRecorded(listener) {
 // The salt and iteration count sit beside it in the clear. They are not secret, and they are what
 // lets the SAME key be derived again from the password on a new phone (backupEncryption.js).
 //
-// **Per workspace, like every other record here**, which is also the answer for the sandbox: sample
-// data needs no password, so the sandbox simply has no key and its backups stay plain JSON.
+// **Per workspace, like every other record here.** The sandbox therefore has a key of its own, and a
+// password set in one workspace protects that workspace's backups only — which is what the backup
+// dialog's state line has to say, or a trainer reads "encrypted" as a promise about their own work.
 const BACKUP_KEY_META_KEY = "backupKey";
 
 /** The stored key material, or null when this device has no backup password set. */

@@ -428,3 +428,42 @@ def test_the_sandbox_card_lists_the_chapters_of_the_guided_story(page, local_ser
     chapters.last.click()
     page.wait_for_url("**chapter=**", timeout=10000)
     assert "demo=story" in page.url, page.url
+
+
+@pytest.mark.clean_start
+def test_the_sandbox_asks_for_a_backup_password_like_the_real_thing(page, local_server):
+    """The sandbox is where a trainer learns the app, so it must not skip the irreversible step.
+
+    It was exempt for one day, on the reasoning that its records are sample data about nobody. Both
+    halves of that were wrong: a rehearsal that leaves out the one act nothing can undo rehearses
+    nothing, and nothing stops a trainer typing a real client in here — the sandbox notification
+    invites them to try anything.
+
+    The key lives in the sandbox's own database, so the password here is its own. The state line has
+    to say that, or "encrypted" reads as a promise about the trainer's own work.
+    """
+    page.goto(f"{local_server}?init=demo_data_load&lang=en")
+    page.wait_for_selector(".session-card")
+    _switch(page, "sandbox")
+
+    page.locator("#backup-btn").click()
+    state = page.locator("#backup-encryption-state")
+    page.wait_for_function(
+        "() => document.getElementById('backup-encryption-state')?.textContent.trim().length > 0"
+    )
+    assert "sandbox" in state.text_content().lower()
+
+    page.locator("#btn-export-db").click()
+    page.wait_for_selector("#dialog-backup-password[open]")
+    with page.expect_download():
+        page.locator("#btn-backup-pw-confirm").click()
+
+    # And the password that was just set belongs to the sandbox alone: it is written into the
+    # sandbox's database, which is the same isolation every other record here relies on.
+    assert page.evaluate(WORKSPACE) == "sandbox"
+    assert page.evaluate(
+        """async () => {
+            const s = await import(new URL('data/stateStore.js', document.baseURI).href);
+            return Boolean((await s.readBackupKeyRecord())?.key);
+        }"""
+    )

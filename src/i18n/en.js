@@ -340,7 +340,10 @@ export const en = {
   backup_pw_forget: "Forget it on this device",
   backup_pw_forget_done:
     "Forgotten on this device. Files already written stay encrypted, and the password still opens them.",
-  backup_pw_sandbox: "The sandbox holds sample data, so its backups are not encrypted.",
+  backup_pw_sandbox_on:
+    "The sandbox has its own backup password. It protects the sandbox's backups, not your own work.",
+  backup_pw_sandbox_off:
+    "Backups from the sandbox are not encrypted yet. The sandbox has its own password, separate from the one for your own work.",
   backup_pw_export_cancelled: "Nothing was exported. A backup needs a password first.",
   backup_pw_exported_encrypted: "Exported and encrypted.",
   backup_pw_exported_plain: "Exported.",

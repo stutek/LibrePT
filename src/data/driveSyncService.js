@@ -26,7 +26,7 @@
 // salted hashes and nothing else (erasureSuppression.js), so there is nothing in it to disclose, and
 // it has to be unionable across devices that may not share a password yet.
 //
-// **A sync does not run at all until a backup password is set** (except in the sandbox). Writing the
+// **A sync does not run at all until a backup password is set**, in either workspace. Writing the
 // database to Google unencrypted, once, leaves a copy behind that setting a password later does not
 // reach — Drive keeps earlier versions of a file.
 //
@@ -94,7 +94,6 @@ import {
   writeDriveSyncMeta,
 } from "./stateStore.js";
 import { countChangedRecords, mergeState } from "./syncMerge.js";
-import { SANDBOX, activeWorkspace } from "./workspace.js";
 
 let syncing = false;
 let lastSyncResult = null;
@@ -388,11 +387,12 @@ async function syncRegister(mergedState) {
 // having changed nothing — `auth_required`, and `backup_password_required` for an encrypted Drive copy
 // with no key here, which the dialog turns into "type your backup password".
 async function prepareSyncPass() {
-  // **A sync writes the trainer's whole database into Google's storage, so it does not run until that
-  // copy can be encrypted.** Google encrypts Drive with Google's own key, which its own infrastructure
-  // can read; this is the only thing that makes the file opaque to everyone but the trainer. The
-  // sandbox is exempt: its records are sample data about nobody.
-  if (activeWorkspace() !== SANDBOX && !(await backupKeyForWriting())) {
+  // **A sync writes the whole database into Google's storage, so it does not run until that copy can
+  // be encrypted.** Google encrypts Drive with Google's own key, which its own infrastructure can
+  // read; this is the only thing that makes the file opaque to everyone but the trainer. The sandbox
+  // syncs its own file and is held to the same rule — it holds sample data only by default, and it is
+  // where a trainer learns what this app asks of them.
+  if (!(await backupKeyForWriting())) {
     return { error: "backup_password_not_set" };
   }
   const token = await requestAccessToken({ interactive: false });

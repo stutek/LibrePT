@@ -359,8 +359,10 @@ export const de = {
   backup_pw_forget: "Auf diesem Gerät vergessen",
   backup_pw_forget_done:
     "Auf diesem Gerät vergessen. Bereits geschriebene Dateien bleiben verschlüsselt, und das Passwort öffnet sie weiterhin.",
-  backup_pw_sandbox:
-    "Die Sandbox enthält Beispieldaten, deshalb sind ihre Sicherungen nicht verschlüsselt.",
+  backup_pw_sandbox_on:
+    "Die Sandbox hat ihr eigenes Passwort für Sicherungen. Es schützt die Sicherungen der Sandbox, nicht deine eigene Arbeit.",
+  backup_pw_sandbox_off:
+    "Sicherungen aus der Sandbox sind noch nicht verschlüsselt. Die Sandbox hat ihr eigenes Passwort, getrennt von dem für deine eigene Arbeit.",
   backup_pw_export_cancelled:
     "Es wurde nichts exportiert. Eine Sicherung braucht zuerst ein Passwort.",
   backup_pw_exported_encrypted: "Exportiert und verschlüsselt.",

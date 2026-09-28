@@ -40,8 +40,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 - **Google Drive sync does not start until a backup password is set**, so no readable copy of the
   database is ever left behind in Drive's version history. Where the Drive copy was written with a
   different password, sync stops and asks for that one instead of merging a file it cannot read.
-- **The sandbox needs no password.** Its records are sample data about nobody, and its backups stay
-  plain.
+- **The sandbox asks for a password too, and it is its own.** It is a second database, so a password
+  set there protects the sandbox's backups and nothing else, and the line under *Export Data Backup*
+  says which workspace it is talking about. The sandbox is where you learn the app, and a rehearsal
+  that leaves out the one step nothing can undo is not a rehearsal — and its records are sample data
+  only until you type a real client into it.
 - **What is kept on the device is a key, never the password** — derived with PBKDF2-SHA-256 at 600,000
   rounds and marked non-extractable, which the browser will let LibrePT use but will not let any
   script, including a browser extension, read out.

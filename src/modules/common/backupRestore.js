@@ -7,9 +7,12 @@
 // asked for later is a password nobody sets. Declining the dialog cancels the export — it does NOT
 // quietly write a plain file, which would be the failure the encryption exists to prevent.
 //
-// **The sandbox is the exception and needs no password.** Its records are generated sample data about
-// nobody, and asking for a password to export them would teach a trainer to skip the dialog on the
-// one that matters.
+// **The sandbox asks too, and it has its own password.** It was exempt for one day and that was
+// wrong twice over. The sandbox is where a trainer learns the app, so a rehearsal that leaves out the
+// one irreversible step rehearses nothing; and its records are sample data only by default — nothing
+// stops a trainer typing a real client in there, which is exactly what the app invites them to do.
+// The password is per workspace because the key lives in that workspace's own database, so the state
+// line says which workspace it is talking about.
 //
 // deps: {
 //   getState(),
@@ -250,16 +253,13 @@ async function refreshEncryptionState() {
   const forget = document.getElementById("btn-backup-pw-forget");
   if (!line) return;
 
-  if (activeWorkspace() === SANDBOX) {
-    line.textContent = deps.t("backup_pw_sandbox");
-    line.className = "status-msg";
-    if (manage) manage.hidden = true;
-    if (forget) forget.hidden = true;
-    return;
-  }
-
   const set = await hasBackupPassword();
-  line.textContent = deps.t(set ? "backup_pw_state_on" : "backup_pw_state_off");
+  // Which workspace this answer is about. The sandbox is a second database with its own key, so a
+  // password set here does not protect the trainer's own work and must not read as though it does.
+  const inSandbox = activeWorkspace() === SANDBOX;
+  line.textContent = inSandbox
+    ? deps.t(set ? "backup_pw_sandbox_on" : "backup_pw_sandbox_off")
+    : deps.t(set ? "backup_pw_state_on" : "backup_pw_state_off");
   line.className = set ? "status-msg text-emerald" : "status-msg text-danger";
   if (manage) {
     manage.hidden = false;
@@ -561,11 +561,9 @@ export function setupBackupRestore() {
   const exportBtn = document.getElementById("btn-export-db");
   if (exportBtn) {
     exportBtn.addEventListener("click", async () => {
-      // The sandbox exports sample data about nobody, so it needs no password (this module's header).
-      const inSandbox = activeWorkspace() === SANDBOX;
       // Asked BEFORE the payload is built, so a declined dialog leaves no copy of the database in a
       // variable and nothing to accidentally write out.
-      if (!inSandbox && !(await ensureBackupPassword())) {
+      if (!(await ensureBackupPassword())) {
         setExportStatus("backup_pw_export_cancelled");
         return;
       }
@@ -580,7 +578,7 @@ export function setupBackupRestore() {
         suppressions: readSuppressionList(),
       });
 
-      const stored = inSandbox ? null : await backupKeyForWriting();
+      const stored = await backupKeyForWriting();
       // Indented plain JSON stays indented: a trainer opening the file in a text editor to check it
       // is real is a thing that happens. An envelope has nothing in it to read, so it is written
       // compactly.

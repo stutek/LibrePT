@@ -15,6 +15,11 @@
 // the app and export or restore, because the app can use the key. It protects the file that leaves
 // the phone, and the key from being copied off the phone.
 //
+// **One key per workspace**, because the record lives in that workspace's own database. So the
+// sandbox has its own password, and setting one there protects the sandbox's backups and nothing
+// else. The sandbox is not exempt from having one: it holds sample data only by default — a trainer
+// can type a real client into it — and it is where they learn what the app asks of them.
+//
 // **Why a password at all rather than a random key.** A backup exists for the day the phone is gone,
 // so the key must be reproducible without it. A password the trainer keeps on paper is; a random key
 // stored only on the phone is not, and would turn every Drive copy into an unreadable file on the day

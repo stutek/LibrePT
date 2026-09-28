@@ -68,6 +68,10 @@ depends on — that tier mounts one component and nothing else.
   would mean a forgotten password destroys a trainer's business records, which is a likelier loss than
   the theft it would prevent. Encrypting what travels costs nothing that cannot be recovered, because
   the live database is still there.
+- **A rehearsal surface is held to the rules it rehearses.** The sandbox asks for a backup password
+  exactly as the trainer's own workspace does. It holds sample data only by default — nothing stops a
+  real client being typed into it — and it is where a trainer meets each step for the first time, so
+  skipping the irreversible one there is where the loss gets learned.
 - **A key kept for reuse is derived from a password and stored non-extractable.** Derived, because a
   backup is for the day the device is gone and the key has to be reproducible from words on paper; non
   extractable, because a key the browser will not export cannot be copied out by a script, an

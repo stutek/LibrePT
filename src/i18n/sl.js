@@ -354,7 +354,10 @@ export const sl = {
   backup_pw_forget: "Pozabi ga na tej napravi",
   backup_pw_forget_done:
     "Pozabljeno na tej napravi. Že zapisane datoteke ostanejo šifrirane in geslo jih še naprej odpre.",
-  backup_pw_sandbox: "Peskovnik ima vzorčne podatke, zato njegove kopije niso šifrirane.",
+  backup_pw_sandbox_on:
+    "Peskovnik ima svoje geslo za varnostne kopije. Varuje kopije peskovnika, ne tvojega dela.",
+  backup_pw_sandbox_off:
+    "Varnostne kopije peskovnika še niso šifrirane. Peskovnik ima svoje geslo, ločeno od gesla za tvoje delo.",
   backup_pw_export_cancelled: "Nič ni bilo izvoženo. Varnostna kopija najprej potrebuje geslo.",
   backup_pw_exported_encrypted: "Izvoženo in šifrirano.",
   backup_pw_exported_plain: "Izvoženo.",
