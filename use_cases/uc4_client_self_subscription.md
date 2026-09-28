@@ -55,3 +55,10 @@ graph TD
 6. **Send Invitation**: Google Calendar automatically sends a calendar invitation email (ics attachment) to the client's email inbox.
 7. **PT Calendar Sync**: The event updates on the PT's calendar grid, listing the client as an attendee.
 8. **App Sync (Passive)**: When the PT opens the LibrePT app, the app queries the Google Calendar API (`events.list` or `events.get`) to read the guest email lists for today's session event, automatically checking them into the active tracking clipboard.
+
+## Spec ↔ test traceability
+
+| Promise | Where it is held |
+| :--- | :--- |
+| Booking, the seat limit and the invitation email (steps 1–7) | **Outside the app** — Google hosts the page and sends the email. |
+| The app reads the event's guests and checks them in (step 8) | **Not built** — the app holds only the free/busy scope, which cannot read guests; the question is open in TODO.md. |

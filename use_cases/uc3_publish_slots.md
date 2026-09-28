@@ -51,3 +51,9 @@ graph TD
    - **Maximum Booking Capacity per Slot**: Set guest limit to 4.
 4. **Publish**: The PT saves the setup. Google Calendar generates a unique public booking page URL (e.g., `calendar.app.google/xxxx`).
 5. **API Accessibility**: Google Calendar updates the PT's calendar grid. These slot events are now readable via the Google Calendar API.
+
+## Spec ↔ test traceability
+
+| Promise | Where it is held |
+| :--- | :--- |
+| Creating and publishing an appointment schedule | **Outside the app** — every step happens in Google Calendar. |

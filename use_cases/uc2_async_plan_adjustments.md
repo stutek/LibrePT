@@ -64,3 +64,17 @@ graph TD
 ### 3. Alternative Flows
 - **Keep Alert Pending**: The PT can close the detail panel without resolving, keeping the card in the "Adjustments Needed" queue until they have time to re-evaluate.
 - **Dismiss Alert**: If the feedback was a minor one-off notice, the PT can click **Dismiss** to archive the record without updating the client's template.
+
+## Spec ↔ test traceability
+
+| Promise | Where it is held |
+| :--- | :--- |
+| The review screen lists every unresolved signal, with a count | [test_plan_adjustments.py](../tests/medium/test_plan_adjustments.py) |
+| The dialog opens with the tag in words, the note, and a suggested target | [test_plan_adjustments.py](../tests/medium/test_plan_adjustments.py) |
+| *Apply & Resolve* writes the typed target into the plan and resolves the card | [test_plan_adjustments.py](../tests/medium/test_plan_adjustments.py) |
+| *Swap* puts another movement in the same place, prescription unchanged | [test_plan_adjustments.py](../tests/medium/test_plan_adjustments.py) |
+| *Dismiss* resolves the card and leaves the plan alone | [test_plan_adjustments.py](../tests/medium/test_plan_adjustments.py) |
+| Closing without a decision (Cancel, ✕, Esc) keeps the card waiting | [test_plan_adjustments.py](../tests/medium/test_plan_adjustments.py) |
+| Resolving the last card empties the drawer at once | [test_views_follow_their_data.py](../tests/e2e/test_views_follow_their_data.py) |
+| The dialog is in the trainer's language | [test_adjustment_dialog_language.py](../tests/e2e/test_adjustment_dialog_language.py) |
+| A note typed on the floor is on the card's dialog at the desk | [test_gym_note_kept_on_record.py](../tests/e2e/test_gym_note_kept_on_record.py) |

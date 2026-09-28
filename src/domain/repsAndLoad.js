@@ -134,23 +134,6 @@ export function formatLoad(value, unit = "kg") {
   }
 }
 
-// Split a load into { value, label } for a stat tile (value on top, unit beneath).
-export function loadParts(value, unit = "kg") {
-  const num = Number.parseFloat(value);
-  switch (unit) {
-    case "band":
-      return { value: value ? String(value) : "—", label: "Band" };
-    case "level":
-      return { value: num > 0 ? String(num) : "—", label: "Level" };
-    case "bw":
-      return num > 0
-        ? { value: `+${num}`, label: "kg (BW)" }
-        : { value: "BW", label: "Bodyweight" };
-    default:
-      return { value: num > 0 ? String(num) : "—", label: "kg" };
-  }
-}
-
 // Short unit label + input hint for authoring controls, keyed by load unit.
 export function loadFieldMeta(unit) {
   switch (unit) {

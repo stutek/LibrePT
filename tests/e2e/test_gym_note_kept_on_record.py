@@ -1,5 +1,6 @@
 # tests/e2e/test_gym_note_kept_on_record.py
-# A note taken mid-session can be kept on the CLIENT's record.
+# A note taken mid-session can be kept on the CLIENT's record; one that is not kept waits on the
+# review screen, where the trainer reads it at the desk.
 #
 # Why that matters: a twinge a client mentions between rounds changes how they are programmed for
 # months, but logged as an alert it waits on the Pending Review screen and is resolved away within
@@ -106,3 +107,39 @@ def test_the_kept_note_is_waiting_when_the_next_plan_is_shaped(page, local_serve
 
     notes = page.locator("#client-focus-notes")
     assert "left knee clicks on the last rep" in notes.inner_text()
+
+
+def test_a_note_not_kept_waits_on_the_review_screen(page, local_server):
+    """The other half of the default: a note not kept on the record becomes a card on the review
+    screen, and the sentence is there when the trainer opens it at the desk — after a reload too,
+    because a phone on the gym floor gets closed between the two."""
+    _open_session_with_one_exercise(page, local_server, log_id="keep-on-record-log-4")
+    name = page.evaluate(
+        """async () => {
+            const store = await import(new URL('data/stateStore.js', document.baseURI).href);
+            return store.getState().clients[0].name;
+        }"""
+    )
+    _submit_note(page, "left knee clicks on the last rep", keep=False)
+    # Saving is write-behind (src/data/writeQueue.js): the note is on the phone once the queued
+    # write has landed, and not before.
+    page.evaluate(
+        "async () => (await import(new URL('data/writeQueue.js', document.baseURI).href)).flushWrites()"
+    )
+
+    page.goto(local_server + "adjustments")
+    page.reload()
+    page.wait_for_selector("#view-adjustments.active")
+    card = page.locator(
+        "#dashboard-adjustments-list .adjustment-card", has_text="Barbell Row"
+    )
+    assert card.count() == 1
+    assert name in card.inner_text()
+    assert "Joint pain or discomfort" in card.inner_text()
+
+    card.locator(".btn-resolve-alert").click()
+    page.wait_for_selector("#dialog-apply-adjustment[open]")
+    assert (
+        "left knee clicks on the last rep"
+        in page.locator("#adjust-details").inner_text()
+    )

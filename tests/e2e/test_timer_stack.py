@@ -1,8 +1,13 @@
 # tests/e2e/test_timer_stack.py
 # The clipboard timer stack: starting a timer from a card adds one labelled countdown (client name +
 # Rest/Exercise) to #clipboard-timer-stack; there is at most one per client; it counts into negative
-# overtime; it survives a reload; and a start on a still-running timer does not reset it while a start
-# on an overtime timer does. Fixtures (page, local_server) come from tests/conftest.py.
+# overtime; it survives a reload; a start on a still-running timer does not reset it while a start
+# on an overtime timer does; ✕ is the only way a card leaves; and a countdown sounds once as it
+# crosses zero. Fixtures (page, local_server) come from tests/conftest.py.
+
+from datetime import timedelta
+
+from tests.conftest import FROZEN_NOW
 
 
 def _open_session(page, local_server):
@@ -99,3 +104,55 @@ def test_timer_survives_reload_and_goes_overtime(page, local_server):
         .strip()
         .startswith("-")
     )
+
+
+def test_the_close_button_dismisses_the_timer(page, local_server):
+    """Timers are dismiss-only: ✕ is the one way a card leaves the stack, and it stays gone after a
+    reload rather than coming back from the stored list."""
+    _open_session(page, local_server)
+    _start_a_timer(page)
+
+    page.locator("#clipboard-timer-stack .timer-card .timer-close").click()
+    assert page.locator("#clipboard-timer-stack .timer-card").count() == 0
+
+    page.reload()
+    page.wait_for_selector("#active-session-overlay:not(.hidden)")
+    page.wait_for_timeout(300)
+    assert page.locator("#clipboard-timer-stack .timer-card").count() == 0
+
+
+# Counts the tones the app plays: each call to createOscillator is one tone. Installed before the
+# app's own scripts run, so the app's `new AudioContext()` gets the counting one.
+COUNT_TONES = """() => {
+  window.__tones = 0;
+  const Real = window.AudioContext || window.webkitAudioContext;
+  if (!Real) return;
+  window.AudioContext = class extends Real {
+    createOscillator() { window.__tones += 1; return super.createOscillator(); }
+  };
+}"""
+
+
+def test_a_rest_timer_sounds_once_when_it_crosses_zero(page, local_server):
+    """The trainer is watching someone else when a rest period ends, so the phone has to say it.
+    It says it once: a card that keeps sounding every second in overtime, or again after a reload,
+    is a phone the trainer mutes."""
+    page.add_init_script(f"({COUNT_TONES})()")
+    _open_session(page, local_server)
+    _start_a_timer(page)
+    assert page.evaluate("window.__tones") == 0
+
+    # The wall clock is frozen for every browser test; moving it past the rest period is the
+    # crossing. The timer ticks once a second in real time, so give it two ticks.
+    page.clock.set_fixed_time(FROZEN_NOW + timedelta(minutes=10))
+    page.wait_for_timeout(2200)
+    tones = page.evaluate("window.__tones")
+    assert tones > 0, "the rest period ended in silence"
+
+    page.wait_for_timeout(2200)
+    assert page.evaluate("window.__tones") == tones, "it sounds again in overtime"
+
+    page.reload()
+    page.wait_for_selector("#clipboard-timer-stack .timer-card")
+    page.wait_for_timeout(2200)
+    assert page.evaluate("window.__tones") == 0, "a reload replays the alert"

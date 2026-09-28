@@ -7,6 +7,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import * as m from "../../../src/domain/exerciseModality.js";
+import { TRANSLATIONS } from "../../../src/i18n/index.js";
 
 test("metric formatting model renders the right units", () => {
   const results = {
@@ -103,4 +104,31 @@ test("compactTargetString: the one wording the live card and the plan sheet shar
     m.compactTargetString({ setsTarget: 3, repsTarget: 10, modality: "strength", weightTarget: 0 }),
     "S3 × R10",
   );
+});
+
+test("only a duration can be timed on the clipboard", () => {
+  assert.equal(m.isTimeBasedMetric("time"), true);
+  assert.equal(m.isTimeBasedMetric("hold"), true);
+  // Pace is a rate: there is nothing to count down.
+  for (const metric of ["pace", "distance", "calories", "watts", "heartrate", "reps"]) {
+    assert.equal(m.isTimeBasedMetric(metric), false, metric);
+  }
+});
+
+test("every metric's unit label is a word every dictionary has", () => {
+  const metrics = new Set([...m.CARDIO_METRICS, ...m.AGILITY_METRICS, "hold", "reps"]);
+  for (const [lang, dict] of Object.entries(TRANSLATIONS)) {
+    for (const metric of metrics) {
+      const key = m.metricLabelKey(metric);
+      assert.ok(dict[key], `${lang} has no ${key} for ${metric}`);
+    }
+  }
+  // Distinct metrics never share a label, or two columns would read the same.
+  const keys = [...metrics].map(m.metricLabelKey);
+  assert.equal(new Set(keys).size, keys.length);
+});
+
+test("an unknown metric falls back to reps", () => {
+  assert.equal(m.metricLabelKey("unknown"), "reps_label");
+  assert.equal(m.formatMetricValue(12, "unknown"), "12");
 });

@@ -10,6 +10,8 @@
 # from the test, would stop exercising the button's own wiring.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
+import json
+
 import pytest
 
 from tests.medium._harness import load_with_stub, view_stub
@@ -38,6 +40,7 @@ const state = {
   sessions: [],
   history: [],
 };
+window.__state = state;
 
 renderAdjustmentsViewShell();
 renderApplyAdjustmentDialog();
@@ -199,3 +202,91 @@ def test_a_slovenian_trainer_reads_the_tag_in_slovenian(page, local_server):
     assert badges[0] == "Prelahko – povečaj težo"
     assert badges[1] == "Tehnika popušča – pazi na položaj"
     assert not [text for text in badges if "Too Easy" in text or "Form Break" in text]
+
+
+# What the plan holds, one JSON string per routine row, in order. Compared before and after a submit:
+# the promise is about which rows change, so the whole plan is read rather than one guessed row.
+ROUTINE_ROWS = """() => window.__state.routines.flatMap((r) =>
+  r.exercises.map((e) => JSON.stringify({ routine: r.id, ...e })))"""
+
+
+def _open_wizard(page, local_server, action):
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#view-adjustments.active")
+    card = _cards(page).first
+    card.scroll_into_view_if_needed()
+    card.locator(".btn-resolve-alert").click()
+    page.wait_for_selector("#dialog-apply-adjustment[open]")
+    page.locator("#adjust-action-type").select_option(action)
+
+
+def _changed_rows(before, after):
+    assert len(before) == len(after), "a plan row was added or removed"
+    return [(json.loads(b), json.loads(a)) for b, a in zip(before, after) if b != a]
+
+
+def _submit(page):
+    page.locator("#form-apply-adjustment button[type=submit]").click()
+    page.wait_for_selector("#dialog-apply-adjustment", state="hidden")
+
+
+def test_apply_writes_the_typed_target_into_the_plan(page, local_server):
+    """The review exists to change the next session. A count that drops while the plan keeps its
+    old load reads as done and changes nothing."""
+    _open_wizard(page, local_server, "modify")
+    before = page.evaluate(ROUTINE_ROWS)
+    page.locator("#adjust-weight").fill("77.5")
+    page.locator("#adjust-reps").fill("6")
+    page.locator("#adjust-sets").fill("5")
+    _submit(page)
+
+    changed = _changed_rows(before, page.evaluate(ROUTINE_ROWS))
+    assert len(changed) == 1, changed
+    old, new = changed[0]
+    assert new["id"] == old["id"], "the movement itself was replaced"
+    assert (new["weight"], str(new["reps"]), new["sets"]) == (77.5, "6", 5)
+
+
+def test_dismiss_resolves_the_signal_and_leaves_the_plan_alone(page, local_server):
+    _open_wizard(page, local_server, "dismiss")
+    before = page.evaluate(ROUTINE_ROWS)
+    _submit(page)
+
+    assert page.evaluate(ROUTINE_ROWS) == before
+    assert _cards(page).count() == 2
+    assert page.locator("#badge-adjustments-count").inner_text().strip() == "2"
+
+
+@pytest.mark.parametrize("close", ["cancel", "x", "escape"])
+def test_closing_the_dialog_keeps_the_signal_waiting(page, local_server, close):
+    """Closing without a decision is how a trainer says 'not now'. The typed target is dropped and
+    the card stays, whichever way the dialog was closed."""
+    _open_wizard(page, local_server, "modify")
+    before = page.evaluate(ROUTINE_ROWS)
+    page.locator("#adjust-weight").fill("99")
+    if close == "cancel":
+        page.locator("#form-apply-adjustment .modal-cancel").click()
+    elif close == "x":
+        page.locator("#dialog-apply-adjustment .modal-close-btn").click()
+    else:
+        page.keyboard.press("Escape")
+    page.wait_for_selector("#dialog-apply-adjustment", state="hidden")
+
+    assert page.evaluate(ROUTINE_ROWS) == before
+    assert _cards(page).count() == 3
+    assert page.locator("#badge-adjustments-count").inner_text().strip() == "3"
+
+
+def test_swap_puts_the_replacement_in_the_same_slot(page, local_server):
+    """A regression or progression replaces the movement and keeps the prescription around it."""
+    _open_wizard(page, local_server, "swap")
+    before = page.evaluate(ROUTINE_ROWS)
+    _submit(page)
+
+    changed = _changed_rows(before, page.evaluate(ROUTINE_ROWS))
+    assert len(changed) == 1, changed
+    old, new = changed[0]
+    assert new["id"] and new["id"] != old["id"], "no movement was put in its place"
+    assert {k: v for k, v in new.items() if k != "id"} == {
+        k: v for k, v in old.items() if k != "id"
+    }

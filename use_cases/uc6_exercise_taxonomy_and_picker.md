@@ -220,10 +220,10 @@ Adopts an open standard for interchangeable exports.
 
 | Specification Requirement | Target Implementation / Test |
 | :--- | :--- |
-| Taxonomy catalog (equipment + pattern badges) | [../src/data/exercises.js](../src/data/exercises.js) · `EXERCISES` |
-| Filtered movement picker modal (Scenario A/B) | [../src/modules/exercises/exercisePicker.js](../src/modules/exercises/exercisePicker.js) · `mountExercisePicker` |
-| Polymorphic reps/load parse, format & equipment-derived units | [../src/domain/repsAndLoad.js](../src/domain/repsAndLoad.js) · `parseRepsTarget` / `formatRepsTarget` / `getLoadUnitForEquipment` |
-| Custom movement creation (strict inheritance) | [../src/components/exercisePicker.js](../src/modules/exercises/exercisePicker.js) · `renderCustomMovementForm` |
+| Taxonomy catalog (equipment + pattern badges) | [../src/data/exercises.js](../src/data/exercises.js) · `DEFAULT_EXERCISES` · test: [test_exercise_catalog.py](../tests/medium/test_exercise_catalog.py) |
+| Filtered movement picker modal (Scenario A/B) | [../src/modules/exercises/exercisePicker.js](../src/modules/exercises/exercisePicker.js) · `mountExercisePicker` · test: [test_clipboard_catalog_picker.py](../tests/medium/test_clipboard_catalog_picker.py) |
+| Polymorphic reps/load parse, format & equipment-derived units | [../src/domain/repsAndLoad.js](../src/domain/repsAndLoad.js) · `parseReps` / `formatReps` / `loadUnitForEquipment` · test: [repsAndLoad.test.mjs](../tests/unit_js/domain/repsAndLoad.test.mjs) |
+| Custom movement creation (strict inheritance) | [../src/controllers/exerciseFormsController.js](../src/controllers/exerciseFormsController.js) · `openExerciseCreateDialog` · test: [test_exercise_catalog.py](../tests/medium/test_exercise_catalog.py) |
 | Catalog shows equipment/pattern badges, not instructions | [../tests/medium/test_exercise_catalog.py](../tests/medium/test_exercise_catalog.py) · `test_catalog_shows_taxonomy_badges_not_instructions` |
 | Picker search narrows the list live; Enter takes the top match | [../tests/medium/test_clipboard_catalog_picker.py](../tests/medium/test_clipboard_catalog_picker.py) · `test_search_narrows_and_enter_takes_the_top_match` |
 | Filter chip rows are labelled by axis (Muscle / Equipment) | [../tests/medium/test_clipboard_catalog_picker.py](../tests/medium/test_clipboard_catalog_picker.py) · `test_filter_rows_are_labelled_by_axis` |
@@ -238,12 +238,12 @@ Adopts an open standard for interchangeable exports.
 | No screen reads the stored exercises past the library | [../tests/unit_js/data/exerciseLibrary.test.mjs](../tests/unit_js/data/exerciseLibrary.test.mjs) · `no screen reads the stored exercises past the library` |
 | Custom movement form enforces name + equipment + pattern | [../tests/medium/test_exercise_catalog.py](../tests/medium/test_exercise_catalog.py) · `test_custom_exercise_requires_taxonomy` |
 | Polymorphic reps/load parse, format & equipment-derived units | [../tests/e2e/test_reps_and_load.py](../tests/e2e/test_reps_and_load.py) · `test_reps_and_load_helpers` |
-| Exercise modality axis + per-metric target formatting | [../src/domain/exerciseModality.js](../src/domain/exerciseModality.js) · `modalityOf` / `primaryMetricOf` / `formatMetricValue` |
+| Exercise modality axis + per-metric target formatting | [../src/domain/exerciseModality.js](../src/domain/exerciseModality.js) · `modalityOf` / `primaryMetricOf` / `formatMetricValue` · test: [exerciseModality.test.mjs](../tests/unit_js/domain/exerciseModality.test.mjs) |
 | Catalog & picker flag non-strength movements with a modality badge | [../tests/medium/test_exercise_catalog.py](../tests/medium/test_exercise_catalog.py) · `test_catalog_marks_cardio_with_a_modality_badge` |
 | Custom-create reveals the cardio metric selector and persists modality + metric | [../tests/medium/test_exercise_catalog.py](../tests/medium/test_exercise_catalog.py) · `test_create_cardio_exercise_reveals_metric_and_persists` |
 | Metric formatting renders time/distance/calories/watts/hold units | [../tests/unit_js/domain/exerciseModality.test.mjs](../tests/unit_js/domain/exerciseModality.test.mjs) · `metric formatting model renders the right units` |
 | Routine builder authors metric per modality (relabel primary, hide load) | [../tests/medium/test_routine_builder.py](../tests/medium/test_routine_builder.py) · `test_routine_builder_row_is_modality_aware` |
-| Open-standard crosswalk: category/equipment → wger canonical names, honest nulls | [../src/domain/exerciseStandard.js](../src/domain/exerciseStandard.js) · `wgerCategoryOf` / `wgerEquipmentOf` / `unmappedTerms` |
+| Open-standard crosswalk: category/equipment → wger canonical names, honest nulls | [../src/domain/exerciseStandard.js](../src/domain/exerciseStandard.js) · `wgerCategoryOf` / `wgerEquipmentOf` / `unmappedTerms` · test: [exerciseStandard.test.mjs](../tests/unit_js/domain/exerciseStandard.test.mjs) |
 | Interchange record preserves LibrePT axes under `x_librept`; CSV crosswalk | [../tests/unit_js/domain/exerciseStandard.test.mjs](../tests/unit_js/domain/exerciseStandard.test.mjs) · `interchange record preserves librept axes and flags gaps` / `csv export has header and quotes cells` |
 | The library's "Export the library (JSON)" downloads a self-describing interchange file, routines included | [../tests/e2e/test_exercise_standard.py](../tests/e2e/test_exercise_standard.py) · `test_catalog_export_button_downloads_interchange_json` |
 | **Security** — a movement name cannot execute as a spreadsheet formula in the exported CSV (CWE-1236) | [../tests/unit_js/security/csvInjection.test.mjs](../tests/unit_js/security/csvInjection.test.mjs) · gated by the `security-tests` CI job, not by ZAP (its baseline scan is passive and this never crosses the network) |
