@@ -100,12 +100,20 @@ export function proposeAdjustedSchedule(sourceSession, actualStartMs) {
 //
 // A session that was only STAGED (opened, never started) still ages out against its slot — there
 // is no elapsed time to lose, and a plan left open from this morning is not today's next session.
+// Unless the trainer has edited its plan since: the last plan edit (`planEditedAt`) is also a moment
+// the session was current. A morning session written up in the afternoon, the everyday way of
+// recording one after the fact, was thrown away on the next reload together with the plan.
 export function isCachedSessionStale(activeSession, now = Date.now()) {
   const scheduledEndMs = toEpochMs(activeSession?.sourceSession?.endDate);
   const startedAtMs = activeSession?.started ? (activeSession.startTime ?? null) : null;
   if (scheduledEndMs === null && startedAtMs === null) return false;
 
-  const lastCurrentAtMs = Math.max(scheduledEndMs ?? -Infinity, startedAtMs ?? -Infinity);
+  // An edit only ever EXTENDS the window: a clipboard with nothing to age against stays unexpiring.
+  const lastCurrentAtMs = Math.max(
+    scheduledEndMs ?? -Infinity,
+    startedAtMs ?? -Infinity,
+    activeSession?.planEditedAt ?? -Infinity,
+  );
   return now > lastCurrentAtMs + ACTIVE_SESSION_STALE_AFTER_MS;
 }
 

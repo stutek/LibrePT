@@ -54,3 +54,12 @@ export function saveActiveSessionToCache() {
   saveActiveSessionToCacheHelper(getActiveSession());
   syncPlanningSnapshotToHistory();
 }
+
+// A plan edit, as distinct from any other save: it records when the trainer last worked on this
+// clipboard. isCachedSessionStale counts from that moment too, so a morning session written up in
+// the afternoon is not thrown away by the next reload for being past its slot.
+export function savePlanEdit() {
+  const session = getActiveSession();
+  if (session) session.planEditedAt = Date.now();
+  saveActiveSessionToCache();
+}

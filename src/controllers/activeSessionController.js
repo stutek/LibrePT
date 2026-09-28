@@ -38,7 +38,7 @@ import {
 import { updateClientTabsFadeState } from "../modules/common/activeUsersList.js";
 import { askInApp } from "../modules/common/appQuestion.js";
 import { isGuideSurface } from "../modules/common/dom.js";
-import { saveActiveSessionToCache } from "./activeSessionCache.js";
+import { saveActiveSessionToCache, savePlanEdit } from "./activeSessionCache.js";
 import {
   currentPlanMode,
   getActiveSession,
@@ -173,6 +173,7 @@ initActiveSessionBoard({
   enterEditMode: enterClipboardEditMode,
   exitEditMode: exitClipboardEditMode,
   saveActiveSessionToCache: () => saveActiveSessionToCache(),
+  savePlanEdit: () => savePlanEdit(),
   openAddExercise: () => openAddSessionExerciseDialog(),
   // Routed so a reload reopens the picker. `query`/`category` are transient typing state and stay
   // out of the URL; the route re-derives the filter from the row it is swapping.

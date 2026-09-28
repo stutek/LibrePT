@@ -108,3 +108,34 @@ def test_edit_deeplink_typed_directly_restores_editor(page, local_server):
     assert page.locator(".clipboard-editor").is_visible(), (
         "edit deep link should reopen the editor"
     )
+
+
+def test_a_plan_written_up_after_its_slot_survives_reload(page, local_server):
+    """The morning session recorded in the afternoon. Its slot ended three hours ago, but the
+    trainer is editing its plan now, so a reload must not throw the plan away as forgotten."""
+    _open_session(page, local_server)
+    page.evaluate(
+        """async () => {
+            const ctrl = await import(new URL('controllers/activeSessionController.js', document.baseURI).href);
+            const session = ctrl.getActiveSession();
+            session.started = false;
+            session.startTime = null;
+            session.sourceSession.startDate = new Date(Date.now() - 4 * 3600000);
+            session.sourceSession.endDate = new Date(Date.now() - 3 * 3600000);
+        }"""
+    )
+    _open_plan_editor(page)
+    page.wait_for_selector(".clipboard-editor")
+    name = "Written Up Later"
+    page.locator(".editor-row-name").first.fill(name)
+    page.wait_for_timeout(150)
+
+    page.reload()
+    page.wait_for_timeout(900)
+
+    values = page.eval_on_selector_all(
+        ".editor-row-name", "els => els.map(e => e.value)"
+    )
+    assert name in values, (
+        f"the plan written up after its slot was lost on reload; rows = {values}"
+    )

@@ -254,6 +254,31 @@ test("a session only staged ages out against its slot", () => {
   assert.equal(clock.isCachedSessionStale(staged, Date.parse("2026-08-07T20:01:00")), true);
 });
 
+test("a staged session whose plan is being written up after its slot is kept", () => {
+  // The morning session recorded in the afternoon: the slot ended hours ago, but the trainer edited
+  // the plan a minute ago. The window runs from that edit, not from the slot.
+  const writtenUp = {
+    started: false,
+    startTime: null,
+    planEditedAt: Date.parse("2026-08-07T15:00:00"),
+    sourceSession: {
+      id: "s1",
+      startDate: new Date(Date.parse("2026-08-07T08:00:00")),
+      endDate: new Date(Date.parse("2026-08-07T09:00:00")),
+    },
+  };
+
+  assert.equal(clock.isCachedSessionStale(writtenUp, Date.parse("2026-08-07T15:01:00")), false);
+  assert.equal(clock.isCachedSessionStale(writtenUp, Date.parse("2026-08-07T17:01:00")), true);
+  // An edit never gives an undated clipboard an expiry it did not have.
+  const draft = {
+    started: false,
+    planEditedAt: Date.parse("2026-08-07T15:00:00"),
+    sourceSession: null,
+  };
+  assert.equal(clock.isCachedSessionStale(draft, Date.parse("2026-08-09T15:00:00")), false);
+});
+
 test("a session with no schedule at all is kept until it has run its window", () => {
   // An ad-hoc clipboard and a planning draft carry no dates (docs/DATA_MODEL.md §7): with nothing
   // to age against, a staged one is never stale, and a started one ages from its own start.

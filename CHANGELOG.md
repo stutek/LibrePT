@@ -25,6 +25,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 - **A load written with a decimal comma is read as a decimal.** "2,5" was saved as 25 kg on a phone
   set to English, with nothing on screen to say so. Both "2,5" and "2.5" now mean 2.5 kg in every
   load field, whatever the phone's language, and a load the app cannot read is marked on the field.
+- **A plan written up after its session ended survives a reload.** A morning session recorded in the
+  afternoon lost its plan on the next reload, because the app took it for a session left open and
+  forgotten.
 
 ---
 

@@ -18,6 +18,7 @@
 //   rerender()              — re-render this board (what the editor/deck call after a mutation)
 //   enterEditMode(), exitEditMode()           — mode switches that render
 //   saveActiveSessionToCache()
+//   savePlanEdit()          — the editor's save: stamps when the plan was last edited, then caches
 //   openAddExercise(), openCatalogPicker(opts)
 //   buildCircuitUnits, getExerciseSignalColor, hasExerciseNote, hasQuickSignal, logQuickSignal,
 //   completeCircuitRound, focusExerciseByIndex, activateExerciseByScroll, startRestTimer
@@ -285,14 +286,16 @@ function syncStartCompleteVisibility(canStartSession, started) {
   }
 }
 
+/** What every editor's save does: stamp the plan as edited, write the cache, write the state. */
+function persistPlanEdit() {
+  deps.savePlanEdit();
+  deps.getAppDeps().saveToLocalStorage?.();
+}
+
 /** The dependency bag one editor needs, for one client. Split out of renderPlanEditor so the column
  *  renderer can ask for the same bag per participant without this file knowing about columns. */
 function editorDepsFor(clientId, clientState, callout) {
-  const { state, t, saveToLocalStorage } = deps.getAppDeps();
-  const persist = () => {
-    deps.saveActiveSessionToCache();
-    saveToLocalStorage?.();
-  };
+  const { state, t } = deps.getAppDeps();
   const editClient = state.clients.find((c) => c.id === clientId);
   return {
     activeClientState: clientState,
@@ -303,7 +306,7 @@ function editorDepsFor(clientId, clientState, callout) {
     allExerciseNames: libraryExercises(state).map((e) => e.name),
     t,
     escapeHTML,
-    save: persist,
+    save: persistPlanEdit,
     rerender: deps.rerender,
     openAddExercise: deps.openAddExercise,
     openCatalogPicker: deps.openCatalogPicker,
@@ -358,11 +361,7 @@ function renderPlanEditor(deckContainer, activeClientId, activeClientState, call
   const columns = renderPlanColumnsIfWide(deckContainer, activeClientId, callout);
   if (columns) return columns;
 
-  const { state, t, saveToLocalStorage } = deps.getAppDeps();
-  const persist = () => {
-    deps.saveActiveSessionToCache();
-    saveToLocalStorage?.();
-  };
+  const { state, t } = deps.getAppDeps();
   const editClient = state.clients.find((c) => c.id === activeClientId);
   return renderClipboardEditor(deckContainer, {
     activeClientState,
@@ -375,7 +374,7 @@ function renderPlanEditor(deckContainer, activeClientId, activeClientState, call
     allExerciseNames: libraryExercises(state).map((e) => e.name),
     t,
     escapeHTML,
-    save: persist,
+    save: persistPlanEdit,
     rerender: deps.rerender,
     openAddExercise: deps.openAddExercise,
     openCatalogPicker: deps.openCatalogPicker,
