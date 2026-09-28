@@ -6702,6 +6702,21 @@ ustavljen trening.
 kartica: »Se začne čez …«), in naj šteje od pravega dne; številka naj teče. Opaženo na
 objavljeni `0625bd6`, sl, 390 × 844; brez napak v konzoli.
 
+### 80.67 [ ] P3 — Čip »Datumi« zapiše izbrano obdobje kot »5. okt. – 11. okt.«, ne v ISO
+
+**Scenarij in koraki:** v peskovniku na plošči »Treningi« pritisniti »Datumi«, v koledarju
+pritisniti 5 in nato 11 v vrstici oktobra pod septembrom.
+
+**Opaženo:** čip se glasi »5. okt. – 11. okt.«. Plošča pod njim piše datume kot »2026-10-06«
+in »2026-10-08«. Filter sam deluje pravilno: pokaže samo treninga 2026-10-06 in 2026-10-08.
+Koledar se ob pritisku zunaj njega ne zapre, zapre ga šele ponovni pritisk na čip.
+
+**Težava in vpliv:** isti datum je na enem zaslonu v dveh oblikah; obdobje čez novo leto
+(»28. dec. – 3. jan.«) ne pove leta.
+
+**Predlog:** čip naj piše obdobje v obliki ISO, na primer »2026-10-05 – 2026-10-11«, kot vsi
+drugi datumi v aplikaciji. Opaženo na objavljeni `0625bd6`, sl, 390 × 844; brez napak v konzoli.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
