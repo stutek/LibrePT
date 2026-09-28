@@ -6366,6 +6366,17 @@ Predlog dopolnitve: jasno ločiti trenutno predlogo od že pripravljenega načrt
 oba načina odpiranja morata vrniti isti načrt. Brez zabeleženih napak brskalnika;
 kode v tem nadaljevanju nismo pregledovali.
 
+**Dopolnitev: sklop v jutrišnjem »Opombe v paru«, objavljena `0625bd6`.** Pri
+jutranjem Luki odpreti »Uredi načrt«, dodati »Sklop«, naslov »SIM Ravnotežje in moč«,
+dva kroga in vajo Wall Sit z vrednostjo 20. Pritisniti »Končano z urejanjem načrta«.
+Beležka pokaže naslov sklopa, »KROG 1 / 2«, Wall Sit in »Zaključi krog 1 / 2«.
+Že osvežitev te strani vrne samo prvotna Dumbbell Bicep Curl in Počitek 60s. Tudi
+ponovno odprtje iste kartice in urejevalnika pokaže samo prvotno vajo, brez sklopa.
+Termin je jutrišnji, zato to razširja preizkus tudi na obnovitev prihodnjega načrta
+po osvežitvi. Trener izgubi pripravljeni sklop brez opozorila. Predlog: preveriti
+obstoj celotnega sklopa in števila krogov po osvežitvi ter po vseh poteh ponovnega
+odpiranja. Sl, 390 × 844; brez novih prestreženih napak. Kode nismo pregledovali.
+
 ### 80.53 [ ] P2 — Načrt treninga, vpisanega za nazaj, po osvežitvi izgine
 
 **Scenarij in koraki:** trener popoldne odpre jutranji trening, ki ga ni začel v aplikaciji, v meniju ⋮
