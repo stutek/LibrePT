@@ -20,19 +20,13 @@ import {
   isPreviewVersion,
   schemaRank,
 } from "./migrationSteps.js";
+import { LIVE_SCHEMAS } from "./recordSchemas.js";
 
-// Collections that must be arrays if present at all — the cheap, universal shape assertion every
-// step's output is held to.
-const ARRAY_COLLECTIONS = [
-  "clients",
-  "exercises",
-  "routines",
-  "history",
-  "planUpdates",
-  "sessions",
-  "notifications",
-  "circuits",
-];
+// The collections the in-memory state holds: those the schema the chain ends at declares. Read from
+// the schema rather than listed, because a hand-written list here once lacked `invites` and
+// `sessionSeries`, so neither was shape-checked nor filled in. Each must be an array if present at
+// all — the cheap, universal shape assertion every step's output is held to.
+export const STATE_COLLECTIONS = Object.keys(LIVE_SCHEMAS[CURRENT_SCHEMA_VERSION]);
 
 /**
  * Which version a stored database should be read AS.
@@ -61,7 +55,7 @@ export function validateStateShape(state, expectedVersion) {
   if (!state || typeof state !== "object" || Array.isArray(state)) {
     return ["the migrated database is not an object"];
   }
-  for (const key of ARRAY_COLLECTIONS) {
+  for (const key of STATE_COLLECTIONS) {
     if (key in state && !Array.isArray(state[key])) {
       problems.push(`\`${key}\` is not an array`);
     }
@@ -78,7 +72,7 @@ export function validateStateShape(state, expectedVersion) {
 // them one at a time. Done once here rather than defended against at every read site.
 export function normalizeCollections(state) {
   if (!state || typeof state !== "object") return state;
-  for (const key of ARRAY_COLLECTIONS) {
+  for (const key of STATE_COLLECTIONS) {
     // Only ABSENT collections are filled in. A key that is present but not an array is corruption,
     // and must still fail validation loudly rather than be quietly replaced with an empty list.
     if (state[key] === undefined || state[key] === null) state[key] = [];

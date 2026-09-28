@@ -41,7 +41,7 @@ import {
   schemaAcceptsCollection,
 } from "./recordProjections.js";
 import { LIVE_SCHEMAS, fieldsHiddenFrom, narrowToSchema } from "./recordSchemas.js";
-import { describeMigration, migrateState } from "./schemaMigrations.js";
+import { STATE_COLLECTIONS, describeMigration, migrateState } from "./schemaMigrations.js";
 import { DEMO_ORIGIN, stampAsSeeded } from "./seedProvenance.js";
 import { clearWorkspaceKeys, readVersionScoped, writeVersionScoped } from "./storageNamespace.js";
 import { isThisTabActive } from "./tabOwnership.js";
@@ -99,17 +99,12 @@ export function emptyState() {
   };
 }
 
+// Notifications are the app's own messages to the trainer, not their work: a database holding only
+// the welcome notice is still empty. Every other collection counts, a new one included.
 export function stateHasData(s = state) {
-  return [
-    "clients",
-    "exercises",
-    "routines",
-    "history",
-    "planUpdates",
-    "sessions",
-    "sessionSeries",
-    "circuits",
-  ].some((k) => Array.isArray(s[k]) && s[k].length > 0);
+  return STATE_COLLECTIONS.filter((k) => k !== "notifications").some(
+    (k) => Array.isArray(s[k]) && s[k].length > 0,
+  );
 }
 
 // Every seeded record is STAMPED (data/seedProvenance.js) so a later "clear the demo data" can tell

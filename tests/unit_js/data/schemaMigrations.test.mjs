@@ -177,6 +177,22 @@ test("absent collections are filled in but corrupt ones still fail", () => {
   );
 });
 
+test("every collection the current schema declares is filled in and shape-checked", () => {
+  // Invitations and repeating sessions were once missing from a hand-written list here, so a
+  // backup without them reached the renderers with `undefined`, and a corrupt one passed.
+  const sparse = m.migrateState({ schemaVersion: CURRENT_SCHEMA_VERSION, sessions: [] });
+  assert.equal(sparse.ok, true);
+  for (const collection of ["invites", "sessionSeries"]) {
+    assert.deepEqual(sparse.state[collection], [], `${collection} is filled in`);
+    const corrupt = m.migrateState({
+      schemaVersion: CURRENT_SCHEMA_VERSION,
+      sessions: [],
+      [collection]: "nope",
+    });
+    assert.equal(corrupt.ok, false, `a corrupt ${collection} is refused`);
+  }
+});
+
 test("the chain from 0 clears the stored language so everyone is asked once", async () => {
   // Deliberately treats every existing PT as never-asked: before the splash could offer a choice,
   // `lang` was forced to "en" wherever it was absent, so a chosen English and a never-asked
