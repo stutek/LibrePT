@@ -6376,6 +6376,16 @@ po osvežitvi. Trener izgubi pripravljeni sklop brez opozorila. Predlog: preveri
 obstoj celotnega sklopa in števila krogov po osvežitvi ter po vseh poteh ponovnega
 odpiranja. Sl, 390 × 844; brez novih prestreženih napak. Kode nismo pregledovali.
 
+**Stanje 2026-09-29 — predlagani popravek ne zadošča, čaka na odločitev o zasnovi.** Preizkušeno na
+`main`: tap na kartico, ki bi vrnil na že odprto podlogo namesto nove gradnje, ohrani spremembe
+načrta, pokvari pa demo zgodbo (korak »Pritisni Johnovo ime«). Vzrok: odprta podloga ima udeležence
+iz trenutka, ko je bila zgrajena. Udeleženec, dodan treningu pozneje, v njej manjka, nova gradnja iz
+rutine pa ga vključi. Vrnitev bi torej zamenjala izgubo načrta za izgubo udeleženca. Načrt treninga,
+ki se še ni začel, živi samo v eni podlogi (`librept_active_session`), zato ga izgubi tudi odprtje
+katerega koli drugega treninga. Popravek, ki drži, shrani načrt vsakega udeleženca pri treningu
+samem. To je sprememba sheme podatkov in odločitev za Simona: ali načrt prihodnjega treninga postane
+del zapisa treninga. Do takrat §80.52 ostane odprta.
+
 ### 80.53 [ ] P2 — Načrt treninga, vpisanega za nazaj, po osvežitvi izgine
 
 **Scenarij in koraki:** trener popoldne odpre jutranji trening, ki ga ni začel v aplikaciji, v meniju ⋮
