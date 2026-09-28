@@ -1666,6 +1666,12 @@ Consolidating into one `planItemFromCatalogEntry()` would let the routine path c
 and retire that fallback — but that changes what the catalog picker excludes for routine-authored
 slots, so it is a **behaviour change** wanting its own commit rather than riding along with a move.
 
+**Pregled 2026-09-28 (§89):** kopiji sta se že razšli. `sessionsView.js` (okoli vrstice 80) gradi
+postavke načrta iz rutine enako kot `buildClientStateFromRoutine` v `domain/sessionPlanFactory.js`,
+le brez polja `pattern`; ali trener razliko vidi, ni preverjeno. Privzeta nova vaja (3 serije,
+10 ponovitev, 0 kg, trije prazni zapisi serij) je napisana trikrat: `clipboardEditor.js` (`makeExercise`)
+in dvakrat v `exerciseDeckOfCards.js` (vaja in krog).
+
 ### 24.5 [~] Stage 5 — `clipboardEditor.js`'s 710-line function
 `renderClipboardEditor()` holds a template layer, 11 wiring closures, a drag reorder engine and
 circuit normalisation in one scope.
@@ -6998,4 +7004,57 @@ prisotnost in odpovedi v dveh (§86 in §88.3).
 **O postopku:** vsak dan je izpeljal tri do šest treningov v eni uri; dnevi, ki so poskusili zajeti
 vse, niso prišli do konca. Dve poročili »napak« sta bili omejitvi orodja za brskalnik, ne aplikacije
 (kliki po besedilu v zaprtih oknih, `fill` v prvi zadetek); oboje je v orodju popravljeno.
+
+## 89. [ ] Pregled 2026-09-28: isti podatek na več mestih
+
+Iskano po vrednotah »en vir resnice«, »preprostost« in »napake ne more narediti«. Dobesednih
+kopij kode je malo: iskanje enakih blokov šestih vrstic v `src/` je našlo le spodnje. Dobiček je
+v podatkih in seznamih, ki jih ljudje ročno prepisujejo na drugo mesto. Po dobičku padajoče.
+
+### 89.1 [ ] Seznam datotek za delo brez povezave je ročna kopija `integrity.json`
+`src/sw/cacheManifest.js` ima 307 ročno vpisanih poti (`ASSETS`) in ročno številko
+`CACHE_NAME = "librept-v143"`. Vsak nov, premaknjen ali izbrisan modul zahteva vpis in dvig
+številke. Service worker ob namestitvi že naloži `integrity.json` (`sw/integrity.js`), ki ima vse
+datoteke z zgoščeno vrednostjo SHA-256. **Predlog:** seznam za predpomnilnik so ključi kataloga
+(brez `sw.js` in `sw/`), ime predpomnilnika pa zgoščena vrednost kataloga. Odpadejo ročni seznam,
+ročna številka in test `test_service_worker_precaches_every_runtime_module`, ki preverja le
+manjkajoče poti, ne odvečnih. **Odprto pred delom:** ali `dist/` vsebuje datoteke, ki jih namerno
+ne predpomnimo (velike slike, `404.html`); te bi potrebovale seznam izjem.
+
+### 89.2 [ ] `docs/SRC_MODULES.md` (128 KB) prepisuje glave modulov
+Opis vsake datoteke ponovi razlog iz njene glave, npr. `data/workspace.js` in
+`data/sandboxStaleness.js` (dvanajst ur, tri ure). 232 od 236 JS datotek glavo ima. Pravilo zahteva,
+da nov ali premaknjen modul popravi katalog v isti spremembi, zato ima vsak razlog dve mesti.
+**Predlog:** katalog ustvari orodje iz prve vrstice glave in plasti iz `agent_tools/import_layers.py`;
+ročno ostane le uvod. Nato se spremeni tudi pravilo o posodabljanju kataloga.
+
+### 89.3 [ ] Pet pravil o usklajevanju sej opisuje, kar `build check` že izsili — čaka na Simona
+`AGENT_RULES.md` (vrstice o mirnem drevesu, `pgrep`, posnetku drevesa, `tests/` in zavrnitvi
+preverjanja) je približno četrtina datoteke. `build check` drži `.build-reports/gate.lock` in
+zavrne drugi zagon; `build/__main__.py` po zagonu primerja posnetek `src/` in `tests/` ter konča z
+napako, če se je drevo premaknilo. Točke nosijo datume in zgodbe, kar skupno pravilo »brez
+zgodovine« prepoveduje. **Predlog** (namen: pravila, ki so v vsakem kontekstu, krajša za toliko,
+kolikor jih koda že izsili): strniti v eno točko — »V drevo piše ena seja naenkrat; zasede ga v
+zapisu. `build check` zavrne drugi zagon in zavrže rezultat, če se `src/` ali `tests/` med
+zagonom spremenita: zavrnitev ali premaknjeno drevo pomeni počakaj, nikoli commit.« Pravila
+spreminja Simon.
+
+### 89.4 [ ] Tema je zapisana na šestih mestih, ena kopija je že zastarela
+`modules/common/theme.js` (razred, barva, stara imena, imena v treh jezikih), `theme-boot.js`
+(kopija razredov in starih imen, ker je navaden skript brez `import`), `tests/medium/test_theme.py`
+(tretja kopija razredov), `index.html`, `sw/cacheManifest.js` (odpade z §89.1) in komentar v
+`modules/common/shareLink.js`, ki še našteva temo `red`. Razred je vedno `<ime>-theme`, zato je
+tabela `THEME_BODY_CLASS` pravilo, ne podatek. Komentar v `theme.js` pravi, da imena tem niso
+besedilo vmesnika, a so prevedena (Dan, Polnoč): nov jezik zato popravlja `theme.js`. Ni
+preverjeno, ali preverjanje enakosti slovarjev ta imena vidi.
+
+### 89.5 [ ] Seznam zbirk ročno, čeprav obstaja izpeljan
+`COLLECTIONS` v `data/recordProjections.js` je izpeljan iz tabele projekcij. `ARRAY_COLLECTIONS` v
+`data/schemaMigrations.js` je ročna kopija brez `invites` in `sessionSeries`, zato preverjanje
+oblike po migraciji tega dvojega ne preveri. `stateHasData` v `data/stateStore.js` je še ena ročna
+kopija (brez `invites` in `notifications`; ali namerno, ni preverjeno).
+
+### 89.6 Kar se ne izplača
+Nadaljnje delitve velikih datotek (§24.5, §24.7) le, če kaj postane preizkusljivo ali skupno — §24
+je to že ugotovil. Razdelitev slovarjev po funkcijah (§14.5) ne odpravi nobene kopije.
 
