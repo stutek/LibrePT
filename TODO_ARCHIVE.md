@@ -20,6 +20,71 @@ Read [CHANGELOG.md](CHANGELOG.md) for what shipped and when. This file is why.
 
 ---
 
+### 89.1 [x] Seznam datotek za delo brez povezave je ročna kopija `integrity.json` — odločeno 2026-09-29: ostane
+`src/sw/cacheManifest.js` ima 307 ročno vpisanih poti (`ASSETS`) in ročno številko
+`CACHE_NAME = "librept-v143"`. Vsak nov, premaknjen ali izbrisan modul zahteva vpis in dvig
+številke. Service worker ob namestitvi že naloži `integrity.json` (`sw/integrity.js`), ki ima vse
+datoteke z zgoščeno vrednostjo SHA-256. **Predlog:** seznam za predpomnilnik so ključi kataloga
+(brez `sw.js` in `sw/`), ime predpomnilnika pa zgoščena vrednost kataloga. Odpadejo ročni seznam,
+ročna številka in test `test_service_worker_precaches_every_runtime_module`, ki preverja le
+manjkajoče poti, ne odvečnih. **Odprto pred delom:** ali `dist/` vsebuje datoteke, ki jih namerno
+ne predpomnimo (velike slike, `404.html`); te bi potrebovale seznam izjem.
+
+**Odločitev: ročni seznam ostane.** Pri izvedbi se je pokazalo, da predlog ni zamenjava enega
+seznama z drugim. V produkciji gradnja datotek service workerja ne spreminja, zato brskalnik novo
+različico opazi le, ko se spremenijo bajti `sw.js` ali `sw/*.js`. Ročni vpis in dvig `CACHE_NAME`
+sta tisto, kar sproži ponovno shranjevanje. Seznam, izpeljan iz `integrity.json`, bi zahteval, da
+gradnja ob vsaki objavi vpiše različico v service worker, telefon pa bi ob vsaki objavi znova
+prenesel vse datoteke. **Namesto tega** (`d4ee523`) test primerja seznam z `src/` natančno, v obe
+smeri in za vse vrste datotek; tako je našel `icons/icon-mark-512.png`, ki ni bil nikoli na seznamu.
+Napaka zdaj ne more priti v `main`; ročno delo je ena vrstica in dvig številke na nov modul.
+Odločitev lahko Simon ovrže.
+
+---
+
+### 89.3 [x] Pet pravil o usklajevanju sej opisuje, kar `build check` že izsili — uveljavljeno 2026-09-29
+`AGENT_RULES.md` (vrstice o mirnem drevesu, `pgrep`, posnetku drevesa, `tests/` in zavrnitvi
+preverjanja) je približno četrtina datoteke. `build check` drži `.build-reports/gate.lock` in
+zavrne drugi zagon; `build/__main__.py` po zagonu primerja posnetek `src/` in `tests/` ter konča z
+napako, če se je drevo premaknilo. Točke nosijo datume in zgodbe, kar skupno pravilo »brez
+zgodovine« prepoveduje. **Predlog** (namen: pravila, ki so v vsakem kontekstu, krajša za toliko,
+kolikor jih koda že izsili): strniti v eno točko — »V drevo piše ena seja naenkrat; zasede ga v
+zapisu. `build check` zavrne drugi zagon in zavrže rezultat, če se `src/` ali `tests/` med
+zagonom spremenita: zavrnitev ali premaknjeno drevo pomeni počakaj, nikoli commit.« Pravila
+spreminja Simon.
+
+**Uveljavljeno** v `2ff6351`, ko se je Simon strinjal z namenom. Šest točk je postalo dve: ena o
+enem pisarju in zaklepu preverjanja, ena o preverbi, na katero nič ne ukrepa.
+
+---
+
+### 89.4 [x] Tema je zapisana na šestih mestih, ena kopija je že zastarela — popravljeno 2026-09-29
+`modules/common/theme.js` (razred, barva, stara imena, imena v treh jezikih), `theme-boot.js`
+(kopija razredov in starih imen, ker je navaden skript brez `import`), `tests/medium/test_theme.py`
+(tretja kopija razredov), `index.html`, `sw/cacheManifest.js` (odpade z §89.1) in komentar v
+`modules/common/shareLink.js`, ki še našteva temo `red`. Razred je vedno `<ime>-theme`, zato je
+tabela `THEME_BODY_CLASS` pravilo, ne podatek. Komentar v `theme.js` pravi, da imena tem niso
+besedilo vmesnika, a so prevedena (Dan, Polnoč): nov jezik zato popravlja `theme.js`. Ni
+preverjeno, ali preverjanje enakosti slovarjev ta imena vidi.
+
+**Popravljeno** v `c8d8953`: seznam `THEMES` in pravilo `themeClass` namesto tabele, imena v
+slovarjih (`theme_name_<tema>`), mrtvi ključ `theme_light` odstranjen, komentar v `shareLink.js`
+popravljen. `theme-boot.js` obdrži kopijo; `tests/unit_js/modules/themeBoot.test.mjs` ga požene
+proti `theme.js` za vsako ime. Barve `THEME_META_COLOR` ostajajo tabela v `theme.js`.
+
+---
+
+### 89.5 [x] Seznam zbirk ročno, čeprav obstaja izpeljan — popravljeno 2026-09-29
+`COLLECTIONS` v `data/recordProjections.js` je izpeljan iz tabele projekcij. `ARRAY_COLLECTIONS` v
+`data/schemaMigrations.js` je ročna kopija brez `invites` in `sessionSeries`, zato preverjanje
+oblike po migraciji tega dvojega ne preveri. `stateHasData` v `data/stateStore.js` je še ena ročna
+kopija (brez `invites` in `notifications`; ali namerno, ni preverjeno).
+
+**Popravljeno** v `8ef7f8e`: `STATE_COLLECTIONS` je izpeljan iz sheme, v katero pripelje veriga
+posodobitev; `stateHasData` bere isti seznam brez `notifications`.
+
+---
+
 ### 79.3 [x] The evening theme card names an option the menu does not have — popravljeno 2026-09-26
 
 `story_step_evening_theme` told the viewer to choose *Dark Mode* (en) and *Temna tema* (sl), but
