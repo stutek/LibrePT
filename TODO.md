@@ -7252,25 +7252,28 @@ shape it does not declare.** Everything else on the list is screens and reading.
 | :--- | :--- | :--- |
 | **1. Fork** | Copy the repository, edit freely | A merge conflict on every release of this app, for ever. Rejected there, and still rejected |
 | **2. A separate app reading an export** | Two apps, a monthly import | Fails the invoice run: a month-end screen that needs re-importing a diary is the work the trainer already does. Invoices land outside this app's backup and sync |
-| **3. Overlay + an extension point here** | This app ships an empty `registerExtensions()`; the overlay fills it | Works, but the empty hook is dead code in a free app for a paid tier, which §68 forbids and which would have to be argued away |
-| **4. Overlay that owns the entry, and shadows what is stable** | The overlay ships its own `index.html`, which loads its own boot module, which imports this app's boot and then registers its own routes, menu entries and collections | **Recommended.** No hook here, no rule to change, nothing dead in the free app |
+| **3. This app provides an empty function for ProPT to fill** | This app adds `registerExtensions()`, which does nothing here, and `appBoot.js` calls it at start-up. The paid build replaces that one file | Works, but the empty function exists in the free app for one reason only: so the paid product can use it. §68 forbids that — *"no paid features, no dead code for them"* — so the rule would have to change first |
+| **4. The paid build provides its own starting file** | `index.html` is the first file a browser loads, and it names the JavaScript file that starts the app. The paid build ships its own `index.html`, which starts its own file, which runs this app's `app.js` and then adds its own screens | **Recommended.** Nothing is added to this app for the paid product, so §68 stands as written |
 
-**Why 4 beats 3, in one rule: shadow what is stable, seam what churns.** An overlay file that replaces
-one of this app's files costs nothing on a release UNLESS that file changes often, in which case the
-overlay silently misses what changed. So the choice per file is not a matter of taste:
+**Why 4 beats 3.** When the paid build replaces one of this app's files with its own copy, that copy
+stops receiving later changes to it — silently, with no error and no merge conflict. So which files it
+may replace is decided by how often each one changes, not by preference:
 
-- `index.html` changes rarely — **shadow it**, and the entry problem disappears without a hook here.
-- `app.js` / `appBoot.js` change with every feature — **never shadow**; the overlay imports them.
-- `routeTable.js` gains a line per route, `applicationHeader.js` per menu entry — **seam**, because
-  shadowing either would drift within weeks.
-- `cacheManifest.js` changes with every module — **generate it** (§90.4).
-- `recordSchemas.js` is this app's core — neither; the collection is declared here, once (§90.6).
+- `index.html` changes almost never — **the paid build replaces it**, and that is how it starts, with
+  nothing added here.
+- `app.js` / `appBoot.js` change with every feature — **never replaced**; the paid build runs them.
+- `routeTable.js` gains a line per screen and `applicationHeader.js` one per menu entry — **neither**:
+  replacing either would fall behind within weeks, so this app gains a list they can register into.
+- `cacheManifest.js`, the list of files kept for offline use, changes with every module — **generated
+  rather than maintained by hand** (§90.4).
+- `recordSchemas.js`, what the database stores, is this app's core — never touched; the one new
+  collection is declared here (§90.6).
 
-**And the seam that follows is not new machinery.** This app already registers its own shells through
+**And that registration list is not new machinery.** This app already registers its own shells through
 `registerShellRender` in [renderRegistry.js](src/modules/common/renderRegistry.js), which exists
 because hand-ordering render calls failed silently. Routes and menu entries getting the same treatment
-is **this app's existing pattern applied twice more**, used by its own routes and its own menu — so it
-is not dead code, it is not for a paid tier, and **§68's first bullet stands unchanged.** That bullet
+is **this app's existing pattern used twice more**, by its own routes and its own menu — so it is not
+dead code, it is not there for a paid tier, and **§68's first bullet stands unchanged.** That bullet
 already allows the overlay to *"register itself into existing registries"*.
 
 ### 90.4 [ ] The precache list becomes generated, and that pays for itself here
