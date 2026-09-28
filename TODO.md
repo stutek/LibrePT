@@ -2976,6 +2976,15 @@ vadbe pokažejo vzdevka; v oknu »Pošlji vabila v koledar« pa sta dve enaki oz
 vabil naj pokažeta vzdevek ali naslov prejemnika. Vabil v preizkusu nismo poslali.
 Preizkušeno samo prek vmesnika, brez preverjanja kode.
 
+
+**Dopolnitev iz »Opombe v paru«, objavljena `0625bd6`:** pri jutranjem Luki
+odpreti Dumbbell Bicep Curl → Opombe, vpisati »SAMO JUTRANJI: simulirana opomba brez
+shranitve«, zapreti z X, preklopiti na večernega in odpreti njegove Opombe.
+Neshranjeno besedilo se pravilno počisti. Naslov obrazca pa pokaže samo »Povratne
+informacije za TEST Luka Kovač pri Dumbbell Bicep Curl«, brez vzdevka. Trener pred
+zapisom ne more iz samega obrazca potrditi prejemnika. Predlog: vzdevek vključiti
+tudi v naslov opombe. Sl, 390 × 844; brez prestreženih napak brskalnika.
+
 **Dopolnitev iz skupinske vadbe »Izmenični odmori«, objavljena `0625bd6`:** oba Luka
 imata isto vajo Dumbbell Bicep Curl. Časomer premora prvega teče tudi po preklopu na
 drugega, drugi časomer začne neodvisno. Obe plavajoči oznaki pa kažeta samo »TEST Luka
