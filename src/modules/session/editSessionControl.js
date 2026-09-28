@@ -37,7 +37,7 @@ import { clockToMinutes, parseTimeRange, timePlusMinutes } from "../../domain/ti
 import { askInApp, tellInApp } from "../common/appQuestion.js";
 import { mountDateField } from "../common/dateField.js";
 import { mountTimeField } from "../common/timeField.js";
-import { formatClockFromEpoch } from "../common/utils.js";
+import { clientNameMatches, formatClockFromEpoch } from "../common/utils.js";
 import {
   readRepeatFields,
   resetRepeatControls,
@@ -965,7 +965,7 @@ function matchingClients(query) {
   const needle = query.trim().toLowerCase();
   if (!needle) return [];
   return (participantRowContext?.state?.clients || [])
-    .filter((client) => !chosen.has(client.id) && client.name.toLowerCase().includes(needle))
+    .filter((client) => !chosen.has(client.id) && clientNameMatches(client, needle))
     .sort((a, b) => a.name.localeCompare(b.name))
     .slice(0, MAX_PARTICIPANT_MATCHES);
 }

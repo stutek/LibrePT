@@ -170,6 +170,13 @@ function shortClientName(client, others) {
   return stillClashes ? client.name : initials;
 }
 
+// Whether a search finds this client by the name the trainer sees — the name or the alias, because
+// the alias is printed beside the name everywhere and is the word that tells two namesakes apart.
+// `needle` is already trimmed and lower-cased.
+export function clientNameMatches(client, needle) {
+  return [client?.name, client?.alias].some((part) => part?.toLowerCase().includes(needle));
+}
+
 export function getClientDisplayNameHTML(
   client,
   isShort = false,

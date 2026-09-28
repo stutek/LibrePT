@@ -154,3 +154,20 @@ def test_enter_books_the_first_match_without_submitting_the_form(page, local_ser
     assert submitted == 0, (
         "Enter in the search field must add a client, not launch the clipboard"
     )
+
+
+def test_a_typed_alias_finds_the_client(page, local_server):
+    """Two clients with one name are told apart by their alias, so the alias is what the trainer
+    types; it answered "No client of that name"."""
+    seeded = "  clients: structuredClone(DEFAULT_CLIENTS),"
+    assert seeded in STUB
+    stub = STUB.replace(
+        seeded,
+        "  clients: structuredClone(DEFAULT_CLIENTS).map((c) =>"
+        " c.name === 'Jane Doe' ? { ...c, alias: 'mornings' } : c),",
+    )
+    load_with_stub(page, local_server, stub)
+    page.fill("#setup-participant-search", "morn")
+    matches = page.locator(f"{MATCHES} .participant-match")
+    expect(matches).to_have_count(1)
+    expect(matches.first).to_contain_text("Jane")

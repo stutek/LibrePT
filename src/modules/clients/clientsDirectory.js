@@ -9,6 +9,8 @@
 //   truncateString, onOpenClient(clientId)
 // }
 
+import { clientNameMatches } from "../common/utils.js";
+
 export function renderClientsDirectory(container, deps) {
   if (!container) return;
   const {
@@ -26,7 +28,7 @@ export function renderClientsDirectory(container, deps) {
 
   const q = filterQuery.toLowerCase();
   const filtered = clients.filter(
-    (c) => c.name.toLowerCase().includes(q) || c.goals.toLowerCase().includes(q),
+    (c) => clientNameMatches(c, q) || c.goals.toLowerCase().includes(q),
   );
 
   if (filtered.length === 0) {

@@ -30,6 +30,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   forgotten.
 - **A session without a routine no longer shows a bare "Undefined".** It was read as the attendance
   state. The warning "Program not defined" on the same card already says what is missing.
+- **The client search finds a client by their alias**, in the client directory and when adding a
+  participant to a session. The alias is shown beside the name, and it is the word that tells two
+  clients with the same name apart.
 
 ---
 

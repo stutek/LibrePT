@@ -111,3 +111,21 @@ def test_a_card_still_opens_after_the_grid_has_been_filtered(page, local_server)
 
     assert not errors, f"clicking a filtered card raised: {errors}"
     assert page.evaluate("() => window.__navigated") == ["/clients/c1a9f0e2"]
+
+
+def test_the_search_finds_a_client_by_the_alias_on_their_card(page, local_server):
+    """An alias exists to tell two people with one name apart, and it is printed on the card; a
+    search for it answered "No clients found" and offered to add a new client."""
+    seeded = "const state = { clients: structuredClone(DEFAULT_CLIENTS), lang: 'en' };"
+    assert seeded in STUB
+    stub = STUB.replace(
+        seeded,
+        seeded
+        + "\nstate.clients.find((c) => c.name === 'Jane Doe').alias = 'mornings';",
+    )
+    load_with_stub(page, local_server, stub)
+    page.wait_for_selector("#view-client-directory.active")
+
+    page.locator("#search-clients").fill("morn")
+    expect(_cards(page)).to_have_count(1)
+    expect(_cards(page).first).to_contain_text("Jane Doe")
