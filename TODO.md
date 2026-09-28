@@ -678,16 +678,20 @@ The Playwright suites drive real end-to-end flows that are documented nowhere. E
 - **Still open**: (a) the reverse gaps — UC1/UC2 behaviour (voice notes, the feedback→adjustment
   wizard, plan pivots) with partial or no coverage; (b) whether the newer app-surface flows (themes,
   header menu, first-run terms, sync/backup) each deserve a UC or belong in README feature docs.
-- **[~] Coverage measured 2026-09-28, gaps being closed (Claude, librept-39).** Line coverage of
+- **Coverage measured 2026-09-28; gaps closed in `ddd9e95`, gate checks in `2d7ef08`.** Line coverage of
   `src/` over all test tiers, one run with a V8 coverage plugin kept outside the repository: 93.3% of
   27,510 code lines. The run cannot see the service worker (`src/sw/`, 0%) or `src/app.js` (served
   different from disk); seven e2e tests failed on the integrity overlay because another session wrote
-  `src/` mid-run, so their share is missing. Tests being added: UC2's Apply / Dismiss / close / Swap
-  on the plan, a floor note reaching the review screen after a reload, the timer's ✕ and its single
+  `src/` mid-run, so their share is missing. Tests added: UC2's Apply / Dismiss / close / Swap on
+  the plan, a floor note reaching the review screen after a reload, the timer's ✕ and its single
   alert at zero, the app opening and keeping a note with the network off (no test did this before),
-  and unit tests for `loadInputHTML`, `metricLabelKey` and their neighbours. `loadParts` has no
-  caller and goes. UC1–UC4 get traceability tables; the gate gets two checks — a use case without
-  one, and pure logic below 90% unit coverage.
+  and unit tests for `loadInputHTML`, `metricLabelKey` and their neighbours. `loadParts` had no
+  caller and is gone. UC1–UC4 have traceability tables; the gate fails a use case without one
+  (`agent_tools/use_case_tests.py`) and pure logic below 90% unit coverage
+  (`agent_tools/unit_coverage.py`). Browser-tier coverage is not gated: it moves with timing.
+- **[ ] The tier counts in `tests/INDEX.md` are stale**: e2e says 55 files and 253 tests, pytest
+  collects 73 and 328; medium 60/349 against 64/442; unit 44/316 against 52/360. A number copied
+  into prose is wrong the day after. Next step: drop the counts, or generate them.
 - **[ ] UC1 and README describe a plan pivot the app does not have.** *Pivot / Wipe Plan*, *Undo
   Pivot* and the three placeholder cards (*Mobility & Core Flow*, *Machine Circuit/Giant Set*,
   *Freestyle Block*): nothing in `src/` implements them. **Blocks** the UC1 rewrite and README's
