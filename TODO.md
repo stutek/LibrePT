@@ -7180,3 +7180,185 @@ kopija (brez `invites` in `notifications`; ali namerno, ni preverjeno).
 Nadaljnje delitve velikih datotek (§24.5, §24.7) le, če kaj postane preizkusljivo ali skupno — §24
 je to že ugotovil. Razdelitev slovarjev po funkcijah (§14.5) ne odpravi nobene kopije.
 
+## 90. [ ] Extending this app into ProPT: the scenarios, the approaches, and the seam
+
+**Asked by Simon 2026-09-28**, in two parts: list the scenarios ProPT adds, and find the
+architectural approaches for extending this app into it. The design belongs here rather than in
+`~/Projects/EnterprisePT`, because that is what its `TODO.md` §16.3 concluded on 2026-09-25 — *"the
+seam is designed there, not here"* — and it names itself as what blocks `PROPT_IMPLEMENTATION.md` §8
+step 2, since an invoice needs somewhere to live before it needs anything else.
+
+Read at the source before writing this: that project's `README.md`, `AGENT_RULES.md`,
+`PROPT_IMPLEMENTATION.md` §2 and §9, and its `TODO.md` §15.1, §15.4 and §16. The scenarios below are
+its list, not a new one; what is added here is what each one demands of THIS repository.
+
+### 90.1 [ ] The contradiction that decides everything else
+
+Two documents there disagree, and neither says so:
+
+- `PROPT_IMPLEMENTATION.md` §2: the trainer who pays **"installs a different app from a different
+  address"**.
+- `TODO.md` §16.3 recommends the overlay because then **"the trainer has one app"**.
+
+**A different address is a different origin, and a different origin has an empty IndexedDB.** The paid
+build would start with no clients, no sessions and no history. Buying ProPT would mean carrying the
+database across by hand, and since 2026-09-28 that also means typing the backup password (§18.8).
+Nobody wrote that down, and it is the first thing a paying customer would meet.
+
+**Why the addresses cannot simply be the same.** The lock is physical: a separate build, because a
+licence check inside an MIT app can be deleted (§68.1). Physical enforcement needs the build not to be
+publicly downloadable, which needs an access-controlled host, which is a different origin. **The
+separation is forced by the lock, not chosen.** Anyone arguing for one origin has to propose a
+different lock first.
+
+**Recommended: separate origins, and the data crosses by a channel that already exists.**
+
+- **Google Drive.** `appDataFolder` is scoped to the OAuth grant rather than to the origin
+  ([driveAppData.js](src/data/driveAppData.js) says so), so a ProPT build shipping this app's own
+  client id would see the same snapshot: install, connect Drive, type the backup password, sync.
+  **Not verified at Google's documentation** — that is this repository's own comment, and it must be
+  read at the source before anything depends on it.
+- **The backup file**, for a trainer who never connected Drive: export on the old address, import on
+  the new one, one password. Already built, and now the upgrade path as well.
+
+This is the same question as §16.6. It is one decision, not two, and it decides both.
+
+### 90.2 [ ] The scenarios ProPT adds, and what each one demands here
+
+From `TODO.md` §15.1 there, in its order. The right-hand column is the new part: what each scenario
+needs from THIS app, which is what makes the approaches in §90.3 comparable at all.
+
+| Scenario | What it needs here |
+| :--- | :--- |
+| **The month-end invoice run** — every client, the sessions actually held, the price of each, one action that produces every invoice with its QR code | Reads sessions, which exist. Writes invoices — **storage this app does not have**. A screen and a menu entry. Its own QR encoder, already a parameter |
+| **Session packages and the balance left** — bought ten, used seven, three left, and **the client must see it too** | Storage. Reads sessions. A document the phone shares — no server, no client account |
+| **Who owes, and for how long** — invoices sent and unpaid, oldest first, a reminder carrying the same QR | Reads its own storage. A screen. The phone's own share, not a transport here |
+| **A cancellation that costs, and one that does not** — the trainer's rule, applied when a session is cancelled | Reads sessions, which already carry when the cancellation happened. **Needs no hook** — see §90.5 |
+| **A different price per client and per kind of session** | Storage, attached to a client |
+| **The client's monthly summary** | Reads records that exist. No new storage |
+| **The year in one file, for the accountant** | An export that carries its storage |
+| **Self-service booking, and every Google Calendar integration** (§11 and §19 there) | The whole calendar integration moves OUT of this app (§68.3). The overlay needs network and screens, and it writes this app's own sessions |
+
+**Three of them are the product**: the invoice run, packages, and who owes (§15.4 there). They are one
+loop — the work is recorded, the invoice follows from it, the money is chased from the invoice — and
+each replaces a notebook. **All three need exactly one thing this app cannot do: store a record whose
+shape it does not declare.** Everything else on the list is screens and reading.
+
+### 90.3 [ ] Four approaches, and what each costs
+
+`TODO.md` §16.3 there compares three. A fourth is missing, and it is the one that changes the answer.
+
+| Approach | How it composes | What it costs |
+| :--- | :--- | :--- |
+| **1. Fork** | Copy the repository, edit freely | A merge conflict on every release of this app, for ever. Rejected there, and still rejected |
+| **2. A separate app reading an export** | Two apps, a monthly import | Fails the invoice run: a month-end screen that needs re-importing a diary is the work the trainer already does. Invoices land outside this app's backup and sync |
+| **3. Overlay + an extension point here** | This app ships an empty `registerExtensions()`; the overlay fills it | Works, but the empty hook is dead code in a free app for a paid tier, which §68 forbids and which would have to be argued away |
+| **4. Overlay that owns the entry, and shadows what is stable** | The overlay ships its own `index.html`, which loads its own boot module, which imports this app's boot and then registers its own routes, menu entries and collections | **Recommended.** No hook here, no rule to change, nothing dead in the free app |
+
+**Why 4 beats 3, in one rule: shadow what is stable, seam what churns.** An overlay file that replaces
+one of this app's files costs nothing on a release UNLESS that file changes often, in which case the
+overlay silently misses what changed. So the choice per file is not a matter of taste:
+
+- `index.html` changes rarely — **shadow it**, and the entry problem disappears without a hook here.
+- `app.js` / `appBoot.js` change with every feature — **never shadow**; the overlay imports them.
+- `routeTable.js` gains a line per route, `applicationHeader.js` per menu entry — **seam**, because
+  shadowing either would drift within weeks.
+- `cacheManifest.js` changes with every module — **generate it** (§90.4).
+- `recordSchemas.js` is this app's core — neither; the collection is declared here, once (§90.6).
+
+**And the seam that follows is not new machinery.** This app already registers its own shells through
+`registerShellRender` in [renderRegistry.js](src/modules/common/renderRegistry.js), which exists
+because hand-ordering render calls failed silently. Routes and menu entries getting the same treatment
+is **this app's existing pattern applied twice more**, used by its own routes and its own menu — so it
+is not dead code, it is not for a paid tier, and **§68's first bullet stands unchanged.** That bullet
+already allows the overlay to *"register itself into existing registries"*.
+
+### 90.4 [ ] The precache list becomes generated, and that pays for itself here
+
+A ProPT file missing from [cacheManifest.js](src/sw/cacheManifest.js) is not precached, and the app
+fails in the gym basement — the one place it exists for. The answer is not a seam but a **generator**,
+the way `src/privacy.html`, the icon subset and the glyph baseline are already generated here: a tool
+writes the list, the gate fails when it is stale, and the overlay runs the same tool over its own tree.
+
+**It is worth having with or without a paid tier.** A hand-written list is a rule a person must
+remember, and [tests/unit/test_project_layout.py](tests/unit/test_project_layout.py) exists because
+remembering it failed. Generating it makes the mistake impossible instead of forbidden.
+
+### 90.5 [ ] Money is computed at invoice time, so no event hook is needed
+
+The cancellation rule looks like it needs a hook: *apply the rule when a session is cancelled*. **It
+does not, and building it that way would be worse.**
+
+A side effect at cancellation time writes down a decision that cannot afterwards be re-derived — change
+the rule, or fix a wrong cancellation time, and last month's charge is a number nobody can explain.
+Computing it **at invoice time**, from the session records this app already keeps, makes every charge
+re-computable from the records and auditable against the rule that was in force. The screen that shows
+*"cancelled at 07:10, less than 24 hours, this session is used up"* is then a read, not a write.
+
+**So the overlay never reacts to anything in this app.** No event bus, no hooks, no listeners for a
+paid tier. That is the single biggest reason this app stays clean under approach 4.
+
+### 90.6 [ ] Storage: one collection this app carries and never reads
+
+The invoice must ride in the backup, the Drive sync and the export, or the one record the law requires
+to be kept is the least protected record on the phone. And this app must not interpret it.
+
+**One collection, declared in a numbered schema**, with a fixed envelope and an opaque body:
+
+| Field           | Meaning                                                                          |
+| :-------------- | :------------------------------------------------------------------------------- |
+| `id`            | UUIDv7, as every record here                                                      |
+| `kind`          | namespaced, owned by the overlay — `propt.invoice`, `propt.package`               |
+| `ownerClientId` | which client it concerns, or null, so erasure and the Art. 15 export can find it  |
+| `sealedAt`      | once set, the write layer REFUSES any further change to that record               |
+| `keptUntil`     | an ISO date before which erasure must not touch it                                |
+| `payload`       | opaque JSON: stored, projected, backed up, synced and exported, never read        |
+
+**Two properties this app does not have, and both are right on their own merits:**
+
+1. **Sealed records.** ZDDV-1 article 86(3) requires that a stored invoice cannot be changed or
+   deleted. The star-write layer has no notion of a record that refuses an update.
+2. **Kept by law, and SAID so.** [clientErasure.js](src/data/clientErasure.js) irreversibly anonymises
+   every identifying field of a client; run over an invoice it would destroy a record the law requires
+   to be kept. GDPR article 17(3)(b) exempts exactly that. So erasure must skip records whose
+   `keptUntil` has not passed **and report what it kept and why** — a person asking to be forgotten
+   has to be told what remains. **That is a gap here today, with or without a paid tier.**
+
+**A decision that keeps new personal data out of the free app.** A UPN order needs the payer's street
+and city (`PROPT_IMPLEMENTATION.md` §3.1), and that project assumed this app's client record gains an
+address. **It should not.** The address belongs in the overlay's own record, reached through
+`ownerClientId`, so this app gains no category of personal data it has no use for, and neither its
+consent wording nor [PRIVACY.md](PRIVACY.md) changes for a feature it does not have.
+
+**The cost, named rather than discovered**: a collection the backup carries must be in a NUMBERED
+schema, so this is a schema bump with a real record change behind it — unlike §18.8's container change,
+which deliberately avoided one.
+
+### 90.7 [ ] What is deliberately NOT built here
+
+- **No licence check, no token, no server address.** The lock lives in the paid build alone (§68.1). A
+  check here would be both removable and dishonest.
+- **No transport seam.** Closed there 2026-09-25: an invoice leaves as a file the phone made.
+- **No sync-target seam.** [syncMerge.js](src/data/syncMerge.js) is already pure and takes no view on
+  where a snapshot came from; a hosted tier calls it with its own wire. This line exists so nobody
+  adds one.
+- **Nothing for the multi-trainer tier.** One trainer per install is a decision here
+  ([trainerIdentity.js](src/modules/common/trainerIdentity.js): *"Not a profile, and deliberately not
+  one"*). A client belonging to two trainers is a different data model, not an overlay on this one.
+
+### 90.8 [ ] What Simon decides, and what is already answered
+
+**Answered by this design, needing no ruling:** how the overlay loads (it owns the entry), how it
+appears (the registry pattern this app already uses), how it stays offline (a generated list), and
+whether §68 has to change (**no** — approach 4 adds no hook for a paid tier).
+
+**His to decide:**
+
+1. **The origin fork of §16.6**, which §90.1 answers but cannot close.
+2. **Whether the collection is declared now or when the first invoice is built.** Declaring is cheap;
+   the schema bump is the cost, and it buys nothing until something writes to it.
+3. **Whether erasure's "kept by law" behaviour is built now on its own merits**, ahead of any paid
+   tier. It is a correctness gap in this app today.
+
+**Blocks**: `PROPT_IMPLEMENTATION.md` §8 step 2 there. **Blocked on**: nothing here — decisions 2 and 3
+set the order, not the design.
