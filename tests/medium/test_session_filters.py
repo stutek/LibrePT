@@ -143,3 +143,23 @@ def test_a_filter_matching_nothing_says_it_is_the_filter(page, local_server):
     assert "filter" in empty.lower(), (
         "an empty board must say the filters emptied it, or the trainer goes looking for lost data"
     )
+    # It says which control clears them: the ✕, which carries no word of its own.
+    assert "✕" in empty, empty
+
+
+def test_every_control_in_the_filter_row_is_a_thumb_wide(page, local_server):
+    """The ✕ that clears the filters measured 32 × 31 pixels on a phone, beside chips a thumb can
+    hit. Every control in the row is at least 44 × 44."""
+    page.set_viewport_size({"width": 390, "height": 844})
+    load_with_stub(page, local_server, SESSIONS_STUB)
+    page.wait_for_selector("#sessions-filter-bar")
+    page.locator("#filter-chip-client").select_option(index=1)
+
+    sizes = page.evaluate(
+        """() => [...document.querySelectorAll('#sessions-filter-bar button, #sessions-filter-bar select')]
+             .filter((el) => el.offsetParent && !el.closest('#sessions-filter-calendar'))
+             .map((el) => { const r = el.getBoundingClientRect();
+                            return [el.id, Math.round(r.width), Math.round(r.height)]; })"""
+    )
+    small = [s for s in sizes if s[1] < 44 or s[2] < 44]
+    assert sizes and not small, f"controls smaller than a thumb: {small}"

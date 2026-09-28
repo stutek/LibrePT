@@ -38,6 +38,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   Thursday at 18:00, was put into one clipboard with it.
 - **Before a session starts, the bar above the bottom edge says when it starts**, in the words its
   card uses, and the time moves. It showed a number without a word that did not change.
+- **Every control in the board's filter row is big enough for a thumb**, and the message on an empty
+  board names the ✕ that clears the filters.
 
 ---
 

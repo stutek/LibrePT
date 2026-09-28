@@ -454,7 +454,7 @@ export const sl = {
   filter_prev_month: "Prejšnji mesec",
   filter_next_month: "Naslednji mesec",
   no_sessions_for_filters:
-    "Tem filtrom ne ustreza noben trening. Počisti jih, da vidiš vso ploščo.",
+    "Tem filtrom ne ustreza noben trening. Pritisni ✕ desno od filtrov, da vidiš vso ploščo.",
   no_sessions_scheduled: "Ni načrtovanih treningov.",
   program_not_defined: "Program ni določen",
   no_members_assigned: "Ni udeležencev",

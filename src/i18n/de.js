@@ -464,7 +464,7 @@ export const de = {
   filter_prev_month: "Vorheriger Monat",
   filter_next_month: "Nächster Monat",
   no_sessions_for_filters:
-    "Kein Training passt zu diesen Filtern. Lösche sie, um die ganze Übersicht zu sehen.",
+    "Kein Training passt zu diesen Filtern. Tippe rechts neben den Filtern auf ✕, um die ganze Übersicht zu sehen.",
   no_sessions_scheduled: "Keine Trainings geplant.",
   program_not_defined: "Kein Programm festgelegt",
   no_members_assigned: "Keine Teilnehmer",

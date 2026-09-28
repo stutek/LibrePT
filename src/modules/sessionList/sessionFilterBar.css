@@ -15,6 +15,13 @@
   gap: 6px;
 }
 
+/* A thumb's width and height for every control in the row. The selects get it from the phone rule
+   in index.css; the two buttons did not, and the ✕ that clears the filters measured 32 × 31. */
+.sessions-filter-chips button.chip {
+  min-height: 44px;
+  min-width: 44px;
+}
+
 /* A line of their own on a phone, beside the title above 600px. Squeezing three filters in next to
    the title and the day buttons on a narrow screen was measured at 390px: three wrapped lines and a
    170px header, half the height of a session card. The rule lives on the HEADER (sessionsView.css),
