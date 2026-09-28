@@ -7276,6 +7276,31 @@ is **this app's existing pattern used twice more**, by its own routes and its ow
 dead code, it is not there for a paid tier, and **§68's first bullet stands unchanged.** That bullet
 already allows the overlay to *"register itself into existing registries"*.
 
+**Is copying the source smart? Asked by Simon 2026-09-28.** It is cheap HERE, for a reason that is a
+property of this app rather than a general truth: **there is no bundler.** `python -m build` is
+`copytree` of `src/`, a version stamp, one `<base href>` rewrite and the integrity catalog. So the paid
+build is the same operation this app already performs, with one folder laid on top. If this app ever
+gained a bundler, this answer would have to be asked again.
+
+What makes a copy bad is not the copying, it is losing track of WHICH copy. So it is pinned to a
+commit — `PROPT_IMPLEMENTATION.md` §9 already says "a pinned checkout", and a git submodule is simply
+the mechanism that makes that pin real instead of remembered. **On each new pin the paid build runs its
+own gate**, and the only things that can break are the files it replaced and any registration point
+that changed shape; everything else it imports moves with this app.
+
+**The real cost is operational, not technical, and a paid product has to state it**: a fix made here
+reaches a paying trainer only when the paid build is rebuilt and redeployed. How fast that happens for
+a security fix is a promise ProPT makes, and it belongs in that project rather than in this section.
+**And the MIT notice travels with the copy** — the combined build ships this app's code.
+
+**Two alternatives, rejected with the reason:**
+
+- **Publish this app as an npm package.** There is no `package.json`, no `node_modules` and no bundler
+  here on purpose, and adding them for the benefit of a paid product is exactly what §68 forbids.
+- **Load this app's modules at run time from the free site.** It breaks offline use, breaks the
+  `script-src 'self'` policy in [index.html](src/index.html), breaks the integrity catalog, ties the
+  paid product to the free site staying up, and tells the free site's host which trainers are paying.
+
 ### 90.4 [ ] The precache list becomes generated, and that pays for itself here
 
 A ProPT file missing from [cacheManifest.js](src/sw/cacheManifest.js) is not precached, and the app
