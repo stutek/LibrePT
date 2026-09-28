@@ -6660,6 +6660,27 @@ da vidiš vso ploščo.«; ✕ naj ima velikost za palec; izbrano ime naj se pre
 besedilo je preverjeno na posnetku zaslona. Opaženo na objavljeni `0625bd6`, sl, 390 × 844;
 brez napak v konzoli.
 
+### 80.65 [ ] P3 — Vzorčna obvestila v peskovniku omenjajo stranke in trening, ki jih ni
+
+**Scenarij in koraki:** pritisniti »Razišči z vzorčnimi podatki«, odpreti predal »Obvestila in
+pregled stanja« na dnu zaslona in prebrati kartici »📅 Rezervacija mesta za stranko« in
+»👋 Raziskujete z vzorčnimi podatki«. Nato pritisniti »Poglej vzorčne stranke« in odpreti
+petkov trening »HIIT kondicija« (2026-10-02, 10:00).
+
+**Opaženo:** kartica pravi »Alex Smith je rezerviral mesto za petkov HIIT.« in »Mike Johnson je
+odpovedal mesto za jutri ob 10:00.« V »Imenik strank« ni ne Alexa Smitha ne Mika Johnsona;
+na petkovem HIIT sta Jane in John; jutri (2026-09-29) ni treninga ob 10:00. Druga kartica
+ima naslov »Raziskujete z vzorčnimi podatki« (vikanje), besedilo pod njim pa »Razišči brez
+skrbi« (tikanje), kot vsa druga besedila v aplikaciji.
+
+**Težava in vpliv:** trener, ki spoznava aplikacijo, išče Alexa na petkovem treningu in ga ne
+najde. Sklepa lahko, da rezervacija ni bila shranjena, ali da obvestila ne kažejo resničnega
+stanja. Mešanje vikanja in tikanja v eni kartici deluje nedokončano.
+
+**Predlog:** vzorčno obvestilo naj imenuje stranko in trening, ki sta v peskovniku res, in dan,
+ki se ujema s ploščo; naslov naj bo v tikanju (»Raziskuješ z vzorčnimi podatki«). Opaženo na
+objavljeni `0625bd6`, sl, 390 × 844; brez napak v konzoli.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
