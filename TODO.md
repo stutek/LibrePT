@@ -692,23 +692,24 @@ The Playwright suites drive real end-to-end flows that are documented nowhere. E
 - **[ ] The tier counts in `tests/INDEX.md` are stale**: e2e says 55 files and 253 tests, pytest
   collects 73 and 328; medium 60/349 against 64/442; unit 44/316 against 52/360. A number copied
   into prose is wrong the day after. Next step: drop the counts, or generate them.
-- **[ ] UC1 and README describe a plan pivot the app does not have.** *Pivot / Wipe Plan*, *Undo
-  Pivot* and the three placeholder cards (*Mobility & Core Flow*, *Machine Circuit/Giant Set*,
-  *Freestyle Block*): nothing in `src/` implements them. **Blocks** the UC1 rewrite and README's
-  feature list: build it, or remove it from both? Needs Simon's ruling.
-- **[ ] UC1 step 2 and UC4 step 8 have the app read Google Calendar guests.** The app holds only the
-  free/busy scope (`src/data/calendarFreeBusy.js`), which cannot read guests; attendance comes from
-  the app's own invitations and RSVP. **Blocks** rewriting both steps against the RSVP flow.
-- **[ ] UC2 *Apply & Resolve* changes a routine every client shares.** Routines have no client, and
-  the dialog writes into the first routine holding the exercise (`resolveAdjustmentTargets` in
-  `src/modules/plans/planAdjustments.js`), so Jane's adjustment moves the plan of everyone on that
-  routine; UC2 says "updates Jane's template". **Blocks** UC2's wording and any per-client plan work.
-  The new test pins that exactly one routine row changes, which holds under either answer.
-- **[ ] The last save is lost when the page closes at once.** Saving is write-behind
-  (`src/data/writeQueue.js`); nothing flushes pending writes on `visibilitychange` or `pagehide`. In
-  a test, a note submitted and the page left in the same moment was gone after a reload; waiting 1 s
-  kept it. On a phone: the app swiped away right after a tap. Not measured on a device. Next step: a
-  flush when the page is hidden, after the backup-encryption work releases `src/data/`.
+- **[~] Adapting a plan: during the session, after it, and for the next one — ruled 2026-09-28
+  (Simon).** *Pivot / Wipe Plan* and its placeholder cards were never asked for: nobody wipes a plan.
+  What is wanted: when a plan has to change — something unexpected, or simply for better results —
+  the trainer logs on the changed steps with as few taps as possible during the session, and
+  afterwards edits notes and plans as a retrospective and adjusts future plans. Find the simplest way
+  to support it. The pivot text leaves UC1 and README with that design. Proposal being discussed:
+  a client always trains from their OWN copy of the plan, the routine is only where a copy starts.
+- **[~] UC2 *Apply & Resolve* changes a routine every client shares — ruled 2026-09-28 (Simon): on a
+  change to something shared, detect the client it is for and split off a copy for them.** Routines
+  have no client; the dialog writes into the first routine holding the exercise
+  (`resolveAdjustmentTargets` in `src/modules/plans/planAdjustments.js`). A scheduled session holds
+  ONE `routineId` for all participants, and the only per-client owned plan is a planning draft in
+  `history`, which a session does not read when it starts — so a split-off copy would not reach the
+  gym floor until a session does. Same design round as the item above.
+- UC1 step 2 and UC4 step 8 (Google Calendar guests): resolved by §68.3 — UC4 is gone, UC1 says
+  participants are assigned or answer the session's invitation.
+- The last save lost when the page closes at once: fixed — a closing page with a write unfinished
+  keeps a copy in localStorage, and the next start takes it (`src/data/unsavedStateJournal.js`).
 
 ### 6.3 [x] The bottom session bar renders nothing — decided: restore, active state only
 
@@ -4883,6 +4884,13 @@ Calendar half, §1.6 lost its external half, §45.12 closed.
    [overlapLanes.js](src/domain/overlapLanes.js),
    [erasureChecklist.js](src/data/erasureChecklist.js) and
    [docs/GOOGLE_CLOUD_SETUP.md](docs/GOOGLE_CLOUD_SETUP.md).
+
+**Steps 1–5 done 2026-09-28**, with the stale root `use_case.md` index that still listed UC3/UC4.
+The gym-calendar item of the erasure checklist is now manual for good (`reach: "never"`), and the
+generic `busy` seam in `scheduleConflicts.js` stays for whatever supplies external busy times.
+**Left for Simon, in the Google Cloud console** (the repository cannot do it): disable the Google
+Calendar API in Part A's project, and remove `calendar.freebusy` from the consent screen's scopes
+(docs/GOOGLE_CLOUD_SETUP.md A2 and the scope step now describe Drive only).
 
 **Not part of this, deliberately**: the canary credential is granted `calendar.freebusy` beside
 `drive.appdata` (§1.5.1). Narrowing it means running the consent flow again, so it waits for the
