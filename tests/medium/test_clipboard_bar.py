@@ -115,6 +115,30 @@ def test_past_the_planned_end_the_bar_says_so_in_words(page, local_server):
     assert "signed:" not in duration.inner_text(), "the word replaces the minus sign"
 
 
+def test_a_session_not_yet_started_says_when_it_starts(page, local_server):
+    """Opened on Monday night, a Friday session put a bare "35:07:25" in the bar: a count to an end
+    the trainer was not asking about, which did not move. Before its start the bar says when it
+    starts, in the words the session's card uses."""
+    session = (
+        _session_js(MERGED)
+        .replace('"started": true', '"started": false')
+        .replace('"startTime": Date.now()', '"startTime": null')
+        .replace(
+            '"startDate": "2026-08-08T09:00:00.000Z"',
+            '"startDate": Date.now() + 4 * 86400000',
+        )
+        .replace(
+            '"endDate": "2026-08-08T11:00:00.000Z"',
+            '"endDate": Date.now() + 4 * 86400000 + 7200000',
+        )
+    )
+    assert '"started": false' in session and "Date.now() + 4 * 86400000," in session
+    load_with_stub(page, local_server, _bar_stub(session))
+
+    duration = page.locator("#clipboard-bar-duration").inner_text()
+    assert duration == "Starts in hm:345600", duration
+
+
 def test_a_merged_clipboard_names_every_session_it_covers(page, local_server):
     """The case the app is built for: two overlapping slots are ONE clipboard. Both titles must
     appear — a bar built from `titles[0]` would silently drop the second booking, and the trainer

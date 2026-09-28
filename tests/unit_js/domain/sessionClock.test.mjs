@@ -254,6 +254,22 @@ test("a session only staged ages out against its slot", () => {
   assert.equal(clock.isCachedSessionStale(staged, Date.parse("2026-08-07T20:01:00")), true);
 });
 
+test("before its start, a session counts to its start; once started or past it, not", () => {
+  const now = Date.parse("2026-09-28T23:52:00");
+  const friday = {
+    started: false,
+    sourceSession: { startDate: new Date(Date.parse("2026-10-02T10:00:00")) },
+  };
+
+  assert.equal(clock.secondsUntilScheduledStart(friday, now), (82 * 60 + 8) * 60);
+  assert.equal(clock.secondsUntilScheduledStart({ ...friday, started: true }, now), null);
+  assert.equal(clock.secondsUntilScheduledStart(friday, Date.parse("2026-10-02T10:01:00")), null);
+  assert.equal(
+    clock.secondsUntilScheduledStart({ started: false, sourceSession: null }, now),
+    null,
+  );
+});
+
 test("a staged session whose plan is being written up after its slot is kept", () => {
   // The morning session recorded in the afternoon: the slot ended hours ago, but the trainer edited
   // the plan a minute ago. The window runs from that edit, not from the slot.

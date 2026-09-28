@@ -60,6 +60,16 @@ export function computeActiveSessionCountdown(activeSession, now = Date.now()) {
   return { seconds: elapsedSeconds(activeSession, now), isCountdown: false, isOvertime: false };
 }
 
+// Seconds until a session nobody has started is scheduled to begin. Null once it is started, when
+// it has no scheduled start, and once that start has passed: before its start, what a trainer asks
+// of a session is when it starts, not how long until its end.
+export function secondsUntilScheduledStart(activeSession, now = Date.now()) {
+  if (activeSession?.started) return null;
+  const startMs = toEpochMs(activeSession?.sourceSession?.startDate);
+  if (startMs === null || startMs <= now) return null;
+  return Math.round((startMs - now) / 1000);
+}
+
 // Signed milliseconds between the actual start and the scheduled one (positive = started late).
 // Null when there is nothing to compare against: a planning draft carries no dates at all, and an
 // ad-hoc clipboard has no source session (docs/DATA_MODEL.md §7).

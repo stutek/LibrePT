@@ -36,6 +36,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 - **A session more than two days ahead opens on its own date.** A Friday session opened on a Monday
   counted down to Wednesday, and every future session at the same hour, such as each Tuesday and
   Thursday at 18:00, was put into one clipboard with it.
+- **Before a session starts, the bar above the bottom edge says when it starts**, in the words its
+  card uses, and the time moves. It showed a number without a word that did not change.
 
 ---
 

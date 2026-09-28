@@ -24,11 +24,17 @@
 //   navigateToPath, clipboardPath()
 // }
 
-import { computeActiveSessionCountdown } from "../../domain/sessionClock.js";
+import {
+  computeActiveSessionCountdown,
+  secondsUntilScheduledStart,
+} from "../../domain/sessionClock.js";
 import { countedText } from "../../i18n/plural.js";
 import { renderMarkupOnce } from "../common/dom.js";
 
 let deps = null;
+// A session not yet started has no session timer of its own (sessionTimers.js starts one on Start),
+// so without this the bar's number was drawn once and stood still.
+let unstartedTick = null;
 
 export function initSessionBar(d) {
   deps = d;
@@ -106,13 +112,39 @@ export function renderClipboardBar() {
   updateSessionBarTimer();
 }
 
+// Ticks the bar while the clipboard holds a scheduled session nobody has started; stops otherwise.
+// Every 30 seconds, because the bar says minutes before the start.
+function keepUnstartedBarTicking(activeSession) {
+  const unstarted =
+    !!activeSession &&
+    !activeSession.started &&
+    !activeSession.sourceSession?.isPlanning &&
+    !!activeSession.sourceSession?.startDate;
+  if (unstarted && !unstartedTick) unstartedTick = setInterval(updateSessionBarTimer, 30000);
+  if (!unstarted && unstartedTick) {
+    clearInterval(unstartedTick);
+    unstartedTick = null;
+  }
+}
+
 // What the timer MEANS — a countdown to the scheduled end, or an elapsed count-up once there is no
 // live schedule left to count down — is decided by computeActiveSessionCountdown, shared with the
 // clipboard title bar and the dashboard card so the three can never disagree (domain/sessionClock.js).
 export function updateSessionBarTimer() {
   const activeSession = deps.getActiveSession();
+  keepUnstartedBarTicking(activeSession);
   if (!activeSession) return;
   const durationEl = document.getElementById("clipboard-bar-duration");
+  const untilStart = secondsUntilScheduledStart(activeSession);
+  if (untilStart !== null) {
+    // Said as the session's card says it. The dashboard card timers below belong to a started
+    // clipboard, so they are left alone.
+    if (durationEl) {
+      durationEl.textContent = `${deps.t("starts_in")} ${deps.formatDurationHourMin(untilStart)}`;
+      durationEl.classList.remove("overtime");
+    }
+    return;
+  }
   // This bar keeps second-level precision (a separate surface from the dashboard's session-card
   // status lines); .session-card-timer is that dashboard card's own live timer and must
   // render "01h 32m", same as its non-launched countdown states.
