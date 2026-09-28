@@ -3,7 +3,7 @@
 A use case in `use_cases/` is the specification a trainer's workflow is built against. Five of the
 nine had a *Spec ↔ test traceability* table; four did not, and those four were the ones where the
 specification had drifted furthest from the app: UC1 described a plan-pivot button and a Next
-Exercise button that do not exist, and UC4 had the app reading Google Calendar guest lists that its
+Exercise button that do not exist, and had the app reading Google Calendar guest lists that its
 own permission scope cannot read. A promise nobody has to point at a test for is a promise nobody
 checks against the app.
 

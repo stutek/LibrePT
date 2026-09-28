@@ -19,18 +19,11 @@
 
 import assert from "node:assert/strict";
 import { before, describe, test } from "node:test";
-import { GOOGLE_CALENDAR_FREEBUSY_SCOPE } from "../../src/data/calendarFreeBusy.js";
 import { GOOGLE_DRIVE_SCOPE } from "../../src/data/driveSyncConfig.js";
 import { resolveAccessToken, skipReason } from "./_credentials.mjs";
 
 const accessToken = await resolveAccessToken();
 const TOKENINFO_ENDPOINT = "https://oauth2.googleapis.com/tokeninfo";
-
-// Imported from the shipping module now that src/data/calendarFreeBusy.js exists, so the scope the
-// canary checks and the scope the app will ask for cannot drift apart. It is not yet in the grant
-// googleAuth.js requests — the occupancy feature adds a scope in the change that ships it — but the consent
-// screen it is checked against already carries it.
-const CALENDAR_FREEBUSY_SCOPE = GOOGLE_CALENDAR_FREEBUSY_SCOPE;
 
 // Every one of these would keep the Drive tests green while reaching far beyond the hidden per-app
 // folder production is bounded to.
@@ -61,14 +54,10 @@ describe("Granted OAuth scopes", { skip: skipReason(accessToken) }, () => {
     granted = (payload.scope || "").split(" ").filter(Boolean);
   });
 
-  test("the token carries the app's own Drive and Calendar scopes", () => {
+  test("the token carries the app's own Drive scope", () => {
     assert.ok(
       granted.includes(GOOGLE_DRIVE_SCOPE),
       `grant is missing the app's Drive scope ${GOOGLE_DRIVE_SCOPE}; got ${granted.join(", ")}`,
-    );
-    assert.ok(
-      granted.includes(CALENDAR_FREEBUSY_SCOPE),
-      `grant is missing ${CALENDAR_FREEBUSY_SCOPE}; got ${granted.join(", ")}`,
     );
   });
 

@@ -24,7 +24,7 @@
 <h2>2. Cloud Synchronization &amp; Data Security (Optional Cloud Storage &amp; Backups)</h2>
 <p>LibrePT's optional Google integration is split by what the data actually is, not bundled into one generic &quot;cloud sync&quot;:</p>
 <ul>
-<li><strong>Scheduling data (session times, room, client RSVP)</strong> is planned to live in <strong>your own Google Calendar</strong>, read and written directly via your own OAuth-authorized account, as the authoritative record for that data. <strong>Not built yet</strong> — LibrePT currently has no Calendar integration.</li>
+<li><strong>Scheduling data (session times, room, client RSVP)</strong> is stored on your device with the rest of your records. LibrePT does not connect to Google Calendar.</li>
 <li><strong>App data</strong> (clients, routines, session notes, logged sets/reps) can optionally sync across your own devices via <strong>Google Drive's <code>appDataFolder</code></strong> — a storage area private to the LibrePT app inside your own Drive, invisible in your normal Drive file browser and inaccessible to other apps. <strong>Built</strong>: this covers every collection today, not only &quot;no Calendar equivalent&quot; data, since there is no Calendar-sourced overlap to exclude yet — that will narrow once Calendar integration exists. Requires the deployment you're using to have its own Google OAuth client id configured; a deployment without one shows &quot;not configured&quot; rather than a broken connect button.</li>
 <li><strong>Other trainers sharing a gym/room</strong> seeing only busy/free time blocks (via Calendar free/busy), never client names, notes, or session detail, is likewise part of the not-yet-built Calendar integration.</li>
 </ul>

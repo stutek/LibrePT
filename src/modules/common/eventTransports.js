@@ -9,8 +9,8 @@
 // out of the app is somebody's messaging app, and which ones exist depends on the device (`share`
 // only on mobile), on the recipient (no phone number, no SMS) and on the session. Written as
 // branches at the call site, that check would be repeated in every surface that sends anything, and
-// each copy would drift. Written here, a new transport — a scannable code, a Google Calendar
-// invitation once the scope exists — is a new entry in one list.
+// each copy would drift. Written here, a new transport — a scannable code, say — is a new entry in
+// one list.
 //
 // **Platform calls are injected, never reached for.** `navigator.share`, `clipboard.writeText` and
 // opening a URL are supplied as a `platform` object, so these are testable without a browser and

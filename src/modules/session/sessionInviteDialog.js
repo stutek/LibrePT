@@ -1,10 +1,8 @@
 // src/modules/session/sessionInviteDialog.js
-// Dialog shown after a PT assigns new participants to a session — the PT-side
-// counterpart to a client self-subscribing via the Google-hosted booking page
-// (use_cases/uc4_client_self_subscription.md). Offers each newly-assigned client a calendar
-// invite: a downloadable .ics plus a prefilled mailto compose to send it in. LibrePT has no
-// backend/SMTP relay, so this is the honest, no-network equivalent of Google
-// Calendar's own invite email.
+// Dialog shown after a PT assigns new participants to a session. Offers each newly-assigned client
+// a calendar invite: a downloadable .ics plus a prefilled mailto compose to send it in. LibrePT
+// has no backend/SMTP relay and connects to no calendar, so the .ics is a file the app writes
+// itself.
 //
 // **The invite also carries a link the client can actually answer** (a confirm link). An
 // `.ics` only collects an acceptance from a calendar client that speaks iMIP, which is not what a gym

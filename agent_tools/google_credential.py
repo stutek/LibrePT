@@ -62,13 +62,10 @@ DRIVE_ABOUT_ENDPOINT = (
     "https://www.googleapis.com/drive/v3/about?fields=user/emailAddress"
 )
 
-# Mirrors of shipping constants, not new decisions: GOOGLE_DRIVE_SCOPE in src/data/driveSyncConfig.js
-# and CALENDAR_FREEBUSY_SCOPE in tests/live/tokenScopes.live.test.mjs. A unit test asserts the mirror
-# still matches, because a drift here mints a credential the canary then rejects.
-REQUIRED_SCOPES = (
-    "https://www.googleapis.com/auth/drive.appdata",
-    "https://www.googleapis.com/auth/calendar.freebusy",
-)
+# A mirror of a shipping constant, not a new decision: GOOGLE_DRIVE_SCOPE in
+# src/data/driveSyncConfig.js. A unit test asserts the mirror still matches, because a drift here
+# mints a credential the canary then rejects. Google Calendar is not part of LibrePT (it is in PRO).
+REQUIRED_SCOPES = ("https://www.googleapis.com/auth/drive.appdata",)
 
 # Each would keep the Drive tests green while reaching far beyond the hidden per-app folder
 # production is bounded to. Kept in step with tokenScopes.live.test.mjs's OVERBROAD_SCOPES.

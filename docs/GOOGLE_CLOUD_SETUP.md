@@ -27,7 +27,7 @@ Two independent setups. Either works without the other.
 
 | | Who it serves | Credential | Where it lives |
 | :--- | :--- | :--- | :--- |
-| **Part A** — Production OAuth client | Trainers connecting their own Drive and Calendar | OAuth **client ID** — public, not a secret | Committed in `src/data/driveSyncConfig.js` |
+| **Part A** — Production OAuth client | Trainers connecting their own Drive | OAuth **client ID** — public, not a secret | Committed in `src/data/driveSyncConfig.js` |
 | **Part B** — CI canary | The pipeline, checking Google has not changed their API | A real account's OAuth **refresh token** — genuinely secret | One GitHub Actions *secret*, `GOOGLE_LIVE_CREDENTIALS` |
 | **Part B** — its Desktop client (B1) | Minting that refresh token, and nothing else | Client **ID + secret** — the secret is not a real one (B1), but it travels with the token | Cloud Console, **and** `.private/client_secret_*.json` if you downloaded it there. Not in version control |
 
@@ -82,9 +82,7 @@ Google's signup anti-abuse blocked the first attempt at this account, rate-limit
 which is why an earlier revision of this file said not to bother retrying. Retrying worked.
 
 The exposure is bounded whichever account is used — the
-grant is `drive.appdata` (a hidden folder holding one probe file, unreadable by any other app) plus
-`calendar.freebusy` (busy/free intervals only, never an event body, and the suite asserts shape
-without logging it).
+grant is `drive.appdata` (a hidden folder holding one probe file, unreadable by any other app).
 
 What no account of either kind can cover is the CONSENT flow, since Google fingerprints and blocks
 automated browsers on `accounts.google.com`. That check stays manual (A8), and it is run as
@@ -92,9 +90,6 @@ automated browsers on `accounts.google.com`. That check stays manual (A8), and i
 personal account through a consent flow for no gain: A8 asks whether the consent screen works for an
 ordinary user, and a throwaway answers that as well as a person's inbox does. The account already
 exists and already carries the only stored refresh token, so nothing new is exposed by it.
-
-Revisit only when the planned room-occupancy feature (see [TODO.md](../TODO.md)) needs a genuine second calendar identity — "PT A
-sees PT B as busy" cannot be tested from one account.
 
 ## Part 0 — Forward the admin inbox
 
@@ -141,12 +136,13 @@ Signed in as `admin@` throughout.
 
 **Create**, then confirm it is the selected project in the dropdown.
 
-## A2. Enable two APIs
+## A2. Enable one API
 
 **APIs & Services → Library** — search, open, **Enable**, one at a time:
 
 - **Google Drive API**
-- **Google Calendar API**
+
+Google Calendar is not part of LibrePT (it belongs to the PRO package), so its API stays disabled.
 
 **Nothing else.** Every enabled API is a permanent cost: attack surface, a line on the consent screen
 a nervous trainer reads before granting, and more for Google to review at verification. Analytics and
@@ -236,40 +232,20 @@ Anyone not on this list gets `403: access_denied`. The cap is 100.
 
 ## A5. Data Access — scopes
 
-**Data Access** (older console: *Scopes*) → **Add or remove scopes** → tick exactly two:
+**Data Access** (older console: *Scopes*) → **Add or remove scopes** → tick exactly one:
 
 | Scope | Grants |
 | :--- | :--- |
 | `https://www.googleapis.com/auth/drive.appdata` | This app's hidden per-app folder only — invisible in the trainer's Drive UI and picker, unreachable by any other app's grant |
-| `https://www.googleapis.com/auth/calendar.freebusy` | Busy intervals only — structurally cannot read an event's title, attendees, or location |
 
 **Update** → **Save**.
 
-⚠️ **Never widen these.** Do not add `drive`, `drive.file`, `drive.readonly`, `calendar`,
-`calendar.readonly`, or `calendar.events`. The broad `drive*` scopes are Google's *restricted* tier,
-which requires a paid annual third-party security assessment (CASA); these two avoid that tier
-entirely. `calendar.freebusy` is also what makes "no PT's session detail leaks to another"
-enforced by Google rather than by our own restraint.
+⚠️ **Never widen this.** Do not add `drive`, `drive.file`, `drive.readonly`, or any `calendar`
+scope. The broad `drive*` scopes are Google's *restricted* tier, which requires a paid annual
+third-party security assessment (CASA); `drive.appdata` avoids that tier entirely.
 
 The sensitivity label the console shows beside each scope is authoritative — trust it over any list,
 including this one.
-
-**Scopes deliberately NOT requested yet.** Verification asks for a working demo justifying each
-scope, so an unused one is a rejection risk. Adding a scope later does force existing users to
-re-consent — cheap now with no users, and by the time it is not, a verification pass is happening
-anyway. Add each in the same change that ships its feature:
-
-| Scope | Add when |
-| :--- | :--- |
-| `calendar.app.created` | LibrePT creates session events in a calendar it owns. Narrow by construction — the app can only touch calendars it created, so it stays blind to the trainer's personal calendar (the Calendar analogue of `drive.appdata`). |
-| `calendar.events` | Only if writing to a gym's *existing* shared calendar, which `app.created` cannot reach. Broad ("view and edit events on all your calendars") — avoid if `app.created` suffices. |
-| `calendar.calendarlist.readonly` | Only for a "pick from your calendars" dropdown. The connected-calendars design pastes a calendar ID instead, which needs no scope at all — a cheap reason to keep pasting. |
-
-Note what does *not* need a new scope: querying any number of gym or room calendars. The grant is
-account-wide and the **request** names the calendar IDs, so `freeBusy.query` covers the whole
-occupancy feature. What decides whether a given calendar answers is its sharing ACL, not our scope —
-a gym calendar shared at "See only free/busy (hide details)" returns busy blocks with no titles,
-attendees or locations, enforced by Google rather than by our restraint.
 
 ## A6. Create the client
 
@@ -342,8 +318,7 @@ A service account can therefore read the Drive API and can never write to it. Si
 permanently empty, download, update and the `modifiedTime` check go with the upload — the canary
 would have been one call on its empty-result path. So: a real account's refresh token, in a GitHub
 Actions secret. The cost is one long-lived credential; what bounds it is the grant itself —
-`drive.appdata` reaches one hidden folder holding one probe file, `calendar.freebusy` returns busy
-intervals and never an event body.
+`drive.appdata` reaches one hidden folder holding one probe file.
 
 **Do B0 first.** Skipping it turns this into a weekly manual chore forever.
 
@@ -456,20 +431,20 @@ What happens, in order, so nothing below is a surprise:
    not the one in `driveSyncConfig.js`.
 2. It asks for **Client secret**. *Nothing appears as you type or paste* — that is deliberate, not a
    hung prompt. Press Enter.
-3. It lists the two scopes it is about to request, then opens your browser. If no browser opens, the
+3. It lists the scope it is about to request, then opens your browser. If no browser opens, the
    URL is printed above — paste it yourself, or re-run with `--no-browser`.
 4. **In the browser: pick `test@`.** If it signs you in as someone else automatically, use *Use
    another account*. The account that approves here is the account the canary runs as forever.
 5. You will see an **unverified app** warning. That is expected until OAuth verification (see
    *Before public launch*); continue via **Advanced → Go to LibrePT (unsafe)**.
-6. Tick **exactly the two scopes listed** — see the warning below — and **Continue**.
+6. Tick **exactly the scope listed** — see the warning below — and **Continue**.
 7. The browser lands on a blank page reading *Authorization complete. You can close this tab.* The
    terminal takes it from there: it exchanges the code, checks the grant, and writes
    `.private/google-live.json`.
 8. It prints the file it wrote, the scopes actually granted, and a **rotation date**. Put that date
    in your calendar now — nothing else will remind you (see B6).
 
-⚠️ **Grant exactly the two scopes it lists and nothing else.** The tool checks the grant against
+⚠️ **Grant exactly the scope it lists and nothing else.** The tool checks the grant against
 `tokeninfo` before writing, and refuses on anything broader — a stray `drive` scope would keep every
 Drive test green while production's narrow `drive.appdata` was broken, which is a canary reporting
 confidence it has not earned. `tests/live/tokenScopes.live.test.mjs` enforces the same rule on every
@@ -531,7 +506,7 @@ is always safe.
 | `Access blocked: LibrePT has not completed the Google verification process` | Expected while unverified | **Advanced → Go to LibrePT (unsafe)** |
 | `403: access_denied` after choosing an account | The consent screen is back in *Testing* and this account is not on A4's list | Publish it (B0), or add the account in A4 |
 | `Google returned no refresh token` | This client already holds a live grant for this account, so Google reissued an access token only | Revoke at <https://myaccount.google.com/permissions> and re-run |
-| `The grant does not match what production asks for` | You ticked more (or fewer) than the two scopes | Re-run and tick exactly two; revoke first if Google stops asking |
+| `The grant does not match what production asks for` | You ticked more than the one scope | Re-run and tick exactly that one; revoke first if Google stops asking |
 | `Cannot listen on 127.0.0.1:8765` | Something else holds the port | `--port 9000`, and it is used for that run only |
 | `No response within 300s` | The browser tab was closed, or consent was never completed | Re-run; nothing was written |
 | Terminal appears stuck at `Client secret:` | It is waiting — the secret is deliberately not echoed | Paste and press Enter |
@@ -590,8 +565,8 @@ there, along with the `librept-test` GCP project, the `librept-canary` service a
 | `invalid_grant` from the token exchange | The refresh token was revoked, changed, or unused for six months — repeat B2–B4 |
 | *"credential is due for rotation"* before the live suite | Working as intended — see B7. Repeat B2–B4 |
 | `403` on `createSyncFile` only, list calls fine | The credential is a service account, not a real account — see this part's preamble |
-| `403 ACCESS_TOKEN_SCOPE_INSUFFICIENT` | Drive or Calendar API not enabled in Part A's project (A2) |
-| `tokeninfo` test fails on a broader scope | B2 — re-consent with only the two scopes |
+| `403 ACCESS_TOKEN_SCOPE_INSUFFICIENT` | Drive API not enabled in Part A's project (A2) |
+| `tokeninfo` test fails on a broader scope | B2 — re-consent with only the Drive scope |
 | Suite reports *skipped* after credential installation | The secret is empty or malformed JSON; treat it as a broken canary |
 
 **What this canary does and does not cover.** It authenticates as a test identity, so it verifies

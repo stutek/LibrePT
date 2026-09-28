@@ -24,8 +24,8 @@ name: Live Google API Canary
 # **So the trade is explicit rather than hidden**: one long-lived credential exists, in this
 # repository's Actions secrets, and the OAuth app's *Testing* publishing status expires it every 7
 # days (see the runbook — publishing to In production ends that). Everything else about the design
-# is aimed at bounding it: the grant is `drive.appdata` (one hidden folder, one probe file) plus
-# `calendar.freebusy` (busy intervals, never an event body), it is never echoed into a log, and
+# is aimed at bounding it: the grant is `drive.appdata` (one hidden folder, one probe file), it
+# is never echoed into a log, and
 # there is no `pull_request_target` trigger — the standard way a public repository hands its
 # secrets to untrusted fork code.
 
@@ -50,7 +50,7 @@ jobs:
   live-google-canary:
     # NOT named "Stage N · …" — that prefix is how pipeline_gates.py binds a job to a local pipeline
     # stage and enforces stage ordering. This job belongs to no stage.
-    name: Live · Google Drive & Calendar Contract
+    name: Live · Google Drive Contract
     runs-on: ubuntu-latest
     # Forks do not run scheduled workflows, but they can run workflow_dispatch — and a fork holds no
     # copy of this repository's secrets, so the run would fail confusingly rather than skip.

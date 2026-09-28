@@ -16,7 +16,7 @@ tags:
 
 This use case specifies how the Personal Trainer (PT) moves across their scheduled sessions on the
 dashboard and how every screen is addressable by a clean, shareable URL. It documents behaviour
-the Playwright suite already drives end-to-end but that UC1–UC4 did not previously specify — most
+the Playwright suite already drives end-to-end but that UC1 and UC2 did not previously specify — most
 notably the **session timeline**, each card's **status line** (§ 3), and the **deep-link router**.
 See also the deep-link routing overview in
 [README.md](../README.md) (§ *Deep-Linkable Clean URLs*).
@@ -106,14 +106,12 @@ exclusive states, so the PT reads a card's state at a glance without opening it:
 
 Client assignment is not only client-initiated: the card's Edit button opens the same
 participant-assignment form used to create a session, letting the PT check clients directly onto
-`participants` — this complements, and does not replace, the Google-hosted self-subscription flow
-([UC4](uc4_client_self_subscription.md)).
+`participants`.
 
 - On save, any **newly** assigned participant (diffed against the session's prior `participants`,
   so re-saving unchanged assignments never re-prompts) triggers a "Send calendar invites" dialog.
 - LibrePT has no backend/SMTP relay, so a client is offered a downloadable `.ics` file plus a
-  prefilled `mailto:` compose to send it in — not an automated send like UC4's Google-triggered
-  invite email.
+  prefilled `mailto:` compose to send it in.
 - A client with no email on record gets a disabled "Send invite" affordance with a tooltip, the
   same fallback used elsewhere for a missing email — assignment itself is never blocked on it.
 
@@ -234,7 +232,6 @@ not-found view (`#view-error`) *inside* the content area:
 
 - **[UC1 — Gym-Floor Clipboard](uc1_gym_floor_clipboard.md)**: this timeline is where the PT **launches** the clipboard UC1 specifies; the deep links in § 4 address that clipboard down to the focused card.
 - **[UC2 — Asynchronous Plan Adjustments](uc2_async_plan_adjustments.md)**: the Pending Review deck reviewed at the desk is its own view (§ 3), reachable from the ☰ menu — it was part of this same dashboard before an earlier split moved it out.
-- **[UC4 — Client Self-Subscription](uc4_client_self_subscription.md)**: bookings surfaced in the timeline originate from the self-subscription flow.
 
 > **Closed 2026-07-27.** Sessions now carry a real `startDate` (schema 3), and
 > `/sessions/{YYYY-MM-DD}` resolves to any date, not just one of four relative buckets — the gap

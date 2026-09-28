@@ -785,9 +785,8 @@ into a backup file only at export time. That boundary is the whole point of it: 
 inside the database would be replaced by the very restore it exists to filter.
 
 **What erasure cannot reach** is itemised for the trainer rather than glossed over
-([erasureChecklist.js](../src/data/erasureChecklist.js)): the gym calendar (reachable on the Google
-grant the app already asks for — automatable once Google Calendar integration lands), sent mail and SMS (never reachable —
-composed in the trainer's own client), backup files already written, and the signed consent form,
+([erasureChecklist.js](../src/data/erasureChecklist.js)): the gym calendar (LibrePT connects to no
+calendar), sent mail and SMS (never reachable — composed in the trainer's own client), backup files already written, and the signed consent form,
 which must deliberately be **kept**.
 
 ---

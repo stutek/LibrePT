@@ -2,10 +2,10 @@
 // Single responsibility: carry the HTTP status alongside the message, and answer the one
 // question every caller actually asks — "is the GRANT gone, or was this request merely bad?"
 //
-// Extracted when calendarFreeBusy.js became the second such client. The predicate below is not
-// Drive-specific in anything but its old name: an access token dies the same way whichever API
-// notices, so a second copy would only create the opportunity for the two to disagree about what
-// counts as "reconnect" — a disagreement that surfaces as a trainer tapping Sync forever.
+// The predicate below is not Drive-specific in anything but its old name: an access token dies the
+// same way whichever Google API notices, so a second client must share it rather than copy it — two
+// copies could disagree about what counts as "reconnect", which surfaces as a trainer tapping Sync
+// forever.
 //
 // Injected dependencies: none.
 

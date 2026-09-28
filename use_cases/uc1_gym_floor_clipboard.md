@@ -182,12 +182,12 @@ graph LR
 
 ### 1. Preconditions
 - The session start time is reached.
-- Participants have self-subscribed to the class slot via Google Calendar.
+- The participants are on the session: assigned by the PT, or added by answering the session's invitation.
 - The PT has opened the app on their mobile device.
 
 ### 2. Main Flow of Events
 1. **Initialize Session**: The PT selects the scheduled session slot from their dashboard.
-2. **Attendance Check**: The PT reviews the subscriber list fetched from Google Calendar, confirms attendees, and taps **Open in Clipboard**.
+2. **Open the Clipboard**: The PT taps the session card, which opens the clipboard with the session's participants.
 3. **Lock Clipboard Workspace**: The system opens the tracking dashboard, **locking participant tabs** strictly to the checked-in clients.
 4. **Session Orchestration & Single-Exercise Tracking**:
    - **Sub-Second Tab Switch**: Tapping a participant's name (`[ Jane ]`, `[ John ]`) swaps the active view in under 50ms.
@@ -233,4 +233,3 @@ graph LR
 | A start off schedule offers the new time; declining changes nothing; counts up after the end | [test_session_start_time_adjust.py](../tests/e2e/test_session_start_time_adjust.py) |
 | Completing stamps the booking completed, with its duration | [test_session_status_line.py](../tests/e2e/test_session_status_line.py) |
 | Plan pivot and placeholder cards | **Not built** — nothing in `src/` implements them; the question is open in TODO.md. |
-| Attendance read from the Google Calendar guest list | **Not built** — the app holds only the free/busy scope, which cannot read guests; attendance comes from its own invitations. |

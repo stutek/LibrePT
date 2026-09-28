@@ -1,7 +1,7 @@
 // src/domain/scheduleConflicts.js — is this slot a clash, or is it the normal gym-floor case?
 // Single responsibility: given one slot the trainer is about to save, say which
 // already-known commitments it collides with and WHICH KIND of collision each one is. Pure — the
-// form owns the warning, and the calendar client owns fetching the busy intervals.
+// form owns the warning, and whoever supplies external busy intervals owns fetching them.
 //
 // **An overlap is not automatically a conflict, and getting that backwards would make the warning
 // worthless.** Two of this trainer's sessions running at the same time IN THE SAME PLACE is a
@@ -13,14 +13,12 @@
 //
 // **Silence when we do not know the place, not a guess.** A blank location means the trainer never
 // filled the field in, which is common; treating unknown as "somewhere else" would warn on most of
-// the merged case. This is the opposite of the choice `calendarFreeBusy.js` makes about an unreadable
-// room, and deliberately so: there, the unknown is a room a DIFFERENT trainer may be occupying and
-// the default action books over them; here the unknown is the trainer's own field, and the default
-// action is a flow the app supports.
+// the merged case. The unknown here is the trainer's own field, and the default action is a flow
+// the app supports.
 //
-// **External busy intervals come in as data, not as Google.** `busy` is whatever the trainer's own
-// calendar says they are already committed to — read via `data/calendarFreeBusy.js` today, and via
-// whatever Microsoft's equivalent turns out to be later. Nothing in here knows which.
+// **External busy intervals come in as data.** `busy` is whatever an external calendar says the
+// trainer is already committed to. LibrePT itself connects no calendar and passes none; nothing in
+// here knows which calendar it would be.
 //
 // deps: none — pure functions over plain objects.
 

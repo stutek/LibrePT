@@ -13,10 +13,9 @@
 //
 // **Scope of what syncs**: the collections `recordProjections.js` projects (clients, exercises,
 // routines, sessions, history, planUpdates, notifications) — i.e. everything a backup export already
-// carries. `schemaVersion` and `lang` are per-device/per-build, not synced. Once Google Calendar
-// integration exists as the source of truth for scheduling facts, this scope should narrow to
-// app-only data with no Calendar equivalent; until then there is no Calendar-sourced overlap
-// to exclude, so the full domain snapshot is what a PT actually needs mirrored across their devices.
+// carries. `schemaVersion` and `lang` are per-device/per-build, not synced. LibrePT keeps its own
+// schedule (Google Calendar is not part of it), so the full domain snapshot is what a PT actually
+// needs mirrored across their devices.
 //
 // **The snapshot on Drive is encrypted when a backup password is set** (data/backupEncryption.js).
 // Google encrypts Drive in transit and at rest already, but that is Google's key, not the trainer's:

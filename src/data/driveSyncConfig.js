@@ -6,7 +6,7 @@
 // card's Connect simply fails for them. That is a console setting, not a code one; publishing to
 // Production (even unverified) drops the list while keeping the cap. Nothing here changes either way.
 //
-// **`CLIENT_ID` must be filled in by whoever deploys this build.** Google Calendar/Drive API access
+// **`CLIENT_ID` must be filled in by whoever deploys this build.** Google Drive API access
 // requires a GCP project registered once by the developer — this is a public
 // OAuth client id for a browser app, not a secret (Google's own installed/SPA OAuth flows are
 // designed to ship it in client code; the security boundary is the redirect-URI allowlist configured

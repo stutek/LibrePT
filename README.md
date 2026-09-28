@@ -117,11 +117,9 @@ LibrePT is comprised of three major subsystems:
    - **Low-Interaction Progression & Safety Signals**: One-tap action buttons to record *"Load Up Next Weight"* (progression), *"Step Back Load"* (regression), or *"Pain / Injury Flag"* without typing on a phone keyboard.
    - **Reversible Plan Pivot & Placeholder Injection**: Low friction session wipe/pivot with full undo capability. Low friction ability to inject generic placeholder cards when client fatigue or equipment delays force a sudden plan change.
 
-2. **Google Calendar Booking & Sync Integration (Cloud APIs) — DESIGNED, NOT BUILT**
-   The app makes **no Google Calendar API calls today**. The design below is settled and blocked on the OAuth consent-screen verification path, not on the code.
-   - **Planned — no custom client web app**: rather than building and hosting a booking portal, LibrePT would lean on **Google Calendar Appointment Schedules**: the PT publishes slots (recurring rules, guest capacity) from Calendar itself, and clients self-subscribe via the standard Google-hosted scheduling page.
-   - **Planned — active sync**: query the Calendar API for a session's guest list to pre-load the clipboard with checked-in clients; read per-room resource calendars via `freebusy.query` for occupancy shading. See [TODO.md](TODO.md).
-   - **Built instead, today**: the PT assigns clients to a session inside LibrePT, and each newly-assigned client gets a downloadable **`.ics` invite** plus a prefilled `mailto:` compose ([`data/calendarInvite.js`](src/data/calendarInvite.js), [`modules/session/sessionInviteDialog.js`](src/modules/session/sessionInviteDialog.js)). There is no backend or SMTP relay to send mail on the trainer's behalf, so this is the no-network equivalent of Calendar's own invite email.
+2. **Scheduling and Invitations, inside LibrePT**
+   - The PT assigns clients to a session inside LibrePT, and each newly-assigned client gets a downloadable **`.ics` invite** plus a prefilled `mailto:` compose ([`data/calendarInvite.js`](src/data/calendarInvite.js), [`modules/session/sessionInviteDialog.js`](src/modules/session/sessionInviteDialog.js)). There is no backend or SMTP relay to send mail on the trainer's behalf.
+   - LibrePT does not connect to Google Calendar. Calendar booking and sync belong to the PRO package.
 
 3. **Trainer Program Adjustments Deck (Back-Office)**
    - The desk-side workspace where feedback alerts and details are reviewed to asynchronously edit client routine templates and plan progressive overload trajectories.
@@ -173,11 +171,10 @@ The service worker is split into single-responsibility modules so each concern c
 *   **Generic Placeholder Card Injection**: When a session is wiped or pivoted, the PT can instantly inject low-friction placeholder cards (`[ Mobility & Core Flow ]`, `[ Machine Circuit/Giant Set ]`, `[ Freestyle Block ]`) to continue tracking effort without typing new exercises from scratch.
 *   **Asynchronous Session Scenarios**: Guide multiple participants through separate, distinct individual routines in the same session slot.
 
-### 2. Google Calendar Appointment Booking & Integration
-*   **No Custom Web Hosting**: The PT creates recurring training slots directly in Google Calendar (using Appointment Schedules). Google auto-generates the public scheduling page.
-*   **Self-Subscription**: Clients visit the Google-hosted page to book slots, entering their name and email.
-*   **Automated Invitations**: Booking a slot adds the client to the Google Calendar event guest list, triggering a formal invite sent directly to their email inbox.
-*   **Participant Lock Guard**: The LibrePT app queries the Google Calendar API to fetch the guest list, pre-loading the active session clipboard and locking client selection strictly to checked-in participants.
+### 2. Scheduling and Invitations
+*   **Sessions live in LibrePT**: the PT schedules sessions, repeating ones included, in the app, and assigns the clients who take part.
+*   **Invitations without a server**: each newly-assigned client gets an `.ics` invitation file and a prefilled email, and can answer through the app's own RSVP link.
+*   **No Google Calendar**: booking pages and calendar sync are part of the PRO package, not of LibrePT.
 
 ### 3. Closed-Loop Plan Feedback & Client Progression
 *   **Granular Signal Processing**: Signals recorded on the gym floor (`Load Up`, `Step Back`, `Pain/Injury`) flow directly into the trainer's back-office review queue.
@@ -249,8 +246,8 @@ LibrePT/
 
 *   **Core**: HTML5, Vanilla JavaScript (ES6+ ES modules), and Vanilla CSS custom properties driving a 5-theme system (Midnight, Daylight, Red, Blossom, Nebula) — no hard-coded theme colours.
 *   **Internationalization**: Built-in English, Slovenian and German dictionaries with locale-aware weekday names via `Intl`; dates stay ISO and times 24-hour in every language. The German one is a machine translation that a German speaker has not yet reviewed.
-*   **Data Sync**: No backend of our own — Google Calendar is the planned source of truth for bookings/RSVP (not yet built, see [TODO.md](TODO.md)), and Google Drive's `appDataFolder` covers optional cross-device sync of app-only data — **built**. A Firestore/Firebase relay was considered and set aside as the default: it would make the operator a GDPR data processor for PT/client data, which this design avoids.
-*   **Third-Party APIs**: Google Drive API (OAuth 2.0, `drive.appdata` scope) — the only third-party API the app calls today. The Google Calendar API is planned, not integrated.
+*   **Data Sync**: No backend of our own — Google Drive's `appDataFolder` covers optional cross-device sync — **built**. A Firestore/Firebase relay was considered and set aside as the default: it would make the operator a GDPR data processor for PT/client data, which this design avoids.
+*   **Third-Party APIs**: Google Drive API (OAuth 2.0, `drive.appdata` scope) — the only third-party API the app calls.
 *   **Native Wrap**: **Capacitor** to wrap the HTML/CSS/JS code into native Android (.apk) and iOS (.ipa) app packages.
 
 ---

@@ -9,12 +9,10 @@
 // surfaces the trainer never used trains them to skim it. Sessions only produce a calendar item if
 // sessions exist; the sent-mail item only appears if there was an address to have written to.
 //
-// The items are NOT all the same kind of unreachable, and conflating them would misplan the
-// roadmap. The **gym calendar** is reachable — it sits on the same Google grant the app already
-// asks for, and only waits on Calendar integration, at which point erasure must fan out
-// to it automatically and the item disappears from this list. **Mail and SMS never are**: a
-// `mailto:`/`sms:` hands a draft to the trainer's own client and forgets it, by design, so no
-// version of this app will ever reach into a sent folder. Each item says which it is.
+// The items are NOT all the same kind of unreachable. The **gym calendar** is wherever the trainer
+// keeps it; LibrePT connects to no calendar, so it cannot clear one. **Mail and SMS** are the same:
+// a `mailto:`/`sms:` hands a draft to the trainer's own client and forgets it, by design, so no
+// version of this app will ever reach into a sent folder. Each item says which kind it is.
 //
 // Injected dependencies: none — pure derivation from state.
 
@@ -24,11 +22,9 @@
  *   ones that are hygiene. A trainer triaging under time pressure needs that distinction; without
  *   it, the calendar entry titled "Jane Doe — 07:00" ranks equal with clearing a downloads folder.
  *
- *   `reach` is the roadmap fact rather than the user-facing one: "app" — already done for you;
- *   "planned" — reachable on a grant the app already asks for and simply not built yet (the gym
- *   calendar); "never" — no software could do it, because it lives in the trainer's own
- *   mail or messaging app or in a file already written; "paper" — the item that must deliberately
- *   NOT be erased.
+ *   `reach` says who can do it: "app" — already done for you; "never" — LibrePT cannot, because
+ *   it lives in the trainer's own calendar, mail or messaging app or in a file already written;
+ *   "paper" — the item that must deliberately NOT be erased.
  */
 export function externalErasureChecklist(state, client, { driveConfigured = false } = {}) {
   const items = [];
@@ -41,12 +37,10 @@ export function externalErasureChecklist(state, client, { driveConfigured = fals
       id: "calendar",
       surface: "The gym calendar",
       action: `Open the ${sessions.length} event${sessions.length === 1 ? "" : "s"} for this client and remove their name from the title and guest list.`,
-      // NOT a permanent limitation, and the distinction matters for planning: the gym/room calendar
-      // is reached through the trainer's OWN OAuth grant, so once Calendar integration
-      // lands this fan-out becomes the app's job and this item disappears. Today LibrePT only hands
-      // the trainer an .ics to send themselves (sessionInviteDialog.js), so it is manual.
-      why: "The gym calendar is reachable on the same Google grant the app already asks for — but LibrePT does not write to Calendar yet, so today this is manual.",
-      reach: "planned",
+      // LibrePT only hands the trainer an .ics to send themselves (sessionInviteDialog.js); it
+      // connects to no calendar, so whatever calendar they keep is theirs to clear.
+      why: "LibrePT does not connect to any calendar, so it cannot remove the name there.",
+      reach: "never",
       blocking: true,
     });
     items.push({
@@ -162,10 +156,7 @@ export function renderErasureReceipt(summary, checklist, client) {
 
   lines.push("", "Still yours to do:");
   for (const item of checklist) {
-    // The reach marker travels into the receipt because a trainer re-reading it in six months
-    // should not have to re-derive why the calendar was manual — by then it may not be.
-    const marker = item.reach === "planned" ? " (manual until Calendar integration lands)" : "";
-    lines.push(`${item.blocking ? "[ ]" : "[i]"} ${item.surface}: ${item.action}${marker}`);
+    lines.push(`${item.blocking ? "[ ]" : "[i]"} ${item.surface}: ${item.action}`);
   }
   lines.push("", `Prepared for client id …${String(client?.id || "").slice(-6)}.`);
   return lines.join("\n");

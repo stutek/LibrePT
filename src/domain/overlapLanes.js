@@ -1,8 +1,7 @@
 // src/domain/overlapLanes.js — lay overlapping time intervals out into side-by-side lanes.
 // Single responsibility: decide WHICH COLUMN each block belongs in and how many columns
 // it must share width with. Knows nothing about pixels, rooms, or where the intervals came from —
-// the same answer serves the trainer's own sessions and the read-only room occupancy blocks
-// calendarFreeBusy.js returns.
+// the same answer serves the trainer's own sessions and any other intervals laid out beside them.
 //
 // **Why lanes at all.** The requirement is that 10:00–11:00 and 10:30–11:30 both render, showing
 // the overlap, rather than stacking as if sequential. That is the calendar-app layout: a vertical

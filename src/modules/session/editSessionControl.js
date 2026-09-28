@@ -192,9 +192,9 @@ function describeConflict(conflict, t) {
 }
 
 // What the form currently describes, against everything already known: the trainer's own sessions
-// plus whatever external calendar they have connected (none today — see getExternalBusyIntervals in
-// the deps; the domain rules take both from the start because a clash is a clash whichever calendar
-// knows about it).
+// plus the busy times of an external calendar, if one is connected. LibrePT connects none; the seam
+// (getExternalBusyIntervals in the deps) is for whatever supplies them, and knows nothing of which
+// calendar it is.
 function currentScheduleConflicts() {
   const fieldValue = (id) => document.getElementById(id)?.value.trim() || "";
   const state = deps.getState?.() || {};

@@ -27,6 +27,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   or edit. The app now keeps a copy when it is closed or put in the background with a save
   unfinished, and takes it back the next time it opens.
 
+### Changed
+
+- **LibrePT does not connect to Google Calendar.** Calendar booking and sync are part of the PRO
+  package. The privacy page no longer says scheduling data is planned to live in your Google
+  Calendar: it stays on your device with your other records. Invitations as `.ics` files are
+  unchanged.
+
 ---
 
 ## 2026-09-28 — Backups are encrypted

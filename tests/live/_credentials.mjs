@@ -69,7 +69,7 @@ async function exchangeRefreshToken({ client_id, client_secret, refresh_token })
 
   // `invalid_grant` is the one failure worth naming precisely. While the OAuth app is in Testing
   // mode Google expires refresh tokens after SEVEN DAYS, so this is the expected end state of any
-  // local credential left alone for a week — and the resulting Drive/Calendar 401s two calls later
+  // local credential left alone for a week — and the resulting Drive 401s two calls later
   // look nothing like the actual cause. Say the real thing instead of letting it cascade.
   if (payload.error === "invalid_grant") {
     throw new Error(

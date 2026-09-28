@@ -222,7 +222,6 @@ self.swCacheManifest = (() => {
     "./data/dataWipe.js",
     "./data/syncMerge.js",
     "./data/driveSyncConfig.js",
-    "./data/calendarFreeBusy.js",
     "./data/driveAppData.js",
     "./data/googleApiError.js",
     "./data/driveSyncService.js",

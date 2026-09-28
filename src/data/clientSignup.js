@@ -79,7 +79,7 @@ function readConsent(raw) {
  *
  * Refuses without a name AND at least one way to reach the person: those two are what the trainer
  * reviewing it needs in order to recognise who this is, and email/phone is also the key the review
- * dialog's dedupe and [UC4](../../use_cases/uc4_client_self_subscription.md) both reconcile on.
+ * dialog's dedupe reconciles on.
  * A nameless, contactless submission is a row nobody can act on.
  */
 export function buildClientSignup(input) {

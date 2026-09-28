@@ -21,7 +21,6 @@ from agent_tools import google_credential
 REPO_ROOT = google_credential.REPO_ROOT
 DRIVE_SYNC_CONFIG = REPO_ROOT / "src" / "data" / "driveSyncConfig.js"
 TOKEN_SCOPES_TEST = REPO_ROOT / "tests" / "live" / "tokenScopes.live.test.mjs"
-CALENDAR_FREEBUSY = REPO_ROOT / "src" / "data" / "calendarFreeBusy.js"
 
 
 def _js_string_const(source, name):
@@ -44,12 +43,7 @@ def test_the_required_scopes_mirror_the_shipping_constants():
     drive_scope = _js_string_const(
         DRIVE_SYNC_CONFIG.read_text(encoding="utf-8"), "GOOGLE_DRIVE_SCOPE"
     )
-    # Reads the shipping module, not the live test — the calendar scope earned a real constant when
-    # src/data/calendarFreeBusy.js landed, and the live test now imports it rather than restating it.
-    freebusy_scope = _js_string_const(
-        CALENDAR_FREEBUSY.read_text(encoding="utf-8"), "GOOGLE_CALENDAR_FREEBUSY_SCOPE"
-    )
-    assert set(google_credential.REQUIRED_SCOPES) == {drive_scope, freebusy_scope}
+    assert set(google_credential.REQUIRED_SCOPES) == {drive_scope}
 
 
 def test_the_overbroad_list_mirrors_what_the_live_test_rejects():
@@ -83,10 +77,10 @@ def test_an_exact_grant_has_no_problems():
 
 
 def test_a_missing_scope_is_reported():
-    granted = [google_credential.REQUIRED_SCOPES[0]]
+    granted = ["https://www.googleapis.com/auth/userinfo.email"]
     problems = google_credential.scope_problems(granted)
     assert len(problems) == 1
-    assert google_credential.REQUIRED_SCOPES[1] in problems[0]
+    assert google_credential.REQUIRED_SCOPES[0] in problems[0]
 
 
 def test_an_overbroad_scope_is_reported_even_alongside_the_required_ones():
