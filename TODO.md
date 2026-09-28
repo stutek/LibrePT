@@ -6530,25 +6530,9 @@ z načrtovanjem druge in vrnitev, tudi po osvežitvi. Vzrok in najmanjši nabor 
 korakov še nista ugotovljena. Objavljena `0625bd6`, Chrome CDP, 390 × 844, sl;
 brez zabeleženih napak brskalnika, brez pregleda kode.
 
-### 80.61 [ ] P2 — Konec ponavljanja pred začetkom se shrani brez opozorila
+### 80.61 [x] P2 — Konec ponavljanja pred začetkom se shrani brez opozorila — popravljeno 2026-09-29
 
-**Scenarij in koraki:** trener ustvari »Serija z obrnjenim obdobjem« za TEST Luka
-Kovač (večerni), Studio, 2026-11-10 16:00–16:45. Označi »Ponovi vsak teden«, torek,
-in v »Do« vpiše 2026-11-03. Pritisne »Odpri v beležki«, zapre vabila in trening ter
-ponovno odpre urejanje kartice. Enako nastavitev ponavljanja preveri še ob urejanju.
-
-**Opaženo:** shranitev uspe brez opozorila na končni datum pred začetnim. Na seznamu
-je en termin, pri ponovnem urejanju ponavljanje ni označeno. Pri drugem poskusu sta
-bila pred shranitvijo izrecno preverjena označeni torek in »Ponovi vsak teden« ter
-datuma 2026-11-10 in 2026-11-03. Tudi ta poskus ne pokaže validacijskega sporočila.
-
-**Težava in vpliv:** tipkarska napaka v obdobju se spremeni v navidezno uspešno
-shranjevanje; trener lahko meni, da je pripravil serijo, čeprav vidi samo en termin.
-
-**Predlog:** ob koncu pred začetkom ustaviti shranitev in označiti polje »Do«, da
-trener popravi datum. Preveriti tako ustvarjanje kot urejanje serije. Opaženo na
-objavljeni `0625bd6`, sl, Chrome CDP, 390 × 844, brez branja kode. Med scenarijem ni
-novih prestreženih napak; ostaneta dve opozorili prejšnjega preizkusa brez povezave.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8061-x-p2--konec-ponavljanja-pred-začetkom-se-shrani-brez-opozorila--popravljeno-2026-09-29).
 
 ### 80.62 [ ] P2 — Izvoz kataloga izpusti shranjena navodila lastne vaje
 
@@ -6592,79 +6576,21 @@ razlikovanje med številom ponovitev in trajanjem ob premikanju vaje v sklop in 
 njega. Opaženo na objavljeni `0625bd6`, sl, Chrome CDP, 390 × 844; brez novih
 prestreženih napak brskalnika in brez pregledovanja kode.
 
-### 80.64 [ ] P3 — Prazna plošča po filtrih reče »Počisti jih«, ne pove pa, kje
+### 80.64 [x] P3 — Prazna plošča po filtrih reče »Počisti jih«, ne pove pa, kje — popravljeno 2026-09-29
 
-**Scenarij in koraki:** v peskovniku z vzorčnimi podatki na plošči »Treningi« izbrati
-»Lokacija« → »zunanje igrišče«, nato še »Stranka« → »Priya Patel«.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8064-x-p3--prazna-plošča-po-filtrih-reče-počisti-jih-ne-pove-pa-kje--popravljeno-2026-09-29).
 
-**Opaženo:** plošča pokaže »Tem filtrom ne ustreza noben trening. Počisti jih, da vidiš vso
-ploščo.« Gumb za to je ✕ desno od obeh filtrov, brez besedila; velik je 32 × 31 pikslov.
-Izbrana filtra sta odrezana na »Priya Pa…« in »zunanje …«. ✕ filtre pravilno počisti.
+### 80.65 [x] P3 — Vzorčna obvestila v peskovniku omenjajo stranke in trening, ki jih ni — popravljeno 2026-09-29
 
-**Težava in vpliv:** trener ne izve, kateri gumb počisti filtre, in ✕ je manjši od palca.
-Iz odrezanega imena ne vidi, katera lokacija je izbrana, če se dve imeni začneta enako.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8065-x-p3--vzorčna-obvestila-v-peskovniku-omenjajo-stranke-in-trening-ki-jih-ni--popravljeno-2026-09-29).
 
-**Predlog:** sporočilo naj imenuje gumb in mesto, na primer »Pritisni ✕ desno od filtrov,
-da vidiš vso ploščo.«; ✕ naj ima velikost za palec; izbrano ime naj se prebere v celoti. Odrezano
-besedilo je preverjeno na posnetku zaslona. Opaženo na objavljeni `0625bd6`, sl, 390 × 844;
-brez napak v konzoli.
+### 80.66 [x] P2 — Vrstica nad dnom pri prihodnjem treningu kaže stoječo številko za napačen dan — popravljeno 2026-09-29
 
-### 80.65 [ ] P3 — Vzorčna obvestila v peskovniku omenjajo stranke in trening, ki jih ni
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8066-x-p2--vrstica-nad-dnom-pri-prihodnjem-treningu-kaže-stoječo-številko-za-napačen-dan--popravljeno-2026-09-29).
 
-**Scenarij in koraki:** pritisniti »Razišči z vzorčnimi podatki«, odpreti predal »Obvestila in
-pregled stanja« na dnu zaslona in prebrati kartici »📅 Rezervacija mesta za stranko« in
-»👋 Raziskujete z vzorčnimi podatki«. Nato pritisniti »Poglej vzorčne stranke« in odpreti
-petkov trening »HIIT kondicija« (2026-10-02, 10:00).
+### 80.67 [x] P3 — Čip »Datumi« zapiše izbrano obdobje kot »5. okt. – 11. okt.«, ne v ISO — popravljeno 2026-09-29
 
-**Opaženo:** kartica pravi »Alex Smith je rezerviral mesto za petkov HIIT.« in »Mike Johnson je
-odpovedal mesto za jutri ob 10:00.« V »Imenik strank« ni ne Alexa Smitha ne Mika Johnsona;
-na petkovem HIIT sta Jane in John; jutri (2026-09-29) ni treninga ob 10:00. Druga kartica
-ima naslov »Raziskujete z vzorčnimi podatki« (vikanje), besedilo pod njim pa »Razišči brez
-skrbi« (tikanje), kot vsa druga besedila v aplikaciji.
-
-**Težava in vpliv:** trener, ki spoznava aplikacijo, išče Alexa na petkovem treningu in ga ne
-najde. Sklepa lahko, da rezervacija ni bila shranjena, ali da obvestila ne kažejo resničnega
-stanja. Mešanje vikanja in tikanja v eni kartici deluje nedokončano.
-
-**Predlog:** vzorčno obvestilo naj imenuje stranko in trening, ki sta v peskovniku res, in dan,
-ki se ujema s ploščo; naslov naj bo v tikanju (»Raziskuješ z vzorčnimi podatki«). Opaženo na
-objavljeni `0625bd6`, sl, 390 × 844; brez napak v konzoli.
-
-### 80.66 [ ] P2 — Vrstica nad dnom pri prihodnjem treningu kaže stoječo številko za napačen dan
-
-**Scenarij in koraki:** v peskovniku z vzorčnimi podatki ob 23:51 (ponedeljek 2026-09-28) na
-plošči »Treningi« pritisniti petkov trening »HIIT kondicija« (2026-10-02, 10:00–11:00).
-Nato enako z »Moč nog« (sreda 2026-09-30, 08:00–09:30).
-
-**Opaženo:** vrstica nad dnom zaslona pokaže »HIIT kondicija 2 strank · 10:00 - 11:00
-35:07:25«. Kartica istega treninga na plošči pravi »Se začne čez 82h 07m«. 35 ur in 7 minut od
-23:52:37 je sreda ob 11:00, dva dni pred koncem petkovega treninga. Pri »Moč nog« vrstica
-pokaže »33:37:49«, kar je točno konec treninga v sredo ob 09:30. Pri obeh številka stoji:
-po 10 sekundah je enaka. Ob ponovnem odprtju je manjša za toliko, kolikor je minilo časa.
-Ob številki ni besede, ki bi povedala, do česa šteje.
-
-**Težava in vpliv:** trener ne ve, ali številka pomeni čas do začetka, do konca ali že
-pretečeni čas, in ob petkovem treningu kaže napačen dan. Številka, ki ne teče, je videti kot
-ustavljen trening.
-
-**Predlog:** pri treningu, ki se še ni začel, naj vrstica pove z besedo, kdaj se začne (kot
-kartica: »Se začne čez …«), in naj šteje od pravega dne; številka naj teče. Opaženo na
-objavljeni `0625bd6`, sl, 390 × 844; brez napak v konzoli.
-
-### 80.67 [ ] P3 — Čip »Datumi« zapiše izbrano obdobje kot »5. okt. – 11. okt.«, ne v ISO
-
-**Scenarij in koraki:** v peskovniku na plošči »Treningi« pritisniti »Datumi«, v koledarju
-pritisniti 5 in nato 11 v vrstici oktobra pod septembrom.
-
-**Opaženo:** čip se glasi »5. okt. – 11. okt.«. Plošča pod njim piše datume kot »2026-10-06«
-in »2026-10-08«. Filter sam deluje pravilno: pokaže samo treninga 2026-10-06 in 2026-10-08.
-Koledar se ob pritisku zunaj njega ne zapre, zapre ga šele ponovni pritisk na čip.
-
-**Težava in vpliv:** isti datum je na enem zaslonu v dveh oblikah; obdobje čez novo leto
-(»28. dec. – 3. jan.«) ne pove leta.
-
-**Predlog:** čip naj piše obdobje v obliki ISO, na primer »2026-10-05 – 2026-10-11«, kot vsi
-drugi datumi v aplikaciji. Opaženo na objavljeni `0625bd6`, sl, 390 × 844; brez napak v konzoli.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8067-x-p3--čip-datumi-zapiše-izbrano-obdobje-kot-5-okt--11-okt-ne-v-iso--popravljeno-2026-09-29).
 
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
