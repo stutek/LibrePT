@@ -197,6 +197,7 @@ self.swCacheManifest = (() => {
     "./data/storageDurability.js",
     "./data/backupHealth.js",
     "./data/writeQueue.js",
+    "./data/unsavedStateJournal.js",
     "./data/openRecordEdits.js",
     "./data/previewTransfer.js",
     "./data/schemaMigrations.js",

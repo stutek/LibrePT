@@ -800,6 +800,13 @@ The database holds the **only** copy of a trainer's records — there is no serv
   storage pressure, and Safari caps script-writable storage for sites unopened for seven days.
 - Risk is reported by **measuring the consequence** (quota, persistence) rather than by sniffing for
   private browsing — see [storageDurability.js](../src/data/storageDurability.js).
+- **A save the page did not finish is not lost.** Writes are write-behind
+  ([writeQueue.js](../src/data/writeQueue.js)), so a page closed right after a tap used to take the
+  last change with it. When the page is hidden or closed with a write unfinished, the state is copied
+  to localStorage, which writes at once
+  ([unsavedStateJournal.js](../src/data/unsavedStateJournal.js)); the next start takes that copy over
+  the database and writes it through. The copy exists only while the database is behind, so it can
+  never replace newer records. A database too large for localStorage's few megabytes is not covered.
 - The **backup file is the disaster-recovery tier**, and the only recovery path from a write-layer
   bug. Backups export the newest schema's store only (every other store is derived), and old backups
   stay importable indefinitely: readers are retained forever, writers never.

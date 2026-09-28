@@ -35,6 +35,7 @@ export const VERSION_SCOPED_KEYS = [
   "librept_workout_setup_draft",
   "librept_read_notifications",
   "librept_last_route",
+  "librept_unsaved_state",
 ];
 
 // Preferences and consents belong to the PERSON, not the build: re-accepting the terms or losing

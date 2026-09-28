@@ -155,3 +155,26 @@ test("flush on an idle queue resolves immediately", async () => {
   await Promise.resolve();
   assert.equal(resolved, true);
 });
+
+test("a write is unfinished from the moment it is queued until it lands", async () => {
+  m.resetWriteQueue();
+  assert.equal(m.hasUnfinishedWrites(), false);
+
+  let finish;
+  m.enqueueWrite(
+    () =>
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+    "first",
+  );
+  m.enqueueWrite(async () => {}, "second");
+  assert.equal(m.hasUnfinishedWrites(), true);
+  // The first is running; one waits behind it.
+  assert.equal(m.writesWaiting(), 1);
+
+  finish();
+  await m.flushWrites();
+  assert.equal(m.hasUnfinishedWrites(), false);
+  assert.equal(m.writesWaiting(), 0);
+});

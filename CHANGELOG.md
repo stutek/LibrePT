@@ -18,6 +18,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-09-28 — A save survives closing the app
+
+### Fixed
+
+- **A change is no longer lost when the app is closed right after it.** Saving finishes a moment
+  after the screen changes, and an app swiped away in that moment used to lose the last note, signal
+  or edit. The app now keeps a copy when it is closed or put in the background with a save
+  unfinished, and takes it back the next time it opens.
+
+---
+
 ## 2026-09-28 — Backups are encrypted
 
 ### Added

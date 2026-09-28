@@ -45,6 +45,7 @@ import { describeMigration, migrateState } from "./schemaMigrations.js";
 import { DEMO_ORIGIN, stampAsSeeded } from "./seedProvenance.js";
 import { clearWorkspaceKeys, readVersionScoped, writeVersionScoped } from "./storageNamespace.js";
 import { isThisTabActive } from "./tabOwnership.js";
+import { forgetUnsavedState, keepUnsavedState, unsavedState } from "./unsavedStateJournal.js";
 import {
   SANDBOX,
   activeWorkspace,
@@ -52,7 +53,7 @@ import {
   isWorkspace,
   setActiveWorkspace,
 } from "./workspace.js";
-import { enqueueWrite, flushWrites } from "./writeQueue.js";
+import { enqueueWrite, flushWrites, hasUnfinishedWrites, writesWaiting } from "./writeQueue.js";
 
 let state = emptyState();
 // What the last load's schema migration did (or refused to do) — read by the UI so an upgrade can
@@ -447,6 +448,14 @@ export async function loadSavedState() {
   await refreshPreviewStoreIfBuildChanged(db, BUILD_INFO?.commit ?? null);
 
   state = finalizeLoadedState(await readStateFromIndexedDb(db));
+  // The last page closed before its save landed, and kept what it had (unsavedStateJournal.js).
+  // That copy is newer than the database by construction, so it wins, and is written through; the
+  // write's own task forgets the copy once it lands.
+  const kept = unsavedState();
+  if (kept) {
+    state = finalizeLoadedState(kept);
+    saveToLocalStorage();
+  }
   return state;
 }
 
@@ -478,6 +487,9 @@ export function saveToLocalStorage() {
       async () => {
         const db = await getDb();
         await starWrite(db, state);
+        // The database now holds the live state, unless another save is already queued behind
+        // this one; a copy kept for a closing page is then older than the database, so it goes.
+        if (writesWaiting() === 0) forgetUnsavedState();
       },
       "state",
       { readsLiveState: true },
@@ -488,6 +500,14 @@ export function saveToLocalStorage() {
   // Fired immediately, not after the (possibly still-queued) IndexedDB write completes: `state` is
   // already mutated in memory at this point, which is all a live ahead-count diff needs.
   for (const listener of stateSavedListeners) listener();
+}
+
+/** Called as the page is hidden or closed (appLifecycleController.js). With a write still running,
+ * the state goes to a synchronous copy the next start takes (unsavedStateJournal.js); with none,
+ * the database already has everything and nothing is written. */
+export function keepStateIfUnsaved() {
+  if (!indexedDbSupported() || !isThisTabActive() || !hasUnfinishedWrites()) return;
+  keepUnsavedState(state);
 }
 
 // Google Drive sync's own bookkeeping: the Drive file id and the merge ancestor

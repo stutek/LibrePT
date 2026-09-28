@@ -1,6 +1,7 @@
 // src/controllers/appLifecycleController.js - Application Lifecycle & Browser Runtime Integration
 // Single responsibility: Handles PWA screen orientation lock, dev phone viewport resizing,
-// build stamp header rendering, Service Worker registration, and network connectivity state monitoring.
+// build stamp header rendering, Service Worker registration, network connectivity state monitoring,
+// and keeping an unsaved state when the page closes.
 
 import { buildCrashReport, recordCrash } from "../data/crashReport.js";
 import {
@@ -9,6 +10,7 @@ import {
   startPeriodicSync as startPeriodicDriveSync,
 } from "../data/driveSyncService.js";
 import { CURRENT_SCHEMA_VERSION } from "../data/migrationSteps.js";
+import { keepStateIfUnsaved } from "../data/stateStore.js";
 import { BUILD_INFO } from "../version.js";
 
 export function resizeToPhoneViewport() {
@@ -157,6 +159,18 @@ export function setupDriveSyncOnResume() {
   });
 }
 
+// A page can be closed while its last save is still being written. `pagehide` is the close;
+// `visibilitychange` to hidden is the phone's app switcher, after which the page may be killed with
+// no further event. Both hand the state to stateStore.js, which keeps a copy only when a write is
+// unfinished.
+function setupKeepUnsavedStateOnClose() {
+  if (typeof document === "undefined") return;
+  window.addEventListener("pagehide", keepStateIfUnsaved);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") keepStateIfUnsaved();
+  });
+}
+
 // Crashes the trainer can report. Nothing installed `window.onerror` before this, so a
 // thrown error died in a console a PT will never open — while docs/BUG_REPORTING.md asked them to
 // retype the build stamp by hand.
@@ -208,6 +222,7 @@ export function initAppLifecycle({ basePath, setOfflineCachedState, t }) {
   registerServiceWorker(basePath, setOfflineCachedState, t);
   setupOnlineOfflineListeners(basePath, setOfflineCachedState);
   setupDriveSyncOnResume();
+  setupKeepUnsavedStateOnClose();
   // Runs unconditionally from boot regardless of connection state (periodicTick() no-ops until
   // connected) — the alternative, starting it only after a successful connect, would also need to
   // restart on every future boot with a stored grant, which this already does for free.

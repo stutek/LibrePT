@@ -110,6 +110,16 @@ export function onWriteError(listener) {
   return previous;
 }
 
+/** True while a write is queued or running — what a closing page would lose. */
+export function hasUnfinishedWrites() {
+  return draining || queue.length > 0;
+}
+
+/** Writes queued behind the one running now. Zero inside a task means that task is the last. */
+export function writesWaiting() {
+  return queue.length;
+}
+
 /** Queue health, for the UI and for support: pending work, and whether anything has ever failed. */
 export function writeQueueStatus() {
   return { pending: queue.length, draining, failureCount, lastError };
