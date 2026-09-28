@@ -76,11 +76,6 @@ function isoOf(date) {
   return `${date.getFullYear()}-${month}-${day}`;
 }
 
-function dateFromIso(iso) {
-  const [year, month, day] = iso.split("-").map(Number);
-  return new Date(year, month - 1, day);
-}
-
 function monthStart(iso) {
   const [year, month] = iso.split("-").map(Number);
   return new Date(year, month - 1, 1);
@@ -139,13 +134,12 @@ function weekdayLabels(lang) {
   });
 }
 
+// ISO, as every date in the app: the board under the chip writes 2026-10-06, and a range across the
+// new year needs its year. The filter already holds the ends in that form.
 function dateChipLabel() {
-  const { t, lang } = deps;
-  if (!hasDateFilter(filters)) return t("filter_dates");
-  const format = new Intl.DateTimeFormat(lang(), { day: "numeric", month: "short" });
-  const from = format.format(dateFromIso(filters.from));
-  if (isSingleDay(filters)) return from;
-  return `${from} – ${format.format(dateFromIso(filters.to))}`;
+  if (!hasDateFilter(filters)) return deps.t("filter_dates");
+  if (isSingleDay(filters)) return filters.from;
+  return `${filters.from} – ${filters.to}`;
 }
 
 /** One day button. `state` carries the three things it can be at once: an end, inside the range, or

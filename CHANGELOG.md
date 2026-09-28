@@ -40,6 +40,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   card uses, and the time moves. It showed a number without a word that did not change.
 - **Every control in the board's filter row is big enough for a thumb**, and the message on an empty
   board names the ✕ that clears the filters.
+- **The dates filter writes its range as ISO dates**, with the year, like every other date.
 
 ---
 

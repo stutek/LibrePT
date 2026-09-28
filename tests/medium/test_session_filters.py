@@ -8,6 +8,8 @@
 # them and that the board actually changes.
 # Mounted via tests/medium/_harness.py's SESSIONS_STUB; fixtures come from tests/conftest.py.
 
+import re
+
 import pytest
 
 from tests.medium._harness import SESSIONS_STUB, load_with_stub
@@ -96,6 +98,10 @@ def test_the_calendar_selects_a_day_then_a_range_then_starts_over(page, local_se
     assert calendar.locator(".filter-day-inside").count() == 3, (
         "the days between the ends are covered by the range, not chosen — and are drawn as such"
     )
+    # The chip says the range as every date in the app is written: ISO, with the year. It read
+    # "5. okt. – 11. okt." above a board that writes 2026-10-06.
+    chip = page.locator("#filter-chip-dates").inner_text().strip()
+    assert re.fullmatch(r"\d{4}-\d{2}-\d{2} – \d{4}-\d{2}-\d{2}", chip), chip
 
     # The third tap starts over from that day. This is the behaviour every documented picker has
     # (eBay, Syncfusion, react-dates), and the reason neither alternating taps nor a "nearer end
