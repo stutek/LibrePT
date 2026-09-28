@@ -213,10 +213,6 @@
 .session-card-dot-sep {
   opacity: 0.45;
 }
-.session-card-undefined-programme {
-  color: var(--danger); /* was the literal #ef4444, midnight's --danger */
-  font-weight: 600;
-}
 .session-warning-pill {
   display: inline-flex;
   align-items: center;

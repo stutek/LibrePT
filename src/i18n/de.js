@@ -968,7 +968,6 @@ export const de = {
   live: "Läuft",
   editing: "In Bearbeitung",
   unscheduled: "Ohne Termin",
-  undefined: "Nicht festgelegt",
   combo_round_title: "Zirkel",
   bar_clients_one: "{count} Kunde",
   bar_clients_two: "{count} Kunden",

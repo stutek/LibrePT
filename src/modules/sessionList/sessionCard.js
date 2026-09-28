@@ -218,13 +218,13 @@ function buildSessionCardInfoHTML({
     String(b.title || "")
       .trim()
       .toLowerCase();
-  const programmeHTML = routineName
-    ? sameAsTitle
-      ? ""
-      : `<span class="session-card-dot-sep">&bull;</span>
+  // No routine: nothing here. The card's warning says "Program not defined" in words; a second,
+  // bare "Undefined" on this line was read as the attendance state.
+  const programmeHTML =
+    routineName && !sameAsTitle
+      ? `<span class="session-card-dot-sep">&bull;</span>
       <span><i class="fa-solid fa-clipboard-list session-card-icon"></i>${escapeHTML(routineName)}</span>`
-    : `<span class="session-card-dot-sep">&bull;</span>
-      <span class="session-card-undefined-programme"><i class="fa-solid fa-clipboard-list session-card-icon"></i>${escapeHTML(t("undefined"))}</span>`;
+      : "";
 
   const injuryHTML = anyInjury
     ? `<i class="fa-solid fa-triangle-exclamation session-card-injury-icon" title="${escapeHTML(t("notes_injuries"))}"></i>`

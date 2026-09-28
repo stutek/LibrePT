@@ -914,7 +914,6 @@ export const sl = {
   live: "V živo",
   editing: "Urejanje",
   unscheduled: "Nenačrtovano",
-  undefined: "Nedoločen",
   combo_round_title: "Sklop vaj",
   bar_clients_one: "{count} stranka",
   bar_clients_two: "{count} stranki",

@@ -132,3 +132,22 @@ def test_the_programme_is_not_printed_twice(page, local_server):
         }).length"""
     )
     assert doubled == 0, f"{doubled} card(s) print their own title a second time"
+
+
+def test_a_session_without_a_routine_says_which_thing_is_missing(page, local_server):
+    """A lone "Undefined" beside the clipboard icon was read as the attendance state: a trainer
+    looked for where to change it to "came". The card's warning already names what is missing, so
+    the card says it once, in those words."""
+    seeded = "sessions: structuredClone(DEFAULT_SESSIONS),"
+    assert seeded in SESSIONS_STUB
+    stub = SESSIONS_STUB.replace(
+        seeded,
+        "sessions: structuredClone(DEFAULT_SESSIONS).map((s) => "
+        "s.title === 'Morning Conditioning' ? { ...s, routineId: null } : s),",
+    )
+    load_with_stub(page, local_server, stub)
+    card = page.locator(".session-card", has_text="Morning Conditioning").first
+    card.wait_for()
+    text = card.inner_text()
+    assert text.count("Program Not Defined") == 1, text
+    assert "Undefined" not in text, text

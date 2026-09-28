@@ -977,7 +977,6 @@ export const en = {
   live: "Live",
   editing: "Editing",
   unscheduled: "Unscheduled",
-  undefined: "Undefined",
   combo_round_title: "Circuit",
   bar_clients_one: "{count} client",
   bar_clients_two: "{count} clients",

@@ -28,6 +28,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 - **A plan written up after its session ended survives a reload.** A morning session recorded in the
   afternoon lost its plan on the next reload, because the app took it for a session left open and
   forgotten.
+- **A session without a routine no longer shows a bare "Undefined".** It was read as the attendance
+  state. The warning "Program not defined" on the same card already says what is missing.
 
 ---
 
