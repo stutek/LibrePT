@@ -6623,6 +6623,26 @@ omejitev. Preveriti večvrstično besedilo s šumniki, vejicami in narekovaji. O
 na objavljeni `0625bd6`, sl, Chrome CDP, 390 × 844; brez branja kode. Med scenarijem
 ni novih prestreženih napak brskalnika.
 
+### 80.63 [ ] P2 — Časovna vaja v sklopu izgubi oznako trajanja
+
+**Scenarij in koraki:** v jutrišnjem treningu »Vrstni red vaj« pri stranki TEST Luka
+Kovač (jutranji · Studio A) zamenjati samostojno vajo z Wall Sit iz kataloga,
+nastaviti vrednost 25 in končati urejanje. Nato spet odpreti »Uredi načrt«, razširiti
+Wall Sit ter pri »Sklop« izbrati »+ Nov sklop«. Končati urejanje brez spremembe 25.
+
+**Opaženo:** samostojna kartica kaže »S3 × 0:25 × BW«. Ista vaja v sklopu kaže
+»KROG 1 / 3«, »Wall Sit« in »25 · BW«. Številka nima oznake sekund ali zapisa časa.
+Pri prej sestavljenem dvokrožnem sklopu je bilo enako z vrednostjo »20 · BW«.
+
+**Težava in vpliv:** trener med krožno vadbo ne vidi, ali številka pomeni ponovitve
+ali trajanje. Da potrdi predvideno držo, mora znova v urejevalnik ali si podatek
+zapomniti. Premik v sklop spremeni jasnost istega navodila.
+
+**Predlog:** pri časovnih vajah tudi v sklopu prikazati »0:25« ali »25 s«; ohraniti
+razlikovanje med številom ponovitev in trajanjem ob premikanju vaje v sklop in iz
+njega. Opaženo na objavljeni `0625bd6`, sl, Chrome CDP, 390 × 844; brez novih
+prestreženih napak brskalnika in brez pregledovanja kode.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
