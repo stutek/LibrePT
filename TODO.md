@@ -1092,7 +1092,7 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#163-x-resolved-
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#165-x-retire-the-multi-version-hosting-machinery-from-the-code-done); what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-### 16.6 [ ] The deployment shares one origin with everything else on that account
+### 16.6 [ ] One origin or two: the boundary around LibrePT's data is undecided
 
 **Found 2026-09-28 while answering Simon's question about the backup key.** The app is deployed at
 `https://stutek.github.io/LibrePT` ([publicUrls.js](src/data/publicUrls.js)). A browser separates
@@ -1119,12 +1119,43 @@ IndexedDB does not travel, so every trainer would have to export on the old addr
 new one by hand. The same move also needs Google's allowed JavaScript origins updated
 ([GOOGLE_CLOUD_SETUP.md](docs/GOOGLE_CLOUD_SETUP.md)) and `PUBLIC_SITE_URL` changed.
 
-**Recommended**: a domain of LibrePT's own, in place before anybody's real data exists. The
-alternative — never publish anything else under this account — is a rule that has to hold forever and
-will be broken once, quietly, by the person who does not know it.
+**Simon, 2026-09-28: sharing may be WANTED.** If EnterprisePT is to be an extension of LibrePT for
+the same trainer, one origin is the simplest way to share — no export, no import, no sync protocol.
+That is a legitimate design, and it reframes what is wrong here: not the sharing, but that the sharing
+is **accidental**. Nothing states it, nothing checks it, and the next page published there inherits
+total access in silence.
 
-**Blocks**: nothing in the code. It blocks the launch plan, because the cost of this decision is
-decided by whether any trainer has data yet.
+**"The domain is mine" is not the guarantee it sounds like.** An origin does not separate by who owns
+it. It admits everything ever served from that host, including code not written yet and code written
+by somebody else.
+
+**And XSS is possible with one app anyway — true, with two differences.** With one app the exposed
+surface is one codebase; with several on one origin an attacker needs a hole in ANY of them and the
+access is identical, so a marketing page with a form is a softer way in than the app. More
+importantly, XSS is a DEFECT and a co-hosted page is a PERMISSION: a page on the same origin needs no
+bug at all to read the database. Defects can be removed; a permission granted to every future page
+cannot be undone by care in one codebase.
+
+**A CSP protects the page, not the origin's data.** LibrePT's is strict — `script-src 'self'
+https://accounts.google.com`, no CDN, no analytics ([index.html](src/index.html)) — and it does
+nothing for LibrePT's records if a neighbour on the same host ships a loose one. A commercial
+EnterprisePT will want a payment widget, analytics or a support chat, and each vendor would then read
+special-category health data without a single bug. **That is where the two goals collide.**
+
+**The decision, either way, with its condition:**
+
+- **One origin, on purpose.** Everything published there is one security body, held to LibrePT's rules,
+  and **no third-party script, anywhere on it, ever.** Written into PRIVACY.md, because the claim that
+  nobody but the trainer reaches the data changes shape.
+- **Two origins, one domain.** `librept.<domain>` and `enterprise.<domain>` are separate origins while
+  the domain stays Simon's; sharing becomes explicit (`postMessage`, or an export handed over) instead
+  of ambient. GitHub Pages supports a custom domain per repository.
+
+**No test can hold this.** LibrePT cannot see other pages on its own origin, so this is a rule rather
+than a gate — which is exactly why it has to be written down rather than remembered.
+
+**Blocks**: nothing in the code. It blocks the launch plan, because moving origin after trainers have
+data means each of them exporting on the old address and importing on the new one by hand.
 
 ## 17. Structured session/program history (`sessionItemRecord`)
 
