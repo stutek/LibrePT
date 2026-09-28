@@ -91,6 +91,12 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
   from `git status --short` — your own files only, and a file two sessions have touched is staged by
   hunk, never whole. **Read `git diff --cached` before every commit** — a claim in a note does not
   stop another session writing the file, and a whole-file `git add` then commits its work as yours.
+  **Stage and commit in ONE step, and read the index immediately before committing, not earlier.**
+  The index is shared state: another session staging the same file replaces your entry with the
+  working tree's, so a commit prepared several steps ago carries whatever landed in between. On
+  2026-09-28 an index built, then left while other checks ran, committed twenty lines of another
+  session's defect report under an unrelated message. The reading is only worth what it is worth at
+  the instant of the commit.
   **Never push.** **A request that arrives mid-turn is its own commit**,
   not an addition to the one in progress: several asks landing while a gate run is in flight are
   split apart when it ends, never bulked because they happened in one turn. Where one verified tree
