@@ -6409,6 +6409,11 @@ filtrira po tujih besedah. P3.
 **Predlog in preverjanje:** obe vrstici dobita besede iz slovarja, kot jih ima vrstica izvora; vrednost
 filtra ostane angleška. Preizkus naj v slovenščini zahteva, da noben gumb filtra ni angleški.
 
+**Stanje 2026-09-29 — čaka na Simona.** Isto vprašanje je v §38.20 odprto kot odločitev zanj
+(»Decision, not work — Simon«): ali mišične skupine, oprema in vzorci gibanja dobijo besedo v
+vsakem jeziku, tako v obrazcu za vajo kot na čipih izbirnika. Popravek je pripravljen v glavi,
+ne v drevesu: ključi `muscle_*` in `equipment_*` v treh slovarjih, vrednost filtra ostane angleška.
+
 ### 80.55 [x] P3 — Kartica treninga pravi samo »Nedoločen«, trener pa to bere kot stanje — popravljeno 2026-09-29
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8055-x-p3--kartica-treninga-pravi-samo-nedoločen-trener-pa-to-bere-kot-stanje--popravljeno-2026-09-29).
