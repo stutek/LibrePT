@@ -6643,6 +6643,23 @@ razlikovanje med številom ponovitev in trajanjem ob premikanju vaje v sklop in 
 njega. Opaženo na objavljeni `0625bd6`, sl, Chrome CDP, 390 × 844; brez novih
 prestreženih napak brskalnika in brez pregledovanja kode.
 
+### 80.64 [ ] P3 — Prazna plošča po filtrih reče »Počisti jih«, ne pove pa, kje
+
+**Scenarij in koraki:** v peskovniku z vzorčnimi podatki na plošči »Treningi« izbrati
+»Lokacija« → »zunanje igrišče«, nato še »Stranka« → »Priya Patel«.
+
+**Opaženo:** plošča pokaže »Tem filtrom ne ustreza noben trening. Počisti jih, da vidiš vso
+ploščo.« Gumb za to je ✕ desno od obeh filtrov, brez besedila; velik je 32 × 31 pikslov.
+Izbrana filtra sta odrezana na »Priya Pa…« in »zunanje …«. ✕ filtre pravilno počisti.
+
+**Težava in vpliv:** trener ne izve, kateri gumb počisti filtre, in ✕ je manjši od palca.
+Iz odrezanega imena ne vidi, katera lokacija je izbrana, če se dve imeni začneta enako.
+
+**Predlog:** sporočilo naj imenuje gumb in mesto, na primer »Pritisni ✕ desno od filtrov,
+da vidiš vso ploščo.«; ✕ naj ima velikost za palec; izbrano ime naj se prebere v celoti. Odrezano
+besedilo je preverjeno na posnetku zaslona. Opaženo na objavljeni `0625bd6`, sl, 390 × 844;
+brez napak v konzoli.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
