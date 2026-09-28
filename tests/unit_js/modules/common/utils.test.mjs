@@ -14,6 +14,7 @@ import {
   escapeHTML,
   formatDateStr,
   getInitials,
+  getOverlappingSessions,
 } from "../../../../src/modules/common/utils.js";
 
 test("initials from a hostile name stay alphanumeric", () => {
@@ -132,6 +133,59 @@ test("a slot spanning several sessions reports the outer range as its schedule",
   assert.equal(meta.timeLabel, "09:00 - 11:30");
   assert.equal((meta.endDate.getTime() - meta.startDate.getTime()) / 60000, 150);
   assert.deepEqual(meta.ids, ["s1", "s2"]);
+});
+
+// "upcoming" is every day from the day after tomorrow on, so it cannot say WHICH day. A Friday
+// session opened on a Monday counted down to Wednesday, the bucket's own guess.
+function daysFromToday(days, hour) {
+  const date = new Date();
+  date.setHours(hour, 0, 0, 0);
+  date.setDate(date.getDate() + days);
+  return date;
+}
+
+test("a session far ahead is scheduled on its own date, not on its bucket's", () => {
+  const friday = daysFromToday(4, 10);
+  const sessions = [
+    {
+      id: "s1",
+      title: "HIIT",
+      time: "10:00 - 11:00",
+      day: "upcoming",
+      startDate: friday.toISOString(),
+    },
+  ];
+  const byBucket = (day) => daysFromToday({ upcoming: 2 }[day] ?? 0, 0);
+
+  const meta = buildSessionMeta(sessions, "upcoming", byBucket);
+
+  assert.equal(meta.startDate.getTime(), friday.getTime());
+  assert.equal(meta.endDate.getTime(), daysFromToday(4, 11).getTime());
+});
+
+test("two sessions at the same hour on different days are not one clipboard", () => {
+  const tuesday = {
+    id: "t",
+    time: "18:00 - 19:00",
+    day: "upcoming",
+    startDate: daysFromToday(3, 18).toISOString(),
+  };
+  const thursday = {
+    id: "h",
+    time: "18:00 - 19:00",
+    day: "upcoming",
+    startDate: daysFromToday(5, 18).toISOString(),
+  };
+  const sameEvening = {
+    id: "x",
+    time: "18:30 - 19:30",
+    day: "upcoming",
+    startDate: daysFromToday(3, 18).toISOString(),
+  };
+
+  const merged = getOverlappingSessions(tuesday, [tuesday, thursday, sameEvening]).map((s) => s.id);
+
+  assert.deepEqual(merged, ["t", "x"]);
 });
 
 // The app writes a date as ISO, in every language. `formatDateStr` is what the client

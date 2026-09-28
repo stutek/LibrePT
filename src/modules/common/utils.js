@@ -11,6 +11,7 @@
 //
 // deps: none
 
+import { sessionCalendarDate } from "../../domain/sessionRecord.js";
 import { isTimeOverlapping, parseTimeRange } from "../../domain/timeRange.js";
 
 // Generate initials for avatar text representation
@@ -195,11 +196,19 @@ export function getClientDisplayNameHTML(
   return escapeHTML(nameText);
 }
 
+// The day two sessions are compared on: the calendar date where both have one. The bucket alone
+// ("upcoming") is every day from the day after tomorrow on, so it put every future Tuesday and
+// Thursday at 18:00 into one clipboard.
+function sameDay(a, b) {
+  const [dateA, dateB] = [sessionCalendarDate(a), sessionCalendarDate(b)];
+  return dateA && dateB ? dateA === dateB : a.day === b.day;
+}
+
 // Return list of sessions overlapping with target session
 export function getOverlappingSessions(session, sessions) {
   const targetRange = parseTimeRange(session.time);
   return sessions.filter((s) => {
-    if (s.day !== session.day) return false;
+    if (!sameDay(s, session)) return false;
     return isTimeOverlapping(targetRange, parseTimeRange(s.time));
   });
 }
@@ -211,7 +220,10 @@ export function buildSessionMeta(sessions, day, getSessionDayDate) {
   const ranges = sessions.map((s) => parseTimeRange(s.time)).filter(Boolean);
   const startMin = Math.min(...ranges.map((r) => r.start));
   const endMin = Math.max(...ranges.map((r) => r.end));
-  const dayDate = getSessionDayDate(day);
+  // The session's own date where it has one; the bucket cannot say which day "upcoming" is.
+  const dated = sessions.find((s) => s.startDate);
+  const dayDate = dated ? new Date(dated.startDate) : getSessionDayDate(day);
+  dayDate.setHours(0, 0, 0, 0);
   const startDate = new Date(dayDate);
   startDate.setMinutes(startDate.getMinutes() + startMin);
   const endDate = new Date(dayDate);

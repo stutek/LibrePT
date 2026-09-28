@@ -33,6 +33,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 - **The client search finds a client by their alias**, in the client directory and when adding a
   participant to a session. The alias is shown beside the name, and it is the word that tells two
   clients with the same name apart.
+- **A session more than two days ahead opens on its own date.** A Friday session opened on a Monday
+  counted down to Wednesday, and every future session at the same hour, such as each Tuesday and
+  Thursday at 18:00, was put into one clipboard with it.
 
 ---
 
