@@ -675,6 +675,33 @@ The Playwright suites drive real end-to-end flows that are documented nowhere. E
 - **Still open**: (a) the reverse gaps — UC1/UC2 behaviour (voice notes, the feedback→adjustment
   wizard, plan pivots) with partial or no coverage; (b) whether the newer app-surface flows (themes,
   header menu, first-run terms, sync/backup) each deserve a UC or belong in README feature docs.
+- **[~] Coverage measured 2026-09-28, gaps being closed (Claude, librept-39).** Line coverage of
+  `src/` over all test tiers, one run with a V8 coverage plugin kept outside the repository: 93.3% of
+  27,510 code lines. The run cannot see the service worker (`src/sw/`, 0%) or `src/app.js` (served
+  different from disk); seven e2e tests failed on the integrity overlay because another session wrote
+  `src/` mid-run, so their share is missing. Tests being added: UC2's Apply / Dismiss / close / Swap
+  on the plan, a floor note reaching the review screen after a reload, the timer's ✕ and its single
+  alert at zero, the app opening and keeping a note with the network off (no test did this before),
+  and unit tests for `loadInputHTML`, `metricLabelKey` and their neighbours. `loadParts` has no
+  caller and goes. UC1–UC4 get traceability tables; the gate gets two checks — a use case without
+  one, and pure logic below 90% unit coverage.
+- **[ ] UC1 and README describe a plan pivot the app does not have.** *Pivot / Wipe Plan*, *Undo
+  Pivot* and the three placeholder cards (*Mobility & Core Flow*, *Machine Circuit/Giant Set*,
+  *Freestyle Block*): nothing in `src/` implements them. **Blocks** the UC1 rewrite and README's
+  feature list: build it, or remove it from both? Needs Simon's ruling.
+- **[ ] UC1 step 2 and UC4 step 8 have the app read Google Calendar guests.** The app holds only the
+  free/busy scope (`src/data/calendarFreeBusy.js`), which cannot read guests; attendance comes from
+  the app's own invitations and RSVP. **Blocks** rewriting both steps against the RSVP flow.
+- **[ ] UC2 *Apply & Resolve* changes a routine every client shares.** Routines have no client, and
+  the dialog writes into the first routine holding the exercise (`resolveAdjustmentTargets` in
+  `src/modules/plans/planAdjustments.js`), so Jane's adjustment moves the plan of everyone on that
+  routine; UC2 says "updates Jane's template". **Blocks** UC2's wording and any per-client plan work.
+  The new test pins that exactly one routine row changes, which holds under either answer.
+- **[ ] The last save is lost when the page closes at once.** Saving is write-behind
+  (`src/data/writeQueue.js`); nothing flushes pending writes on `visibilitychange` or `pagehide`. In
+  a test, a note submitted and the page left in the same moment was gone after a reload; waiting 1 s
+  kept it. On a phone: the app swiped away right after a tap. Not measured on a device. Next step: a
+  flush when the page is hidden, after the backup-encryption work releases `src/data/`.
 
 ### 6.3 [x] The bottom session bar renders nothing — decided: restore, active state only
 
