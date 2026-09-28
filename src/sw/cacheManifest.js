@@ -11,7 +11,7 @@
 // atomic version. The worker's own sub-scripts (sw.js + this sw/ folder) are deliberately NOT in ASSETS:
 // they are the worker's script resources, kept coherent by the browser's own SW-update mechanism.
 self.swCacheManifest = (() => {
-  const CACHE_NAME = "librept-v143";
+  const CACHE_NAME = "librept-v144";
   const ASSETS = [
     "./",
     "./index.html",
@@ -318,6 +318,7 @@ self.swCacheManifest = (() => {
     "./icons/icon-192.png",
     "./icons/icon-512.png",
     "./icons/icon-maskable-512.png",
+    "./icons/icon-mark-512.png",
     // Vendored webfonts — same-origin, so part of the atomic app shell (no third-party font origin).
     "./fonts/fonts.css",
     "./fonts/dmsans-normal-latin.woff2",

@@ -3,6 +3,7 @@
 # and the split of the seed data into src/data/. Uses the src_dir fixture (tests/conftest.py).
 
 import json
+import re
 
 
 def test_runtime_files_present(src_dir):
@@ -22,25 +23,27 @@ def test_manifest_icons_exist(src_dir):
         )
 
 
-def test_service_worker_precaches_every_runtime_module(src_dir):
+def test_service_worker_precaches_exactly_the_files_the_app_ships(src_dir):
     """Module-version coherence (README "Architectural Invariants"): the app is a graph of cross-
-    importing ES modules, so every runtime .js/.css must be in the ASSETS manifest (sw/cacheManifest.js)
-    or an offline load serves a version-skewed mix (some cached, some missing). Enforce that the precache
-    set stays complete — a new module that is not listed would otherwise silently break offline."""
+    importing ES modules, so every runtime file must be in the ASSETS manifest (sw/cacheManifest.js)
+    or an offline load serves a version-skewed mix (some cached, some missing). Checked in both
+    directions and for every kind of file: the splash image went unlisted for months because only
+    .js/.css were checked, and a listed file that no longer exists fails the whole atomic install."""
     manifest = (src_dir / "sw" / "cacheManifest.js").read_text(encoding="utf-8")
-    missing = []
-    for path in sorted([*src_dir.rglob("*.js"), *src_dir.rglob("*.css")]):
+    listed = set(re.findall(r'"\./([^"]+)"', manifest))
+    shipped = set()
+    for path in src_dir.rglob("*"):
         rel = path.relative_to(src_dir).as_posix()
         # The service worker entry and its own sub-modules (sw/) are the worker's script resources,
         # loaded via importScripts and kept coherent by the browser's SW update — never fetched through
         # the app-shell cache, so they are intentionally absent from the ASSETS manifest.
-        if rel == "sw.js" or rel.startswith("sw/"):
-            continue
-        if f'"./{rel}"' not in manifest:
-            missing.append(rel)
-    assert not missing, (
-        "sw/cacheManifest.js ASSETS is missing runtime files (add them AND bump CACHE_NAME): "
-        + ", ".join(missing)
+        if path.is_file() and rel != "sw.js" and not rel.startswith("sw/"):
+            shipped.add(rel)
+    missing = sorted(shipped - listed)
+    stale = sorted(listed - shipped)
+    assert not missing and not stale, (
+        "sw/cacheManifest.js ASSETS differs from src/ (fix the list AND bump CACHE_NAME) — "
+        f"missing: {', '.join(missing) or 'none'}; listed but absent: {', '.join(stale) or 'none'}"
     )
 
 
