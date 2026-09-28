@@ -40,7 +40,10 @@ import {
   repsPresetListId,
 } from "../../domain/repsAndLoad.js";
 import { isRestRecord as isRest } from "../../domain/sessionItemRecord.js";
-import { buildClientStateFromLibraryCircuit } from "../../domain/sessionPlanFactory.js";
+import {
+  blankExercise,
+  buildClientStateFromLibraryCircuit,
+} from "../../domain/sessionPlanFactory.js";
 import { isGuideSurface } from "../common/dom.js";
 
 const DEFAULT_SERIES = 3;
@@ -651,24 +654,15 @@ export function renderClipboardEditor(container, deps) {
 
   // ---------- insert bars: inject an exercise / circuit / rest at a gap ----------
   const makeExercise = (cid) => {
-    const id = newId();
     const meta = cid ? circuitMetaOf(cid) : null;
-    activeClientState.logs[id] = Array.from({ length: 3 }, () => ({
-      reps: 10,
-      weight: 0,
-      completed: false,
-      note: "",
-    }));
-    return {
-      id,
-      name: "",
-      setsTargetCount: 3,
-      repsTarget: 10,
-      weightTarget: 0,
+    const { planItem, logs } = blankExercise({
+      id: newId(),
       circuitId: cid || null,
       circuitTitle: meta ? meta.title : "",
       circuitSeries: meta ? meta.series : 1,
-    };
+    });
+    activeClientState.logs[planItem.id] = logs;
+    return planItem;
   };
   const makeRest = (cid) => {
     const meta = cid ? circuitMetaOf(cid) : null;

@@ -116,6 +116,31 @@ function historyExerciseItemToPlanItem(item, exercises) {
   return { planItem, logs };
 }
 
+// The exercise the trainer inserts into a running plan before choosing the movement: no name, three
+// sets of ten at no load, one empty log row per set. The editor and the deck's quick insert both
+// start from this, so the two cannot drift apart.
+const BLANK_SETS = 3;
+const BLANK_REPS = 10;
+export function blankExercise({ id, circuitId = null, circuitTitle = "", circuitSeries = 1 }) {
+  const planItem = {
+    id,
+    name: "",
+    setsTargetCount: BLANK_SETS,
+    repsTarget: BLANK_REPS,
+    weightTarget: 0,
+    circuitId,
+    circuitTitle,
+    circuitSeries,
+  };
+  const logs = Array.from({ length: BLANK_SETS }, () => ({
+    reps: BLANK_REPS,
+    weight: 0,
+    completed: false,
+    note: "",
+  }));
+  return { planItem, logs };
+}
+
 // Rebuild the live plan from a stored history/planning snapshot, restoring rests and circuit
 // grouping — not just the performed exercises. Read in the record's OWN program order: the array
 // it arrives in is a storage detail.

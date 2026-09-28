@@ -1,7 +1,6 @@
 import { libraryExercises } from "../../data/exerciseLibrary.js";
-import { modalityOf, primaryMetricOf } from "../../domain/exerciseModality.js";
-import { loadUnitForEquipment } from "../../domain/repsAndLoad.js";
 import { filterSessions, hasAnyFilter } from "../../domain/sessionFilters.js";
+import { buildClientStateFromRoutine } from "../../domain/sessionPlanFactory.js";
 import { sessionCalendarDate } from "../../domain/sessionRecord.js";
 import { occurrenceAsSession, sessionsWithSeries } from "../../domain/sessionSeries.js";
 import { renderMarkupOnce } from "../common/dom.js";
@@ -65,40 +64,16 @@ export function renderClientsViewShell() {
   );
 }
 
+// The same plan a real session builds from this routine. The demo session is already under way, so
+// its card in focus is open rather than collapsed as a fresh plan starts.
 function buildClientRoutineState(routine, state) {
-  const clientState = {
+  const clientState = buildClientStateFromRoutine({
     routineId: routine.id,
-    routineName: routine.name,
-    activeExerciseIndex: 0,
-    exercises: [],
-    logs: {},
-  };
-  for (const item of routine.exercises || []) {
-    const ex = libraryExercises(state).find((e) => e.id === item.id);
-    if (!ex) continue;
-    clientState.exercises.push({
-      id: item.id,
-      name: ex.name,
-      category: ex.category,
-      instructions: ex.instructions,
-      setsTargetCount: item.sets,
-      repsTarget: item.reps,
-      weightTarget: item.weight,
-      loadUnit: loadUnitForEquipment(ex.equipment),
-      modality: modalityOf(ex),
-      metric: primaryMetricOf(ex),
-      rest: item.rest,
-      circuitId: item.circuitId || null,
-      circuitTitle: item.circuitTitle || "",
-      circuitSeries: item.circuitSeries || 1,
-    });
-    clientState.logs[item.id] = Array.from({ length: item.sets }, () => ({
-      reps: item.reps,
-      weight: item.weight,
-      completed: false,
-      note: "",
-    }));
-  }
+    routines: [routine],
+    exercises: libraryExercises(state),
+    emptyPlanName: routine.name,
+  });
+  clientState.deckAllCollapsed = false;
   return clientState;
 }
 

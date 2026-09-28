@@ -21,6 +21,7 @@ import { newRecordId } from "../../data/recordId.js";
 import { formatMetricValue, usesLoad } from "../../domain/exerciseModality.js";
 import { formatLoad, formatReps } from "../../domain/repsAndLoad.js";
 import { exerciseRecordsOf, isRestRecord } from "../../domain/sessionItemRecord.js";
+import { blankExercise } from "../../domain/sessionPlanFactory.js";
 import { formatDateStr } from "../common/utils.js";
 import { CircuitDeckCard } from "./circuitCard.js";
 import { trackDeckScroll } from "./deckScrollFocus.js";
@@ -144,46 +145,16 @@ function insertFastAdjustmentItem(type, activeItem, ctx) {
       circuitTitle: circuitTitle,
       circuitSeries: circuitSeries,
     });
-  } else if (type === "circuit") {
-    const newCircuitId = `c-${newRecordId()}`;
-    const id = newRecordId();
-    newItemId = id;
-    activeClientState.logs[id] = Array.from({ length: 3 }, () => ({
-      reps: 10,
-      weight: 0,
-      completed: false,
-      note: "",
-    }));
-    activeClientState.exercises.splice(newIdx, 0, {
-      id,
-      name: "",
-      setsTargetCount: 3,
-      repsTarget: 10,
-      weightTarget: 0,
-      circuitId: newCircuitId,
-      circuitTitle: "",
-      circuitSeries: 3,
-    });
   } else {
-    // exercise
-    const id = newRecordId();
-    newItemId = id;
-    activeClientState.logs[id] = Array.from({ length: 3 }, () => ({
-      reps: 10,
-      weight: 0,
-      completed: false,
-      note: "",
-    }));
-    activeClientState.exercises.splice(newIdx, 0, {
-      id,
-      name: "",
-      setsTargetCount: 3,
-      repsTarget: 10,
-      weightTarget: 0,
-      circuitId: cid,
-      circuitTitle: circuitTitle,
-      circuitSeries: circuitSeries,
-    });
+    // An exercise joins the circuit in focus; a new circuit starts as one blank exercise of three
+    // rounds.
+    const { planItem, logs } =
+      type === "circuit"
+        ? blankExercise({ id: newRecordId(), circuitId: `c-${newRecordId()}`, circuitSeries: 3 })
+        : blankExercise({ id: newRecordId(), circuitId: cid, circuitTitle, circuitSeries });
+    newItemId = planItem.id;
+    activeClientState.logs[planItem.id] = logs;
+    activeClientState.exercises.splice(newIdx, 0, planItem);
   }
 
   activeClientState.activeExerciseIndex = newIdx;

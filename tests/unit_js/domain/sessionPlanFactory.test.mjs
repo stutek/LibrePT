@@ -14,6 +14,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
+  blankExercise,
   buildClientStateFromHistoryLog,
   buildClientStateFromLibraryCircuit,
   buildClientStateFromRoutine,
@@ -250,4 +251,24 @@ test("focus is clamped into range, and a rest is a valid place to land", () => {
   const empty = { activeExerciseIndex: 0, exercises: [] };
   clampFocusIndex(empty);
   assert.equal(empty.activeExerciseIndex, 0);
+});
+
+test("a blank exercise has one empty log row per target set, in the circuit it joins", () => {
+  // The editor and the deck's quick insert both start here; a log row count that differs from the
+  // set target leaves a set the trainer cannot tick, or a tick with no set.
+  const { planItem, logs } = blankExercise({
+    id: "x1",
+    circuitId: "c1",
+    circuitTitle: "Core",
+    circuitSeries: 2,
+  });
+  assert.equal(planItem.name, "");
+  assert.equal(logs.length, planItem.setsTargetCount);
+  assert.ok(logs.every((row) => row.reps === planItem.repsTarget && row.completed === false));
+  assert.equal(logs[0] === logs[1], false, "each set is its own row");
+  assert.deepEqual(
+    [planItem.circuitId, planItem.circuitTitle, planItem.circuitSeries],
+    ["c1", "Core", 2],
+  );
+  assert.deepEqual(blankExercise({ id: "x2" }).planItem.circuitId, null);
 });
