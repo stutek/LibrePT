@@ -15,8 +15,13 @@
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { DEFAULT_SESSIONS, DEFAULT_SESSION_SERIES } from "../../../src/data/index.js";
+import {
+  DEFAULT_CLIENTS,
+  DEFAULT_SESSIONS,
+  DEFAULT_SESSION_SERIES,
+} from "../../../src/data/index.js";
 import { sessionsWithSeries } from "../../../src/domain/sessionSeries.js";
+import { TRANSLATIONS } from "../../../src/i18n/index.js";
 
 // The window modules/sessionList/sessionsView.js draws: eight weeks ahead, one week back.
 const calendarDate = (daysFromToday) => {
@@ -91,4 +96,35 @@ test("the repeating session's past evenings are stored, so the rule stops produc
     [],
     "an evening is on the board twice: once stored, once derived",
   );
+});
+
+// The sandbox's two sample messages said Alex Smith had booked Friday's HIIT and Mike Johnson had
+// cancelled tomorrow at 10:00. Neither person was in the sample, the HIIT had Jane and John on it,
+// and there was nothing at 10:00: a trainer learning the app went looking for a booking that did
+// not exist. A sample message speaks about the sample.
+test("the sample messages name people and sessions that are in the sample", () => {
+  const nameOf = (id) => DEFAULT_CLIENTS.find((client) => client.id === id)?.name;
+  const hiit = DEFAULT_SESSIONS.find((session) => session.title === "HIIT Conditioning");
+  const morning = DEFAULT_SESSIONS.find((session) => session.title === "Morning Conditioning");
+  assert.ok(hiit && morning, "both sessions the messages name are seeded");
+
+  const booked = TRANSLATIONS.en.notif_spot_res_desc;
+  const cancelled = TRANSLATIONS.en.notif_spot_cancel_desc;
+  assert.ok(booked.includes("HIIT Conditioning"), booked);
+  assert.ok(
+    hiit.participants.some((id) => booked.includes(nameOf(id))),
+    `${booked} names nobody on the session`,
+  );
+  assert.ok(
+    cancelled.includes("Morning Conditioning") && cancelled.includes(morning.time.slice(0, 5)),
+  );
+  const canceller = DEFAULT_CLIENTS.find((client) => cancelled.includes(client.name));
+  assert.ok(canceller, `${cancelled} names nobody in the sample`);
+  assert.ok(!morning.participants.includes(canceller.id), "who cancelled is no longer booked");
+
+  for (const [lang, dict] of Object.entries(TRANSLATIONS)) {
+    for (const text of [dict.notif_spot_res_desc, dict.notif_spot_cancel_desc]) {
+      assert.doesNotMatch(text, /\b(AM|PM)\b/, `${lang}: a time is 24-hour`);
+    }
+  }
 });

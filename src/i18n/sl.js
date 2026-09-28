@@ -1074,7 +1074,7 @@ export const sl = {
     "Aplikacija deluje na vzorčnih strankah, rutinah in treningih. Počisti jih, preden jo uporabiš za resnično delo: čiščenje natančno našteje, kaj odstrani, in ohrani katalog vaj, tako da vse, kar si zgradil na njem, še naprej deluje.",
   filter_participants_placeholder: "Poišči stranko po imenu...",
   notif_demo_mode_reset_btn: "Počisti podatke in zapusti predstavitveni način",
-  notif_welcome_title: "👋 Raziskujete z vzorčnimi podatki",
+  notif_welcome_title: "👋 Raziskuješ z vzorčnimi podatki",
   notif_welcome_desc:
     "Stranke, rutine in treningi tukaj so vzorčni fitnes, vključno z enim treningom, ki že poteka. Razišči brez skrbi — nihče od teh ljudi ni resničen.",
   notif_welcome_clients_btn: "Poglej vzorčne stranke",
@@ -1088,9 +1088,10 @@ export const sl = {
   build_info_copied: "Kopirano",
   build_info_copy_failed: "Označi in kopiraj besedilo zgoraj",
   notif_spot_res_title: "📅 Rezervacija mesta za stranko",
-  notif_spot_res_desc: "Alex Smith je rezerviral mesto za petkov HIIT.",
+  notif_spot_res_desc: "John Smith je rezerviral mesto na treningu HIIT kondicija.",
   notif_spot_cancel_title: "⚠️ Odpoved rezervacije",
-  notif_spot_cancel_desc: "Mike Johnson je odpovedal mesto za jutri ob 10:00.",
+  notif_spot_cancel_desc:
+    "Mike Chen je odpovedal mesto na treningu Jutranja kondicija jutri ob 09:00.",
   notif_count_badge: "{unread} neprebranih / {all} vseh",
   notif_mark_all_read: "Označi vse kot prebrano",
   notif_unscheduled_plans_title: "Nenačrtovani programi",

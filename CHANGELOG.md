@@ -41,6 +41,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 - **Every control in the board's filter row is big enough for a thumb**, and the message on an empty
   board names the ✕ that clears the filters.
 - **The dates filter writes its range as ISO dates**, with the year, like every other date.
+- **The sandbox's sample messages name people and sessions that are in the sandbox.** They named two
+  clients who did not exist and a session at a time when there was none.
 
 ---
 

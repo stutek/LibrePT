@@ -1143,9 +1143,10 @@ export const de = {
   build_info_copied: "Kopiert",
   build_info_copy_failed: "Markiere den Text oben und kopiere ihn",
   notif_spot_res_title: "📅 Platz reserviert",
-  notif_spot_res_desc: "Alex Smith hat einen Platz im HIIT-Training am Freitag gebucht.",
+  notif_spot_res_desc: "John Smith hat einen Platz im Training HIIT-Kondition gebucht.",
   notif_spot_cancel_title: "⚠️ Platz storniert",
-  notif_spot_cancel_desc: "Mike Johnson hat seinen Platz für morgen um 10:00 storniert.",
+  notif_spot_cancel_desc:
+    "Mike Chen hat seinen Platz im Training Morgendliche Kondition morgen um 09:00 storniert.",
   notif_count_badge: "{unread} ungelesen / {all} gesamt",
   notif_mark_all_read: "Alle als gelesen markieren",
   notif_unscheduled_plans_title: "Pläne ohne Termin",
