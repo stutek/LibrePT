@@ -410,3 +410,43 @@ def test_the_meter_warns_before_the_plan_is_already_over(page, local_server):
     meter = page.locator(".editor-plan-fit")
     assert "over" in meter.inner_text(), meter.inner_text()
     assert "is-over" in (meter.get_attribute("class") or "")
+
+
+# --- the load field reads the decimal comma, whatever the phone's language ----------------------
+
+
+def _typed_load(page, local_server, typed):
+    """Type `typed` into the first row's load field key by key, as a thumb does, and return what
+    the plan now holds for it."""
+    _mount(page, local_server, [exercise_item("e1", "Lateral Raise", weightTarget=4)])
+    field = page.locator(".editor-f-weight").first
+    if not field.is_visible():
+        page.locator(".editor-row-toggle").first.click()
+    field.click()
+    field.press("Control+a")
+    field.press_sequentially(typed)
+    field.press("Tab")
+    return page.evaluate(
+        """async () => {
+          const ctrl = await import(new URL('controllers/activeSessionController.js', document.baseURI).href);
+          const session = ctrl.getActiveSession();
+          return session.clientRoutines[session.activeClientId].exercises[0].weightTarget;
+        }"""
+    )
+
+
+def test_a_decimal_comma_is_the_same_load_as_a_decimal_point(page, local_server):
+    """A Slovenian trainer writes 2,5. On a phone set to English, a number field dropped the comma
+    and saved 25 kg, ten times the load, with nothing on screen to say so. The app decides how a
+    number is read, not the phone: both separators mean the same load."""
+    assert _typed_load(page, local_server, "2,5") == 2.5
+    assert _typed_load(page, local_server, "2.5") == 2.5
+
+
+def test_a_load_that_is_not_a_number_is_marked_on_the_field(page, local_server):
+    """Anything the field cannot read as a load is marked on the field itself, never saved as a
+    different number without a word."""
+    _typed_load(page, local_server, "2,5,5")
+    assert page.locator(".editor-f-weight").first.evaluate(
+        "el => el.matches(':invalid')"
+    )

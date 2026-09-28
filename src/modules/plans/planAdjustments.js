@@ -4,6 +4,7 @@
 import { libraryExercises } from "../../data/exerciseLibrary.js";
 import { performedTarget, suggestedTarget } from "../../domain/adjustmentSuggestion.js";
 import { feedbackTagText, readFeedbackTag } from "../../domain/feedbackTags.js";
+import { DECIMAL_PATTERN, parseDecimal } from "../../domain/repsAndLoad.js";
 import { renderMarkupOnce } from "../common/dom.js";
 import { mountExercisePicker, pickerLabels } from "../exercises/exercisePicker.js";
 
@@ -178,7 +179,7 @@ export function renderApplyAdjustmentDialog() {
         <div class="adjust-modify-grid">
           <div class="form-group">
             <label for="adjust-weight" data-i18n="adjust_target_weight">Target Weight (kg)</label>
-            <input type="number" step="0.5" id="adjust-weight" class="form-control">
+            <input type="text" inputmode="decimal" pattern="${DECIMAL_PATTERN}" id="adjust-weight" class="form-control">
           </div>
           <div class="form-group">
             <label for="adjust-reps" data-i18n="adjust_target_reps">Target Reps</label>
@@ -337,7 +338,7 @@ export function openAdjustmentWizardComponent(updateId, ctx) {
     if (action === "modify" && targetRoutine) {
       const targetEx = targetRoutine.exercises.find((ex) => ex.id === exId);
       if (targetEx) {
-        targetEx.weight = parseFloat(document.getElementById("adjust-weight").value) || 0;
+        targetEx.weight = parseDecimal(document.getElementById("adjust-weight").value) || 0;
         targetEx.reps = document.getElementById("adjust-reps").value;
         targetEx.sets = parseInt(document.getElementById("adjust-sets").value) || 3;
       }

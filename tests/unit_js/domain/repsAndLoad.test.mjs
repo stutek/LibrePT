@@ -11,7 +11,13 @@ test("reps and load helpers", () => {
   const parseReps = [m.parseReps("10"), m.parseReps("8-12"), m.parseReps("max"), m.parseReps("")];
   const isFailure = [m.isFailureReps("max"), m.isFailureReps("AMRAP"), m.isFailureReps("10")];
   const formatReps = [m.formatReps("max"), m.formatReps(10), m.formatReps("")];
-  const parseLoad = [m.parseLoad("40"), m.parseLoad("Medium"), m.parseLoad("")];
+  const parseLoad = [
+    m.parseLoad("40"),
+    m.parseLoad("Medium"),
+    m.parseLoad(""),
+    m.parseLoad("2,5"),
+    m.parseLoad("2.5"),
+  ];
   const unit = [
     m.loadUnitForEquipment("Cable"),
     m.loadUnitForEquipment("Band"),
@@ -51,8 +57,8 @@ test("reps and load helpers", () => {
   assert.deepEqual(isFailure, [true, true, false]);
   assert.deepEqual(formatReps, ["Max", "10", "—"]);
 
-  // Load: numeric → Number, band label stays string, empty → 0.
-  assert.deepEqual(parseLoad, [40, "Medium", 0]);
+  // Load: numeric → Number, band label stays string, empty → 0; a decimal comma is a decimal point.
+  assert.deepEqual(parseLoad, [40, "Medium", 0, 2.5, 2.5]);
   // Equipment → load unit (unlisted equipment is kilograms).
   assert.deepEqual(unit, ["level", "band", "bw", "kg"]);
   // Display strings per unit.
@@ -111,7 +117,9 @@ test("every other load is a number field that says its unit", () => {
   const cases = { kg: "kg", level: "Level", bw: "+kg (BW)" };
   for (const [unit, label] of Object.entries(cases)) {
     const html = m.loadInputHTML({ unit, value: 5, cls: "row-load", escapeHTML: String });
-    assert.match(html, /^<input type="number"/, unit);
+    // A text field on the decimal keypad, not type="number": that one reads the separator by the
+    // PHONE's language and drops a Slovenian comma on an English-set phone.
+    assert.match(html, /^<input type="text" inputmode="decimal"/, unit);
     assert.ok(html.includes(`placeholder="${label}"`), unit);
     assert.ok(html.includes('value="5"'), unit);
     assert.equal(m.loadFieldMeta(unit).label, label);

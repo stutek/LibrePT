@@ -18,6 +18,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-09-29 — What the trainer typed stays as typed
+
+### Fixed
+
+- **A load written with a decimal comma is read as a decimal.** "2,5" was saved as 25 kg on a phone
+  set to English, with nothing on screen to say so. Both "2,5" and "2.5" now mean 2.5 kg in every
+  load field, whatever the phone's language, and a load the app cannot read is marked on the field.
+
+---
+
 ## 2026-09-29 — Offline start-up picture, damaged backups refused
 
 ### Fixed

@@ -96,12 +96,24 @@ export function parseReps(raw) {
   return /^\d+$/.test(s) ? Number(s) : s;
 }
 
+// A non-negative decimal written with either separator: "2,5" and "2.5" are the same load. The app
+// decides how a number reads, never the phone — a number field on an English-set phone drops the
+// comma a Slovenian trainer types, and 2,5 kg is saved as 25.
+export const DECIMAL_PATTERN = "[0-9]*[.,]?[0-9]*";
+const DECIMAL = new RegExp(`^${DECIMAL_PATTERN}$`);
+
+// A typed number as a Number, either separator; NaN when there is no number to read.
+export function parseDecimal(raw) {
+  const s = String(raw ?? "").trim();
+  return Number.parseFloat(DECIMAL.test(s) ? s.replace(",", ".") : s);
+}
+
 // Parse an authored load value: numeric strings become a Number (kg / stack level / added-bw);
 // a non-numeric value (a band label like "Medium") stays a string; empty becomes 0.
 export function parseLoad(raw) {
   const s = String(raw ?? "").trim();
   if (s === "") return 0;
-  const n = Number.parseFloat(s);
+  const n = parseDecimal(s);
   return Number.isNaN(n) ? s : n;
 }
 
@@ -140,11 +152,11 @@ export function loadFieldMeta(unit) {
     case "band":
       return { label: "Band", kind: "band" };
     case "level":
-      return { label: "Level", kind: "number", placeholder: "Lvl", step: "1", min: "0" };
+      return { label: "Level", kind: "number", placeholder: "Lvl" };
     case "bw":
-      return { label: "+kg (BW)", kind: "number", placeholder: "BW", step: "0.5", min: "0" };
+      return { label: "+kg (BW)", kind: "number", placeholder: "BW" };
     default:
-      return { label: "kg", kind: "number", placeholder: "kg", step: "0.5", min: "0" };
+      return { label: "kg", kind: "number", placeholder: "kg" };
   }
 }
 
@@ -161,5 +173,5 @@ export function loadInputHTML({ unit, value, cls, escapeHTML, ariaLabel = "Load"
   }
   const meta = loadFieldMeta(unit);
   const v = value === "" || value === undefined || value === null ? "" : value;
-  return `<input type="number" min="${meta.min}" step="${meta.step}" placeholder="${meta.label}" class="${cls}" value="${escapeHTML(String(v))}" aria-label="${ariaLabel}">`;
+  return `<input type="text" inputmode="decimal" pattern="${DECIMAL_PATTERN}" placeholder="${meta.label}" class="${cls}" value="${escapeHTML(String(v))}" aria-label="${ariaLabel}">`;
 }

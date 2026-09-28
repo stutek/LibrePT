@@ -6,6 +6,7 @@
 // adding markup ownership on top of its existing behavior logic instead of extracting a companion
 // view file — this is that extraction, unchanged in content.
 
+import { DECIMAL_PATTERN } from "../../domain/repsAndLoad.js";
 import { renderMarkupOnce } from "../common/dom.js";
 
 export function renderAddSessionExerciseDialog() {
@@ -42,7 +43,7 @@ export function renderAddSessionExerciseDialog() {
       <div class="form-row">
         <div class="form-group col">
           <label for="session-add-weight">Weight (kg)</label>
-          <input type="number" step="0.5" id="session-add-weight" value="0" class="form-control">
+          <input type="text" inputmode="decimal" pattern="${DECIMAL_PATTERN}" id="session-add-weight" value="0" class="form-control">
         </div>
         <div class="form-group col">
           <label for="session-add-rest">Rest (sec)</label>

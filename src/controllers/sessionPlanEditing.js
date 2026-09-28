@@ -8,7 +8,7 @@
 import { libraryExercises } from "../data/exerciseLibrary.js";
 import { newRecordId } from "../data/recordId.js";
 import { modalityOf, primaryMetricOf } from "../domain/exerciseModality.js";
-import { loadUnitForEquipment } from "../domain/repsAndLoad.js";
+import { loadUnitForEquipment, parseDecimal } from "../domain/repsAndLoad.js";
 import { renderActiveSessionBoard } from "../modules/clipboard/activeSessionBoard.js";
 import { markEditorRow } from "../modules/clipboard/editModeState.js";
 import { mountExercisePicker, pickerLabels } from "../modules/exercises/exercisePicker.js";
@@ -158,7 +158,7 @@ function handleAddSessionExerciseSubmit(e, state, addExModal) {
   const typed = document.getElementById("session-add-select-ex").value.trim();
   const sets = parseInt(document.getElementById("session-add-sets").value);
   const reps = parseInt(document.getElementById("session-add-reps").value);
-  const weight = parseFloat(document.getElementById("session-add-weight").value);
+  const weight = parseDecimal(document.getElementById("session-add-weight").value);
   const rest = parseInt(document.getElementById("session-add-rest").value);
 
   if (!getActiveSession() || !typed || isNaN(sets)) return;
