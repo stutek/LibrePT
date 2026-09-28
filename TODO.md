@@ -2881,6 +2881,13 @@ vadbe pokažejo vzdevka; v oknu »Pošlji vabila v koledar« pa sta dve enaki oz
 vabil naj pokažeta vzdevek ali naslov prejemnika. Vabil v preizkusu nismo poslali.
 Preizkušeno samo prek vmesnika, brez preverjanja kode.
 
+**Dopolnitev iz skupinske vadbe »Izmenični odmori«, objavljena `0625bd6`:** oba Luka
+imata isto vajo Dumbbell Bicep Curl. Časomer premora prvega teče tudi po preklopu na
+drugega, drugi časomer začne neodvisno. Obe plavajoči oznaki pa kažeta samo »TEST Luka
+Kovač« in isto ime vaje, brez vzdevka. Trener ne more zanesljivo vedeti, kateri čas
+pripada komu. Vzdevek naj bo tudi na časomeru in v izbirniku »Kopiraj ta načrt na …«,
+kjer ga je prejšnji preizkus prav tako pogrešil.
+
 ### 39.6 [x] BUG — the clipboard says which session, and the chapter builds a programme
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#396-x-bug-the-clipboard-says-which-session-and-the-chapter-builds-a-programme); what shipped is in [CHANGELOG.md](CHANGELOG.md).
@@ -6310,7 +6317,7 @@ Prvi v obrazcu doda vzdevek »jutranji«, drugi »večerni«, različna izmišlj
 in različna cilja. Obe shrani. V imeniku poišče »Luka«, nato »jutranji« in »večerni«.
 
 **Opaženo:** »Luka« pokaže obe kartici z ustreznima vzdevkoma in ciljema. Vsak vzdevek
-zase pokaže »Strank ni mogoče najti. Klikni \"Dodaj stranko\", da jo ustvariš.«
+zase pokaže »Strank ni mogoče najti. Klikni "Dodaj stranko", da jo ustvariš.«
 Po izbrisu iskalnega niza sta obe stranki spet vidni. Prestreznik napak ni zabeležil napak.
 Preizkus: objavljena različica `0625bd6`, Chrome CDP, 390 × 844, slovenščina.
 
