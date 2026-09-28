@@ -6441,6 +6441,28 @@ trener popravi datum. Preveriti tako ustvarjanje kot urejanje serije. Opaženo n
 objavljeni `0625bd6`, sl, Chrome CDP, 390 × 844, brez branja kode. Med scenarijem ni
 novih prestreženih napak; ostaneta dve opozorili prejšnjega preizkusa brez povezave.
 
+### 80.62 [ ] P2 — Izvoz kataloga izpusti shranjena navodila lastne vaje
+
+**Scenarij in koraki:** trener v knjižnici ustvari lastno vajo `SIM Počep, "počasi"`,
+Legs / Bodyweight / Squat, z dvema vrsticama navodil: »Spust 3 sekunde, nato premor.«
+in »Izdih: »počasi«; ščž.«. V središču kopij prenese »Izvozi katalog CSV« in
+»Izvozi katalog JSON«. Za primerjavo prenese še polno kopijo prek »Izvozi JSON«.
+
+**Opaženo:** CSV pravilno ohrani šumnike, vejico in narekovaje v imenu; vrstica ni
+razbita. Toda nima stolpca za navodila. Tudi zapis v kataloškem JSON nima navodil.
+Polna varnostna kopija iste vaje jih vsebuje natančno, vključno s prelomom vrstice.
+Pojasnilo kataloškega izvoza govori o preslikavi kategorij in opreme; izpusta navodil
+ne navede. Primerjava je opravljena na datotekah, prenesenih skozi uporabniški vmesnik.
+
+**Težava in vpliv:** trener pri prenosu lastnega kataloga izgubi namige za izvedbo,
+čeprav jih je v aplikaciji vpisal in shranil. Polno kopijo ima, vendar namenski izvoz
+za izmenjavo z drugimi orodji ne prenese tega dela njegovega dela.
+
+**Predlog:** navodila vključiti v oba kataloška izvoza ali pred prenosom jasno navesti
+omejitev. Preveriti večvrstično besedilo s šumniki, vejicami in narekovaji. Opaženo
+na objavljeni `0625bd6`, sl, Chrome CDP, 390 × 844; brez branja kode. Med scenarijem
+ni novih prestreženih napak brskalnika.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
