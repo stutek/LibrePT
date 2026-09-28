@@ -15,9 +15,9 @@ import { test } from "node:test";
 import {
   decryptEnvelope,
   encryptPayload,
-  generatePassphrase,
   isEncryptedEnvelope,
 } from "../../../src/data/encryptedExport.js";
+import { generatePassphrase } from "../../../src/data/passphraseKey.js";
 
 const PAYLOAD = {
   subject: { name: "Jane Doe", email: "jane@example.com", injuryNotes: "L4 disc herniation" },

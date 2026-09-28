@@ -310,6 +310,45 @@ export const en = {
   // The session setup form (modules/session/editSessionView.js).
   session_name_placeholder: "Select or type session name...",
   location_placeholder: "Select or type location...",
+  // The backup password (modules/common/backupPassword.js). The warning is the point of the dialog:
+  // a backup is for the day the phone is gone, and nothing can recover the password.
+  backup_pw_title: "Backup password",
+  backup_pw_lead:
+    "Your backups are encrypted with this password. Without it nobody can read them: not Google, and not anyone who finds the file.",
+  backup_pw_label: "The password",
+  backup_pw_new: "Another one",
+  backup_pw_copy: "Copy",
+  backup_pw_copied: "Copied.",
+  backup_pw_copy_failed: "Could not copy it. Write it down from the screen.",
+  backup_pw_write_it_down:
+    "Write this password down somewhere other than this phone. A backup is for the day this phone is gone, and this password is the only way to open it. LibrePT cannot get it back for you, and neither can Google.",
+  backup_pw_remember: "Remember it on this device",
+  backup_pw_save: "I wrote it down, save it",
+  backup_pw_saved: "Saved. From now on your backups are encrypted.",
+  backup_pw_empty: "Type a password, or tap Another one for a ready-made one.",
+  backup_pw_failed: "The password could not be saved on this device.",
+  backup_pw_change_warning:
+    "Backup files you have already written keep the old password. Only new backups use the new one.",
+  backup_pw_unlock_title: "This backup is encrypted",
+  backup_pw_unlock_lead: "Type the backup password this file was written with.",
+  backup_pw_unlock_open: "Open the file",
+  backup_pw_wrong: "Wrong password, or the file was changed. Nothing on this device was changed.",
+  backup_pw_state_on: "Backups from this device are encrypted.",
+  backup_pw_state_off: "Backups from this device are not encrypted yet.",
+  backup_pw_set: "Set a backup password",
+  backup_pw_change: "Change the backup password",
+  backup_pw_forget: "Forget it on this device",
+  backup_pw_forget_done:
+    "Forgotten on this device. Files already written stay encrypted, and the password still opens them.",
+  backup_pw_sandbox: "The sandbox holds sample data, so its backups are not encrypted.",
+  backup_pw_export_cancelled: "Nothing was exported. A backup needs a password first.",
+  backup_pw_exported_encrypted: "Exported and encrypted.",
+  backup_pw_exported_plain: "Exported.",
+  drive_sync_status_needs_password:
+    "Sync has not started: the copy in Drive is encrypted with your backup password, and there is none yet.",
+  drive_sync_status_locked:
+    "The copy in Drive is encrypted and this device has no password for it. Nothing was synced.",
+  drive_sync_unlock: "Enter the backup password",
   encrypted_title: "Open an encrypted file",
   encrypted_lead: "For a personal-data export your trainer sent you.",
   encrypted_local:

@@ -22,13 +22,14 @@ import {
   renderClientExportMarkdown,
 } from "../../data/clientDataExport.js";
 import { clientDisambiguator, eraseClientInState } from "../../data/clientErasure.js";
-import { encryptPayload, generatePassphrase } from "../../data/encryptedExport.js";
+import { encryptPayload } from "../../data/encryptedExport.js";
 import { externalErasureChecklist, renderErasureReceipt } from "../../data/erasureChecklist.js";
 import {
   readSuppressionList,
   withSuppressedClient,
   writeSuppressionList,
 } from "../../data/erasureSuppression.js";
+import { generatePassphrase } from "../../data/passphraseKey.js";
 import { readTrainerIdentity } from "../../data/trainerIdentity.js";
 import { dictionaryFor } from "../../i18n/index.js";
 import { tellInApp } from "../common/appQuestion.js";

@@ -1,7 +1,7 @@
 // tests/unit_js/data/backupFormat.test.mjs
 // The backup envelope version (src/data/backupFile.js).
 //
-// ONE integer on the envelope, shared by the container and the records. What makes it worth pinning
+// ONE integer on the envelope, and the format table says what it means. What makes it worth pinning
 // is that both failure modes are silent and destructive: a reader that GUESSES at an unknown version
 // imports an empty database over the trainer's real one, and a reader that stops understanding
 // version-less files abandons every backup written before the field existed. "Retain readers
@@ -9,9 +9,11 @@
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { AES_GCM_CONTAINER } from "../../../src/data/backupEncryption.js";
 import {
   BACKUP_FORMATS,
   CURRENT_BACKUP_FORMAT,
+  ENCRYPTED_BACKUP_FORMAT,
   buildBackupPayload,
   resolveBackupFormat,
 } from "../../../src/data/backupFile.js";
@@ -22,9 +24,10 @@ test("a written backup declares the current envelope version", () => {
   assert.equal(payload.formatVersion, CURRENT_BACKUP_FORMAT);
 });
 
-test("the envelope version IS the schema version", () => {
-  // The design decision, pinned: one number written twice, never two numbers that could disagree.
-  // A file whose envelope and payload differ is corrupt or hand-edited, not a valid combination.
+test("the envelope version of a PLAIN file IS the schema version", () => {
+  // The design decision, pinned: for a plain container, one number written twice, never two numbers
+  // that could disagree. A file whose envelope and payload differ is corrupt or hand-edited, not a
+  // valid combination.
   const payload = buildBackupPayload({ lang: "en" });
   assert.equal(payload.formatVersion, payload.schemaVersion);
   assert.equal(resolveBackupFormat(payload).schema, BACKUP_SCHEMA);
@@ -69,4 +72,28 @@ test("version 4 stays a plain-JSON container", () => {
   // what it meant when written. Editing it in place silently redefines files nobody can re-export.
   // A later encryption scheme is version 5 with a new row, not an edit to this one.
   assert.deepEqual(BACKUP_FORMATS[4], { container: "json" });
+});
+
+test("the encrypted container has its own version, and it names the schema inside", () => {
+  // Version 6 is schema 5's records in an AES-GCM envelope. The row has to state the schema, because
+  // the payload's own `schemaVersion` is under the ciphertext where no reader can see it before
+  // decrypting — which is also what stops anyone altering it.
+  const row = BACKUP_FORMATS[ENCRYPTED_BACKUP_FORMAT];
+  assert.equal(row.container, AES_GCM_CONTAINER);
+  assert.equal(row.schema, 5);
+
+  const resolved = resolveBackupFormat({ formatVersion: ENCRYPTED_BACKUP_FORMAT, ciphertext: "…" });
+  assert.equal(resolved.container, AES_GCM_CONTAINER);
+  assert.equal(resolved.schema, 5, "an encrypted file must not be read at schema 6");
+  assert.equal(resolved.unsupported, undefined);
+});
+
+test("every row can be opened by something this build has", () => {
+  // A row with a container nothing implements is a file this build writes and cannot read back.
+  for (const [version, row] of Object.entries(BACKUP_FORMATS)) {
+    assert.ok(
+      ["json", AES_GCM_CONTAINER].includes(row.container),
+      `format ${version} names a container nothing here can open: ${row.container}`,
+    );
+  }
 });

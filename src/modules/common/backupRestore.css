@@ -153,3 +153,33 @@
   line-height: 1.5;
   color: var(--text-muted);
 }
+
+/* The backup password dialog (modules/common/backupPassword.js). The password is SHOWN, not dotted,
+   so it can be read off the screen and written on paper — so it needs to be legible at arm's length
+   on a phone, which is what the larger size and the letter spacing are for. */
+#backup-pw-value {
+  font-size: 16px;
+  letter-spacing: 0.02em;
+}
+
+/* Generate and copy sit side by side above the warning. Real targets: this is tapped one-handed. */
+.backup-pw-actions-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 0 0 14px;
+}
+.backup-pw-actions-row button {
+  flex: 1 1 auto;
+  min-height: 44px;
+}
+
+/* The whole row is the target, not just the box. */
+.backup-pw-remember {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  cursor: pointer;
+  font-size: 13px;
+}

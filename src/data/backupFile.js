@@ -16,22 +16,31 @@
 // SCHEMA_4 plus `startDate`), so the newest is a strict superset of the rest and older copies would
 // store strictly less information at full size. Restore re-derives every live store anyway.
 //
-// **ONE version number, on the envelope, shared by the container and the records.**
-// `formatVersion` sits outside any future compression or encryption, so it is the first thing
-// readable — it answers "can I open this box?" — and it is the SAME integer as `schemaVersion`, so
-// it also answers "how do I read what is inside?". A container change and a record change both bump
-// it; the number is a single monotonic history of the file format as a whole.
+// **ONE version number, on the envelope, and the TABLE below says what it means.**
+// `formatVersion` sits outside any compression or encryption, so it is the first thing readable — it
+// answers "can I open this box?" — and the table answers "how do I read what is inside?". A container
+// change and a record change both bump it; the number is a single monotonic history of the file
+// format as a whole.
 //
 // **Two independent numbers were considered and rejected** (Simon, 2026-08-15), and the two
-// objections to sharing both fall down on this architecture:
-//   * "A container-only change forces a record-schema bump with no migration to run." True, and the
-//     cost is one no-op step in the chain. That is cheap, and it keeps the chain's history complete.
+// objections to one number both fall down on this architecture:
+//   * "A container-only change forces a record-schema bump with no migration to run." It does not,
+//     since 2026-09-28: the row names the record schema, so version 6 is the encrypted container
+//     over schema 5's records and the chain gains nothing. **This is the one part of the 2026-08-15
+//     decision that changed, and why**: the original plan was a no-op step plus a real schema 6, and
+//     a live schema is not free here — the star-write fan-out writes every record to every live
+//     schema, so a schema 6 identical to 5 would have doubled every write on disk to record that the
+//     container had changed.
 //   * "An older build then refuses a file whose container it understands." It should. The guarantee
 //     here is retain READERS forever — new builds open old files — and that is unaffected. Old
 //     builds opening NEW files was never promised, and refusing is already what the restore path
 //     does, because a newer file may hold records this build cannot faithfully represent.
-// What sharing buys is that there is no way to express, or accidentally ship, a file whose two
-// numbers disagree.
+// What ONE number buys is that there is no way to express, or accidentally ship, a file whose
+// container and record shape disagree: a reader takes both from the same integer, through the table.
+//
+// **An encrypted file states its schema nowhere a reader can see it, and that is better.** Version
+// 6's `schemaVersion` is inside the ciphertext, so the row below is the only claim about the record
+// shape and nobody can alter it without the file failing to decrypt at all.
 //
 // The table below records which containers this build can open. **A row is never edited, only
 // added**: files carrying version N are in the wild forever, so row N must keep describing what N
@@ -39,6 +48,7 @@
 //
 // Injected dependencies: none.
 
+import { AES_GCM_CONTAINER } from "./backupEncryption.js";
 import { CURRENT_SCHEMA_VERSION } from "./migrationSteps.js";
 import { COLLECTIONS, collectionsForSchema, projectCollection } from "./recordProjections.js";
 import { BACKUP_SCHEMA, LIVE_SCHEMAS } from "./recordSchemas.js";
@@ -51,19 +61,29 @@ const SETTINGS_KEYS = ["lang"];
 /** How to open a file at each version. **Add rows; never edit one** — files declaring a version are
  * permanent, so the row is the only record of what that version promised.
  *
- * Keyed by the shared version integer, which is also the record schema: version 4 is schema 4 in a
- * plain-JSON container. Adding encryption becomes version 5 with `container: "aes-gcm"`, and a
- * no-op 4→5 step in the migration chain, since the records will not have changed. */
+ * Keyed by the one version integer. A row names the container and, where it is not the version
+ * itself, the record schema inside: version 4 is schema 4 in plain JSON, version 6 is schema 5's
+ * records inside an AES-GCM envelope. */
 export const BACKUP_FORMATS = {
   4: { container: "json" },
   // Schema 5: the same plain-JSON container; the records gained `exercises.source` and
   // the `circuits` collection. A build that knows only 4 refuses a file at 5 — the stated price.
   5: { container: "json" },
+  // 2026-09-28: the same records, encrypted (data/backupEncryption.js). `schema` is stated because
+  // it is NOT the version integer here, and because the payload's own `schemaVersion` is under the
+  // ciphertext where a reader cannot reach it before decrypting.
+  6: { container: AES_GCM_CONTAINER, schema: 5 },
 };
 
-/** The version written today. Tied to BACKUP_SCHEMA rather than restated, because they are one
- * number by design and a second literal here is the one place they could drift apart. */
+/** The version a PLAIN file is written at. Tied to BACKUP_SCHEMA rather than restated, because for a
+ * plain container they are one number by design and a second literal here is the one place they could
+ * drift apart. */
 export const CURRENT_BACKUP_FORMAT = BACKUP_SCHEMA;
+
+/** The version an ENCRYPTED file is written at. A literal, because it is deliberately not a function
+ * of the record schema: the next record change bumps 6 to 7 by adding a row, and the row keeps
+ * saying which schema its ciphertext holds. */
+export const ENCRYPTED_BACKUP_FORMAT = 6;
 
 /** Decides how to open a parsed file and how to read its records, from the single envelope integer.
  *
@@ -83,8 +103,9 @@ export function resolveBackupFormat(parsed) {
   }
   const known = BACKUP_FORMATS[declared];
   if (!known) return { unsupported: true, formatVersion: declared };
-  // schema === the version itself: one number, by design.
-  return { formatVersion: declared, schema: declared, ...known, legacy: false };
+  // The row's own schema where it states one, the version integer otherwise — which is the plain-JSON
+  // case, where the two have always been the same number.
+  return { formatVersion: declared, ...known, schema: known.schema ?? declared, legacy: false };
 }
 
 /**

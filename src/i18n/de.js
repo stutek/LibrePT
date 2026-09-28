@@ -329,6 +329,47 @@ export const de = {
   // The session setup form (modules/session/editSessionView.js).
   session_name_placeholder: "Namen des Trainings wählen oder eingeben...",
   location_placeholder: "Ort wählen oder eingeben...",
+  // Passwort für Sicherungen (modules/common/backupPassword.js).
+  backup_pw_title: "Passwort für Sicherungen",
+  backup_pw_lead:
+    "Deine Sicherungen werden mit diesem Passwort verschlüsselt. Ohne es kann sie niemand lesen: weder Google noch jemand, der die Datei findet.",
+  backup_pw_label: "Das Passwort",
+  backup_pw_new: "Ein anderes",
+  backup_pw_copy: "Kopieren",
+  backup_pw_copied: "Kopiert.",
+  backup_pw_copy_failed: "Kopieren nicht möglich. Schreibe es vom Bildschirm ab.",
+  backup_pw_write_it_down:
+    "Schreibe dieses Passwort an einem anderen Ort als auf diesem Telefon auf. Eine Sicherung ist für den Tag, an dem dieses Telefon weg ist, und dieses Passwort ist der einzige Weg, sie zu öffnen. LibrePT kann es nicht zurückholen, und Google kann es auch nicht.",
+  backup_pw_remember: "Auf diesem Gerät behalten",
+  backup_pw_save: "Ich habe es aufgeschrieben, speichern",
+  backup_pw_saved: "Gespeichert. Ab jetzt sind deine Sicherungen verschlüsselt.",
+  backup_pw_empty: "Gib ein Passwort ein oder tippe auf Ein anderes für ein fertiges.",
+  backup_pw_failed: "Das Passwort konnte auf diesem Gerät nicht gespeichert werden.",
+  backup_pw_change_warning:
+    "Bereits geschriebene Sicherungsdateien behalten das alte Passwort. Nur neue Sicherungen nutzen das neue.",
+  backup_pw_unlock_title: "Diese Sicherung ist verschlüsselt",
+  backup_pw_unlock_lead: "Gib das Passwort ein, mit dem diese Datei geschrieben wurde.",
+  backup_pw_unlock_open: "Datei öffnen",
+  backup_pw_wrong:
+    "Falsches Passwort, oder die Datei wurde geändert. Auf diesem Gerät wurde nichts geändert.",
+  backup_pw_state_on: "Sicherungen von diesem Gerät sind verschlüsselt.",
+  backup_pw_state_off: "Sicherungen von diesem Gerät sind noch nicht verschlüsselt.",
+  backup_pw_set: "Passwort für Sicherungen festlegen",
+  backup_pw_change: "Passwort für Sicherungen ändern",
+  backup_pw_forget: "Auf diesem Gerät vergessen",
+  backup_pw_forget_done:
+    "Auf diesem Gerät vergessen. Bereits geschriebene Dateien bleiben verschlüsselt, und das Passwort öffnet sie weiterhin.",
+  backup_pw_sandbox:
+    "Die Sandbox enthält Beispieldaten, deshalb sind ihre Sicherungen nicht verschlüsselt.",
+  backup_pw_export_cancelled:
+    "Es wurde nichts exportiert. Eine Sicherung braucht zuerst ein Passwort.",
+  backup_pw_exported_encrypted: "Exportiert und verschlüsselt.",
+  backup_pw_exported_plain: "Exportiert.",
+  drive_sync_status_needs_password:
+    "Die Synchronisierung hat noch nicht begonnen: Die Kopie in Google Drive wird mit deinem Passwort für Sicherungen verschlüsselt, und es gibt noch keines.",
+  drive_sync_status_locked:
+    "Die Kopie in Google Drive ist verschlüsselt, und dieses Gerät hat kein Passwort dafür. Es wurde nichts synchronisiert.",
+  drive_sync_unlock: "Passwort für Sicherungen eingeben",
   encrypted_title: "Verschlüsselte Datei öffnen",
   encrypted_lead:
     "Für einen Export deiner personenbezogenen Daten, den dir dein Trainer geschickt hat.",

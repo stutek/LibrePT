@@ -11,12 +11,14 @@ import {
   connectDriveSync,
   disconnectDriveSync,
   driveSyncStatus,
+  lockedDriveSnapshot,
   resolveSyncConflict,
   setSyncIntervalMinutes,
   syncNow,
 } from "../../data/driveSyncService.js";
 import { preloadGoogleIdentityServices } from "../../data/googleAuth.js";
 import { isSandbox } from "../../data/workspace.js";
+import { askToSet, askToUnlock } from "./backupPassword.js";
 import { closeModal, openModal, renderMarkupOnce } from "./dom.js";
 import { formatClockFromEpoch } from "./utils.js";
 
@@ -47,6 +49,23 @@ function formatLastSync(status) {
       return tr(
         "drive_sync_status_denied",
         "Google hasn't approved this account for sync yet. Your data is safe on this device.",
+      );
+    }
+    // No backup password yet, so nothing has been written to Google at all. Said as the one act that
+    // starts sync, not as a failure the trainer has to interpret.
+    if (error === "backup_password_not_set") {
+      return tr(
+        "drive_sync_status_needs_password",
+        "Sync has not started: the copy in Drive is encrypted with your backup password, and there is none yet.",
+      );
+    }
+    // The Drive copy is encrypted and this device has no key for it. Nothing was merged, applied or
+    // uploaded (driveSyncService.js) — so this names the one act that fixes it and does not pretend
+    // the sync half-happened.
+    if (error === "backup_password_required") {
+      return tr(
+        "drive_sync_status_locked",
+        "The copy in Drive is locked. Open Export Data Backup below and enter your backup password.",
       );
     }
     // Closing the consent popup is a choice, not a fault — acknowledge and stop.
@@ -89,6 +108,7 @@ function cardStateFor(status) {
       statusClass: "status-msg",
       reviewVisible: false,
       reviewLabel: "",
+      passwordAction: null,
     };
   }
   const busyLabel = tr("drive_sync_syncing", "Syncing…");
@@ -108,6 +128,15 @@ function cardStateFor(status) {
       statusClass: `status-msg ${failed ? "text-danger" : "text-emerald"}`,
       reviewVisible: conflictCount > 0,
       reviewLabel: `${tr("drive_sync_review_conflicts", "Review conflicts")} (${conflictCount})`,
+      // One control, two jobs: set the first password, or type the one the Drive copy was written
+      // with. They are different acts — a new password derives a different key and cannot open that
+      // file — so the label and the tap differ, and the card never shows both.
+      passwordAction:
+        status.lastSyncResult?.error === "backup_password_not_set"
+          ? "set"
+          : status.lastSyncResult?.error === "backup_password_required"
+            ? "unlock"
+            : null,
     };
   }
   return {
@@ -121,6 +150,7 @@ function cardStateFor(status) {
     statusClass: "status-msg",
     reviewVisible: false,
     reviewLabel: "",
+    passwordAction: null,
   };
 }
 
@@ -154,6 +184,13 @@ function applyCardState(state) {
   // otherwise read as a promise about their own work.
   set("drive-sync-sandbox-note", (el) => {
     el.hidden = !isSandbox();
+  });
+  set("btn-drive-unlock", (el) => el.classList.toggle("hidden", !state.passwordAction));
+  set("btn-drive-unlock-text", (el) => {
+    el.textContent =
+      state.passwordAction === "set"
+        ? tr("backup_pw_set", "Set a backup password")
+        : tr("drive_sync_unlock", "Enter the backup password");
   });
   set("btn-drive-review-conflicts", (el) => el.classList.toggle("hidden", !state.reviewVisible));
   set("btn-drive-review-conflicts-text", (el) => {
@@ -220,6 +257,26 @@ export function setupDriveSyncUi() {
     intervalInput.addEventListener("change", () => {
       setSyncIntervalMinutes(intervalInput.value);
       renderDriveSyncCard();
+    });
+  }
+
+  // The Drive copy is encrypted and this device has no key for it. The password is derived from THAT
+  // file's salt, not from a freshly set one — see driveSyncService.js's `lockedSnapshot`.
+  const unlockBtn = document.getElementById("btn-drive-unlock");
+  if (unlockBtn) {
+    unlockBtn.addEventListener("click", async () => {
+      const envelope = lockedDriveSnapshot();
+      // With a file in hand, the password has to be the one THAT file was written with — a freshly
+      // set one derives a different key (driveSyncService.js). With no file, there is nothing yet to
+      // open and this is the first password. Kept on this device without asking either way: a sync
+      // that could not keep the key would ask again on every pass.
+      const ready = envelope
+        ? await askToUnlock(envelope, { mustRemember: true })
+        : await askToSet();
+      if (!ready) return;
+      await syncNow();
+      renderDriveSyncCard();
+      deps?.renderSyncBadge?.();
     });
   }
 

@@ -1,6 +1,16 @@
 // src/modules/common/backupRestore.js
 // Component that manages the data backup, JSON export, and JSON file import actions.
 //
+// **An exported file is encrypted whenever this workspace has a backup password**
+// (data/backupEncryption.js), and setting one is part of the first export rather than a setting
+// somewhere else: the export is the moment the trainer is thinking about the file, and a password
+// asked for later is a password nobody sets. Declining the dialog cancels the export — it does NOT
+// quietly write a plain file, which would be the failure the encryption exists to prevent.
+//
+// **The sandbox is the exception and needs no password.** Its records are generated sample data about
+// nobody, and asking for a password to export them would teach a trainer to skip the dialog on the
+// one that matters.
+//
 // deps: {
 //   getState(),
 //   setState(newState),
@@ -14,12 +24,15 @@
 //   t
 // }
 
+import { AES_GCM_CONTAINER, decryptBackup, encryptBackup } from "../../data/backupEncryption.js";
 import {
+  ENCRYPTED_BACKUP_FORMAT,
   buildBackupPayload,
   refusesRestoreInto,
   resolveBackupFormat,
   summarizeReplacement,
 } from "../../data/backupFile.js";
+import { backupKeyForWriting, hasBackupPassword } from "../../data/backupKeyStore.js";
 import {
   applySuppressions,
   mergeSuppressionLists,
@@ -29,10 +42,16 @@ import {
 import { DEFAULT_SESSIONS } from "../../data/index.js";
 import { bringsDataForward, describeMigration, migrateState } from "../../data/schemaMigrations.js";
 import { recordBackupTaken } from "../../data/stateStore.js";
-import { activeWorkspace } from "../../data/workspace.js";
+import { SANDBOX, activeWorkspace } from "../../data/workspace.js";
 import { countedText } from "../../i18n/plural.js";
 import { BUILD_INFO } from "../../version.js";
 import { isOfflineCachedActive } from "./applicationHeader.js";
+import {
+  askToSet,
+  askToUnlock,
+  ensureBackupPassword,
+  forgetOnThisDevice,
+} from "./backupPassword.js";
 import { renderMarkupOnce } from "./dom.js";
 import { downloadFile } from "./download.js";
 import { handleHeaderCloudTap } from "./driveSyncUi.js";
@@ -146,6 +165,110 @@ function showReplaceConfirmation(replacing, migrationSummary) {
   box.hidden = false;
 }
 
+/** The export card's own status line — what the last tap on Export did, in one sentence. */
+function setExportStatus(key, tone = "") {
+  const line = document.getElementById("export-status");
+  if (!line) return;
+  line.textContent = key ? deps.t(key) || key : "";
+  line.className = tone ? `status-msg ${tone}` : "status-msg";
+}
+
+/**
+ * Open an encrypted backup: the key this device already holds, or a password typed now.
+ *
+ * Returns the payload, or null when it could not be opened — which is NOT an error about the file.
+ * Every null path leaves a message saying what happened and leaves the database untouched.
+ *
+ * The stored key is tried first and its failure is silent on purpose: a trainer restoring a file
+ * written under an older password should be asked for that password, not told their own device is
+ * broken.
+ */
+async function openEncryptedBackup(envelope) {
+  const stored = await backupKeyForWriting();
+  if (stored) {
+    try {
+      return await decryptBackup(envelope, { key: stored.key });
+    } catch {
+      /* Written with a different password. Ask for that one. */
+    }
+  }
+
+  const key = await askToUnlock(envelope);
+  if (!key) {
+    setImportStatus("restore_nothing_changed");
+    return null;
+  }
+  try {
+    return await decryptBackup(envelope, { key });
+  } catch {
+    setImportStatus("backup_pw_wrong", "text-danger");
+    return null;
+  }
+}
+
+/**
+ * The text of a chosen file, turned into a backup payload.
+ *
+ * **The envelope is read FIRST, before anything else touches the file** — including before any key
+ * work. A version this build does not know may be compressed, or encrypted in a way this build cannot
+ * open, and a collection check run first would see no arrays and the importer would write an empty
+ * database over the trainer's real one. Refusing is the only safe answer to "I cannot open this".
+ *
+ * Returns null for a file that is locked and stayed locked, which is not a bad file and does not
+ * throw: `openEncryptedBackup` has already said what happened.
+ */
+async function readImportedFile(text) {
+  const parsed = JSON.parse(text);
+  const format = resolveBackupFormat(parsed);
+  if (format.unsupported) {
+    throw new Error(
+      `This backup is format version ${format.formatVersion}, which this version of LibrePT cannot open. Update LibrePT and try again — the file is unchanged.`,
+    );
+  }
+  if (format.container !== AES_GCM_CONTAINER) return parsed;
+  return openEncryptedBackup(parsed);
+}
+
+/** The import card's status line, so the encrypted paths report the way every other one does. */
+function setImportStatus(key, tone = "") {
+  const line = document.getElementById("import-status");
+  if (!line) return;
+  line.textContent = deps.t(key) || key;
+  line.className = tone ? `status-msg ${tone}` : "status-msg";
+}
+
+/**
+ * Say whether backups from this device are encrypted, and offer the two acts that change it.
+ *
+ * Read from the store on every dialog open rather than remembered: the password can be set on
+ * another surface, forgotten here, or wiped with the database, and a remembered answer would be the
+ * one thing on the card that is out of date.
+ */
+async function refreshEncryptionState() {
+  const line = document.getElementById("backup-encryption-state");
+  const manage = document.getElementById("btn-backup-pw-manage");
+  const forget = document.getElementById("btn-backup-pw-forget");
+  if (!line) return;
+
+  if (activeWorkspace() === SANDBOX) {
+    line.textContent = deps.t("backup_pw_sandbox");
+    line.className = "status-msg";
+    if (manage) manage.hidden = true;
+    if (forget) forget.hidden = true;
+    return;
+  }
+
+  const set = await hasBackupPassword();
+  line.textContent = deps.t(set ? "backup_pw_state_on" : "backup_pw_state_off");
+  line.className = set ? "status-msg text-emerald" : "status-msg text-danger";
+  if (manage) {
+    manage.hidden = false;
+    const label = document.getElementById("btn-backup-pw-manage-text");
+    if (label) label.textContent = deps.t(set ? "backup_pw_change" : "backup_pw_set");
+  }
+  if (forget) forget.hidden = !set;
+}
+
 export function initBackupRestore(d) {
   deps = d;
 }
@@ -157,6 +280,10 @@ export function prepareBackupDialog() {
     importStatus.textContent = "";
     importStatus.className = "status-msg";
   }
+  setExportStatus("");
+  // Not awaited: the dialog shows now and the line fills a tick later. Holding the dialog on an
+  // IndexedDB read would put a wait in front of every open of the backup centre.
+  refreshEncryptionState();
 }
 
 export function renderBackupDialog() {
@@ -240,6 +367,10 @@ export function renderBackupDialog() {
                folder and spends the same grant. Said here, or a trainer reads "synced" and
                believes their own work is safe. Hidden outside the sandbox. -->
           <p id="drive-sync-sandbox-note" class="status-msg" data-i18n="sync_sandbox_note" hidden></p>
+          <!-- Shown only when the copy in Drive is encrypted and this device has no key for it
+               (driveSyncUi.js). It asks for the password THAT file was written with, which a newly
+               set password cannot be. -->
+          <button type="button" id="btn-drive-unlock" class="btn primary-btn w-full hidden"><i class="fa-solid fa-key"></i> <span id="btn-drive-unlock-text"></span></button>
           <button id="btn-drive-review-conflicts" class="btn secondary-btn w-full hidden"><i class="fa-solid fa-code-compare"></i> <span id="btn-drive-review-conflicts-text"></span></button>
         </div>
 
@@ -247,7 +378,14 @@ export function renderBackupDialog() {
           <i class="fa-solid fa-file-export backup-icon-large text-emerald"></i>
           <h4 id="backup-export-title" data-i18n="backup_export_title">Export Data Backup</h4>
           <p id="backup-export-desc" data-i18n="backup_export_desc">Download your clients, routines, and workout logs as a single JSON file.</p>
+          <!-- Whether the file that leaves this device can be read by whoever finds it. Filled by
+               refreshEncryptionState() on every open, because the answer is kept in the database and
+               can change on another surface. -->
+          <p id="backup-encryption-state" class="status-msg"></p>
           <button id="btn-export-db" class="btn primary-btn w-full" data-i18n="btn_export_json">Export JSON</button>
+          <button type="button" id="btn-backup-pw-manage" class="btn secondary-btn w-full" hidden><i class="fa-solid fa-key"></i> <span id="btn-backup-pw-manage-text"></span></button>
+          <button type="button" id="btn-backup-pw-forget" class="btn secondary-btn w-full" hidden data-i18n="backup_pw_forget">Forget it on this device</button>
+          <p id="export-status" class="status-msg"></p>
         </div>
 
         <div class="action-card card">
@@ -343,6 +481,21 @@ export function setupBackupRestore() {
     .getElementById("btn-backup-open-encrypted")
     ?.addEventListener("click", () => deps.openEncryptedFileReader?.());
 
+  // Set the password, or change it. `changing` is what makes the dialog state the consequence a
+  // change has and a first setting does not: the old files keep the old password.
+  document.getElementById("btn-backup-pw-manage")?.addEventListener("click", async () => {
+    const changing = await hasBackupPassword();
+    const saved = await askToSet({ changing });
+    if (saved) setExportStatus("backup_pw_saved", "text-emerald");
+    await refreshEncryptionState();
+  });
+
+  document.getElementById("btn-backup-pw-forget")?.addEventListener("click", async () => {
+    await forgetOnThisDevice();
+    setExportStatus("backup_pw_forget_done");
+    await refreshEncryptionState();
+  });
+
   const importFile = document.getElementById("import-db-file");
   const importStatus = document.getElementById("import-status");
 
@@ -407,7 +560,16 @@ export function setupBackupRestore() {
   // Export JSON — the whole local database, for backup / device migration.
   const exportBtn = document.getElementById("btn-export-db");
   if (exportBtn) {
-    exportBtn.addEventListener("click", () => {
+    exportBtn.addEventListener("click", async () => {
+      // The sandbox exports sample data about nobody, so it needs no password (this module's header).
+      const inSandbox = activeWorkspace() === SANDBOX;
+      // Asked BEFORE the payload is built, so a declined dialog leaves no copy of the database in a
+      // variable and nothing to accidentally write out.
+      if (!inSandbox && !(await ensureBackupPassword())) {
+        setExportStatus("backup_pw_export_cancelled");
+        return;
+      }
+
       // Built at the newest NUMBERED schema, not at the runtime one (data/backupFile.js): a file
       // written at the unstable preview shape is restorable only by the build that wrote it.
       const payload = buildBackupPayload(deps.getState(), {
@@ -417,12 +579,27 @@ export function setupBackupRestore() {
         // Carried so the erasure register survives a reinstall — see erasureSuppression.js.
         suppressions: readSuppressionList(),
       });
-      const dataStr = JSON.stringify(payload, null, 2);
+
+      const stored = inSandbox ? null : await backupKeyForWriting();
+      // Indented plain JSON stays indented: a trainer opening the file in a text editor to check it
+      // is real is a thing that happens. An envelope has nothing in it to read, so it is written
+      // compactly.
+      const written = stored
+        ? JSON.stringify(
+            await encryptBackup(payload, {
+              key: stored.key,
+              salt: stored.salt,
+              iterations: stored.iterations,
+              formatVersion: ENCRYPTED_BACKUP_FORMAT,
+            }),
+          )
+        : JSON.stringify(payload, null, 2);
       downloadFile(
-        dataStr,
+        written,
         `librept_backup_${new Date().toISOString().substring(0, 10)}.json`,
         "application/json",
       );
+      setExportStatus(stored ? "backup_pw_exported_encrypted" : "backup_pw_exported_plain");
       // A downloaded file is a real backup, so it answers the unbacked-data warning's "is this
       // data anywhere durable" exactly as a Drive sync does. Recording it is what keeps the
       // coming unbacked warning honest — a trainer who exports weekly must be able to clear it
@@ -448,7 +625,10 @@ export function setupBackupRestore() {
       const reader = new FileReader();
       reader.onload = async (evt) => {
         try {
-          const importedData = JSON.parse(evt.target.result);
+          const importedData = await readImportedFile(evt.target.result);
+          // Locked, and the trainer gave up or typed the wrong password. `readImportedFile` has
+          // already said which; the database is untouched.
+          if (!importedData) return;
 
           // Simple verification schema
           if (
@@ -456,17 +636,6 @@ export function setupBackupRestore() {
             Array.isArray(importedData.clients) &&
             Array.isArray(importedData.exercises)
           ) {
-            // The envelope is read BEFORE anything else touches the file. A version
-            // this build does not know may be compressed or encrypted, and the collection check
-            // above would then see no arrays and this reader would import an empty database over
-            // the trainer's real one. Refusing is the only safe answer to "I cannot open this".
-            const format = resolveBackupFormat(importedData);
-            if (format.unsupported) {
-              throw new Error(
-                `This backup is format version ${format.formatVersion}, which this version of LibrePT cannot open. Update LibrePT and try again — the file is unchanged.`,
-              );
-            }
-
             // Refused WHOLE, and here rather than at the button: this is the seam
             // every file comes in through, and the erasure register is already filtered one line
             // further on for the same class of reason — something that must not come back in.

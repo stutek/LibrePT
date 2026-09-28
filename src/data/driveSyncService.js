@@ -18,6 +18,22 @@
 // app-only data with no Calendar equivalent; until then there is no Calendar-sourced overlap
 // to exclude, so the full domain snapshot is what a PT actually needs mirrored across their devices.
 //
+// **The snapshot on Drive is encrypted when a backup password is set** (data/backupEncryption.js).
+// Google encrypts Drive in transit and at rest already, but that is Google's key, not the trainer's:
+// Google's own infrastructure can read the file. With a password set, the file in `appDataFolder` is
+// an AES-GCM envelope and neither Google nor anyone who obtains the file can read a client's health
+// record out of it. The erasure register is the one file left in the clear, on purpose — it holds
+// salted hashes and nothing else (erasureSuppression.js), so there is nothing in it to disclose, and
+// it has to be unionable across devices that may not share a password yet.
+//
+// **A sync does not run at all until a backup password is set** (except in the sandbox). Writing the
+// database to Google unencrypted, once, leaves a copy behind that setting a password later does not
+// reach — Drive keeps earlier versions of a file.
+//
+// **A device with no key must never merge an encrypted snapshot.** An unreadable download would look
+// like an empty Drive file, and merging an empty remote against a populated ancestor is how a sync
+// deletes the trainer's data on every device. So this asks for the password and stops.
+//
 // **Not built in this slice**: incremental sync via the Drive Changes API (`changes.list` +
 // `pageToken`) — every sync downloads and re-uploads the whole JSON file, which is correct but not
 // bandwidth-minimal; a real optimisation, not a correctness gap, and left for a follow-up once this
@@ -42,6 +58,9 @@
 // Injected dependencies: none at the module level — call sites are the UI layer (driveSyncUi.js) and
 // app.js's lifecycle hook.
 
+import { decryptBackup, encryptBackup, isEncryptedBackup } from "./backupEncryption.js";
+import { ENCRYPTED_BACKUP_FORMAT } from "./backupFile.js";
+import { backupKeyForWriting } from "./backupKeyStore.js";
 import {
   createSyncFile,
   downloadSyncFile,
@@ -75,9 +94,14 @@ import {
   writeDriveSyncMeta,
 } from "./stateStore.js";
 import { countChangedRecords, mergeState } from "./syncMerge.js";
+import { SANDBOX, activeWorkspace } from "./workspace.js";
 
 let syncing = false;
 let lastSyncResult = null;
+// The encrypted snapshot this device has no key for. Kept so the dialog can ask for THAT file's
+// password: a freshly set password uses a fresh salt and would derive a different key, which could
+// not open this file no matter how correctly it was typed.
+let lockedSnapshot = null;
 
 // The real ahead/behind counters (replaces the header badge's former hardcoded mock).
 // `cachedAncestor` is the last-synced snapshot, kept in memory so `getAheadCount()` can be
@@ -185,12 +209,12 @@ export async function refreshSyncCounts() {
     if (!token) return;
 
     const meta = (await readDriveSyncMeta()) || { fileId: null, ancestor: {} };
-    let fileId = meta.fileId;
-    if (!fileId) {
-      const existing = await findSyncFile(token);
-      if (existing) fileId = existing.id;
-    }
-    const remoteState = fileId ? (await downloadSyncFile(token, fileId)) || {} : {};
+    // Through the SAME reader syncNow uses, so an encrypted snapshot is decrypted here too. Counting
+    // an envelope as an empty remote would report the whole database as "behind" and send a trainer
+    // to sync away a difference that does not exist.
+    const { remoteState, locked } = await fetchRemoteSnapshot(token, meta);
+    // No key for this file: the counts stay as they were, like every other failure here.
+    if (locked) return;
     cachedBehind = countChangedRecords(COLLECTIONS, meta.ancestor || {}, remoteState);
     notifyCountsChanged();
   } catch (error) {
@@ -261,6 +285,12 @@ export async function connectDriveSync() {
   return syncNow();
 }
 
+/** The encrypted Drive snapshot the last pass could not open, or null. The dialog derives the key
+ *  from THIS envelope's salt — see `lockedSnapshot` above for why a newly set password cannot do. */
+export function lockedDriveSnapshot() {
+  return lockedSnapshot;
+}
+
 /** End the app's Drive access at Google and forget it here; resolves to revokeAccess's outcome. */
 export async function disconnectDriveSync() {
   const outcome = await revokeAccess();
@@ -291,8 +321,42 @@ async function fetchRemoteSnapshot(token, meta) {
     const existing = await findSyncFile(token);
     if (existing) fileId = existing.id;
   }
-  const remoteState = fileId ? (await downloadSyncFile(token, fileId)) || {} : {};
-  return { fileId, remoteState };
+  const downloaded = fileId ? (await downloadSyncFile(token, fileId)) || {} : {};
+  if (!isEncryptedBackup(downloaded)) return { fileId, remoteState: downloaded };
+
+  // Encrypted on Drive. Without the key this pass CANNOT continue: see the header — an unreadable
+  // snapshot is indistinguishable from an empty one, and merging an empty remote would delete
+  // records everywhere.
+  const stored = await backupKeyForWriting();
+  if (!stored) {
+    lockedSnapshot = downloaded;
+    return { fileId, remoteState: null, locked: true };
+  }
+  try {
+    const remoteState = await decryptBackup(downloaded, { key: stored.key });
+    lockedSnapshot = null;
+    return { fileId, remoteState };
+  } catch {
+    // A key on this device, a file written with a different password. Same answer: stop, and keep the
+    // file so the trainer can be asked for the password it was actually written with.
+    lockedSnapshot = downloaded;
+    return { fileId, remoteState: null, locked: true };
+  }
+}
+
+// The bytes to upload: the snapshot in an AES-GCM envelope when this workspace has a backup
+// password, the plain snapshot when it has none. The ancestor recorded in the meta store stays the
+// PLAIN merged state either way — it is a local record of what Drive last saw, read by the next
+// merge, and encrypting it would buy nothing while costing a decrypt on every pass.
+async function snapshotForUpload(mergedState) {
+  const stored = await backupKeyForWriting();
+  if (!stored) return mergedState;
+  return encryptBackup(mergedState, {
+    key: stored.key,
+    salt: stored.salt,
+    iterations: stored.iterations,
+    formatVersion: ENCRYPTED_BACKUP_FORMAT,
+  });
 }
 
 // Kept out of syncNow's body so a Drive hiccup on the register cannot fail a state sync that
@@ -319,6 +383,26 @@ async function syncRegister(mergedState) {
   }
 }
 
+// Everything that has to succeed before a merge can be attempted: a live token, the meta record, and
+// a snapshot this device can actually read. Returns `{ error }` for each case where the pass must stop
+// having changed nothing — `auth_required`, and `backup_password_required` for an encrypted Drive copy
+// with no key here, which the dialog turns into "type your backup password".
+async function prepareSyncPass() {
+  // **A sync writes the trainer's whole database into Google's storage, so it does not run until that
+  // copy can be encrypted.** Google encrypts Drive with Google's own key, which its own infrastructure
+  // can read; this is the only thing that makes the file opaque to everyone but the trainer. The
+  // sandbox is exempt: its records are sample data about nobody.
+  if (activeWorkspace() !== SANDBOX && !(await backupKeyForWriting())) {
+    return { error: "backup_password_not_set" };
+  }
+  const token = await requestAccessToken({ interactive: false });
+  if (!token) return { error: "auth_required" };
+  const meta = (await readDriveSyncMeta()) || { fileId: null, ancestor: {} };
+  const { fileId, remoteState, locked } = await fetchRemoteSnapshot(token, meta);
+  if (locked) return { error: "backup_password_required" };
+  return { token, meta, fileId, remoteState };
+}
+
 export async function syncNow() {
   if (!isDriveSyncConfigured()) return { ok: false, error: "not_configured", at: Date.now() };
   if (!hasStoredConsent()) return { ok: false, error: "not_connected", at: Date.now() };
@@ -327,15 +411,13 @@ export async function syncNow() {
   syncing = true;
   let reErasedOnSync = [];
   try {
-    const token = await requestAccessToken({ interactive: false });
-    if (!token) {
-      const result = { ok: false, error: "auth_required", at: Date.now() };
+    const prepared = await prepareSyncPass();
+    if (prepared.error) {
+      const result = { ok: false, error: prepared.error, at: Date.now() };
       lastSyncResult = result;
       return result;
     }
-
-    const meta = (await readDriveSyncMeta()) || { fileId: null, ancestor: {} };
-    const { fileId, remoteState } = await fetchRemoteSnapshot(token, meta);
+    const { token, meta, fileId, remoteState } = prepared;
 
     const localState = getState();
     const { mergedState, conflicts } = mergeState(COLLECTIONS, {
@@ -364,8 +446,10 @@ export async function syncNow() {
     setState(localState);
     saveToLocalStorage();
 
-    const writtenFileId = fileId || (await createSyncFile(token, mergedState)).id;
-    if (fileId) await updateSyncFile(token, fileId, mergedState);
+    // What goes on the wire, which is the merged snapshot itself only while no password is set.
+    const outgoing = await snapshotForUpload(mergedState);
+    const writtenFileId = fileId || (await createSyncFile(token, outgoing)).id;
+    if (fileId) await updateSyncFile(token, fileId, outgoing);
     await writeDriveSyncMeta({ fileId: writtenFileId, ancestor: mergedState });
     cachedAncestor = mergedState;
     // The data now exists somewhere the browser cannot evict — the other half of what the

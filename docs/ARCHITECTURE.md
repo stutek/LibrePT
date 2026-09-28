@@ -62,6 +62,21 @@ depends on — that tier mounts one component and nothing else.
   ([tabOwnership.js](../src/data/tabOwnership.js)); every other tab stops saving and is covered
   until the trainer uses it again, which reloads it. Keeping two tabs' memory in step was rejected:
   a dialog open in one tab would still write into a record the other had replaced.
+- **What leaves the device is encrypted; what stays on it is not.** A backup file and the Drive
+  snapshot are AES-GCM envelopes ([backupEncryption.js](../src/data/backupEncryption.js)); the live
+  IndexedDB store is plaintext and relies on the phone's own encryption. Encrypting the live store
+  would mean a forgotten password destroys a trainer's business records, which is a likelier loss than
+  the theft it would prevent. Encrypting what travels costs nothing that cannot be recovered, because
+  the live database is still there.
+- **A key kept for reuse is derived from a password and stored non-extractable.** Derived, because a
+  backup is for the day the device is gone and the key has to be reproducible from words on paper; non
+  extractable, because a key the browser will not export cannot be copied out by a script, an
+  extension, or a copied browser profile ([backupKeyStore.js](../src/data/backupKeyStore.js)). The
+  password is never stored, and no check of it is either.
+- **A container change is a new row in the backup format table, not a new record schema**
+  ([backupFile.js](../src/data/backupFile.js)). The one envelope integer still answers both "can I
+  open this box" and "what shape is inside", because the row names the schema. A record schema is not
+  free here: the star-write fan-out writes every record to every live schema.
 
 ## Themes and styling
 

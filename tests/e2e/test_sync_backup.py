@@ -7,6 +7,9 @@
 # wrapper. A mounted component with a fake state could not assert that.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
+import json
+from pathlib import Path
+
 # Seeds a Drive-sync ancestor directly via stateStore.js/driveSyncService.js, bypassing the OAuth
 # flow these tests can't perform, so the real diff (syncMerge.js's countChangedRecords, driven
 # through driveSyncService.js's getAheadCount) is what's under test — not just the badge's markup.
@@ -73,13 +76,18 @@ def test_downloading_a_backup_records_it_without_involving_drive(page, local_ser
     This is what keeps the unbacked-data warning honest: a trainer who exports weekly has
     to be able to clear it WITHOUT connecting Google. If only a Drive sync counted, a safety
     indicator would quietly be a prompt to enable an integration, and trainers can tell.
+
+    The export asks for a backup password on the way through (modules/common/backupPassword.js), so
+    the download is expected around the dialog's save, not around the Export tap.
     """
     page.goto(local_server + "clients")
     page.wait_for_selector("#view-client-directory.active")
 
     page.locator("#backup-btn").click()
+    page.locator("#btn-export-db").click()
+    page.wait_for_selector("#dialog-backup-password[open]")
     with page.expect_download():
-        page.locator("#btn-export-db").click()
+        page.locator("#btn-backup-pw-confirm").click()
 
     # The handler does not await the IndexedDB write, so poll rather than assume it has landed.
     page.wait_for_function(READ_BACKUP_HISTORY)
@@ -147,4 +155,58 @@ def test_more_than_nine_unpushed_changes_reads_as_an_alarm(page, local_server):
     # ...while the exact count still rides along in the aria-label for screen readers.
     assert "changes on this device to send" in (
         page.locator("#sync-badge").get_attribute("aria-label") or ""
+    )
+
+
+def test_an_exported_backup_holds_nothing_readable(page, local_server):
+    """The file that leaves the phone must disclose nothing to whoever ends up holding it.
+
+    Asserted on the bytes actually downloaded, not on the encrypting function — the function is
+    pinned in tests/unit_js/data/backupEncryption.test.mjs, and what this adds is that the app's own
+    export path really goes through it. A client's name here would mean the encryption is a setting
+    that the download ignores.
+    """
+    page.goto(local_server + "clients")
+    page.wait_for_selector("#view-client-directory.active")
+    page.wait_for_function(
+        """async () => {
+            const s = await import(new URL('data/stateStore.js', document.baseURI).href);
+            return (s.getState().clients || []).length > 0;
+        }"""
+    )
+    names = page.evaluate(
+        """async () => {
+            const s = await import(new URL('data/stateStore.js', document.baseURI).href);
+            return (s.getState().clients || []).map((c) => c.name).filter(Boolean);
+        }"""
+    )
+    assert names, "the demo seed produced no client to look for"
+
+    page.locator("#backup-btn").click()
+    page.locator("#btn-export-db").click()
+    page.wait_for_selector("#dialog-backup-password[open]")
+    with page.expect_download() as downloaded:
+        page.locator("#btn-backup-pw-confirm").click()
+    written = Path(downloaded.value.path()).read_text(encoding="utf-8")
+
+    envelope = json.loads(written)
+    assert envelope["container"] == "aes-gcm"
+    assert envelope["formatVersion"] == 6
+    # The version and the key parameters are readable, because a file nobody can open still has to be
+    # identifiable. Nothing else is.
+    assert set(envelope) == {
+        "formatVersion",
+        "container",
+        "kdf",
+        "salt",
+        "iv",
+        "ciphertext",
+        "hint",
+    }
+    for name in names:
+        assert name not in written, (
+            f"the client {name} is readable in the exported file"
+        )
+    assert "clients" not in written, (
+        "the collection names are readable in the exported file"
     )

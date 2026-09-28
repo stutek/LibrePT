@@ -325,6 +325,44 @@ export const sl = {
   // The session setup form (modules/session/editSessionView.js).
   session_name_placeholder: "Izberi ali vpiši ime treninga ...",
   location_placeholder: "Izberi ali vpiši lokacijo ...",
+  // Geslo za varnostne kopije (modules/common/backupPassword.js).
+  backup_pw_title: "Geslo za varnostne kopije",
+  backup_pw_lead:
+    "Varnostne kopije so šifrirane s tem geslom. Brez njega jih ne more prebrati nihče: ne Google in ne kdor najde datoteko.",
+  backup_pw_label: "Geslo",
+  backup_pw_new: "Drugo geslo",
+  backup_pw_copy: "Kopiraj",
+  backup_pw_copied: "Kopirano.",
+  backup_pw_copy_failed: "Kopiranje ni uspelo. Prepiši geslo z zaslona.",
+  backup_pw_write_it_down:
+    "Zapiši to geslo nekam izven tega telefona. Varnostna kopija je za dan, ko telefona ni več, in to geslo je edina pot do nje. LibrePT ti ga ne more priklicati nazaj, Google pa tudi ne.",
+  backup_pw_remember: "Zapomni si ga na tej napravi",
+  backup_pw_save: "Zapisal sem si ga, shrani",
+  backup_pw_saved: "Shranjeno. Od zdaj so varnostne kopije šifrirane.",
+  backup_pw_empty: "Vpiši geslo ali pritisni Drugo geslo za pripravljeno.",
+  backup_pw_failed: "Gesla ni bilo mogoče shraniti na to napravo.",
+  backup_pw_change_warning:
+    "Datoteke, ki so že zapisane, obdržijo staro geslo. Novo velja samo za nove kopije.",
+  backup_pw_unlock_title: "Ta varnostna kopija je šifrirana",
+  backup_pw_unlock_lead: "Vpiši geslo, s katerim je bila ta datoteka zapisana.",
+  backup_pw_unlock_open: "Odpri datoteko",
+  backup_pw_wrong: "Napačno geslo ali spremenjena datoteka. Na tej napravi se ni nič spremenilo.",
+  backup_pw_state_on: "Varnostne kopije s te naprave so šifrirane.",
+  backup_pw_state_off: "Varnostne kopije s te naprave še niso šifrirane.",
+  backup_pw_set: "Nastavi geslo za varnostne kopije",
+  backup_pw_change: "Zamenjaj geslo za varnostne kopije",
+  backup_pw_forget: "Pozabi ga na tej napravi",
+  backup_pw_forget_done:
+    "Pozabljeno na tej napravi. Že zapisane datoteke ostanejo šifrirane in geslo jih še naprej odpre.",
+  backup_pw_sandbox: "Peskovnik ima vzorčne podatke, zato njegove kopije niso šifrirane.",
+  backup_pw_export_cancelled: "Nič ni bilo izvoženo. Varnostna kopija najprej potrebuje geslo.",
+  backup_pw_exported_encrypted: "Izvoženo in šifrirano.",
+  backup_pw_exported_plain: "Izvoženo.",
+  drive_sync_status_needs_password:
+    "Usklajevanje se še ni začelo: kopijo na Google Drive šifrira geslo za varnostne kopije, tega pa še ni.",
+  drive_sync_status_locked:
+    "Kopija na Google Drive je šifrirana, ta naprava pa zanjo nima gesla. Nič ni bilo usklajeno.",
+  drive_sync_unlock: "Vpiši geslo za varnostne kopije",
   encrypted_title: "Odpri šifrirano datoteko",
   encrypted_lead: "Za izvoz osebnih podatkov, ki ti ga je poslal trener.",
   encrypted_local:

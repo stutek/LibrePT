@@ -10,12 +10,12 @@
 // travel in the same email as the file; the UI says so, and generates a strong one so the trainer
 // does not reach for their dog's name.
 //
-// Scheme, and why each parameter: PBKDF2-HMAC-SHA-256 at 600,000 iterations (OWASP's 2023 floor for
-// SHA-256) over a 16-byte random salt, into a 256-bit AES-GCM key with a 12-byte random IV. GCM
-// because it authenticates as well as encrypts: a truncated or tampered attachment fails to open
-// rather than decrypting to plausible nonsense. Everything needed to decrypt EXCEPT the passphrase
-// travels in the envelope, because a file that can only be opened by the build that wrote it is not
-// a portable export.
+// Scheme: the shared passphrase KDF in [passphraseKey.js](./passphraseKey.js) — PBKDF2-HMAC-SHA-256
+// into an AES-GCM key. It lives there rather than here because the encrypted backup container uses
+// the same primitive, and two copies of a KDF is two iteration counts with the weaker one deciding
+// how hard the file is to attack. Everything needed to decrypt EXCEPT the passphrase travels in the
+// envelope, because a file that can only be opened by the build that wrote it is not a portable
+// export.
 //
 // The envelope is JSON with base64 fields rather than a binary blob: it survives every mail gateway,
 // quoted-printable transform and copy-paste that a `.bin` does not, and a human can see what it is.
@@ -23,87 +23,24 @@
 // Injected dependencies: `cryptoImpl` (browser `crypto`, Node's `webcrypto` in tests) — passed in so
 // the whole module is testable without a DOM.
 
+import {
+  KDF_ITERATIONS,
+  deriveAesKey,
+  fromBase64,
+  randomIv,
+  randomSalt,
+  toBase64,
+} from "./passphraseKey.js";
+
 export const ENVELOPE_FORMAT = "librept-encrypted-export";
 export const ENVELOPE_VERSION = 1;
-const KDF_ITERATIONS = 600000;
-
-function toBase64(bytes) {
-  let binary = "";
-  for (const byte of new Uint8Array(bytes)) binary += String.fromCharCode(byte);
-  return btoa(binary);
-}
-
-function fromBase64(text) {
-  const binary = atob(text);
-  const bytes = new Uint8Array(binary.length);
-  for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
-  return bytes;
-}
-
-async function deriveKey(passphrase, salt, iterations, cryptoImpl) {
-  const material = await cryptoImpl.subtle.importKey(
-    "raw",
-    new TextEncoder().encode(passphrase),
-    "PBKDF2",
-    false,
-    ["deriveKey"],
-  );
-  return cryptoImpl.subtle.deriveKey(
-    { name: "PBKDF2", salt, iterations, hash: "SHA-256" },
-    material,
-    { name: "AES-GCM", length: 256 },
-    false,
-    ["encrypt", "decrypt"],
-  );
-}
-
-/**
- * A passphrase a trainer can read down a phone line and a client can type without a typo.
- *
- * Six words from a small, deliberately unambiguous alphabet-free list steps a random character
- * string here: the failure mode is not brute force (600k PBKDF2 rounds over ~77 bits of entropy is
- * far past what an email interceptor would spend), it is the trainer picking "gym2024" because the
- * generated one was unreadable over a bad connection.
- */
-const PASSPHRASE_WORDS = [
-  "anchor",
-  "barbell",
-  "cadence",
-  "deadlift",
-  "elbow",
-  "flywheel",
-  "gravity",
-  "hinge",
-  "impulse",
-  "jumprope",
-  "kettle",
-  "lever",
-  "mobility",
-  "nordic",
-  "overhead",
-  "posture",
-  "quadrant",
-  "rowing",
-  "sprint",
-  "tempo",
-  "unrack",
-  "vertical",
-  "warmup",
-  "zercher",
-];
-
-export function generatePassphrase(cryptoImpl = globalThis.crypto, wordCount = 6) {
-  const picks = new Uint32Array(wordCount);
-  cryptoImpl.getRandomValues(picks);
-  return Array.from(picks, (value) => PASSPHRASE_WORDS[value % PASSPHRASE_WORDS.length]).join("-");
-}
 
 /** Encrypt any JSON-serialisable payload into a self-describing envelope. */
 export async function encryptPayload(payload, passphrase, cryptoImpl = globalThis.crypto) {
   if (!passphrase) throw new Error("a passphrase is required to encrypt an export");
-  const salt = cryptoImpl.getRandomValues(new Uint8Array(16));
-  const iv = cryptoImpl.getRandomValues(new Uint8Array(12));
-  const key = await deriveKey(passphrase, salt, KDF_ITERATIONS, cryptoImpl);
+  const salt = randomSalt(cryptoImpl);
+  const iv = randomIv(cryptoImpl);
+  const key = await deriveAesKey(passphrase, salt, { cryptoImpl });
   const ciphertext = await cryptoImpl.subtle.encrypt(
     { name: "AES-GCM", iv },
     key,
@@ -141,7 +78,7 @@ export function isEncryptedEnvelope(parsed) {
 export async function decryptEnvelope(envelope, passphrase, cryptoImpl = globalThis.crypto) {
   if (!isEncryptedEnvelope(envelope)) throw new Error("not a LibrePT encrypted export");
   const iterations = envelope.kdf?.iterations || KDF_ITERATIONS;
-  const key = await deriveKey(passphrase, fromBase64(envelope.salt), iterations, cryptoImpl);
+  const key = await deriveAesKey(passphrase, fromBase64(envelope.salt), { iterations, cryptoImpl });
   try {
     const plaintext = await cryptoImpl.subtle.decrypt(
       { name: "AES-GCM", iv: fromBase64(envelope.iv) },

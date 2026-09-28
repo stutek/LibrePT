@@ -565,6 +565,51 @@ export function onBackupRecorded(listener) {
   backupRecordedListener = listener;
 }
 
+// The backup password's derived key. **The password itself is never stored, anywhere, in any form** —
+// only an AES-GCM `CryptoKey` derived from it, with `extractable: false`, which the browser will let
+// the app encrypt and decrypt with but will not let any script read out. So a stolen browser profile,
+// a malicious extension and a script on the page all get a key they can use only while they are
+// inside this origin on this device, and never a password they could try on the trainer's Drive copy.
+//
+// A `CryptoKey` can live here because IndexedDB stores it by structured clone, which preserves the
+// flag: the W3C Web Crypto spec sets the serialized `[[Extractable]]` from the key's own slot, so a
+// key written non-extractable comes back non-extractable. localStorage could not hold it at all —
+// it stores strings, and a key that has been turned into a string is a key that has been read out.
+//
+// The salt and iteration count sit beside it in the clear. They are not secret, and they are what
+// lets the SAME key be derived again from the password on a new phone (backupEncryption.js).
+//
+// **Per workspace, like every other record here**, which is also the answer for the sandbox: sample
+// data needs no password, so the sandbox simply has no key and its backups stay plain JSON.
+const BACKUP_KEY_META_KEY = "backupKey";
+
+/** The stored key material, or null when this device has no backup password set. */
+export async function readBackupKeyRecord() {
+  if (!indexedDbSupported()) return null;
+  const db = await getDb();
+  const entry = await readMeta(db, BACKUP_KEY_META_KEY);
+  return entry?.value || null;
+}
+
+/** `{ key, salt, iterations, setAt }` — the key non-extractable, the rest in the clear. */
+export async function writeBackupKeyRecord(value) {
+  if (!indexedDbSupported()) return;
+  const db = await getDb();
+  await withTransaction(db, [META_STORE], "readwrite", ({ store }) => {
+    store(META_STORE).put({ key: BACKUP_KEY_META_KEY, value });
+  });
+}
+
+/** Forget the backup password on THIS device. Files already written stay encrypted and stay
+ *  openable with the password — that is the point of deriving the key from one. */
+export async function clearBackupKeyRecord() {
+  if (!indexedDbSupported()) return;
+  const db = await getDb();
+  await withTransaction(db, [META_STORE], "readwrite", ({ store }) => {
+    store(META_STORE).delete(BACKUP_KEY_META_KEY);
+  });
+}
+
 // The sandbox's own bookkeeping: when it was seeded, and when the trainer last declined
 // the offer to reseed it. Both are facts about ONE workspace, so they live in that workspace's own
 // meta store — which is also why a reset needs to remember neither: deleting the database takes them

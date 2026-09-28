@@ -42,6 +42,7 @@ import {
   initApplicationHeader,
   setupApplicationHeader,
 } from "./modules/common/applicationHeader.js";
+import { setupBackupPassword } from "./modules/common/backupPassword.js";
 import { initBackupRestore, setupBackupRestore } from "./modules/common/backupRestore.js";
 import { initBuildInfoDialog, setupBuildInfoDialog } from "./modules/common/buildInfoDialog.js";
 import {
@@ -180,6 +181,9 @@ export function rebindTimers() {
 
 export function bootBackupRestore(deps) {
   initBackupRestore(deps);
+  // Before setupBackupRestore: the export button asks this dialog whether there is a password, so its
+  // markup and listeners have to exist by the time anything can be tapped.
+  setupBackupPassword(deps);
   setupBackupRestore();
 }
 
