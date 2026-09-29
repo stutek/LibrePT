@@ -6454,6 +6454,11 @@ sklop je pri kateri stranki že zaključil, zato ga ponovi ali pa ga izpusti.
 **Predlog:** po zaprtju urejevalnika naj podloga pokaže isto stanje, kot ga ima zapis, torej
 »Zaključeno« — opaženo na različici `8b2ce80`.
 
+Seja, ki dela na drevesu, poroča (2026-09-30, 01:30), da je to na `main` že popravljeno s `5ea4ada`
+(popravek §80.74: Walking Lunges je bil v tej rutini dvakrat z enim skupnim zapisom serij, obhod
+urejevalnika pa mu je spremenil velikost), in da na sedanjem drevesu ogrevanje po urejevalniku ostane
+»Zaključeno«. Tega nisem preveril sam — objavljena `8b2ce80` je za `main` približno dvajset commitov.
+
 ### 80.83 [ ] P1 — Treninga, ki se konča po polnoči, ni mogoče niti vpisati niti urediti
 
 **Scenarij in koraki:** dvoje, oboje ponovljeno.
