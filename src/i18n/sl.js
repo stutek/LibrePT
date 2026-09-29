@@ -1091,7 +1091,7 @@ export const sl = {
   notif_demo_mode_reset_btn: "Počisti podatke in zapusti predstavitveni način",
   notif_welcome_title: "👋 Raziskuješ z vzorčnimi podatki",
   notif_welcome_desc:
-    "Stranke, rutine in treningi tukaj so vzorčni fitnes, vključno z enim treningom, ki že poteka. Razišči brez skrbi — nihče od teh ljudi ni resničen.",
+    "Stranke, rutine in treningi tukaj so vzorčni fitnes. Razišči brez skrbi — nihče od teh ljudi ni resničen.",
   notif_welcome_clients_btn: "Poglej vzorčne stranke",
 
   // Pogovorno okno s podatki o gradnji: odpre se z dotikom oznake v glavi (namig ob prehodu miške na telefonu ni dosegljiv).

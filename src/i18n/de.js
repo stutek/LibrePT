@@ -1145,7 +1145,7 @@ export const de = {
   notif_demo_mode_reset_btn: "Demodaten löschen und Demomodus beenden",
   notif_welcome_title: "👋 Du erkundest die App mit Beispieldaten",
   notif_welcome_desc:
-    "Die Kunden, Routinen und Trainings hier sind ein Beispielstudio, mit einem Training, das schon läuft. Schau dich frei um — keine dieser Personen ist echt.",
+    "Die Kunden, Routinen und Trainings hier sind ein Beispielstudio. Schau dich frei um — keine dieser Personen ist echt.",
   notif_welcome_clients_btn: "Beispielkunden ansehen",
 
   // Build-info dialog: reachable by tapping the header stamp (a tooltip is unreachable on a phone).

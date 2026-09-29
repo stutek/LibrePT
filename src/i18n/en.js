@@ -1159,7 +1159,7 @@ export const en = {
   notif_demo_mode_reset_btn: "Clear Demo Data & Exit Demo Mode",
   notif_welcome_title: "👋 You're exploring with sample data",
   notif_welcome_desc:
-    "The clients, routines and sessions here are a sample gym, including one session already under way. Explore freely — none of these people are real.",
+    "The clients, routines and sessions here are a sample gym. Explore freely — none of these people are real.",
   notif_welcome_clients_btn: "See the sample clients",
 
   // Build-info dialog: reachable by tapping the header stamp (a tooltip is unreachable on a phone).

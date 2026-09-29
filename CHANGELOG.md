@@ -30,6 +30,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 - **Two clients with one name are told apart by their alias** in the invite dialog, in the title of
   the feedback form, on the rest and exercise timers and in "Copy this plan to…". Each showed the
   bare name, so a trainer could not tell which of two "Luka Kovač" an invite or a timer belonged to.
+- **The sandbox's welcome card no longer promises a session already under way.** The sandbox has
+  none.
+- **The first screen asks in Slovenian "Izberi jezik"**, in the informal form the rest of the app
+  uses, not "Izberite".
 
 ---
 
