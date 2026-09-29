@@ -6585,6 +6585,50 @@ preklicati, izbriše. Izbrisano je nepovratno — vrne ga le varnostna kopija, n
 pove, da brisanja ni mogoče razveljaviti, in naj prej ponudi »Izvozi JSON« — opaženo na različici
 `8b2ce80`.
 
+### 80.89 [ ] P2 — Po čiščenju vzorčnih podatkov vrstica na dnu še vodi v izbrisani vzorčni trening
+
+**Scenarij in koraki:** svež zagon z vzorčnimi podatki, predal na dnu → »Počisti podatke in zapusti
+predstavitveni način« → »Odstrani«. Nato poglej vrstico na dnu zaslona in jo tapni.
+
+**Opaženo:** vrstica pravi »Skupinska moč in kondicija · 2 stranki · 00:00 - 02:00 · Zamuja 00h 09m«,
+čeprav je čiščenje pravkar odstranilo vseh 20 vzorčnih terminov; v shrambi ni nobenega vzorčnega
+treninga več, ostal je samo tisti, ki sem ga ustvaril sam. Dotik na vrstico odpre podlogo tega
+izbrisanega treninga, v celoti delujočo: »Začni trening«, zavihek stranke Jane, opozorilo o poškodbi,
+sklop »Dinamično ogrevanje«, časomer premora, »Prelahko«, »Pretežko«, »Dodaj opombo«.
+
+**Težava in vpliv:** trener počisti vzorčne podatke, da začne z resničnim delom, na dnu pa mu ostane
+vrstica, ki ga vabi v trening, ki ga ni. Če ga začne in vpiše serije, dela v termin, ki je izbrisan;
+kaj se z zapisanim zgodi, ni videti nikjer.
+
+**Predlog:** čiščenje naj zapre tekočo podlogo in odstrani vrstico na dnu — opaženo na različici
+`8b2ce80`.
+
+### 80.90 [ ] P2 — Aplikacija po čiščenju še naprej terja odstranitev testnih zapisov, gumba za to pa ni več
+
+**Scenarij in koraki:** svež zagon z vzorčnimi podatki. Ustvari en svoj trening z vzorčno stranko
+(»Ponedeljkova moc«, 2026-10-05, 09:00 - 10:00, Jane Doe). Odpri predal na dnu → »Počisti podatke in
+zapusti predstavitveni način« → »Odstrani«. Nato preberi predal in odpri »Imenik strank«.
+
+**Opaženo:** troje.
+1. Okno pred brisanjem našteje ohranjeno pod slovenskim naslovom »Ohranjeno, ker je tvoje delo odvisno
+   od tega«, razlog pri vsaki vrstici pa je angleški: »Jane Doe — a record you created still depends
+   on it«, »Zgornji del A — a record you created still depends on it«.
+2. Po brisanju predal pravi: »51 zapisov, ki jih je ustvaril testni zagon, je shranjenih skupaj s
+   tvojim delom, in sicer v: clients, exercises, routines, sessionSeries. Niso tvoji; ko jih
+   odstraniš, vse, kar si ustvaril sam, ostane nedotaknjeno.« Vrstice »Počisti podatke in zapusti
+   predstavitveni način« v predalu ni več, drugega gumba za to pa ni nikjer. Imena shramb so
+   angleška.
+3. Vzorčna stranka Jane Doe ostane v imeniku med trenerjevimi strankami, brez oznake, da je vzorčna,
+   in oznaka »PREDOGLED« je še vedno v glavi.
+
+**Težava in vpliv:** trener stori, kar mu aplikacija naroči, in po tem mu ta še naprej govori, da ima
+51 tujih zapisov in naj jih odstrani, pri čemer tega ne more storiti. Izmišljena oseba ostane v
+imeniku poleg resničnih strank, zato ne ve, ali je aplikacija pripravljena za resnično delo.
+
+**Predlog:** besedilo po čiščenju naj pove, kaj je ostalo in zakaj (ker je od tega odvisen trenerjev
+zapis), naj bo v slovenščini z imeni, ki jih trener pozna, in naj obdrži pot, po kateri ohranjeno
+odstrani, ko zapisa ne potrebuje več — opaženo na različici `8b2ce80`.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
