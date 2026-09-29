@@ -6545,6 +6545,25 @@ nepotrebnem skrbi; če pa res kaže neposlane spremembe, tega ne izve.
 **Predlog:** ob številki naj bo na zaslonu napisano, kaj šteje, in okno naj isto številko ponovi z
 besedami — opaženo na različici `8b2ce80`.
 
+### 80.87 [ ] P2 — Napačna datoteka pri uvozu odgovori angleško: »Error: Invalid backup file format.«
+
+**Scenarij in koraki:** tapni gumb z oblakom v glavi → »Središče za sinhronizacijo in varnostne
+kopije« → »Izberi JSON datoteko« in izberi datoteko, ki ni varnostna kopija. Preizkušeno z besedilno
+datoteko (nakupovalni seznam) in z datoteko JSON, ki ni kopija (`{"seznam":["kruh","mleko"]}`).
+
+**Opaženo:** v obeh primerih se v oknu izpiše »Error: Invalid backup file format.« Vse ostalo v tem
+oknu je slovensko. Sporočilo ne pove, katero datoteko aplikacija pričakuje, ne kako jo trener dobi,
+in ne, da se na napravi ni nič spremenilo. Pri pravi kopiji z napačnim geslom je isti korak slovenski
+in pomirjujoč: »Napačno geslo ali spremenjena datoteka. Na tej napravi se ni nič spremenilo.«
+
+**Težava in vpliv:** trener, ki išče svojo kopijo med datotekami na telefonu, prvič skoraj zagotovo
+izbere napačno. Dobi angleško besedo »Error« in ne ve, ali je pokvaril svoje podatke, ne kaj naj
+izbere.
+
+**Predlog:** sporočilo naj bo slovensko, naj pove, da se ni nič spremenilo, in naj imenuje datoteko,
+ki jo aplikacija pričakuje (tisto, ki jo je sama naredila z »Izvozi JSON«) — opaženo na različici
+`8b2ce80`.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
