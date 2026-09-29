@@ -6515,6 +6515,34 @@ obdrži, zato zgrešen pritisk ne izgubi podatkov, stane pa ponovni poskus.
 oknu zahteva, da je gumb za zapiranje velik vsaj toliko. Opaženo na objavljeni `0625bd6`, sl,
 390 × 844; brez napak v konzoli.
 
+### 80.69 [ ] P1 — Ocena obrazca »Dodaj stranko«: poškodba, ki jo vpiše trener, ne sproži opozorila
+
+Način 3 veščine. Naloga (zapisal jo je podagent, preden je obrazec videl): nova stranka, ki je danes
+prvič prišla na trening. Pot: ☰ → »Imenik strank« → »Dodaj stranko«. Lokalni strežnik, `main` na
+`e55bbd2`, sl, 390 × 844. Ocena: `.private/exploratory-test/forms/2026-09-29-01-evaluation.md`.
+
+**Manjka.**
+- **P1 — polje za poškodbo.** Vpisal sem »operacija kolena 2023, desno« v »Predhodne poškodbe in
+  opombe«. Stranka je shranjena brez `hasInjury`, zato podloga med treningom ne pokaže opozorila,
+  kartica treninga ne pokaže znaka in ime nima oznake. Zastavico nastavita le vzorčni podatki in
+  obrazec, ki ga izpolni stranka sama; trenerjev obrazec je nima. Naloga pravi: »a missed knee note
+  is the actual danger here«. Predlog: ločeno polje »Poškodbe in omejitve«, kot ga ima obrazec
+  stranke, zastavica izpeljana iz njega; »Opombe« ostanejo zase, kar reši tudi §88.7.
+- Zapis prvega, že opravljenega treninga (§88.4) in teža ob prvem obisku (§78, §86.4) — že zapisano.
+
+**Odveč — čaka na Simona.** »Vzdevek« je vedno viden, čeprav ga oznaka omeji na dve stranki z
+enakim imenom. Razdelek GDPR (»Jezik obrazca«, »Kdo hrani obrazec?«) na dan prvega obiska, ko ga
+naloga ne želi (§27).
+
+**Ne deluje.** ✕ meri 12 × 16 (§80.68). **P3:** po shranitvi prve stranke obvestilo še naprej
+pravi »Tukaj še ni ničesar shranjenega«, do naslednjega nalaganja strani.
+
+**Vrstni red — čaka na Simona.** E-pošta je pred telefonom; naloga ima telefon vedno, e-pošto
+pozneje.
+
+**V redu:** »Shrani« je ob odprtju na zaslonu; napačen telefon in e-pošta sta povedana pri polju
+(obrazec trenerjevih podatkov); stranka se najde z iskanjem; opomba je v profilu vidna.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
