@@ -6389,6 +6389,9 @@ zaslonu ni nikjer zapisano.
 **Predlog:** dotikalna tarča ročice naj bo visoka vsaj 44 pik in med njo in gumbom »Nazaj na
 današnji trening« naj bo prazen pas — opaženo na različici `8b2ce80`.
 
+Enako meri ročica, ki odpre predal z obvestili na dnu zaslona (»Toggle notifications drawer«): 40 × 5
+pik pri 787. piki navpično. Isti popravek velja za obe.
+
 **Presoja 2026-09-30 (Claude): čaka na Simona.** Ročica je gumb `.view-grabber` z nevidno tarčo
 `::before`, ki jo razširi na 23 pik. Nad njo je le 6 pik naslovne vrstice, nato glava aplikacije z
 oznako na sredini; spodaj je vrstica z gumbi. Tarča 44 pik zato zahteva eno od dveh: naslovno
@@ -6562,6 +6565,24 @@ izbere.
 
 **Predlog:** sporočilo naj bo slovensko, naj pove, da se ni nič spremenilo, in naj imenuje datoteko,
 ki jo aplikacija pričakuje (tisto, ki jo je sama naredila z »Izvozi JSON«) — opaženo na različici
+`8b2ce80`.
+
+### 80.88 [ ] P1 — V oknu, ki briše podatke, sta »Prekliči« in »Odstrani« visoka 21 pik in 4 pike narazen
+
+**Scenarij in koraki:** svež zagon z vzorčnimi podatki. Odpri predal z obvestili na dnu in tapni
+»Počisti podatke in zapusti predstavitveni način«. Odpre se okno »Počisti vzorčne podatke«, ki našteje
+8 vzorčnih strank, 5 rutin, 5 zapisov treningov, 3 prilagoditve načrta, 20 terminov in 4 obvestila.
+
+**Opaženo:** na dnu okna sta gumba »Prekliči« (46 × 19 pik, dotikalni pas od 42. do 90. pike
+vodoravno) in »Odstrani« (54 × 19 pik, pas od 94. do 146. pike, navpično od 617. do 637., torej 21
+pik). Med njima so štiri pike praznega prostora. Okno ne pove, da brisanja ni mogoče razveljaviti, in
+pred brisanjem ne ponudi varnostne kopije.
+
+**Težava in vpliv:** palec meri okoli 44 pik, torej pokrije oba gumba hkrati. Trener, ki hoče
+preklicati, izbriše. Izbrisano je nepovratno — vrne ga le varnostna kopija, na katero okno ne opozori.
+
+**Predlog:** oba gumba naj imata dotikalno tarčo vsaj 44 pik in med njima naj bo prazen pas; okno naj
+pove, da brisanja ni mogoče razveljaviti, in naj prej ponudi »Izvozi JSON« — opaženo na različici
 `8b2ce80`.
 
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
