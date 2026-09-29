@@ -6091,3 +6091,39 @@ prestreženih napak brskalnika in brez pregledovanja kode.
 
 **Popravljeno 2026-09-29 (`7e8fc99`).** Vrstica v sklopu zapiše vrednost s `formatMetricValue`, kot
 samostojna kartica: »0:25«. Test: `test_a_timed_movement_in_a_circuit_says_its_time`.
+
+### 80.52 [x] P2 — Gumb »Shrani« je ob odprtju obrazca pod robom zaslona — popravljeno 2026-09-29
+
+**Kako je prišlo na dan:** ne iz scenarija, ampak iz Simonovega ugovora (2026-09-27). Zapisal sem,
+da bo podagent brez konteksta poročal lažne napake, ker ne zna voziti gonilnika; Simon je odgovoril,
+da je to vprašanje oblike — če je aplikacija pretežka za uporabo, je treba popraviti aplikacijo.
+Izmeril sem in ima prav.
+
+**Izmerjeno v brskalniku na objavljeni različici `0625bd6`,** ob odprtju okna, preden je vanj kaj
+vpisano:
+
+| okno              | zaslon 390×844                | zaslon 320×680            |
+| :---------------- | :---------------------------- | :------------------------ |
+| »Dodaj stranko«   | »Shrani« 133 pik pod robom    | **387 pik pod robom**     |
+| »Ustvari rutino«  | »Shrani« 55 pik pod robom     | —                         |
+| »Dodaj vajo«      | viden (vrh pri 678)           | —                         |
+
+**Težava in vpliv:** edina pot do shranitve ob odprtju ni na zaslonu. Trener, ki hoče popraviti eno
+polje — na primer označiti privolitev —, se mora prebiti čez cel obrazec, da pride do gumba. Na
+najmanjšem telefonu je to več kot pol zaslona drsenja. Novi uporabnik ob tem sklepa, da obrazca ni
+mogoče shraniti; prav to se je zgodilo pri preizkusu, dvakrat, in obakrat sem najprej okrivil svoje
+orodje namesto aplikacije.
+
+**Predlog:** vrstica z dejanji (»Prekliči« in »Shrani«) naj se drži dna okna, telo obrazca pa naj
+drsi pod njo. Gumb je tako viden ves čas, na vsaki višini zaslona, in shranitev je en dotik od
+koder koli v obrazcu. Pri tem preveriti §80.41: ✕ in Esc obdržita vpisano, »Prekliči« pa ga zavrže,
+kar ob vedno vidnem gumbu postane še bolj vidno neskladje.
+
+**Preverjanje:** preizkus naj na treh širinah odpre vsak obrazec z gumbom za shranitev in zahteva,
+da je ta ob odprtju znotraj zaslona. To je ista vrsta meritve kot §80.25 (velikost tarč) in sodi v
+isti preizkus geometrije.
+
+**Popravljeno 2026-09-29 (`597c906`).** Vrstica z dejanji se v vsakem oknu drži dna okna, obrazec pa
+se pomika pod njo, na ozadju okna. Velja za vsa okna z `.modal-actions`, torej tudi za »Ustvari
+rutino«. Neskladje iz §80.41 (✕ in Esc obdržita vpisano) ostane odprto tam. Test:
+`test_save_is_on_the_screen_when_the_client_form_opens` na 390×844 in 320×680.
