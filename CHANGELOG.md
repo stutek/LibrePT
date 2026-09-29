@@ -52,6 +52,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   badge.
 - **The badge saying how a movement is logged is in the app's language**: "Izometrija", not
   "ISOMETRIC".
+- **The field for a client's number or address in "Invite a client" is a thumb high.** It was 19
+  pixels.
 
 ---
 

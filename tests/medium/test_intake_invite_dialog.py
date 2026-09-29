@@ -52,6 +52,15 @@ def _open(page, local_server):
     page.wait_for_selector("#dialog-intake-invite[open]")
 
 
+def test_the_contact_field_is_a_thumb_high(page, local_server):
+    """The field for the client's number or address was 19 pixels high: it wore a class no style
+    defines, while every other field in the app is an input a thumb can hit."""
+    page.set_viewport_size({"width": 390, "height": 844})
+    _open(page, local_server)
+    box = page.locator("#intake-invite-contact").bounding_box()
+    assert box and box["height"] >= 44, box
+
+
 def test_there_is_nowhere_to_send_until_a_contact_is_typed(page, local_server):
     """A trainer is standing in front of somebody; the control that opens a mail app must not be
     reachable while the address is half typed."""

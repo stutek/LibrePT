@@ -48,14 +48,14 @@ export function renderIntakeInviteDialog() {
   <div class="modal-form">
     <p id="intake-invite-lede" class="text-sm"></p>
     <label class="form-label" for="intake-invite-contact" id="intake-invite-contact-label"></label>
-    <input type="text" id="intake-invite-contact" class="form-input" autocomplete="off"
+    <input type="text" id="intake-invite-contact" class="form-control" autocomplete="off"
            inputmode="email" enterkeyhint="send" />
     <p id="intake-invite-channel" class="text-sm intake-invite-channel"></p>
     <div class="modal-actions intake-invite-actions">
       <a id="intake-invite-send" class="btn primary-btn disabled" role="button"><span></span></a>
       <button type="button" class="btn secondary-btn" id="intake-invite-share"></button>
     </div>
-    <input type="text" id="intake-invite-link" class="form-input hidden" readonly />
+    <input type="text" id="intake-invite-link" class="form-control hidden" readonly />
     <!-- The code the trainer holds up, for the person standing in front of them: no number typed,
          no address spelled out, no channel at all. White ground and black
          modules whatever the theme is set to - this is a picture for somebody else's camera, not a
