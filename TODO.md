@@ -2823,7 +2823,7 @@ first control on the row while the secondary sits to its right.
 Two changes, and the second is a rule rather than a one-off: the primary keeps its own name while
 disabled, and the primary action goes on the RIGHT everywhere a dialog has two.
 
-### 39.5 [ ] BUG — the register takes the same person twice
+### 39.5 [~] BUG — the register takes the same person twice
 
 **Reported at card 8:** *"adding an customer is not idempotent operation, i have multiples in DB, so on
 name clash alias should be mandatory, how is clipboard gona distinguish name clashes?"*
@@ -2858,6 +2858,12 @@ drugega, drugi časomer začne neodvisno. Obe plavajoči oznaki pa kažeta samo 
 Kovač« in isto ime vaje, brez vzdevka. Trener ne more zanesljivo vedeti, kateri čas
 pripada komu. Vzdevek naj bo tudi na časomeru in v izbirniku »Kopiraj ta načrt na …«,
 kjer ga je prejšnji preizkus prav tako pogrešil.
+
+**State 2026-09-30:** the alias now shows in all four places the walks found — the invite rows, the
+feedback form's title, the rest and exercise timers and "Copy this plan to…" (`e46267f`). **Open,
+waiting on Simon:** whether an alias becomes mandatory when a second client of the same name is
+saved. §80.69 records the opposite pull: the alias field is always visible and a first visit does
+not need it.
 
 ### 39.6 [x] BUG — the clipboard says which session, and the chapter builds a programme
 
@@ -2986,7 +2992,7 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#3915-x-bug-the-
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#3916-x-change-the-fit-meter-warns-before-the-hour-is-gone-and-costs-a-set-by-its-reps); what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-### 39.17 [ ] CHANGE — deleting a session earns ceremony proportional to what it destroys
+### 39.17 [~] CHANGE — deleting a session earns ceremony proportional to what it destroys
 
 **Reported 2026-09-01 (Simon):** *"delete session is quite an intrusive operation, should have a
 clear warning popup / when a session was already started it should be even clearer warning / also
@@ -3022,6 +3028,12 @@ plans"*. An EMPTY plan is not rescued, deliberately — there is nothing in it t
 operation."* It costs a keyboard and screen-reader path, and this screen already uses drag for
 reordering rows and the grabber for closing the session — so the slider is reserved for the one case
 that earns a third drag idiom, and every other delete stays a button.
+
+**State 2026-09-30:** the future and started rows of the table shipped (`5da23e1`). The question
+names the session with its date and time; a started session lists the logged sets per participant
+and is deleted only by sliding from the handle to the end (a tap on the track does nothing; End on
+the keyboard confirms). **Open:** the merged row, which waits on §39.13's ruling of what a delete on
+a merged clipboard takes.
 
 ### 39.18 [x] FIX — the gate's worker split had gone stale, and it cost half the run
 
@@ -4089,26 +4101,10 @@ and two languages. A new component, not a setting on an existing one.
 Also unresolved and cheap to get wrong: what the list shows when a filter matches nothing. An empty
 board that does not say "because of a filter" is the same defect in a different costume.
 
-### 45.7 [ ] Finish "seja" → "trening", and settle on ONE form of address
+### 45.7 [x] Finish "seja" → "trening", and settle on ONE form of address — finished 2026-09-30
 
-**Reported:** the rename from *seja* (session) to *trening* (training) is not consistent, worst of all
-where a new session is planned.
-
-**Confirmed.** The rename was started and left half-done — its reasoning is recorded in the
-translation file itself ([sl.js](src/i18n/sl.js)): *seja* in Slovenian reads first as a meeting, while
-*trening* is the word a trainer and a client actually use. Above that comment sit roughly twenty
-strings still saying *seja*, including "Nastavitev seje vadbe" and "Ime seje" — the new-session
-screen the trainer named.
-
-**A second inconsistency, not reported but worse in use:** the Slovenian text switches between the
-formal and the familiar form of address. "Nastavite podrobnosti seje" in one place, "želiš poslati" in
-another. A reader notices a change of register faster than a change of noun.
-
-**Ruling (Simon, 2026-09-11):** finish the rename, and use the **familiar form (tikanje)**
-throughout — a trainer talks to a client, not an office to a citizen.
-
-**This is a rule for new text as well, not a one-time sweep**, which is why it is written here rather
-than only fixed: Slovenian user-visible text is familiar-form, and a training session is a *trening*.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#457-x-finish-seja--trening-and-settle-on-one-form-of-address--finished-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ### 45.8 [ ] The clipboard and the client's history are two views of one thing
 
@@ -6391,15 +6387,10 @@ namesto dveh. Pri rutinah z isto vajo v ogrevanju in glavnem delu je to pogosto.
 Dotakne se zgodovine (»Zadnjič«), fokusa v naslovu (`/exercise/<id>`) in prilagoditev načrta, zato
 ni del hitrih popravkov. Najdeno pri raziskovalnem testiranju 2026-09-29.
 
-### 80.75 [ ] P3 — Vzorčni peskovnik obljublja trening, ki že poteka, a ga ni
+### 80.75 [x] P3 — Vzorčni peskovnik obljublja trening, ki že poteka, a ga ni — popravljeno 2026-09-30
 
-**Opaženo:** obvestilo »Raziskuješ z vzorčnimi podatki« pravi »vključno z enim treningom, ki že
-poteka«. Odprt trening »Skupinska moč in kondicija« kaže »Začni trening«: vzorčna aktivna seja nima
-`started: true` (`seedDemoActiveSession` v
-[sessionsView.js](src/modules/sessionList/sessionsView.js)), tap kartice pa jo zgradi znova.
-Lokalni strežnik, `main` na `080ab10`, sl.
-
-**Predlog:** ali vzorčna seja res teče (in jo tap kartice ohrani), ali obvestilo tega ne obljublja.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8075-x-p3--vzorčni-peskovnik-obljublja-trening-ki-že-poteka-a-ga-ni--popravljeno-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ### 80.76 [x] P1 — Tap na kartico treninga, ki že teče, ga zamenja z novim, nezačetim — popravljeno 2026-09-30
 

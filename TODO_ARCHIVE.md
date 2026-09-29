@@ -20,6 +20,37 @@ Read [CHANGELOG.md](CHANGELOG.md) for what shipped and when. This file is why.
 
 ---
 
+### 80.75 [x] P3 — Vzorčni peskovnik obljublja trening, ki že poteka, a ga ni — popravljeno 2026-09-30
+
+**Opaženo:** obvestilo »Raziskuješ z vzorčnimi podatki« pravi »vključno z enim treningom, ki že
+poteka«. Odprt trening »Skupinska moč in kondicija« kaže »Začni trening«: vzorčna aktivna seja nima
+`started: true` (`seedDemoActiveSession` v
+[sessionsView.js](src/modules/sessionList/sessionsView.js)), tap kartice pa jo zgradi znova.
+Lokalni strežnik, `main` na `080ab10`, sl.
+
+**Predlog:** ali vzorčna seja res teče (in jo tap kartice ohrani), ali obvestilo tega ne obljublja.
+
+### 45.7 [x] Finish "seja" → "trening", and settle on ONE form of address — finished 2026-09-30
+
+**Reported:** the rename from *seja* (session) to *trening* (training) is not consistent, worst of all
+where a new session is planned.
+
+**Confirmed.** The rename was started and left half-done — its reasoning is recorded in the
+translation file itself ([sl.js](src/i18n/sl.js)): *seja* in Slovenian reads first as a meeting, while
+*trening* is the word a trainer and a client actually use. Above that comment sit roughly twenty
+strings still saying *seja*, including "Nastavitev seje vadbe" and "Ime seje" — the new-session
+screen the trainer named.
+
+**A second inconsistency, not reported but worse in use:** the Slovenian text switches between the
+formal and the familiar form of address. "Nastavite podrobnosti seje" in one place, "želiš poslati" in
+another. A reader notices a change of register faster than a change of noun.
+
+**Ruling (Simon, 2026-09-11):** finish the rename, and use the **familiar form (tikanje)**
+throughout — a trainer talks to a client, not an office to a citizen.
+
+**This is a rule for new text as well, not a one-time sweep**, which is why it is written here rather
+than only fixed: Slovenian user-visible text is familiar-form, and a training session is a *trening*.
+
 ## 74. [x] The sessions board's header and its calendar — all four done, closed 2026-09-30
 
 Four things Simon reported on 2026-09-21, all on the board and its date filter.
