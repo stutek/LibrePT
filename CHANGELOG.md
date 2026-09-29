@@ -18,6 +18,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-09-29 — Save a session without opening it
+
+### Changed
+
+- **The session form has a Save button.** It stores the session and returns to the board on the
+  session's day; *Open in Clipboard* still saves and opens it. Planning next week was several saves
+  in a row, and each one opened the clipboard, which had to be closed before the next. The
+  invitation dialog still opens when new clients were added, because that is the one moment the
+  app offers to invite them.
+
+---
+
 ## 2026-09-29 — What the trainer typed stays as typed
 
 ### Fixed

@@ -115,7 +115,7 @@ def test_an_end_before_the_start_is_refused_at_the_field(page, local_server):
     )
     page.fill("#setup-start-time", "18:00")
     page.fill("#setup-end-time", "09:00")
-    page.locator("#form-workout-setup button[type=submit]").click()
+    page.locator("#btn-setup-open").click()
 
     expect(page.locator("#setup-end-time")).to_have_class(re.compile("is-invalid"))
     expect(page.locator("#setup-end-time-error")).to_have_text(
@@ -135,13 +135,49 @@ def test_a_repeat_that_ends_before_it_starts_is_refused_at_the_field(
     page.fill("#setup-session-date", "2026-11-10")
     page.check("#setup-repeat")
     page.fill("#setup-repeat-until", "2026-11-03")
-    page.locator("#form-workout-setup button[type=submit]").click()
+    page.locator("#btn-setup-open").click()
 
     expect(page.locator("#setup-repeat-until")).to_have_class(re.compile("is-invalid"))
     expect(page.locator("#setup-repeat-until-error")).to_have_text(
         "The repeat ends before the first session. Choose a date on or after it."
     )
     expect(page.locator("#form-workout-setup")).to_be_visible()
+
+
+SPY_DEPS = """startWorkoutSession: () => { window.__launched = true; },
+  pushRoute: (path) => { window.__routes = [...(window.__routes || []), path]; },
+  urlFor: (name, params) => `/${name}/${params?.isoDate || ''}`,"""
+
+
+def test_save_stores_the_session_without_opening_the_clipboard(page, local_server):
+    """Planning next week, a trainer saves five sessions in a row. Every save opened the clipboard,
+    which had to be closed before the next one. Save stores the session and goes back to the board,
+    on the session's own day; opening the clipboard stays a separate button."""
+    load_with_stub(
+        page,
+        local_server,
+        setup_stub(SCHEDULED_SESSION, target_session="'s-edit'", extra_deps=SPY_DEPS),
+    )
+    answer_app_questions(page)
+    page.fill("#setup-location", "Studio B")
+    page.locator("#btn-setup-save").click()
+
+    page.wait_for_function("() => (window.__routes || []).length > 0")
+    assert page.evaluate("() => window.__launched") is None, (
+        "Save must not open the clipboard"
+    )
+    assert page.evaluate("() => window.__routes") == [f"/sessions.day/{SESSION_DATE}"]
+
+
+def test_open_in_clipboard_still_saves_and_opens_it(page, local_server):
+    load_with_stub(
+        page,
+        local_server,
+        setup_stub(SCHEDULED_SESSION, target_session="'s-edit'", extra_deps=SPY_DEPS),
+    )
+    answer_app_questions(page)
+    page.locator("#btn-setup-open").click()
+    page.wait_for_function("() => window.__launched === true")
 
 
 def test_the_first_evening_of_a_new_repeat_is_on_the_board_once(page, local_server):
@@ -157,7 +193,7 @@ def test_the_first_evening_of_a_new_repeat_is_on_the_board_once(page, local_serv
 
     page.check("#setup-repeat")
     page.fill("#setup-repeat-until", "2026-09-29")
-    page.locator("#form-workout-setup button[type=submit]").click()
+    page.locator("#btn-setup-open").click()
     page.wait_for_function("() => (window.__state.sessionSeries || []).length === 1")
 
     evenings = page.evaluate(
@@ -453,7 +489,7 @@ def test_taking_someone_off_a_session_with_feedback_asks_in_the_dictionary_s_wor
 
     rows = "#setup-participants-assignment-list .participant-setup-row"
     page.locator(f"{rows} .participant-remove").last.click()
-    page.locator("#form-workout-setup button[type=submit]").click()
+    page.locator("#btn-setup-open").click()
     page.wait_for_function("() => (window.__appQuestionMessages || []).length > 0")
     messages = app_question_messages(page)
 

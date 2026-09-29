@@ -90,7 +90,7 @@ def test_a_session_with_nobody_in_it_is_refused_in_the_chosen_language(
 
 
 def _save(page):
-    page.locator("#form-workout-setup button[type=submit]").click()
+    page.locator("#btn-setup-open").click()
 
 
 def test_a_session_named_after_a_client_is_refused_and_says_why(page, local_server):

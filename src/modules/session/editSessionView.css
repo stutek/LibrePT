@@ -243,3 +243,8 @@
   background: var(--primary-light);
   color: var(--text-main);
 }
+/* Three buttons — discard, save, open — are wider than a phone in Slovenian and German. They wrap
+   rather than run off the edge, and the one that opens the clipboard stays last, on the right. */
+.setup-actions {
+  flex-wrap: wrap;
+}

@@ -34,7 +34,7 @@ def test_planning_programme_created_from_a_client_is_not_completable(
     page.fill("#setup-session-date", "2026-08-01")
     page.fill("#setup-start-time", "09:00")
     page.fill("#setup-end-time", "10:00")
-    page.click("#form-workout-setup button[type='submit']")
+    page.click("#btn-setup-open")
 
     page.wait_for_selector("#active-session-overlay:not(.hidden)")
     page.wait_for_timeout(400)

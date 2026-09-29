@@ -599,11 +599,7 @@ export function setupEditSessionControl() {
   const handleCancel = () => {
     clearEditSessionDraft();
     editingSessionId = null;
-    deps.pushRoute(deps.urlFor("sessions.day", { isoDate: deps.getISODateForColumn("today") }));
-    deps.switchView("clients");
-    // Coordinated against renderSessions()'s own re-settle via scheduleTimelineSettle, rather than
-    // a private requestAnimationFrame racing it (sessionTimeline.js).
-    deps.scheduleTimelineSettle?.("today", "auto");
+    returnToBoard(deps.getISODateForColumn("today"));
   };
 
   for (const btn of cancelBtns) {
@@ -724,10 +720,30 @@ export function setupEditSessionControl() {
       });
     }
 
-    clearEditSessionDraft();
-    editingSessionId = null;
-    deps.startWorkoutSession(clientRoutines, sessionMeta);
+    finishAfterSave(e.submitter, { sessionDate, clientRoutines, sessionMeta });
   });
+}
+
+// "Save" stores the session and goes back to the board, on the session's own day, where its card now
+// is; "Open in Clipboard" opens it as well. A planning form has no Save: a programme without a slot
+// is kept by the clipboard, not by the board.
+function finishAfterSave(submitter, { sessionDate, clientRoutines, sessionMeta }) {
+  clearEditSessionDraft();
+  editingSessionId = null;
+  if (submitter?.dataset.action === "save" && !isPlanningModeActive) {
+    returnToBoard(sessionDate);
+    return;
+  }
+  deps.startWorkoutSession(clientRoutines, sessionMeta);
+}
+
+/** Leave the form for the board, settled on `isoDate`. */
+function returnToBoard(isoDate) {
+  deps.pushRoute(deps.urlFor("sessions.day", { isoDate }));
+  deps.switchView("clients");
+  // Coordinated against renderSessions()'s own re-settle via scheduleTimelineSettle, rather than
+  // a private requestAnimationFrame racing it (sessionTimeline.js).
+  deps.scheduleTimelineSettle?.(isoDate, "auto");
 }
 export const setupWorkoutSetup = setupEditSessionControl;
 
@@ -1127,6 +1143,9 @@ export function openEditSessionControlModal(
 ) {
   isPlanningModeActive = isPlanning;
   editingSessionId = preselectedSessionId || null;
+  // A planning programme has no slot on the board to save into; only the clipboard keeps it.
+  const saveOnly = document.getElementById("btn-setup-save");
+  if (saveOnly) saveOnly.hidden = isPlanning;
   if (deps.switchView) {
     deps.switchView("workout-setup");
   }

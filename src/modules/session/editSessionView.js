@@ -125,9 +125,12 @@ export function renderEditSessionView(targetElement) {
           </div>
         </div>
 
-        <div class="modal-actions mt-4 flex justify-end gap-3">
+        <div class="modal-actions setup-actions mt-4 flex justify-end gap-3">
           <button type="button" class="btn secondary-btn modal-cancel setup-cancel-btn" data-i18n="btn_discard_changes">Discard Changes</button>
-          <button type="submit" class="btn success-btn"><span data-i18n="btn_launch_clipboard_short">Open in Clipboard</span> <i class="fa-solid fa-clipboard-list ml-1"></i></button>
+          <!-- Stores the session and returns to the board: planning next week is several saves in a
+               row, and opening the clipboard after each one was a screen to close every time. -->
+          <button type="submit" id="btn-setup-save" class="btn secondary-btn" data-action="save" data-i18n="btn_save">Save</button>
+          <button type="submit" id="btn-setup-open" class="btn success-btn"><span data-i18n="btn_launch_clipboard_short">Open in Clipboard</span> <i class="fa-solid fa-clipboard-list ml-1"></i></button>
         </div>
       </form>
     </div>

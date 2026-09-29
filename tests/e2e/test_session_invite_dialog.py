@@ -35,7 +35,7 @@ def _create_session_with_participants(
         )
         row.locator("select").select_option(index=1)
 
-    page.click("#form-workout-setup button[type=submit]")
+    page.click("#btn-setup-open")
 
 
 def test_new_session_with_participants_opens_invite_dialog(page, local_server):
@@ -98,6 +98,6 @@ def test_resaving_unchanged_participants_does_not_reopen_invite_dialog(
         )
     ).to_be_visible()
 
-    page.click("#form-workout-setup button[type=submit]")
+    page.click("#btn-setup-open")
     page.wait_for_timeout(300)
     expect(dialog).not_to_be_visible()

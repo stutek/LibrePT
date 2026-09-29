@@ -71,7 +71,7 @@ def _edit_the_time(page, local_server, session):
     # A different slot — the change a client would actually act on.
     page.fill("#setup-start-time", "07:15")
     page.fill("#setup-end-time", "08:15")
-    page.locator("#view-workout-setup button[type=submit]").click()
+    page.locator("#btn-setup-open").click()
 
 
 def test_moving_a_session_asks_whether_the_invited_clients_should_be_told(
@@ -124,7 +124,7 @@ def test_a_session_nobody_was_invited_to_never_raises_the_prompt(page, local_ser
     page.fill("#setup-session-date", "2026-09-15")
     page.fill("#setup-start-time", "18:00")
     page.fill("#setup-end-time", "19:00")
-    page.locator("#view-workout-setup button[type=submit]").click()
+    page.locator("#btn-setup-open").click()
     page.wait_for_timeout(1_000)
 
     prompts = app_question_messages(page)
