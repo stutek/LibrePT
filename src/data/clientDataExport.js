@@ -20,6 +20,7 @@
 // Injected dependencies: none. The readable copy's words come from the dictionary of `payload.lang`.
 
 import { dictionaryFor } from "../i18n/index.js";
+import { localDateString } from "./calendarDay.js";
 import { consentSignedDate, isConsentActive, isConsentWithdrawn } from "./clientConsent.js";
 import { clientDisambiguator } from "./clientErasure.js";
 
@@ -255,7 +256,7 @@ export function clientExportFilename(client, { now = new Date(), extension = "js
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
   const tail = String(client?.id || "").slice(-6);
-  return `librept-${slug}-${tail}-${now.toISOString().substring(0, 10)}.${extension}`;
+  return `librept-${slug}-${tail}-${localDateString(now)}.${extension}`;
 }
 
 export { clientDisambiguator };

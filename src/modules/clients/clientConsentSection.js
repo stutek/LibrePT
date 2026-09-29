@@ -18,6 +18,7 @@
 //
 // deps: injected { t } via initClientConsentSection; reads/writes only its own form controls.
 
+import { localDateString } from "../../data/calendarDay.js";
 import {
   consentSignedDate,
   isConsentActive,
@@ -154,14 +155,12 @@ export function setupClientConsentSection() {
 // the field this feeds: a consent date is the day written on a piece of paper in the trainer's own
 // timezone, and it is what a supervisory authority asks about. For anyone east of UTC, between
 // local midnight and the UTC rollover, the UTC date is YESTERDAY — so a trainer in CEST signing a
-// client up at 00:30 recorded consent dated the day before, silently and unrecoverably.
-//
-// Shifting by the offset before formatting keeps the cheap `toISOString` slice while making the
-// calendar day the local one. Found 2026-08-16 by tests/medium/test_client_consent.py, which had
-// always compared against Python's LOCAL date and so only disagreed inside that nightly window.
+// client up at 00:30 recorded consent dated the day before, silently and unrecoverably. Found
+// 2026-08-16 by tests/medium/test_client_consent.py, which had always compared against Python's
+// LOCAL date and so only disagreed inside that nightly window. The day now comes from
+// data/calendarDay.js, the one helper every calendar day in the app goes through.
 export function todayDateString(now = new Date()) {
-  const local = new Date(now.getTime() - now.getTimezoneOffset() * 60_000);
-  return local.toISOString().substring(0, 10);
+  return localDateString(now);
 }
 
 // Called on every dialog open (add and edit alike): `form.reset()` restores the checkbox but not

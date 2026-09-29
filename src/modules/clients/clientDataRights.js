@@ -16,6 +16,7 @@
 //
 // Injected dependencies (initClientDataRights): { getState, saveState, t, onErased }.
 
+import { localDateString } from "../../data/calendarDay.js";
 import {
   buildClientExport,
   clientExportFilename,
@@ -260,7 +261,7 @@ export function openClientEraseDialog(clientId) {
     );
   }
 
-  $id("client-erase-requested").value = new Date().toISOString().substring(0, 10);
+  $id("client-erase-requested").value = localDateString();
   // The word to type is the language's own — "IZBRIŠI", "LÖSCHEN" — and so is the instruction: the
   // last guard before the one act that cannot be undone was English in every language.
   const word = tr("rights_erase_word");

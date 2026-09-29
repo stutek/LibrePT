@@ -24,6 +24,7 @@
 //
 // Injected dependencies: none — a plain data module.
 
+import { localDateString } from "../../data/calendarDay.js";
 import { SERIES_ID } from "../../data/sessionSeriesSeed.js";
 import { GYM_FLOOR_TOUR } from "./gymFloorTour.js";
 import {
@@ -605,7 +606,7 @@ const REVIEW_STEPS = [
     target: "#demo-narrator-attachment",
     attachment: {
       name: STORY_SIGNUP_FILENAME,
-      text: storySignupFileText(new Date().toISOString().slice(0, 10)),
+      text: storySignupFileText(localDateString()),
     },
     caption: "story_step_review_attach",
     expect: { selector: "#dialog-signup-review", containsText: STORY_SIGNUP_NAME },

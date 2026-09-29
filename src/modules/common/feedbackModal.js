@@ -16,6 +16,7 @@
 //   renderPendingPlanAdjustments()
 // }
 
+import { localDateString } from "../../data/calendarDay.js";
 import { FEEDBACK_TAGS } from "../../domain/feedbackTags.js";
 import { notesWithGymNote } from "../../domain/gymNotes.js";
 import { $id, closeModal, openModal, renderMarkupOnce } from "./dom.js";
@@ -175,7 +176,7 @@ export function setupFeedbackForms() {
       // guess made from a string, and the trainer's own record is where that call belongs.
       if (client && $id("feedback-keep-on-record").checked) {
         client.notes = notesWithGymNote(client.notes, {
-          on: new Date().toISOString().slice(0, 10),
+          on: localDateString(),
           exerciseName: exName,
           tag: newFeedback.tag,
         });

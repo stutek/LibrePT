@@ -35,6 +35,7 @@ import {
   summarizeReplacement,
 } from "../../data/backupFile.js";
 import { backupKeyForWriting, hasBackupPassword } from "../../data/backupKeyStore.js";
+import { localDateString } from "../../data/calendarDay.js";
 import {
   applySuppressions,
   mergeSuppressionLists,
@@ -521,11 +522,7 @@ export function setupBackupRestore() {
             }),
           )
         : JSON.stringify(payload, null, 2);
-      downloadFile(
-        written,
-        `librept_backup_${new Date().toISOString().substring(0, 10)}.json`,
-        "application/json",
-      );
+      downloadFile(written, `librept_backup_${localDateString()}.json`, "application/json");
       setExportStatus(stored ? "backup_pw_exported_encrypted" : "backup_pw_exported_plain");
       // A downloaded file is a real backup, so it answers the unbacked-data warning's "is this
       // data anywhere durable" exactly as a Drive sync does. Recording it is what keeps the

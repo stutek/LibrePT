@@ -6,6 +6,7 @@
 // forms in one file despite the three sharing nothing but boilerplate.
 
 import { hasBehaviour } from "../data/appVersions.js";
+import { localDateString } from "../data/calendarDay.js";
 import { libraryExercises } from "../data/exerciseLibrary.js";
 import { newRecordId } from "../data/recordId.js";
 import { metricOptionsFor } from "../domain/exerciseModality.js";
@@ -142,7 +143,7 @@ export function renderExerciseDialog() {
 }
 
 function libraryFilename(extension) {
-  return `librept_catalog_${new Date().toISOString().substring(0, 10)}.${extension}`;
+  return `librept_catalog_${localDateString()}.${extension}`;
 }
 
 /** The library export, beside its import. The JSON is the whole library — exercises mapped to the

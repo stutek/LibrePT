@@ -28,6 +28,8 @@
 //
 // Injected dependencies: none.
 
+import { localDateString } from "./calendarDay.js";
+
 // Fields that describe the PERSON. Cleared outright — unlike the execution data, none of them mean
 // anything once the person is gone.
 //
@@ -94,7 +96,7 @@ export function eraseClientRecord(client, { requestedOn = "", now = new Date() }
       erasedAt: now.toISOString(),
       // The date the CLIENT asked, which is what the deadline (Art. 12(3)) runs from — not the date
       // the trainer got round to it. Same distinction as consentDate vs timestamp.
-      requestedOn: requestedOn || now.toISOString().substring(0, 10),
+      requestedOn: requestedOn || localDateString(now),
     },
   };
   for (const field of CLEARED_TEXT_FIELDS) erased[field] = "";

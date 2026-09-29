@@ -3,6 +3,7 @@
 // Split 2026-08-01 out of the old formsController.js, which bundled Client, Routine, and Exercise
 // forms in one file despite the three sharing nothing but boilerplate.
 
+import { localDateString } from "../data/calendarDay.js";
 import { clientDisambiguator, clientsSharingName } from "../data/clientErasure.js";
 import { newRecordId } from "../data/recordId.js";
 import { readTrainerIdentity } from "../data/trainerIdentity.js";
@@ -171,7 +172,7 @@ export function setupClientForms({
       name: t("placeholder_client_name"),
       alias: "",
       avatar: "",
-      joinedDate: new Date().toISOString().substring(0, 10),
+      joinedDate: localDateString(),
       email: "",
       phone: "",
       goals: "",

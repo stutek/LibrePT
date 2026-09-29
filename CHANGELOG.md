@@ -37,6 +37,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Fixed
 
+- **After midnight the app's dates are today's, not yesterday's.** Between local midnight and the
+  UTC rollover (until 02:00 in summer in Slovenia) the new-session form offered yesterday's date,
+  and a client's joining date, an erasure request, a feedback note and the names of exported files
+  were dated a day early. Every calendar day now comes from one helper that reads the local day,
+  and a test fails the build on a day taken from UTC.
 - **The "Last time" row shows only what the client did.** It listed a skipped movement's prescribed
   sets as if they had been lifted, and a movement stopped part-way with its unfinished sets. A
   skipped movement now says *Skipped*, as the client's history page does, and unfinished sets are

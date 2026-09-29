@@ -3,6 +3,7 @@
 // allowing selection of participants, assigning routine plans, and configuring session details before launching the clipboard.
 // Auto-persists form drafts to localStorage so user data survives page reloads.
 
+import { localDateString } from "../../data/calendarDay.js";
 import { libraryExercises } from "../../data/exerciseLibrary.js";
 import { newRecordId } from "../../data/recordId.js";
 import {
@@ -807,7 +808,7 @@ function computeDefaultSessionTimes() {
   const fmtTime = (d) =>
     `${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}`;
   return {
-    defaultDate: startDate.toISOString().split("T")[0],
+    defaultDate: localDateString(startDate),
     defaultStartTime: fmtTime(startDate),
     defaultEndTime: fmtTime(endDate),
   };
