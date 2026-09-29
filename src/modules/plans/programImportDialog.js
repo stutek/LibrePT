@@ -273,7 +273,7 @@ export function openProgramImportDialog() {
     document.getElementById("program-import-session"),
     (state.sessions || []).map((session) => ({
       id: session.id,
-      label: `${session.title || t("workout_setup_title")} · ${session.time || ""}`.trim(),
+      label: `${session.title || t("session_untitled")} · ${session.time || ""}`.trim(),
     })),
     t("program_import_no_session"),
   );

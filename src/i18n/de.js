@@ -115,6 +115,7 @@ export const de = {
     "Alle Übungen aus diesem Plan löschen? Danach kannst du ihn neu aufbauen oder die Bearbeitung beenden.",
   warning_banner_title: "Sicherheitshinweis zum Kunden",
   workout_setup_title: "Training einrichten",
+  session_untitled: "Training",
   workout_setup_desc:
     "Lege Termin und Ort fest und füge dann die Kunden hinzu, die trainieren. Jeder kann ein eigenes Programm bekommen, oder alle dasselbe.",
   label_session_name: "Name des Trainings",

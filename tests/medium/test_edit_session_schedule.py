@@ -169,6 +169,27 @@ def test_save_stores_the_session_without_opening_the_clipboard(page, local_serve
     assert page.evaluate("() => window.__routes") == [f"/sessions.day/{SESSION_DATE}"]
 
 
+def test_a_session_saved_without_a_name_is_not_called_by_the_form_s_heading(
+    page, local_server
+):
+    """Saved without a name, a session was called "Workout Session Setup" — the heading of the
+    form — on its card, in its invitation and in its series."""
+    stub = setup_stub("[]", extra_deps=SPY_DEPS)
+    anchor = "bootWorkoutSetup({"
+    assert stub.count(anchor) == 1
+    load_with_stub(
+        page, local_server, stub.replace(anchor, "window.__state = state;\n" + anchor)
+    )
+    answer_app_questions(page)
+    page.fill("#setup-participant-search", "Jane")
+    page.locator("#setup-participant-matches .participant-match").first.click()
+    page.locator("#btn-setup-save").click()
+    page.wait_for_function("() => (window.__state.sessions || []).length === 1")
+
+    title = page.evaluate("() => window.__state.sessions[0].title")
+    assert title == "Training session", title
+
+
 def test_open_in_clipboard_still_saves_and_opens_it(page, local_server):
     load_with_stub(
         page,

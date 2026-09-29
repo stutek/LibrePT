@@ -27,6 +27,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 - **An injury the trainer writes down raises the warning during training.** The client form has its
   own field, *Injuries and limits*; what is written there is what the clipboard warns about. Other
   notes have their own field. Before, only a client's own signup could raise the warning.
+- **A session saved without a name is called "Training session"**, not by the form's heading.
 
 ---
 

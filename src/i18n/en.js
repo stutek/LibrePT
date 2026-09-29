@@ -99,6 +99,7 @@ export const en = {
     "Delete every exercise from this plan? You can rebuild it from scratch or exit editing.",
   warning_banner_title: "Client Safety Advisory",
   workout_setup_title: "Workout Session Setup",
+  session_untitled: "Training session",
   workout_setup_desc:
     "Set the slot and the place, then add the clients who are training. Each one can be given their own programme, or all of them the same one.",
   label_session_name: "Session Name",

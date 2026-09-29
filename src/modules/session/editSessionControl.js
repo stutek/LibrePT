@@ -285,7 +285,7 @@ function notifyNewlyAssignedParticipants(
   if (!slot) return;
   deps.openSessionInviteDialog({
     sessionId,
-    sessionName: sessionName || t("workout_setup_title") || "Workout Session",
+    sessionName: sessionName || t("session_untitled"),
     location,
     dateLabel: sessionDate,
     timeLabel: computeTimeLabel(startTime, endTime, t("date_unknown") || "Date Unknown"),
@@ -375,7 +375,7 @@ function commitSeriesIfRepeating(
   const series = readRepeatFields({
     id: newRecordId(),
     session: {
-      title: sessionName || t("workout_setup_title") || "Workout Session",
+      title: sessionName || t("session_untitled"),
       sessionDate,
       timeLabel,
       location,
@@ -446,7 +446,7 @@ function commitRealSession(
   const state = deps.getState();
   state.sessions = state.sessions || [];
 
-  const title = sessionName || t("workout_setup_title") || "Workout Session";
+  const title = sessionName || t("session_untitled");
   const identity = { sessionId, sessionName: title, sessionDate, timeLabel, location };
 
   // Snapshot BEFORE the upsert, because it edits in place: the resend prompt below compares what the

@@ -115,6 +115,7 @@ export const sl = {
     "Izbrišem vse vaje iz tega plana? Lahko ga sestaviš znova ali zapustiš urejanje.",
   warning_banner_title: "Varnostno opozorilo za stranko",
   workout_setup_title: "Nastavitev treninga",
+  session_untitled: "Trening",
   workout_setup_desc:
     "Nastavi termin in kraj, nato dodaj stranke, ki trenirajo. Vsaka lahko dobi svoj program ali pa vse isti.",
   label_session_name: "Ime treninga",
