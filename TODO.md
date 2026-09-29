@@ -7412,3 +7412,23 @@ whether §68 has to change (**no** under approach 4, which adds nothing here for
 
 **Blocks**: `PROPT_IMPLEMENTATION.md` §8 step 2 there. **Blocked on**: nothing here — decisions 3 and 4
 set the order, not the design.
+
+## 91. [ ] The pipeline is slower than it needs to be — measured 2026-09-30
+
+Last green CI run (36063598211): 20 min. Stage 3 alone is 12 min: e2e 675s, demo 472s. Local
+`build check`: 9–10½ min, Stage 3 is 387–454s and the demo suite is the slowest task in it.
+
+1. **[ ] CI runs e2e and demo on ONE browser worker each.** `demo_worker_count` and
+   `e2e_worker_count` in `build/__init__.py` split one budget (half the cores) between the two
+   tasks, because locally they share one machine and one dev server. In CI each has its own
+   4-core runner, so the budget is 2 and the split gives 1 + 1: each runner uses half of what it
+   has. Derived from the code, not read from a CI log. Fix: split only when both tasks run in one
+   process (`build check`); a CI job takes the whole budget. Expected: Stage 3 from ~12 to ~6 min.
+2. **[ ] Locally the demo task finishes 80–150s after e2e.** `DEMO_WORKER_SHARE = 3/8` was
+   measured on 2026-09-01 (demo 181s, e2e 162s); on 2026-09-29 it was demo 387–454s, e2e
+   217–303s. The demo task used 210–290 CPU-seconds over 387–454s of wall time on 3 workers, so
+   it mostly waits. Next step: one run with `--durations=20` to find what it waits for, then set
+   the share again.
+3. **[ ] Every browser job installs Chromium with `--with-deps` again** (34–75s per job, four jobs
+   on the critical path). Caching `~/.cache/ms-playwright` saves the download, not the system
+   packages. Worth measuring after 1.
