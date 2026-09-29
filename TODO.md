@@ -6499,21 +6499,9 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8066-x-p2--vrst
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8067-x-p3--čip-datumi-zapiše-izbrano-obdobje-kot-5-okt--11-okt-ne-v-iso--popravljeno-2026-09-29).
 
-### 80.68 [ ] P2 — Križec ✕, ki zapre okno, meri 12 × 16 pik
+### 80.68 [x] P2 — Križec ✕, ki zapre okno, meri 12 × 16 pik — popravljeno 2026-09-29
 
-**Scenarij in koraki:** v peskovniku odpreti »Imenik strank« → »Dodaj stranko«, in »Knjižnica
-vaj« → »Dodaj vajo«. Izmerjeno z ukazom `measure` (način 3 veščine), zaslon 390 × 844.
-
-**Opaženo:** v obeh oknih je ✕ zgoraj desno (»Zapri«) velik 12 × 16 pik. Vse druge kontrole v
-obeh oknih so dovolj velike.
-
-**Težava in vpliv:** najmanjša tarča v oknu je prav tista, s katero trener okno zapre. Na telefonu
-v eni roki jo zgreši in pritisne okno pod njo ali polje obrazca. Po pravilu 2026-09-17 ✕ vpisano
-obdrži, zato zgrešen pritisk ne izgubi podatkov, stane pa ponovni poskus.
-
-**Predlog:** ✕ naj ima tarčo najmanj 44 × 44, znak sam je lahko manjši. Preizkus naj v vsakem
-oknu zahteva, da je gumb za zapiranje velik vsaj toliko. Opaženo na objavljeni `0625bd6`, sl,
-390 × 844; brez napak v konzoli.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8068-x-p2--križec--ki-zapre-okno-meri-12--16-pik--popravljeno-2026-09-29).
 
 ### 80.69 [ ] P1 — Ocena obrazca »Dodaj stranko«: poškodba, ki jo vpiše trener, ne sproži opozorila
 
@@ -6537,11 +6525,57 @@ naloga ne želi (§27).
 **Ne deluje.** ✕ meri 12 × 16 (§80.68). **P3:** po shranitvi prve stranke obvestilo še naprej
 pravi »Tukaj še ni ničesar shranjenega«, do naslednjega nalaganja strani.
 
+**Stanje 2026-09-29:** P1 je popravljen (`d273a74`): obrazec ima polje »Poškodbe in omejitve«, iz
+njega se izpelje zastavica za opozorilo, »Opombe« so ločene. P3 o obvestilu je popravljen
+(`7a1670d`), ✕ v §80.68. Odprto ostanejo točke, ki čakajo na Simona: »Vzdevek«, razdelek GDPR ob
+prvem obisku in vrstni red e-pošta–telefon.
+
 **Vrstni red — čaka na Simona.** E-pošta je pred telefonom; naloga ima telefon vedno, e-pošto
 pozneje.
 
 **V redu:** »Shrani« je ob odprtju na zaslonu; napačen telefon in e-pošta sta povedana pri polju
 (obrazec trenerjevih podatkov); stranka se najde z iskanjem; opomba je v profilu vidna.
+
+### 80.70 [ ] P2 — Ocena obrazca »Nov trening«: brez imena je trening »Nastavitev treninga«, gumbi pod robom
+
+Način 3. Naloga (podagent): naslednji torek ob 18:00 za dve stalni stranki, Fitpark dvorana 2. Pot:
+plošča → »Ustvari trening«. `main` na `e55bbd2`, sl, 390 × 844. Ocena:
+`.private/exploratory-test/forms/2026-09-29-02-evaluation.md`.
+
+**Ne deluje — popravljeno 2026-09-29.** Trening brez imena je dobil ime »Nastavitev treninga« (naslov
+obrazca) na kartici, v vabilu in v seriji — `a8939c6`, zdaj »Trening«. »Shrani« in »Odpri v beležki«
+sta bila ob odprtju 116 in 170 pik pod robom — `9dfa340`. Trening s »Prazen načrt, brez rutine« se je
+odprl s prvo rutino v knjižnici — `0caf9b5`. Okno o začetku izven urnika je govorilo »začeto 10651 min
+prezgodaj« — `c3da9c7`.
+
+**Manjka — čaka na Simona.** Lokacija na kartici treninga; prihodnji treningi na strani stranke; cena
+in plačilo (§86).
+
+**Vrstni red — čaka na Simona.** Stranke so zadnje, naloga jih ima prve; »Ime treninga« je prvo, naloga
+ga ne omenja.
+
+### 80.71 [ ] P2 — Ocena obrazca »Dodaj vajo«: izbire, ki jih trener ni naredil, se shranijo
+
+Način 3. Naloga (podagent): ozek potisk s prsi z drogom. Pot: ☰ → »Vaje in rutine« → »Dodaj vajo«.
+`main` na `e55bbd2`, sl, 390 × 844.
+
+**Tip — čaka na Simona.** Štirje obvezni izbirni seznami se odprejo z vrednostjo (Chest, Barbell,
+Horizontal Push, Moč). Vaja, pri kateri trener vpiše le ime, se shrani s temi, ne da bi jih izbral;
+od njih so odvisni filtri, izbirnik in enota bremena. Posledica pravila 2026-09-17 (obrazec nikoli ne
+zavrne), zato ni popravljeno: odločitev je, ali se izbirni seznami odprejo prazni.
+
+**Manjka — čaka na Simona.** »Kettlebell« med opremo; »Triceps« (samo »Arms«); sopomenke za iskanje
+(§80.3); privzete serije in ponovitve.
+
+**Ne deluje.** ✕ 12 × 16 — popravljeno v §80.68.
+
+### 80.72 [x] P2 — Ocena obrazca »Ustvari rutino« — popravljeno 2026-09-29
+
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8072-x-p2--ocena-obrazca-ustvari-rutino--popravljeno-2026-09-29).
+
+### 80.73 [x] P1 — »Sinhroniziraj podatke« je zamenjal trenerjeve treninge z vzorčnimi — popravljeno 2026-09-29
+
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8073-x-p1--sinhroniziraj-podatke-je-zamenjal-trenerjeve-treninge-z-vzorčnimi--popravljeno-2026-09-29).
 
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
@@ -6975,6 +7009,10 @@ tedensko navodilo ali dogovor o otroku zapiše med zdravstvene podatke, in ob na
 trajnega od začasnega. **Vrednost:** dva od štirih dni; zdravstveni podatki so tudi občutljivi po GDPR,
 zato je mešanje z logistiko slabo še iz drugega razloga. **Cena:** majhna — ločeno polje »Druge
 opombe« (ali »Dogovori«), prikazano v urejevalniku načrta tako kot poškodbe. **Presoja: izplača se.**
+
+**Stanje 2026-09-29:** narejeno v `d273a74` kot del §80.69 — obrazec stranke ima ločeni polji
+»Poškodbe in omejitve« in »Opombe«; urejevalnik načrta pokaže oboje, poškodbo prvo. Obstoječe
+zapiske strank ostanejo v »Opombah«, zato jih trener, ki želi opozorilo, prenese v novo polje sam.
 
 ### 88.8 [ ] Prehransko svetovanje nima mesta
 

@@ -6127,3 +6127,39 @@ isti preizkus geometrije.
 se pomika pod njo, na ozadju okna. Velja za vsa okna z `.modal-actions`, torej tudi za »Ustvari
 rutino«. Neskladje iz §80.41 (✕ in Esc obdržita vpisano) ostane odprto tam. Test:
 `test_save_is_on_the_screen_when_the_client_form_opens` na 390×844 in 320×680.
+
+### 80.68 [x] P2 — Križec ✕, ki zapre okno, meri 12 × 16 pik — popravljeno 2026-09-29
+
+**Scenarij in koraki:** v peskovniku odpreti »Imenik strank« → »Dodaj stranko«, in »Knjižnica
+vaj« → »Dodaj vajo«. Izmerjeno z ukazom `measure` (način 3 veščine), zaslon 390 × 844.
+
+**Opaženo:** v obeh oknih je ✕ zgoraj desno (»Zapri«) velik 12 × 16 pik. Vse druge kontrole v
+obeh oknih so dovolj velike.
+
+**Težava in vpliv:** najmanjša tarča v oknu je prav tista, s katero trener okno zapre. Na telefonu
+v eni roki jo zgreši in pritisne okno pod njo ali polje obrazca. Po pravilu 2026-09-17 ✕ vpisano
+obdrži, zato zgrešen pritisk ne izgubi podatkov, stane pa ponovni poskus.
+
+**Predlog:** ✕ naj ima tarčo najmanj 44 × 44, znak sam je lahko manjši. Preizkus naj v vsakem
+oknu zahteva, da je gumb za zapiranje velik vsaj toliko. Opaženo na objavljeni `0625bd6`, sl,
+390 × 844; brez napak v konzoli.
+
+**Popravljeno 2026-09-29 (`fdfaffb`).** Tarča ✕ meri najmanj 44 × 44 v vsakem oknu; znak ostane
+majhen, negativni rob ohrani višino glave. Test:
+`test_the_cross_that_closes_the_form_is_a_thumb_wide`.
+
+### 80.72 [x] P2 — Ocena obrazca »Ustvari rutino« — popravljeno 2026-09-29
+
+Način 3. Naloga (podagent): začetniška rutina s petimi vajami, Plank na čas. Pot: ☰ → »Vaje in
+rutine« → »Ustvari rutino«. `main` na `e55bbd2`, sl, 390 × 844. Iskalno polje izbirnika vaj je bilo
+16 pik visoko v okvirju 38 pik in pritisk na okvir ga ni izbral — `e844d16`. Plank je bil v katalogu
+vaja s ponovitvami, čeprav ga vse vzorčne rutine predpisujejo s časom — `5d00270`. Čipi izbirnika
+(26 pik) in vrstice vaj (37 pik) ostanejo pod mero za palec; sodijo k odločitvi v §80.25.
+
+### 80.73 [x] P1 — »Sinhroniziraj podatke« je zamenjal trenerjeve treninge z vzorčnimi — popravljeno 2026-09-29
+
+V »Središče za sinhronizacijo in varnostne kopije« je kartica »Sinhroniziraj podatke o treningih«
+obljubljala rezervacije iz povezanega koledarja. Koledarja ni: po 1,2 sekunde je vse treninge v pravem
+delovnem prostoru zamenjala z 20 angleškimi vzorčnimi in izpisala »Koledar je bil uspešno
+sinhroniziran!«. Preizkušeno na `main`; trenerjev trening je izginil. Odstranjeno v `080ab10`, s ključi
+in handlerjem; test `test_sync_and_backup_offers_no_calendar_it_does_not_have`.
