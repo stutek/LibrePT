@@ -879,52 +879,10 @@ Fold `#active-session-overlay` into a normal `#view-session` inside `#main-conte
 header is omnipresent and sits above it, the fixed-overlay special-casing is redundant; this
 simplifies the deck/tabs/title-bar wiring and unifies router handling.
 
-### 11.3 [ ] The ☰ menu is where everything without a home ended up
+### 11.3 [x] The ☰ menu is where everything without a home ended up — superseded by §81.2, closed 2026-09-30
 
-**Superseded 2026-09-26 by §81** — Simon set the menu at five entries; the plan below is kept for its
-counts and reasoning, not as the plan.
-
-**Reported 2026-09-11 (Simon):** *"☰ je natlačen morala bova zgostiti in prioritizirati, morda celo
-narediti podskupine"*. **Raised again 2026-09-21 (Simon): the menu is too long and too complex, and
-wants reorganising.** Same section, nothing new to decide — what it is waiting on is below.
-
-**Counted, not estimated: 21 rows plus 2 selects** in one dropdown
-([applicationHeader.js](src/modules/common/applicationHeader.js)) — language, theme, the trainer's
-details, the sandbox pair, five views, five data actions, and six support/legal rows.
-
-**Re-measured 2026-09-21 (Claude): 19 rows carrying `session-menu-item`** in that file, one of them
-(`menu-sandbox-reset`) hidden by default, plus the same 2 selects. That is two fewer than the count
-above and the difference has NOT been traced — the file's last commit is e1490a5 (2026-09-13,
-§49.2's Spreadsheet theme), which is not an obvious cause. Trace it before quoting either number as
-the baseline for a fold.
-
-**Five of those rows are §11.1 arriving as a bill.** Clients, Routines, Exercises and History are
-NAVIGATION; they live here because the footer nav was replaced and they were never given a new home.
-So this section cannot be finished without §11.1 — the menu is not crowded by accident, it is holding
-somebody else's luggage.
-
-**Two foldings need no design decision at all, and are worth doing before anything is rearranged:**
-
-- ***Connect cloud storage* and *Export data as a file* open the SAME dialog.** Both are
-  `goto(urlFor("backup"))`. That is a duplicate rather than a choice — one row, and nothing is lost.
-- **Six support/legal rows are read once in a lifetime**: GitHub, Send feedback, Bug report, About,
-  Terms, Privacy. One row — *About & help* — opening a panel with all of them is five rows fewer at
-  no cost to anybody who has already read them. *Open an encrypted file* belongs in there too: by its
-  own module header it is for a CLIENT who was emailed their export, not for the trainer.
-
-That is 21 → 14 with no capability lost and no ruling needed.
-
-**Subgroups, asked about in the same message: not yet.** Headings inside a dropdown do not shorten a
-list — they add rows to it and give the reader a sense of structure over the same number of taps.
-They earn their place once the count is down. Fold first; then, if it is still long, three headings
-(settings · work · data).
-
-**Withdrawn the same day:** §45.9's note recommended moving the board's expand-all DEFAULT into this
-menu. That would make this section worse. The better answer is that the global control simply goes —
-the per-card chevron stays, and §45.6's client filter has taken over the reason anybody expanded
-every card at once (to read the names and find one person's sessions).
-
----
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#113-x-the--menu-is-where-everything-without-a-home-ended-up--superseded-by-812-closed-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ## Audit schedule — every two weeks
 
@@ -967,52 +925,10 @@ from the agent because reflog expiry is irreversible:
 git reflog expire --expire=now --all && git gc --prune=now
 ```
 
-### 12.6 [~] Vendor Font Awesome locally — the last CDN dependency
-**Vendored 2026-08-05** ([CHANGELOG](CHANGELOG.md)); it was the root cause of §21's `Page.goto`
-stalls.
+### 12.6 [x] Vendor Font Awesome locally — the last CDN dependency — done, closed 2026-09-30
 
-**[x] Glyph subsetting — done 2026-08-22.** 252KB of two whole faces became **7KB** of two subsets,
-72 glyphs, on the first load that matters most. Three things worth not re-deriving:
-
-- **Two subsets, not one merged font.** The first attempt merged both faces into one family and two
-  brand icons silently became other glyphs: the faces share 96 codepoints (both map ASCII, and
-  `fa-plus` genuinely lives at U+002B), so merging forces a winner per codepoint. Upstream's own
-  separation is kept.
-- **The check had to come first, and it caught exactly that.** `icon_coverage.py` compares NAMES;
-  [glyph_render.py](agent_tools/glyph_render.py) compares rendered SHAPES against a recorded
-  baseline — a 16×16 grid per icon, so a re-encode's antialiasing (3-17 cells) passes and a wrong
-  glyph (114) does not.
-- **The upstream faces moved to `assets/fontawesome-upstream/`**, out of the shipped app but in the
-  repository, so regenerating after an icon is added needs nothing else. `fonttools` is installed
-  for the run and removed again.
-
-**The original note, kept for the reasoning:** 2 woff2 files remain (252KB) using 48
-glyphs of ~1400 plus 2 brand glyphs; the codepoints do not collide, so merging would land ~381KB of
-font+CSS at roughly 24KB. The prerequisite is built —
-[agent_tools/icon_coverage.py](agent_tools/icon_coverage.py) gates every `fa-` class in `src/`
-against what the stylesheet can render, with the four **runtime-built** names
-(`fa-arrow-${dir}`, `fa-chevron-${…}`) declared explicitly because a static scan misses them and they
-would subset to blank boxes with no error. Remaining work is a dev-time `fonttools` script (not a
-build dependency — regeneration stays a deliberate committed act).
-
-**Licensing, checked against the shipped text**: a subset is a "Modified Version" under SIL OFL 1.1,
-which permits it but reserves the name — so the merged font's `font-family` must be renamed
-(`"LibrePT Icons"`), and the copyright/licence must travel with it, which subsetting tools routinely
-strip from the name table. The icons are separately CC BY 4.0, so attribution must also state that
-the set was subset. **Today is compliant and relies on none of this**: both woff2 files are
-byte-identical to upstream (SHA-256 verified), so no Modified Version exists yet.
-
-**What is still missing is a check, not the script** (established 2026-08-22): `fonttools` installs
-cleanly into the venv as a one-off (`pip install fonttools brotli`, then uninstall — it must not
-become a build dependency), so writing the merge is the small half. The large half is that
-[icon_coverage.py](agent_tools/icon_coverage.py) compares NAMES, and a subset's failure mode is a
-correct name whose glyph is a blank box — which a name-level gate cannot see. Do the render check
-first, the way §12.6's own note argues the coverage gate had to come before subsetting.
-
-**Subsetting cannot affect names in any language** — Font Awesome is Private Use Area only and
-contains no letters. Non-Latin coverage is a `fonts.css` question (latin + latin-ext only, deliberate
-since a CJK webfont is megabytes per trainer), and `getInitials()` derives real initials from
-Han/Cyrillic/Greek/Arabic names.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#126-x-vendor-font-awesome-locally--the-last-cdn-dependency--done-closed-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ### 12.7 [x] [CLOSED — measured, do not reopen] ~89 separate module requests on first load
 
@@ -1301,67 +1217,10 @@ Quotas are orders of magnitude clear of that table, so sizing is not the constra
   you, which the app already promotes), quota-pressure eviction on Android, and private-browsing
   quotas. The recovery tier for all three is §18.7's backup file.
 
-### 18.7 [~] [Decided] Backups: 1× not N×, readers forever, writers never
-**Core shipped 2026-08-10** — [CHANGELOG](CHANGELOG.md). What landed, and what the decisions were:
+### 18.7 [x] [Decided] Backups: 1× not N×, readers forever, writers never — every part shipped, closed 2026-09-30
 
-- **Back up the newest STABLE bucket only — 1×, not 3×.** Export projects through `STABLE_SCHEMA`
-  ([backupFile.js](src/data/backupFile.js)) using the same projection path the star-write fan-out
-  uses, so a file cannot drift from what the store would write for that shape. Not the newest *live*
-  shape — that is the disposable preview schema (§18.14), which is exactly what a backup must not be
-  written at. One shape per file, because expand-first staging (§18.4) makes the newest a strict
-  superset of every older one; a test asserts that superset rather than trusting the convention.
-- **No snapshot tier** (Simon: endless point-in-time issues in the backup world).
-- **Retain readers forever; retain writers never** — a restore runs `parse → migration chain →
-  single write layer → fan out`, so an old file needs no old writer.
-- **Frozen backup-fixture corpus in CI** — five committed fixtures (schema 0 through 4) in
-  [tests/fixtures/backups/](tests/fixtures/backups/), asserted by
-  [frozenBackupCorpus.test.mjs](tests/unit_js/data/frozenBackupCorpus.test.mjs) to still import to
-  the expected domain object.
-- **A restore REPLACES, and now says so** — it names what would be lost per collection ("8 clients,
-  13 sessions") and only when something is at stake, because a warning shown every time is a warning
-  nobody reads. Declining discards the parsed file rather than leaving it primed for a later click.
-  Merging two databases was rejected: it needs a common ancestor, which Drive sync's three-way merge
-  has and a file import does not.
-
-**Still open**:
-
-- **[x] ONE version number, on the envelope — 2026-08-15.** `formatVersion` is written outside any
-  future compression or encryption, so it is the first thing readable, and it is the **same integer**
-  as `schemaVersion`: a container change and a record change both bump it. Version 4 is schema 4 in a
-  plain-JSON container; [BACKUP_FORMATS](src/data/backupFile.js) records how to open each version and
-  is **append-only**, since files declaring a version are in the wild forever. An unknown version is
-  refused before anything touches the database — a newer file may be compressed, so this reader would
-  otherwise find no `clients` array and restore an empty database over the trainer's real one.
-
-  **Two independent numbers were the original plan and were rejected** (Simon, 2026-08-15). Both
-  arguments for splitting fail on this architecture:
-  - *"A container-only change forces a record bump with no migration to run."* It does, and the cost
-    is one no-op step in the chain. Cheap, and it keeps the chain's history complete.
-  - *"An older build then refuses a file whose container it understands."* It should. The guarantee
-    here is retain **readers** forever — new builds open old files — and that is untouched. Old builds
-    opening NEW files was never promised, and refusing is already what the restore path does, since a
-    newer file may hold records this build cannot faithfully represent.
-
-  What sharing buys: there is no way to express, or accidentally ship, a file whose two numbers
-  disagree. Files written before today carry no `formatVersion` and stay readable permanently via the
-  payload's own `schemaVersion` — the frozen corpus is all of that shape.
-
-  §18.8's encryption becomes **version 5**, a new row with `container: "aes-gcm"`, plus a no-op 4→5
-  record step.
-- **[x] Forward-migration consent at import — 2026-08-18.** The prompt covered *what you lose from this
-  device*; it now also says what the import does to the FILE: the steps in the trainer's own words, then
-  *"this brings the file's data forward, and it will no longer open in older builds of LibrePT"*.
-
-  **The case it was missing was the empty device**, which skipped the prompt entirely — and that is
-  exactly where the replace warning has nothing to say while the one-way door still applies. Consent is
-  now asked when EITHER consequence is real, and the two lines show independently.
-
-  Declining leaves the `.json` untouched (the app never writes to it) and the database unwritten — no
-  half-import, asserted on a clean device. A file already at this build's shape still restores in one
-  step: `bringsDataForward` is false when nothing was applied, so the ordinary case — yesterday's backup
-  restored today — gained no toll. One existing test had to be **rewritten rather than kept**: it
-  asserted that an empty device never asks, using an OLD file, which stopped being right the moment
-  portability became something to lose.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#187-x-decided-backups-1-not-n-readers-forever-writers-never--every-part-shipped-closed-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ### 18.8 [ ] [Open] Encryption, device theft, and storage durability
 - **IndexedDB is not encrypted by the app**; at rest it relies on OS full-disk encryption. A stolen
@@ -1395,8 +1254,11 @@ Quotas are orders of magnitude clear of that table, so sizing is not the constra
     for. The trainer keeps six readable words; the device keeps a non-extractable key derived from
     them and no copy of the words. §81.6's storage question is answered by the same choice and closed.
 
-  **Still open from this bullet:** the WebAuthn `prf` unlock below, the desktop File System Access
-  handle, and the storage-durability warning.
+  **Still open from this bullet:** the WebAuthn `prf` unlock below and the desktop File System Access
+  handle. The storage-durability warning exists (checked 2026-09-30):
+  [storageDurability.js](src/data/storageDurability.js) asks for persistent storage and measures the
+  quota, and [backupHealthController.js](src/controllers/backupHealthController.js) passes the result
+  to the backup badge.
 - **Biometrics: WebAuthn cannot decrypt.** It is authentication and returns a signature, never key
   material. The real primitive is the **WebAuthn PRF extension**, which derives a stable secret usable
   as an AES-GCM key (Chrome/Edge and Safari passkeys; good but not universal support). Portable
@@ -1423,35 +1285,10 @@ single-database layout), so **no app-level lock is needed for it**.
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#1810-x-resolved-one-build-deep-links-and-one-build-vs-many-builds); what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-### 18.11 [~] [Open] Legal gaps this design creates
-- **[x] Retention basis is documented — 2026-08-22.** [PRIVACY.md](PRIVACY.md) §3.3 now states it:
-  nothing is deleted on a schedule, records stay until the trainer removes them, and the anonymised
-  remains of an erased client are kept indefinitely because a training history with the person taken
-  out of it is no longer personal data (Recital 26). The trainer's own retention period stays the
-  trainer's obligation, and the paragraph says what to do when theirs is shorter.
+### 18.11 [x] Legal gaps this design creates — every gap answered, closed 2026-09-30
 
-  **Writing it found a worse bug than the missing paragraph**: the same section claimed deleting a
-  client "instantly purges their records", which is not what this app does and has not been since
-  §17.3 — the exact class of error §27 was filed about, a document that is wrong about the app rather
-  than about the law. It now describes anonymisation, its irreversibility, and the two things it
-  cannot reach.
-- **[x] Re-identification via backups + the mapping table — closed 2026-08-11.** A pre-erasure backup
-  names Jane; restoring it brought her back, and **§18.7's indefinite-restore requirement removes**
-  the usual "backups rotate out" defence. The register ships with both properties this bullet
-  demanded: applied **at import**, before the data becomes live, and keyed so a backup written under
-  another schema still matches. See [CHANGELOG](CHANGELOG.md). §17.3's key-location tension is gone
-  rather than resolved — a derived pseudonym stores no mapping to re-identify against.
-- **[x] Minimize the suppression list itself — done.** Salted hashes of the id and nothing else, with
-  a **fresh salt per entry** rather than one install-wide: the register is unioned across devices on
-  import, which a shared salt cannot survive. The side effect is strictly better, since duplicates
-  become unscannable.
-- **Taxonomy licensing — checked 2026-07-26, currently clear.** wger's *application* is AGPLv3 but no
-  wger code is linked; its *dataset* is CC-BY-SA 4.0 but
-  [exerciseStandard.js](src/domain/exerciseStandard.js) vendors ~17 generic category and equipment
-  words, far below any threshold. **The line not to cross**: bulk-importing wger's 1000+ entries would
-  engage both ShareAlike (a licensing split inside an MIT repo, and a one-way door for that file) and
-  the **EU *sui generis* database right** (Dir. 96/9/EC), which is separate from copyright and needs
-  no originality. SNOMED CT, if ever considered, requires an affiliate licence.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#1811-x-legal-gaps-this-design-creates--every-gap-answered-closed-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ### 18.12 [ ] [Decided] Reuse the preview badge for unsupported-version warning
 Generalise `#preview-badge` into a **build-status ribbon with severity tiers**: `PREVIEW` (amber,
@@ -5540,31 +5377,9 @@ Open, and the reason §73.4 stopped at the structure. Each language is 6xx keys.
 is a guess, and this app's own rule is that a guess is not reported as a measurement — so the
 decision needed is **which languages** and **who translates them**, before any file is added.
 
-## 74. [ ] The sessions board's header and its calendar
+## 74. [x] The sessions board's header and its calendar — all four done, closed 2026-09-30
 
-Four things Simon reported on 2026-09-21, all on the board and its date filter.
-
-### 74.1 [x] The filter chips break into two rows on a desktop — fixed 2026-09-21
-
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#741-x-the-filter-chips-break-into-two-rows-on-a-desktop--fixed-2026-09-21).
-
-### 74.2 [x] Today belongs in the calendar — shipped 2026-09-21
-
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#742-x-today-belongs-in-the-calendar--shipped-2026-09-21).
-
-### 74.3 [x] The calendar's month and year are chosen, not stepped to — shipped 2026-09-21
-
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#743-x-the-calendars-month-and-year-are-chosen-not-stepped-to--shipped-2026-09-21).
-
-### 74.5 [x] Four icons had no glyph, and the check could not see it — fixed 2026-09-21
-
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#745-x-four-icons-had-no-glyph-and-the-check-could-not-see-it--fixed-2026-09-21).
-This was the reported "missing glyphs": both calendar chevrons, `id-card` and `paperclip` drew a
-crossed box. §74.4 below is the other half and is still open.
-
-### 74.4 [x] The app ships the symbols and emoji it writes — shipped 2026-09-21
-
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#744-x-the-app-ships-the-symbols-and-emoji-it-writes--shipped-2026-09-21);
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#74-x-the-sessions-boards-header-and-its-calendar--all-four-done-closed-2026-09-30);
 what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ## 75. [ ] The displayed date format should be the trainer's choice
@@ -5766,54 +5581,25 @@ in brisanje ob povratku. Obstoječi
 [test_read_schema_toggle.py](tests/e2e/test_read_schema_toggle.py) uporablja samo novo
 kodo. Blokira zagotovilo varnega povratka oziroma dela stare predpomnjene izdaje (§76.4).
 
-### 77.3 [ ] P2 — Uvoz sklopa tiho zavrže nenumerične cilje vaj
+### 77.3 [x] P2 — Uvoz sklopa tiho zavrže nenumerične cilje vaj — popravljeno 2026-09-30
 
-**Izvor:** `4faf64f`, [libraryImport.js](src/domain/libraryImport.js), `readItem`.
-Za `reps` in `weight` uporabi `toNumber`, čeprav aplikacija podpira besedilne cilje
-([repsAndLoad.js](src/domain/repsAndLoad.js), `parseReps` in `parseLoad`).
-
-**Ponovitev:** sklop z vajama `{name: "Squat", reps: "8-12", weight: "Medium", rest: 60}`
-in `{name: "Pull-up", reps: "max", weight: "BW"}`. `readLibrary` vrne `ok: true` in
-`unreadable: []`, vendar obdrži samo imeni in `rest: 60`. Enako se izgubi ob izvozu in
-ponovnem uvozu kataloga s takimi cilji. Vstavljanje nato uporabi privzete cilje.
-
-**Odprava:** ohraniti dovoljene besedilne cilje po skupnih pravilih aplikacije; nepodprte
-vrednosti jasno poročati pred potrditvijo. Testirati izvoz → uvoz za `max`, razpon `8-12`,
-časovni cilj in besedilno obremenitev. Blokira zanesljivo izmenjavo predpisov vadbe (§45.5).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#773-x-p2--uvoz-sklopa-tiho-zavrže-nenumerične-cilje-vaj--popravljeno-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ### 77.4 [x] P2 — Vir iz imena datoteke izgine ob potrditvi uvoza — popravljeno 2026-09-25
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#774-x-p2--vir-iz-imena-datoteke-izgine-ob-potrditvi-uvoza--popravljeno-2026-09-25);
 what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-### 77.5 [ ] P2 — Ponovni uvoz istega kataloga podvoji sklope
+### 77.5 [x] P2 — Ponovni uvoz istega kataloga podvoji sklope — popravljeno 2026-09-30
 
-**Izvor:** `4faf64f`, [libraryImport.js](src/domain/libraryImport.js), `planLibraryImport`.
-Obstoječe vaje se preverijo, obstoječi sklopi pa funkciji sploh niso predani; vsak dobi
-nov ID. Tudi ID sklopa iz lastnega izvoza se pri branju ne ohrani.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#775-x-p2--ponovni-uvoz-istega-kataloga-podvoji-sklope--popravljeno-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-**Ponovitev:** dvakrat uvozi `{"circuits":[{"name":"Legs","exercises":["Squat"]}]}`.
-Drugi načrt doda nič vaj in en nov sklop `Legs`, `duplicates` pa ostane prazen. Vsaka
-ponovitev iste datoteke podaljša seznam enakih sklopov v urejevalniku načrta.
+### 77.6 [x] P3 — Ime uvoznega vira se lahko zamenja z internim filtrom — popravljeno 2026-09-30
 
-**Odprava:** določiti identiteto in preverjanje podvojitev tudi za sklope ter v pregledu
-ločiti nov sklop od že prisotnega; ne združevati različnih predpisov samo po naslovu.
-Test: dvakrat uvožen lasten izvoz ne podvoji sklopov, spremenjen predpis pa ni tiho
-izpuščen. Blokira ponovljivo izmenjavo katalogov (§45.5).
-
-### 77.6 [ ] P3 — Ime uvoznega vira se lahko zamenja z internim filtrom
-
-**Izvor:** `fc172f9` in `4faf64f`, [exerciseLibrary.js](src/data/exerciseLibrary.js),
-`exerciseSourceOf`, `sourcesOf`, `withSource`; besedila filtrov v
-[exercisePicker.js](src/modules/exercises/exercisePicker.js), `sourceLabels`.
-
-**Ponovitev:** vaji imata vira `all` in `Ana`. `withSource(vaje, "all")` vrne obe vaji;
-vira `all` zato ni mogoče izbrati samostojno. Vir `own` se predstavi kot lastne vaje,
-`librept` pa kot vgrajeni katalog in izgubi oznako uvoza. Polje sprejme vsa tri imena.
-
-**Odprava:** ločiti identifikatorje sistemskih filtrov od poljubnih imen virov. Testirati
-prikaz oznak in neodvisno filtriranje vseh treh imen v knjižnici in izbirniku vaj.
-Blokira pravilno filtriranje sicer veljavnih uvozov (§45.5).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#776-x-p3--ime-uvoznega-vira-se-lahko-zamenja-z-internim-filtrom--popravljeno-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ### 77.7 [x] P2 — Danes ne prikaže današnjih vadb ob aktivnem datumskem filtru — popravljeno 2026-09-24
 
@@ -6615,23 +6401,10 @@ Lokalni strežnik, `main` na `080ab10`, sl.
 
 **Predlog:** ali vzorčna seja res teče (in jo tap kartice ohrani), ali obvestilo tega ne obljublja.
 
-### 80.76 [ ] P1 — Tap na kartico treninga, ki že teče, ga zamenja z novim, nezačetim
+### 80.76 [x] P1 — Tap na kartico treninga, ki že teče, ga zamenja z novim, nezačetim — popravljeno 2026-09-30
 
-**Scenarij in koraki:** trener začne »Group Strength & Conditioning« (»Začni trening«), se vrne na
-ploščo in tapne kartico istega treninga, ki je označena kot aktivna.
-
-**Opaženo, izmerjeno 2026-09-29 na `main` (`8b2ce80`) s preizkusom v brskalniku:** pred tapom je v
-shrambi `librept_active_session` `started: true` in čas začetka; po tapu `started: false` in brez
-časa začetka. Nobeno okno ne vpraša ničesar. Časomer in vse vpisane serije so izgubljeni.
-
-**Vzrok, potrjen v kodi:** tap na kartico ([sessionCard.js](src/modules/sessionList/sessionCard.js))
-vedno pokliče `launchClipboardDirectly`, ta pa `startWorkoutSession`
-([sessionLifecycle.js](src/controllers/sessionLifecycle.js)), ki podlogo zgradi na novo, tudi ko je
-isti trening že začet. Isti vzrok kot §80.52, a tu brez odprtega vprašanja o zasnovi: trening, ki
-teče, ima svoje udeležence in serije že v podlogi, nova gradnja pa ne more dati ničesar boljšega.
-
-**Popravek:** tap na kartico začetega treninga, ki je v odprti podlogi, odpre to podlogo. Nezačeti
-trening ostane pri §80.52.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8076-x-p1--tap-na-kartico-treninga-ki-že-teče-ga-zamenja-z-novim-nezačetim--popravljeno-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
