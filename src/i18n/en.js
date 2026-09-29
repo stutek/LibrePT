@@ -150,8 +150,6 @@ export const en = {
     "LibrePT stores your logs directly on this device. Sync the latest session schedule, download a backup file to keep your history safe, or import it to move to another phone.",
   btn_download_backup: "Download JSON Backup",
   btn_import_backup: "Import JSON Backup",
-  sync_session_title: "Sync Session Data",
-  sync_session_desc: "Pull the latest bookings and session schedule from your connected calendar.",
   backup_export_title: "Export Data Backup",
   backup_export_desc: "Download your clients, routines, and workout logs as a single JSON file.",
   btn_export_json: "Export JSON",
@@ -433,11 +431,8 @@ export const en = {
   library_import_refused_no_exercises: "This library lists no exercises and no circuits.",
   sessions_schedule: "Sessions",
   btn_sync_calendar: "Sync Calendar",
-  btn_sync_data: "Sync Data",
   spots_filled: "spots filled",
   btn_launch_clipboard_short: "Open in Clipboard",
-  syncing_calendar: "Syncing...",
-  calendar_synced: "Calendar synchronized successfully!",
   // The board's filters. Each chip says what it filters by when nothing is chosen, and
   // its value once something is — the chip IS the readout, which is why there is no modal.
   filter_dates: "Dates",

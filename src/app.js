@@ -584,7 +584,6 @@ async function init() {
     renderRoutinesList,
     renderExercisesList,
     populateDropdownSelectors,
-    renderSessions,
     openEncryptedFileReader,
     t,
   });

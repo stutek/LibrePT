@@ -37,6 +37,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   it.
 - **A session started far from its slot says the difference in hours and minutes**, not as
   thousands of minutes.
+- **"Sync Data" is gone from Sync & Backup.** It promised the bookings of a connected calendar,
+  connected to none, and replaced the trainer's own sessions with the sample ones while saying the
+  calendar had synced.
 
 ---
 

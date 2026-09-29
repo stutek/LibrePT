@@ -49,20 +49,10 @@ def test_interactive_dashboard_flow(page, local_server):
     page.locator("#dialog-settings .modal-close-btn").click()
     page.wait_for_selector("#dialog-settings", state="hidden")
 
-    # The sync control now lives in the header cloud (Sync & Backup) modal; open it and
-    # confirm its label translated too.
+    # The header cloud opens Sync & Backup, and it speaks the language just chosen.
     page.locator("#backup-btn").click()
     page.wait_for_selector("#dialog-backup[open]")
-    assert (
-        page.locator("#btn-sync-data-text").inner_text().strip().upper()
-        == "SINHRONIZIRAJ PODATKE"
-    )
-
-    # --- STEP 2: SESSION DATA SYNC (merged into the header cloud button) ---
-    page.locator("#btn-sync-data").click()
-    page.wait_for_selector(
-        "#sync-status.text-emerald"
-    )  # sync reports success in the modal
+    assert "Izvozi varnostno kopijo" in page.locator("#dialog-backup").inner_text()
     page.locator("#dialog-backup .modal-close-btn").click()
     page.wait_for_selector("#dialog-backup", state="hidden")
 

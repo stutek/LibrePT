@@ -70,6 +70,28 @@ async () => {
 """
 
 
+SESSION_IDS = """async () => {
+    const s = await import(new URL('data/stateStore.js', document.baseURI).href);
+    return (s.getState().sessions || []).map((session) => session.id);
+}"""
+
+
+def test_sync_and_backup_offers_no_calendar_it_does_not_have(page, local_server):
+    """ "Sync Data" promised the bookings of a connected calendar, connected to none, and replaced
+    the trainer's own sessions with the sample ones, saying "Calendar synced successfully!". The
+    dialog offers no calendar, and visiting it leaves the sessions as they were."""
+    page.goto(local_server + "clients")
+    page.wait_for_selector("#view-client-directory.active")
+    before = page.evaluate(SESSION_IDS)
+    page.locator("#backup-btn").click()
+    page.wait_for_selector("#dialog-backup[open]")
+
+    assert "calendar" not in page.locator("#dialog-backup").inner_text().lower()
+    page.locator("#dialog-backup .modal-close-btn").click()
+    page.wait_for_timeout(1500)
+    assert page.evaluate(SESSION_IDS) == before
+
+
 def test_downloading_a_backup_records_it_without_involving_drive(page, local_server):
     """A downloaded file is a real backup, and must be recorded as one.
 

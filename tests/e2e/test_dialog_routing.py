@@ -106,15 +106,22 @@ def test_build_stamp_does_not_also_navigate_home(page, local_server):
 
 
 def test_a_background_render_does_not_clobber_an_open_dialog(page, local_server):
-    """Syncing redraws the dashboard underneath; the day deck must not push its URL over the dialog."""
+    """A sync redraws the dashboard underneath, and the day deck settling its scroll must not push
+    its URL over the dialog. The settle is called directly: the Drive sync that redraws in real use
+    cannot run here."""
     page.goto(local_server)
     page.wait_for_selector("#backup-btn")
     page.wait_for_timeout(300)
     page.locator("#backup-btn").click()
     page.wait_for_selector("#dialog-backup[open]")
 
-    page.locator("#btn-sync-data").click()
-    page.wait_for_selector("#sync-status.text-emerald")
+    page.evaluate(
+        """async () => {
+          const timeline = await import(new URL('modules/sessionList/sessionTimeline.js', document.baseURI).href);
+          timeline.scheduleTimelineSettle('today', 'auto');
+          await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));
+        }"""
+    )
     assert _path(page).endswith("/backup"), (
         "a background re-render pushed over the dialog's URL"
     )
