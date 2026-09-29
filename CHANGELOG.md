@@ -48,6 +48,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 - **A session planned for tomorrow and started today opens as itself.** Its card could open
   tomorrow's session at the same hour instead, with another title, time and participants, and it
   was tinted as a future session.
+- **A timed movement inside a circuit shows its time**, "0:25", as on its own card. It showed a bare
+  "25".
 
 ---
 

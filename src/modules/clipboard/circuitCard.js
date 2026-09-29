@@ -16,6 +16,7 @@
 //   completeCircuitRound(circuitId), onFocus(firstExerciseIndex)
 // }
 
+import { formatMetricValue } from "../../domain/exerciseModality.js";
 import { formatLoad, hasLoad, isFailureReps } from "../../domain/repsAndLoad.js";
 import { isRestRecord } from "../../domain/sessionItemRecord.js";
 import { DeckCard } from "./deckCard.js";
@@ -50,7 +51,7 @@ function buildCircuitExerciseRowHTML(ex, ctx) {
           <div class="circuit-ex-head">
             <span class="circuit-ex-name${nameClass}"${nameStyle}>${escapeHTML(ex.name)}</span>
             <span class="circuit-ex-sep">·</span>
-            <span class="circuit-ex-target"><span class="circuit-ex-reps">${escapeHTML(String(ex.repsTarget))}${load}</span></span>
+            <span class="circuit-ex-target"><span class="circuit-ex-reps">${escapeHTML(formatMetricValue(ex.repsTarget, ex.metric || "reps"))}${load}</span></span>
           </div>
         </div>`;
 }

@@ -156,6 +156,33 @@ def test_a_collapsed_circuit_names_its_movements(page, local_server):
     assert summary["controls"] == 0, "a collapsed card offers nothing to tap"
 
 
+def test_a_timed_movement_in_a_circuit_says_its_time(page, local_server):
+    """Wall Sit held for 25 seconds read "S3 × 0:25 × BW" on its own card and "25 · BW" inside a
+    circuit: a count of what, the trainer could not tell. A circuit row writes the target the way
+    the movement's own card does."""
+    held = exercise_item(
+        "exH",
+        "Wall Sit",
+        circuit_id="c1",
+        circuitTitle="Balance and strength",
+        circuitSeries=2,
+        modality="isometric",
+        metric="hold",
+        repsTarget=25,
+        loadUnit="bw",
+    )
+    lead = exercise_item("exL", "Barbell Back Squat")
+    load_with_stub(
+        page,
+        local_server,
+        clipboard_stub(active_session_fixture(exercises=[lead, held])),
+    )
+    page.wait_for_selector(".circuit-card .circuit-ex-row")
+
+    row = page.locator(".circuit-card .circuit-ex-row", has_text="Wall Sit").first
+    assert "0:25" in row.inner_text(), row.inner_text()
+
+
 # A card looks like itself however open it is (ruled 2026-09-10): "expanding the card
 # should just insert elements into existing exercise design, not load a completely different one".
 # The exercise card used to answer a tap by throwing its target line away and saying the same three
