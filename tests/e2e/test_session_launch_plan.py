@@ -34,3 +34,44 @@ def test_a_session_planned_empty_opens_empty(page, local_server):
         }"""
     )
     assert planned and all(count == 0 for count in planned), planned
+
+
+# Seeded around the current hour and not completed, so it can always be started.
+RUNNING = ".session-card"
+RUNNING_TITLE = "Group Strength & Conditioning"
+
+
+def _running_session(page):
+    return page.evaluate(
+        """async () => {
+          const ctrl = await import(new URL('controllers/activeSessionController.js', document.baseURI).href);
+          const s = ctrl.getActiveSession();
+          return s && { started: !!s.started, startTime: s.startTime };
+        }"""
+    )
+
+
+def test_tapping_a_running_sessions_card_returns_to_it(page, local_server):
+    # A started session holds its clock and every set logged so far. Its card on the board is
+    # marked as the running one, and a tap on it rebuilt the clipboard from the routine: an
+    # unstarted copy replaced the session, without a word.
+    page.goto(local_server)
+    page.wait_for_selector("#view-clients.active")
+    page.locator(RUNNING, has_text=RUNNING_TITLE).first.click()
+    page.wait_for_selector("#active-session-overlay:not(.hidden)")
+    page.click("#btn-start-session")
+    # Started off its slot, the app offers to move the slot onto the clock. Accepting it is the
+    # quickest way to a running session; where the slot ends up does not matter here.
+    dialog = page.locator("#dialog-session-start-time[open]")
+    dialog.wait_for()
+    page.click("#btn-session-start-time-apply")
+    dialog.wait_for(state="detached")
+    before = _running_session(page)
+    assert before["started"] and before["startTime"], before
+
+    page.goto(local_server)
+    page.wait_for_selector("#view-clients.active")
+    page.locator(RUNNING, has_text=RUNNING_TITLE).first.click()
+    page.wait_for_selector("#active-session-overlay:not(.hidden)")
+
+    assert _running_session(page) == before

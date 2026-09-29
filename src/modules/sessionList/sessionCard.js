@@ -4,7 +4,7 @@
 // so this component stays decoupled from app.js internals and is easy to relocate/test.
 //
 // deps: { state, t, escapeHTML, launchClipboardDirectly, sessionDayTemporal,
-//         activeId, saveToLocalStorage, rerenderSessions }
+//         saveToLocalStorage, rerenderSessions }
 
 import { computeActiveSessionCountdown } from "../../domain/sessionClock.js";
 import { parseTimeRange } from "../../domain/timeRange.js";
@@ -91,13 +91,19 @@ function wireElapsedEdit(valueEl, b, deps) {
 // the launched clipboard's source session id(s) AND activeSession.started) — reaching the
 // scheduled time by wall-clock alone is NOT enough. Every applicable card is marked, so
 // overlapping sessions all show as ongoing.
-function computeIsLaunched(b, activeSession, activeId) {
-  if (b.completed || !activeSession || !activeSession.started) return false;
-  if (activeId && b.id === activeId) return true;
-  if (activeSession.id === b.id) return true;
+function computeIsLaunched(b, activeSession) {
+  return !b.completed && isRunningOn(activeSession, b.id);
+}
+
+/** True when the started clipboard already holds this session. A tap on such a card must return to
+ * that clipboard: building it again from the routine replaced a running session, its clock and
+ * every logged set with an unstarted copy. The card's "Active session" mark reads the same rule. */
+export function isRunningOn(activeSession, sessionId) {
+  if (!activeSession || !activeSession.started) return false;
+  if (activeSession.id === sessionId) return true;
   const ss = activeSession.sourceSession;
-  if (ss && ss.id === b.id) return true;
-  return !!(ss && Array.isArray(ss.ids) && ss.ids.includes(b.id));
+  if (ss && ss.id === sessionId) return true;
+  return !!(ss && Array.isArray(ss.ids) && ss.ids.includes(sessionId));
 }
 
 // Readiness warnings — a session needs both a program and at least one participant.
@@ -302,7 +308,7 @@ function buildSessionCardStatusBarHTML({
 }
 
 export function renderSessionCard(b, colContainer, deps) {
-  const { state, t, escapeHTML, launchClipboardDirectly, sessionDayTemporal, activeId } = deps;
+  const { state, t, escapeHTML, launchClipboardDirectly, sessionDayTemporal } = deps;
 
   const card = document.createElement("div");
   // Layout lives in .session-card (index.css) so it can stack to a single column on mobile.
@@ -310,7 +316,7 @@ export function renderSessionCard(b, colContainer, deps) {
   const temporal = sessionDayTemporal(b.day);
   card.className = `session-card card glassmorphic${temporal !== "today" ? ` session-${temporal}` : ""}`;
   const activeSession = deps.getActiveSession ? deps.getActiveSession() : null;
-  const isLaunched = computeIsLaunched(b, activeSession, activeId);
+  const isLaunched = computeIsLaunched(b, activeSession);
   const range = parseTimeRange(b.time);
   // Reaching the scheduled start by wall-clock is NOT the same as the trainer having actually
   // started the session — beginWorkoutSession() requires an explicit tap from the clipboard title

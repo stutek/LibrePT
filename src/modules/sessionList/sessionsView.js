@@ -6,7 +6,7 @@ import { occurrenceAsSession, sessionsWithSeries } from "../../domain/sessionSer
 import { renderMarkupOnce } from "../common/dom.js";
 import { buildSessionMeta, escapeHTML, getOverlappingSessions } from "../common/utils.js";
 import { updateSessionBarTimer } from "../session/sessionBar.js";
-import { renderSessionCard } from "./sessionCard.js";
+import { isRunningOn, renderSessionCard } from "./sessionCard.js";
 import { activeSessionFilters, renderSessionFilterBar } from "./sessionFilterBar.js";
 import {
   formatCalendarDayLabel,
@@ -150,7 +150,14 @@ export function seedDemoActiveSession({ state }) {
   localStorage.setItem("librept_active_session", JSON.stringify(session));
 }
 
-export function launchClipboardDirectly({ sessionId, state, startWorkoutSession }, options = {}) {
+export function launchClipboardDirectly(
+  { sessionId, state, startWorkoutSession, activeSession, resumeRunning },
+  options = {},
+) {
+  if (resumeRunning && isRunningOn(activeSession, sessionId)) {
+    resumeRunning();
+    return;
+  }
   // The same set the board drew, so an evening that is still only a rule can be opened from a deep
   // link as well as from a tap — overlap merging then sees the derived evenings too, which is what
   // keeps a repeating group and a one-off rehab session in the same clipboard.
@@ -244,7 +251,6 @@ export function renderSessions({
   const sessions = filterSessions(onBoard, activeSessionFilters(), {
     dateOf: sessionCalendarDate,
   });
-  const activeSession = getActiveSession();
 
   // An evening that exists only as a rule becomes a RECORD the moment the trainer acts on it.
   // Done here, at the board, because this is where every tap on a derived evening
@@ -265,7 +271,6 @@ export function renderSessions({
     escapeHTML,
     launchClipboardDirectly: (sessionId) => launchClipboardDirectly(store(sessionId)),
     sessionDayTemporal,
-    activeId: activeSession ? activeSession.id : null,
     getActiveSession,
     saveToLocalStorage,
     rerenderSessions,

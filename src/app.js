@@ -1167,7 +1167,19 @@ function openPlanningForClient(clientId) {
 
 function launchClipboardDirectly(arg, options = {}) {
   const sessionId = arg && typeof arg === "object" ? arg.sessionId : arg;
-  sessionsViewLaunchClipboard({ sessionId, state: getState(), startWorkoutSession }, options);
+  sessionsViewLaunchClipboard(
+    {
+      sessionId,
+      state: getState(),
+      startWorkoutSession,
+      activeSession: getActiveSession(),
+      resumeRunning: () => {
+        const path = sessionFocusPath();
+        if (path) navigateToPath(path);
+      },
+    },
+    options,
+  );
 }
 
 /** Opens an imported programme in the plan editor.
