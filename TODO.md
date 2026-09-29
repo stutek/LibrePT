@@ -138,7 +138,7 @@ the thing that must happen first, not merely what it touches.
 
 | Theme | Open | Lead item | Blocked on |
 | :--- | :--- | :--- | :--- |
-| **Launch prerequisites** | — | Nothing left | §23.5 shipped 2026-08-22; what remains of a launch is §23.1's own decision |
+| **Launch prerequisites** | §16.6, §23.5 | §16.6: one origin or two (custom domain) before trainers hold data | Simon's ruling on §16.6; §23.5's two open items (demo deep-link, Calendar in README) do not block a push |
 | **Data safety remainder** | §18.8, §18.9, §18.12 | Storage durability warning, and the desktop file handle | Nothing; the backup encryption shipped 2026-09-28 |
 | **Scheduling** | §1.2, §1.3, §1.4, §1.5 | Room occupancy via `freebusy.query` | §1.5's OAuth/verification path |
 | **Gym-floor UX** | §8.7, §8.8 | Copy-program icon on the clipboard | Nothing; §8.7 is a question, not work |
@@ -1661,7 +1661,7 @@ one job they all hate, and expand from there.
 - [x] **Onboarding for an empty app — 2026-08-17.** §9.5's guided walkthrough shipped, reached from the
       splash a first-run trainer is already looking at. The blank-client-list churn this named is now
       answered by a route that carries the sample gym with it.
-- [ ] **No feedback route a non-developer will use.** GitHub issues is a wall to a PT; one email
+- [x] **No feedback route a non-developer will use.** Shipped 2026-08-22 (§23.5). GitHub issues is a wall to a PT; one email
       address or form, linked in-app. See [docs/BUG_REPORTING.md](docs/BUG_REPORTING.md).
 
 ### 23.6 [ ] Campaign plan — kept private, not in this repo
