@@ -4672,6 +4672,16 @@ The gate no longer runs on a saturated machine at all (§64, `build/quiet_machin
 stop appearing in gate runs. That is not this section: a phone in a gym is slow and cannot be asked
 to wait, so the question below still stands on its own.
 
+**Again 2026-09-30 01:41 (Claude), on a quiet machine.** The gate of 01:36 failed on
+`test_a_reload_keeps_the_active_card_closed_when_it_was_closed` alone, while the change under test
+touched neither the deck's scrolling nor its layout (a session form's draft, and the injury banner
+of a bound group). Its timeline: `start` at top 214 with 788 px to scroll, a `wheel` at 30 ms, then
+no `scroll` event at all for 5 s. The recorder listens for `wheel` on the WINDOW, so this does not
+show the wheel landed on the deck. Alone it passed 3 of 3; alone under twelve busy-loop processes it
+passed 10 of 10. CPU load alone does not reproduce it, so the cause is something only a full parallel
+run has — other browser workers, or the stage's own order. Next step unchanged: record where the
+wheel lands (listen on the deck's scroller, not the window) and trace one failing full run.
+
 ## 54. [x] The past cards on the clipboard write their date as "20. jul." — fixed 2026-09-20
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#54-x-the-past-cards-on-the-clipboard-write-their-date-as-20-jul--fixed-2026-09-20);
