@@ -610,7 +610,7 @@ export const en = {
     "This slot clashes with something you are already booked for. Schedule it anyway?",
   session_start_time_title: "Session started off schedule",
   session_start_time_desc:
-    "Scheduled for {scheduled}, started {minutes} min {direction}. Move the session to when it is actually running?",
+    "Scheduled for {scheduled}, started {amount} {direction}. Move the session to when it is actually running?",
   session_start_time_late: "late",
   session_start_time_early: "early",
   session_start_time_keep: "Keep scheduled",

@@ -179,6 +179,21 @@ def test_deleting_an_off_schedule_session_keeps_its_plans_unscheduled(
     assert _unscheduled_plan_count(page) == planned_after
 
 
+def test_a_start_hours_off_its_slot_is_said_in_hours(page, local_server):
+    """Started a week early, the dialog said "started 10651 min early": a number the trainer had to
+    divide twice to read. A difference of an hour or more is said as hours and minutes."""
+    card = '.session-card[data-session-id="s04f2e3d"]'  # Morning Conditioning, seeded tomorrow 09:00
+    page.goto(local_server)
+    page.locator(card).click()
+    page.wait_for_selector("#active-session-overlay:not(.hidden)")
+    page.click("#btn-start-session")
+    page.wait_for_selector(f"{DIALOG}[open]")
+
+    said = page.inner_text("#session-start-time-desc")
+    assert re.search(r"\d{2}h \d{2}m", said), said
+    assert not re.search(r"\d{3,} min", said), said
+
+
 def test_tomorrows_session_moved_onto_today_is_shown_as_today(page, local_server):
     """Planned for tomorrow, started today, and moved onto the clock: the card still said
     "tomorrow" in the only way the board says it, the future tint, because the stored day did not

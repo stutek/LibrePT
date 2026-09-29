@@ -35,6 +35,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 - **The first client saved ends the empty-app welcome** at once, not at the next reload.
 - **A plank is logged by time**, like the weighted plank and like every routine that prescribes
   it.
+- **A session started far from its slot says the difference in hours and minutes**, not as
+  thousands of minutes.
 
 ---
 

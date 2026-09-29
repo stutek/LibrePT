@@ -23,7 +23,7 @@
 
 import { closeModal, openModal, renderMarkupOnce } from "../common/dom.js";
 import { mountTimeField } from "../common/timeField.js";
-import { formatClockFromEpoch } from "../common/utils.js";
+import { formatClockFromEpoch, formatDurationHourMin } from "../common/utils.js";
 
 const DIALOG_ID = "dialog-session-start-time";
 
@@ -113,10 +113,17 @@ function ensureStartTimeDialog(t) {
   return dialog;
 }
 
+// Under an hour in minutes; longer as hours and minutes, the way every card on the board writes a
+// span. "Started 10651 min early" had to be divided twice before it said a week.
+function driftAmount(driftMs) {
+  const minutes = Math.round(Math.abs(driftMs) / 60000);
+  return minutes < 60 ? `${minutes} min` : formatDurationHourMin(minutes * 60);
+}
+
 function describeDrift(driftMs, scheduledLabel, t) {
   return t("session_start_time_desc")
     .replace("{scheduled}", scheduledLabel)
-    .replace("{minutes}", String(Math.round(Math.abs(driftMs) / 60000)))
+    .replace("{amount}", driftAmount(driftMs))
     .replace(
       "{direction}",
       driftMs >= 0 ? t("session_start_time_late") : t("session_start_time_early"),

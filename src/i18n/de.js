@@ -617,7 +617,7 @@ export const de = {
     "Dieser Termin überschneidet sich mit etwas, für das du schon gebucht bist. Trotzdem eintragen?",
   session_start_time_title: "Training außerhalb der geplanten Zeit gestartet",
   session_start_time_desc:
-    "Geplant für {scheduled}, gestartet {minutes} Min. {direction}. Das Training auf die Zeit verschieben, zu der es wirklich läuft?",
+    "Geplant für {scheduled}, gestartet {amount} {direction}. Das Training auf die Zeit verschieben, zu der es wirklich läuft?",
   session_start_time_late: "zu spät",
   session_start_time_early: "zu früh",
   session_start_time_keep: "Geplante Zeit behalten",

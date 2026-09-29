@@ -594,7 +594,7 @@ export const sl = {
     "Ta termin se prekriva z nečim, kar že imaš. Želiš trening vseeno razporediti?",
   session_start_time_title: "Trening se je začel izven urnika",
   session_start_time_desc:
-    "Načrtovano ob {scheduled}, začeto {minutes} min {direction}. Želiš trening premakniti na dejanski čas izvedbe?",
+    "Načrtovano ob {scheduled}, začeto {amount} {direction}. Želiš trening premakniti na dejanski čas izvedbe?",
   session_start_time_late: "prepozno",
   session_start_time_early: "prezgodaj",
   session_start_time_keep: "Ohrani urnik",
