@@ -187,6 +187,33 @@ test("a routine builds its plan; an unknown routine still yields a usable empty 
   assert.deepEqual(empty.exercises, []);
 });
 
+test("a movement a routine lists twice gets two slots, each with its own sets", () => {
+  // A warm-up and a main block often share a movement. One id for both meant one log: the
+  // warm-up's single set and the main block's three were the same record.
+  const routines = [
+    {
+      id: "r1",
+      name: "Warm-up then work",
+      exercises: [
+        { id: "ex-row", sets: 1, reps: 10, weight: 0, circuitId: "warm", circuitTitle: "Warm-up" },
+        { id: "ex-bench", sets: 3, reps: 5, weight: 80 },
+        { id: "ex-row", sets: 3, reps: 8, weight: 40, circuitId: "main", circuitTitle: "Main" },
+      ],
+    },
+  ];
+
+  const plan = buildClientStateFromRoutine({ routineId: "r1", routines, exercises: CATALOG });
+
+  const [warm, , main] = plan.exercises;
+  assert.equal(warm.id, "ex-row", "the first occurrence keeps the catalogue id, as every plan did");
+  assert.notEqual(main.id, warm.id);
+  assert.equal(main.exerciseId, "ex-row", "the second still knows which movement it is");
+  assert.equal(main.name, "Barbell Row");
+  assert.equal(plan.logs[warm.id].length, 1);
+  assert.equal(plan.logs[main.id].length, 3);
+  assert.equal(plan.logs[main.id][0].weight, 40);
+});
+
 // Legacy plans carried rest as a NUMBER on the exercise. The migration has to be idempotent,
 // because it runs on every board render — a second pass inserting a second rest would grow the
 // plan without limit.

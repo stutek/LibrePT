@@ -22,6 +22,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Fixed
 
+- **A movement a routine lists twice keeps two records of sets.** A warm-up and a main block with
+  the same movement shared one log, so finishing the warm-up's one set showed as three sets in the
+  main block, and the session's history kept one exercise instead of two.
 - **Deleting a session says which session, and a started one is deleted by sliding.** The question
   names the session with its date and time. For a session already started it says which logged
   sets cannot come back, per participant, and the delete button gives way to a slider that must be

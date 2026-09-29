@@ -167,12 +167,26 @@ export function buildClientStateFromHistoryLog(log, exercises) {
   return clientState;
 }
 
+// A plan item's id is also the key of its logged sets. A routine that lists one movement twice (a
+// warm-up and a main block) would give both occurrences one log, so the second occurrence onward
+// gets its own id and keeps the movement in `exerciseId`, the shape library circuits already use.
+// The first keeps the catalogue id, so a routine without repeats builds exactly the plan it did.
+function planItemIdFor(item, seen) {
+  if (!seen.has(item.id)) {
+    seen.add(item.id);
+    return { id: item.id };
+  }
+  return { id: newRecordId(), exerciseId: item.id };
+}
+
 function populateClientStateExercisesFromRoutine(clientState, routine, exercises) {
+  const seen = new Set();
   for (const item of routine.exercises) {
     const catalogEntry = exercises.find((e) => e.id === item.id);
     if (!catalogEntry) continue;
+    const slot = planItemIdFor(item, seen);
     clientState.exercises.push({
-      id: item.id,
+      ...slot,
       name: catalogEntry.name,
       category: catalogEntry.category,
       pattern: catalogEntry.pattern,
@@ -189,7 +203,7 @@ function populateClientStateExercisesFromRoutine(clientState, routine, exercises
       circuitSeries: item.circuitSeries || 1,
     });
 
-    clientState.logs[item.id] = Array.from({ length: item.sets }, () => ({
+    clientState.logs[slot.id] = Array.from({ length: item.sets }, () => ({
       reps: item.reps,
       weight: item.weight,
       completed: false,
