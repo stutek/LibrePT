@@ -8,6 +8,7 @@
 # neither.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
+import pytest
 from playwright.sync_api import expect
 
 from tests.e2e.test_sync_backup import SEED_ANCESTOR_TO_CURRENT_STATE
@@ -176,3 +177,18 @@ def test_an_exercise_and_a_routine_are_in_the_store_before_done(page, local_serv
     assert len(routine["exercises"]) == 1, (
         "adding a row types nothing, but it is still written"
     )
+
+
+@pytest.mark.clean_start
+def test_the_first_client_ends_the_empty_app_welcome(page, local_server):
+    """On an empty app the drawer says nothing has been saved yet. After the first client was
+    saved it went on saying so until the page was reloaded."""
+    page.goto(local_server + "clients")
+    page.wait_for_selector("#view-client-directory.active")
+    expect(page.locator("#btn-first-run-sandbox")).to_have_count(1)
+
+    page.locator("#btn-add-client").click()
+    page.locator("#client-name").fill("First Client")
+    page.locator("#form-client button[type=submit]").click()
+
+    expect(page.locator("#btn-first-run-sandbox")).to_have_count(0)

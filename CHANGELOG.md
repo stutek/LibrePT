@@ -32,6 +32,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   at the bottom, while the form scrolls.
 - **The exercise search box is a thumb high**, and a tap anywhere in its frame reaches it.
 - **The ✕ that closes a dialog is a thumb wide.** It measured 12 × 16 pixels.
+- **The first client saved ends the empty-app welcome** at once, not at the next reload.
 
 ---
 

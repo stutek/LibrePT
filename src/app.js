@@ -970,6 +970,7 @@ function setupClientForms() {
     showErrorView,
     switchView,
     openWorkoutSetupModal,
+    renderNotificationArea,
   });
 }
 function setupRoutineForms() {

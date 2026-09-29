@@ -130,6 +130,7 @@ export function setupClientForms({
   showErrorView,
   switchView,
   openWorkoutSetupModal,
+  renderNotificationArea,
 }) {
   renderClientDialog();
   const dialog = $id("dialog-client");
@@ -142,6 +143,9 @@ export function setupClientForms({
   const repaint = (client) => {
     renderClientsList({ state: getState(), t, navigateToPath });
     populateDropdownSelectors();
+    // The drawer's "nothing saved yet" welcome is judged from the state, and the first client
+    // is what ends it; it went on greeting an empty app until the next reload.
+    renderNotificationArea?.();
     if (client && getActiveDetailClientId() === client.id) {
       showClientDetails({
         clientId: client.id,
