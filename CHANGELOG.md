@@ -45,6 +45,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   clients who did not exist and a session at a time when there was none.
 - **A repeat that ends before the first session is refused at the "Until" field.** It was saved as
   one session without a repeat, and the form said nothing.
+- **A session planned for tomorrow and started today opens as itself.** Its card could open
+  tomorrow's session at the same hour instead, with another title, time and participants, and it
+  was tinted as a future session.
 
 ---
 

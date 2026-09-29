@@ -179,6 +179,31 @@ def test_deleting_an_off_schedule_session_keeps_its_plans_unscheduled(
     assert _unscheduled_plan_count(page) == planned_after
 
 
+def test_tomorrows_session_moved_onto_today_is_shown_as_today(page, local_server):
+    """Planned for tomorrow, started today, and moved onto the clock: the card still said
+    "tomorrow" in the only way the board says it, the future tint, because the stored day did not
+    move with the slot. The card now reads as today's."""
+    tomorrow_card = '.session-card[data-session-id="s04f2e3d"]'  # Morning Conditioning, seeded tomorrow 09:00
+    page.goto(local_server)
+    page.wait_for_selector(tomorrow_card)
+    assert "session-future" in (
+        page.locator(tomorrow_card).get_attribute("class") or ""
+    )
+
+    page.locator(tomorrow_card).click()
+    page.wait_for_selector("#active-session-overlay:not(.hidden)")
+    page.click("#btn-start-session")
+    page.wait_for_selector(f"{DIALOG}[open]")
+    page.click("#btn-session-start-time-apply")
+    page.wait_for_selector(f"{DIALOG}[open]", state="detached")
+    page.locator("#active-session-overlay .view-grabber").click()
+    page.wait_for_selector(tomorrow_card)
+
+    assert "session-future" not in (
+        page.locator(tomorrow_card).get_attribute("class") or ""
+    )
+
+
 def test_keeping_the_schedule_leaves_the_slot_and_counts_up(page, local_server):
     _launch_and_start(page, local_server)
     scheduled_title = page.inner_text("#session-title-text")

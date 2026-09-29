@@ -11,7 +11,7 @@ import {
   proposeAdjustedSchedule,
   resolveScheduleFromClockValues,
 } from "../domain/sessionClock.js";
-import { sessionBelongsToSlot } from "../domain/sessionRecord.js";
+import { computeSessionDayBucket, sessionBelongsToSlot } from "../domain/sessionRecord.js";
 import { askInApp } from "../modules/common/appQuestion.js";
 import { formatClockFromMinutes } from "../modules/common/utils.js";
 import { renderClipboardBar, updateSessionBarTimer } from "../modules/session/sessionBar.js";
@@ -36,9 +36,13 @@ function applyAdjustedSchedule({ startMs, endMs }) {
   };
   const timeLabel = `${toClock(startMs)} - ${toClock(endMs)}`;
 
+  // The day bucket moves with the slot. Left behind, a session planned for tomorrow and started
+  // today still said "tomorrow", and whatever reads the bucket put it on the wrong day.
+  const day = computeSessionDayBucket(new Date(startMs));
   sourceSession.startDate = new Date(startMs);
   sourceSession.endDate = new Date(endMs);
   sourceSession.timeLabel = timeLabel;
+  sourceSession.day = day;
 
   // The trainer's own answer to "when did this actually start" — what the elapsed clock and the
   // history record's date are both measured from. Never later than now: a start in the future would
@@ -51,6 +55,7 @@ function applyAdjustedSchedule({ startMs, endMs }) {
     if (!sessionBelongsToSlot(session, sourceSession)) continue;
     session.time = timeLabel;
     session.startDate = new Date(startMs).toISOString();
+    session.day = day;
   }
 
   saveActiveSessionToCache();

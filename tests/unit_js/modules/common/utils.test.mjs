@@ -188,6 +188,28 @@ test("two sessions at the same hour on different days are not one clipboard", ()
   assert.deepEqual(merged, ["t", "x"]);
 });
 
+// A session planned for tomorrow and started today keeps "tomorrow" as its stored bucket. Compared
+// by bucket, it overlapped tomorrow's session at the same hour, and its card opened THAT session:
+// another title, another time and other participants.
+test("a session moved to today is not merged with tomorrow's at the same hour", () => {
+  const movedToToday = {
+    id: "moved",
+    time: "18:41 - 19:26",
+    day: "tomorrow",
+    startDate: daysFromToday(0, 18).toISOString(),
+  };
+  const tomorrows = {
+    id: "pair",
+    time: "18:30 - 19:30",
+    day: "tomorrow",
+    startDate: daysFromToday(1, 18).toISOString(),
+  };
+
+  const merged = getOverlappingSessions(movedToToday, [tomorrows, movedToToday]).map((s) => s.id);
+
+  assert.deepEqual(merged, ["moved"]);
+});
+
 // The app writes a date as ISO, in every language. `formatDateStr` is what the client
 // profile's "Joined" line and every row of the history view write their date with, and it used to
 // build "Sep 26, 2026" from a hardcoded list of English month abbreviations — the month in English
