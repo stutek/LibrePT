@@ -507,6 +507,25 @@ h6 {
 }
 .icon-btn:hover {
   background: var(--border-color);
+}
+/* A small round button drawn small, answering a thumb-sized square. The menu of a live session is
+   one of these, tapped mid-set; drawn at 38px, it was only as big as it was drawn. The same for the
+   32px rest timers on the clipboard (exerciseDeckOfCards.css, circuitCard.css). */
+.icon-btn,
+.deck-card-timer,
+.circuit-break-play {
+  position: relative;
+}
+.icon-btn::after,
+.deck-card-timer::after,
+.circuit-break-play::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 44px;
+  height: 44px;
+  transform: translate(-50%, -50%);
 } /* Theme-aware Badge & Text Utility Classes */
 .badge {
   display: inline-flex;

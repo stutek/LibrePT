@@ -54,6 +54,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   "ISOMETRIC".
 - **The field for a client's number or address in "Invite a client" is a thumb high.** It was 19
   pixels.
+- **The small round buttons answer a thumb.** The rest timers on the clipboard (32 pixels) and
+  every round icon button, the session's menu and the cards' edit buttons among them (38 pixels),
+  are drawn as before and reached from a 44-pixel square around them.
 
 ---
 

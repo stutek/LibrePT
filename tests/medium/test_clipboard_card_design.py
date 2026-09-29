@@ -79,6 +79,36 @@ def _focus_card(page, name):
     page.wait_for_timeout(400)
 
 
+THUMB_REACH = """(selector) => {
+  const el = document.querySelector(selector);
+  const r = el.getBoundingClientRect();
+  const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+  // The corners and edges of a 44 x 44 square centred on the control, 1px inside it.
+  const misses = [];
+  for (const dx of [-21, 0, 21]) for (const dy of [-21, 0, 21]) {
+    const hit = document.elementFromPoint(cx + dx, cy + dy);
+    if (!hit || !el.contains(hit)) misses.push([dx, dy]);
+  }
+  return misses;
+}"""
+
+
+def test_the_clipboard_s_small_controls_answer_a_thumb(page, local_server):
+    """The rest timer on a card and the menu of the session were drawn 32 and 38 pixels square, and
+    were only as big as they were drawn: the controls a trainer taps most, mid-set. They stay drawn
+    that size, and a thumb-sized square around each reaches them."""
+    page.set_viewport_size({"width": 390, "height": 844})
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#active-exercise-scroll-deck .exercise-deck-card")
+    _focus_card(page, "Barbell Back Squat")
+
+    for control in (
+        ".exercise-deck-card.in-focus .deck-card-timer",
+        "#btn-session-menu",
+    ):
+        assert page.evaluate(THUMB_REACH, control) == [], control
+
+
 def test_only_the_card_in_focus_can_be_acted_on(page, local_server):
     """The safety half. Reading the plan must not become logging against the wrong exercise."""
     load_with_stub(page, local_server, STUB)
