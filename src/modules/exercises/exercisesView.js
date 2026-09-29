@@ -6,7 +6,7 @@ import {
   sourcesOf,
   withSource,
 } from "../../data/exerciseLibrary.js";
-import { modalityOf } from "../../domain/exerciseModality.js";
+import { modalityLabelKey, modalityOf } from "../../domain/exerciseModality.js";
 import { renderMarkupOnce } from "../common/dom.js";
 import { libraryTabsHtml } from "../common/libraryTabs.js";
 import { escapeHTML } from "../common/utils.js";
@@ -172,7 +172,7 @@ export function renderExercisesList({ state, t, filterQuery, categoryFilter, sou
     const modalityBadge =
       modality === "strength"
         ? ""
-        : `<span class="taxonomy-badge taxonomy-badge-modality">${escapeHTML(modality)}</span>`;
+        : `<span class="taxonomy-badge taxonomy-badge-modality">${escapeHTML(t(modalityLabelKey(modality)))}</span>`;
     const meta =
       sourceBadge(ex, t("source_own_badge") || "Mine") +
       modalityBadge +

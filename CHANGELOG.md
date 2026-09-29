@@ -50,6 +50,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   Joint pain and the rest were 16-pixel lines in the form a trainer fills mid-session.
 - **A skipped movement in a client's history says "Skipped" once**, not as text and again as a
   badge.
+- **The badge saying how a movement is logged is in the app's language**: "Izometrija", not
+  "ISOMETRIC".
 
 ---
 

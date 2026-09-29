@@ -83,6 +83,25 @@ def test_catalog_shows_taxonomy_badges_not_instructions(page, local_server):
     )
 
 
+def test_the_modality_badge_is_the_dictionary_s_word(page, local_server):
+    """How a movement is logged is the app's word, not a taxonomy value: the badge read "ISOMETRIC"
+    on a Slovenian screen, the stored value in capitals, while the exercise form beside it said
+    "Izometrija". The badge says the dictionary's word."""
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#view-exercises.active")
+    page.fill("#search-exercises", "Wall Sit")
+    page.wait_for_timeout(200)
+
+    badge = page.locator("#view-exercises .taxonomy-badge-modality").first
+    expected = page.evaluate(
+        """async () => {
+          const { TRANSLATIONS } = await import(new URL('i18n/index.js', document.baseURI).href);
+          return TRANSLATIONS.en.modality_isometric;
+        }"""
+    )
+    assert badge.evaluate("el => el.textContent.trim()") == expected
+
+
 def test_catalog_marks_cardio_with_a_modality_badge(page, local_server):
     load_with_stub(page, local_server, STUB)
     page.wait_for_selector("#view-exercises.active")

@@ -128,6 +128,18 @@ test("every metric's unit label is a word every dictionary has", () => {
   assert.equal(new Set(keys).size, keys.length);
 });
 
+test("every modality's name is a word every dictionary has, and none shares one", () => {
+  for (const [lang, dict] of Object.entries(TRANSLATIONS)) {
+    for (const modality of m.MODALITIES) {
+      const key = m.modalityLabelKey(modality);
+      assert.ok(dict[key], `${lang} has no ${key} for ${modality}`);
+    }
+  }
+  const keys = m.MODALITIES.map(m.modalityLabelKey);
+  assert.equal(new Set(keys).size, keys.length);
+  assert.equal(m.modalityLabelKey("unknown"), m.modalityLabelKey("strength"));
+});
+
 test("an unknown metric falls back to reps", () => {
   assert.equal(m.metricLabelKey("unknown"), "reps_label");
   assert.equal(m.formatMetricValue(12, "unknown"), "12");

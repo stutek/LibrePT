@@ -12,7 +12,7 @@ import {
   sourcesOf,
   withSource,
 } from "../../data/exerciseLibrary.js";
-import { modalityOf } from "../../domain/exerciseModality.js";
+import { MODALITIES, modalityLabelKey, modalityOf } from "../../domain/exerciseModality.js";
 import { escapeHTML } from "../common/utils.js";
 
 const MUSCLE_GROUPS = [
@@ -54,6 +54,7 @@ export function pickerLabels(t) {
     countLabel: t("picker_count") || "Movements: {count}",
     emptyLabel: t("picker_empty") || "No movements match this filter.",
     emptyQueryLabel: t("picker_empty_query") || 'No movement matches "{query}".',
+    modalityWords: Object.fromEntries(MODALITIES.map((m) => [m, t(modalityLabelKey(m))])),
   };
 }
 
@@ -88,6 +89,7 @@ export function sourceBadge(exercise, ownWord) {
  * @param {string}  [opts.countLabel]      - How many match, with `{count}` for the number.
  * @param {string}  [opts.emptyLabel]      - What the list says when nothing matches.
  * @param {string}  [opts.emptyQueryLabel] - The same when a typed search is why, with `{query}`.
+ * @param {Object}  [opts.modalityWords]   - Modality → the word its badge shows.
  * Callers pass `...pickerLabels(t)` for all the words at once.
  * @param {(exercise: Object) => void} opts.onSelect - Called with the chosen exercise on tap.
  */
@@ -108,6 +110,7 @@ export function mountExercisePicker(
     countLabel = "Movements: {count}",
     emptyLabel = "No movements match this filter.",
     emptyQueryLabel = 'No movement matches "{query}".',
+    modalityWords = {},
     onSelect,
   },
 ) {
@@ -194,7 +197,7 @@ export function mountExercisePicker(
         const modalityBadge =
           modality === "strength"
             ? ""
-            : `<span class="taxonomy-badge taxonomy-badge-modality">${escapeHTML(modality)}</span>`;
+            : `<span class="taxonomy-badge taxonomy-badge-modality">${escapeHTML(modalityWords[modality] || modality)}</span>`;
         const badges =
           sourceBadge(ex, sources.badge) +
           modalityBadge +

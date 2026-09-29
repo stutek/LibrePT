@@ -146,6 +146,21 @@ export function compactTargetString({
   return `S${setsTarget} × ${primaryPart}${compactLoad}`;
 }
 
+// i18n key for a modality's short name, the word its badge shows. How a movement is logged is the
+// app's own word and is translated; the badge showed the stored value, "ISOMETRIC" on a Slovenian
+// screen. Callers do t(modalityLabelKey(modality)).
+const MODALITY_LABEL_KEYS = {
+  strength: "modality_strength",
+  isometric: "modality_isometric",
+  cardio: "modality_cardio",
+  stretch: "modality_stretch",
+  balance: "modality_balance",
+  agility: "modality_agility",
+};
+export function modalityLabelKey(modality) {
+  return MODALITY_LABEL_KEYS[modality] || MODALITY_LABEL_KEYS.strength;
+}
+
 // i18n key for a metric's short unit label. Callers do t(metricLabelKey(metric)).
 export function metricLabelKey(metric) {
   switch (metric) {
