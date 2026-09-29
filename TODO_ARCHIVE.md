@@ -20,6 +20,83 @@ Read [CHANGELOG.md](CHANGELOG.md) for what shipped and when. This file is why.
 
 ---
 
+### 1.2 [x] Simultaneous sessions merged into one clipboard: multi-line titles + per-participant tags — dots shipped 2026-09-30
+
+Overlapping same-day sessions **already merge** into one clipboard (`getOverlappingSessions` /
+`launchClipboardDirectly`). What is missing is the visual separation of who belongs to which
+programme. Relates to [uc1_gym_floor_clipboard.md](use_cases/uc1_gym_floor_clipboard.md).
+
+- **The data gap**: `buildSessionMeta` already carries a deduplicated `titles`/`ids` list, but the
+  merge loop builds a flat `clientId → routineId` map with no record of the source session. Needs a
+  parallel `clientId → sourceSessionId` threaded into `clientRoutines`.
+- **Decided — where the tag shows**: stacked title lines in the session title bar
+  (`components/sessionTitleBar.js`), *not* the participant tabs (already tight on space). Each line
+  gets a subtle colour dot repeated next to the matching participant tab, so the pairing is
+  glanceable without reading. `renderSessionTitle()` shows only `titles[0]` today, so this is new UI.
+- **Decided — de-duplication**: identical titles collapse to one line, not repeated ones.
+
+### 80.77 [x] P2 — Po polnoči obrazec »Nastavitev treninga« privzame včerajšnji datum — popravljeno 2026-09-30
+
+**Scenarij in koraki:** ob 00:38 dne 2026-09-30 odpri aplikacijo (`?lang=sl&init=demo_data_load`),
+tapni »Ustvari trening«. Enako se zgodi ob neposrednem odprtju naslova `session/new`.
+
+**Opaženo:** polje DATUM pokaže `2026-09-29`, ZAČETNI ČAS pa `01:00`. Nobeden od čipov nad poljem
+(»danes«, »jutri«, »pet. 2.«, »sob. 3.«) ni izbran, čeprav so ti čipi šteti od pravega današnjega
+dne. Isti zaslon v seznamu treningov piše »sreda 2026-09-30 DANES«, seznam »Termini treningov« pa se
+odpre na naslovu `/sessions/2026-09-30`. Torej aplikacija v isti minuti na enem mestu ve, da je
+danes 30. september, na obrazcu pa ponudi 29. september.
+
+**Težava in vpliv:** trener, ki po polnoči vpiše naslednji trening in datuma ne popravi, ga shrani
+na včerajšnji dan ob 01:00, torej skoraj cel dan v preteklost. Tak trening se uvrsti med pretekle in
+ne v seznam, kjer ga trener pričakuje. Pozno načrtovanje po zaključku večernih treningov je ravno
+tisti čas, ko trener to dela.
+
+**Predlog:** obrazec naj privzame isti dan, kot ga aplikacija na plošči označi z »DANES«, in naj bo
+čip »danes« pri odprtju izbran — opaženo na različici `8b2ce80`.
+
+### 80.79 [x] P2 — Kartica treninga brez udeležencev se na dotik ne odzove, noter vodi le svinčnik — popravljeno 2026-09-30
+
+**Scenarij in koraki:** na plošči (vzorčni podatki) tapni kartico »Prost termin (brez najave)«,
+danes 04:00 - 05:00, ki pravi »0/3 mest zasedenih« in »Ni udeležencev«. Tapni jo dvakrat, na naslov
+in na telo kartice.
+
+**Opaženo:** nič. Naslov se ne spremeni, podloga se ne odpre, okna ni, sporočila ni, v dnevniku
+konzole ni napake. Kartica treninga z udeleženci (»Hitri HIIT za trup«) se na isti dotik odpre v
+podlogo. Edina pot v tak termin je ikona svinčnika v desnem zgornjem kotu kartice, ki meri 38 × 38
+pik in nima napisane oznake (pomožno ime je »Uredi«); ta odpre »Nastavitev treninga«, kjer se stranka
+doda.
+
+**Težava in vpliv:** ko pride stranka brez najave, trener tapne prosti termin, da jo vpiše. Dotik ne
+naredi nič in trener ne ve, ali je bil zaznan, zato tapne znova. Da bi našel svinčnik, mora zapustiti
+prvo domnevo.
+
+**Predlog:** dotik na kartico brez udeležencev naj odpre isti zaslon kot svinčnik, torej
+»Nastavitev treninga« — opaženo na različici `8b2ce80`.
+
+### 80.80 [x] P1 — Vrstica »Zadnjič« na podlogi pokaže tudi serije, ki jih stranka ni naredila — popravljeno 2026-09-30
+
+**Scenarij in koraki:** vzorčni podatki, stranka Sarah Jenkins. Odpri današnji trening »Hitri HIIT
+za trup«, tapni »Začni trening«, potrdi »Prilagodi čas«. Odpri prvi sklop »Krog za moč nog« in ga
+odpelji do konca (»Zaključi krog 1 / 3«, »Zaključi krog 2 / 3«, »Zaključi krog 3 / 3«, »Zaključi
+sklop«). Drugega sklopa »Trojka za hipertrofijo in trup« (Leg Press, Plank, Hanging Knee Raise) se
+ne dotakni. Tapni »Zaključi vadbo« in »Zaključi zdaj«. Nato odpri naslednji trening iste stranke in
+poglej podlogo.
+
+**Opaženo:** podloga na vrhu pravi »Zadnjič: 2026-09-30« in pod tem: »Leg Press 140 kg x 12, 140 kg
+x 12, 140 kg x 12«, »Plank BW x 45, BW x 45, BW x 45«, »Hanging Knee Raise BW x 15, BW x 15, BW x
+15«. Nobene od teh serij ni bilo. Zaslon stranke (Imenik strank → Sarah Jenkins → ZGODOVINA
+ZABELEŽENIH VADB) iste vaje pravilno označi z »Leg Press PRESKOČENO«, »Plank PRESKOČENO«, »Hanging
+Knee Raise PRESKOČENO«, in shranjeni zapis ima pri vsaki od teh serij `completed: false`. Napačna je
+torej samo vrstica »Zadnjič« na podlogi.
+
+**Težava in vpliv:** »Zadnjič« je številka, po kateri trener nastavi težo za današnjo serijo. Če
+piše, da je stranka prejšnjič trikrat naredila 140 kg, ji trener naloži 140 kg ali več, čeprav te
+vaje sploh ni delala. Trening, ki ga je trener predčasno zaključil (stranka je morala prej oditi, se
+je poškodovala), se tako naslednjič bere kot opravljen v celoti.
+
+**Predlog:** »Zadnjič« naj šteje samo serije z `completed: true`, preskočene vaje pa naj označi
+enako kot zaslon stranke, torej »PRESKOČENO« — opaženo na različici `8b2ce80`.
+
 ### 80.74 [x] P2 — Vaja, ki je v rutini dvakrat, si deli zapis serij — popravljeno 2026-09-30
 
 **Scenarij in koraki:** peskovnik, lokalni strežnik (`main` na `080ab10`), sl, 390 × 844. Odpreti

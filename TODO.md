@@ -165,19 +165,10 @@ the thing that must happen first, not merely what it touches.
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#11-x-pt-side-client-assignment-to-a-session); what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-### 1.2 [ ] Simultaneous sessions merged into one clipboard: multi-line titles + per-participant tags
-Overlapping same-day sessions **already merge** into one clipboard (`getOverlappingSessions` /
-`launchClipboardDirectly`). What is missing is the visual separation of who belongs to which
-programme. Relates to [uc1_gym_floor_clipboard.md](use_cases/uc1_gym_floor_clipboard.md).
+### 1.2 [x] Simultaneous sessions merged into one clipboard: multi-line titles + per-participant tags — dots shipped 2026-09-30
 
-- **The data gap**: `buildSessionMeta` already carries a deduplicated `titles`/`ids` list, but the
-  merge loop builds a flat `clientId → routineId` map with no record of the source session. Needs a
-  parallel `clientId → sourceSessionId` threaded into `clientRoutines`.
-- **Decided — where the tag shows**: stacked title lines in the session title bar
-  (`components/sessionTitleBar.js`), *not* the participant tabs (already tight on space). Each line
-  gets a subtle colour dot repeated next to the matching participant tab, so the pairing is
-  glanceable without reading. `renderSessionTitle()` shows only `titles[0]` today, so this is new UI.
-- **Decided — de-duplication**: identical titles collapse to one line, not repeated ones.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#12-x-simultaneous-sessions-merged-into-one-clipboard-multi-line-titles--per-participant-tags--dots-shipped-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ### 1.3 [ ] Session list must model partial overlaps
 
@@ -6374,24 +6365,10 @@ what shipped is in [CHANGELOG.md](CHANGELOG.md).
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8076-x-p1--tap-na-kartico-treninga-ki-že-teče-ga-zamenja-z-novim-nezačetim--popravljeno-2026-09-30);
 what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-### 80.77 [ ] P2 — Po polnoči obrazec »Nastavitev treninga« privzame včerajšnji datum
+### 80.77 [x] P2 — Po polnoči obrazec »Nastavitev treninga« privzame včerajšnji datum — popravljeno 2026-09-30
 
-**Scenarij in koraki:** ob 00:38 dne 2026-09-30 odpri aplikacijo (`?lang=sl&init=demo_data_load`),
-tapni »Ustvari trening«. Enako se zgodi ob neposrednem odprtju naslova `session/new`.
-
-**Opaženo:** polje DATUM pokaže `2026-09-29`, ZAČETNI ČAS pa `01:00`. Nobeden od čipov nad poljem
-(»danes«, »jutri«, »pet. 2.«, »sob. 3.«) ni izbran, čeprav so ti čipi šteti od pravega današnjega
-dne. Isti zaslon v seznamu treningov piše »sreda 2026-09-30 DANES«, seznam »Termini treningov« pa se
-odpre na naslovu `/sessions/2026-09-30`. Torej aplikacija v isti minuti na enem mestu ve, da je
-danes 30. september, na obrazcu pa ponudi 29. september.
-
-**Težava in vpliv:** trener, ki po polnoči vpiše naslednji trening in datuma ne popravi, ga shrani
-na včerajšnji dan ob 01:00, torej skoraj cel dan v preteklost. Tak trening se uvrsti med pretekle in
-ne v seznam, kjer ga trener pričakuje. Pozno načrtovanje po zaključku večernih treningov je ravno
-tisti čas, ko trener to dela.
-
-**Predlog:** obrazec naj privzame isti dan, kot ga aplikacija na plošči označi z »DANES«, in naj bo
-čip »danes« pri odprtju izbran — opaženo na različici `8b2ce80`.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8077-x-p2--po-polnoči-obrazec-nastavitev-treninga-privzame-včerajšnji-datum--popravljeno-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ### 80.78 [ ] P2 — Ročica, ki zapre podlogo treninga, je visoka 21 pik, tik pod njo pa je drug gumb
 
@@ -6412,50 +6389,23 @@ zaslonu ni nikjer zapisano.
 **Predlog:** dotikalna tarča ročice naj bo visoka vsaj 44 pik in med njo in gumbom »Nazaj na
 današnji trening« naj bo prazen pas — opaženo na različici `8b2ce80`.
 
-### 80.79 [ ] P2 — Kartica treninga brez udeležencev se na dotik ne odzove, noter vodi le svinčnik
+**Presoja 2026-09-30 (Claude): čaka na Simona.** Ročica je gumb `.view-grabber` z nevidno tarčo
+`::before`, ki jo razširi na 23 pik. Nad njo je le 6 pik naslovne vrstice, nato glava aplikacije z
+oznako na sredini; spodaj je vrstica z gumbi. Tarča 44 pik zato zahteva eno od dveh: naslovno
+vrstico, višjo za okoli 20 pik na vsakem zaslonu z ročico (plošča, načrti, nastavitev treninga,
+podloga), ali tarčo, ki prekrije sredino glave. Oboje je odločitev o prostoru na zaslonu, kot §80.25.
 
-**Scenarij in koraki:** na plošči (vzorčni podatki) tapni kartico »Prost termin (brez najave)«,
-danes 04:00 - 05:00, ki pravi »0/3 mest zasedenih« in »Ni udeležencev«. Tapni jo dvakrat, na naslov
-in na telo kartice.
+### 80.79 [x] P2 — Kartica treninga brez udeležencev se na dotik ne odzove, noter vodi le svinčnik — popravljeno 2026-09-30
 
-**Opaženo:** nič. Naslov se ne spremeni, podloga se ne odpre, okna ni, sporočila ni, v dnevniku
-konzole ni napake. Kartica treninga z udeleženci (»Hitri HIIT za trup«) se na isti dotik odpre v
-podlogo. Edina pot v tak termin je ikona svinčnika v desnem zgornjem kotu kartice, ki meri 38 × 38
-pik in nima napisane oznake (pomožno ime je »Uredi«); ta odpre »Nastavitev treninga«, kjer se stranka
-doda.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8079-x-p2--kartica-treninga-brez-udeležencev-se-na-dotik-ne-odzove-noter-vodi-le-svinčnik--popravljeno-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-**Težava in vpliv:** ko pride stranka brez najave, trener tapne prosti termin, da jo vpiše. Dotik ne
-naredi nič in trener ne ve, ali je bil zaznan, zato tapne znova. Da bi našel svinčnik, mora zapustiti
-prvo domnevo.
+### 80.80 [x] P1 — Vrstica »Zadnjič« na podlogi pokaže tudi serije, ki jih stranka ni naredila — popravljeno 2026-09-30
 
-**Predlog:** dotik na kartico brez udeležencev naj odpre isti zaslon kot svinčnik, torej
-»Nastavitev treninga« — opaženo na različici `8b2ce80`.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8080-x-p1--vrstica-zadnjič-na-podlogi-pokaže-tudi-serije-ki-jih-stranka-ni-naredila--popravljeno-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-### 80.80 [ ] P1 — Vrstica »Zadnjič« na podlogi pokaže tudi serije, ki jih stranka ni naredila
-
-**Scenarij in koraki:** vzorčni podatki, stranka Sarah Jenkins. Odpri današnji trening »Hitri HIIT
-za trup«, tapni »Začni trening«, potrdi »Prilagodi čas«. Odpri prvi sklop »Krog za moč nog« in ga
-odpelji do konca (»Zaključi krog 1 / 3«, »Zaključi krog 2 / 3«, »Zaključi krog 3 / 3«, »Zaključi
-sklop«). Drugega sklopa »Trojka za hipertrofijo in trup« (Leg Press, Plank, Hanging Knee Raise) se
-ne dotakni. Tapni »Zaključi vadbo« in »Zaključi zdaj«. Nato odpri naslednji trening iste stranke in
-poglej podlogo.
-
-**Opaženo:** podloga na vrhu pravi »Zadnjič: 2026-09-30« in pod tem: »Leg Press 140 kg x 12, 140 kg
-x 12, 140 kg x 12«, »Plank BW x 45, BW x 45, BW x 45«, »Hanging Knee Raise BW x 15, BW x 15, BW x
-15«. Nobene od teh serij ni bilo. Zaslon stranke (Imenik strank → Sarah Jenkins → ZGODOVINA
-ZABELEŽENIH VADB) iste vaje pravilno označi z »Leg Press PRESKOČENO«, »Plank PRESKOČENO«, »Hanging
-Knee Raise PRESKOČENO«, in shranjeni zapis ima pri vsaki od teh serij `completed: false`. Napačna je
-torej samo vrstica »Zadnjič« na podlogi.
-
-**Težava in vpliv:** »Zadnjič« je številka, po kateri trener nastavi težo za današnjo serijo. Če
-piše, da je stranka prejšnjič trikrat naredila 140 kg, ji trener naloži 140 kg ali več, čeprav te
-vaje sploh ni delala. Trening, ki ga je trener predčasno zaključil (stranka je morala prej oditi, se
-je poškodovala), se tako naslednjič bere kot opravljen v celoti.
-
-**Predlog:** »Zadnjič« naj šteje samo serije z `completed: true`, preskočene vaje pa naj označi
-enako kot zaslon stranke, torej »PRESKOČENO« — opaženo na različici `8b2ce80`.
-
-### 80.81 [ ] P1 — Ko trener na prost termin doda eno stranko, termin izgubi mesta in zamenja rutino
+### 80.81 [~] P1 — Ko trener na prost termin doda eno stranko, termin izgubi mesta in zamenja rutino
 
 **Scenarij in koraki:** vzorčni podatki. Kartica »Prost termin (brez najave)«, danes 04:00 - 05:00,
 pravi »0/3 mest zasedenih« in »Noge in trup B«. Tapni svinčnik na kartici, v polje za iskanje vpiši
@@ -6474,6 +6424,11 @@ dobi zgornji del telesa.
 **Predlog:** dodajanje stranke naj ne spremeni števila mest, izbirnik rutine pri stranki naj se odpre
 na rutini, ki jo termin že ima, in obrazec naj imeti polje za število mest — opaženo na različici
 `8b2ce80`.
+
+**Stanje 2026-09-30:** prva dva dela sta popravljena (`cfd4e10`): urejanje termina števila mest ne
+zmanjša več, stranka, dodana terminu z rutino, dobi rutino termina. **Odprto, čaka na Simona:** ali
+obrazec »Nastavitev treninga« dobi polje za število mest. To je novo polje v obrazcu, o katerega
+vsebini in vrstnem redu odloča Simon (§80.70).
 
 Isto se zgodi pri skupinskem treningu, ki ni prost termin: kartica »Skupinska moč in kondicija« je
 pred posegom pisala »2/7 mest zasedenih«, po odstranitvi ene stranke »1/1«, po dodani novi pa »2/2«.
