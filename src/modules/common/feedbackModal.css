@@ -1,5 +1,33 @@
 /* modules/common/feedbackModal.css — the feedback dialog's own rows, next to feedbackModal.js. */
 
+/* The six choices, one under the other, each a thumb high with the whole row as its target. They
+   were bare inline labels, 16px high on one line, in the form filled mid-session with one hand. */
+.feedback-chips-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+.feedback-chip-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 10px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--btn-radius);
+  cursor: pointer;
+}
+.feedback-chip-option input[type="radio"] {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+}
+.feedback-chip-option:has(input:checked) {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+
 /* Keeping a note on the client's record. The whole row is the target — a 16px tick
    box is not something a trainer hits one-handed with the other hand on a barbell. */
 .feedback-keep-row {

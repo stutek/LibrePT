@@ -46,6 +46,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   beside its OK.
 - **Entering the sandbox from real work lists the guided tour's chapters.** The sandbox card
   pointed at a list that appeared only after a reload.
+- **The choices in the note form are a thumb high**, one under the other: Too easy, Too hard,
+  Joint pain and the rest were 16-pixel lines in the form a trainer fills mid-session.
 
 ---
 

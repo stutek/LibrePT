@@ -162,3 +162,18 @@ def test_a_note_written_without_choosing_a_rating_stays_neutral(page, local_serv
     )
     assert tags["session"] == ["Note"]
     assert tags["review"] == ["Note - plank 30 s, 25 s, 20 s"]
+
+
+def test_every_choice_in_the_note_form_is_a_thumb_high(page, local_server):
+    """The six choices — Too easy, Too hard, Joint pain and the rest — were bare inline labels, 16
+    pixels high where they fit one line: the form a trainer fills mid-session with one hand, while
+    the other steadies a client. Each choice is at least 44 pixels high."""
+    page.set_viewport_size({"width": 390, "height": 844})
+    _open_session_with_one_exercise(page, local_server)
+    page.locator("#btn-log-feedback").click()
+    page.wait_for_selector("#dialog-feedback[open]")
+
+    heights = page.locator("#dialog-feedback .feedback-chip-option").evaluate_all(
+        "(labels) => labels.map((l) => Math.round(l.getBoundingClientRect().height))"
+    )
+    assert len(heights) == 6 and min(heights) >= 44, heights
