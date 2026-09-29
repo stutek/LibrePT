@@ -90,16 +90,38 @@ export function saveEditSessionDraft() {
   };
 
   try {
-    writeVersionScoped(DRAFT_KEY, JSON.stringify(draft));
+    writeVersionScoped(DRAFT_KEY, JSON.stringify({ ...storedDrafts(), [draftFormKey()]: draft }));
   } catch (e) {
     console.warn("Failed to save workout setup draft to localStorage", e);
   }
+}
+
+// One stored record holds a draft PER FORM: a new session, a new plan, or one existing session by
+// its id. With a single draft for all of them, a new session left half-typed was put into the
+// edit form of a different session the next time one was opened, and saving that form wrote the
+// draft over the other session: its name, day, time, routine and clients. A draft now comes back
+// only to the form it was typed in, and saving one form leaves every other form's draft alone.
+function draftFormKey() {
+  if (editingSessionId) return `session:${editingSessionId}`;
+  return isPlanningModeActive ? "plan" : "new";
+}
+
+// A draft stored before drafts were kept per form is a bare draft object; it is read as the new
+// session's, the form a trainer is likeliest to have left half-typed.
+function storedDrafts() {
+  const raw = readVersionScoped(DRAFT_KEY);
+  if (!raw) return {};
+  const parsed = JSON.parse(raw);
+  if (!parsed || typeof parsed !== "object") return {};
+  return "sessionName" in parsed || "checkedClients" in parsed ? { new: parsed } : parsed;
 }
 export const saveSetupDraft = saveEditSessionDraft;
 
 export function clearEditSessionDraft() {
   try {
-    removeVersionScoped(DRAFT_KEY);
+    const { [draftFormKey()]: _cleared, ...others } = storedDrafts();
+    if (Object.keys(others).length) writeVersionScoped(DRAFT_KEY, JSON.stringify(others));
+    else removeVersionScoped(DRAFT_KEY);
   } catch (e) {
     console.warn("Failed to clear edit session draft from localStorage:", e);
   }
@@ -108,8 +130,7 @@ export const clearSetupDraft = clearEditSessionDraft;
 
 export function getEditSessionDraft() {
   try {
-    const raw = readVersionScoped(DRAFT_KEY);
-    return raw ? JSON.parse(raw) : null;
+    return storedDrafts()[draftFormKey()] ?? null;
   } catch (e) {
     console.warn("Failed to retrieve edit session draft from localStorage:", e);
     return null;

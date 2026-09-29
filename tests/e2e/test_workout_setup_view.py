@@ -118,6 +118,32 @@ def test_workout_setup_draft_persists_across_reload(page, local_server):
     expect(page.locator("#setup-location")).to_have_value("City Park Outdoor Gym")
 
 
+def test_a_new_sessions_draft_never_fills_the_form_of_another_session(
+    page, local_server
+):
+    """A new session left half-typed came back in the edit form of a different session, and saving
+    that form wrote the draft over the other session: its name, day, time, routine and client, with
+    no question asked. A draft belongs to the form it was typed in, and stays there."""
+    page.goto(f"{local_server}session/new")
+    page.wait_for_selector("#view-workout-setup.active")
+    page.fill("#setup-session-name", "Draft C")
+    page.fill("#setup-start-time", "07:00")
+    page.reload()
+    page.wait_for_selector("#view-workout-setup.active")
+
+    # "Morning Conditioning", seeded tomorrow 09:00-10:00 (src/data/sessions.js).
+    page.goto(f"{local_server}session/setup/s04f2e3d")
+    page.wait_for_selector("#view-workout-setup.active")
+    expect(page.locator("#setup-session-name")).to_have_value("Morning Conditioning")
+    expect(page.locator("#setup-start-time")).to_have_value("09:00")
+
+    # And the draft is still waiting in the form it was typed in.
+    page.goto(f"{local_server}session/new")
+    page.wait_for_selector("#view-workout-setup.active")
+    expect(page.locator("#setup-session-name")).to_have_value("Draft C")
+    expect(page.locator("#setup-start-time")).to_have_value("07:00")
+
+
 def test_the_name_and_place_fields_prompt_in_slovenian(page, local_server):
     """Both placeholders were English in every language."""
     page.goto(f"{local_server}session/new?lang=sl")

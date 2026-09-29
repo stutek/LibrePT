@@ -42,6 +42,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Fixed
 
+- **A half-typed new session no longer overwrites another session.** A new session left unsaved came
+  back in the edit form of a different session, and saving that form wrote it over the other
+  session: its name, day, time, routine and clients, with no question. A draft now returns only to
+  the form it was typed in, and saving one form leaves every other form's draft alone.
 - **A session may end after midnight.** 21:00 to 00:30 was refused as "ends before it starts", and
   so was every edit of a stored session running past midnight, so a late group could be neither
   entered nor changed. An end before the start is the next day, as everywhere else in the app. What
