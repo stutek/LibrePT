@@ -6454,6 +6454,30 @@ prvo domnevo.
 **Predlog:** dotik na kartico brez udeležencev naj odpre isti zaslon kot svinčnik, torej
 »Nastavitev treninga« — opaženo na različici `8b2ce80`.
 
+### 80.80 [ ] P1 — Vrstica »Zadnjič« na podlogi pokaže tudi serije, ki jih stranka ni naredila
+
+**Scenarij in koraki:** vzorčni podatki, stranka Sarah Jenkins. Odpri današnji trening »Hitri HIIT
+za trup«, tapni »Začni trening«, potrdi »Prilagodi čas«. Odpri prvi sklop »Krog za moč nog« in ga
+odpelji do konca (»Zaključi krog 1 / 3«, »Zaključi krog 2 / 3«, »Zaključi krog 3 / 3«, »Zaključi
+sklop«). Drugega sklopa »Trojka za hipertrofijo in trup« (Leg Press, Plank, Hanging Knee Raise) se
+ne dotakni. Tapni »Zaključi vadbo« in »Zaključi zdaj«. Nato odpri naslednji trening iste stranke in
+poglej podlogo.
+
+**Opaženo:** podloga na vrhu pravi »Zadnjič: 2026-09-30« in pod tem: »Leg Press 140 kg x 12, 140 kg
+x 12, 140 kg x 12«, »Plank BW x 45, BW x 45, BW x 45«, »Hanging Knee Raise BW x 15, BW x 15, BW x
+15«. Nobene od teh serij ni bilo. Zaslon stranke (Imenik strank → Sarah Jenkins → ZGODOVINA
+ZABELEŽENIH VADB) iste vaje pravilno označi z »Leg Press PRESKOČENO«, »Plank PRESKOČENO«, »Hanging
+Knee Raise PRESKOČENO«, in shranjeni zapis ima pri vsaki od teh serij `completed: false`. Napačna je
+torej samo vrstica »Zadnjič« na podlogi.
+
+**Težava in vpliv:** »Zadnjič« je številka, po kateri trener nastavi težo za današnjo serijo. Če
+piše, da je stranka prejšnjič trikrat naredila 140 kg, ji trener naloži 140 kg ali več, čeprav te
+vaje sploh ni delala. Trening, ki ga je trener predčasno zaključil (stranka je morala prej oditi, se
+je poškodovala), se tako naslednjič bere kot opravljen v celoti.
+
+**Predlog:** »Zadnjič« naj šteje samo serije z `completed: true`, preskočene vaje pa naj označi
+enako kot zaslon stranke, torej »PRESKOČENO« — opaženo na različici `8b2ce80`.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
