@@ -10,6 +10,7 @@
 import { libraryExercises } from "../data/exerciseLibrary.js";
 import { newRecordId } from "../data/recordId.js";
 import { clearActiveSessionCache, readActiveSessionCache } from "../data/sessionCache.js";
+import { loggedSetsPerParticipant } from "../domain/loggedSets.js";
 import { boundClientRoutines } from "../domain/participantBinding.js";
 import { isCachedSessionStale } from "../domain/sessionClock.js";
 import { buildSessionHistoryRecord } from "../domain/sessionHistoryRecord.js";
@@ -19,12 +20,18 @@ import {
 } from "../domain/sessionPlanFactory.js";
 import { sessionBelongsToSlot } from "../domain/sessionRecord.js";
 import { sessionsAfterRemoving } from "../domain/sessionSeries.js";
+import { countedText } from "../i18n/plural.js";
 import { renderClientsList } from "../modules/clients/clientsView.js";
 import { renderActiveSessionBoard } from "../modules/clipboard/activeSessionBoard.js";
 import { markEditorRow, setClipboardEditModeFlag } from "../modules/clipboard/editModeState.js";
 import { clearAllTimers, restoreSessionTimers } from "../modules/clipboard/exerciseAndRestTimer.js";
 import { askInApp } from "../modules/common/appQuestion.js";
 import { renderNotificationArea } from "../modules/common/notificationArea.js";
+import {
+  clientDisplayName,
+  formatClockFromEpoch,
+  getISODateString,
+} from "../modules/common/utils.js";
 import {
   releaseScreenWakeLock,
   requestScreenWakeLock as requestScreenWakeLockHelper,
@@ -211,17 +218,52 @@ export function cancelWorkoutSession() {
 // exactly the one that gets re-run on another day; the feed's "unscheduled plans" item is then the
 // route back to it. Logged sets and feedback ARE discarded, which is what the confirm says — a
 // session worth deleting is a session that did not happen.
-/** The question asked before deleting the session on the clipboard. An evening of a repeating
- *  session is deleted alone, and the question says so: without it a trainer could fear that every
- *  evening of the series had gone. */
+/** The session's title, ISO date and 24-hour time, in one line: what the question is about. */
+function sessionNameLine(t, sourceSession) {
+  const titles = (sourceSession?.titles || []).filter(Boolean).join(", ");
+  const start = sourceSession?.startDate ? new Date(sourceSession.startDate) : null;
+  if (!start || Number.isNaN(start.getTime())) return titles;
+  return t("delete_session_named")
+    .replace("{title}", titles)
+    .replace("{date}", getISODateString(start))
+    .replace("{time}", formatClockFromEpoch(start.getTime()));
+}
+
+/** What a started session loses: the logged sets, per participant. */
+function loggedSetsLine(t, activeSession) {
+  const { state } = getAppDeps();
+  const lang = document.documentElement.lang;
+  const parts = loggedSetsPerParticipant(activeSession).map(({ clientId, count }) =>
+    t("delete_sets_participant")
+      .replace("{name}", clientDisplayName((state?.clients || []).find((c) => c.id === clientId)))
+      .replace("{count}", countedText(t, lang, "delete_sets", count)),
+  );
+  return parts.length
+    ? t("delete_sets_lost").replace("{sets}", parts.join("; "))
+    : t("delete_sets_none");
+}
+
+/** The question asked before deleting the session on the clipboard. It names the session. An
+ *  evening of a repeating session is deleted alone, and the question says so: without it a trainer
+ *  could fear that every evening of the series had gone. A started session also says which logged
+ *  sets cannot come back. */
 export function deleteSessionQuestion(t) {
   const { state } = getAppDeps();
-  const sourceSession = getActiveSession()?.sourceSession;
+  const activeSession = getActiveSession();
+  const sourceSession = activeSession?.sourceSession;
   const oneOfASeries = (state?.sessions || []).some(
     (session) => session.seriesId && sessionBelongsToSlot(session, sourceSession),
   );
   const question = t("confirm_delete_session");
-  return oneOfASeries ? `${t("delete_one_evening")} ${question}` : question;
+  const lines = [sessionNameLine(t, sourceSession)];
+  lines.push(oneOfASeries ? `${t("delete_one_evening")} ${question}` : question);
+  if (activeSession?.started) lines.push(loggedSetsLine(t, activeSession));
+  return lines.filter(Boolean).join("\n");
+}
+
+/** A started session is deleted by sliding, not by a tap: a phone in a pocket cannot slide. */
+export function deleteSessionNeedsSlide() {
+  return Boolean(getActiveSession()?.started);
 }
 
 export function deleteScheduledSession() {

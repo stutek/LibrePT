@@ -57,6 +57,7 @@ import {
   beginWorkoutSession,
   cancelWorkoutSession,
   deleteScheduledSession,
+  deleteSessionNeedsSlide,
   deleteSessionQuestion,
   finishWorkoutSession,
 } from "./sessionLifecycle.js";
@@ -420,7 +421,10 @@ function wireSessionMenuAndActions(t) {
     // discarding the clipboard; a real session's delete has to remove the row behind it too.
     const isPlanning = getActiveSession()?.sourceSession?.isPlanning;
     const message = isPlanning ? t("confirm_cancel") : deleteSessionQuestion(t);
-    if (!(await askInApp({ t, message, confirmKey: "btn_delete_session", danger: true }))) return;
+    const slide = !isPlanning && deleteSessionNeedsSlide();
+    if (!(await askInApp({ t, message, confirmKey: "btn_delete_session", danger: true, slide }))) {
+      return;
+    }
     if (isPlanning) cancelWorkoutSession();
     else deleteScheduledSession();
   });

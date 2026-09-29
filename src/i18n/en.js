@@ -95,6 +95,15 @@ export const en = {
     "Delete this session? It comes off the schedule and its logged progress and feedback are discarded — each participant's plan is kept under Unscheduled plans.",
   delete_one_evening:
     "This is one evening of a repeating session. Only this evening is deleted; the others stay.",
+  delete_session_named: "{title}, {date} {time}",
+  delete_sets_lost: "These logged sets cannot be restored. {sets}",
+  delete_sets_none: "No sets are logged yet.",
+  delete_sets_participant: "{name}: {count}",
+  delete_slide_label: "Slide to the end to delete this session",
+  delete_sets_one: "{count} set",
+  delete_sets_two: "{count} sets",
+  delete_sets_few: "{count} sets",
+  delete_sets_other: "{count} sets",
   confirm_delete_plan:
     "Delete every exercise from this plan? You can rebuild it from scratch or exit editing.",
   warning_banner_title: "Client Safety Advisory",

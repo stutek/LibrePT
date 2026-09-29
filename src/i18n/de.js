@@ -111,6 +111,15 @@ export const de = {
     "Dieses Training löschen? Es wird aus dem Terminplan entfernt, und der aufgezeichnete Fortschritt und die Rückmeldungen werden gelöscht — der Plan jedes Teilnehmers bleibt unter „Pläne ohne Termin“ erhalten.",
   delete_one_evening:
     "Das ist ein Abend eines wiederkehrenden Termins. Nur dieser Abend wird gelöscht, die anderen bleiben.",
+  delete_session_named: "{title}, {date} {time}",
+  delete_sets_lost: "Diese erfassten Sätze lassen sich nicht wiederherstellen. {sets}",
+  delete_sets_none: "Es ist noch kein Satz erfasst.",
+  delete_sets_participant: "{name}: {count}",
+  delete_slide_label: "Zum Löschen dieses Trainings bis ans Ende schieben",
+  delete_sets_one: "{count} Satz",
+  delete_sets_two: "{count} Sätze",
+  delete_sets_few: "{count} Sätze",
+  delete_sets_other: "{count} Sätze",
   confirm_delete_plan:
     "Alle Übungen aus diesem Plan löschen? Danach kannst du ihn neu aufbauen oder die Bearbeitung beenden.",
   warning_banner_title: "Sicherheitshinweis zum Kunden",

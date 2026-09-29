@@ -22,6 +22,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Fixed
 
+- **Deleting a session says which session, and a started one is deleted by sliding.** The question
+  names the session with its date and time. For a session already started it says which logged
+  sets cannot come back, per participant, and the delete button gives way to a slider that must be
+  dragged from its handle to the end: a tap anywhere on the track does nothing, so a phone in a
+  pocket cannot delete a workout in progress. From the keyboard, the End key confirms.
 - **Two clients with one name are told apart by their alias** in the invite dialog, in the title of
   the feedback form, on the rest and exercise timers and in "Copy this plan to…". Each showed the
   bare name, so a trainer could not tell which of two "Luka Kovač" an invite or a timer belonged to.

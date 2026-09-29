@@ -111,6 +111,15 @@ export const sl = {
     "Izbriši ta trening? Odstranjen bo z urnika, zabeležen napredek in povratne informacije pa bodo izgubljeni — program vsakega udeleženca se ohrani med nenačrtovanimi programi.",
   delete_one_evening:
     "To je en večer ponavljajočega se treninga. Izbriše se samo ta večer, ostali ostanejo.",
+  delete_session_named: "{title}, {date} {time}",
+  delete_sets_lost: "Teh zabeleženih serij ni mogoče obnoviti. {sets}",
+  delete_sets_none: "Nobena serija še ni zabeležena.",
+  delete_sets_participant: "{name}: {count}",
+  delete_slide_label: "Povleci do konca, da izbrišeš ta trening",
+  delete_sets_one: "{count} serija",
+  delete_sets_two: "{count} seriji",
+  delete_sets_few: "{count} serije",
+  delete_sets_other: "{count} serij",
   confirm_delete_plan:
     "Izbrišem vse vaje iz tega plana? Lahko ga sestaviš znova ali zapustiš urejanje.",
   warning_banner_title: "Varnostno opozorilo za stranko",

@@ -468,6 +468,73 @@ h6 {
 .danger-btn:hover {
   background-color: color-mix(in srgb, var(--danger) 24%, transparent);
 }
+/* The question dialog keeps the line breaks of its text: the session's name is its own line. */
+#app-question-text {
+  white-space: pre-line;
+}
+/* Slide to confirm: a native range, so arrow keys, End and screen readers work without code. The
+   filled part follows --slide-fill (set by appQuestion.js). Track and thumb are both 48px tall, the
+   thumb is wide enough to hold with a thumb, and touch-action stops the page scrolling under it. */
+.slide-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+.slide-confirm[hidden] {
+  display: none;
+}
+.slide-confirm-label {
+  color: var(--danger);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.slide-confirm-range {
+  --slide-fill: 0%;
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 48px;
+  margin: 0;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--danger) 45%, transparent);
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--danger) 35%, transparent) var(--slide-fill),
+    var(--danger-light) var(--slide-fill)
+  );
+  touch-action: none;
+  cursor: grab;
+}
+.slide-confirm-range:focus-visible {
+  outline: 2px solid var(--danger);
+  outline-offset: 2px;
+}
+.slide-confirm-range::-webkit-slider-runnable-track {
+  height: 46px;
+  background: transparent;
+}
+.slide-confirm-range::-moz-range-track {
+  height: 46px;
+  background: transparent;
+}
+.slide-confirm-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 64px;
+  height: 46px;
+  border-radius: 999px;
+  border: 0;
+  background: var(--danger);
+}
+.slide-confirm-range::-moz-range-thumb {
+  width: 64px;
+  height: 46px;
+  border-radius: 999px;
+  border: 0;
+  background: var(--danger);
+}
 /* A destructive action that shares a row with the ordinary ones — it must read as available but
    never compete for a thumb aiming at the button beside it, so it drops the filled surface and
    takes the far end of the row instead. Full button padding is kept: on a phone this is still a
