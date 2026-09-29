@@ -132,7 +132,8 @@ export const de = {
   label_session_date: "Datum",
   label_start_time: "Beginn",
   label_end_time: "Ende",
-  end_before_start: "Der Termin endet, bevor er beginnt. Prüfe die Endzeit.",
+  end_makes_session_too_long:
+    "Dieser Termin würde am nächsten Tag um {end} enden und {hours} h dauern. Prüfe die Endzeit.",
   repeat_until_before_start:
     "Die Wiederholung endet vor dem ersten Termin. Wähle den Tag des ersten Termins oder einen späteren.",
   time_field_later: "Fünf Minuten später",

@@ -107,9 +107,12 @@ def test_a_session_being_edited_does_not_clash_with_itself(page, local_server):
     expect(page.locator("#setup-schedule-conflicts")).to_be_hidden()
 
 
-def test_an_end_before_the_start_is_refused_at_the_field(page, local_server):
-    """18:00 to 09:00 was saved without a word: a session nine hours long in the minus, and every
-    countdown and duration computed from it wrong. An end of 00:00 is midnight and stays allowed."""
+def test_an_end_that_makes_the_session_too_long_is_refused_at_the_field(
+    page, local_server
+):
+    """18:00 to 09:00 was saved without a word. An end before the start is the next day, so this
+    is a session of fifteen hours — a typing slip, not a session. The field says what the time
+    was read as, so the trainer sees why."""
     load_with_stub(
         page, local_server, setup_stub(SCHEDULED_SESSION, target_session="'s-edit'")
     )
@@ -119,9 +122,24 @@ def test_an_end_before_the_start_is_refused_at_the_field(page, local_server):
 
     expect(page.locator("#setup-end-time")).to_have_class(re.compile("is-invalid"))
     expect(page.locator("#setup-end-time-error")).to_have_text(
-        "The session ends before it starts. Check the end time."
+        "This session would end the next day at 09:00 and last 15 h. Check the end time."
     )
     expect(page.locator("#form-workout-setup")).to_be_visible()
+
+
+def test_an_evening_session_may_end_after_midnight(page, local_server):
+    """21:00 to 00:30 was refused as "ends before it starts", and so was every edit of a stored
+    session running past midnight: a late group could be neither entered nor changed. An end before
+    the start is the next day, as everywhere else in the app."""
+    load_with_stub(
+        page, local_server, setup_stub(SCHEDULED_SESSION, target_session="'s-edit'")
+    )
+    page.fill("#setup-start-time", "21:00")
+    page.fill("#setup-end-time", "00:30")
+    page.locator("#btn-setup-open").click()
+
+    expect(page.locator("#setup-end-time")).not_to_have_class(re.compile("is-invalid"))
+    expect(page.locator("#setup-end-time-error")).to_be_hidden()
 
 
 def test_a_repeat_that_ends_before_it_starts_is_refused_at_the_field(

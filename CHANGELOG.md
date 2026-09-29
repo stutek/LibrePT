@@ -42,6 +42,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Fixed
 
+- **A session may end after midnight.** 21:00 to 00:30 was refused as "ends before it starts", and
+  so was every edit of a stored session running past midnight, so a late group could be neither
+  entered nor changed. An end before the start is the next day, as everywhere else in the app. What
+  is refused is a session longer than twelve hours (18:00 to 09:00), and the field says it would end
+  the next day and how long it would last.
 - **After midnight the app's dates are today's, not yesterday's.** Between local midnight and the
   UTC rollover (until 02:00 in summer in Slovenia) the new-session form offered yesterday's date,
   and a client's joining date, an erasure request, a feedback note and the names of exported files

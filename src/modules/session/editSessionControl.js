@@ -529,20 +529,31 @@ function clearNameWordProblem(field) {
   }
 }
 
-/** True when the end comes after the start. An end of 00:00 is midnight, the one end that may be
- *  "earlier" than the start; any other one is a typing slip (18:00–09:00), and a session saved like
- *  that computes every countdown and duration wrong. Said at the field, like the name check. */
+// The longest session the form takes without calling the end a typing slip. Half a day holds any
+// session a trainer runs, and it is far below the 15 hours that 18:00–09:00 would read as.
+const LONGEST_SESSION_MINUTES = 12 * 60;
+const MINUTES_PER_DAY = 24 * 60;
+
+/** True when the end makes a session of a sensible length. An end at or before the start is the
+ *  next day, as everywhere else in the app (timeRange.js): 21:00–00:30 is an evening group. Refusing
+ *  it meant a late group could be neither entered nor edited. What is refused is a length no
+ *  session has (18:00–09:00, fifteen hours), and the field says how the time was read, so the
+ *  trainer sees why. Said at the field, like the name check. */
 function endComesAfterStart(t) {
   const field = document.getElementById("setup-end-time");
   if (!field) return true;
   clearNameWordProblem(field);
   const start = clockToMinutes(document.getElementById("setup-start-time")?.value.trim() || "");
   const end = clockToMinutes(field.value);
-  if (start === null || end === null || end > start || end === 0) return true;
+  if (start === null || end === null) return true;
+  const length = (end - start + MINUTES_PER_DAY) % MINUTES_PER_DAY || MINUTES_PER_DAY;
+  if (length <= LONGEST_SESSION_MINUTES) return true;
   field.classList.add("is-invalid");
   const line = document.getElementById("setup-end-time-error");
   if (line) {
-    line.textContent = t("end_before_start");
+    line.textContent = t("end_makes_session_too_long")
+      .replace("{end}", field.value.trim())
+      .replace("{hours}", String(Math.round(length / 60)));
     line.hidden = false;
   }
   field.focus();

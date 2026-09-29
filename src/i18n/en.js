@@ -116,7 +116,8 @@ export const en = {
   label_session_date: "Date",
   label_start_time: "Start Time",
   label_end_time: "End Time",
-  end_before_start: "The session ends before it starts. Check the end time.",
+  end_makes_session_too_long:
+    "This session would end the next day at {end} and last {hours} h. Check the end time.",
   repeat_until_before_start:
     "The repeat ends before the first session. Choose a date on or after it.",
   time_field_later: "Five minutes later",
