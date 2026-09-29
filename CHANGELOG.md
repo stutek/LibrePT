@@ -31,6 +31,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 - **Save and Open in Clipboard are on the screen when the session form opens**, clear of the bar
   at the bottom, while the form scrolls.
 - **The exercise search box is a thumb high**, and a tap anywhere in its frame reaches it.
+- **The ✕ that closes a dialog is a thumb wide.** It measured 12 × 16 pixels.
 
 ---
 

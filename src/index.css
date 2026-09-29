@@ -729,12 +729,21 @@ h6 {
 .modal-header {
   margin-bottom: 16px;
 }
+/* The glyph stays small in the corner; the target around it is a thumb. It measured 12 × 16, the
+   smallest target in every dialog and the one a trainer leaves it by. The negative margin keeps the
+   header as tall as it was. */
 .modal-close-btn {
   background: transparent;
   border: none;
   color: var(--text-muted);
   font-size: 16px;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  margin: -12px -14px -12px 0;
 }
 .modal-form {
   gap: 14px;

@@ -113,6 +113,19 @@ def test_a_card_still_opens_after_the_grid_has_been_filtered(page, local_server)
     assert page.evaluate("() => window.__navigated") == ["/clients/c1a9f0e2"]
 
 
+def test_the_cross_that_closes_the_form_is_a_thumb_wide(page, local_server):
+    """The ✕ in the corner of every dialog measured 12 × 16 pixels: the smallest target in the form
+    is the one a trainer leaves it by."""
+    page.set_viewport_size({"width": 390, "height": 844})
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#view-client-directory.active")
+    page.locator("#btn-add-client").click()
+    page.wait_for_selector("#dialog-client[open]")
+
+    box = page.locator("#dialog-client .modal-close-btn").bounding_box()
+    assert box and box["width"] >= 44 and box["height"] >= 44, box
+
+
 def test_an_injury_the_trainer_writes_down_raises_the_warning(page, local_server):
     """The trainer wrote "knee surgery 2023, right" into the client form, and the clipboard never
     warned about it: only a client's own signup set the flag the warning reads. The form has its own
