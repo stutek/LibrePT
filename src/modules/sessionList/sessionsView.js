@@ -163,10 +163,10 @@ export function launchClipboardDirectly({ sessionId, state, startWorkoutSession 
   const clientRoutinesMap = new Map();
   for (const os of overlappingSessions) {
     for (const pId of os.participants) {
-      let routineId = os.routineId;
-      if (!routineId || !state.routines.some((r) => r.id === routineId)) {
-        routineId = state.routines.length > 0 ? state.routines[0].id : "routine-upper-a";
-      }
+      // As stored, even when no routine has that id: "empty_plan" is the trainer's choice of an
+      // empty plan, and buildClientStateFromRoutine makes one of it. Substituting the library's
+      // first routine put a programme nobody chose on the clipboard.
+      const routineId = os.routineId || "";
       if (!clientRoutinesMap.has(pId)) {
         clientRoutinesMap.set(pId, routineId);
       }

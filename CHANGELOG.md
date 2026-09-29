@@ -18,6 +18,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-09-29 — What evaluating the forms found
+
+### Fixed
+
+- **A session planned with an empty plan opens empty.** It opened with the first routine in the
+  library, a programme nobody had chosen.
+
+---
+
 ## 2026-09-29 — Save a session without opening it
 
 ### Changed
