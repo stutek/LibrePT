@@ -53,6 +53,7 @@ export function pickerLabels(t) {
     sources: sourceLabels(t),
     countLabel: t("picker_count") || "Movements: {count}",
     emptyLabel: t("picker_empty") || "No movements match this filter.",
+    emptyQueryLabel: t("picker_empty_query") || 'No movement matches "{query}".',
   };
 }
 
@@ -86,6 +87,7 @@ export function sourceBadge(exercise, ownWord) {
  * @param {Object}  [opts.sources]         - `sourceLabels(t)`: the source row's words and the mark.
  * @param {string}  [opts.countLabel]      - How many match, with `{count}` for the number.
  * @param {string}  [opts.emptyLabel]      - What the list says when nothing matches.
+ * @param {string}  [opts.emptyQueryLabel] - The same when a typed search is why, with `{query}`.
  * Callers pass `...pickerLabels(t)` for all the words at once.
  * @param {(exercise: Object) => void} opts.onSelect - Called with the chosen exercise on tap.
  */
@@ -105,6 +107,7 @@ export function mountExercisePicker(
     sources = sourceLabels(() => ""),
     countLabel = "Movements: {count}",
     emptyLabel = "No movements match this filter.",
+    emptyQueryLabel = 'No movement matches "{query}".',
     onSelect,
   },
 ) {
@@ -175,7 +178,11 @@ export function mountExercisePicker(
       ? countLabel.replace("{count}", String(matches.length))
       : "";
     if (matches.length === 0) {
-      const safeEmpty = escapeHTML(emptyLabel);
+      // A typed search is named when it is there: blaming "this filter" with every filter on All sent
+      // a trainer who typed "počep" away believing the app had no squat.
+      const safeEmpty = escapeHTML(
+        filters.query ? emptyQueryLabel.replace("{query}", filters.query) : emptyLabel,
+      );
       listEl.innerHTML = `<div class="picker-empty text-muted">${safeEmpty}</div>`;
       return;
     }

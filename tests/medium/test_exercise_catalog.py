@@ -101,6 +101,18 @@ def test_catalog_marks_cardio_with_a_modality_badge(page, local_server):
     )
 
 
+def test_a_search_that_finds_nothing_names_the_search(page, local_server):
+    """The library said "No exercises match filter criteria." to a trainer who had typed "počep"
+    with no filter on. The message names what was typed — safely, since it is typed text."""
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#view-exercises.active")
+
+    page.fill("#search-exercises", "počep <b>")
+    page.wait_for_timeout(200)
+    empty = page.locator("#exercises-list .card").first.inner_text()
+    assert empty == 'No movement matches "počep <b>".', empty
+
+
 def test_custom_exercise_requires_taxonomy(page, local_server):
     load_with_stub(page, local_server, STUB)
     page.wait_for_selector("#view-exercises.active")

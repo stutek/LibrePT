@@ -309,6 +309,7 @@ export const en = {
   // The exercise picker (modules/exercises/exercisePicker.js).
   picker_count: "Movements: {count}",
   picker_empty: "No movements match this filter.",
+  picker_empty_query: 'No movement matches "{query}".',
   // The session setup form (modules/session/editSessionView.js).
   session_name_placeholder: "Select or type session name...",
   location_placeholder: "Select or type location...",

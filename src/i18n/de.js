@@ -328,6 +328,8 @@ export const de = {
   // The exercise picker (modules/exercises/exercisePicker.js).
   picker_count: "Übungen: {count}",
   picker_empty: "Keine Übung passt zu diesem Filter.",
+  picker_empty_query:
+    "Keine Übung passt zur Suche „{query}“. Die Übungen im Katalog haben englische Namen.",
   // The session setup form (modules/session/editSessionView.js).
   session_name_placeholder: "Namen des Trainings wählen oder eingeben...",
   location_placeholder: "Ort wählen oder eingeben...",

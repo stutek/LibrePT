@@ -183,6 +183,24 @@ def test_search_narrows_and_enter_takes_the_top_match(page, local_server):
     assert after["name"] != before["name"]
 
 
+def test_a_search_that_finds_nothing_blames_the_search_not_the_filter(
+    page, local_server
+):
+    """A Slovenian trainer typed "počep" and read "No movements match this filter." with every
+    filter on All — and concluded the app has no squat. The message names what was typed."""
+    _open_editor(page, local_server)
+    page.locator(".editor-row .editor-row-catalog").first.click()
+    page.wait_for_selector("#dialog-catalog-picker[open]")
+    page.click(
+        "#catalog-picker-mount .picker-chips[data-axis=muscle] .chip[data-value=All]"
+    )
+    page.locator("#catalog-picker-mount .picker-search").fill("počep")
+
+    empty = page.locator("#catalog-picker-mount .picker-empty")
+    empty.wait_for()
+    assert empty.inner_text() == 'No movement matches "počep".', empty.inner_text()
+
+
 def test_editor_catalog_button_adds_a_movement_and_returns(page, local_server):
     """The editor-level button APPENDS rather than swapping — same picker, different landing."""
     _open_editor(page, local_server)

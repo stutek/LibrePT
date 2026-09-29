@@ -155,7 +155,12 @@ export function renderExercisesList({ state, t, filterQuery, categoryFilter, sou
   filtered.sort((a, b) => a.name.localeCompare(b.name));
 
   if (filtered.length === 0) {
-    container.innerHTML = `<div class="card glassmorphic text-center text-muted">${t("no_exercises_matched")}</div>`;
+    // A typed search is named when it is the reason, as in the picker: "filter criteria" with every
+    // filter off told a trainer who typed "počep" that the library had no squat.
+    const empty = query
+      ? t("picker_empty_query").replace("{query}", query)
+      : t("no_exercises_matched");
+    container.innerHTML = `<div class="card glassmorphic text-center text-muted">${escapeHTML(empty)}</div>`;
     return;
   }
 

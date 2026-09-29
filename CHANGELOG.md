@@ -53,6 +53,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 - **The first evening of a new repeating session is on the board once.** It had two identical cards.
 - **A date that does not exist is moved to a real one, and the field says so**: "2027-02-29 does
   not exist. The date is set to 2027-02-28." The change was made without a word.
+- **A search for an exercise that finds nothing names the search**, in the catalog picker and in
+  the exercise library. It blamed the filters, even with every filter off. In Slovenian and German
+  it adds that the catalog's exercise names are in English.
 
 ---
 
