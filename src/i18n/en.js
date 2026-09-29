@@ -421,6 +421,8 @@ export const en = {
   library_import_read:
     "New exercises: {exercises}. New circuits: {circuits}. New routines: {routines}.",
   library_import_duplicates: "Already in your library, so not added again: {count}",
+  library_import_circuit_duplicates:
+    "Circuits already in your library, so not added again: {count}",
   library_import_unreadable: "Entries that could not be read: {count}",
   library_import_add: "Add to library",
   library_import_refused_empty: "There is nothing to read yet.",

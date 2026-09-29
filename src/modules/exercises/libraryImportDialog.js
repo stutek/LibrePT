@@ -132,6 +132,18 @@ function renderReport(parsed, plan) {
     );
     report.appendChild(list(plan.duplicates));
   }
+  if (plan.circuitDuplicates.length > 0) {
+    report.appendChild(
+      paragraph(
+        "program-import-unreadable-heading",
+        t("library_import_circuit_duplicates").replace(
+          "{count}",
+          String(plan.circuitDuplicates.length),
+        ),
+      ),
+    );
+    report.appendChild(list(plan.circuitDuplicates));
+  }
   if (parsed.unreadable.length > 0) {
     report.appendChild(
       paragraph(
@@ -163,6 +175,7 @@ function readCurrent() {
         newId,
         circuitWord: t("circuit"),
         takenIds: recordIdsInUse(getState()),
+        circuits: getState().circuits || [],
         routineNames: (getState().routines || []).map((routine) => normalise(routine.name)),
       })
     : null;

@@ -436,6 +436,8 @@ export const sl = {
   library_import_read:
     "Novih vaj: {exercises}. Novih sklopov: {circuits}. Novih rutin: {routines}.",
   library_import_duplicates: "Že v tvoji knjižnici, zato ne bodo dodane še enkrat: {count}",
+  library_import_circuit_duplicates:
+    "Sklopi, ki so že v tvoji knjižnici, zato ne bodo dodani še enkrat: {count}",
   library_import_unreadable: "Vnosi, ki jih ni mogoče prebrati: {count}",
   library_import_add: "Dodaj v knjižnico",
   library_import_refused_empty: "Ni še ničesar za branje.",

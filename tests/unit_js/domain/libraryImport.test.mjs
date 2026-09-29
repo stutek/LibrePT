@@ -260,3 +260,106 @@ test("no source name means the trainer's own", () => {
   });
   assert.deepEqual(plan.exercises, [{ id: "id1", name: "Sled Push" }]);
 });
+
+test("a circuit's text targets are read by the app's own rules and survive export and import", () => {
+  const exercises = [
+    { id: "squat", name: "Squat" },
+    { id: "pull", name: "Pull-up" },
+    { id: "plank", name: "Plank" },
+  ];
+  const circuits = [
+    {
+      id: "c1",
+      name: "Mixed",
+      exercises: [
+        { id: "squat", reps: "8-12", weight: "Medium", rest: 60 },
+        { id: "pull", reps: "max", weight: "BW" },
+        { id: "plank", reps: "30s" },
+        { id: "squat", reps: 10, weight: 2.5 },
+      ],
+    },
+  ];
+  const parsed = readLibrary(JSON.stringify(catalogToInterchange(exercises, circuits)));
+  assert.deepEqual(parsed.unreadable, []);
+  const plan = planLibraryImport(parsed, [], { newId: counter() });
+  assert.deepEqual(plan.circuits[0].exercises, circuits[0].exercises);
+});
+
+test("typed targets are stored as the app stores them: numbers as numbers, text as text", () => {
+  const parsed = readLibrary(
+    JSON.stringify({
+      circuits: [{ name: "C", exercises: [{ name: "Squat", reps: " 8 ", weight: "2,5" }] }],
+    }),
+  );
+  assert.deepEqual(parsed.circuits[0].items, [{ name: "Squat", reps: 8, weight: 2.5 }]);
+});
+
+test("a target the app cannot read is reported with its position and the entry is kept", () => {
+  const parsed = readLibrary(
+    JSON.stringify({
+      circuits: [
+        {
+          name: "C",
+          exercises: [
+            { name: "Squat", reps: { min: 8 }, weight: "Medium", rest: 60 },
+            { name: "Lunge", reps: -5 },
+          ],
+        },
+      ],
+    }),
+  );
+  assert.deepEqual(parsed.circuits[0].items, [
+    { name: "Squat", weight: "Medium", rest: 60 },
+    { name: "Lunge" },
+  ]);
+  assert.deepEqual(
+    parsed.unreadable.map((row) => row.position),
+    ["circuit 1 · 1 · reps", "circuit 1 · 2 · reps"],
+  );
+});
+
+const legs = { name: "Legs", exercises: [{ name: "Squat", reps: 8 }] };
+const planFor = (file, existing = [], library = []) =>
+  planLibraryImport(readLibrary(JSON.stringify(file)), library, {
+    newId: counter(),
+    circuits: existing,
+  });
+
+test("importing the same file twice does not duplicate its circuits", () => {
+  const first = planFor({ circuits: [legs] });
+  assert.equal(first.circuits.length, 1);
+  const second = planFor({ circuits: [legs] }, first.circuits, first.exercises);
+  assert.deepEqual(second.circuits, []);
+  assert.deepEqual(second.circuitDuplicates, ["Legs"]);
+});
+
+test("a circuit keeps its own id from our export, and is present when that id is held", () => {
+  const exercises = [{ id: "squat", name: "Squat" }];
+  const circuit = { id: "legs-1", name: "Legs", exercises: [{ id: "squat", reps: 8 }] };
+  const file = catalogToInterchange(exercises, [circuit]);
+  const first = planFor(file);
+  assert.equal(first.circuits[0].id, "legs-1");
+  const renamed = { ...file, circuits: [{ ...file.circuits[0], name: "Other", exercises: [] }] };
+  renamed.circuits[0].exercises = [{ name: "Squat", reps: 3 }];
+  const second = planFor(renamed, first.circuits, first.exercises);
+  assert.deepEqual(second.circuitDuplicates, ["Other"]);
+});
+
+test("the same name with another prescription is imported as new, never skipped", () => {
+  const existing = planFor({ circuits: [legs] });
+  const changed = { name: "legs", exercises: [{ name: "Squat", reps: 12 }] };
+  const plan = planFor({ circuits: [changed] }, existing.circuits, existing.exercises);
+  assert.equal(plan.circuits.length, 1);
+  assert.deepEqual(plan.circuitDuplicates, []);
+});
+
+test("a new circuit takes its id from the file only when nothing holds it", () => {
+  const held = { id: "x1", name: "Held", exercises: [] };
+  const plan = planFor(
+    { circuits: [{ id: "x1", name: "Different", exercises: [{ name: "Squat", reps: 1 }] }] },
+    [held],
+  );
+  assert.equal(plan.circuits.length, 0);
+  const free = planFor({ circuits: [{ id: "free", ...legs }] });
+  assert.equal(free.circuits[0].id, "free");
+});

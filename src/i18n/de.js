@@ -442,6 +442,8 @@ export const de = {
   library_import_read:
     "Neue Übungen: {exercises}. Neue Zirkel: {circuits}. Neue Routinen: {routines}.",
   library_import_duplicates: "Schon in deiner Bibliothek, daher nicht erneut hinzugefügt: {count}",
+  library_import_circuit_duplicates:
+    "Zirkel, die schon in deiner Bibliothek sind, daher nicht erneut hinzugefügt: {count}",
   library_import_unreadable: "Einträge, die nicht gelesen werden konnten: {count}",
   library_import_add: "Zur Bibliothek hinzufügen",
   library_import_refused_empty: "Es gibt noch nichts zu lesen.",

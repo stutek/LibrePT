@@ -25,6 +25,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 - **A tap on the card of a running session returns to it.** It built the session again from its
   routine, so the running clock and every logged set were replaced by an unstarted copy, without a
   word.
+- **A library import keeps text targets in circuits and routines.** "8-12", "max", "30s", "BW" and
+  "Medium" were dropped without a word, so an exported library came back with default targets. A
+  value the app cannot hold is listed among the entries that could not be read.
+- **Importing the same library twice does not add its circuits twice.** A circuit whose id or whose
+  name, rounds and entries are already in the library is listed as already there. A circuit with
+  the same name and another prescription is still added.
 - **An import source called "all", "own" or "librept" is filtered on its own.** Its name was the
   same value as the filter for everything, for the trainer's own exercises, or for the catalogue.
 - **A session planned with an empty plan opens empty.** It opened with the first routine in the

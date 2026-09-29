@@ -13,6 +13,11 @@
 // failure the exercise library's taxonomy exists to prevent. The trainer is told which ones were
 // skipped.
 //
+// **A circuit already in the library is not added again.** Present means its id is held by a circuit,
+// or a circuit of the same folded name holds the same exercises, targets and rounds. The same name
+// with another prescription is a different circuit and is added: skipping it would lose the trainer's
+// changes without a word. Skipped circuits are listed apart, in `circuitDuplicates`.
+//
 // **A circuit and a routine point at exercises by id.** In the file they name them; a name the library
 // does not know becomes a new exercise of the same import, so neither ever refers to nothing. A
 // routine keeps its entries' grouping (circuitId, circuitTitle, circuitSeries, comboGroupId), and a
@@ -27,6 +32,7 @@
 
 import { normalise } from "./catalogMatch.js";
 import { jsonSpan, toNumber } from "./programImport.js";
+import { parseLoad, parseReps } from "./repsAndLoad.js";
 
 export const LIBRARY_FORMAT = "librept.library/1";
 const INTERCHANGE_FORMAT = "wger-exercise-interchange";
@@ -52,7 +58,10 @@ const ALIASES = {
 };
 
 const EXERCISE_FIELDS = ["category", "equipment", "pattern", "modality", "metric", "source"];
-const ITEM_NUMBERS = ["sets", "reps", "weight", "rest"];
+const ITEM_NUMBERS = ["sets", "rest"];
+// Reps and load are read by the app's own rules (repsAndLoad.js), because the app takes text there:
+// "8-12", "max", "30s" for reps, "BW" or "Medium" for load.
+const ITEM_TARGETS = { reps: parseReps, weight: parseLoad };
 // How a routine's entries are grouped. Kept as they are: they are tokens local to the routine's own
 // entries, not ids of other records.
 const ROUTINE_GROUPING = ["circuitId", "circuitTitle", "comboGroupId"];
@@ -85,14 +94,30 @@ function readExercise(raw) {
   return exercise;
 }
 
-/** A circuit's entry: which exercise, and the targets that came with it. */
-function readItem(raw) {
+/** The target as the app stores a typed one, or undefined when the app has no such value: only text
+ * and non-negative numbers can be typed into the field. */
+function readTarget(value, parse) {
+  if (typeof value === "string") return value.trim() ? parse(value) : undefined;
+  if (typeof value === "number" && Number.isFinite(value) && value >= 0) return parse(value);
+  return undefined;
+}
+
+/** A circuit's entry: which exercise, and the targets that came with it. A reps or load value the
+ * app cannot hold goes to `unreadable` at `position`, and the rest of the entry is kept. */
+function readItem(raw, unreadable, position) {
   const exercise = readExercise(raw);
   if (!exercise) return null;
   const item = { name: exercise.name };
   for (const field of ITEM_NUMBERS) {
     const value = toNumber(raw?.[field] ?? pick(raw, field));
     if (value !== undefined) item[field] = value;
+  }
+  for (const [field, parse] of Object.entries(ITEM_TARGETS)) {
+    const given = raw?.[field] ?? pick(raw, field);
+    if (given === undefined || (typeof given === "string" && !given.trim())) continue;
+    const value = readTarget(given, parse);
+    if (value !== undefined) item[field] = value;
+    else unreadable.push({ position: `${position} · ${field}`, raw: given });
   }
   return item;
 }
@@ -178,15 +203,19 @@ function readCircuits(rawCircuits, unreadable) {
     const items = [];
     const rawItems = pick(raw, "items");
     (Array.isArray(rawItems) ? rawItems : []).forEach((rawItem, itemIndex) => {
-      const item = readItem(rawItem);
+      const position = `circuit ${index + 1} · ${itemIndex + 1}`;
+      const item = readItem(rawItem, unreadable, position);
       if (item) items.push(item);
-      else unreadable.push({ position: `circuit ${index + 1} · ${itemIndex + 1}`, raw: rawItem });
+      else unreadable.push({ position, raw: rawItem });
     });
     if (items.length === 0) {
       unreadable.push({ position: `circuit ${index + 1}`, raw });
       return;
     }
     const circuit = { items };
+    // The id from our own export: how a circuit already in the library is recognised.
+    const id = text(raw.id);
+    if (id) circuit.id = id;
     const source = text(pick(raw, "source"));
     if (source) circuit.source = source;
     const name = text(pick(raw, "name"));
@@ -199,8 +228,8 @@ function readCircuits(rawCircuits, unreadable) {
 }
 
 /** A routine's entry: an item, plus how it is grouped within the routine. */
-function readRoutineEntry(raw) {
-  const item = readItem(raw);
+function readRoutineEntry(raw, unreadable, position) {
+  const item = readItem(raw, unreadable, position);
   if (!item || typeof raw !== "object") return item;
   for (const field of ROUTINE_GROUPING) {
     const value = text(raw[field]);
@@ -218,9 +247,10 @@ function readRoutines(rawRoutines, unreadable) {
     const rawItems = pick(raw, "items");
     const items = [];
     (Array.isArray(rawItems) ? rawItems : []).forEach((rawItem, itemIndex) => {
-      const item = readRoutineEntry(rawItem);
+      const position = `routine ${index + 1} · ${itemIndex + 1}`;
+      const item = readRoutineEntry(rawItem, unreadable, position);
       if (item) items.push(item);
-      else unreadable.push({ position: `routine ${index + 1} · ${itemIndex + 1}`, raw: rawItem });
+      else unreadable.push({ position, raw: rawItem });
     });
     // A routine needs a name to be found again, and something in it to be worth adding.
     if (!name || items.length === 0) {
@@ -235,10 +265,86 @@ function readRoutines(rawRoutines, unreadable) {
   return routines;
 }
 
+/** What makes two circuits the same: the folded name, the rounds, and every entry's exercise and
+ * targets in order. Keys are sorted so the order they were written in does not matter. */
+function prescriptionOf(circuit) {
+  const entries = (circuit.exercises || []).map((entry) =>
+    JSON.stringify(Object.entries(entry).sort(([a], [b]) => a.localeCompare(b))),
+  );
+  return JSON.stringify([normalise(circuit.name), circuit.series ?? null, entries]);
+}
+
+/** A circuit's name, or one made of its first two exercises when the file gave none. */
+function circuitName(circuit, circuitWord) {
+  if (circuit.name) return circuit.name;
+  return `${circuitWord} — ${circuit.items
+    .slice(0, 2)
+    .map((item) => item.name)
+    .join(", ")}`;
+}
+
+/** The prescription of a circuit from the file, or null when it names an exercise the library lacks:
+ * such a circuit cannot equal one already in the library. */
+function filePrescription(circuit, name, byName) {
+  const known = circuit.items.map((item) => byName.get(normalise(item.name)));
+  if (!known.every(Boolean)) return null;
+  return prescriptionOf({
+    name,
+    series: circuit.series,
+    exercises: circuit.items.map(({ name: _name, ...targets }, i) => ({
+      id: known[i],
+      ...targets,
+    })),
+  });
+}
+
+/**
+ * The circuits a read library adds, and the names of those already present. A circuit is present when
+ * its id is held by a circuit, or when a circuit of the same name holds the same exercises with the
+ * same targets and rounds. The same name with another prescription is a different circuit and is
+ * added: skipping it would lose the trainer's changes without a word.
+ */
+function planCircuits(fileCircuits, existingCircuits, context) {
+  const { byName, ids, takenIds, newId, add, withSource, circuitWord } = context;
+  const circuitIds = new Set(existingCircuits.map((circuit) => circuit.id));
+  const prescriptions = new Set(existingCircuits.map(prescriptionOf));
+  const circuitDuplicates = [];
+  const circuits = [];
+  for (const circuit of fileCircuits) {
+    const name = circuitName(circuit, circuitWord);
+    // Checked before any exercise is created: a circuit that turns out to be present must not leave
+    // new exercises behind.
+    const present =
+      (circuit.id && circuitIds.has(circuit.id)) ||
+      prescriptions.has(filePrescription(circuit, name, byName));
+    if (present) {
+      circuitDuplicates.push(name);
+      continue;
+    }
+    const exercises = circuit.items.map(({ name: itemName, ...targets }) => ({
+      id: byName.get(normalise(itemName)) ?? add({ name: itemName }),
+      ...targets,
+    }));
+    const free = circuit.id && !ids.has(circuit.id) && !takenIds.has(circuit.id);
+    const record = { id: free ? circuit.id : newId() };
+    if (circuit.source) record.source = circuit.source;
+    record.name = name;
+    if (circuit.series !== undefined) record.series = circuit.series;
+    const added = withSource({ ...record, exercises });
+    circuits.push(added);
+    circuitIds.add(added.id);
+    ids.add(added.id);
+    prescriptions.add(prescriptionOf(added));
+  }
+  return { circuits, circuitDuplicates };
+}
+
 /**
  * The new records a read library adds to `library` (the trainer's whole library, catalog included):
- * `{ exercises, circuits, duplicates }`. `source` is written on every new record, or left off when
- * empty — no source means the trainer's own. `newId` is injected so a test is deterministic.
+ * `{ exercises, circuits, routines, duplicates, circuitDuplicates }`. `circuits` in the options are
+ * the trainer's circuits; `circuitDuplicates` names the file's circuits already among them. `source`
+ * is written on every new record, or left off when empty — no source means the trainer's own.
+ * `newId` is injected so a test is deterministic.
  *
  * `takenIds` are the ids every other record already holds (recordProjections.js's
  * `recordIdsInUse`). All records of one schema share one key in the store, so an exercise kept under
@@ -247,7 +353,14 @@ function readRoutines(rawRoutines, unreadable) {
 export function planLibraryImport(
   parsed,
   library,
-  { source, newId, circuitWord = "Circuit", takenIds = new Set(), routineNames = [] },
+  {
+    source,
+    newId,
+    circuitWord = "Circuit",
+    takenIds = new Set(),
+    routineNames = [],
+    circuits: existingCircuits = [],
+  },
 ) {
   const byName = new Map(
     (library || []).map((exercise) => [normalise(exercise.name), exercise.id]),
@@ -275,23 +388,14 @@ export function planLibraryImport(
     add(exercise);
   }
 
-  const circuits = (parsed.circuits || []).map((circuit) => {
-    const entries = circuit.items.map(({ name, ...targets }) => ({
-      id: byName.get(normalise(name)) ?? add({ name }),
-      ...targets,
-    }));
-    const record = {
-      id: newId(),
-      ...(circuit.source ? { source: circuit.source } : {}),
-      name:
-        circuit.name ||
-        `${circuitWord} — ${circuit.items
-          .slice(0, 2)
-          .map((item) => item.name)
-          .join(", ")}`,
-    };
-    if (circuit.series !== undefined) record.series = circuit.series;
-    return withSource({ ...record, exercises: entries });
+  const { circuits, circuitDuplicates } = planCircuits(parsed.circuits || [], existingCircuits, {
+    byName,
+    ids,
+    takenIds,
+    newId,
+    add,
+    withSource,
+    circuitWord,
   });
 
   // `routineNames` are the names of the trainer's routines, already folded with catalogMatch's rule.
@@ -317,7 +421,7 @@ export function planLibraryImport(
     });
   }
 
-  return { exercises, circuits, routines, duplicates };
+  return { exercises, circuits, routines, duplicates, circuitDuplicates };
 }
 
 /**
