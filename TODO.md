@@ -6556,6 +6556,13 @@ omejitev. Preveriti večvrstično besedilo s šumniki, vejicami in narekovaji. O
 na objavljeni `0625bd6`, sl, Chrome CDP, 390 × 844; brez branja kode. Med scenarijem
 ni novih prestreženih napak brskalnika.
 
+**Stanje 2026-09-29 — čaka na Simona.** Izpust je nameren: `toInterchangeExercise` v
+[exerciseStandard.js](src/domain/exerciseStandard.js) navodila izpusti z utemeljitvijo, da jih
+katalog opušča (»a certified PT does not need how-to text«, [exercises.js](src/data/exercises.js)).
+Ta utemeljitev velja za vgrajeni katalog, ne za navodila, ki jih trener sam vpiše k svoji vaji in
+jih aplikacija pokaže med vadbo. Odločitev: ali kataloški izvoz nosi navodila trenerjevih lastnih
+vaj (in jih uvoz prebere), ali pojasnilo izvoza pove, da jih ne nosi.
+
 ### 80.63 [ ] P2 — Časovna vaja v sklopu izgubi oznako trajanja
 
 **Scenarij in koraki:** v jutrišnjem treningu »Vrstni red vaj« pri stranki TEST Luka
