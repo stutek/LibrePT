@@ -6435,6 +6435,25 @@ zaslonu ni nikjer zapisano.
 **Predlog:** dotikalna tarča ročice naj bo visoka vsaj 44 pik in med njo in gumbom »Nazaj na
 današnji trening« naj bo prazen pas — opaženo na različici `8b2ce80`.
 
+### 80.79 [ ] P2 — Kartica treninga brez udeležencev se na dotik ne odzove, noter vodi le svinčnik
+
+**Scenarij in koraki:** na plošči (vzorčni podatki) tapni kartico »Prost termin (brez najave)«,
+danes 04:00 - 05:00, ki pravi »0/3 mest zasedenih« in »Ni udeležencev«. Tapni jo dvakrat, na naslov
+in na telo kartice.
+
+**Opaženo:** nič. Naslov se ne spremeni, podloga se ne odpre, okna ni, sporočila ni, v dnevniku
+konzole ni napake. Kartica treninga z udeleženci (»Hitri HIIT za trup«) se na isti dotik odpre v
+podlogo. Edina pot v tak termin je ikona svinčnika v desnem zgornjem kotu kartice, ki meri 38 × 38
+pik in nima napisane oznake (pomožno ime je »Uredi«); ta odpre »Nastavitev treninga«, kjer se stranka
+doda.
+
+**Težava in vpliv:** ko pride stranka brez najave, trener tapne prosti termin, da jo vpiše. Dotik ne
+naredi nič in trener ne ve, ali je bil zaznan, zato tapne znova. Da bi našel svinčnik, mora zapustiti
+prvo domnevo.
+
+**Predlog:** dotik na kartico brez udeležencev naj odpre isti zaslon kot svinčnik, torej
+»Nastavitev treninga« — opaženo na različici `8b2ce80`.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
