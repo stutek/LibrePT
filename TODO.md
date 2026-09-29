@@ -6577,6 +6577,36 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8072-x-p2--ocen
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8073-x-p1--sinhroniziraj-podatke-je-zamenjal-trenerjeve-treninge-z-vzorčnimi--popravljeno-2026-09-29).
 
+### 80.74 [ ] P2 — Vaja, ki je v rutini dvakrat, si deli zapis serij
+
+**Scenarij in koraki:** peskovnik, lokalni strežnik (`main` na `080ab10`), sl, 390 × 844. Odpreti
+»Skupinska moč in kondicija« in pri Jane zaključiti »Dinamično ogrevanje« (en krog: Face Pulls,
+Walking Lunges).
+
+**Opaženo:** Walking Lunges je v isti rutini dvakrat — v ogrevanju (1 krog) in v »Metabolni krog v
+trojkah« (3 krogi). Obe postavki imata isti id (`e38c4d5e`), ker postavka rutine dobi id vaje iz
+kataloga (`populateClientStateExercisesFromRoutine` v
+[sessionPlanFactory.js](src/domain/sessionPlanFactory.js)). Zapis serij je en sam, zato druga postavka
+prepiše prvo (tri serije namesto ene), zaključek ogrevanja pa šteje v metabolični krog. Krožni sklopi
+iz knjižnice to že rešujejo z lastnim id-jem za vsako pojavitev (`buildClientStateFromLibraryCircuit`).
+
+**Težava in vpliv:** trener vidi napačno število opravljenih serij, zgodovina treninga ima eno vajo
+namesto dveh. Pri rutinah z isto vajo v ogrevanju in glavnem delu je to pogosto.
+
+**Predlog:** vsaka pojavitev dobi svoj id, vez na katalog pa ločeno polje, kot pri krožnih sklopih.
+Dotakne se zgodovine (»Zadnjič«), fokusa v naslovu (`/exercise/<id>`) in prilagoditev načrta, zato
+ni del hitrih popravkov. Najdeno pri raziskovalnem testiranju 2026-09-29.
+
+### 80.75 [ ] P3 — Vzorčni peskovnik obljublja trening, ki že poteka, a ga ni
+
+**Opaženo:** obvestilo »Raziskuješ z vzorčnimi podatki« pravi »vključno z enim treningom, ki že
+poteka«. Odprt trening »Skupinska moč in kondicija« kaže »Začni trening«: vzorčna aktivna seja nima
+`started: true` (`seedDemoActiveSession` v
+[sessionsView.js](src/modules/sessionList/sessionsView.js)), tap kartice pa jo zgradi znova.
+Lokalni strežnik, `main` na `080ab10`, sl.
+
+**Predlog:** ali vzorčna seja res teče (in jo tap kartice ohrani), ali obvestilo tega ne obljublja.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
