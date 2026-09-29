@@ -6475,6 +6475,30 @@ dobi zgornji del telesa.
 na rutini, ki jo termin že ima, in obrazec naj imeti polje za število mest — opaženo na različici
 `8b2ce80`.
 
+Isto se zgodi pri skupinskem treningu, ki ni prost termin: kartica »Skupinska moč in kondicija« je
+pred posegom pisala »2/7 mest zasedenih«, po odstranitvi ene stranke »1/1«, po dodani novi pa »2/2«.
+Skupina sedmih mest tako postane polna pri dveh.
+
+### 80.82 [ ] P2 — Odprt in zaprt urejevalnik načrta pobriše oznako »Zaključeno« z opravljenega sklopa
+
+**Scenarij in koraki:** vzorčni podatki, skupinski trening »Skupinska moč in kondicija« (stranke
+Jane, Sarah in ena dodana). Tapni kartico, »Začni trening«, v oknu »Trening se je začel izven
+urnika« tapni »Ohrani urnik«. Na Janinem zavihku odpri sklop »Dinamično ogrevanje« (en krog) in
+tapni »Zaključi sklop«; sklop pravi »Zaključeno«. Nato tapni ⋮ »Možnosti treninga« → »Uredi načrt«
+in takoj »Končano z urejanjem načrta«, brez ene same spremembe.
+
+**Opaženo:** sklop »Dinamično ogrevanje« ne piše več »Zaključeno«, ampak spet »KROG 1 / 1«, torej
+neopravljeno. Shranjeni zapis vadbe je pri tem pravilen: v zgodovini je »Dinamično ogrevanje / Face
+Pulls: opravljeno 1/1«. Izgubi se samo oznaka na zaslonu. Pri treningu z eno stranko in sklopom treh
+krogov se to ni zgodilo — oznaka »Zaključeno« je ostala.
+
+**Težava in vpliv:** trener popravi eno težo v načrtu in se vrne na podlogo, ki zdaj trdi, da
+ogrevanje ni opravljeno. Sredi skupinskega treninga s tremi strankami si ne more zapomniti, kateri
+sklop je pri kateri stranki že zaključil, zato ga ponovi ali pa ga izpusti.
+
+**Predlog:** po zaprtju urejevalnika naj podloga pokaže isto stanje, kot ga ima zapis, torej
+»Zaključeno« — opaženo na različici `8b2ce80`.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
