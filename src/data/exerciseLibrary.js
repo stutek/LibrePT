@@ -28,6 +28,17 @@ export const CATALOG_SOURCE = "librept";
 export const OWN_SOURCE = "own";
 export const ALL_SOURCES = "all";
 
+// An imported source's filter value carries this prefix. Its name is free text, so a source called
+// "all", "own" or "librept" would otherwise be the same value as a system filter above.
+const IMPORTED_PREFIX = "source:";
+
+/** The name an imported source's filter value stands for, or undefined for a system filter. */
+export function importedSourceName(value) {
+  return typeof value === "string" && value.startsWith(IMPORTED_PREFIX)
+    ? value.slice(IMPORTED_PREFIX.length)
+    : undefined;
+}
+
 // Frozen, so a screen that changed a listed entry would throw instead of changing the catalog for
 // the rest of the page's life — DEFAULT_EXERCISES is a module singleton.
 const CATALOG = Object.freeze(DEFAULT_EXERCISES.map((exercise) => Object.freeze({ ...exercise })));
@@ -53,21 +64,22 @@ export function libraryExerciseById(state, id) {
   return libraryExercises(state).find((exercise) => exercise.id === id);
 }
 
-/** `CATALOG_SOURCE` for an entry of LibrePT's catalog, stored copy or not; the name it was imported
- * under; otherwise `OWN_SOURCE` — typed in the app, or imported with no name given. */
+/** The filter value of an entry: `CATALOG_SOURCE` for LibrePT's catalog, stored copy or not; the
+ * prefixed name it was imported under; otherwise `OWN_SOURCE` — typed in the app, or imported with
+ * no name given. */
 export function exerciseSourceOf(exercise) {
   if (CATALOG_IDS.has(exercise?.id)) return CATALOG_SOURCE;
-  return exercise?.source || OWN_SOURCE;
+  return exercise?.source ? IMPORTED_PREFIX + exercise.source : OWN_SOURCE;
 }
 
 /** Every source these exercises come from: LibrePT and the trainer's own first when present, then
  * the imported ones alphabetically — the order the filter row shows them in. */
 export function sourcesOf(exercises) {
   const found = new Set(exercises.map(exerciseSourceOf));
-  const named = [...found].filter((source) => source !== CATALOG_SOURCE && source !== OWN_SOURCE);
+  const named = [...found].filter((source) => importedSourceName(source) !== undefined);
   return [
     ...[CATALOG_SOURCE, OWN_SOURCE].filter((source) => found.has(source)),
-    ...named.sort((a, b) => a.localeCompare(b)),
+    ...named.sort((a, b) => importedSourceName(a).localeCompare(importedSourceName(b))),
   ];
 }
 

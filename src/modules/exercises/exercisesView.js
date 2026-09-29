@@ -2,6 +2,7 @@
 import { hasBehaviour } from "../../data/appVersions.js";
 import {
   ALL_SOURCES,
+  importedSourceName,
   libraryExercises,
   sourcesOf,
   withSource,
@@ -112,7 +113,7 @@ function renderSourceChips(row, library, t, chosen) {
     chip.type = "button";
     chip.className = value === active ? "chip active" : "chip";
     chip.setAttribute("data-filter", value);
-    chip.textContent = Object.hasOwn(words, value) ? words[value] : value;
+    chip.textContent = Object.hasOwn(words, value) ? words[value] : importedSourceName(value);
     row.appendChild(chip);
   }
   return active;

@@ -8,6 +8,7 @@ import {
   CATALOG_SOURCE,
   OWN_SOURCE,
   exerciseSourceOf,
+  importedSourceName,
   libraryExercises,
   sourcesOf,
   withSource,
@@ -67,7 +68,8 @@ export function pickerLabels(t) {
 export function sourceBadge(exercise, ownWord) {
   const source = exerciseSourceOf(exercise);
   if (source === CATALOG_SOURCE) return "";
-  const [glyph, word] = source === OWN_SOURCE ? ["fa-pencil", ownWord] : ["fa-file-import", source];
+  const [glyph, word] =
+    source === OWN_SOURCE ? ["fa-pencil", ownWord] : ["fa-file-import", importedSourceName(source)];
   return `<span class="taxonomy-badge taxonomy-badge-source"><i class="fa-solid ${glyph}"></i> ${escapeHTML(word)}</span>`;
 }
 
@@ -135,7 +137,7 @@ export function mountExercisePicker(
           (v) =>
             `<button type="button" class="chip chip-sm ${v === active ? "active" : ""}" data-value="${escapeHTML(
               v,
-            )}">${escapeHTML(Object.hasOwn(words, v) ? words[v] : v)}</button>`,
+            )}">${escapeHTML(Object.hasOwn(words, v) ? words[v] : (importedSourceName(v) ?? v))}</button>`,
         )
         .join("")}</div>`;
 

@@ -8,10 +8,12 @@ import { join, relative } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import {
+  ALL_SOURCES,
   CATALOG_SOURCE,
   OWN_SOURCE,
   addToLibrary,
   exerciseSourceOf,
+  importedSourceName,
   libraryExercises,
   sourcesOf,
   withSource,
@@ -76,10 +78,30 @@ test("the source filter keeps only the exercises from the chosen source", () => 
 
 test("an imported exercise's source is the name it was imported under", () => {
   const imported = { id: "0000000000000000000anas", name: "Sled Push", source: "Ana Novak" };
-  assert.equal(exerciseSourceOf(imported), "Ana Novak");
+  assert.equal(importedSourceName(exerciseSourceOf(imported)), "Ana Novak");
   const library = libraryExercises({ exercises: [own, imported] });
-  assert.deepEqual(sourcesOf(library), [CATALOG_SOURCE, OWN_SOURCE, "Ana Novak"]);
-  assert.deepEqual(withSource(library, "Ana Novak"), [imported]);
+  const filter = exerciseSourceOf(imported);
+  assert.deepEqual(sourcesOf(library), [CATALOG_SOURCE, OWN_SOURCE, filter]);
+  assert.deepEqual(withSource(library, filter), [imported]);
+});
+
+test("a source named like a system filter is filtered on its own", () => {
+  const named = ["all", "own", "librept"].map((source, index) => ({
+    id: `0000000000000000000src${index}`,
+    name: `Imported ${source}`,
+    source,
+  }));
+  const library = libraryExercises({ exercises: [own, ...named] });
+  assert.equal(withSource(library, ALL_SOURCES).length, library.length);
+  assert.deepEqual(withSource(library, OWN_SOURCE), [own]);
+  assert.equal(withSource(library, CATALOG_SOURCE).length, DEFAULT_EXERCISES.length);
+  for (const exercise of named) {
+    const filter = exerciseSourceOf(exercise);
+    assert.notEqual(filter, exercise.source);
+    assert.equal(importedSourceName(filter), exercise.source);
+    assert.deepEqual(withSource(library, filter), [exercise]);
+  }
+  assert.equal(sourcesOf(library).length, 2 + named.length);
 });
 
 test("an import adds to the stored library without touching what was there", () => {

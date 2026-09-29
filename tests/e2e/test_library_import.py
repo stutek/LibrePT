@@ -26,7 +26,9 @@ def test_an_imported_library_is_still_there_after_a_reload(page, local_server):
 
     page.reload()
     page.wait_for_selector("#view-exercises.active")
-    page.click(".filter-chips[data-axis='source'] .chip[data-filter='Ana Novak']")
+    page.click(
+        ".filter-chips[data-axis='source'] .chip[data-filter='source:Ana Novak']"
+    )
     names = page.locator("#view-exercises .exercise-item h3").all_text_contents()
     assert names == ["Sled Push"]
     circuits = page.evaluate(

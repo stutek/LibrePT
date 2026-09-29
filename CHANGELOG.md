@@ -25,6 +25,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 - **A tap on the card of a running session returns to it.** It built the session again from its
   routine, so the running clock and every logged set were replaced by an unstarted copy, without a
   word.
+- **An import source called "all", "own" or "librept" is filtered on its own.** Its name was the
+  same value as the filter for everything, for the trainer's own exercises, or for the catalogue.
 - **A session planned with an empty plan opens empty.** It opened with the first routine in the
   library, a programme nobody had chosen.
 - **An injury the trainer writes down raises the warning during training.** The client form has its
