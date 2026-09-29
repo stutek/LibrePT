@@ -711,7 +711,8 @@ h6 {
   border: 1px solid var(--card-border);
   background-color: var(--card-bg);
   border-radius: var(--border-radius-lg);
-  padding: 20px;
+  --dialog-padding: 20px;
+  padding: var(--dialog-padding);
   margin: auto;
   max-width: 440px;
   width: 90%;
@@ -793,6 +794,18 @@ textarea.form-control {
   margin-top: 10px;
   border-top: 1px solid var(--border-color);
   padding-top: 14px;
+}
+/* A dialog longer than the screen scrolls, and its action row stays at the bottom of it: the client
+   form opened with Save 133 pixels below a 390×844 screen, 387 below a 320×680 one, and the one way
+   to keep an edit was a scroll away. The row carries the dialog's own background and covers the
+   dialog's bottom padding, so what scrolls under it does not show through. */
+.dialog-modal .modal-actions {
+  position: sticky;
+  bottom: calc(-1 * var(--dialog-padding));
+  margin-bottom: calc(-1 * var(--dialog-padding));
+  padding-bottom: var(--dialog-padding);
+  background-color: var(--card-bg);
+  z-index: 1;
 } /* The app versions a trainer can choose (appVersionDialog.js): one full-width choice per line */
 .app-version-list {
   display: flex;

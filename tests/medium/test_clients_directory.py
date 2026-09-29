@@ -113,6 +113,30 @@ def test_a_card_still_opens_after_the_grid_has_been_filtered(page, local_server)
     assert page.evaluate("() => window.__navigated") == ["/clients/c1a9f0e2"]
 
 
+@pytest.mark.parametrize("width,height", [(390, 844), (320, 680)])
+def test_save_is_on_the_screen_when_the_client_form_opens(
+    page, local_server, width, height
+):
+    """The form opened with its Save 133 pixels below a 390×844 screen and 387 below a 320×680 one:
+    a trainer fixing one field had to scroll the whole form to find the one way to keep it, and a
+    new user concluded it could not be saved. The action row stays on the screen."""
+    page.set_viewport_size({"width": width, "height": height})
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#view-client-directory.active")
+    page.locator("#btn-add-client").click()
+    page.wait_for_selector("#dialog-client[open]")
+
+    save = page.locator("#form-client button[type=submit]")
+    box = save.bounding_box()
+    assert box and box["y"] >= 0 and box["y"] + box["height"] <= height, (box, height)
+    hit = page.evaluate(
+        """() => { const b = document.querySelector('#form-client button[type=submit]');
+                   const r = b.getBoundingClientRect();
+                   return b.contains(document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2)); }"""
+    )
+    assert hit, "something covers the Save button"
+
+
 def test_the_search_finds_a_client_by_the_alias_on_their_card(page, local_server):
     """An alias exists to tell two people with one name apart, and it is printed on the card; a
     search for it answered "No clients found" and offered to add a new client."""

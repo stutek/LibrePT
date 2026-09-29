@@ -56,6 +56,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 - **A search for an exercise that finds nothing names the search**, in the catalog picker and in
   the exercise library. It blamed the filters, even with every filter off. In Slovenian and German
   it adds that the catalog's exercise names are in English.
+- **Save stays on the screen in a long form.** The action row keeps to the bottom of the dialog
+  while the form scrolls under it. The client form opened with Save below the edge of a phone
+  screen.
 
 ---
 
