@@ -20,6 +20,105 @@ Read [CHANGELOG.md](CHANGELOG.md) for what shipped and when. This file is why.
 
 ---
 
+### 80.82 [x] P2 — Odprt in zaprt urejevalnik načrta pobriše oznako »Zaključeno« z opravljenega sklopa — popravljeno 2026-09-30 z 5ea4ada
+
+**Scenarij in koraki:** vzorčni podatki, skupinski trening »Skupinska moč in kondicija« (stranke
+Jane, Sarah in ena dodana). Tapni kartico, »Začni trening«, v oknu »Trening se je začel izven
+urnika« tapni »Ohrani urnik«. Na Janinem zavihku odpri sklop »Dinamično ogrevanje« (en krog) in
+tapni »Zaključi sklop«; sklop pravi »Zaključeno«. Nato tapni ⋮ »Možnosti treninga« → »Uredi načrt«
+in takoj »Končano z urejanjem načrta«, brez ene same spremembe.
+
+**Opaženo:** sklop »Dinamično ogrevanje« ne piše več »Zaključeno«, ampak spet »KROG 1 / 1«, torej
+neopravljeno. Shranjeni zapis vadbe je pri tem pravilen: v zgodovini je »Dinamično ogrevanje / Face
+Pulls: opravljeno 1/1«. Izgubi se samo oznaka na zaslonu. Pri treningu z eno stranko in sklopom treh
+krogov se to ni zgodilo — oznaka »Zaključeno« je ostala.
+
+**Težava in vpliv:** trener popravi eno težo v načrtu in se vrne na podlogo, ki zdaj trdi, da
+ogrevanje ni opravljeno. Sredi skupinskega treninga s tremi strankami si ne more zapomniti, kateri
+sklop je pri kateri stranki že zaključil, zato ga ponovi ali pa ga izpusti.
+
+**Predlog:** po zaprtju urejevalnika naj podloga pokaže isto stanje, kot ga ima zapis, torej
+»Zaključeno« — opaženo na različici `8b2ce80`.
+
+**Vzrok in stanje 2026-09-30 (Claude):** popravljeno že z `5ea4ada` (§80.74). »Dinamično ogrevanje«
+vsebuje Walking Lunges, ki je v tej rutini dvakrat; obe pojavitvi sta imeli en zapis serij, in izhod
+iz urejevalnika je ta zapis prilagodil na tri serije glavnega sklopa, zato ogrevanje ni bilo več
+zaključeno. Izmerjeno v brskalniku: s kodo pred `5ea4ada` je po urejevalniku »Round 1 / 1«, s kodo
+po njem »Completed«. Pri eni stranki se ni zgodilo, ker tam vaja ni bila dvakrat.
+
+Seja, ki dela na drevesu, poroča (2026-09-30, 01:30), da je to na `main` že popravljeno s `5ea4ada`
+(popravek §80.74: Walking Lunges je bil v tej rutini dvakrat z enim skupnim zapisom serij, obhod
+urejevalnika pa mu je spremenil velikost), in da na sedanjem drevesu ogrevanje po urejevalniku ostane
+»Zaključeno«. Tega nisem preveril sam — objavljena `8b2ce80` je za `main` približno dvajset commitov.
+
+### 80.83 [x] P1 — Treninga, ki se konča po polnoči, ni mogoče niti vpisati niti urediti — popravljeno 2026-09-30
+
+**Scenarij in koraki:** dvoje, oboje ponovljeno.
+1. »Ustvari trening«: ime »Pozna skupina«, datum 2026-10-02, začetek 21:00, konec 00:30, »Shrani«.
+2. Vzorčni trening »Vrnitev po poškodbi«, 23:00 - 01:00: tapni svinčnik na kartici in takoj
+   »Shrani«, brez ene same spremembe.
+
+**Opaženo:** v obeh primerih se obrazec ne zapre. Med poljema za čas se izpiše: »Trening se konča,
+preden se začne. Preveri uro konca.« Vpisani konec 00:30 oziroma 01:00 je torej prebran kot čas pred
+začetkom istega dne, ne kot čas naslednjega jutra. Sporočilo ne pove, da je težava v prehodu čez
+polnoč, in ne ponudi izhoda.
+
+**Težava in vpliv:** večerna skupina, ki se konča ob 00:30, je običajen termin, in vpisati je ni
+mogoče. Še huje pri obstoječih: vzorčni podatki sami vsebujeta dva taka treninga (»Skupinska moč in
+kondicija« in »Vrnitev po poškodbi«, oba 23:00 - 01:00), pri katerih trener ne more dodati stranke,
+je odstraniti, popraviti kraja ali imena, dokler ne zlaže ure konca (z 23:59 se shrani). Preverba, ki
+to ustavi, je prišla z §80.48, kjer se je trening s koncem pred začetkom shranil brez besede.
+
+**Predlog:** konec, ki je manjši od začetka, naj se bere kot naslednji dan, dokler trening ni daljši
+od nekega razuma (recimo 12 ur); nad tem naj bo vprašanje, ne zavrnitev — opaženo na različici
+`8b2ce80`.
+
+### 80.84 [x] P1 — Nedokončan nov trening se prilepi na urejanje drugega treninga in ga pri shranjevanju povozi — popravljeno 2026-09-30
+
+**Scenarij in koraki:**
+1. Na plošči tapni »Ustvari trening«. Vpiši IME TRENINGA »Osnutek C«, DATUM 2026-10-05, ZAČETNI ČAS
+   07:00, KONČNI ČAS 08:00 in dodaj stranko »Tom Walker«. Ne shrani. Zapusti obrazec tako, kot ga
+   trener zapusti, ko ga kdo pokliče: ☰ → »Termini treningov« (enako se zgodi po osvežitvi strani).
+2. V seznamu odpri za urejanje **drug** trening: svinčnik na kartici »Jutranja kondicija«,
+   2026-10-01, 09:00 - 10:00, »1/3 mest zasedenih«, stranka Jane Doe, rutina »Metabolna kondicija v
+   trojkah«.
+3. Tapni »Shrani«.
+
+**Opaženo:** obrazec, ki se odpre v 2. koraku, ni trening s kartice. V njem je »Osnutek C«,
+2026-10-05, 07:00 - 08:00 in »Izbrani: 1 Tom Walker«. Naslov je vseeno naslov urejanega treninga
+(`session/setup/s04f2e3d`). Po »Shrani« se odpre okno »Pošlji vabila v koledar« s Tomom Walkerjem, in
+zapis treninga »Jutranja kondicija« je zdaj: naslov »Osnutek C«, čas 07:00 - 08:00, datum
+2026-10-05, udeleženec Tom Walker, rutina »Zgornji del A«, mest 1, kraj prazen. Jane Doe na treningu
+ni več in treninga 1. oktobra ob 09:00 ni več. Vprašanja pred tem ni bilo nobenega.
+
+**Težava in vpliv:** trener začne vpisovati nov termin, nekdo ga pokliče, obrazec pusti. Ko se vrne in
+odpre povsem drug trening, da bi mu dodal stranko, izgubi tisti trening: ime, dan, uro, rutino in
+stranko, ki je bila nanj vpisana. Stranka ostane brez termina, trener pa o tem ne izve nič, ker vse
+skupaj izgleda kot uspešno shranjevanje. Osnutek, ki se ohrani, je Simonovo pravilo (2026-09-17: samo
+»Prekliči« zavrže); napaka je, da se ohrani osnutek *novega* treninga v obrazcu *obstoječega*.
+
+**Predlog:** osnutek naj se vrne samo v obrazec, v katerem je nastal (nov trening k »Ustvari
+trening«, obstoječi k svojemu naslovu). Obrazec obstoječega treninga naj vedno pokaže ta trening —
+opaženo na različici `8b2ce80`.
+
+### 80.85 [x] P2 — V skupnem načrtu je opozorilo o poškodbi ene stranke prikazano brez imena — popravljeno 2026-09-30
+
+**Scenarij in koraki:** vzorčni podatki, skupinski trening »Skupinska moč in kondicija« s tremi
+strankami (Jane, Sarah in ena dodana). Odpri podlogo in tapni ⋮ »Možnosti treninga« → »Vsi na ta
+načrt«.
+
+**Opaženo:** zavihki strank se združijo v enega z napisom »Skupaj JD · SL · SJ«. Takoj pod njim je
+opozorilo »Rahla napetost v levi rami pri dvigih nad glavo« in vrstice »Zadnjič: 2026-09-30 | Face
+Pulls | Lvl 5 x 10 ponovitev (lahko)«. Oboje je Janino — na ločenih zavihkih se to pokaže na njenem.
+V skupnem pogledu ni nikjer napisano, čigavo je, opozoril in zgodovine drugih dveh strank pa ni.
+
+**Težava in vpliv:** trener, ki vodi tri ljudi po istem načrtu, prebere eno opozorilo o poškodbi brez
+imena. Lahko ga upošteva pri napačni osebi ali pa spregleda omejitev pri tistih dveh, katerih
+opozorila niso prikazana. Prav zato, da bi jih prebral hitro, je vse tri dal na skupen načrt.
+
+**Predlog:** v skupnem pogledu naj bo pri opozorilu in pri vrstici »Zadnjič« napisano ime stranke, in
+naj bosta prikazani za vse stranke na treningu — opaženo na različici `8b2ce80`.
+
 ### 1.2 [x] Simultaneous sessions merged into one clipboard: multi-line titles + per-participant tags — dots shipped 2026-09-30
 
 Overlapping same-day sessions **already merge** into one clipboard (`getOverlappingSessions` /
