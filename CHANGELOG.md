@@ -24,6 +24,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 - **A session planned with an empty plan opens empty.** It opened with the first routine in the
   library, a programme nobody had chosen.
+- **An injury the trainer writes down raises the warning during training.** The client form has its
+  own field, *Injuries and limits*; what is written there is what the clipboard warns about. Other
+  notes have their own field. Before, only a client's own signup could raise the warning.
 
 ---
 

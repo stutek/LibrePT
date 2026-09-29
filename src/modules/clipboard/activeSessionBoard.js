@@ -141,7 +141,9 @@ function renderClientFocusPanel(activeClient, activeClientState) {
   if (goalsLabel) goalsLabel.textContent = t("goals") || "Training Goals";
   if (notesLabel) notesLabel.textContent = t("notes_injuries") || "Notes";
   if (goalsEl) goalsEl.textContent = activeClient.goals || t("no_goals_specified") || "";
-  if (notesEl) notesEl.textContent = activeClient.notes || t("no_notes_specified") || "";
+  // Injuries first: the plan being shaped here is the one the injury limits.
+  const notes = [activeClient.injury, activeClient.notes].filter(Boolean).join(" · ");
+  if (notesEl) notesEl.textContent = notes || t("no_notes_specified") || "";
   renderGymNotes(activeClient, activeClientState);
 }
 

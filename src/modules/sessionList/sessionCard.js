@@ -227,7 +227,7 @@ function buildSessionCardInfoHTML({
       : "";
 
   const injuryHTML = anyInjury
-    ? `<i class="fa-solid fa-triangle-exclamation session-card-injury-icon" title="${escapeHTML(t("notes_injuries"))}"></i>`
+    ? `<i class="fa-solid fa-triangle-exclamation session-card-injury-icon" title="${escapeHTML(t("injury_label"))}"></i>`
     : "";
 
   return `

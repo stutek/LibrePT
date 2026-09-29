@@ -113,6 +113,33 @@ def test_a_card_still_opens_after_the_grid_has_been_filtered(page, local_server)
     assert page.evaluate("() => window.__navigated") == ["/clients/c1a9f0e2"]
 
 
+def test_an_injury_the_trainer_writes_down_raises_the_warning(page, local_server):
+    """The trainer wrote "knee surgery 2023, right" into the client form, and the clipboard never
+    warned about it: only a client's own signup set the flag the warning reads. The form has its own
+    field for injuries, and what is written there is what the warning shows; other notes stay apart."""
+    seeded = "const state = { clients: structuredClone(DEFAULT_CLIENTS), lang: 'en' };"
+    assert seeded in STUB
+    load_with_stub(
+        page, local_server, STUB.replace(seeded, seeded + "\nwindow.__state = state;")
+    )
+    page.wait_for_selector("#view-client-directory.active")
+    page.locator("#btn-add-client").click()
+    page.wait_for_selector("#dialog-client[open]")
+
+    page.fill("#client-name", "Ana Testna")
+    page.fill("#client-injury", "knee surgery 2023, right")
+    page.fill("#client-notes", "prefers mornings")
+    page.locator("#form-client button[type=submit]").click()
+    page.wait_for_selector("#dialog-client", state="hidden")
+
+    saved = page.evaluate(
+        "() => window.__state.clients.find((c) => c.name === 'Ana Testna')"
+    )
+    assert saved["hasInjury"] is True
+    assert saved["injury"] == "knee surgery 2023, right"
+    assert saved["notes"] == "prefers mornings"
+
+
 @pytest.mark.parametrize("width,height", [(390, 844), (320, 680)])
 def test_save_is_on_the_screen_when_the_client_form_opens(
     page, local_server, width, height

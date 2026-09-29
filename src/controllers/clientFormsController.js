@@ -68,9 +68,16 @@ export function renderClientDialog() {
         <textarea id="client-goals" rows="2" placeholder="e.g. Strength gain, consistency..." data-i18n-placeholder="goals_placeholder" class="form-control"></textarea>
       </div>
 
+      <!-- Its own field, because what is written here is what the clipboard warns about during a
+           session. Written into the shared notes it never raised the warning at all. -->
       <div class="form-group">
-        <label for="client-notes" data-i18n="notes_injuries">Trainer Notes & Injuries (Alert banner shows during workout)</label>
-        <textarea id="client-notes" rows="3" placeholder="e.g. Left knee issue; monitor squat depth..." data-i18n-placeholder="notes_placeholder" class="form-control"></textarea>
+        <label for="client-injury" data-i18n="injury_label">Injuries and limits</label>
+        <textarea id="client-injury" rows="2" placeholder="e.g. Right knee surgery 2023; no deep squats" data-i18n-placeholder="injury_placeholder" class="form-control"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="client-notes" data-i18n="notes_label">Notes</label>
+        <textarea id="client-notes" rows="2" placeholder="e.g. prefers mornings; homework: daily stretching" data-i18n-placeholder="notes_placeholder" class="form-control"></textarea>
       </div>
 
 ${consentSectionMarkup()}
@@ -175,13 +182,17 @@ export function setupClientForms({
       client.email = $id("client-email").value.trim();
       client.phone = $id("client-phone").value.trim();
       client.goals = $id("client-goals").value.trim();
+      // The flag the clipboard's warning reads is DERIVED from the field, as a client's own signup
+      // derives it (clientSignup.js): written down means warned about.
+      client.injury = $id("client-injury").value.trim();
+      client.hasInjury = client.injury !== "";
       client.notes = $id("client-notes").value.trim();
       // Initials follow the name only while the client is being added, as they always did.
       if (!before) client.avatar = getInitials(client.name);
       client.gdprConsent = readConsentFromSection(before?.gdprConsent ?? null);
     },
     isBlank: () =>
-      ["name", "alias", "email", "phone", "goals", "notes"].every(
+      ["name", "alias", "email", "phone", "goals", "injury", "notes"].every(
         (field) => !$id(`client-${field}`).value.trim(),
       ),
     onChange: repaint,
@@ -238,6 +249,7 @@ export function setupClientForms({
     $id("client-email").value = client.email || "";
     $id("client-phone").value = client.phone || "";
     $id("client-goals").value = client.goals || "";
+    $id("client-injury").value = client.injury || "";
     $id("client-notes").value = client.notes || "";
     fillConsentSection(client);
     renderNameCollisionHint(getState(), client, t);

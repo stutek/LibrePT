@@ -124,7 +124,11 @@ export function renderClientDetailViewShell() {
             <p id="profile-goals"></p>
           </div>
           <div class="info-block">
-            <label data-i18n="notes_injuries">Health & Injury Notes</label>
+            <label data-i18n="injury_label">Injuries and limits</label>
+            <p id="profile-injury"></p>
+          </div>
+          <div class="info-block">
+            <label data-i18n="notes_label">Notes</label>
             <p id="profile-notes"></p>
           </div>
           <div class="info-block">
@@ -171,6 +175,20 @@ export function renderClientDetailViewShell() {
   );
 }
 
+/** The profile's plain text fields, each with what it says when the trainer left it empty. */
+function fillProfileText(client, t) {
+  const fields = [
+    ["profile-goals", client.goals, "no_goals_specified"],
+    ["profile-injury", client.injury, "not_specified"],
+    ["profile-notes", client.notes, "no_notes_specified"],
+    ["profile-email", client.email, "not_specified"],
+    ["profile-phone", client.phone, "not_specified"],
+  ];
+  for (const [id, value, emptyKey] of fields) {
+    document.getElementById(id).textContent = value || t(emptyKey);
+  }
+}
+
 export function showClientDetails({
   clientId,
   state,
@@ -202,10 +220,7 @@ export function showClientDetails({
   );
   document.getElementById("profile-joined-date").textContent =
     `${t("joined")} ${formatDateStr(client.joinedDate)}`;
-  document.getElementById("profile-goals").textContent = client.goals || t("no_goals_specified");
-  document.getElementById("profile-notes").textContent = client.notes || t("no_notes_specified");
-  document.getElementById("profile-email").textContent = client.email || t("not_specified");
-  document.getElementById("profile-phone").textContent = client.phone || t("not_specified");
+  fillProfileText(client, t);
 
   renderConsentStatus(client, t);
   renderConsentDelivery(client, client.gdprConsent?.formLang || state.lang, t);
