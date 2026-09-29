@@ -6476,6 +6476,34 @@ to ustavi, je prišla z §80.48, kjer se je trening s koncem pred začetkom shra
 od nekega razuma (recimo 12 ur); nad tem naj bo vprašanje, ne zavrnitev — opaženo na različici
 `8b2ce80`.
 
+### 80.84 [ ] P1 — Nedokončan nov trening se prilepi na urejanje drugega treninga in ga pri shranjevanju povozi
+
+**Scenarij in koraki:**
+1. Na plošči tapni »Ustvari trening«. Vpiši IME TRENINGA »Osnutek C«, DATUM 2026-10-05, ZAČETNI ČAS
+   07:00, KONČNI ČAS 08:00 in dodaj stranko »Tom Walker«. Ne shrani. Zapusti obrazec tako, kot ga
+   trener zapusti, ko ga kdo pokliče: ☰ → »Termini treningov« (enako se zgodi po osvežitvi strani).
+2. V seznamu odpri za urejanje **drug** trening: svinčnik na kartici »Jutranja kondicija«,
+   2026-10-01, 09:00 - 10:00, »1/3 mest zasedenih«, stranka Jane Doe, rutina »Metabolna kondicija v
+   trojkah«.
+3. Tapni »Shrani«.
+
+**Opaženo:** obrazec, ki se odpre v 2. koraku, ni trening s kartice. V njem je »Osnutek C«,
+2026-10-05, 07:00 - 08:00 in »Izbrani: 1 Tom Walker«. Naslov je vseeno naslov urejanega treninga
+(`session/setup/s04f2e3d`). Po »Shrani« se odpre okno »Pošlji vabila v koledar« s Tomom Walkerjem, in
+zapis treninga »Jutranja kondicija« je zdaj: naslov »Osnutek C«, čas 07:00 - 08:00, datum
+2026-10-05, udeleženec Tom Walker, rutina »Zgornji del A«, mest 1, kraj prazen. Jane Doe na treningu
+ni več in treninga 1. oktobra ob 09:00 ni več. Vprašanja pred tem ni bilo nobenega.
+
+**Težava in vpliv:** trener začne vpisovati nov termin, nekdo ga pokliče, obrazec pusti. Ko se vrne in
+odpre povsem drug trening, da bi mu dodal stranko, izgubi tisti trening: ime, dan, uro, rutino in
+stranko, ki je bila nanj vpisana. Stranka ostane brez termina, trener pa o tem ne izve nič, ker vse
+skupaj izgleda kot uspešno shranjevanje. Osnutek, ki se ohrani, je Simonovo pravilo (2026-09-17: samo
+»Prekliči« zavrže); napaka je, da se ohrani osnutek *novega* treninga v obrazcu *obstoječega*.
+
+**Predlog:** osnutek naj se vrne samo v obrazec, v katerem je nastal (nov trening k »Ustvari
+trening«, obstoječi k svojemu naslovu). Obrazec obstoječega treninga naj vedno pokaže ta trening —
+opaženo na različici `8b2ce80`.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
