@@ -6499,6 +6499,22 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8066-x-p2--vrst
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8067-x-p3--čip-datumi-zapiše-izbrano-obdobje-kot-5-okt--11-okt-ne-v-iso--popravljeno-2026-09-29).
 
+### 80.68 [ ] P2 — Križec ✕, ki zapre okno, meri 12 × 16 pik
+
+**Scenarij in koraki:** v peskovniku odpreti »Imenik strank« → »Dodaj stranko«, in »Knjižnica
+vaj« → »Dodaj vajo«. Izmerjeno z ukazom `measure` (način 3 veščine), zaslon 390 × 844.
+
+**Opaženo:** v obeh oknih je ✕ zgoraj desno (»Zapri«) velik 12 × 16 pik. Vse druge kontrole v
+obeh oknih so dovolj velike.
+
+**Težava in vpliv:** najmanjša tarča v oknu je prav tista, s katero trener okno zapre. Na telefonu
+v eni roki jo zgreši in pritisne okno pod njo ali polje obrazca. Po pravilu 2026-09-17 ✕ vpisano
+obdrži, zato zgrešen pritisk ne izgubi podatkov, stane pa ponovni poskus.
+
+**Predlog:** ✕ naj ima tarčo najmanj 44 × 44, znak sam je lahko manjši. Preizkus naj v vsakem
+oknu zahteva, da je gumb za zapiranje velik vsaj toliko. Opaženo na objavljeni `0625bd6`, sl,
+390 × 844; brez napak v konzoli.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
