@@ -42,6 +42,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Fixed
 
+- **Clients on one plan show every injury and every last session, each with a name.** With
+  "Everyone on this plan", the shared tab showed one client's injury and one client's "Last time"
+  rows, neither named, and nothing of the others.
 - **A half-typed new session no longer overwrites another session.** A new session left unsaved came
   back in the edit form of a different session, and saving that form wrote it over the other
   session: its name, day, time, routine and clients, with no question. A draft now returns only to

@@ -369,3 +369,8 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   font-size: 12px;
   color: var(--text-muted);
 }
+
+/* Clients bound to one plan: each member's injury on its own line, under the client's name. */
+.client-caveat-line {
+  display: block;
+}

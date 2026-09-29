@@ -40,7 +40,7 @@ export class PastDeckCard extends DeckCard {
           .join(", ");
     card.innerHTML = `
         <div class="deck-card-compact">
-          <span class="badge deck-card-status deck-card-status-past">${escapeHTML(t("last_time"))}: ${escapeHTML(item.sessionDate)}</span>
+          <span class="badge deck-card-status deck-card-status-past">${escapeHTML(t("last_time"))}${item.clientName ? ` · ${escapeHTML(item.clientName)}` : ""}: ${escapeHTML(item.sessionDate)}</span>
           <span class="deck-card-name deck-card-name-inline">${escapeHTML(item.name)}</span>
           <span class="deck-card-compact-target">${escapeHTML(setsSummary)}</span>
         </div>

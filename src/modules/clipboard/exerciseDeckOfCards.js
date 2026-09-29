@@ -19,6 +19,7 @@
 
 import { newRecordId } from "../../data/recordId.js";
 import { formatMetricValue, usesLoad } from "../../domain/exerciseModality.js";
+import { bindingFor, bindingMembers } from "../../domain/participantBinding.js";
 import { formatLoad, formatReps } from "../../domain/repsAndLoad.js";
 import {
   exerciseRecordsOf,
@@ -26,7 +27,7 @@ import {
   isSkippedRecord,
 } from "../../domain/sessionItemRecord.js";
 import { blankExercise } from "../../domain/sessionPlanFactory.js";
-import { formatDateStr } from "../common/utils.js";
+import { clientDisplayName, formatDateStr } from "../common/utils.js";
 import { CircuitDeckCard } from "./circuitCard.js";
 import { trackDeckScroll } from "./deckScrollFocus.js";
 import { ExerciseDeckCard } from "./exerciseCard.js";
@@ -39,7 +40,7 @@ import { RestDeckCard } from "./restDeckCard.js";
 // listing those read as sets the client performed. A skipped movement says so instead, as the
 // client's history page does, and an unfinished set is left out. A set with no flag is a legacy row,
 // which only ever stored performed work.
-function buildPastExerciseItems(pastSession, dateStr) {
+function buildPastExerciseItems(pastSession, dateStr, clientName = "") {
   const items = [];
   let pIdx = 0;
   for (const ex of exerciseRecordsOf(pastSession.exercises)) {
@@ -49,6 +50,7 @@ function buildPastExerciseItems(pastSession, dateStr) {
       name: ex.name,
       type: "past",
       sessionDate: dateStr,
+      clientName,
       skipped,
       sets: skipped ? [] : (ex.sets || []).filter((set) => set.completed !== false),
       loadUnit: ex.loadUnit || "kg",
@@ -258,15 +260,21 @@ export function renderExerciseDeck(deckContainer, deps) {
   // Past session exercises. Excludes isPlanning drafts (syncPlanningSnapshotToHistory writes them
   // with an ever-fresh `date` on every save) — a drafted-but-unrun plan is not a performed session,
   // and would otherwise eclipse the client's actual most recent workout here.
-  const clientHistory = (state.history || []).filter(
-    (h) => h.clientId === activeClientId && !h.isPlanning,
-  );
-  clientHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-  const pastExList =
-    clientHistory.length > 0
-      ? buildPastExerciseItems(clientHistory[0], formatDateStr(clientHistory[0].date))
-      : [];
+  //
+  // Clients bound to one plan share one tab, so each member's last session is listed, under the
+  // client's name. The tapped client's alone, unnamed, read as the whole group's.
+  const group = bindingFor(activeSession.bindings, activeClientId);
+  const historyOwners = group
+    ? bindingMembers(group, activeSession.participants)
+    : [activeClientId];
+  const pastExList = historyOwners.flatMap((clientId) => {
+    const latest = (state.history || [])
+      .filter((h) => h.clientId === clientId && !h.isPlanning)
+      .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+    if (!latest) return [];
+    const owner = group ? clientDisplayName(state.clients?.find((c) => c.id === clientId)) : "";
+    return buildPastExerciseItems(latest, formatDateStr(latest.date), owner);
+  });
 
   // Current routine exercises. activeExerciseIndex is the ACTIVE card, always marked; deckAllCollapsed
   // says no card is OPEN. A fresh open starts collapsed (startWorkoutSession /

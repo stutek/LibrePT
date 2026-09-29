@@ -152,3 +152,49 @@ def test_it_can_be_undone_from_the_same_control(page, local_server):
         [JANE, JOHN],
     )
     assert separate is True
+
+
+# Each client with an injury and a last session of their own.
+BOTH_INJURED_WITH_HISTORY = """
+for (const [id, injury] of [['%s', 'Left shoulder'], ['%s', 'Right knee']]) {
+  Object.assign(state.clients.find((client) => client.id === id), { hasInjury: true, injury });
+  state.history.push({
+    id: 'h-' + id, clientId: id, routineName: 'Lower Body', date: '2026-07-20T17:30:00',
+    exercises: [{ id: 'p-' + id, type: 'exercise', name: 'Back Squat', completed: true,
+      loadUnit: 'kg', metric: 'reps', modality: 'strength',
+      sets: [{ reps: 8, weight: 60, completed: true }] }],
+    feedback: [],
+  });
+}
+renderActiveGroupBoard();
+""" % (JANE, JOHN)
+
+
+def test_one_plan_for_several_names_each_injury_and_each_last_session(
+    page, local_server
+):
+    """Bound to one plan, the group showed one injury and one "Last time" row, both the tapped
+    client's and neither named: a trainer could apply one person's limit to another and miss the
+    rest. Each member's injury and last session is listed, under the client's name."""
+    page.set_viewport_size({"width": 390, "height": 844})
+    load_with_stub(
+        page,
+        local_server,
+        clipboard_stub(
+            _two_participant_session(), extra_body=BOTH_INJURED_WITH_HISTORY
+        ),
+    )
+    page.wait_for_selector("#active-session-overlay:not(.hidden)")
+    _bind(page)
+
+    lines = page.locator("#clipboard-client-notes-text .client-caveat-line")
+    expect(lines).to_have_count(2)
+    assert sorted(lines.all_inner_texts()) == [
+        "Jane Doe: Left shoulder",
+        "John Smith: Right knee",
+    ]
+    badges = page.locator(".deck-card-status-past").all_inner_texts()
+    assert sorted(badges) == [
+        "Last time · Jane Doe: 2026-07-20",
+        "Last time · John Smith: 2026-07-20",
+    ], badges

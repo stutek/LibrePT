@@ -29,10 +29,15 @@ import { hasBehaviour } from "../../data/appVersions.js";
 import { libraryExercises } from "../../data/exerciseLibrary.js";
 import { feedbackTagText } from "../../domain/feedbackTags.js";
 import { gymNotesForPlan } from "../../domain/gymNotes.js";
-import { bindingFor } from "../../domain/participantBinding.js";
+import { bindingFor, bindingMembers } from "../../domain/participantBinding.js";
 import { renderActiveUsersList } from "../common/activeUsersList.js";
 import { openFeedbackModal } from "../common/feedbackModal.js";
-import { escapeHTML, getClientDisplayNameHTML, getInitials } from "../common/utils.js";
+import {
+  clientDisplayName,
+  escapeHTML,
+  getClientDisplayNameHTML,
+  getInitials,
+} from "../common/utils.js";
 import { renderClipboardEditor } from "./clipboardEditor.js";
 import { isClipboardEditMode, markEditorRow, takePendingCallout } from "./editModeState.js";
 import { renderExerciseDeck } from "./exerciseDeckOfCards.js";
@@ -61,16 +66,36 @@ function renderClientTabsBar(activeClientId) {
   });
 }
 
-function renderInjuryAlertBanner(activeClient) {
+const injuryTextOf = (client) =>
+  client?.hasInjury && (client.injury || client.notes) ? client.injury || client.notes : "";
+
+// On its own tab a client's injury needs no name: the tab says whose it is. Clients bound to one
+// plan share one tab, so every member's injury is listed, each under its client's name. Showing
+// only the tapped client's, unnamed, let a trainer apply one person's limit to another and miss the
+// limits of the rest.
+function renderInjuryAlertBanner(activeClient, session, clients) {
   const alertBanner = document.getElementById("clipboard-client-alert");
   const alertText = document.getElementById("clipboard-client-notes-text");
-  if (!alertBanner || !activeClient) return;
-  if (activeClient.hasInjury && (activeClient.injury || activeClient.notes)) {
-    alertText.textContent = activeClient.injury || activeClient.notes;
-    alertBanner.classList.remove("hidden");
+  if (!alertBanner || !alertText || !activeClient) return;
+  const group = bindingFor(session.bindings, activeClient.id);
+  const members = group
+    ? bindingMembers(group, session.participants).map((id) => clients.find((c) => c.id === id))
+    : [activeClient];
+  const injured = members.filter((client) => injuryTextOf(client));
+  alertText.replaceChildren();
+  if (!group && injured.length) {
+    alertText.textContent = injuryTextOf(activeClient);
   } else {
-    alertBanner.classList.add("hidden");
+    for (const client of injured) {
+      const line = document.createElement("span");
+      line.className = "client-caveat-line";
+      const name = document.createElement("strong");
+      name.textContent = `${clientDisplayName(client)}: `;
+      line.append(name, injuryTextOf(client));
+      alertText.appendChild(line);
+    }
   }
+  alertBanner.classList.toggle("hidden", injured.length === 0);
 }
 
 // How many gym notes the panel shows before it starts hiding them. The panel shares a 390px
@@ -474,7 +499,7 @@ export function renderActiveSessionBoard() {
   const activeClient = state.clients.find((c) => c.id === activeClientId);
 
   renderClientTabsBar(activeClientId);
-  renderInjuryAlertBanner(activeClient);
+  renderInjuryAlertBanner(activeClient, activeSession, state.clients);
   renderClientFocusPanel(activeClient, activeClientState);
   renderTitleBarForEditMode(activeClient);
 
