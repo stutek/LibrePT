@@ -29,6 +29,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Changed
 
+- **A tap on a session with nobody booked opens its form**, where a client is added, as the card's
+  pencil does. The tap did nothing.
 - **The main button of a dialog is on the right, in every dialog.** The client-invite dialog had it
   on the left, and while no contact was typed it read "Nowhere to send it yet", which looked like an
   error rather than a button. It now reads "Write the message", greyed until a contact is typed; the
@@ -42,6 +44,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   and a client's joining date, an erasure request, a feedback note and the names of exported files
   were dated a day early. Every calendar day now comes from one helper that reads the local day,
   and a test fails the build on a day taken from UTC.
+- **Adding the first client to a drop-in slot keeps its places and its plan.** The slot for three
+  became a slot for one, so the next two walk-ins could not be added, and the new client's routine
+  menu opened on the library's first routine, which replaced the slot's own plan on save. An edit
+  now keeps the places a session had, and a client added to a session joins its routine.
 - **The "Last time" row shows only what the client did.** It listed a skipped movement's prescribed
   sets as if they had been lifted, and a movement stopped part-way with its unfinished sets. A
   skipped movement now says *Skipped*, as the client's history page does, and unfinished sets are

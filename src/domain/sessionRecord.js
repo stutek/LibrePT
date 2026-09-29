@@ -55,10 +55,17 @@ export function sessionCalendarDate(session) {
 // Merge over an existing row rather than replacing it: a stored session carries fields this form
 // never edits (`completed`, `duration`, stamped by finishing a session), and a wholesale replace
 // would silently drop them.
+//
+// The number of places is one of them: the form has no field for it and counts the participants.
+// Saving a drop-in slot for three with its first client turned it into a slot for one, so the next
+// two could not be added. An edit keeps the places the session had, and grows them only when more
+// people are on it than that.
 export function upsertSessionRecord(sessions, sessionRecord) {
   const existingIndex = sessions.findIndex((session) => session.id === sessionRecord.id);
   if (existingIndex >= 0) {
-    sessions[existingIndex] = { ...sessions[existingIndex], ...sessionRecord };
+    const existing = sessions[existingIndex];
+    const maxCapacity = Math.max(existing.maxCapacity ?? 0, sessionRecord.maxCapacity ?? 0);
+    sessions[existingIndex] = { ...existing, ...sessionRecord, maxCapacity };
     return;
   }
   sessions.push(sessionRecord);

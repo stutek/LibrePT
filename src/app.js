@@ -1177,6 +1177,7 @@ function launchClipboardDirectly(arg, options = {}) {
         const path = sessionFocusPath();
         if (path) navigateToPath(path);
       },
+      openSetup: (id) => navigateToPath(urlFor("session.setup", { sessionId: id })),
     },
     options,
   );

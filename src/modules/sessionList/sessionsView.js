@@ -151,7 +151,7 @@ export function seedDemoActiveSession({ state }) {
 }
 
 export function launchClipboardDirectly(
-  { sessionId, state, startWorkoutSession, activeSession, resumeRunning },
+  { sessionId, state, startWorkoutSession, activeSession, resumeRunning, openSetup },
   options = {},
 ) {
   if (resumeRunning && isRunningOn(activeSession, sessionId)) {
@@ -185,7 +185,13 @@ export function launchClipboardDirectly(
     routineId,
   }));
 
-  if (clientRoutines.length === 0) return;
+  // Nobody to train: a drop-in slot waiting for its first walk-in. The tap did nothing at all, and a
+  // trainer who wants to add the client who just arrived tapped again. It opens the session's form,
+  // where a client is added — what the card's pencil does.
+  if (clientRoutines.length === 0) {
+    openSetup?.(sessionId);
+    return;
+  }
 
   startWorkoutSession(
     clientRoutines,

@@ -901,6 +901,9 @@ function determineParticipantRoutineValue(
   if (isPlanningModeActive) return "empty_plan";
   if (targetSession?.participants.includes(client.id)) return targetSession.routineId;
   if (preselectedRoutineId && preselectedClientId === client.id) return preselectedRoutineId;
+  // Someone added to a session that already has a programme joins that programme. Offering the
+  // library's first routine instead replaced the session's plan when the form was saved.
+  if (targetSession?.routineId) return targetSession.routineId;
   if (client.id === "c1a9f0e2") return "r10d5e6f";
   if (client.id === "c2b8e1d3") return "r11d5e6f";
   if (state.routines.length > 0) return state.routines[0].id;
