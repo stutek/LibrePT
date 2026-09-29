@@ -40,6 +40,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 - **"Sync Data" is gone from Sync & Backup.** It promised the bookings of a connected calendar,
   connected to none, and replaced the trainer's own sessions with the sample ones while saying the
   calendar had synced.
+- **A programme planned from a client's profile offers no Save**, only Open in Clipboard, as
+  intended: the Save added this morning showed there and did what Open does.
 
 ---
 

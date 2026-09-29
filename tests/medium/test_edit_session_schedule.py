@@ -190,6 +190,21 @@ def test_a_session_saved_without_a_name_is_not_called_by_the_form_s_heading(
     assert title == "Training session", title
 
 
+def test_a_planning_form_offers_no_save_to_the_board(page, local_server):
+    """A programme planned from a client's profile has no slot on the board to save into, so the
+    form offers only Open in Clipboard. Save was hidden by an attribute the button's own style
+    overrode, and it showed — and did what Open does."""
+    load_with_stub(page, local_server, setup_stub("[]", extra_deps=SPY_DEPS))
+    page.evaluate(
+        """async () => {
+          const control = await import(new URL('modules/session/editSessionControl.js', document.baseURI).href);
+          control.openWorkoutSetupModal('c1', null, null, true);
+        }"""
+    )
+    expect(page.locator("#btn-setup-open")).to_be_visible()
+    expect(page.locator("#btn-setup-save")).to_be_hidden()
+
+
 def test_open_in_clipboard_still_saves_and_opens_it(page, local_server):
     load_with_stub(
         page,

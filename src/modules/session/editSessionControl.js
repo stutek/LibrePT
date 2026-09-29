@@ -1144,8 +1144,8 @@ export function openEditSessionControlModal(
   isPlanningModeActive = isPlanning;
   editingSessionId = preselectedSessionId || null;
   // A planning programme has no slot on the board to save into; only the clipboard keeps it.
-  const saveOnly = document.getElementById("btn-setup-save");
-  if (saveOnly) saveOnly.hidden = isPlanning;
+  // The class, not the `hidden` attribute: `.btn` sets `display`, which beats the attribute.
+  document.getElementById("btn-setup-save")?.classList.toggle("hidden", isPlanning);
   if (deps.switchView) {
     deps.switchView("workout-setup");
   }
