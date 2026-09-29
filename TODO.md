@@ -6455,6 +6455,26 @@ je poškodovala), se tako naslednjič bere kot opravljen v celoti.
 **Predlog:** »Zadnjič« naj šteje samo serije z `completed: true`, preskočene vaje pa naj označi
 enako kot zaslon stranke, torej »PRESKOČENO« — opaženo na različici `8b2ce80`.
 
+### 80.81 [ ] P1 — Ko trener na prost termin doda eno stranko, termin izgubi mesta in zamenja rutino
+
+**Scenarij in koraki:** vzorčni podatki. Kartica »Prost termin (brez najave)«, danes 04:00 - 05:00,
+pravi »0/3 mest zasedenih« in »Noge in trup B«. Tapni svinčnik na kartici, v polje za iskanje vpiši
+»Sarah«, tapni zadetek »Sarah Jenkins«, tapni »Odpri v beležki«. Ne dotakni se ničesar drugega.
+
+**Opaženo:** kartica zdaj pravi »1/1 mest zasedenih« in »Zgornji del A«. V zapisu treninga se je
+`maxCapacity` spremenil s 3 na 1 in `routineId` z »Noge in trup B« na »Zgornji del A«. Obrazec
+»Nastavitev treninga« nima nobenega polja za število mest, izbirnik rutine pri stranki pa se odpre na
+prvi rutini s seznama (»Zgornji del A«), ne na tisti, ki jo termin že ima.
+
+**Težava in vpliv:** dve stvari naenkrat. Termin, ki ga je trener odprl za tri stranke brez najave,
+je po prvi stranki videti zaseden, drugih dveh ne more več vpisati, števila mest pa nikjer ne more
+popraviti. In program se zamenja: trener, ki je pripravil noge in trup, po dodani stranki na podlogi
+dobi zgornji del telesa.
+
+**Predlog:** dodajanje stranke naj ne spremeni števila mest, izbirnik rutine pri stranki naj se odpre
+na rutini, ki jo termin že ima, in obrazec naj imeti polje za število mest — opaženo na različici
+`8b2ce80`.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
