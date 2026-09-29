@@ -20,7 +20,11 @@
 import { newRecordId } from "../../data/recordId.js";
 import { formatMetricValue, usesLoad } from "../../domain/exerciseModality.js";
 import { formatLoad, formatReps } from "../../domain/repsAndLoad.js";
-import { exerciseRecordsOf, isRestRecord } from "../../domain/sessionItemRecord.js";
+import {
+  exerciseRecordsOf,
+  isRestRecord,
+  isSkippedRecord,
+} from "../../domain/sessionItemRecord.js";
 import { blankExercise } from "../../domain/sessionPlanFactory.js";
 import { formatDateStr } from "../common/utils.js";
 import { CircuitDeckCard } from "./circuitCard.js";
@@ -31,16 +35,22 @@ import { RestDeckCard } from "./restDeckCard.js";
 
 // The last-performance reference lists movements only — flatten past rests/circuit scaffolding
 // to their exercise leaves (structured records) while legacy flat rows pass through unchanged.
+// It shows what was DONE: a record keeps a skipped movement's prescription as uncompleted sets, and
+// listing those read as sets the client performed. A skipped movement says so instead, as the
+// client's history page does, and an unfinished set is left out. A set with no flag is a legacy row,
+// which only ever stored performed work.
 function buildPastExerciseItems(pastSession, dateStr) {
   const items = [];
   let pIdx = 0;
   for (const ex of exerciseRecordsOf(pastSession.exercises)) {
+    const skipped = isSkippedRecord(ex);
     items.push({
       id: `past-${pastSession.id}-${ex.id}-${pIdx}`,
       name: ex.name,
       type: "past",
       sessionDate: dateStr,
-      sets: ex.sets,
+      skipped,
+      sets: skipped ? [] : (ex.sets || []).filter((set) => set.completed !== false),
       loadUnit: ex.loadUnit || "kg",
       metric: ex.metric || "reps",
       modality: ex.modality || "strength",

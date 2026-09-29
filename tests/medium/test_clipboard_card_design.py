@@ -308,3 +308,50 @@ def test_the_past_card_writes_its_date_as_an_iso_day(page, local_server):
     assert badge == f"Last time: {PAST_SESSION_DATE}", (
         f"the past card says when it was, as an ISO day, in a word from the dictionary: {badge!r}"
     )
+
+
+# A finished session keeps a skipped movement's prescription as sets flagged completed:false, and a
+# movement the client stopped part-way keeps its unfinished sets the same way.
+SEED_PARTLY_DONE_SESSION = """
+state.history.push({
+  id: 'h2',
+  clientId: 'c1a9f0e2',
+  routineName: 'Lower Body',
+  date: '2026-07-20T17:30:00',
+  duration: 3600,
+  exercises: [
+    { id: 'p1', type: 'exercise', name: 'Barbell Back Squat', completed: true, loadUnit: 'kg',
+      metric: 'reps', modality: 'strength',
+      sets: [{ reps: 8, weight: 60, completed: true }, { reps: 8, weight: 60, completed: false }] },
+    { id: 'p2', type: 'exercise', name: 'Leg Press', completed: false, loadUnit: 'kg',
+      metric: 'reps', modality: 'strength',
+      sets: [{ reps: 12, weight: 140, completed: false }, { reps: 12, weight: 140, completed: false }] },
+  ],
+  feedback: [],
+});
+renderActiveGroupBoard();
+"""
+
+
+def test_the_past_card_shows_only_what_was_done(page, local_server):
+    """The "Last time" row listed "Leg Press 140 kg x 12, 140 kg x 12" for a movement the client
+    never did: the record keeps a skipped movement's prescription as unfinished sets. The trainer
+    reads that row to choose today's load, so it names a skipped movement as skipped and leaves an
+    unfinished set out."""
+    stub = clipboard_stub(
+        active_session_fixture(exercises=PLAN), extra_body=SEED_PARTLY_DONE_SESSION
+    )
+    load_with_stub(page, local_server, stub)
+    page.wait_for_selector(".deck-card-status-past")
+
+    rows = page.evaluate(
+        """() => [...document.querySelectorAll('.exercise-deck-card.past-session')].map((card) => [
+          card.querySelector('.deck-card-name-inline').textContent.trim(),
+          card.querySelector('.deck-card-compact-target').textContent.trim(),
+        ])"""
+    )
+
+    assert rows == [
+        ["Barbell Back Squat", "60 kg x 8"],
+        ["Leg Press", "Skipped"],
+    ], rows

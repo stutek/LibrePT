@@ -37,6 +37,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Fixed
 
+- **The "Last time" row shows only what the client did.** It listed a skipped movement's prescribed
+  sets as if they had been lifted, and a movement stopped part-way with its unfinished sets. A
+  skipped movement now says *Skipped*, as the client's history page does, and unfinished sets are
+  left out.
 - **A movement a routine lists twice keeps two records of sets.** A warm-up and a main block with
   the same movement shared one log, so finishing the warm-up's one set showed as three sets in the
   main block, and the session's history kept one exercise instead of two.

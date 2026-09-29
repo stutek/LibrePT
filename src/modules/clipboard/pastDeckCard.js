@@ -30,12 +30,14 @@ export class PastDeckCard extends DeckCard {
   renderCard(card) {
     const { escapeHTML, formatLoad, formatReps, t } = this.ctx;
     const item = this.item;
-    const setsSummary = item.sets
-      .map((s) => {
-        const load = formatLoad(s.weight, item.loadUnit);
-        return `${load ? `${load} x ` : ""}${formatReps(s.reps)}`;
-      })
-      .join(", ");
+    const setsSummary = item.skipped
+      ? t("skipped")
+      : item.sets
+          .map((s) => {
+            const load = formatLoad(s.weight, item.loadUnit);
+            return `${load ? `${load} x ` : ""}${formatReps(s.reps)}`;
+          })
+          .join(", ");
     card.innerHTML = `
         <div class="deck-card-compact">
           <span class="badge deck-card-status deck-card-status-past">${escapeHTML(t("last_time"))}: ${escapeHTML(item.sessionDate)}</span>
