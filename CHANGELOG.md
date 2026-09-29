@@ -48,6 +48,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   pointed at a list that appeared only after a reload.
 - **The choices in the note form are a thumb high**, one under the other: Too easy, Too hard,
   Joint pain and the rest were 16-pixel lines in the form a trainer fills mid-session.
+- **A skipped movement in a client's history says "Skipped" once**, not as text and again as a
+  badge.
 
 ---
 

@@ -64,3 +64,15 @@ def test_history_renders_the_structured_program(page, local_server):
     assert log.locator(".history-ex-skipped").count() >= 1, (
         "a skipped exercise should be greyed"
     )
+
+
+def test_a_skipped_movement_says_so_once(page, local_server):
+    """ "Leg Press: Skipped SKIPPED" — the word as the row's text and again as its badge. The badge
+    says it; the row names the movement."""
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#view-client-detail.active")
+
+    rows = page.locator("#client-history-list .history-ex-skipped").evaluate_all(
+        "(rows) => rows.map((r) => r.textContent.replace(/\\s+/g, ' ').trim())"
+    )
+    assert rows and all(row.lower().count("skipped") == 1 for row in rows), rows

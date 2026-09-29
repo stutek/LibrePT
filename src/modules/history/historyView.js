@@ -65,8 +65,7 @@ function buildFeedbackIconsHTML(log, ex, t) {
 
 // Load-bearing modalities (strength, isometric) show "load×value" (e.g. "60×6", "20kg×0:45");
 // cardio/holds/agility show the bare metric magnitude.
-function buildExerciseSetsText(ex, metric, modality, skipped, t) {
-  if (skipped) return t("skipped");
+function buildExerciseSetsText(ex, metric, modality) {
   const sets = Array.isArray(ex.sets) ? ex.sets : [];
   return sets
     .map((s) => {
@@ -97,13 +96,13 @@ export function renderHistoryItems({ historyList, container, t, openSessionFromH
       const metric = ex.metric || "reps";
       const modality = ex.modality || "strength";
       const skipped = isSkippedRecord(ex);
-      const setsText = buildExerciseSetsText(ex, metric, modality, skipped, t);
+      const setsText = skipped ? "" : buildExerciseSetsText(ex, metric, modality);
       const feedbackIconsHTML = buildFeedbackIconsHTML(log, ex, t);
       const skipBadge = skipped ? `<span class="history-skip-badge">${t("skipped")}</span>` : "";
       return `
         <div class="history-ex-row${skipped ? " history-ex-skipped" : ""}">
           <div>
-            <strong>${escapeHTML(ex.name)}</strong>: <span>${escapeHTML(setsText)}</span>${skipBadge}
+            <strong>${escapeHTML(ex.name)}</strong>${skipped ? " " : `: <span>${escapeHTML(setsText)}</span>`}${skipBadge}
           </div>
           <div class="history-ex-icons">
             ${feedbackIconsHTML}
