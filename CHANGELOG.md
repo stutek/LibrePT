@@ -30,6 +30,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 - **A session saved without a name is called "Training session"**, not by the form's heading.
 - **Save and Open in Clipboard are on the screen when the session form opens**, clear of the bar
   at the bottom, while the form scrolls.
+- **The exercise search box is a thumb high**, and a tap anywhere in its frame reaches it.
 
 ---
 

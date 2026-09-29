@@ -183,6 +183,18 @@ def test_search_narrows_and_enter_takes_the_top_match(page, local_server):
     assert after["name"] != before["name"]
 
 
+def test_the_search_box_is_a_thumb_high(page, local_server):
+    """The search box sat in a 38-pixel frame but was 16 pixels high itself: a tap on the frame
+    above or below the text did nothing. The field fills a thumb-high frame."""
+    page.set_viewport_size({"width": 390, "height": 844})
+    _open_editor(page, local_server)
+    page.locator(".editor-row .editor-row-catalog").first.click()
+    page.wait_for_selector("#dialog-catalog-picker[open]")
+
+    box = page.locator("#catalog-picker-mount .picker-search").bounding_box()
+    assert box and box["height"] >= 44, box
+
+
 def test_a_search_that_finds_nothing_blames_the_search_not_the_filter(
     page, local_server
 ):
