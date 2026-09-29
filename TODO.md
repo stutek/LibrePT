@@ -6527,6 +6527,24 @@ opozorila niso prikazana. Prav zato, da bi jih prebral hitro, je vse tri dal na 
 **Predlog:** v skupnem pogledu naj bo pri opozorilu in pri vrstici »Zadnjič« napisano ime stranke, in
 naj bosta prikazani za vse stranke na treningu — opaženo na različici `8b2ce80`.
 
+### 80.86 [ ] P2 — Značka v glavi piše »7?« in nikjer na zaslonu ni povedano, kaj šteje
+
+**Scenarij in koraki:** delaj z aplikacijo (dodaj stranko, vpiši serijo, shrani opombo) in glej gumb
+z oblakom v glavi, levo od menija ☰. Nato ga tapni.
+
+**Opaženo:** gumb pokaže besedilo »7?« — številko in vprašaj — in številka z vsako spremembo zraste.
+Kaj šteje, piše samo v pomožnem imenu gumba, ki ga trener ne vidi: »Središče za sinhronizacijo in
+varnostne kopije — Sinhronizacija v oblak ni povezana«. Okno, ki se na dotik odpre (»Središče za
+sinhronizacijo in varnostne kopije«), te številke ne omeni; v njem ni ne števila sprememb ne besede
+»sprememb«.
+
+**Težava in vpliv:** trener bere »7?« ob oblaku kot sedem stvari, ki niso shranjene, in ne more
+nikjer preveriti, ali je to res. Aplikacija sicer vse hrani na napravi, torej ga številka po
+nepotrebnem skrbi; če pa res kaže neposlane spremembe, tega ne izve.
+
+**Predlog:** ob številki naj bo na zaslonu napisano, kaj šteje, in okno naj isto številko ponovi z
+besedami — opaženo na različici `8b2ce80`.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
