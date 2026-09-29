@@ -6457,78 +6457,17 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8056-x-p2--iska
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8057-x-p1--decimalna-vejica-spremeni-25-kg-v-25-kg-brez-opozorila--popravljeno-2026-09-29).
 
-### 80.58 [ ] P2 — Prvi termin tedenske serije ima dve enaki kartici
+### 80.58 [x] P2 — Prvi termin tedenske serije ima dve enaki kartici — popravljeno 2026-09-29
 
-**Scenarij in koraki:** ustvariti »Nedeljska moč«, Studio, 2026-10-18, 09:00–09:45,
-ponavljanje ob nedeljah do vključno 2026-11-01, udeleženec TEST Luka Kovač (večerni),
-rutina SIM Osnovna moč. Shraniti, zapreti neodposlana vabila in trening, pregledati seznam
-ter osvežiti stran. Namen scenarija je bil preveriti termine čez oktobrski premik ure.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8058-x-p2--prvi-termin-tedenske-serije-ima-dve-enaki-kartici--popravljeno-2026-09-29).
 
-**Opaženo:** 2026-10-18 ima dve kartici »Nedeljska moč« z enakim časom in udeležbo.
-2026-10-25 in 2026-11-01 imata vsaka eno. Štiri kartice ostanejo tudi po osvežitvi.
-Obe prvi kartici odpreta isti naslov treninga (ID `034WBB1veZioyikcozc7gC`).
-To potrjuje podvojen prikaz, ne nastanka dveh zapisov v podatkovni zbirki.
-Vse tri nedelje pravilno ohranijo lokalno uro 09:00–09:45 v časovnem pasu Europe/Ljubljana.
-Preizkus na objavljeni `0625bd6`, Chrome CDP, 390 × 844, sl; brez zabeleženih napak.
+### 80.59 [x] P2 — Neveljavni datum se brez pojasnila zamenja z drugim dnevom — popravljeno 2026-09-29
 
-**Težava in vpliv:** trener vidi dva prekrivajoča se termina in lahko sklepa, da je
-trening ustvaril dvakrat. Ker oba vodita na isti trening, bi popravljanje domnevnega
-dvojnika lahko prizadelo načrtovani termin.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8059-x-p2--neveljavni-datum-se-brez-pojasnila-zamenja-z-drugim-dnevom--popravljeno-2026-09-29).
 
-**Predlog in preverjanje:** en termin naj ima eno kartico. Ponoviti opisano serijo in
-zahtevati tri kartice, po eno na vsako nedeljo, tudi po ponovnem nalaganju. Preverjeno
-samo prek vmesnika, brez branja kode; vzrok ni ugotovljen.
+### 80.60 [x] P1 — Kartica »Sled predloge« odpre drug trening z drugima terminom in udeležbo — popravljeno 2026-09-29
 
-**Dodatno opažanje pri GDPR-izvozu iste stranke:** šifrirano datoteko smo odprli v
-vgrajenem bralniku. V razdelku »Sessions (4)« sta dve enaki vrstici za Nedeljsko moč
-2026-10-18 09:00–09:45. Torej podvajanje ni omejeno na kartici: vidno je tudi v
-izvozu. Ponavljanji 2026-10-25 in 2026-11-01, ki ju plošča kaže, v tem izvozu nista
-navedeni. Preverjanje naj zato zajame tudi dosleden seznam terminov v izvozu.
-
-### 80.59 [ ] P2 — Neveljavni datum se brez pojasnila zamenja z drugim dnevom
-
-**Scenarij in koraki:** trener pri novem treningu »Kontrola datuma« vpiše 2027-02-29,
-09:00–09:45, Studio, izbere testno stranko in shrani. V ločenem osnutku s tipkovnico
-vpiše 2027-04-31, pritisne Tab, nato enako preveri 2028-02-29.
-
-**Opaženo:** prvi datum se spremeni v 2027-02-28 in trening je na seznamu na tem dnevu.
-31. april se ob zapustitvi polja spremeni v 30. april, brez validacijskega sporočila.
-Veljavni prestopni datum 2028-02-29 ostane pravilen. Primerjalni osnutek je zavržen.
-Objavljena `0625bd6`, sl, Chrome CDP, 390 × 844; brez zabeleženih napak brskalnika.
-
-**Težava in vpliv:** trenerjeva tipkarska napaka postane drug veljaven termin brez
-pojasnila. Spremembo lahko spregleda in nato stranko povabi na napačen dan.
-
-**Predlog in preverjanje:** neveljavni dan označiti in zahtevati popravek ali vidno
-pojasniti predlagano spremembo, preden se termin shrani. Veljavni 29. februar naj
-ostane nespremenjen. Gre za opažanje vmesnika in predlog izboljšave; kode nismo brali.
-
-### 80.60 [ ] P1 — Kartica »Sled predloge« odpre drug trening z drugima terminom in udeležbo
-
-**Scenarij in koraki:** v istem profilu obstajata »Par z vzdevkoma« (jutranji in večerni
-TEST Luka Kovač, jutri 18:30–19:30) in »Sled predloge« (jutranji Luka, rutina SIM Osnovna
-moč). Drugi trening začeti pred načrtovanim časom, izbrati »Prilagodi čas« (v preizkusu
-danes 18:41–19:26), odpreti Dumbbell Bicep Curl in označiti »Pretežko«. Zapreti trening,
-ustvariti »Naslednji obisk« za večernega Luko 2026-09-29 17:00–17:45. Zapreti vabila
-brez pošiljanja, se vrniti na seznam in odpreti kartico z naslovom »Sled predloge«.
-
-**Opaženo:** kartica kaže »Sled predloge«, 18:41–19:26 in eno mesto. Odprti pogled pa
-kaže »Par z vzdevkoma«, pod njim »Sled predloge«, jutri 18:30–19:30 in oba udeleženca.
-Naslov strani vsebuje ID treninga Par z vzdevkoma (`034WAw24qVRnACeQo4mLV3`), medtem
-ko je Sled predloge pred tem imel `034WB6QrvMesM2tyJDKucm`. Ponovljeno s klikom kartice,
-izbrane po njenem točnem naslovu; enak rezultat tudi po osvežitvi. Namesto zaključka
-prejšnje aktivne vadbe je v odprtem pogledu gumb za začetek. Po osvežitvi obvestilo
-»Pretežko« pripada »TEST Luka Kovač — Par z vzdevkoma«.
-
-**Težava in vpliv:** trener iz seznama ne pride do pričakovanega treninga; prikaz
-združi ime izbrane vadbe s terminom in udeleženci druge. Nadaljnji vnos bi lahko
-pripisal napačnemu treningu. To niso samo nejasna imena dveh istoimenskih oseb.
-
-**Predlog in preverjanje:** naslov, termin, udeleženci in povratne informacije naj
-ob odprtju ustrezajo izbrani kartici. Preizkusiti opisano prekinitev aktivne vadbe
-z načrtovanjem druge in vrnitev, tudi po osvežitvi. Vzrok in najmanjši nabor potrebnih
-korakov še nista ugotovljena. Objavljena `0625bd6`, Chrome CDP, 390 × 844, sl;
-brez zabeleženih napak brskalnika, brez pregleda kode.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8060-x-p1--kartica-sled-predloge-odpre-drug-trening-z-drugima-terminom-in-udeležbo--popravljeno-2026-09-29).
 
 ### 80.61 [x] P2 — Konec ponavljanja pred začetkom se shrani brez opozorila — popravljeno 2026-09-29
 
@@ -6563,25 +6502,9 @@ Ta utemeljitev velja za vgrajeni katalog, ne za navodila, ki jih trener sam vpi�
 jih aplikacija pokaže med vadbo. Odločitev: ali kataloški izvoz nosi navodila trenerjevih lastnih
 vaj (in jih uvoz prebere), ali pojasnilo izvoza pove, da jih ne nosi.
 
-### 80.63 [ ] P2 — Časovna vaja v sklopu izgubi oznako trajanja
+### 80.63 [x] P2 — Časovna vaja v sklopu izgubi oznako trajanja — popravljeno 2026-09-29
 
-**Scenarij in koraki:** v jutrišnjem treningu »Vrstni red vaj« pri stranki TEST Luka
-Kovač (jutranji · Studio A) zamenjati samostojno vajo z Wall Sit iz kataloga,
-nastaviti vrednost 25 in končati urejanje. Nato spet odpreti »Uredi načrt«, razširiti
-Wall Sit ter pri »Sklop« izbrati »+ Nov sklop«. Končati urejanje brez spremembe 25.
-
-**Opaženo:** samostojna kartica kaže »S3 × 0:25 × BW«. Ista vaja v sklopu kaže
-»KROG 1 / 3«, »Wall Sit« in »25 · BW«. Številka nima oznake sekund ali zapisa časa.
-Pri prej sestavljenem dvokrožnem sklopu je bilo enako z vrednostjo »20 · BW«.
-
-**Težava in vpliv:** trener med krožno vadbo ne vidi, ali številka pomeni ponovitve
-ali trajanje. Da potrdi predvideno držo, mora znova v urejevalnik ali si podatek
-zapomniti. Premik v sklop spremeni jasnost istega navodila.
-
-**Predlog:** pri časovnih vajah tudi v sklopu prikazati »0:25« ali »25 s«; ohraniti
-razlikovanje med številom ponovitev in trajanjem ob premikanju vaje v sklop in iz
-njega. Opaženo na objavljeni `0625bd6`, sl, Chrome CDP, 390 × 844; brez novih
-prestreženih napak brskalnika in brez pregledovanja kode.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8063-x-p2--časovna-vaja-v-sklopu-izgubi-oznako-trajanja--popravljeno-2026-09-29).
 
 ### 80.64 [x] P3 — Prazna plošča po filtrih reče »Počisti jih«, ne pove pa, kje — popravljeno 2026-09-29
 
