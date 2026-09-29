@@ -3,7 +3,15 @@
 
    The app underneath keeps its own appearance, like every other demo surface here: the story is the
    live app being used, and a demo that restyled what it demonstrates would be showing a different
-   product. Only the words wrapped around it are drawn here. */
+   product. Only the words wrapped around it are drawn here.
+
+   One card has several kinds: the shared shell and slots come first, then only what each kind adds.
+   The paper kind adds a texture. A message adds a tint and a quotation; the invitation shares the
+   message kind, keeps its line breaks and lets its long link wrap. The guide adds its own accent.
+   The paper kind is a texture, not a drawn form. Everything else on screen is the live app, so a
+   drawn form would read as a real screen and send a viewer looking for it. A card that tints itself
+   owns its text colours, because the muted tokens sit near the AA contrast bar on the light
+   palettes and a tint removes the margin. */
 
 /* Inside the guide's panel, the narration is a SECTION of that card, not a card of its own
    (reported 2026-08-23: two boxes, one unnumbered and one apparently mis-numbered). It keeps only

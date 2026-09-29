@@ -1,4 +1,8 @@
 // src/data/schemaMigrations.js — walks the schema-migration chain and reports what it did.
+// **Legacy chain runner, awaiting deletion.** Chains are not the architecture. Star writes were
+// decided instead: every record is projected directly from the live domain object into each live
+// schema, and no step feeds another. This file walks the old v1 to v2 to v3 chain and is kept only
+// until the projections replace it. Do not extend it.
 // Single responsibility: take a stored database of ANY known schema version and produce one at the
 // current version, or refuse and say why. The individual transforms live in data/migrationSteps.js.
 //

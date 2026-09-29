@@ -3,7 +3,14 @@
    Behaviour lives in modules/clipboard/planPeek.js and controllers/planPeekController.js; this file
    owns only what the classes they toggle LOOK like (docs/ARCHITECTURE.md "look and layout live
    only in CSS"). Colours come from theme tokens throughout, so every theme gets the drag
-   (ruled 2026-09-14) without a line of JS caring which one is active. */
+   (ruled 2026-09-14) without a line of JS caring which one is active.
+
+   What planPeek.js's classes look like: the blanket's narrow, dense `.is-held` state (denser by the
+   cards' own padding, never by a deeper stack overlap, which would hide the row a collapsed card
+   needs read); the spring-back transition; the clipped-preview and chosen-side visibility of the two
+   under-layers; the "Release to open" label; the create-a-plan card; the Today button. It also sets
+   `touch-action: pan-y` on the clipboard body, because touch-action stops at the nearest scroll
+   container. It honours prefers-reduced-motion. */
 
 /* The current plan: title bar, client tabs and clipboard body, all as one unit so they move
    together. Sits above the two under-layers by DOM order and paints opaque, so nothing further

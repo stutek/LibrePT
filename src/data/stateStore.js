@@ -1,3 +1,11 @@
+// src/data/stateStore.js — the app's in-memory state and how it is loaded, saved and switched.
+// The state object stays synchronous. Load at boot and save on write run through IndexedDB, by a
+// one-time, revertable import from the legacy `localStorage` bucket. If IndexedDB is unavailable,
+// it falls back to plain `localStorage`.
+// It also owns the move between workspaces. `switchWorkspace` drains the write queue before it
+// closes the connection: otherwise a queued write of the workspace being left would be saved into
+// the one being entered. `resetSandbox` deletes a database that cannot be the trainer's own.
+
 import { BUILD_INFO } from "../version.js";
 import { fingerprintState } from "./backupHealth.js";
 import { applyDemoRemoval, brokenDependenciesAfter, planDemoRemoval } from "./demoDataRemoval.js";

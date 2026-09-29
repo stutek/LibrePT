@@ -1,5 +1,10 @@
 // src/modules/common/applicationHeader.js
 // Handles the shared top header bar actions: theme, language, logo clicks, and synchronization/backup badge.
+// It owns the markup of the `#app-header` shell. The ☰ menu has five places: training sessions,
+// client directory, exercises and routines, data management, settings. Inside the sandbox only, a
+// sixth entry, *Leave the sandbox*, is added.
+// It also owns `#dialog-settings` (language and theme switchers, the trainer's details, the app
+// version, the sandbox, help and legal) and the dialogs `#dialog-about` and `#dialog-terms`.
 //
 // deps: {
 //   getState(),

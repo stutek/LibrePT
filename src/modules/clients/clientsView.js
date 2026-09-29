@@ -1,3 +1,6 @@
+// src/modules/clients/clientsView.js — renders the client directory and the client profile.
+// Modular view renderer. It owns the markup of `#view-client-directory` and `#view-client-detail`.
+
 import {
   consentSignedDate,
   isConsentActive,

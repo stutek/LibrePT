@@ -1,4 +1,5 @@
 // src/data/routines.js — seed routines/programs (exercises + optional circuit groups).
+// The seed routine (plan) templates of the demo dataset.
 export const DEFAULT_ROUTINES = [
   {
     id: "r10d5e6f",

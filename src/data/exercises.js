@@ -4,6 +4,8 @@
 // (biomechanical movement pattern), and `modality` (HOW it is logged — see exerciseModality.js).
 // `instructions` is retained for the live deck but deprecated in the catalog view — a certified PT
 // does not need how-to text.
+// This is the exercise catalog of LibrePT, the corpus of the movement taxonomy. It is shown in every
+// workspace through `exerciseLibrary.js`, and it is stored only when the sandbox is seeded.
 //
 // Controlled vocabularies (keep values stable — history and analytics bucket on them):
 //   category: Chest | Back | Legs | Shoulders | Arms | Core | Recovery | Cardio

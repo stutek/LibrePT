@@ -1,5 +1,6 @@
 // src/modules/common/notificationArea.js
 // Omnipresent bottom notification and status area replacing the old app footer.
+// The toast and banner notification area handler. It owns the markup of the `#notification-area` shell.
 // Handles:
 //   - Collapsed status bar showing grab handle, active/next session status, and notification count.
 //   - Expandable upward drawer/sheet triggered by clicking or swiping/dragging the handle or bar upwards

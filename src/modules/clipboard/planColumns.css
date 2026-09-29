@@ -3,7 +3,11 @@
 
    Only the layout AROUND the editor. Everything inside a column is clipboardEditor.css, unchanged
    and unaware that it is one of several — which is what keeps this file small and what keeps a
-   later change to the editor from having to be made twice. */
+   later change to the editor from having to be made twice.
+
+   This file styles the grid the plan columns sit in, and nothing inside one. Each column scrolls on
+   its own: two programmes of different lengths in one shared scroll would put the shorter one's
+   end out of reach, and comparing them is why they are side by side. */
 
 .plan-columns {
   display: grid;

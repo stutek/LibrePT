@@ -1,7 +1,14 @@
 /* src/modules/demo/walkthrough.css — the guided walkthrough's panel and spotlight.
    The app underneath keeps its own appearance and stays fully usable: the whole point is that the
    trainer performs the step on the real control, so nothing here may cover or restyle it.
-   The pointer is styled in demoTour.css — shared with the automatic demo, which is the same tap. */
+   The pointer is styled in demoTour.css — shared with the automatic demo, which is the same tap.
+   The panel and the ring around the step's control are drawn outside the control's box, so they
+   never hide the label a trainer is being asked to recognise. There is no backdrop at all, because
+   a scrim would block the tap the walkthrough is asking for.
+   The panel is bounded to 45vh and laid out as a column. It gets out of the way by docking at the
+   other end of the screen, which needs an end to be free. A chapter's card had grown it to 63% of an
+   iPhone SE, where neither end is free. The prose scrolls inside the panel. The step number, the
+   instruction and the buttons keep their own height. */
 
 .walkthrough {
   position: fixed;

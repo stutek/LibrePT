@@ -1,4 +1,5 @@
-/* themes/daylight.css - Daylight (light) — airy slate + emerald, soft rounded shapes */
+/* themes/daylight.css - Daylight (light) — airy slate + emerald, soft rounded shapes.
+   The Daylight theme palette. It is the default theme. */
 html.daylight-theme,
 body.daylight-theme {
   --bg-color: #f6f7fb;

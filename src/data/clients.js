@@ -1,4 +1,5 @@
 // src/data/clients.js — seed clients (name, goals, injuries/notes).
+// The seed client roster of the demo dataset.
 export const DEFAULT_CLIENTS = [
   {
     id: "c1a9f0e2",

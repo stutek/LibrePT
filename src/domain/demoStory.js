@@ -11,6 +11,23 @@
 // useful. A chapter is DATA — the engine that runs it is the same one the wedge uses.
 //
 // Injected dependencies: none — pure functions over plain objects.
+//
+// What it does for a link: it decides which steps a `?demo=story` link asks for, and whether the
+// story is well-formed. A chapter is a tour, so the per-step rules stay in `demoTour.js`. Only the
+// two rules that need more than one chapter live here: every chapter is named, and no step id is
+// reused, because results are reported by id.
+//
+// **An unknown chapter plays the whole story rather than nothing.** These links are pasted into
+// chat apps and typed by hand. A player handed an empty step list looks exactly like an app that
+// failed to boot.
+//
+// It resolves what a step types into the viewer's language (`enterKey` becomes `enter`, `hasValueKey`
+// becomes `hasValue`). What a person enters in a demo is content, not a selector: a client once
+// wrote up her shoulder in English on a Slovenian phone.
+//
+// Each step is handed its place in the whole story (`storyPosition`), worked out before any chapter
+// is filtered out. The story is played by two separate boots, one per phone. A place in the script
+// is the only number they can agree on without sharing state.
 
 import { validateTour } from "./demoTour.js";
 

@@ -1,3 +1,7 @@
+// src/modules/sessionList/sessionsView.js — renders the Sessions dashboard.
+// Modular view renderer. It merges and sorts all sessions, then groups them into the per-day
+// sections of the continuous timeline. It owns the markup of its `<section id="view-clients">` shell.
+
 import { libraryExercises } from "../../data/exerciseLibrary.js";
 import { filterSessions, hasAnyFilter } from "../../domain/sessionFilters.js";
 import { buildClientStateFromRoutine } from "../../domain/sessionPlanFactory.js";

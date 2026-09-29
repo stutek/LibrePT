@@ -1,3 +1,7 @@
+// src/modules/plans/plansView.js — renders the Plans catalog and the plan template editor.
+// Plans were formerly called routines, so some names below still say routine. Modular view
+// renderer. It owns the markup of `#view-routines` and `#dialog-routine`.
+
 import { libraryExercises } from "../../data/exerciseLibrary.js";
 import {
   formatMetricValue,
@@ -12,7 +16,6 @@ import {
   loadInputHTML,
   loadUnitForEquipment,
 } from "../../domain/repsAndLoad.js";
-// src/views/routinesView.js - Domain module for routines catalog and template editor builder
 import { renderMarkupOnce } from "../common/dom.js";
 import { libraryTabsHtml } from "../common/libraryTabs.js";
 import { escapeHTML } from "../common/utils.js";

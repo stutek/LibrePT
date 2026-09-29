@@ -1,6 +1,6 @@
 // src/modules/common/utils.js
-// General stateless utility helpers for formatting, time conversions, HTML escaping, and scheduling
-// time checks. Used widely by components and the app entry.
+// Shared, general stateless utility helpers for formatting, date conversion, string helpers, time conversions, HTML escaping, and
+// scheduling time checks. Used widely by components and the app entry.
 //
 // Slot parsing and interval collision are NOT here — see domain/timeRange.js. They are training
 // vocabulary rather than formatting, and the domain layer cannot import upwards from here.

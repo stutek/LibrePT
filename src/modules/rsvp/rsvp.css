@@ -1,6 +1,9 @@
 /* src/modules/rsvp/rsvp.css — the invite-reply page, opened from an invite's confirm link.
    Client-facing, like the intake page: no header chrome, no bottom nav, one screen read once on a
-   phone from a message. Reuses index.css's buttons rather than restyling them. */
+   phone from a message. Reuses index.css's buttons rather than restyling them.
+   The page has one screen with three full-width answers. The chosen answer stays visibly chosen.
+   The send button is a second step, and a client who cannot see what they picked will not trust
+   what they are about to send. */
 
 .rsvp-view {
   padding: 24px 16px calc(32px + var(--safe-bottom, 0px)) 16px;

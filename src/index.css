@@ -1,8 +1,14 @@
-/* index.css - LibrePT Modern UI Style Guide & Design System */
+/* index.css - LibrePT Modern UI Style Guide & Design System.
+   Shared design-system tokens and foundations only: buttons, cards, modals, form controls, resets.
+   Each feature's own rules live in its module's same-named .css file. */
 
 /* The five themes and the sandbox marks are NOT imported here. They are the last <link> tags in
    index.html, after every module stylesheet: a theme may restyle any component
-   (docs/ARCHITECTURE.md#themes-and-styling), and at equal specificity the later rule wins. */
+   (docs/ARCHITECTURE.md#themes-and-styling), and at equal specificity the later rule wins.
+
+   This file holds only the shared design-system tokens and foundations: buttons, cards, modals,
+   form controls, resets. Each feature's own rules live in a same-named .css file next to its
+   module. */
 
 /* Design system shared, non-theme tokens (fonts, layout heights, blur) */
 :root {
