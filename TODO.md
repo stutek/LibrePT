@@ -6504,6 +6504,24 @@ skupaj izgleda kot uspešno shranjevanje. Osnutek, ki se ohrani, je Simonovo pra
 trening«, obstoječi k svojemu naslovu). Obrazec obstoječega treninga naj vedno pokaže ta trening —
 opaženo na različici `8b2ce80`.
 
+### 80.85 [ ] P2 — V skupnem načrtu je opozorilo o poškodbi ene stranke prikazano brez imena
+
+**Scenarij in koraki:** vzorčni podatki, skupinski trening »Skupinska moč in kondicija« s tremi
+strankami (Jane, Sarah in ena dodana). Odpri podlogo in tapni ⋮ »Možnosti treninga« → »Vsi na ta
+načrt«.
+
+**Opaženo:** zavihki strank se združijo v enega z napisom »Skupaj JD · SL · SJ«. Takoj pod njim je
+opozorilo »Rahla napetost v levi rami pri dvigih nad glavo« in vrstice »Zadnjič: 2026-09-30 | Face
+Pulls | Lvl 5 x 10 ponovitev (lahko)«. Oboje je Janino — na ločenih zavihkih se to pokaže na njenem.
+V skupnem pogledu ni nikjer napisano, čigavo je, opozoril in zgodovine drugih dveh strank pa ni.
+
+**Težava in vpliv:** trener, ki vodi tri ljudi po istem načrtu, prebere eno opozorilo o poškodbi brez
+imena. Lahko ga upošteva pri napačni osebi ali pa spregleda omejitev pri tistih dveh, katerih
+opozorila niso prikazana. Prav zato, da bi jih prebral hitro, je vse tri dal na skupen načrt.
+
+**Predlog:** v skupnem pogledu naj bo pri opozorilu in pri vrstici »Zadnjič« napisano ime stranke, in
+naj bosta prikazani za vse stranke na treningu — opaženo na različici `8b2ce80`.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
