@@ -6499,6 +6499,28 @@ sklop je pri kateri stranki že zaključil, zato ga ponovi ali pa ga izpusti.
 **Predlog:** po zaprtju urejevalnika naj podloga pokaže isto stanje, kot ga ima zapis, torej
 »Zaključeno« — opaženo na različici `8b2ce80`.
 
+### 80.83 [ ] P1 — Treninga, ki se konča po polnoči, ni mogoče niti vpisati niti urediti
+
+**Scenarij in koraki:** dvoje, oboje ponovljeno.
+1. »Ustvari trening«: ime »Pozna skupina«, datum 2026-10-02, začetek 21:00, konec 00:30, »Shrani«.
+2. Vzorčni trening »Vrnitev po poškodbi«, 23:00 - 01:00: tapni svinčnik na kartici in takoj
+   »Shrani«, brez ene same spremembe.
+
+**Opaženo:** v obeh primerih se obrazec ne zapre. Med poljema za čas se izpiše: »Trening se konča,
+preden se začne. Preveri uro konca.« Vpisani konec 00:30 oziroma 01:00 je torej prebran kot čas pred
+začetkom istega dne, ne kot čas naslednjega jutra. Sporočilo ne pove, da je težava v prehodu čez
+polnoč, in ne ponudi izhoda.
+
+**Težava in vpliv:** večerna skupina, ki se konča ob 00:30, je običajen termin, in vpisati je ni
+mogoče. Še huje pri obstoječih: vzorčni podatki sami vsebujeta dva taka treninga (»Skupinska moč in
+kondicija« in »Vrnitev po poškodbi«, oba 23:00 - 01:00), pri katerih trener ne more dodati stranke,
+je odstraniti, popraviti kraja ali imena, dokler ne zlaže ure konca (z 23:59 se shrani). Preverba, ki
+to ustavi, je prišla z §80.48, kjer se je trening s koncem pred začetkom shranil brez besede.
+
+**Predlog:** konec, ki je manjši od začetka, naj se bere kot naslednji dan, dokler trening ni daljši
+od nekega razuma (recimo 12 ur); nad tem naj bo vprašanje, ne zavrnitev — opaženo na različici
+`8b2ce80`.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
