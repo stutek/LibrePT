@@ -6744,6 +6744,12 @@ načrtom in evidenco odpovedi; slednje ta pot ne pokaže. Predlog za obstoječi 
 pojasniti odstranitev termina in ohranitev načrta. Preizkušeno samo v vmesniku,
 390 × 844, sl, brez prestreženih napak in brez pregleda kode.
 
+**Dopolnitev iz objavljene `8b2ce80` (2026-09-30), skupinski trening:** pri skupini treh strank je
+»Ni se zgodila« edina bližnjica, in velja za cel trening. Za eno stranko, ki ni prišla, ponuja podloga
+samo »Odstrani s tega treninga: <ime>« v obrazcu, brez vprašanja. S tem se sprosti mesto in o
+odsotnosti ne ostane nič — trening drugih dveh pa mora normalno teči. Zapis prisotnosti po strankah je
+torej pogoj tudi za skupine, ne le za individualne termine.
+
 ### 86.4 Izvedba in stranka
 
 | Opravilo                                  | Kaj aplikacija dela danes                                   | Kje je že prevzeto | Ocena vrednosti |
