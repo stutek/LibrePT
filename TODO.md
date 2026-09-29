@@ -6416,6 +6416,25 @@ tisti čas, ko trener to dela.
 **Predlog:** obrazec naj privzame isti dan, kot ga aplikacija na plošči označi z »DANES«, in naj bo
 čip »danes« pri odprtju izbran — opaženo na različici `8b2ce80`.
 
+### 80.78 [ ] P2 — Ročica, ki zapre podlogo treninga, je visoka 21 pik, tik pod njo pa je drug gumb
+
+**Scenarij in koraki:** na plošči tapni kartico treninga (»Hitri HIIT za trup«, danes 02:00 - 03:00),
+da se odpre podloga. Nato poskusi podlogo zapreti z edinim gumbom za to na zaslonu — vodoravno
+ročico na vrhu, z oznako »Zapri trening in se vrni na začetek«.
+
+**Opaženo:** ročica se odziva na dotik v pasu od 56. do 77. točke navpično in od 152. do 238.
+vodoravno, torej 86 × 21 pik. Že eno piko nižje, od 78. točke naprej, se začne gumb »Nazaj na
+današnji trening«, ki meri 98 × 44 pik. Merjeno z `elementFromPoint` po tri pike navpično in po pet
+vodoravno.
+
+**Težava in vpliv:** palec meri okoli 44 pik. Trener, ki hoče zapreti podlogo, s spodnjim delom
+prsta zadene »Nazaj na današnji trening« in namesto zapiranja odpre drug trening. Ko je na podlogi
+sredi vadbe, je to izguba mesta, kjer je bil. Gumb za nazaj na telefonu podlogo res zapre, a to na
+zaslonu ni nikjer zapisano.
+
+**Predlog:** dotikalna tarča ročice naj bo visoka vsaj 44 pik in med njo in gumbom »Nazaj na
+današnji trening« naj bo prazen pas — opaženo na različici `8b2ce80`.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
