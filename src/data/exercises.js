@@ -234,6 +234,7 @@ export const DEFAULT_EXERCISES = [
     category: "Core",
     equipment: "Bodyweight",
     pattern: "Core",
+    modality: "isometric",
     instructions: "Hold straight body line resting on forearms and toes. Squeeze core and glutes.",
   },
   {

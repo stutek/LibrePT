@@ -21,6 +21,14 @@ import { stampAsSeeded } from "../../../src/data/seedProvenance.js";
 
 const own = { id: "0000000000000000000mine", name: "Landmine Press", category: "Shoulders" };
 
+test("a plank is a hold, timed like the weighted one", () => {
+  // Every seeded routine prescribes it by the second ("45 seconds", "30s hold"), and the weighted
+  // plank beside it was already a hold; the plain one asked for repetitions.
+  const byName = (name) => libraryExercises({ exercises: [] }).find((ex) => ex.name === name);
+  assert.equal(byName("Plank").modality, "isometric");
+  assert.equal(byName("Plank").modality, byName("Weighted Plank").modality);
+});
+
 test("an empty working database still offers the whole LibrePT catalog", () => {
   const ids = libraryExercises({ exercises: [] }).map((exercise) => exercise.id);
   assert.deepEqual(ids.sort(), DEFAULT_EXERCISES.map((exercise) => exercise.id).sort());
