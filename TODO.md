@@ -6397,6 +6397,25 @@ what shipped is in [CHANGELOG.md](CHANGELOG.md).
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8076-x-p1--tap-na-kartico-treninga-ki-že-teče-ga-zamenja-z-novim-nezačetim--popravljeno-2026-09-30);
 what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
+### 80.77 [ ] P2 — Po polnoči obrazec »Nastavitev treninga« privzame včerajšnji datum
+
+**Scenarij in koraki:** ob 00:38 dne 2026-09-30 odpri aplikacijo (`?lang=sl&init=demo_data_load`),
+tapni »Ustvari trening«. Enako se zgodi ob neposrednem odprtju naslova `session/new`.
+
+**Opaženo:** polje DATUM pokaže `2026-09-29`, ZAČETNI ČAS pa `01:00`. Nobeden od čipov nad poljem
+(»danes«, »jutri«, »pet. 2.«, »sob. 3.«) ni izbran, čeprav so ti čipi šteti od pravega današnjega
+dne. Isti zaslon v seznamu treningov piše »sreda 2026-09-30 DANES«, seznam »Termini treningov« pa se
+odpre na naslovu `/sessions/2026-09-30`. Torej aplikacija v isti minuti na enem mestu ve, da je
+danes 30. september, na obrazcu pa ponudi 29. september.
+
+**Težava in vpliv:** trener, ki po polnoči vpiše naslednji trening in datuma ne popravi, ga shrani
+na včerajšnji dan ob 01:00, torej skoraj cel dan v preteklost. Tak trening se uvrsti med pretekle in
+ne v seznam, kjer ga trener pričakuje. Pozno načrtovanje po zaključku večernih treningov je ravno
+tisti čas, ko trener to dela.
+
+**Predlog:** obrazec naj privzame isti dan, kot ga aplikacija na plošči označi z »DANES«, in naj bo
+čip »danes« pri odprtju izbran — opaženo na različici `8b2ce80`.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
