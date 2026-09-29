@@ -95,6 +95,13 @@ export class SteppedField {
     return this.label("stepped_field_set").replace("{value}", mark.label);
   }
 
+  /** What to say under the field when what was typed became a different `value`, or "" for nothing.
+   * A field that quietly writes something other than what was typed is a field the trainer trusts
+   * wrongly. */
+  noteFor(_raw, _value) {
+    return "";
+  }
+
   // ── The parts that are the same for every field ──────────────────────────────────────────────
   /** Write a value and say so: the form around the field listens for `input`/`change` — the draft
    * autosave, the double-booking readout, and the rule that moves an end time when a start moves. */
@@ -107,12 +114,23 @@ export class SteppedField {
   }
 
   step(direction) {
+    this.showNote("");
     this.write(this.stepped(this.input.value, direction));
   }
 
   settle() {
-    const settled = this.normalize(this.input.value);
-    if (settled && settled !== this.input.value) this.write(settled);
+    const raw = this.input.value;
+    const settled = this.normalize(raw);
+    if (settled && settled !== raw) {
+      this.write(settled);
+      this.showNote(this.noteFor(raw, settled));
+    }
+  }
+
+  showNote(text) {
+    if (!this.noteLine) return;
+    this.noteLine.textContent = text;
+    this.noteLine.hidden = !text;
   }
 
   build() {
@@ -134,8 +152,15 @@ export class SteppedField {
     marks.className = "stepped-field-marks";
     wrap.appendChild(marks);
 
+    const note = document.createElement("p");
+    note.className = "stepped-field-note";
+    note.setAttribute("aria-live", "polite");
+    note.hidden = true;
+    wrap.appendChild(note);
+
     this.wrap = wrap;
     this.marksRow = marks;
+    this.noteLine = note;
     this.stepButtons = [
       makeGlyphButton("stepped-field-step", "", "fa-chevron-up"),
       makeGlyphButton("stepped-field-step", "", "fa-chevron-down"),
@@ -150,7 +175,10 @@ export class SteppedField {
       const chip = makeButton("stepped-field-mark", "");
       // Reads its own value at the moment it is tapped: the clock and the calendar move under a form
       // left open, and a mark that set what it was BUILT with would set what it no longer shows.
-      chip.addEventListener("click", () => this.write(chip.dataset.value || ""));
+      chip.addEventListener("click", () => {
+        this.showNote("");
+        this.write(chip.dataset.value || "");
+      });
       marks.appendChild(chip);
     }
   }
@@ -168,13 +196,16 @@ export class SteppedField {
       input.select();
     });
     input.addEventListener("input", () => {
-      const live = this.liveValue(input.value);
+      const raw = input.value;
+      const live = this.liveValue(raw);
       // Through write(), not a bare assignment: the listeners that pair one field to another have
       // ALREADY seen this keystroke, and what they saw was the raw digits. Without a second event
       // carrying the finished value, whatever follows this field stays where it was.
       // Re-entrant by one round only — the value written is already finished, so the next pass finds
       // nothing to change.
       if (live !== null) this.write(live);
+      // After the write: its own `input` event runs this handler again and clears the note.
+      this.showNote(live !== null && live !== raw ? this.noteFor(raw, live) : "");
     });
     input.addEventListener("blur", () => this.settle());
     // Enter submits the form from inside the field, so the value has to be finished before it does.

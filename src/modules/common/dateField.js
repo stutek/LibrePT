@@ -150,6 +150,17 @@ class DateField extends SteppedField {
     return digits.length === 8 ? dateFromDigits(digits, this.settledValue) : null;
   }
 
+  // Eight digits name one day outright. When that day does not exist the field has moved it to a
+  // real one (see dateFromDigits), and it says so: 2027-02-29 becoming 2027-02-28 in silence is a
+  // client invited for a day nobody chose.
+  noteFor(raw, value) {
+    const digits = String(raw || "").replace(/\D/g, "");
+    if (digits.length !== 8) return "";
+    const typed = `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6, 8)}`;
+    if (typed === value) return "";
+    return this.label("date_field_moved").replace("{typed}", typed).replace("{date}", value);
+  }
+
   stepped(value, direction) {
     const base = isoToDate(value) || isoToDate(this.today());
     return getISODateString(base.getTime() + direction * MS_PER_DAY);

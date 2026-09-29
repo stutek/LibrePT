@@ -371,6 +371,30 @@ def test_a_typed_day_is_read_against_the_day_on_screen(page, local_server):
     assert page.input_value("#setup-session-date") == "2026-11-02"
 
 
+def test_a_day_that_does_not_exist_is_moved_and_the_field_says_so(page, local_server):
+    """2027-02-29 became 2027-02-28 without a word: the field keeps a slipped finger on a real day,
+    but a trainer who does not see the change invites a client for the wrong day. The field says
+    which day it chose, and the note goes as soon as the trainer types again."""
+    load_with_stub(
+        page, local_server, setup_stub(SCHEDULED_SESSION, target_session="'s-edit'")
+    )
+    field = page.locator("#setup-session-date")
+    note = page.locator(".stepped-field:has(#setup-session-date) .stepped-field-note")
+
+    field.click()
+    field.press_sequentially("20270229")
+    assert field.input_value() == "2027-02-28"
+    expect(note).to_have_text(
+        "2027-02-29 does not exist. The date is set to 2027-02-28."
+    )
+
+    page.locator("#setup-location").click()
+    field.click()
+    field.press_sequentially("20270301")
+    assert field.input_value() == "2027-03-01"
+    expect(note).to_be_hidden()
+
+
 def test_the_day_marks_are_today_tomorrow_and_the_two_days_after(page, local_server):
     """Named, not four ISO strings: a row of dates the trainer has to decode is no faster than typing
     one. Counted from the CLOCK, so they are the days a session is actually being booked for."""

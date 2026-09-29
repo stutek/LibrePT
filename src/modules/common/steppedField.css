@@ -72,6 +72,19 @@
   border-color: var(--primary);
 }
 
+/* What the field says when it wrote something other than what was typed. Not an error — the value
+   is a real one — so the text colour, made heavy enough to be read. */
+.stepped-field-note {
+  margin: 4px 0 0;
+  color: var(--text-main);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.stepped-field-note[hidden] {
+  display: none;
+}
+
 .stepped-field-marks {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));

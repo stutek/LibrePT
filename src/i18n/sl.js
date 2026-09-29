@@ -128,6 +128,7 @@ export const sl = {
   date_field_later: "Dan pozneje",
   date_field_earlier: "Dan prej",
   date_field_set: "Nastavi {date}",
+  date_field_moved: "{typed} ne obstaja. Izbran je {date}.",
   date_field_today: "danes",
   date_field_tomorrow: "jutri",
   date_field_yesterday: "včeraj",

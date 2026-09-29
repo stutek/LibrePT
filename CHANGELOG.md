@@ -51,6 +51,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 - **A timed movement inside a circuit shows its time**, "0:25", as on its own card. It showed a bare
   "25".
 - **The first evening of a new repeating session is on the board once.** It had two identical cards.
+- **A date that does not exist is moved to a real one, and the field says so**: "2027-02-29 does
+  not exist. The date is set to 2027-02-28." The change was made without a word.
 
 ---
 

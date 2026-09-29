@@ -112,6 +112,7 @@ export const en = {
   date_field_later: "One day later",
   date_field_earlier: "One day earlier",
   date_field_set: "Set {date}",
+  date_field_moved: "{typed} does not exist. The date is set to {date}.",
   date_field_today: "today",
   date_field_tomorrow: "tomorrow",
   date_field_yesterday: "yesterday",
