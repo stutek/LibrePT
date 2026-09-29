@@ -247,7 +247,15 @@ window.stateHasData = () => stateHasData(getState());
 
 // The chapters of the guided story, as `{ id, titleKey }` in playing order — what the two tables of
 // contents draw, and what a tap on one of them names in the URL.
-let storyChapters = [];
+const storyChapters = [];
+
+/** Fill `storyChapters` IN PLACE for the workspace now open. In place, because the drawer and the
+ *  splash hold this array from boot: entering the sandbox from a working database with data (no
+ *  index offered at start-up) left the sandbox card pointing at a list that was not there. */
+async function refreshStoryChapters(state) {
+  const chapters = await loadStoryChapters(state);
+  storyChapters.splice(0, storyChapters.length, ...chapters);
+}
 
 /** Load them from the story script itself, so there is no second list of chapters to keep true.
  *
@@ -420,7 +428,7 @@ async function init() {
 
   // The demo story's table of contents. Read once here, because both surfaces that draw it — the
   // sandbox's message card and the splash — draw synchronously.
-  storyChapters = await loadStoryChapters(state);
+  await refreshStoryChapters(state);
 
   if (shareInit === INIT_DEMO_DATA && !stateHasData(state)) {
     // Stamped as TEST rather than demo. `?init=` is the switch the browser suite puts
@@ -877,6 +885,7 @@ async function switchToWorkspace(name) {
   // Where they are NOW, stored against the workspace being left.
   rememberRoute(window.location.pathname);
   await switchWorkspace(name);
+  await refreshStoryChapters(getState());
   renderEverything();
   // The clocks do not stop: what was ticking underneath becomes the visible stack and the other way
   // round. Deliberately not a teardown — a rest period must survive the switch.

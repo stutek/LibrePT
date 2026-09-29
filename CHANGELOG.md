@@ -44,6 +44,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   intended: the Save added this morning showed there and did what Open does.
 - **A message with one answer shows one button.** Every such message had an empty second button
   beside its OK.
+- **Entering the sandbox from real work lists the guided tour's chapters.** The sandbox card
+  pointed at a list that appeared only after a reload.
 
 ---
 

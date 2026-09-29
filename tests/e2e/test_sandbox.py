@@ -92,6 +92,24 @@ def test_the_sandbox_is_a_separate_database_and_nothing_leaks_back(page, local_s
 
 
 @pytest.mark.clean_start
+def test_entering_the_sandbox_from_real_work_offers_the_chapters(page, local_server):
+    """The sandbox card says "press a chapter in the list below". A trainer who opened the app on
+    their own clients and then entered the sandbox found no list under it until the page was
+    reloaded: the chapters were loaded once, at start-up, only when a list was offered then."""
+    page.goto(f"{local_server}clients")
+    _add_client(page, "Own Client")
+    page.reload()
+    page.wait_for_selector("#view-client-directory.active")
+
+    _switch(page, "sandbox")
+
+    chapters = page.locator("#notification-area .notification-chapter")
+    assert chapters.count() > 0, (
+        "the sandbox card points at a list of chapters that is not there"
+    )
+
+
+@pytest.mark.clean_start
 def test_switching_repaints_instead_of_reloading(page, local_server):
     """Ruled 2026-09-10: the move re-renders. A reload costs the splash hold, the open view and any
     half-filled dialog, and puts a service-worker fetch in the path of a switch that can happen mid
