@@ -12,6 +12,7 @@ import { keepRecordLive } from "../modules/common/liveRecordForm.js";
 import { mountExercisePicker, pickerLabels } from "../modules/exercises/exercisePicker.js";
 import { addRoutineExerciseRow, renderRoutinesList } from "../modules/plans/plansView.js";
 import { openProgramImportDialog } from "../modules/plans/programImportDialog.js";
+import { pickerEmptyWays } from "./exerciseFormsController.js";
 
 // Filled in by setupRoutineForms, and called by the create-form ROUTE. The form fields, the
 // builder list, and the picker are closed over by that setup, so this is the seam that lets the
@@ -108,6 +109,7 @@ export function setupRoutineForms({
     mountExercisePicker(pickerEl, {
       state: getState(),
       ...pickerLabels(t),
+      ...pickerEmptyWays(),
       onSelect: (ex) => {
         addRoutineExerciseRow({
           preset: { id: ex.id, sets: 3, reps: 10, weight: 0, rest: 60 },

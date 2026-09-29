@@ -14,6 +14,7 @@ import { markEditorRow } from "../modules/clipboard/editModeState.js";
 import { mountExercisePicker, pickerLabels } from "../modules/exercises/exercisePicker.js";
 import { saveActiveSessionToCache } from "./activeSessionCache.js";
 import { getActiveSession, getAppDeps } from "./activeSessionStore.js";
+import { pickerEmptyWays } from "./exerciseFormsController.js";
 
 // Opens the existing "add exercise to session" dialog (also used by the in-clipboard editor).
 export function openAddSessionExerciseDialog() {
@@ -144,6 +145,7 @@ export function openCatalogPicker({ slotId = null, query = "", category = "" } =
     initialQuery: query,
     autoFocusSearch: true,
     ...pickerLabels(t),
+    ...pickerEmptyWays(),
     onSelect: (ex) => {
       if (slotId) swapPlanItemMovement(slotId, ex);
       else injectExerciseIntoActivePlan(ex, { sets: 3, reps: 10, weight: 0, rest: 60 });

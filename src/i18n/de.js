@@ -340,6 +340,8 @@ export const de = {
   picker_empty: "Keine Übung passt zu diesem Filter.",
   picker_empty_query:
     "Keine Übung passt zur Suche „{query}“. Die Übungen im Katalog haben englische Namen.",
+  empty_add_exercise: "„{query}“ als neue Übung hinzufügen",
+  empty_import_library: "Größere Übungsbibliothek importieren",
   // The session setup form (modules/session/editSessionView.js).
   session_name_placeholder: "Namen des Trainings wählen oder eingeben...",
   location_placeholder: "Ort wählen oder eingeben...",

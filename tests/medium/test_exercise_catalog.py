@@ -132,6 +132,36 @@ def test_a_search_that_finds_nothing_names_the_search(page, local_server):
     assert empty == 'No movement matches "počep <b>".', empty
 
 
+def test_a_search_that_finds_nothing_offers_to_add_it_or_import(page, local_server):
+    """A trainer who searches "kettlebell swing" and finds nothing can add it by that name, or
+    import a larger library; the typed text is shown as text, never as markup."""
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#view-exercises.active")
+
+    page.fill("#search-exercises", "kettlebell <b>swing")
+    add = page.locator("#exercises-list [data-empty-action='create']")
+    assert add.inner_text() == 'Add "kettlebell <b>swing" as a new exercise'
+    assert page.locator("#exercises-list [data-empty-action='import']").count() == 1
+
+    add.click()
+    page.wait_for_selector("#dialog-exercise[open]")
+    assert page.input_value("#exercise-name") == "kettlebell <b>swing"
+    page.click("#dialog-exercise button[type='submit']")
+    page.wait_for_selector("#dialog-exercise", state="hidden")
+    # The search still holds the text, so the new exercise is now what it finds.
+    names = page.locator("#exercises-list .exercise-item h3").all_text_contents()
+    assert names == ["kettlebell <b>swing"], names
+    assert page.locator("#exercises-list [data-empty-action]").count() == 0
+
+
+def test_the_import_button_of_an_empty_search_opens_the_import(page, local_server):
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#view-exercises.active")
+    page.fill("#search-exercises", "burpee")
+    page.click("#exercises-list [data-empty-action='import']")
+    page.wait_for_selector("#dialog-library-import[open]")
+
+
 def test_custom_exercise_requires_taxonomy(page, local_server):
     load_with_stub(page, local_server, STUB)
     page.wait_for_selector("#view-exercises.active")

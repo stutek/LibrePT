@@ -321,6 +321,8 @@ export const en = {
   picker_count: "Movements: {count}",
   picker_empty: "No movements match this filter.",
   picker_empty_query: 'No movement matches "{query}".',
+  empty_add_exercise: 'Add "{query}" as a new exercise',
+  empty_import_library: "Import a larger exercise library",
   // The session setup form (modules/session/editSessionView.js).
   session_name_placeholder: "Select or type session name...",
   location_placeholder: "Select or type location...",

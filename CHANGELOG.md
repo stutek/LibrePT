@@ -20,6 +20,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ## 2026-09-30 — Namesakes, and what the sandbox promises
 
+### Added
+
+- **A search for an exercise the catalogue does not have leads on.** When the typed text matches
+  nothing, the exercise library and the pickers offer *Add "…" as a new exercise*, which opens the
+  exercise form with the name filled in, and *Import a larger exercise library*. In a picker the new
+  exercise is added to the plan when its form is left, so the name is not typed twice.
+
 ### Changed
 
 - **The main button of a dialog is on the right, in every dialog.** The client-invite dialog had it

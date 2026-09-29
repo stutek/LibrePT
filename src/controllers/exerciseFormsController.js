@@ -5,6 +5,7 @@
 // Split 2026-08-01 out of the old formsController.js, which bundled Client, Routine, and Exercise
 // forms in one file despite the three sharing nothing but boilerplate.
 
+import { hasBehaviour } from "../data/appVersions.js";
 import { libraryExercises } from "../data/exerciseLibrary.js";
 import { newRecordId } from "../data/recordId.js";
 import { metricOptionsFor } from "../domain/exerciseModality.js";
@@ -21,10 +22,27 @@ import {
 
 // Filled in by setupExerciseForms, and called by the create-form ROUTE — same seam pattern as
 // routineFormsController's openRoutineCreateForm.
-let openExerciseCreateForm = () => {};
+let openExerciseCreateForm = (_options) => {};
 
-export function openExerciseCreateDialog() {
-  openExerciseCreateForm();
+/** Opens the create form. `name` fills the name field (what the trainer searched for and did not
+ *  find); `onFinished(exercise | null)` is called when the form is left. The route passes neither. */
+export function openExerciseCreateDialog(options = {}) {
+  openExerciseCreateForm(options);
+}
+
+/** The two ways on the pickers offer when a typed search finds nothing (exercisePicker.js): they
+ *  spread this into `mountExercisePicker`. The import is left out in an app version without it,
+ *  which is asked each time a picker opens: the trainer can switch versions while the app runs. */
+export function pickerEmptyWays() {
+  return {
+    onCreateExercise: (name, done) => openExerciseCreateDialog({ name, onFinished: done }),
+    onImportLibrary: hasBehaviour("libraryImport")
+      ? (done) => {
+          openLibraryImportDialog();
+          $id("dialog-library-import")?.addEventListener("close", () => done(), { once: true });
+        }
+      : null,
+  };
 }
 
 export function renderExerciseDialog() {
@@ -161,12 +179,18 @@ export function setupExerciseForms({
   const closeBtn = dialog.querySelector(".modal-close-btn");
 
   // As with routines: the route (`/exercises/new`) owns opening the form; the button navigates.
-  openExerciseCreateForm = () => {
+  openExerciseCreateForm = ({ name = "", onFinished = null } = {}) => {
     openModal("dialog-exercise", { resetForm: true, formId: "form-exercise" });
     // The form reset restores modality to strength; re-sync so a reopen never leaves a metric
     // selector showing over a fixed-metric modality.
     syncMetricField();
-    live.openNew();
+    live.openNew(onFinished);
+    if (name) {
+      // Filling a field from code fires no event, so the record is asked for by hand: leaving the
+      // form at once must keep the exercise the trainer chose to add.
+      $id("exercise-name").value = name;
+      form.dispatchEvent(new Event("recordchange"));
+    }
   };
   initLibraryImportDialog({
     t,
@@ -261,6 +285,14 @@ export function setupExerciseForms({
     modalitySelect.addEventListener("change", syncMetricField);
     syncMetricField();
   }
+
+  // The two buttons of an empty search (exercisesView.js) are redrawn with the list, hence delegated.
+  $id("exercises-list")?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-empty-action]");
+    if (!button) return;
+    if (button.dataset.emptyAction === "import") openLibraryImportDialog();
+    else openExerciseCreateDialog({ name: $id("search-exercises")?.value.trim() ?? "" });
+  });
 
   const searchExercisesEl = $id("search-exercises");
   if (searchExercisesEl) {

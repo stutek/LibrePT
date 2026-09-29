@@ -55,8 +55,38 @@ export function pickerLabels(t) {
     countLabel: t("picker_count") || "Movements: {count}",
     emptyLabel: t("picker_empty") || "No movements match this filter.",
     emptyQueryLabel: t("picker_empty_query") || 'No movement matches "{query}".',
+    emptyActionWords: {
+      create: t("empty_add_exercise") || 'Add "{query}" as a new exercise',
+      import: t("empty_import_library") || "Import a larger exercise library",
+    },
     modalityWords: Object.fromEntries(MODALITIES.map((m) => [m, t(modalityLabelKey(m))])),
   };
+}
+
+/**
+ * The two ways on when a typed search finds nothing: add the typed name as a new exercise, or
+ * import a larger library. Real buttons (`data-empty-action`), the typed text set with
+ * `textContent`, never markup. A way whose callback is null is left out, so a screen that cannot
+ * do it (an app version without the import) offers only the other.
+ * @param {{create: string, import: string}} words - The button words, `{query}` in the first.
+ * @param {string} query - What the trainer typed.
+ * @param {{onCreate: ?Function, onImport: ?Function}} ways
+ * @returns {HTMLElement}
+ */
+export function emptySearchActions(words, query, { onCreate, onImport }) {
+  const box = document.createElement("div");
+  box.className = "empty-actions";
+  const add = (action, label) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "btn secondary-btn empty-action";
+    button.dataset.emptyAction = action;
+    button.textContent = label;
+    box.appendChild(button);
+  };
+  if (onCreate) add("create", words.create.replace("{query}", query));
+  if (onImport) add("import", words.import);
+  return box;
 }
 
 /**
@@ -91,6 +121,12 @@ export function sourceBadge(exercise, ownWord) {
  * @param {string}  [opts.countLabel]      - How many match, with `{count}` for the number.
  * @param {string}  [opts.emptyLabel]      - What the list says when nothing matches.
  * @param {string}  [opts.emptyQueryLabel] - The same when a typed search is why, with `{query}`.
+ * @param {Object}  [opts.emptyActionWords] - The words of the two buttons `emptySearchActions` draws.
+ * @param {(name: string, done: (exercise: ?Object) => void) => void} [opts.onCreateExercise] - When
+ *   given, an empty typed search offers "add it as a new exercise"; the opener calls `done` with the
+ *   saved exercise (or null), which the picker then chooses as if it had been tapped.
+ * @param {(done: () => void) => void} [opts.onImportLibrary] - When given, the same offers "import a
+ *   larger library"; the opener calls `done` when the import dialog is left, and the list is redrawn.
  * @param {Object}  [opts.modalityWords]   - Modality → the word its badge shows.
  * Callers pass `...pickerLabels(t)` for all the words at once.
  * @param {(exercise: Object) => void} opts.onSelect - Called with the chosen exercise on tap.
@@ -112,6 +148,9 @@ export function mountExercisePicker(
     countLabel = "Movements: {count}",
     emptyLabel = "No movements match this filter.",
     emptyQueryLabel = 'No movement matches "{query}".',
+    emptyActionWords = {},
+    onCreateExercise = null,
+    onImportLibrary = null,
     modalityWords = {},
     onSelect,
   },
@@ -189,6 +228,16 @@ export function mountExercisePicker(
         filters.query ? emptyQueryLabel.replace("{query}", filters.query) : emptyLabel,
       );
       listEl.innerHTML = `<div class="picker-empty text-muted">${safeEmpty}</div>`;
+      // Only a typed search that found nothing: an empty list caused by the chips alone is fixed
+      // by the chips, not by adding a movement.
+      if (filters.query && (onCreateExercise || onImportLibrary)) {
+        listEl.appendChild(
+          emptySearchActions(emptyActionWords, filters.query, {
+            onCreate: onCreateExercise,
+            onImport: onImportLibrary,
+          }),
+        );
+      }
       return;
     }
     listEl.innerHTML = matches
@@ -243,22 +292,38 @@ export function mountExercisePicker(
     });
   }
 
-  // Item selection (delegated).
-  listEl.addEventListener("click", (e) => {
-    const item = e.target.closest(".picker-item");
-    if (!item) return;
-    const ex = libraryExercises(state).find((x) => x.id === item.getAttribute("data-id"));
-    if (!ex) return;
+  const choose = (ex, item) => {
     selectedId = ex.id;
     if (keepSelection) {
       for (const el of listEl.querySelectorAll(".picker-item")) el.classList.remove("selected");
-      item.classList.add("selected");
+      item?.classList.add("selected");
     } else {
       // Momentary confirmation pulse for "drop into template" flows.
-      item.classList.add("just-added");
-      setTimeout(() => item.classList.remove("just-added"), 350);
+      item?.classList.add("just-added");
+      setTimeout(() => item?.classList.remove("just-added"), 350);
     }
     onSelect?.(ex);
+  };
+
+  // Item selection and the two empty-search buttons (delegated).
+  listEl.addEventListener("click", (e) => {
+    const action = e.target.closest("[data-empty-action]");
+    if (action) {
+      if (action.dataset.emptyAction === "import") return onImportLibrary?.(renderList);
+      const typed = filters.query;
+      // The form saves the movement as it is typed; when it is left, the new movement is listed
+      // (the search still holds its name) and chosen, so nothing is typed twice.
+      onCreateExercise?.(typed, (exercise) => {
+        renderList();
+        if (exercise)
+          choose(exercise, listEl.querySelector(`.picker-item[data-id="${exercise.id}"]`));
+      });
+      return;
+    }
+    const item = e.target.closest(".picker-item");
+    if (!item) return;
+    const ex = libraryExercises(state).find((x) => x.id === item.getAttribute("data-id"));
+    if (ex) choose(ex, item);
   });
 
   renderList();

@@ -11,7 +11,7 @@ import { modalityLabelKey, modalityOf } from "../../domain/exerciseModality.js";
 import { renderMarkupOnce } from "../common/dom.js";
 import { libraryTabsHtml } from "../common/libraryTabs.js";
 import { escapeHTML } from "../common/utils.js";
-import { sourceBadge, sourceLabels } from "./exercisePicker.js";
+import { emptySearchActions, sourceBadge, sourceLabels } from "./exercisePicker.js";
 
 // Only in an app version that imports a library. Choosing a version reloads the page, so
 // deciding it once, when the shell is drawn, is enough.
@@ -162,6 +162,16 @@ export function renderExercisesList({ state, t, filterQuery, categoryFilter, sou
       ? t("picker_empty_query").replace("{query}", query)
       : t("no_exercises_matched");
     container.innerHTML = `<div class="card glassmorphic text-center text-muted">${escapeHTML(empty)}</div>`;
+    // Only for a typed search; the buttons are wired by exerciseFormsController (delegated).
+    if (query) {
+      container.appendChild(
+        emptySearchActions(
+          { create: t("empty_add_exercise"), import: t("empty_import_library") },
+          query.trim(),
+          { onCreate: true, onImport: hasBehaviour("libraryImport") },
+        ),
+      );
+    }
     return;
   }
 

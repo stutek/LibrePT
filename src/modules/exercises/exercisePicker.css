@@ -115,3 +115,17 @@
   padding: 12px;
   text-align: center;
 }
+
+/* The two ways on under an empty typed search (also drawn by the exercise library view). */
+.empty-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 4px 12px 12px;
+}
+.empty-actions .empty-action {
+  min-height: 44px;
+  height: auto;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}

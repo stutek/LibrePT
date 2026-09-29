@@ -337,6 +337,8 @@ export const sl = {
   picker_empty: "Temu filtru ne ustreza nobena vaja.",
   picker_empty_query:
     "Nobena vaja ne ustreza iskanju »{query}«. Imena vaj v katalogu so v angleščini.",
+  empty_add_exercise: "Dodaj »{query}« kot novo vajo",
+  empty_import_library: "Uvozi večjo knjižnico vaj",
   // The session setup form (modules/session/editSessionView.js).
   session_name_placeholder: "Izberi ali vpiši ime treninga ...",
   location_placeholder: "Izberi ali vpiši lokacijo ...",
