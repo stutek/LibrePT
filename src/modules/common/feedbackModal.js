@@ -19,6 +19,7 @@
 import { FEEDBACK_TAGS } from "../../domain/feedbackTags.js";
 import { notesWithGymNote } from "../../domain/gymNotes.js";
 import { $id, closeModal, openModal, renderMarkupOnce } from "./dom.js";
+import { clientDisplayName } from "./utils.js";
 
 let deps = null;
 
@@ -42,7 +43,7 @@ export function openFeedbackModal(exId) {
 
   $id("feedback-client-id").value = activeClientId;
   $id("feedback-exercise-name").value = curEx.name;
-  $id("feedback-client-display-name").textContent = client.name;
+  $id("feedback-client-display-name").textContent = clientDisplayName(client);
   $id("feedback-ex-display-name").textContent = curEx.name;
   $id("feedback-custom-note").value = "";
   $id("feedback-keep-on-record").checked = false;

@@ -7,7 +7,7 @@
 import { computeActiveSessionCountdown } from "../domain/sessionClock.js";
 import { focusRefForItem } from "../domain/sessionFocus.js";
 import { startTimer } from "../modules/clipboard/exerciseAndRestTimer.js";
-import { formatDurationHourMin } from "../modules/common/utils.js";
+import { clientDisplayName, formatDurationHourMin } from "../modules/common/utils.js";
 import { updateSessionBarTimer } from "../modules/session/sessionBar.js";
 import { saveActiveSessionToCache } from "./activeSessionCache.js";
 import { getActiveSession, getAppDeps } from "./activeSessionStore.js";
@@ -76,7 +76,7 @@ export function startClientTimer(seconds, type = "rest", label = "") {
   const focusRef = focusRefForItem(cs?.exercises?.[cs.activeExerciseIndex]);
   startTimer({
     clientId,
-    clientName: client ? client.name : "",
+    clientName: clientDisplayName(client),
     type,
     label,
     seconds,

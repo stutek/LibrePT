@@ -18,6 +18,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-09-30 — Namesakes, and what the sandbox promises
+
+### Fixed
+
+- **Two clients with one name are told apart by their alias** in the invite dialog, in the title of
+  the feedback form, on the rest and exercise timers and in "Copy this plan to…". Each showed the
+  bare name, so a trainer could not tell which of two "Luka Kovač" an invite or a timer belonged to.
+
+---
+
 ## 2026-09-29 — What evaluating the forms found
 
 ### Fixed

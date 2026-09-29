@@ -178,6 +178,18 @@ export function clientNameMatches(client, needle) {
   return [client?.name, client?.alias].some((part) => part?.toLowerCase().includes(needle));
 }
 
+// The alias rides along with the name EVERYWHERE the name is rendered, which is the whole point
+// of having one: it exists because two clients share a name, so showing it only on the profile
+// page would leave every list — the one place the two actually sit side by side — ambiguous.
+function withAlias(client, baseName) {
+  return client.alias ? `${baseName} (${client.alias})` : baseName;
+}
+
+/** A client's name with their alias, as plain text — for `textContent`, a label or a title. */
+export function clientDisplayName(client) {
+  return client ? withAlias(client, client.name) : "";
+}
+
 export function getClientDisplayNameHTML(
   client,
   isShort = false,
@@ -186,10 +198,7 @@ export function getClientDisplayNameHTML(
 ) {
   if (!client) return "";
   const baseName = isShort ? shortClientName(client, others) : client.name;
-  // The alias rides along with the name EVERYWHERE the name is rendered, which is the whole point
-  // of having one: it exists because two clients share a name, so showing it only on the profile
-  // page would leave every list — the one place the two actually sit side by side — ambiguous.
-  const nameText = client.alias ? `${baseName} (${client.alias})` : baseName;
+  const nameText = withAlias(client, baseName);
   if (client.hasInjury) {
     return `<span class="client-name-with-injury">${escapeHTML(nameText)} <i class="fa-solid fa-triangle-exclamation client-name-injury-mark" role="img" aria-label="${escapeHTML(injuryLabel)}"></i></span>`;
   }

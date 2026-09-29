@@ -38,6 +38,7 @@ import {
 import { updateClientTabsFadeState } from "../modules/common/activeUsersList.js";
 import { askInApp } from "../modules/common/appQuestion.js";
 import { isGuideSurface } from "../modules/common/dom.js";
+import { clientDisplayName } from "../modules/common/utils.js";
 import { saveActiveSessionToCache, savePlanEdit } from "./activeSessionCache.js";
 import {
   currentPlanMode,
@@ -342,7 +343,7 @@ function wireSessionMenuAndActions(t) {
       option.className = "session-menu-item";
       option.setAttribute("role", "menuitem");
       option.dataset.copyTo = clientId;
-      option.textContent = client?.name || t("unknown_client");
+      option.textContent = client ? clientDisplayName(client) : t("unknown_client");
       option.addEventListener("click", () => {
         closeSessionMenu();
         copyPlanTo(clientId);

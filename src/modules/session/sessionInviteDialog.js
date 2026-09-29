@@ -32,6 +32,7 @@ import { translateMarkup } from "../../i18n/domMappings.js";
 import { closeModal, openModal, renderMarkupOnce } from "../common/dom.js";
 import { downloadFile } from "../common/download.js";
 import { buildEventLink } from "../common/eventTransports.js";
+import { clientDisplayName } from "../common/utils.js";
 
 let deps = null;
 
@@ -325,7 +326,8 @@ function buildInviteRow(client, sessionInfo, t) {
 
   const name = document.createElement("span");
   name.className = "session-invite-name";
-  name.textContent = client.name;
+  // Two clients with one name get one row each; the alias is what tells the trainer which is which.
+  name.textContent = clientDisplayName(client);
   row.append(name, buildEmailInviteButton(client, sessionInfo, replyLink, t));
 
   const sms = buildSmsInviteButton(client, sessionInfo, replyLink, t);
