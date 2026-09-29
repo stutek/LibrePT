@@ -168,6 +168,10 @@ export function launchClipboardDirectly(
   const overlappingSessions = getOverlappingSessions(session, sessions);
 
   const clientRoutinesMap = new Map();
+  // Which booked session each client belongs to, kept on the clipboard's `sourceSession` so it
+  // survives the active-session cache and a reload. The title bar and the participant tabs pair
+  // their colour dots from it. A client booked into two overlapping sessions belongs to the first.
+  const clientSessions = {};
   for (const os of overlappingSessions) {
     for (const pId of os.participants) {
       // As stored, even when no routine has that id: "empty_plan" is the trainer's choice of an
@@ -176,6 +180,7 @@ export function launchClipboardDirectly(
       const routineId = os.routineId || "";
       if (!clientRoutinesMap.has(pId)) {
         clientRoutinesMap.set(pId, routineId);
+        clientSessions[pId] = os.id;
       }
     }
   }
@@ -195,7 +200,10 @@ export function launchClipboardDirectly(
 
   startWorkoutSession(
     clientRoutines,
-    buildSessionMeta(overlappingSessions, session.day, getSessionDayDate),
+    {
+      ...buildSessionMeta(overlappingSessions, session.day, getSessionDayDate),
+      clientSessions,
+    },
     options,
   );
 }

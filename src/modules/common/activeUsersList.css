@@ -41,6 +41,17 @@
   transition: all 0.2s;
   max-width: 140px;
 }
+/* The session dot sits on the tab's top corner and takes no width, so a merged clipboard's tabs are
+   exactly as wide as a single session's. The tab's own content is centred in 44px, well below it. */
+.client-tab-participant {
+  position: relative;
+}
+.client-tab-participant .session-dot {
+  position: absolute;
+  top: 3px;
+  inset-inline-end: 9px;
+  margin: 0;
+}
 .client-tab-participant.active {
   border: 1px solid transparent;
   background: var(--primary-gradient);

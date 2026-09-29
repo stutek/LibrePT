@@ -251,12 +251,27 @@ export function buildSessionMeta(sessions, day, getSessionDayDate) {
     id: sessions.length > 0 ? sessions[0].id : null,
     ids: sessions.map((s) => s.id),
     titles,
+    // Session id to its title, so a client's session id (`clientSessions`) resolves to a title line.
+    sessionTitles: Object.fromEntries(sessions.map((s) => [s.id, s.title])),
     day,
     startDate,
     endDate,
     location: locations.join(" / "),
     timeLabel: `${formatClockFromMinutes(startMin)} - ${formatClockFromMinutes(endMin)}`,
   };
+}
+
+/** The colour slot (0-3) of the session a client belongs to on a merged clipboard, or null when
+ * there is nothing to pair: one title, or a record that predates `clientSessions`. The title bar
+ * numbers its lines the same way, by position in `titles`. */
+export const SESSION_DOT_SLOTS = 4;
+export function sessionSlotOfTitle(sourceSession, title) {
+  const titles = sourceSession?.titles || [];
+  const index = titles.indexOf(title);
+  return titles.length < 2 || index < 0 ? null : index % SESSION_DOT_SLOTS;
+}
+export function sessionTitleOfClient(sourceSession, clientId) {
+  return sourceSession?.sessionTitles?.[sourceSession?.clientSessions?.[clientId]] ?? null;
 }
 
 export function getISODateString(date) {

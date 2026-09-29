@@ -23,6 +23,8 @@
 //   t(key)                            — for the day label ("today" / "tomorrow")
 // }
 
+import { sessionSlotOfTitle } from "../common/utils.js";
+
 let deps = null;
 
 export function initSessionTitleBar(d) {
@@ -82,10 +84,25 @@ export function renderSessionTitle() {
   block.className = "clipboard-title";
 
   for (const title of titles) {
+    // A line holds the name and, on a merged clipboard, its dot. The dot sits in the bar's left
+    // margin and takes no width: the names are already cut to the space beside the buttons, and an
+    // inline dot made the longest seeded name run into an ellipsis at 390px. It is hidden from
+    // screen readers because the name beside it already says which session this is.
+    const line = document.createElement("span");
+    line.className = "clipboard-title-line";
+    const slot = sessionSlotOfTitle(sourceSession, title);
+    if (slot !== null) {
+      const dot = document.createElement("span");
+      dot.className = "session-dot";
+      dot.dataset.sessionSlot = String(slot);
+      dot.setAttribute("aria-hidden", "true");
+      line.appendChild(dot);
+    }
     const nameEl = document.createElement("span");
     nameEl.className = "clipboard-title-name";
     nameEl.textContent = title;
-    block.appendChild(nameEl);
+    line.appendChild(nameEl);
+    block.appendChild(line);
   }
 
   if (under) {

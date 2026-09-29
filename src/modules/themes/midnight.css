@@ -39,6 +39,10 @@ body.midnight-theme {
 
   /* Session temporal tint — violet past / amber future on the zinc field */
   --temporal-past: #c084fc;
+  --session-dot-0: #f59e0b;
+  --session-dot-1: #38bdf8;
+  --session-dot-2: #f472b6;
+  --session-dot-3: #a3e635;
   --temporal-future: #fbbf24;
   --cloud-icon-color: #38bdf8; /* sky-400 blue cloud on dark zinc field */
   --cloud-arrows-color: #052e16; /* green-950 deep forest green arrows for 6.7:1 contrast over light blue cloud */

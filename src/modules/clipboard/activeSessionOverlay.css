@@ -155,6 +155,46 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+/* A merged clipboard: one dot per session, in the title line and again on the tab of each client
+   in that session. Colour only helps the eye; the line's text and the tab's screen-reader text
+   carry the same pairing. The four colours are theme tokens (--session-dot-N). */
+.session-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1px solid var(--card-border);
+  background: var(--session-dot-0);
+  box-sizing: content-box;
+}
+.session-dot[data-session-slot="1"] {
+  background: var(--session-dot-1);
+}
+.session-dot[data-session-slot="2"] {
+  background: var(--session-dot-2);
+}
+.session-dot[data-session-slot="3"] {
+  background: var(--session-dot-3);
+}
+/* One line of the title: the dot (if any) in the bar's left margin, then the name. */
+.clipboard-title > .clipboard-title-line {
+  position: relative;
+  overflow: visible;
+}
+.clipboard-title-line > .clipboard-title-name {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.clipboard-title-line > .session-dot {
+  position: absolute;
+  inset-inline-start: -13px;
+  top: 50%;
+  margin: 0;
+  transform: translateY(-50%);
+}
 .clipboard-title-name {
   font-size: 15px;
   font-weight: 600;

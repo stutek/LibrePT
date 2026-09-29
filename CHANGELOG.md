@@ -29,6 +29,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Changed
 
+- **A clipboard holding two sessions pairs each client with their session.** Each session's title
+  line carries a coloured dot, and the same dot sits on the tab of every client booked in it; a
+  screen reader reads the session's name on the tab. A clipboard with one session shows no dots.
 - **A tap on a session with nobody booked opens its form**, where a client is added, as the card's
   pencil does. The tap did nothing.
 - **The main button of a dialog is on the right, in every dialog.** The client-invite dialog had it

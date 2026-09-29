@@ -3,7 +3,7 @@
 
 // escapeHTML is imported rather than injected: it is a pure helper with no state, and an escaping
 // function that a caller can forget to pass is an escaping function that will eventually be missing.
-import { escapeHTML } from "./utils.js";
+import { escapeHTML, sessionSlotOfTitle, sessionTitleOfClient } from "./utils.js";
 
 function isBound(activeSession, clientId) {
   return (activeSession?.bindings || []).some((group) => group.includes(clientId));
@@ -83,11 +83,20 @@ export function renderActiveUsersList(tabsContainer, activeSession, ctx) {
     // can't force an otherwise-compact row to wrap early. Look lives in activeUsersList.css
     // (.client-tab-participant / .active); isActive only picks the state class.
 
+    // On a merged clipboard the tab carries the dot of its session's title line, and the session's
+    // name as screen-reader text, so the pairing is not only a colour.
+    const sessionTitle = sessionTitleOfClient(activeSession.sourceSession, pId);
+    const slot = sessionSlotOfTitle(activeSession.sourceSession, sessionTitle);
+    const sessionMark =
+      slot === null
+        ? ""
+        : `<span class="session-dot" data-session-slot="${slot}" aria-hidden="true"></span><span class="sr-only">${escapeHTML(sessionTitle)}</span>`;
+
     tab.innerHTML = `
       <div class="avatar client-tab-avatar ${isActive ? "active" : ""}">
         ${escapeHTML(client.avatar || getInitials(client.name))}
       </div>
-      <span class="client-tab-name">${getClientDisplayNameHTML(client, true, t("injury_mark_label"), participants)}</span>
+      <span class="client-tab-name">${getClientDisplayNameHTML(client, true, t("injury_mark_label"), participants)}</span>${sessionMark}
     `;
 
     tab.addEventListener("click", () => {

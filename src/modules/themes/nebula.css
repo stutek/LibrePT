@@ -41,6 +41,10 @@ body.nebula-theme {
      A cooled grey-blue is what "behind you" looks like, and it is the one hue this palette does not
      already spend on something live. */
   --temporal-past: #94a3b8;
+  --session-dot-0: #f59e0b;
+  --session-dot-1: #38bdf8;
+  --session-dot-2: #f472b6;
+  --session-dot-3: #a3e635;
   --temporal-future: #fcd34d;
   --cloud-icon-color: #38bdf8; /* sky-400 blue cloud on dark cosmic field */
   --cloud-arrows-color: #052e16; /* green-950 deep forest green arrows for 6.7:1 contrast over light blue cloud */

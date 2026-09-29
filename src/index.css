@@ -49,6 +49,10 @@
   /* Temporal session tinting (past = cool/history, future = warm/plan). Neutral fallback only;
      each theme overrides these with palette-tuned values (see src/themes/*.css). */
   --temporal-past: #c084fc;
+  --session-dot-0: #f59e0b;
+  --session-dot-1: #38bdf8;
+  --session-dot-2: #f472b6;
+  --session-dot-3: #a3e635;
   --cloud-icon-color: #0284c7;
   --cloud-arrows-color: var(--success, #10b981);
   /* Timer warning animation peak color — computed as color-mix in each theme with theme-specific

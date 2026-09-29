@@ -40,6 +40,10 @@ body.spreadsheet-theme {
      sandbox's hue. 4.92:1. */
   --warning: #a16207;
   --temporal-past: #6b46c1; /* 6.42:1 */
+  --session-dot-0: #b45309;
+  --session-dot-1: #0369a1;
+  --session-dot-2: #be185d;
+  --session-dot-3: #4d7c0f;
   --temporal-future: #4c5fd5;
   --cloud-icon-color: #155e75;
   --cloud-arrows-color: #4ade80;

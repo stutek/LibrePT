@@ -44,6 +44,10 @@ body.blossom-theme {
      The rose-400 #fb7185 that stood here read 2.68:1 and 2.46:1: a pastel that looked
      right beside the pink primary and could not be read on either surface. */
   --temporal-past: #9333ea; /* 5.35:1 card, 4.93:1 field */
+  --session-dot-0: #b45309;
+  --session-dot-1: #0369a1;
+  --session-dot-2: #be185d;
+  --session-dot-3: #4d7c0f;
   --temporal-future: #be123c; /* rose-700 — 6.25:1 card, 5.76:1 field */
   --cloud-icon-color: #6b21a8; /* deep violet/purple for strong contrast against light blush background */
   --cloud-arrows-color: #4ade80; /* green-400 bright standard green arrows for 5:1 contrast over deep violet cloud */
