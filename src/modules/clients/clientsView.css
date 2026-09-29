@@ -437,6 +437,11 @@
 /* The invitation as a code on the trainer's own screen. Black on white whatever the
    theme is: this is a picture for somebody else's camera, and a themed ground turns a symbol a
    phone reads in one pass into one it hunts for. The white padding is the quiet zone's paper. */
+.intake-invite-actions .btn[aria-disabled="true"] {
+  pointer-events: none;
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 .intake-invite-qr {
   display: flex;
   flex-direction: column;

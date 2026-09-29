@@ -733,7 +733,7 @@ export const en = {
   intake_invite_contact_label: "Their phone number or email address",
   intake_invite_send_sms: "Write the text message",
   intake_invite_send_email: "Write the email",
-  intake_invite_send_disabled: "Nowhere to send it yet",
+  intake_invite_send: "Write the message",
   intake_invite_opens_sms:
     "This opens your own messages app with the invitation already written. You press send there.",
   intake_invite_opens_email:

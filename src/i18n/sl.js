@@ -695,7 +695,7 @@ export const sl = {
   intake_invite_contact_label: "Telefonska številka ali e-naslov stranke",
   intake_invite_send_sms: "Napiši sporočilo SMS",
   intake_invite_send_email: "Napiši e-pošto",
-  intake_invite_send_disabled: "Ni še kam poslati",
+  intake_invite_send: "Napiši sporočilo",
   intake_invite_opens_sms:
     "To odpre tvojo aplikacijo za sporočila z že napisanim vabilom. Pošlješ ga tam.",
   intake_invite_opens_email:

@@ -882,6 +882,11 @@ h6 {
 textarea.form-control {
   resize: vertical;
 } /* Compact Workout Setup Modal Styling */
+/* RULE for every dialog: with two or more buttons in this row, the primary (or destructive) action is
+   LAST, so it sits on the RIGHT, and Cancel/Close/Back is first, on the left. Write it in that order in
+   the markup and do not reorder it here (no row-reverse, no order): DOM, tab and visual order must be
+   one. A red danger-link-btn may sit apart at the far left. tests/unit/test_dialog_action_order.py
+   fails the build on a row that breaks this. */
 .modal-actions {
   display: flex;
   justify-content: flex-end;

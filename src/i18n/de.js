@@ -731,7 +731,7 @@ export const de = {
   intake_invite_contact_label: "Telefonnummer oder E-Mail-Adresse des Kunden",
   intake_invite_send_sms: "SMS schreiben",
   intake_invite_send_email: "E-Mail schreiben",
-  intake_invite_send_disabled: "Noch kein Empfänger",
+  intake_invite_send: "Nachricht schreiben",
   intake_invite_opens_sms:
     "Das öffnet deine eigene Nachrichten-App mit der fertigen Einladung. Senden tust du dort.",
   intake_invite_opens_email:

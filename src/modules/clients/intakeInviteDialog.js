@@ -52,8 +52,8 @@ export function renderIntakeInviteDialog() {
            inputmode="email" enterkeyhint="send" />
     <p id="intake-invite-channel" class="text-sm intake-invite-channel"></p>
     <div class="modal-actions intake-invite-actions">
-      <a id="intake-invite-send" class="btn primary-btn disabled" role="button"><span></span></a>
       <button type="button" class="btn secondary-btn" id="intake-invite-share"></button>
+      <a id="intake-invite-send" class="btn primary-btn" role="button" aria-disabled="true" tabindex="-1"><span></span></a>
     </div>
     <input type="text" id="intake-invite-link" class="form-control hidden" readonly />
     <!-- The code the trainer holds up, for the person standing in front of them: no number typed,
@@ -79,9 +79,9 @@ export function renderIntakeInviteDialog() {
 
 /** The send control, kept in step with what has been typed.
  *
- * A disabled-looking anchor rather than a hidden one, and a line under the field saying which way it
- * will go: "there is a way to send this, you have just not given me somewhere to send it" is the
- * useful message, and on a phone it has to be on screen rather than in a tooltip.
+ * Until there is a contact the control keeps its own name, greyed and out of reach (aria-disabled,
+ * no href, out of the tab order; an anchor has no real `disabled`, and the sms:/mailto: link must
+ * stay an anchor). What is missing is said in the line under the field, never on the button.
  */
 function syncSendControl() {
   const { t } = deps;
@@ -96,7 +96,8 @@ function syncSendControl() {
   const label = anchor?.querySelector("span");
   const channelLine = document.getElementById("intake-invite-channel");
 
-  anchor?.classList.toggle("disabled", !ready);
+  anchor?.setAttribute("aria-disabled", ready ? "false" : "true");
+  anchor?.setAttribute("tabindex", ready ? "0" : "-1");
   // WHICH channel, said in a way that is not a sentence. The button's words change with the contact
   // the trainer typed — a number gets a text message, an address gets an email — and until
   // 2026-08-30 the demo asserted that by reading those words, so the story could not be completed in
@@ -108,7 +109,7 @@ function syncSendControl() {
   if (label) {
     label.textContent = ready
       ? t(ready.channel === "sms" ? "intake_invite_send_sms" : "intake_invite_send_email")
-      : t("intake_invite_send_disabled");
+      : t("intake_invite_send");
   }
   if (channelLine) {
     channelLine.textContent = ready

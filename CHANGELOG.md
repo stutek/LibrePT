@@ -20,6 +20,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ## 2026-09-30 — Namesakes, and what the sandbox promises
 
+### Changed
+
+- **The main button of a dialog is on the right, in every dialog.** The client-invite dialog had it
+  on the left, and while no contact was typed it read "Nowhere to send it yet", which looked like an
+  error rather than a button. It now reads "Write the message", greyed until a contact is typed; the
+  line under the field says what is missing. A test fails the build if a dialog puts its main
+  button first.
+
 ### Fixed
 
 - **A movement a routine lists twice keeps two records of sets.** A warm-up and a main block with

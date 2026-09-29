@@ -67,7 +67,20 @@ def test_there_is_nowhere_to_send_until_a_contact_is_typed(page, local_server):
     _open(page, local_server)
 
     assert page.get_attribute(SEND, "href") is None, "it must not lead anywhere yet"
-    expect(page.locator(SEND)).to_contain_text("Nowhere to send it yet")
+    # The button keeps its own name and is disabled; what is missing is said under the field.
+    expect(page.locator(SEND)).to_contain_text("Write the message")
+    expect(page.locator(SEND)).to_have_attribute("aria-disabled", "true")
+    assert (
+        page.evaluate(
+            "getComputedStyle(document.querySelector('#intake-invite-send')).pointerEvents"
+        )
+        == "none"
+    )
+    # Primary action on the right: the secondary comes first.
+    assert (
+        page.locator("#intake-invite-share").bounding_box()["x"]
+        < page.locator(SEND).bounding_box()["x"]
+    )
     expect(page.locator("#intake-invite-channel")).to_contain_text(
         "phone number or an email"
     )
