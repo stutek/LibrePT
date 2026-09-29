@@ -42,6 +42,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   calendar had synced.
 - **A programme planned from a client's profile offers no Save**, only Open in Clipboard, as
   intended: the Save added this morning showed there and did what Open does.
+- **A message with one answer shows one button.** Every such message had an empty second button
+  beside its OK.
 
 ---
 

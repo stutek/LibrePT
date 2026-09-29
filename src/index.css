@@ -831,6 +831,13 @@ textarea.form-control {
 } /* Routine builder items */
 .hidden {
   display: none !important;
+}
+/* The `hidden` attribute hides, whatever else sets `display`. Without this, `.btn`'s inline-flex beat
+   it: every one-answer message showed an empty second button, and a Save meant to be withdrawn
+   stayed on the screen. Ten components had each grown their own `[hidden]` rule for the same
+   reason. */
+[hidden] {
+  display: none !important;
 } /* History Feedback Icon and Tooltip CSS */
 @media (max-width: 600px) {
   /* Scale buttons for thumb-friendly interaction */

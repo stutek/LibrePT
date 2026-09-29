@@ -55,6 +55,18 @@ def test_save_and_open_are_on_the_screen_when_the_form_opens(
         )
 
 
+def test_a_message_with_one_answer_shows_one_button(page, local_server):
+    """ "Choose at least one client." came with its OK and an empty second button beside it: the
+    cancel button was hidden by an attribute that the button style overrode."""
+    page.goto(f"{local_server}session/new")
+    page.wait_for_selector("#view-workout-setup.active #btn-setup-open")
+    page.locator("#btn-setup-open").click()
+
+    dialog = page.locator("dialog[open]:has(#app-question-text)")
+    expect(dialog).to_be_visible()
+    expect(dialog.locator("button:visible")).to_have_count(1)
+
+
 def test_a_group_session_started_from_a_routine_survives_a_reload(page, local_server):
     """Started from a routine, the form kept the address /routines: a reload, which a phone does
     by itself, showed the routine list again and the name typed was gone, and Back went to the
