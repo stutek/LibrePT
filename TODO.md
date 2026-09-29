@@ -6615,6 +6615,24 @@ Lokalni strežnik, `main` na `080ab10`, sl.
 
 **Predlog:** ali vzorčna seja res teče (in jo tap kartice ohrani), ali obvestilo tega ne obljublja.
 
+### 80.76 [ ] P1 — Tap na kartico treninga, ki že teče, ga zamenja z novim, nezačetim
+
+**Scenarij in koraki:** trener začne »Group Strength & Conditioning« (»Začni trening«), se vrne na
+ploščo in tapne kartico istega treninga, ki je označena kot aktivna.
+
+**Opaženo, izmerjeno 2026-09-29 na `main` (`8b2ce80`) s preizkusom v brskalniku:** pred tapom je v
+shrambi `librept_active_session` `started: true` in čas začetka; po tapu `started: false` in brez
+časa začetka. Nobeno okno ne vpraša ničesar. Časomer in vse vpisane serije so izgubljeni.
+
+**Vzrok, potrjen v kodi:** tap na kartico ([sessionCard.js](src/modules/sessionList/sessionCard.js))
+vedno pokliče `launchClipboardDirectly`, ta pa `startWorkoutSession`
+([sessionLifecycle.js](src/controllers/sessionLifecycle.js)), ki podlogo zgradi na novo, tudi ko je
+isti trening že začet. Isti vzrok kot §80.52, a tu brez odprtega vprašanja o zasnovi: trening, ki
+teče, ima svoje udeležence in serije že v podlogi, nova gradnja pa ne more dati ničesar boljšega.
+
+**Popravek:** tap na kartico začetega treninga, ki je v odprti podlogi, odpre to podlogo. Nezačeti
+trening ostane pri §80.52.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
