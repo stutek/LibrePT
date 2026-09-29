@@ -57,6 +57,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 - **The small round buttons answer a thumb.** The rest timers on the clipboard (32 pixels) and
   every round icon button, the session's menu and the cards' edit buttons among them (38 pixels),
   are drawn as before and reached from a 44-pixel square around them.
+- **The bottom bar says "Overdue" for a session whose start has passed and nobody started.** It
+  counted to the end of the slot, then read "00:00", while the session's card said "Overdue".
 
 ---
 

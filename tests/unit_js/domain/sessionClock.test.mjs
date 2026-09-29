@@ -270,6 +270,19 @@ test("before its start, a session counts to its start; once started or past it, 
   );
 });
 
+test("past its start and not started, a session counts from the start it missed", () => {
+  const slot = {
+    started: false,
+    sourceSession: { startDate: "2026-09-29T09:00:00.000Z" },
+  };
+  const later = Date.parse("2026-09-29T10:05:00.000Z");
+
+  assert.equal(clock.secondsSinceMissedStart(slot, later), 65 * 60);
+  assert.equal(clock.secondsSinceMissedStart({ ...slot, started: true }, later), null);
+  assert.equal(clock.secondsSinceMissedStart(slot, Date.parse("2026-09-29T08:59:00.000Z")), null);
+  assert.equal(clock.secondsSinceMissedStart({ started: false, sourceSession: null }, later), null);
+});
+
 test("a staged session whose plan is being written up after its slot is kept", () => {
   // The morning session recorded in the afternoon: the slot ended hours ago, but the trainer edited
   // the plan a minute ago. The window runs from that edit, not from the slot.

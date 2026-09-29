@@ -26,6 +26,7 @@
 
 import {
   computeActiveSessionCountdown,
+  secondsSinceMissedStart,
   secondsUntilScheduledStart,
 } from "../../domain/sessionClock.js";
 import { countedText } from "../../i18n/plural.js";
@@ -136,11 +137,15 @@ export function updateSessionBarTimer() {
   if (!activeSession) return;
   const durationEl = document.getElementById("clipboard-bar-duration");
   const untilStart = secondsUntilScheduledStart(activeSession);
-  if (untilStart !== null) {
+  const sinceMissedStart = secondsSinceMissedStart(activeSession);
+  if (untilStart !== null || sinceMissedStart !== null) {
     // Said as the session's card says it. The dashboard card timers below belong to a started
     // clipboard, so they are left alone.
     if (durationEl) {
-      durationEl.textContent = `${deps.t("starts_in")} ${deps.formatDurationHourMin(untilStart)}`;
+      durationEl.textContent =
+        untilStart !== null
+          ? `${deps.t("starts_in")} ${deps.formatDurationHourMin(untilStart)}`
+          : `${deps.t("overdue")} ${deps.formatDurationHourMin(sinceMissedStart)}`;
       durationEl.classList.remove("overtime");
     }
     return;

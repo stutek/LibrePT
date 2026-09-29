@@ -70,6 +70,15 @@ export function secondsUntilScheduledStart(activeSession, now = Date.now()) {
   return Math.round((startMs - now) / 1000);
 }
 
+// Seconds since the scheduled start of a session nobody has started, once that start has passed;
+// null otherwise. The card calls this "Overdue"; the bar read "00:00" instead.
+export function secondsSinceMissedStart(activeSession, now = Date.now()) {
+  if (activeSession?.started) return null;
+  const startMs = toEpochMs(activeSession?.sourceSession?.startDate);
+  if (startMs === null || startMs > now) return null;
+  return Math.round((now - startMs) / 1000);
+}
+
 // Signed milliseconds between the actual start and the scheduled one (positive = started late).
 // Null when there is nothing to compare against: a planning draft carries no dates at all, and an
 // ad-hoc clipboard has no source session (docs/DATA_MODEL.md §7).
