@@ -20,6 +20,51 @@ Read [CHANGELOG.md](CHANGELOG.md) for what shipped and when. This file is why.
 
 ---
 
+### 80.74 [x] P2 — Vaja, ki je v rutini dvakrat, si deli zapis serij — popravljeno 2026-09-30
+
+**Scenarij in koraki:** peskovnik, lokalni strežnik (`main` na `080ab10`), sl, 390 × 844. Odpreti
+»Skupinska moč in kondicija« in pri Jane zaključiti »Dinamično ogrevanje« (en krog: Face Pulls,
+Walking Lunges).
+
+**Opaženo:** Walking Lunges je v isti rutini dvakrat — v ogrevanju (1 krog) in v »Metabolni krog v
+trojkah« (3 krogi). Obe postavki imata isti id (`e38c4d5e`), ker postavka rutine dobi id vaje iz
+kataloga (`populateClientStateExercisesFromRoutine` v
+[sessionPlanFactory.js](src/domain/sessionPlanFactory.js)). Zapis serij je en sam, zato druga postavka
+prepiše prvo (tri serije namesto ene), zaključek ogrevanja pa šteje v metabolični krog. Krožni sklopi
+iz knjižnice to že rešujejo z lastnim id-jem za vsako pojavitev (`buildClientStateFromLibraryCircuit`).
+
+**Težava in vpliv:** trener vidi napačno število opravljenih serij, zgodovina treninga ima eno vajo
+namesto dveh. Pri rutinah z isto vajo v ogrevanju in glavnem delu je to pogosto.
+
+**Predlog:** vsaka pojavitev dobi svoj id, vez na katalog pa ločeno polje, kot pri krožnih sklopih.
+Dotakne se zgodovine (»Zadnjič«), fokusa v naslovu (`/exercise/<id>`) in prilagoditev načrta, zato
+ni del hitrih popravkov. Najdeno pri raziskovalnem testiranju 2026-09-29.
+
+### 39.4 [x] CHANGE — the invite dialog's two buttons — fixed 2026-09-30
+
+**Reported at card 5:** *"button name nowhere to send it yet is way too confusing - could it be just a
+disabled "send invite"? make the default action button on right (unify), not left"*.
+
+The dialog offers `intake_invite_send_disabled` — *"Nowhere to send it yet"* — on an anchor styled as
+the primary action ([intakeInviteDialog.js](src/modules/clients/intakeInviteDialog.js)). It reads as
+a label for a thing that has gone wrong rather than as a button waiting for input, and it is the
+first control on the row while the secondary sits to its right.
+
+Two changes, and the second is a rule rather than a one-off: the primary keeps its own name while
+disabled, and the primary action goes on the RIGHT everywhere a dialog has two.
+
+### 88.1 [x] Iskanje v katalogu brez zadetka se konča, uvoz večjega kataloga pa obstaja — narejeno 2026-09-30
+
+Dan 01: trenerka je za krožno vadbo iskala »kettlebell«, »burpee«, »box jump« — nič od tega ni med
+48 vajami, in prazen seznam reče samo »No movements match this filter.«. Dan 02 potrdi z vajami brez opreme za
+online trening: navadnega počepa s telesno težo, burpeeja in kettlebell swinga ni. Dan 03: za nosečo stranko ni stenskega
+počepa ne vaje za medenično dno. Dan 04: za tekmovalca v powerliftingu ni ozkega potiska s prsi; vpisal ga je kot
+lastno vajo, kar je delovalo. Aplikacija ima uvoz večjih
+katalogov (`libraryImportDialog.js`) in dovoli vajo z lastnim imenom, a s praznega iskanja ne vodi do
+nobenega. Trener, ki vaje ne najde, jo zapiše na papir. **Vrednost:** vsak nov trener naleti na to pri
+prvem načrtu; vsaka vaja, zapisana mimo aplikacije, nima zgodovine. **Cena:** majhna — prazen seznam
+ponudi »Dodaj kot novo vajo« z vpisanim imenom in »Uvozi večji katalog«. **Presoja: izplača se.**
+
 ### 80.75 [x] P3 — Vzorčni peskovnik obljublja trening, ki že poteka, a ga ni — popravljeno 2026-09-30
 
 **Opaženo:** obvestilo »Raziskuješ z vzorčnimi podatki« pravi »vključno z enim treningom, ki že
