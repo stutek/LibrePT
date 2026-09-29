@@ -6186,6 +6186,14 @@ izbrano vrednost, je sprememba Simonova odločitev, ne popravek. Preizkus naj na
 zahteva, da nobena kontrola na tem zaslonu ni nižja od 44 pik. Izmerjeno na objavljeni
 različici `0625bd6`; pravila na `main` so ista.
 
+**Dopolnitev 2026-09-29, izmerjeno na `main` z ukazom `measure`:** isto vprašanje drugje — čipi filtrov
+v »Knjižnica vaj« 31 pik, čipi izbirnika vaj 26 pik, vrstice vaj v izbirniku 37 pik, »Prelahko« /
+»Pretežko« / »Opombe« na kartici 40 pik, jezikovni gumbi na strani za stranko 40 pik. Popravljeno
+med tem, ker ni šlo za izbrano vrednost: ✕ v oknih (§80.68), iskalno polje izbirnika, izbire v
+obrazcu za opombe, polje za kontakt v »Povabi stranko«; okrogli gumbi in časomeri na podlogi imajo
+tarčo 44 pik ob nespremenjeni velikosti (`b2aa98f`). Isti prijem (nevidna tarča okoli narisanega
+gumba) bi rešil tudi puščici polj za datum in uro, brez spremembe videza.
+
 ### 80.26 [x] P2 — Trenerjev lastni signal se v pregledu pokaže kot »Too Easy - Increase Load« — popravljeno 2026-09-27
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8026-x-p2--trenerjev-lastni-signal-se-v-pregledu-pokaže-kot-too-easy---increase-load--popravljeno-2026-09-27).
