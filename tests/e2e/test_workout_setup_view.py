@@ -6,6 +6,7 @@ auto-persist across page reloads via localStorage.
 
 from urllib.parse import urlparse
 
+import pytest
 from playwright.sync_api import expect
 
 
@@ -29,6 +30,29 @@ def test_a_name_nobody_has_can_be_added_as_a_client_from_the_form(page, local_se
     expect(
         page.locator("#setup-participants-assignment-list .participant-setup-row")
     ).to_contain_text("Zala Novak")
+
+
+@pytest.mark.parametrize("width,height", [(390, 844), (320, 680)])
+def test_save_and_open_are_on_the_screen_when_the_form_opens(
+    page, local_server, width, height
+):
+    """The form opened with Save 116 pixels and Open in Clipboard 170 pixels below a phone screen,
+    under the bar at the bottom: the two ways to finish were a scroll away. The action row stays on
+    the screen, clear of the bar, while the form scrolls."""
+    page.set_viewport_size({"width": width, "height": height})
+    page.goto(f"{local_server}session/new")
+    page.wait_for_selector("#view-workout-setup.active #btn-setup-save")
+
+    for button in ("#btn-setup-save", "#btn-setup-open"):
+        reachable = page.evaluate(
+            """(sel) => { const b = document.querySelector(sel); const r = b.getBoundingClientRect();
+                         const hit = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+                         return r.bottom <= innerHeight && r.top >= 0 && !!hit && b.contains(hit); }""",
+            button,
+        )
+        assert reachable, (
+            f"{button} is not on the screen, or something covers it, at {width}x{height}"
+        )
 
 
 def test_a_group_session_started_from_a_routine_survives_a_reload(page, local_server):

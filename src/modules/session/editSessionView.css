@@ -247,4 +247,13 @@
    rather than run off the edge, and the one that opens the clipboard stays last, on the right. */
 .setup-actions {
   flex-wrap: wrap;
+  /* On the screen while the form scrolls: it opened with Save 116 pixels below a phone screen.
+     Clear of the notification bar by the same offset the board's sticky day footer uses
+     (sessionsView.css explains the arithmetic), on the card's own glass. */
+  position: sticky;
+  bottom: calc(-1 * var(--main-content-bottom-gap, 24px));
+  z-index: 1;
+  padding-bottom: 8px;
+  background: var(--card-bg);
+  backdrop-filter: var(--glass-blur);
 }
