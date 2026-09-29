@@ -9,6 +9,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
+  claimFirstEvening,
   occurrenceAsSession,
   occurrenceCalendarFields,
   occurrenceKey,
@@ -128,6 +129,20 @@ test("a series nobody can act on is rejected before it reaches the board", () =>
   assert.match(validateSeries({ id: "s", weekdays: [], time: "18:00 - 19:00" }).join(" "), /day/);
   assert.match(validateSeries({ id: "s", weekdays: [2] }).join(" "), /time/);
   assert.match(validateSeries({ weekdays: [2], time: "18:00 - 19:00" }).join(" "), /id/);
+});
+
+test("the session saved with a new series is the series' evening on its date", () => {
+  const tuesday = { id: "s1", startDate: new Date(2026, 7, 25, 18).toISOString() };
+  const claimed = claimFirstEvening(tuesday, SERIES);
+  assert.equal(claimed.seriesId, "ser1");
+  assert.equal(claimed.occurrenceDate, "2026-08-25");
+  const board = sessionsWithSeries([claimed], [SERIES], { from: "2026-08-24", to: "2026-08-26" });
+  assert.equal(board.length, 1, "the first evening is on the board once");
+
+  // A session on a day the rule does not produce stays a one-off beside it.
+  const monday = { id: "s2", startDate: new Date(2026, 7, 24, 18).toISOString() };
+  assert.equal(claimFirstEvening(monday, SERIES).seriesId, undefined);
+  assert.equal(claimFirstEvening(tuesday, null), tuesday);
 });
 
 test("a series that ends before it starts is rejected; ending on its first day is not", () => {

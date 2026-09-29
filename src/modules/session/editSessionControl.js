@@ -33,6 +33,7 @@ import {
   upsertSessionRecord,
 } from "../../domain/sessionRecord.js";
 import {
+  claimFirstEvening,
   repeatEndsBeforeStart,
   seriesWithEdit,
   validateSeries,
@@ -430,7 +431,17 @@ function applyEditToSeriesIfAsked(
 
 function commitRealSession(
   deps,
-  { sessionId, sessionName, sessionDate, startTime, timeLabel, location, clientRoutines, t },
+  {
+    sessionId,
+    sessionName,
+    sessionDate,
+    startTime,
+    timeLabel,
+    location,
+    clientRoutines,
+    t,
+    series,
+  },
 ) {
   const state = deps.getState();
   state.sessions = state.sessions || [];
@@ -450,7 +461,7 @@ function commitRealSession(
 
   upsertSessionRecord(
     state.sessions,
-    buildSessionRecord({ ...identity, startTime, clientRoutines }),
+    claimFirstEvening(buildSessionRecord({ ...identity, startTime, clientRoutines }), series),
   );
   deps.saveToLocalStorage?.();
   deps.rerenderSessions?.();
@@ -660,7 +671,7 @@ export function setupEditSessionControl() {
     // there is nothing to write into `sessions` for the weeks ahead, and editing "Tuesdays at six"
     // later is one record rather than a sweep. The session in front of the trainer is still created
     // and still launches, because they filled this form in to run something now.
-    commitSeriesIfRepeating(deps, {
+    const series = commitSeriesIfRepeating(deps, {
       sessionName,
       sessionDate,
       timeLabel,
@@ -696,6 +707,7 @@ export function setupEditSessionControl() {
           location,
           clientRoutines,
           t,
+          series,
         });
 
     if (!isPlanningModeActive) {

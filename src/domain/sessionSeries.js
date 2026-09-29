@@ -21,7 +21,7 @@
 //
 // Injected dependencies: none — pure functions over plain objects.
 
-import { computeSessionDayBucket } from "./sessionRecord.js";
+import { computeSessionDayBucket, sessionCalendarDate } from "./sessionRecord.js";
 import { parseTimeRange } from "./timeRange.js";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -50,6 +50,16 @@ export function occurrenceKey(seriesId, occurrenceDate) {
 export function sessionOccurrenceKey(session) {
   if (!session?.seriesId || !session?.occurrenceDate) return null;
   return occurrenceKey(session.seriesId, session.occurrenceDate);
+}
+
+/** The session saved together with a new series, marked as that series' evening on its own date —
+ * when the rule produces that date at all. Unmarked, the rule produced the same evening again
+ * beside it, and the first date had two identical cards. */
+export function claimFirstEvening(record, series) {
+  const date = sessionCalendarDate(record);
+  if (!series || !date) return record;
+  const produced = seriesOccurrences(series, { from: date, to: date }).length > 0;
+  return produced ? { ...record, seriesId: series.id, occurrenceDate: date } : record;
 }
 
 /** Structural problems in a series, found before it reaches a board.

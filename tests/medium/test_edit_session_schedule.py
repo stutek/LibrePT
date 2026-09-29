@@ -144,6 +144,35 @@ def test_a_repeat_that_ends_before_it_starts_is_refused_at_the_field(
     expect(page.locator("#form-workout-setup")).to_be_visible()
 
 
+def test_the_first_evening_of_a_new_repeat_is_on_the_board_once(page, local_server):
+    """Saving a session that repeats wrote the session AND a rule that produced the same evening,
+    so the first date had two identical cards. The session saved is that rule's first evening."""
+    stub = setup_stub(SCHEDULED_SESSION, target_session="'s-edit'")
+    anchor = "bootWorkoutSetup({"
+    assert stub.count(anchor) == 1
+    load_with_stub(
+        page, local_server, stub.replace(anchor, "window.__state = state;\n" + anchor)
+    )
+    answer_app_questions(page)
+
+    page.check("#setup-repeat")
+    page.fill("#setup-repeat-until", "2026-09-29")
+    page.locator("#form-workout-setup button[type=submit]").click()
+    page.wait_for_function("() => (window.__state.sessionSeries || []).length === 1")
+
+    evenings = page.evaluate(
+        """async () => {
+          const series = await import(new URL('domain/sessionSeries.js', document.baseURI).href);
+          const state = window.__state;
+          return series
+            .sessionsWithSeries(state.sessions, state.sessionSeries, { from: '2026-09-14', to: '2026-09-30' })
+            .map((row) => row.startDate.slice(0, 10));
+        }"""
+    )
+    assert evenings.count(SESSION_DATE) == 1, evenings
+    assert len(evenings) == 3, evenings
+
+
 def fill_slot(page, start, end, location):
     page.fill("#setup-session-date", SESSION_DATE)
     page.fill("#setup-start-time", start)
