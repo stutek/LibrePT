@@ -4287,29 +4287,32 @@ signala pa nič. Pri odgovoru, ki ne pride, bi čakal, dokler telefon ne obupa �
 **Predlog:** ko je stran na telefonu, naj se odpre iz njega in omrežje vpraša v ozadju — opaženo na
 različici `main` `6230070` (zamrznjena kopija), 390 × 844, sl.
 
-### 80.154 [ ] P1 — Občasno se aplikacija ne naloži nikoli: ostane na angleškem zaslonu za nalaganje
+### 80.154 [ ] P2 — Občasno se aplikacija ne naloži: ostane na angleškem zaslonu za nalaganje
 
-**Scenarij in koraki:** trener odpre aplikacijo, ki jo je že uporabljal (podatki trenerke »Tara Zorko«
-vneseni, service worker nameščen), ali stranka odpre povabilo `/intake`. Ponavljano nalaganje istega
-naslova v istem zavihku, na objavljeni aplikaciji in na zamrznjeni kopiji `main`.
+**Popravek 2026-10-01 01:20 (Claude):** prva različica je bila P1 s petimi zastoji na kopiji `main`.
+Ti so skoraj vsi lastnost moje kopije: bila je nežigosana (`version.js` = `dev`), in ko sem ji dal
+pravi SHA, je izginilo tudi 15 zastojev od 15. Na objavljeni aplikaciji je en zastoj.
 
-**Opaženo:** stran ostane na zaslonu »LibrePT / A lightweight, free app for your clipboard, sessions and
-training programmes.« v angleščini, `<html lang="en">`, naslov se ne preusmeri na `/sessions/<datum>`.
-Konzola nima napak. Počakano do 134 sekund, konca ni bilo. Naslednje nalaganje običajno steče.
+**Scenarij in koraki:** objavljena aplikacija, prvi zagon trenerke »Tara Zorko« (podatki, tema,
+»Začni s prazno aplikacijo«), nato isti naslov `/?lang=sl` naložiti znova, več kot štiridesetkrat.
 
-| Kje                                   | Nalaganj | Zastojev |
-| :------------------------------------ | :------- | :------- |
-| objavljena `#8b2ce80`                 | ~40      | 2        |
-| zamrznjena kopija `main` `6230070`    | ~25      | 5        |
+**Opaženo:** enkrat (00:44) je stran ostala na zaslonu »LibrePT / A lightweight, free app for your
+clipboard, sessions and training programmes.« v angleščini, `<html lang="en">`, naslov `/LibrePT/`
+se ni preusmeril na ploščo. Po 50 sekundah enako; konzola brez napak. Naslednja nalaganja so stekla.
 
-Dve obliki. Pri večini zastojev stran še odgovori na branje (`eval`), le zagon ne pride do konca; strežnik
-z vklopljenim dnevnikom je odgovoril na vse zahteve (200 in 304), service worker je aktiven in nadzoruje
-stran. Enkrat (zamrznjena kopija, 00:36) stran ni odgovorila niti na `1+1` prek CDP, brez izvornega okna
-(`Page.handleJavaScriptDialog`: »No dialog is showing«) in brez porabe procesorja.
+| Kje                                        | Nalaganj | Zastojev             |
+| :----------------------------------------- | :------- | :------------------- |
+| objavljena `#8b2ce80`                      | ~40      | 1                    |
+| kopija `main` `6230070`, žigosana          | 18       | 0                    |
+| kopija `main` `6230070`, nežigosana `dev`  | ~25      | 5; `/intake` po prvem zagonu trenerja vsakič (3 od 3) |
 
-**Težava in vpliv:** trener med dvema strankama odpre aplikacijo in dobi zaslon, ki ne pove ničesar in
-se ne premakne; ne ve, ali je podatke izgubil. Stranka, ki odpre povabilo, vidi angleški zaslon brez
-obrazca in odneha.
+Na nežigosani kopiji je en zastoj obstal globlje: stran ni odgovorila niti na `1+1` prek CDP, brez
+izvornega okna in brez porabe procesorja. Na žigosani kopiji in na objavljeni se `/intake` po prvem
+zagonu trenerja odpre (3 od 3).
+
+**Težava in vpliv:** trener, ki mu se to zgodi, vidi angleški zaslon, ki ne pove ničesar in se ne
+premakne, in ne ve, ali je podatke izgubil. Na razvojnem strežniku (nežigosan) pa `/intake` obstane
+vsakič, ko je trener aplikacijo že odprl — kdor povabilo preizkuša lokalno, obtiči.
 
 **Predlog:** zagon naj se vedno konča — s ploščo ali s sporočilom v jeziku trenerja, kaj ni uspelo in kaj
 naj stori — opaženo na različicah `#8b2ce80` (objavljena) in `main` `6230070`, 390 × 844, sl.
