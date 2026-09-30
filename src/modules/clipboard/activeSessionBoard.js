@@ -257,6 +257,7 @@ function syncTitleBarEditChrome() {
   document.getElementById("btn-done-edit")?.classList.toggle("hidden", !editing);
 
   syncBindingLabel(t);
+  syncCopyPlanVisibility();
 
   // In edit mode the ⋯ menu's destructive action targets the PLAN (clear its exercises), not the
   // whole session — relabel it so the trainer knows which one they're deleting. Preserve the icon.
@@ -269,6 +270,15 @@ function syncTitleBarEditChrome() {
   delBtn.innerHTML = "";
   if (icon) delBtn.appendChild(icon);
   delBtn.appendChild(document.createTextNode(` ${label}`));
+}
+
+// Copying a plan goes to another client of this session. With none, the row could only answer
+// "nobody", so it is not offered.
+function syncCopyPlanVisibility() {
+  const session = deps.getActiveSession();
+  const others = (session?.participants || []).filter((id) => id !== session?.activeClientId);
+  document.getElementById("btn-copy-plan")?.classList.toggle("hidden", others.length === 0);
+  if (others.length === 0) document.getElementById("copy-plan-targets")?.classList.add("hidden");
 }
 
 // The same row binds and unbinds, so it says the way it will go now. Bound, it kept reading

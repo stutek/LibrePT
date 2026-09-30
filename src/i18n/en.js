@@ -730,7 +730,7 @@ export const en = {
   // is true — they went exploring — rather than blaming them, and gives the two ways on.
   walkthrough_off_track_title: "The tour is waiting",
   walkthrough_off_track:
-    "The last thing you did was not this step. Back to the demo carries on where you were; End the demo stops it.",
+    "The last thing you did was not this step. Back to the demo carries on where you were; Stop the demo ends it.",
   walkthrough_return: "Back to the demo",
   walkthrough_leave: "Stop the demo",
   walkthrough_finished: "That's the whole loop — one session, one clipboard, four taps.",
@@ -849,8 +849,8 @@ export const en = {
     "{count} could not be read — they are listed with the position they came in at:",
   program_import_custom_hint: "Not in your catalogue — it came in with the programme",
   program_import_custom_tag: "CUSTOM",
-  copy_plan_to: "Copy this plan to…",
-  copy_plan_nobody: "Nobody else is in this session yet.",
+  copy_plan_to: "Copy this plan to another client in this session",
+  copy_plan_done: "Plan copied to {name}",
   unknown_client: "Unknown client",
   bind_participants: "Everyone on this plan",
   unbind_participants: "Give everyone their own plan",
@@ -957,14 +957,16 @@ export const en = {
   story_chapter_evening: "Reviewing the notes and preparing sessions",
   story_step_programme_open_session: "Tap the session Group Strength & Conditioning.",
   story_step_programme_editor:
-    "Tap Edit plan — the row with the pencil in the menu. Jane's plan opens. Beside the title it says, for example, 45 / 60 min: 45 minutes of exercises in a 60-minute session.",
+    "Tap Edit plan — the row with the pencil in the menu. Jane's plan opens. Above the exercises, to the right of the Add from catalog button, it says, for example, 45 / 60 min: 45 minutes of exercises in a 60-minute session.",
   story_step_programme_add_circuit:
-    "At the bottom of the plan, tap + Circuit — the button with the stacked-layers icon. An empty circuit goes in at the end of the plan, for you to add exercises to.",
+    "At the bottom of the plan, tap + Circuit — the button with the stacked-layers icon. A new circuit with one empty exercise goes in at the end of the plan.",
+  story_step_programme_add_exercise:
+    "In the new circuit, tap the Exercise box and type Bird Dog. A circuit without an exercise name is dropped when the plan is saved.",
   story_step_programme_done:
     "Tap ✓ at the top right, beside the title. The plan is saved and the session comes back with all three.",
   story_step_programme_menu_again: "Tap ⋮ in the top right again.",
   story_step_programme_bind:
-    "Tap Everyone on this plan — the row with the chain icon. Jane, John and Sarah do the same circuit, so they share one plan, and you log Tuesday's sets once instead of three times.",
+    "Tap Everyone on this plan — the row with the chain icon. Jane, John and Sarah get the same plan, and Sarah's earlier plan is replaced by it. You log Tuesday's sets once instead of three times.",
   // The friends who arrive in chapter one are new; Tuesday's session is with Jane, John and Sarah,
   // who are already in the seeded register. Said out loud here, because a viewer who noticed the
   // different names and was told nothing would assume the demo had lost track of its own people.
@@ -1262,6 +1264,7 @@ export const en = {
   btn_plan_program: "Plan Program",
   unbacked_due: "NOT BACKED UP",
   unbacked_urgent: "AT RISK — BACK UP",
+  offline_badge: "Offline",
   offline_cached_desc:
     "HTTP server unreachable. Running off cached code; unable to check for updates.",
   // The two data-subject-request dialogs (modules/clients/clientDataRights.js).

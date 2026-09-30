@@ -346,18 +346,25 @@ function wireSessionMenuAndActions(t) {
       option.dataset.copyTo = clientId;
       option.textContent = client ? clientDisplayName(client) : t("unknown_client");
       option.addEventListener("click", () => {
-        closeSessionMenu();
+        // The menu stays open: its list turns into the answer to "did that work, and for whom".
         copyPlanTo(clientId);
+        showCopyPlanDone(option.textContent);
       });
       list.appendChild(option);
     }
-    // Nobody to copy to is a menu that says so rather than an empty box that looks broken.
-    if (others.length === 0) {
-      const empty = document.createElement("p");
-      empty.className = "session-menu-empty";
-      empty.textContent = t("copy_plan_nobody");
-      list.appendChild(empty);
-    }
+  }
+
+  /** Replaces the list of names with one line saying whom the plan was just copied to. */
+  function showCopyPlanDone(name) {
+    const list = document.getElementById("copy-plan-targets");
+    if (!list) return;
+    const { t } = getAppDeps();
+    const done = document.createElement("p");
+    done.className = "session-menu-empty";
+    done.setAttribute("role", "status");
+    done.textContent = t("copy_plan_done").replace("{name}", name);
+    list.textContent = "";
+    list.appendChild(done);
   }
 
   /** Gives another participant a copy of the plan on screen.

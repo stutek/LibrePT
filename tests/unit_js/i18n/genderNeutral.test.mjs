@@ -12,3 +12,8 @@ test("no Slovenian text writes a bracketed ending such as (-a)", () => {
     .map(([key]) => key);
   assert.deepEqual(offenders, []);
 });
+
+test("the page a client opens from an invitation does not address the reader in the feminine", () => {
+  // "izbereš sama" is feminine; the reader may be any client. The text says "izbereš ti" instead.
+  assert.doesNotMatch(TRANSLATIONS.sl.intake_sender_check, /izbereš sama/);
+});

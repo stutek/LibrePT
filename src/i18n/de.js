@@ -274,7 +274,8 @@ export const de = {
   done: "Fertig",
   done_editing_plan: "Bearbeitung des Plans beenden",
   session_options: "Optionen des Trainings",
-  edit_exit_hint: "Tippe auf Fertig, drücke Esc oder tippe daneben, um zu beenden.",
+  edit_exit_hint:
+    "Tippe auf Bearbeitung des Plans beenden, drücke Esc oder tippe daneben, um die Bearbeitung zu beenden.",
   reorder_hint: "Oben/unten tippen zum Verschieben, ziehen zum Neuanordnen",
   circuit: "Zirkel",
   circuit_title: "Name des Zirkels",
@@ -845,8 +846,8 @@ export const de = {
     "{count} konnten nicht gelesen werden — sie sind mit ihrer Position im Programm aufgelistet:",
   program_import_custom_hint: "Nicht in deinem Katalog — kam mit dem Programm",
   program_import_custom_tag: "EIGENE",
-  copy_plan_to: "Diesen Plan kopieren nach…",
-  copy_plan_nobody: "Noch niemand sonst ist in diesem Training.",
+  copy_plan_to: "Diesen Plan einer anderen Person in diesem Training kopieren",
+  copy_plan_done: "Plan kopiert an {name}",
   unknown_client: "Unbekannter Kunde",
   bind_participants: "Alle auf diesen Plan",
   unbind_participants: "Jedem einen eigenen Plan geben",
@@ -948,14 +949,16 @@ export const de = {
   story_chapter_evening: "Notizen durchsehen und Trainings vorbereiten",
   story_step_programme_open_session: "Tippe auf das Training Kraft & Kondition (Gruppe).",
   story_step_programme_editor:
-    "Tippe auf Plan bearbeiten — die Zeile mit dem Stift im Menü. Janes Plan öffnet sich. Neben dem Titel steht zum Beispiel 45 / 60 min: 45 Minuten Übungen in einem 60-Minuten-Training.",
+    "Tippe auf Plan bearbeiten — die Zeile mit dem Stift im Menü. Janes Plan öffnet sich. Über den Übungen, rechts neben der Schaltfläche Aus dem Katalog hinzufügen, steht zum Beispiel 45 / 60 min: 45 Minuten Übungen in einem 60-Minuten-Training.",
   story_step_programme_add_circuit:
-    "Tippe unten im Plan auf + Zirkel — die Schaltfläche mit dem Symbol gestapelter Ebenen. Am Ende des Plans kommt ein leerer Zirkel hinzu, in den du Übungen einfügst.",
+    "Tippe unten im Plan auf + Zirkel — die Schaltfläche mit dem Symbol gestapelter Ebenen. Am Ende des Plans kommt ein neuer Zirkel mit einer leeren Übung hinzu.",
+  story_step_programme_add_exercise:
+    "Tippe im neuen Zirkel auf das Feld Übung und tippe Bird Dog ein. Ein Zirkel ohne Übungsnamen wird beim Speichern des Plans verworfen.",
   story_step_programme_done:
     "Tippe oben rechts neben dem Titel auf ✓. Der Plan ist gespeichert, und das Training erscheint wieder mit allen dreien.",
   story_step_programme_menu_again: "Tippe noch einmal oben rechts auf ⋮.",
   story_step_programme_bind:
-    "Tippe auf Alle auf diesen Plan — die Zeile mit dem Kettensymbol. Jane, John und Sarah machen denselben Zirkel, also teilen sie einen Plan, und du zeichnest die Sätze am Dienstag einmal statt dreimal auf.",
+    "Tippe auf Alle auf diesen Plan — die Zeile mit dem Kettensymbol. Jane, John und Sarah bekommen denselben Plan, und Sarahs bisheriger Plan wird dadurch ersetzt. Du zeichnest die Sätze am Dienstag einmal statt dreimal auf.",
   // Tuesday's session is with Jane, John and Sarah, who are already in the seeded register.
   story_programme_open_body: "Sonntagabend. Du planst die Stunde am Dienstag.",
   story_programme_close_body:
@@ -1245,6 +1248,7 @@ export const de = {
   btn_plan_program: "Programm planen",
   unbacked_due: "NICHT GESICHERT",
   unbacked_urgent: "GEFÄHRDET — JETZT SICHERN",
+  offline_badge: "Offline",
   offline_cached_desc:
     "HTTP-Server nicht erreichbar. Die App läuft mit dem zwischengespeicherten Code und kann nicht nach Updates suchen.",
   // The two data-subject-request dialogs (modules/clients/clientDataRights.js).

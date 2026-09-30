@@ -172,7 +172,7 @@ export function renderActiveSessionOverlayShell() {
                  own loads. The participants are listed by name, because "copy to whom" is the whole
                  question and a menu item that guesses would be answering it for them. -->
             <button id="btn-copy-plan" class="session-menu-item" role="menuitem" aria-haspopup="true">
-              <i class="fa-solid fa-copy"></i> <span data-i18n="copy_plan_to">Copy this plan to…</span>
+              <i class="fa-solid fa-copy"></i> <span data-i18n="copy_plan_to">Copy this plan to another client in this session</span>
             </button>
             <div id="copy-plan-targets" class="session-menu-sub hidden" role="menu"></div>
             <button id="btn-delete-session" class="session-menu-item session-menu-item-danger" role="menuitem">

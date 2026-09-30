@@ -115,3 +115,45 @@ def test_the_copy_is_his_own_from_that_moment(page, local_server):
     assert diverged["his"] == 99
     assert diverged["hers"] != 99
     assert diverged["sharedIds"] is False
+
+
+def test_the_control_says_it_copies_to_another_client_of_this_session(
+    page, local_server
+):
+    """The old words, 'Copy this plan to…', promised a choice of day. It gives the plan to
+    another client of the same session."""
+    _mount(page, local_server)
+    page.click("#btn-session-menu")
+
+    expect(page.locator("#btn-copy-plan")).to_have_text(
+        "Copy this plan to another client in this session"
+    )
+
+
+def test_a_session_with_one_client_offers_no_copy(page, local_server):
+    """With nobody else in the session the control could only answer 'nobody'."""
+    page.set_viewport_size({"width": 390, "height": 844})
+    load_with_stub(
+        page,
+        local_server,
+        clipboard_stub(
+            active_session_fixture(exercises=[exercise_item("e1", "Back Squat")])
+        ),
+    )
+    page.wait_for_selector("#active-session-overlay:not(.hidden)")
+    page.click("#btn-session-menu")
+    page.wait_for_selector("#session-menu:not(.hidden)")
+
+    expect(page.locator("#btn-copy-plan")).to_be_hidden()
+
+
+def test_after_copying_the_app_says_to_whom(page, local_server):
+    """Before, the menu closed and nothing said the copy had happened or to whom."""
+    _mount(page, local_server)
+    _open_copy_list(page)
+
+    page.click("[data-copy-to='%s']" % JOHN)
+
+    expect(page.locator("#copy-plan-targets [role=status]")).to_have_text(
+        "Plan copied to John Smith"
+    )

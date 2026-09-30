@@ -525,7 +525,7 @@ export const sl = {
   intake_step_contact: "1. korak: Shrani ta kontakt",
   intake_step_form: "2. korak: Izpolni obrazec",
   intake_sender_check:
-    "Če to ni oseba, ki ti je dala povezavo, obrazca ne izpolnjuj. Ta stran sama ničesar ne pošlje: iz tvojih odgovorov nastane datoteka na tem telefonu, komu jo daš, pa izbereš sama.",
+    "Če to ni oseba, ki ti je dala povezavo, obrazca ne izpolnjuj. Ta stran sama ničesar ne pošlje: iz tvojih odgovorov nastane datoteka na tem telefonu, komu jo daš, pa izbereš ti.",
   intake_notice_link: "Kaj se zgodi s tvojimi podatki",
   intake_form_link: "Celotno besedilo privolitve",
   intake_send: "Deli s trenerjem",
@@ -693,7 +693,7 @@ export const sl = {
   walkthrough_expand: "Nazaj na kartico demota",
   walkthrough_off_track_title: "Ogled čaka",
   walkthrough_off_track:
-    "Zadnje dejanje ni bilo korak ogleda. Z »Nazaj v demo« nadaljuješ tam, kjer si bil, s »Končaj demo« ga končaš.",
+    "Zadnje dejanje ni bilo korak ogleda. Z »Nazaj v demo« nadaljuješ tam, kjer si bil, s »Ustavi demo« ga končaš.",
   walkthrough_return: "Nazaj v demo",
   walkthrough_leave: "Ustavi demo",
   walkthrough_finished: "To je celoten krog — en trening, ena podloga, štirje dotiki.",
@@ -800,8 +800,8 @@ export const sl = {
     "{count} jih ni bilo mogoče prebrati — spodaj so, z mestom, na katerem so prišle:",
   program_import_custom_hint: "Ni v tvojem katalogu — prišla je s programom",
   program_import_custom_tag: "PO MERI",
-  copy_plan_to: "Kopiraj ta načrt na …",
-  copy_plan_nobody: "V tem treningu ni še nikogar drugega.",
+  copy_plan_to: "Kopiraj ta načrt drugi stranki na tem treningu",
+  copy_plan_done: "Načrt kopiran: {name}",
   unknown_client: "Neznana stranka",
   bind_participants: "Vsi na ta načrt",
   unbind_participants: "Vsak svoj načrt",
@@ -900,14 +900,16 @@ export const sl = {
   story_chapter_evening: "Pregled zaznamkov in priprava treningov",
   story_step_programme_open_session: "Pritisni trening Skupinska moč in kondicija.",
   story_step_programme_editor:
-    "Pritisni Uredi načrt — vrstico s svinčnikom v meniju. Odpre se Janin načrt. Ob naslovu piše na primer 45 / 60 min: 45 minut vaj v 60-minutnem terminu.",
+    "Pritisni Uredi načrt — vrstico s svinčnikom v meniju. Odpre se Janin načrt. Nad vajami, desno od gumba Dodaj iz kataloga, piše na primer 45 / 60 min: 45 minut vaj v 60-minutnem terminu.",
   story_step_programme_add_circuit:
-    "Na dnu načrta pritisni + Sklop — gumb z ikono naloženih slojev. Na konec načrta se doda prazen sklop, v katerega dodaš vaje.",
+    "Na dnu načrta pritisni + Sklop — gumb z ikono naloženih slojev. Na konec načrta se doda nov sklop z eno prazno vajo.",
+  story_step_programme_add_exercise:
+    "V novem sklopu pritisni polje Vaja in vpiši Bird Dog. Sklop brez imena vaje se ob shranjevanju zavrže.",
   story_step_programme_done:
     "Pritisni ✓ zgoraj desno, ob naslovu. Načrt se shrani in trening se vrne z vsemi tremi.",
   story_step_programme_menu_again: "Znova pritisni ⋮ zgoraj desno.",
   story_step_programme_bind:
-    "Pritisni Vsi na ta načrt — vrstico z ikono verige. Jane, John in Sarah delajo isti sklop, zato imajo en načrt in torkove serije zapišeš enkrat, ne trikrat.",
+    "Pritisni Vsi na ta načrt — vrstico z ikono verige. Jane, John in Sarah dobijo isti načrt; Sarahin dosedanji načrt se zamenja z njim. Torkove serije zapišeš enkrat, ne trikrat.",
   story_programme_open_body: "Nedelja zvečer. Torkovo uro pripraviš vnaprej.",
   story_programme_close_body:
     "Jane, John in Sarah imajo en skupen načrt. V torek ga odpreš in začneš.",
@@ -1190,6 +1192,7 @@ export const sl = {
   btn_plan_program: "Načrtuj program",
   unbacked_due: "NI VARNOSTNE KOPIJE",
   unbacked_urgent: "OGROŽENO — NAREDI KOPIJO",
+  offline_badge: "Brez povezave",
   offline_cached_desc:
     "Strežnik HTTP ni dosegljiv. Zagon iz predpomnjene kode; preverjanje posodobitev ni mogoče.",
   // The two data-subject-request dialogs (modules/clients/clientDataRights.js).
