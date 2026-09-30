@@ -7268,6 +7268,29 @@ porodu pridruži skupinskemu metaboličnemu krogu z enim dotikom.
 trener v sklop doda vajo; korak 7 naj velja za stranke, ki res delajo isto, ali naj pove, da Sarah
 zamenja načrt. Opaženo na `main` `e2daf5e`, sl, 390 × 844.
 
+### 80.142 [ ] P2 — Poglavje »Pregled zaznamkov in priprava treningov« trdi, da je torek ob 20:00, ura pa se ne shrani
+
+**Scenarij in koraki:** prvi zagon, poglavje »Pregled zaznamkov in priprava treningov« (7 korakov),
+vsak korak opravljen sam; pri koraku 5 še »Pokaži mi«.
+
+**Opaženo:**
+- **Korak 5:** »Torek se ta teden premakne za dve uri … Pritisni svinčnik na kartici Moč ob torkih in
+  četrtkih.« Prva taka kartica je četrtek 2026-09-24, ki je že mimo; tudi »Pokaži mi« odpre
+  `session/setup/ss092426` z datumom 2026-09-24.
+- **Koraka 6 in 7:** »V polje za začetek vpiši 20:00.« in takoj »Konec ogleda … Torek je ta teden ob
+  20:00.« »Shrani« korak ne zahteva. Po »Končaj« in ponovnem nalaganju kartica 2026-09-24 še vedno
+  kaže »18:00 - 19:00«.
+- **Korak 7**, ko je poglavje začeto samo: »Pri Jane je zapisano, da ji je šlo prelahko. Johnovo koleno
+  je v njegovi kartoteki in v načrtu.« To se zgodi v poglavju »Izvedba in prilagoditve treninga«, ne
+  v tem. (Da ime poglavja obljublja pregled zaznamkov, ki ga ni, je že odprto vprašanje za Simona pri
+  vodenem ogledu.)
+
+**Težava in vpliv:** trener se nauči, da je ura spremenjena, ko jo vpiše; v resnici ni. Termin, ki ga
+misli premakniti, je napačen dan.
+
+**Predlog:** korak 5 naj odpre torek in ga imenuje z datumom; med korakoma 6 in 7 naj bo »Shrani«;
+povzetek naj opiše le, kar je poglavje naredilo. Opaženo na `main` `e2daf5e`, sl, 390 × 844.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
