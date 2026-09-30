@@ -59,6 +59,16 @@ export function buildEscapedTestDataItem(state, t, { sandbox = false, testRun = 
 // A planning-mode session is never "finished" (it has no Start/Complete footer), so it lives on in
 // state.history as `isPlanning: true` — which means it survives being replaced by the next session
 // the trainer opens, but they have no other place to rediscover it. One action per plan resumes it.
+/** The local calendar day a planning record was written for, or "" when it carries no date. */
+function planCalendarDate(plan) {
+  if (!plan?.date) return "";
+  const date = new Date(plan.date);
+  if (Number.isNaN(date.getTime())) return "";
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${date.getFullYear()}-${month}-${day}`;
+}
+
 export function buildUnscheduledPlansItem(state, t) {
   const plans = (state.history || []).filter((entry) => entry.isPlanning);
   if (plans.length === 0) return null;
@@ -74,8 +84,15 @@ export function buildUnscheduledPlansItem(state, t) {
       "notif_unscheduled_plans_desc",
       plans.length,
     ),
+    // The day the plan was written for is part of its name, because these rows are how a trainer
+    // tells one from another. A cancelled course leaves one plan per evening it had, and without the
+    // day they arrive as seven identical lines nobody can act on. The date is read with local
+    // getters, the same way a session's calendar day is: `substring(0, 10)` of a UTC instant is
+    // yesterday for anyone east of UTC late in the evening.
     actions: plans.map((plan) => ({
-      label: `${plan.title || fallbackTitle} · ${plan.clientName || ""}`,
+      label: [plan.title || fallbackTitle, plan.clientName, planCalendarDate(plan)]
+        .filter(Boolean)
+        .join(" · "),
       resumePlanId: plan.id,
     })),
   };

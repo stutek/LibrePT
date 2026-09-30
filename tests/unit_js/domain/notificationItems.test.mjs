@@ -60,6 +60,29 @@ test("every drafted plan gets its own resume action", () => {
   assert.equal(item.actions[1].label.startsWith("[planned_program]"), true);
 });
 
+test("a plan's row carries the day it was written for", () => {
+  // Cancelling a course leaves one plan per evening it had. Named by title and client alone they
+  // arrive as identical lines — seven of them, in the run that found this — and a trainer cannot
+  // tell which is which or which one to resume.
+  const state = {
+    history: [
+      {
+        id: "h1",
+        isPlanning: true,
+        title: "Morning series",
+        clientName: "Ana",
+        date: new Date(2026, 9, 5, 7, 15).toISOString(),
+      },
+      { id: "h2", isPlanning: true, title: "Morning series", clientName: "Ana" },
+    ],
+  };
+
+  const [dated, undated] = buildUnscheduledPlansItem(state, t).actions;
+  assert.equal(dated.label, "Morning series · Ana · 2026-10-05");
+  // A record with no date says what it can rather than showing an empty tail.
+  assert.equal(undated.label, "Morning series · Ana");
+});
+
 test("pending feedback is grouped by client, counted per client", () => {
   const state = {
     planUpdates: [
