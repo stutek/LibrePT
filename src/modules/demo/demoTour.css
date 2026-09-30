@@ -20,6 +20,19 @@
   transform: translate3d(var(--hand-x, 0), var(--hand-y, 0), 0);
   transition: transform 0.42s cubic-bezier(0.33, 0.1, 0.25, 1), opacity 0.2s ease;
 }
+/* DRAGGING: the hand is not travelling TO a control any more, it is the finger that is moving the
+   screen, so it has to be exactly where the pointer event it is sending says it is. The 0.42s glide
+   above would leave it most of half a second behind every point of the path — and the demo's own
+   test asserts the hand is over the place each event lands. It keeps its fade, which is not a
+   position. */
+.demo-tour-hand.is-dragging {
+  transition: opacity 0.2s ease;
+}
+/* Pressed for the whole drag, the way the tap's own press looks, so a viewer reads a finger held
+   down and moved rather than a hand sliding over the glass. */
+.demo-tour-hand.is-dragging svg {
+  transform: scale(0.88);
+}
 /* Light fill with a dark edge, so the hand stays legible over both a pale dashboard and the dark
    live-session overlay without knowing which it is on. */
 .demo-tour-hand svg {

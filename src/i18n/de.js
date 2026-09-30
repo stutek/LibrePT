@@ -732,6 +732,9 @@ export const de = {
     "Tippe auf den Zirkel, um ihn nach vorn zu holen. Seine Bedienelemente sind dann in Daumenreichweite.",
   tour_step_signal:
     "Markiere die Runde als Zu leicht. Ein Tipp zeichnet es auf und hinterlässt eine Notiz für den Plan.",
+  tour_step_open_previous:
+    "Zieh den Plan zur Seite: darunter liegt das Training davor, so ausgerichtet, dass dieselbe Übung auf gleicher Höhe steht. Dann nach oben streichen, um es zu öffnen.",
+  tour_step_back_to_today: "Und zurück — Heute bringt dich zum Training, das du gerade leitest.",
   tour_step_next_participant:
     "Wechsle zum nächsten Teilnehmer — dasselbe Training, sein eigener Plan.",
   // The long demo: chapter titles, the narration cards' bodies, and the labels the

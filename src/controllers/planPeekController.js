@@ -44,9 +44,16 @@ import { buildCircuitUnits } from "./sessionCircuits.js";
 // carries no sourceSession) — either way `id` only needs to differ from a draft this isn't.
 function anchorFor(activeSession) {
   const sourceSession = activeSession?.sourceSession;
-  const date =
-    sourceSession?.startDate ||
-    (activeSession?.startTime ? new Date(activeSession.startTime).toISOString() : "");
+  // ALWAYS an ISO string, whatever the clipboard was opened from. `buildSessionMeta` builds
+  // `startDate` as a Date OBJECT, and a launched session carries that object here; the neighbour
+  // rule takes the first ten characters of whatever it is given, which for a Date is "Tue Sep 30".
+  // Letters sort after digits, so every stored "2026-…" day counted as EARLIER than the session on
+  // screen: the peek offered the client's most recent record as the previous session whatever day
+  // the session was, and never found a next one at all. Seen on 2026-09-30 when the demo tried to
+  // step forward out of a session the peek had just opened and was told the client had no next plan,
+  // with today's own session sitting in the schedule.
+  const raw = sourceSession?.startDate || activeSession?.startTime || "";
+  const date = raw ? new Date(raw).toISOString() : "";
   return { date, id: sourceSession?.id || activeSession?.id || null };
 }
 

@@ -41,6 +41,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 - **The guide gives back the room it took once the control has moved.** It shortened itself to
   clear a control, the board then scrolled the control away, and the guide stayed short with its
   card scrolling inside half an empty screen.
+- **The walkthrough shows the sideways gesture, because nobody can guess it.** A step of the guided
+  walkthrough now pulls the plan aside and slides up, so a trainer sees the previous session
+  uncovered and then opened. It comes before anything is logged, so the walk never leaves work
+  behind.
+
 - **The clipboard's card stack holds one session, and last time's numbers come alongside it.** The
   client's previous session used to sit at the top of the same stack, so scrolling up to read it
   moved the active exercise back to the first of the session. It is now reached by pulling the plan
@@ -71,6 +76,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Fixed
 
+- **The previous and next session were worked out from the wrong day for any session opened from
+  the board.** The clipboard carried its start as a date object rather than as a written date, and
+  the comparison read the first ten characters of it — "Tue Sep 30" instead of "2026-09-30". Letters
+  count as later than digits, so every stored session looked earlier than the one on screen: pulling
+  the plan aside offered the client's most recent record whatever day the session was, and never
+  found a next session at all.
 - **An imported programme opens with its sets, reps and loads.** The editor showed "[object Object]"
   for the sets and every exercise opened without a load.
 - **A load and reps changed in the plan editor reach the sets not yet done**, so the history no

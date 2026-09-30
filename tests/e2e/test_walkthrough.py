@@ -186,13 +186,34 @@ def test_a_step_done_in_front_of_the_viewer_carries_the_card_on(page, local_serv
     expect(page.locator(SHOW_ME)).to_be_visible()
 
 
+def _step_count(page):
+    """How many steps the script has, read off the guide's own progress line rather than written
+    here. The tour is data (modules/demo/gymFloorTour.js says so), and a test that hard-codes its
+    length turns adding a step into a test edit — which is how three tests here broke at once when
+    the peek gesture was added on 2026-09-30."""
+    return int(STEP_COUNT_PATTERN.search(page.locator(PROGRESS).inner_text()).group(1))
+
+
+def _step_number(page):
+    """Which step the guide is on. The NUMBER, never the rendered line: the panel uppercases it in
+    CSS, so `inner_text()` and `to_have_text()` disagree about the same span — the trap this file
+    already documents further down."""
+    return int(re.search(r"\b(\d+)\b", page.locator(PROGRESS).inner_text()).group(1))
+
+
+def _walk_to_the_last_step(page):
+    """Do every step but the last, leaving the guide on it."""
+    for _ in range(_step_count(page) - 1):
+        _do_current_step(page)
+    return _step_count(page)
+
+
 def test_the_last_step_ends_on_the_trainers_tap_like_every_other(page, local_server):
     """Advancing off the final step CLOSES the walkthrough, so Done is a deliberate tap — which is
     now the same sentence as every other step rather than an exception to remember."""
     _open_walkthrough(page, local_server)
-    for _ in range(3):
-        _do_current_step(page)
-    expect(page.locator(PROGRESS)).to_contain_text("4")
+    last = _walk_to_the_last_step(page)
+    expect(page.locator(PROGRESS)).to_contain_text(str(last))
 
     page.locator(SHOW_ME).click()
 
@@ -227,13 +248,17 @@ def test_re_showing_a_done_step_changes_nothing(page, local_server):
     times leaves the same state.
     """
     _open_walkthrough(page, local_server)
-    for _ in range(3):
-        _do_current_step(page)
-    expect(page.locator(PROGRESS)).to_contain_text("4")
     signal = page.locator(".circuit-sig.easy.active")
+    # Walk until the signal is set, whatever number that step carries: what this test is about is
+    # the TOGGLE, not a position in the script. Performing that step leaves the guide on the one
+    # after it, which is where Back is pressed from — one more step would close the guide.
+    signal_step = None
+    while not signal.count():
+        signal_step = _step_number(page)
+        _do_current_step(page)
 
     page.locator(BACK).click()
-    expect(page.locator(PROGRESS)).to_contain_text("3")
+    expect(page.locator(PROGRESS)).to_contain_text(str(signal_step))
     for _ in range(3):
         page.locator(SHOW_ME).click()
         # Assert the PROMISE after each press — the signal this step demonstrated is still set —
@@ -243,7 +268,10 @@ def test_re_showing_a_done_step_changes_nothing(page, local_server):
         expect(signal.first).to_be_visible(timeout=15_000)
 
     expect(signal.first).to_be_visible()
-    expect(page.locator(PROGRESS)).to_contain_text("3"), "a replay is not progress"
+    (
+        expect(page.locator(PROGRESS)).to_contain_text(str(signal_step)),
+        ("a replay is not progress"),
+    )
 
 
 def test_walking_the_whole_script_ends_with_the_app_in_the_state_it_showed(
@@ -627,14 +655,15 @@ def test_back_off_the_last_step_rebuilds_the_state_that_step_needs(page, local_s
     preceding steps itself rather than telling them to start over.
     """
     _open_walkthrough(page, local_server)
-    for _ in range(3):
+    for _ in range(_step_count(page) - 2):
         _do_current_step(page)
-    expect(page.locator(PROGRESS)).to_contain_text("4")
+    before_last = _step_number(page)
+    _do_current_step(page)
     page.locator(SHOW_ME).click()
     expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
 
     page.locator(BACK).click()
 
-    expect(page.locator(PROGRESS)).to_contain_text("3")
+    expect(page.locator(PROGRESS)).to_contain_text(str(before_last))
     expect(page.locator(".walkthrough-problem")).to_be_hidden()
     expect(page.locator(".circuit-sig.easy").first).to_be_visible(timeout=15_000)

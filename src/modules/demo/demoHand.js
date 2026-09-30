@@ -143,6 +143,25 @@ export function pulseDemoHand(hand) {
   hand.classList.add("is-tapping");
 }
 
+/** Press the pointer down and hold it, for a drag rather than a tap.
+ *
+ * A tap is a press that ends immediately, so `pulseDemoHand` draws its rings and lets go. A drag is
+ * a press that travels, and a viewer only reads it as one if the finger stays down the whole way:
+ * the hand keeps its pressed shape, and its travel animation is switched off so it sits exactly
+ * where the pointer events being sent say it is (demoTour.css). The rings are sent once, at the
+ * point of contact, because that is where the screen was touched.
+ */
+export function pressDemoHand(hand) {
+  if (!hand) return;
+  flashTapRipple(hand);
+  hand.classList.add("is-dragging");
+}
+
+/** Lift the pointer at the end of a drag: the press relaxes and the hand may glide again. */
+export function liftDemoHand(hand) {
+  hand?.classList.remove("is-dragging");
+}
+
 export function unmountDemoHand(doc = document) {
   doc.getElementById(HAND_ID)?.remove();
 }

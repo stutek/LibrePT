@@ -32,7 +32,7 @@
 // Injected dependencies: `doc`, `hand` (optional — no pointer in CI), `wait`, `onStep`.
 
 import { checkExpectation, validateTour } from "../../domain/demoTour.js";
-import { moveDemoHand, pulseDemoHand } from "./demoHand.js";
+import { liftDemoHand, moveDemoHand, pressDemoHand, pulseDemoHand } from "./demoHand.js";
 import { demoPace, prefersReducedMotion } from "./demoPace.js";
 
 // How long a step will keep asking whether its expectation has come true. Correctness lives here
@@ -124,6 +124,97 @@ async function pointAndPress(hand, target, wait, travelMs, tapLeadMs) {
   // whole ring long (demoPace.js), so every ring is out and the first one finished by the time the
   // control is touched.
   await wait(tapLeadMs);
+}
+
+// How many pointer events one leg of a drag is sent as. A gesture the app measures — an axis it
+// locks, a distance it arms at, a stroke it counts — has to arrive as movement rather than as one
+// jump from start to end, or the app sees a finger teleport and nothing in between. Twelve is also
+// slow enough that a viewer watches a hand move rather than blink.
+const DRAG_POINTS_PER_LEG = 12;
+const DRAG_POINTER_ID = 1;
+
+/** One synthetic pointer event at a point on the screen. The app's own handlers are the audience:
+ * they read `clientX/clientY`, `pointerId` and `isPrimary`, and `bubbles` is what lets a listener on
+ * `window` hear a press that started on a card deep inside the page. */
+function sendPointer(doc, type, x, y) {
+  const target = doc.elementFromPoint(x, y) || doc.body;
+  target.dispatchEvent(
+    new PointerEvent(type, {
+      pointerId: DRAG_POINTER_ID,
+      pointerType: "touch",
+      isPrimary: true,
+      bubbles: true,
+      cancelable: true,
+      clientX: x,
+      clientY: y,
+    }),
+  );
+}
+
+/** The demonstration of a DRAG: a press that travels and then lifts, rather than a press that ends
+ * where it began.
+ *
+ * `step.drag` is a path in offsets from the press, one pair per corner: `[[200, 0], [200, -90]]` is
+ * the L that opens a neighbouring session — aside, then up without letting go. Offsets rather than
+ * points, because a gesture is a movement of the hand and not a place on the screen, and because a
+ * step written in absolute coordinates would mean something different on every phone.
+ *
+ * The hand leads every event: it is moved first and the pointer event is sent to where it now is,
+ * so what the viewer watches and what the app is told are the same thing at every instant. That is
+ * also what the demo's own test asserts about taps, and a drag has no reason to be held to less.
+ */
+async function performDrag(step, target, { doc, hand, wait, pace }) {
+  const start = centreOf(target);
+  let { x, y } = start;
+  if (hand) {
+    moveDemoHand(hand, x, y);
+    await wait(pace.travelMs);
+    pressDemoHand(hand);
+    await wait(pace.tapLeadMs);
+  }
+  sendPointer(doc, "pointerdown", x, y);
+
+  const legMs = step.dragLegMs ?? pace.travelMs;
+  for (const [dx, dy] of step.drag) {
+    const from = { x, y };
+    for (let point = 1; point <= DRAG_POINTS_PER_LEG; point += 1) {
+      const share = point / DRAG_POINTS_PER_LEG;
+      x = from.x + (start.x + dx - from.x) * share;
+      y = from.y + (start.y + dy - from.y) * share;
+      if (hand) moveDemoHand(hand, x, y);
+      sendPointer(doc, "pointermove", x, y);
+      if (legMs) await wait(legMs / DRAG_POINTS_PER_LEG);
+    }
+  }
+
+  // What the gesture promises WHILE THE FINGER IS DOWN, checked before it lifts. Some gestures leave
+  // nothing behind: a look at the previous session uncovers it and then springs shut, so a step that
+  // only checked the screen afterwards would be asserting the app forgot — which is true of a broken
+  // gesture too. `expectHeld` is the claim about the held state; `expect` still says what is true
+  // once the hand is off.
+  const held = step.expectHeld
+    ? checkExpectation(step.expectHeld, probe(doc, step.expectHeld.selector))
+    : { ok: true };
+
+  sendPointer(doc, "pointerup", x, y);
+  liftDemoHand(hand);
+  return held;
+}
+
+/** A whole drag step: settle, perform the gesture, and grade it twice — what had to be true while
+ * the finger was down, and what had to be true once it lifted.
+ *
+ * Its own function rather than a branch inside `performStep`, because a drag shares almost nothing
+ * with a tap: no tap lead, no retry of the press, and no idempotency reading — a gesture has no
+ * control whose state says "already done", so its expectation is the only judge.
+ */
+async function dragStep(step, target, { doc, hand, wait, pace }) {
+  await waitForBoxToSettle(target, wait);
+  const held = await performDrag(step, target, { doc, hand, wait, pace });
+  if (!held.ok) return { id: step.id, ok: false, reason: `while held: ${held.reason}` };
+  const outcome = await waitForOutcome(step, doc, wait, pace.outcomeBudgetMs);
+  await wait(step.settleMs ?? pace.stepPauseMs);
+  return { id: step.id, ...outcome };
 }
 
 /** Is this element actually on screen? Every view lives in the DOM at once — the router activates
@@ -292,6 +383,12 @@ export async function performStep(
   // Let the scroll settle before reading a box for the pointer, or the hand lands where the control
   // used to be.
   await wait(pace.scrollSettleMs);
+
+  // A DRAG is its own act from here on: it presses, travels and lifts, so it owns the hand for the
+  // whole gesture and has no tap to lead up to. It is not idempotent the way a tap is either —
+  // there is no control whose state says "already done" — so the step's own expectation, checked
+  // below, is what says whether it worked.
+  if (step.drag) return dragStep(step, target, { doc, hand, wait, pace });
 
   const travelMs = step.travelMs ?? pace.travelMs;
   if (hand) {

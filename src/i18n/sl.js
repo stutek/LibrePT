@@ -696,6 +696,9 @@ export const sl = {
   tour_step_focus_exercise:
     "Dotakni se kroga, da pride v fokus. Njegovi gumbi pridejo na doseg palca.",
   tour_step_signal: "Označi krog kot prelahek. En dotik ga zabeleži in pusti opombo za načrt.",
+  tour_step_open_previous:
+    "Potegni načrt vstran: pod njim je prejšnji trening, poravnan tako, da je ista vaja v isti višini. Nato s prstom navzgor in ga odpreš.",
+  tour_step_back_to_today: "In nazaj domov — Danes te vrne na trening, ki ga vodiš.",
   tour_step_next_participant: "Preklopi na zavihek naslednje stranke — isti trening, njen načrt.",
   gym_notes_label: "V telovadnici",
   label_repeats: "Ponovi vsak teden",

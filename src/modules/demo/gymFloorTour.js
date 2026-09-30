@@ -49,6 +49,50 @@ export const GYM_FLOOR_TOUR = {
       expect: { selector: "#active-session-client-tabs", visible: true },
     },
     {
+      // The gesture nobody can guess, which is why it is demonstrated rather than described. The
+      // card stack holds ONE session, so the session before it is reached sideways: pull the plan
+      // aside and it is uncovered underneath, lined up so the same movement sits level with the
+      // exercise in focus. A second stroke, upward without lifting the finger, opens it.
+      //
+      // ONE step, not two, although it shows two things. A look that is let go of leaves no trace
+      // at all, so a step for it could only expect something that was already true when its card
+      // appeared — and the guided walkthrough reads such a step as done before the trainer has done
+      // anything. The look is graded where it happens instead: `expectHeld`, checked while the
+      // finger is still down.
+      //
+      // The press starts on a card in the deck, where a thumb would land, not on the title bar.
+      // 200px on the demo's 390px phone uncovers over half the plan underneath and is well past the
+      // quarter-width the gesture arms at; 90px up is past the 64px the second stroke asks for.
+      id: "open-previous-session",
+      requires: [{ selector: "#active-exercise-scroll-deck", visible: true }],
+      target: "#active-exercise-scroll-deck .exercise-deck-card.circuit-card",
+      drag: [
+        [200, 0],
+        [200, -90],
+      ],
+      caption: "tour_step_open_previous",
+      // Mid-gesture: the previous session is there to READ, which is the whole point of pulling
+      // aside and the only moment the claim can be made.
+      expectHeld: { selector: "#plan-peek-under-past .plan-sheet-row", visible: true },
+      // And after: today's session is a group of two, the one before it is one client alone, so a
+      // Today control to get back is what says the clipboard changed session.
+      expect: { selector: "#btn-plan-today", visible: true },
+    },
+    {
+      // And home. Today is the control the title bar grows once the clipboard is showing another
+      // day, and tapping it is how a trainer gets back after looking something up — so the
+      // walkthrough ends where it began rather than leaving them in a session from July.
+      id: "back-to-today",
+      requires: [{ selector: "#btn-plan-today", visible: true }],
+      target: "#btn-plan-today",
+      caption: "tour_step_back_to_today",
+      // Today's session is the group of two; the one just left was one client alone.
+      expect: {
+        selector: "#active-session-client-tabs .client-tab-btn:nth-child(2)",
+        visible: true,
+      },
+    },
+    {
       id: "focus-exercise",
       // The deck opens fully collapsed, so the first tap is what brings a card into focus and makes
       // its actions reachable at all.
