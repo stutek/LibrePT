@@ -83,6 +83,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Fixed
 
+- **Swapping an exercise for one measured differently no longer keeps the old load.** Leg Press at
+  80 kg swapped for Wall Sit read "BW+80kg"; the sets not yet done now start from 10 reps and no
+  weight, and a swap to the same kind of exercise keeps the load.
+- **"Copy this plan" says it copies to another client of the same session**, is hidden when there is
+  nobody else, and says whose plan it became. It read as copying to another day.
+- **Offline, the Slovenian header says "Brez povezave"**, not "Offline".
+- **The intake page no longer addresses every client in the feminine** ("izbereš ti").
+- **Texts that name a button use the label the button shows**: the German edit hint, and the demo's
+  off-track card ("Ustavi demo", "Stop the demo").
+- **Two guided-tour chapters do what they say.** "Plan for Tuesday" points to where the minute
+  estimate really is and no longer adds a circuit that "Done" then drops; typing into the form that
+  "Your own data" shows no longer stops the tour.
 - **"Invite client" lets the trainer choose the language the client reads.** A new client has no
   language on record, so the message, the intake link, the privacy notice and the QR code all
   followed the app's language; the dialog now offers English, Slovenščina and Deutsch.

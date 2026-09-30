@@ -3031,6 +3031,12 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#804-x-p3--po-iz
 
 ### 80.5 [ ] P1 — Vnos datuma in ure iz profila ne ustvari pričakovanega termina
 
+**Stanje 2026-09-30 (librept-02): čaka na Simona.** Vzrok je namenski: »Načrtuj program« odpre
+obrazec v načinu načrtovanja, ki datum in uro shrani le kot besedilo pri načrtu in ne ustvari
+termina; gumb »Shrani« je bil tam odstranjen namenoma (`3f30a34`). **Vprašanje:** naj obrazec z
+datumom in uro ustvari tudi termin, naj datum in uro v tem načinu skrije, ali naj ostane tak in le
+podnaslov pove, da termin ni rezerviran? Odločiti skupaj s §80.9.
+
 **Scenarij:** v profilu stranke »Načrtuj program«. Obrazec »Načrtuj prihodnji program« poziva
 »Nastavi termin in kraj«. Vpisati ime, kraj in 10:00–10:45 (današnji datum), »Odpri v beležki«,
 dodati tri vaje, zapreti.
@@ -3078,6 +3084,11 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#807-x-p2--prvi-
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#808-x-p1--prosta-opomba-brez-izbrane-ocene-postane-priporočilo-za-večjo-težo--popravljeno-2026-09-27).
 
 ### 80.9 [ ] P2 — Pripravljenega programa ni mogoče izbrati pri ustvarjanju termina
+
+**Stanje 2026-09-30 (librept-02): čaka na Simona.** Termin v `state.sessions` hrani le `routineId`;
+pripravljen program je zapis v `state.history` z lastnimi vajami, zato ga termin nima kam prevzeti.
+**Vprašanje:** naj termin dobi shranjen program po stranki (sprememba podatkovnega modela, gl. §95),
+in naj bo vstop izbira v spustnem seznamu ali »Dodeli terminu« pri programu?
 
 **Scenarij** (`0625bd6`): za Ano obstaja »Uvodna vadba« s tremi vajami med »Nenačrtovani programi«.
 Trener prek »Ustvari trening« ustvari današnjo »Individualna vadba« z isto Ano.
@@ -3226,6 +3237,9 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8037-x-p2--pred
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8038-x-p2--uvoz-pravi-združilo-ali-prepisalo-v-resnici-vedno-zamenja--popravljeno-2026-09-27).
 
 ### 80.39 [ ] P3 — Obrazca za povratno informacijo in za napako mešata slovenščino in angleščino
+
+**Stanje 2026-09-30 (librept-02): čaka na Simona**, kot pravi točka sama: sta obrazca namenjena
+Simonu in tujim sodelavcem (vse angleško) ali trenerju (v njegovem jeziku)?
 
 **Scenarij in koraki:** trener v meniju ☰ izbere »Pošlji povratno informacijo« in nato »Napiši
 e-pošto«, oziroma »Prijavi napako na GitHubu«.
@@ -3646,16 +3660,9 @@ kolenom, je dobila »Leg Press S3 × R10 × 14 kg«.
 prilagoditev pri stranki) ali za vse na rutini. Najmanj v obeh primerih: okno pove, da se spremeni
 rutina, in koliko strank jo uporablja. Isto vprašanje ima ocena obrazca §80.133 (»Za koga«).
 
-### 80.93 [ ] P2 — »Kopiraj ta načrt na …« ne kopira na drug dan, ampak na drugo stranko istega treninga
+### 80.93 [x] P2 — »Kopiraj ta načrt na …« ne kopira na drug dan, ampak na drugo stranko istega treninga — popravljeno 2026-09-30
 
-**Opaženo** (`8b2ce80`): pri treningu z eno stranko ⋮ → »Kopiraj ta načrt na …« odgovori »V tem
-treningu ni še nikogar drugega.« Ukaz kopira načrt k drugi stranki istega treninga, ne na drug dan;
-tri pike obljubljajo izbiro cilja. Pri treningu »Par« (`12d0e66`) kopija k SIM Eva Test uspe, a brez
-besede: okno se zapre, zavihek ostane pri Timu, obvestila ni. »Potrditev bi bila dobrodošla.«
-
-**Presoja:** kopija na drug datum ni napaka, ampak manjkajoča funkcija §88.5. Odprto tukaj: napis naj
-pove, kam kopira (»Kopiraj ta načrt drugi stranki na tem treningu«); pri treningu z eno stranko naj
-ukaza ne bo; po kopiji naj aplikacija pove, komu je kopirala.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8093-x-p2--kopiraj-ta-načrt-na--ne-kopira-na-drug-dan-ampak-na-drugo-stranko-istega-treninga--popravljeno-2026-09-30).
 
 ### 80.94 [x] P2 — V kartoteki stranke je signal s treninga še vedno angleški: »Too Hard - Reduce Load« — popravljeno 2026-09-30
 
@@ -4022,7 +4029,12 @@ gumb, ki ga ni, ali obljubi, česar zaslon ne pokaže, trener ne ve, ali je zgre
 **Predlog:** korak 7 z napisom gumba; korak 12 naj pove, kje je opomba res vidna; koraka 2 in 5 naj
 sklop imenujeta. Opaženo na `main` `e2daf5e`, sl, 390 × 844.
 
-### 80.141 [ ] P3 — Poglavje »Načrt za torek« obljublja oceno minut, ki je ni, in shrani prazen sklop
+### 80.141 [~] P3 — Poglavje »Načrt za torek« obljublja oceno minut, ki je ni, in shrani prazen sklop
+
+**Stanje 2026-09-30 (librept-02):** kartica pove, kje je ocena minut (desno od »Dodaj iz kataloga«),
+nov korak v sklop vpiše vajo, da ga »Končano« ne zavrže, korak z verigo pove, da se Sarahin
+dosedanji načrt zamenja (`3a4b7b6`). **Odprto, čaka na Simona:** ali naj Sarah v demo podatkih sploh
+bo na istem treningu kot Jane in John.
 
 **Scenarij in koraki:** prvi zagon, poglavje »Načrt za torek« (8 korakov), vsak korak opravljen sam.
 
@@ -4067,7 +4079,11 @@ misli premakniti, je napačen dan.
 **Predlog:** korak 5 naj odpre torek in ga imenuje z datumom; med korakoma 6 in 7 naj bo »Shrani«;
 povzetek naj opiše le, kar je poglavje naredilo. Opaženo na `main` `e2daf5e`, sl, 390 × 844.
 
-### 80.143 [ ] P2 — Poglavje »Vnesi svoje podatke« povabi k vpisu, vpis pa ogled ustavi; okno imenuje gumb, ki ga ni
+### 80.143 [~] P2 — Poglavje »Vnesi svoje podatke« povabi k vpisu, vpis pa ogled ustavi; okno imenuje gumb, ki ga ni
+
+**Stanje 2026-09-30 (librept-02):** vpis v polje obrazca, ki ga korak pokaže, ne ustavi več ogleda,
+in kartica imenuje gumba, kot se res imenujeta (`3a4b7b6`, `5fcd503`). **Odprto, čaka na Simona:**
+besedilo 1. koraka še imenuje »temno« vrstico.
 
 **Scenarij in koraki:** prvi zagon, poglavje »Vnesi svoje podatke« (5 korakov). Pri koraku 4 (»Pritisni
 Prekliči na dnu obrazca, ali Shrani, če si vpisal svoje podatke.«) v »Moji podatki« spremeniti
@@ -4089,7 +4105,12 @@ da tisto ni bil korak. Okno potem imenuje gumb z napisom, ki ga ne najde.
 **Predlog:** vpis v polja obrazca v tem koraku naj ogleda ne ustavi; besedilo okna naj imenuje
 »Ustavi demo«; korak 1 brez »temni«. Opaženo na `main` `e2daf5e`, sl, 390 × 844.
 
-### 80.144 [ ] P3 — »S3 × R10« je angleška kratica v vseh jezikih; nemški namig imenuje gumb »Fertig«, ki ga ni
+### 80.144 [~] P3 — »S3 × R10« je angleška kratica v vseh jezikih; nemški namig imenuje gumb »Fertig«, ki ga ni
+
+**Stanje 2026-09-30 (librept-02):** nemški namig imenuje gumb z njegovim pravim imenom (`5fcd503`).
+**Odprto, čaka na Simona:** s čim zamenjati »S3 × R10 × 12 kg« in »BW« (predlog »3 × 10 × 12 kg« ne
+loči serij od ponovitev in ne pokrije »BW«); in ali oznaka »Menu / Meni« gre v slovar, čeprav jo
+`tests/unit/test_aria_labels_translated.py` namenoma vodi kot dvojezično.
 
 **Scenarij in koraki:** trening z vajami na podlogi in v urejevalniku, v slovenščini in nemščini.
 
@@ -4111,22 +4132,16 @@ Nemški trener išče gumb, ki ga ni.
 **Predlog:** kratice in enota iz slovarja (na primer »3 × 10 × 12 kg«, kot jo že kaže rutina: »3×10 ·
 12 kg«); nemški namig z napisom gumba. Opaženo na `main` `e2daf5e`, sl in de, 390 × 844.
 
-### 80.145 [ ] P3 — Stran za prijavo nagovori vsako stranko v ženskem spolu: »izbereš sama«
+### 80.145 [x] P3 — Stran za prijavo nagovori vsako stranko v ženskem spolu: »izbereš sama« — popravljeno 2026-09-30
 
-**Scenarij in koraki:** »Povabi stranko« → povezava `intake?lang=sl` → prvi zaslon strani za prijavo.
-
-**Opaženo:** »Ta stran sama ničesar ne pošlje: iz tvojih odgovorov nastane datoteka na tem telefonu,
-komu jo daš, pa izbereš **sama**.« Stavek nagovarja bralca, to je stranko, ne glede na spol. Drugod
-aplikacija za nagovor ne ve spola in piše »Pozdravljen/a«. Druge ženske oblike v slovarju se ujemajo
-s samostalnikom (»stranka … poslala«, »oseba, ki ti je dala«) in so pravilne.
-
-**Težava in vpliv:** moška stranka na prvem zaslonu, ki ga od trenerja sploh vidi, prebere nagovor
-v ženskem spolu.
-
-**Predlog:** stavek brez spola, na primer »komu jo daš, izbereš ti«. Opaženo na `main` `e2daf5e`, sl,
-390 × 844.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80145-x-p3--stran-za-prijavo-nagovori-vsako-stranko-v-ženskem-spolu-izbereš-sama--popravljeno-2026-09-30).
 
 ### 80.146 [ ] P3 — Po »Začni s prazno aplikacijo« se izbira ob vsakem nalaganju vrne, dokler trener nič ne vpiše
+
+**Stanje 2026-09-30 (librept-02): čaka na Simona.** `index.html` in `splashScreen.js` pravita, da se
+ponudba namenoma vrača, dokler trener ne shrani podatkov. **Vprašanje:** naj se izbira »Začni s
+prazno aplikacijo« zapomni ob prvem kliku? Potem trener s prazno aplikacijo ponudbe za demo ne vidi
+več.
 
 **Scenarij in koraki:** svež brskalnik, pogoji, tema, osebni podatki, »Začni s prazno aplikacijo«.
 Brez vpisa česar koli stran ponovno naložiti (v istem zavihku).
@@ -4170,37 +4185,13 @@ na zaslonu, nobena tarča pod 44 pik).
 
 **Napačen tip ali vrstni red.** Vrstni red (stranka, trening, besedilo) ustreza nalogi.
 
-### 80.148 [ ] P2 — Zamenjava vaje obdrži težo prejšnje: Wall Sit dobi »BW+80kg«
+### 80.148 [x] P2 — Zamenjava vaje obdrži težo prejšnje: Wall Sit dobi »BW+80kg« — popravljeno 2026-09-30
 
-**Scenarij in koraki:** trening »Noge« za Barbaro Kos, v »Uredi načrt« Leg Press 3 × 10 × 80 kg. V
-vrstici Leg Press ikona odprte knjige (»Prebrskaj katalog vaj«), poiskati »wall«, izbrati Wall Sit,
-»Končano z urejanjem načrta«.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80148-x-p2--zamenjava-vaje-obdrži-težo-prejšnje-wall-sit-dobi-bw80kg--popravljeno-2026-09-30).
 
-**Opaženo:** vrstica ima zdaj Wall Sit s 3 serijami, »10« in težo 80; polje za težo ima namig »+kg
-(BW)«. Podloga: »Wall Sit S3 × 0:10 × BW+80kg«. Ponovitve so postale sekunde drže, 80 kg z naprave je
-postalo dodatna teža na telesu. Trener dneva 10, ko je bila naprava zasedena: »Wall Sit je dobil
-"BW+80kg" in 0:12; Goblet Squat je obdržal 100 kg. Trener to na telovadnici zlahka spregleda.«
+### 80.149 [x] P3 — Brez povezave glava slovenske aplikacije napiše »Offline« — popravljeno 2026-09-30
 
-**Težava in vpliv:** zamenjava se dela v naglici, med dvema strankama. Če trener številk ne preveri,
-stranka dobi drža ob steni z 80 kg ali počep z utežjo z 100 kg, ker sta bila tista kilograma
-postavljena za napravo.
-
-**Predlog:** ko se vaja zamenja z vajo druge vrste (naprava → lastna teža, ponovitve → čas), naj se
-teža in cilj ponastavita na privzeto vrednost nove vaje ali naj vrstica na številke opozori. Opaženo na
-`main` `d12646c`, sl, 390 × 844; najprej opazil trener dneva 10.
-
-### 80.149 [ ] P3 — Brez povezave glava slovenske aplikacije napiše »Offline«
-
-**Scenarij in koraki:** aplikacija je naložena, strežnik se ustavi (klet brez signala), stran se ponovno
-naloži.
-
-**Opaženo:** aplikacija se naloži iz predpomnilnika; v glavi je viden napis »Offline«
-(`span.sync-offline`). V slovenskem slovarju tega napisa ni. Delo brez povezave sicer deluje: trening
-»Klet« za jutri je nastal in je po ponovnem nalaganju še tam.
-
-**Težava in vpliv:** edini znak, da telefon nima povezave, je v jeziku, ki ga trener morda ne bere.
-
-**Predlog:** napis iz slovarja, na primer »Brez povezave«. Opaženo na `main` `d12646c`, sl, 390 × 844.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80149-x-p3--brez-povezave-glava-slovenske-aplikacije-napiše-offline--popravljeno-2026-09-30).
 
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 

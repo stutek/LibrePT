@@ -20,6 +20,64 @@ Read [CHANGELOG.md](CHANGELOG.md) for what shipped and when. This file is why.
 
 ---
 
+### 80.148 [x] P2 — Zamenjava vaje obdrži težo prejšnje: Wall Sit dobi »BW+80kg« — popravljeno 2026-09-30
+
+**Scenarij in koraki:** trening »Noge« za Barbaro Kos, v »Uredi načrt« Leg Press 3 × 10 × 80 kg. V
+vrstici Leg Press ikona odprte knjige (»Prebrskaj katalog vaj«), poiskati »wall«, izbrati Wall Sit,
+»Končano z urejanjem načrta«.
+
+**Opaženo:** vrstica ima zdaj Wall Sit s 3 serijami, »10« in težo 80; polje za težo ima namig »+kg
+(BW)«. Podloga: »Wall Sit S3 × 0:10 × BW+80kg«. Ponovitve so postale sekunde drže, 80 kg z naprave je
+postalo dodatna teža na telesu. Trener dneva 10, ko je bila naprava zasedena: »Wall Sit je dobil
+"BW+80kg" in 0:12; Goblet Squat je obdržal 100 kg. Trener to na telovadnici zlahka spregleda.«
+
+**Težava in vpliv:** zamenjava se dela v naglici, med dvema strankama. Če trener številk ne preveri,
+stranka dobi drža ob steni z 80 kg ali počep z utežjo z 100 kg, ker sta bila tista kilograma
+postavljena za napravo.
+
+**Predlog:** ko se vaja zamenja z vajo druge vrste (naprava → lastna teža, ponovitve → čas), naj se
+teža in cilj ponastavita na privzeto vrednost nove vaje ali naj vrstica na številke opozori. Opaženo na
+`main` `d12646c`, sl, 390 × 844; najprej opazil trener dneva 10.
+
+### 80.93 [x] P2 — »Kopiraj ta načrt na …« ne kopira na drug dan, ampak na drugo stranko istega treninga — popravljeno 2026-09-30
+
+**Opaženo** (`8b2ce80`): pri treningu z eno stranko ⋮ → »Kopiraj ta načrt na …« odgovori »V tem
+treningu ni še nikogar drugega.« Ukaz kopira načrt k drugi stranki istega treninga, ne na drug dan;
+tri pike obljubljajo izbiro cilja. Pri treningu »Par« (`12d0e66`) kopija k SIM Eva Test uspe, a brez
+besede: okno se zapre, zavihek ostane pri Timu, obvestila ni. »Potrditev bi bila dobrodošla.«
+
+**Presoja:** kopija na drug datum ni napaka, ampak manjkajoča funkcija §88.5. Odprto tukaj: napis naj
+pove, kam kopira (»Kopiraj ta načrt drugi stranki na tem treningu«); pri treningu z eno stranko naj
+ukaza ne bo; po kopiji naj aplikacija pove, komu je kopirala.
+
+### 80.149 [x] P3 — Brez povezave glava slovenske aplikacije napiše »Offline« — popravljeno 2026-09-30
+
+**Scenarij in koraki:** aplikacija je naložena, strežnik se ustavi (klet brez signala), stran se ponovno
+naloži.
+
+**Opaženo:** aplikacija se naloži iz predpomnilnika; v glavi je viden napis »Offline«
+(`span.sync-offline`). V slovenskem slovarju tega napisa ni. Delo brez povezave sicer deluje: trening
+»Klet« za jutri je nastal in je po ponovnem nalaganju še tam.
+
+**Težava in vpliv:** edini znak, da telefon nima povezave, je v jeziku, ki ga trener morda ne bere.
+
+**Predlog:** napis iz slovarja, na primer »Brez povezave«. Opaženo na `main` `d12646c`, sl, 390 × 844.
+
+### 80.145 [x] P3 — Stran za prijavo nagovori vsako stranko v ženskem spolu: »izbereš sama« — popravljeno 2026-09-30
+
+**Scenarij in koraki:** »Povabi stranko« → povezava `intake?lang=sl` → prvi zaslon strani za prijavo.
+
+**Opaženo:** »Ta stran sama ničesar ne pošlje: iz tvojih odgovorov nastane datoteka na tem telefonu,
+komu jo daš, pa izbereš **sama**.« Stavek nagovarja bralca, to je stranko, ne glede na spol. Drugod
+aplikacija za nagovor ne ve spola in piše »Pozdravljen/a«. Druge ženske oblike v slovarju se ujemajo
+s samostalnikom (»stranka … poslala«, »oseba, ki ti je dala«) in so pravilne.
+
+**Težava in vpliv:** moška stranka na prvem zaslonu, ki ga od trenerja sploh vidi, prebere nagovor
+v ženskem spolu.
+
+**Predlog:** stavek brez spola, na primer »komu jo daš, izbereš ti«. Opaženo na `main` `e2daf5e`, sl,
+390 × 844.
+
 ## [x] Resume point — state as at 2026-09-26 12:06 — merged 2026-09-30
 
 **Merged 2026-09-30 into: 83. [ ] §66 gleda samo naprej: stranka, ki pride za besedilom**
