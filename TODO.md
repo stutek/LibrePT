@@ -8554,9 +8554,15 @@ function above exists to keep the copy in step. That is the single-source-of-tru
 rent: one of the two shapes has to win at recovery, and `recoverActiveSession` decides it is the
 cache.
 
-**Simon's two requirements, which the change is measured against:** one source of truth, and several
-unfinished sessions or plans stored at the same time. The draft path already meets both; a live
-session must meet them the same way.
+**Simon's requirements, which the change is measured against** (2026-09-30): one source of truth;
+several unfinished sessions or plans stored at the same time; **no temporary store for a session in
+progress at all** — he sees no value in one; and **several sessions may be live in parallel**. The
+draft path already meets the first two; a live session must meet all four the same way.
+
+**Parallel live sessions are not hypothetical, and the product said so first.** `a165d08`, shipped
+the same day, puts sessions that overlap in time side by side in columns on the board, because a
+trainer really does have two groups at once. The clipboard can hold one. A feature that shipped
+today already contradicts the single slot.
 
 **The shape.** A session is one record with a STATE — planned, in progress, finished — not a record
 plus a private slot. Complete stops being the moment of first writing and becomes a change of state.
@@ -8568,14 +8574,77 @@ routine built from a session. Give a live session its own boolean and every one 
 silently counts it as performed. One field with three values forces each of those sites to be looked
 at once and decided, which is the only version of this that can be finished.
 
-**What stops existing** — not fixed, but with nothing left to protect: the live-session cache, its
-staleness rule, the recovery path at boot, the `canOpen` guard that refuses to leave a started
-session, and §92.6. A reload reads the record; opening a neighbour leaves the other record alone.
+**What stops existing** — not fixed, but with nothing left to protect: the live-session cache
+ENTIRELY, its staleness rule, the recovery path at boot, the `canOpen` guard, and §92.6. A reload
+reads the record; opening a neighbour leaves the other record alone.
+
+**`canOpen` is not merely unnecessary, it is backwards.** It refuses to leave a STARTED session, to
+protect the one slot. With several live sessions allowed, leaving one is the ordinary thing a
+trainer does between two groups, and the sideways gesture stops being a way to LOOK at neighbouring
+plans and becomes the way to MOVE between the sessions being run. That is a bigger promotion for the
+gesture than anything in §92, and it is what the guard would have to stop doing.
 
 **What it costs.** A data-schema version and its migration. Those 77 sites, read once. The Drive
 sync will carry a session in progress and push it repeatedly, which has to be looked at before it is
-switched on. And one product question that is not technical: with several sessions in progress at
-once, the dashboard badge, the clipboard bar and the timers must each say WHICH session they mean.
+switched on. And the consequence of allowing several at once, which is design work and not
+migration: the dashboard badge, the clipboard bar and the running timers each speak about "the
+session" today and must each name WHICH one — on a phone screen, one-handed, without a second row of
+chrome. That is the part to draw before any of it is written.
+
+### 95.2 [ ] The structure: trening, načrt, rutina — and the states that replace the flags
+
+Asked by Simon 2026-09-30: the data structure for session/training/plan, with the states.
+
+**What exists today, measured rather than recalled.** One lifecycle is spread across three shapes
+with three separate flags, and a fourth shape that is not stored as a record at all:
+
+| Shape | Where | Flag it carries |
+| --- | --- | --- |
+| The booked slot: date, time, location, participants, `routineId` | `state.sessions` | `completed` |
+| The plan authored for one client | `state.history`, one record per client | `isPlanning` |
+| What one client performed | `state.history`, one record per client | none — the absence of `isPlanning` |
+| The clipboard being run | one storage key, `librept_active_session` | `started` |
+
+**And the training does not survive into history.** `buildSessionHistoryRecord`
+(`domain/sessionHistoryRecord.js`) writes `id`, `clientId`, `clientName`, `routineName`, `date`,
+`duration`, the program and that client's feedback — and no session id. A group of three produces
+three unrelated records: afterwards nothing says they were one training, or which booked slot they
+came from. The entity the trainer thinks in is the one thing not stored.
+
+**The structure, in the words the app already uses.**
+
+- **Trening** — one occasion. Date, time, location, participants, the rutina it came from, and its
+  STATE. This is the thing the board shows, the thing the clipboard opens, and the thing history
+  should list. It exists from the moment the slot is booked until long after it is finished; it is
+  never two records.
+- **Načrt** — one participant's program within a trening: what is prescribed and, as the trening is
+  run, what was performed. One per participant, carrying that participant's own state. This is what
+  `clientRoutines` holds live and what the per-client history record holds afterwards.
+- **Rutina** — a reusable template, no date and no participants, in `state.routines`. NOT part of
+  this: a trening is made FROM a rutina and then goes its own way. It stays exactly as it is.
+
+**The states, replacing `completed`, `isPlanning` and `started`.** One field on the trening, not
+three booleans in three places:
+
+- **scheduled** — booked, no plan authored yet.
+- **planned** — a načrt exists for at least one participant (today: an `isPlanning` record).
+- **live** — being run (today: `started` on the cache blob). Several trenings may be live at once.
+- **done** — finished (today: a history record without `isPlanning`).
+
+**Questions this does NOT answer, and must not be answered by whoever writes the code.** They change
+what a trainer sees, so they are Simon's:
+
+1. **Cancelled and missed.** A slot the client cancelled, and a slot nobody came to, are neither
+   done nor live. Are they states of a trening, or is a cancelled trening deleted? The app already
+   sends cancellations through the notification feed, so the case exists today.
+2. **Per-participant state.** In a group of three, one attends, one is absent and one arrives late.
+   Is that a state on the načrt, and what are its values?
+3. **Embedded or linked.** Is a načrt a field inside the trening record, or its own record pointing
+   at one? Embedded keeps a trening in one piece; linked lets one client's history be read without
+   loading every group they trained in.
+4. **What happens to history as it is stored today.** Existing records have no session id and cannot
+   get one — the trening they belonged to was never written. Do old records become single-participant
+   trenings, or does history keep two shapes with a migration boundary and a date?
 
 ### 95.1 [ ] §92.6 is this section's subordinate case, not its own task
 
