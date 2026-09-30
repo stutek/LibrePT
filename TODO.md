@@ -6584,6 +6584,27 @@ razloga za dvom. Delo, ki ga je opravil, je izgubljeno tiho.
 **Predlog:** »Končano z urejanjem načrta« naj spremembo zapiše, in dokler ni zapisana, naj podloga ne
 kaže nove številke — opaženo na različici `8b2ce80`.
 
+### 80.92 [ ] P2 — »Uveljavi in razreši« spremeni skupno rutino, okno pa govori samo o eni stranki
+
+**Scenarij in koraki:** stranka je na treningu pri vaji rekla, da je pretežko (na podlogi »Pretežko«
+in »Dodaj opombo« → »Pretežko – zmanjšaj težo«). Odpri predal na dnu → »Treningi, ki čakajo na
+pregled« → vrstica »SIM Ana — Moč pri Ani (1)« → zaslon »Čakajoče na pregled« → »Razreši«. V oknu
+»Uveljavi spremembo programa« tapni »Uveljavi in razreši«.
+
+**Opaženo:** okno pove »Stranka: SIM Ana«, »Povratna informacija: Pretežko – zmanjšaj težo«,
+»Podrobnosti: SIM pretežko pri 4. seriji« in ponudi »Ciljna teža (kg)« z vpisano 75. Po dotiku se
+spremeni **rutina** »SIM Rutina Ana«: teža pri vaji Barbell Back Squat se je v njenem zapisu
+spremenila s 77.5 na 75. Rutina ni last te stranke — isto rutino ponudi izbirnik »Izberi rutino« pri
+vsaki stranki in vsakem terminu. Okno rutine ne omeni z nobeno besedo.
+
+**Težava in vpliv:** trener zniža breme eni stranki, ki ji je bilo pretežko, in s tem zniža breme
+vsem drugim strankam na isti rutini in vsem svojim prihodnjim terminom s to rutino. Tega ne izve, ker
+okno govori o eni stranki. Pri močnejši stranki to pomeni teden treninga s premajhno težo.
+
+**Predlog:** okno naj napiše, kaj bo spremenilo (»rutina SIM Rutina Ana — velja za vse stranke na
+njej«) in naj ponudi izbiro med spremembo rutine in spremembo načrta te stranke — opaženo na
+različici `8b2ce80`.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
