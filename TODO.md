@@ -7291,6 +7291,26 @@ misli premakniti, je napačen dan.
 **Predlog:** korak 5 naj odpre torek in ga imenuje z datumom; med korakoma 6 in 7 naj bo »Shrani«;
 povzetek naj opiše le, kar je poglavje naredilo. Opaženo na `main` `e2daf5e`, sl, 390 × 844.
 
+### 80.143 [ ] P2 — Poglavje »Vnesi svoje podatke« povabi k vpisu, vpis pa ogled ustavi; okno imenuje gumb, ki ga ni
+
+**Scenarij in koraki:** prvi zagon, poglavje »Vnesi svoje podatke« (5 korakov). Pri koraku 4 (»Pritisni
+Prekliči na dnu obrazca, ali Shrani, če si vpisal svoje podatke.«) v »Moji podatki« spremeniti
+telefon v 041 222 333.
+
+**Opaženo:**
+- Po vpisu se ogled ustavi: »Ogled čaka. Zadnje dejanje ni bilo korak ogleda. Z »Nazaj v demo«
+  nadaljuješ tam, kjer si bil, s »Končaj demo« ga končaš.« Gumba sta »Nazaj v demo« in **»Ustavi
+  demo«**; »Končaj demo« ni nikjer. Isto okno ogled pokaže ob vsakem odstopu, torej v vseh poglavjih.
+- Korak 1: »Pritisni ☰ … zgoraj desno v temni vrstici.« Pri temi »Dan« je glava bela
+  (`rgba(255, 255, 255, 0.96)`).
+- Drži: »Shrani moje podatke« shrani telefon in ta ostane tudi po »Zapusti peskovnik«.
+
+**Težava in vpliv:** korak, ki trenerja povabi, naj vpiše svoje podatke, ga ob vpisu ustavi in mu reče,
+da tisto ni bil korak. Okno potem imenuje gumb z napisom, ki ga ne najde.
+
+**Predlog:** vpis v polja obrazca v tem koraku naj ogleda ne ustavi; besedilo okna naj imenuje
+»Ustavi demo«; korak 1 brez »temni«. Opaženo na `main` `e2daf5e`, sl, 390 × 844.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
