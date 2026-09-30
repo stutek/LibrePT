@@ -6987,6 +6987,36 @@ pa vidi drugo.
 (na primer »trening« ali »vadba«: »Odpri trening«). Izbira besede je Simonova. Opaženo na `main`
 `12d0e66`, sl, 390 × 844.
 
+### 80.119 [ ] P2 — Zgodovina stranke izpusti težo: »Dumbbell Goblet Squat: 10, 10, 10« pri 12 kg
+
+**Scenarij in koraki:** prazna aplikacija, stranka SIM Nina Koleno, trening »Rehabilitacija« z vajo
+Dumbbell Goblet Squat 3 × 10 × 12 kg (podloga kaže »S3 × R10 × 12 kg«). Začeti, pritisniti
+»Prelahko«, zaključiti. ☰ → »Imenik strank« → SIM Nina Koleno.
+
+**Opaženo:** »ZGODOVINA ZABELEŽENIH VADB«: »Dumbbell Goblet Squat: 10, 10, 10«. Teže ni. Vrstica
+»Zadnjič« pri vzorčni stranki Jane Doe pa piše »18 kg x 10, 18 kg x 10, 18 kg x 9«. Trenerka brez
+predznanja: »Teže (12 kg) ni v zgodovini. … napredek po teži ne vidim.«
+
+**Težava in vpliv:** napredek pri vaji z utežjo je teža. Iz zgodovine trener ne vidi, s koliko je
+stranka delala, in pri naslednjem programu ugiba ali išče drugje.
+
+**Predlog:** zgodovina naj pokaže težo ob vsaki seriji, kot vrstica »Zadnjič«. Opaženo na `main`
+`12d0e66`, sl, 390 × 844; najprej opazil trener-podagent.
+
+### 80.120 [ ] P2 — Pod poškodbo kolena stran stranke pravi »Brez zabeleženih zdravstvenih težav«
+
+**Scenarij in koraki:** nova stranka SIM Nina Koleno, v »Poškodbe in omejitve« vpisano »Bolečine v
+desnem kolenu, brez globokih počepov«, polje »Opombe« prazno. Odpreti stran stranke.
+
+**Opaženo:** »POŠKODBE IN OMEJITVE: Bolečine v desnem kolenu, brez globokih počepov«, takoj pod tem
+»OPOMBE: Brez zabeleženih zdravstvenih težav ali posebnosti.«
+
+**Težava in vpliv:** besedilo za prazno polje »Opombe« trdi, da stranka nima zdravstvenih težav, dve
+vrstici pod njeno poškodbo. Trener, ki stran hitro preleti, lahko prebere zadnje.
+
+**Predlog:** za prazne opombe napisati, da opomb ni, na primer »Ni opomb.« Opaženo na `main`
+`12d0e66`, sl, 390 × 844.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
