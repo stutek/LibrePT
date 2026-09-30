@@ -4278,8 +4278,10 @@ Med čakanjem je na zaslonu le »LibrePT / A lightweight, free app for your clip
 brez sporočila, da aplikacija čaka na omrežje. Napak v konzoli ni. Na zamrznjeni kopiji z običajnim
 strežnikom sta se dvakrat zgodila enaka zastoja, oba takrat, ko je glava pisala »Brez povezave«
 (»Strežnik HTTP ni dosegljiv. Zagon iz predpomnjene kode …«); naslednje nalaganje je steklo. Tretjič
-(00:31) se stran v 134 sekundah ni naložila: strežnik na posamezno zahtevo ni odgovoril, aplikacija pa
-iz predpomnilnika ni zagnala. Odgovor, ki ne pride nikoli, je skrajni primer slabega signala.
+(00:31) se stran v 134 sekundah ni naložila. **Ti zastoji morda niso omrežje:** ob četrtem (00:35,
+stran `/intake`, ki jo odpre stranka iz povabila) je strežnik z vklopljenim dnevnikom odgovoril na vse
+zahteve (200 in 304), service worker je bil aktiven, stran pa je ostala na angleškem zaslonu za
+nalaganje. Glej §80.154.
 
 **Težava in vpliv:** v kleti brez signala aplikacija dela, v telovadnici s slabim signalom, kar je
 pogostejše, pa trener med dvema strankama čaka minuto in pol na angleški zaslon, ki ne pove ničesar.
@@ -4288,6 +4290,33 @@ Koda in podatki so že na telefonu.
 **Predlog:** ko sta koda in podatki na telefonu, naj se aplikacija odpre iz njih enako hitro kot brez
 signala, posodobitev pa naj počaka v ozadju — opaženo na različici `main` `6230070` (zamrznjena
 kopija), 390 × 844, sl.
+
+### 80.154 [ ] P1 — Občasno se aplikacija ne naloži nikoli: ostane na angleškem zaslonu za nalaganje
+
+**Scenarij in koraki:** trener odpre aplikacijo, ki jo je že uporabljal (podatki trenerke »Tara Zorko«
+vneseni, service worker nameščen), ali stranka odpre povabilo `/intake`. Ponavljano nalaganje istega
+naslova v istem zavihku, na objavljeni aplikaciji in na zamrznjeni kopiji `main`.
+
+**Opaženo:** stran ostane na zaslonu »LibrePT / A lightweight, free app for your clipboard, sessions and
+training programmes.« v angleščini, `<html lang="en">`, naslov se ne preusmeri na `/sessions/<datum>`.
+Konzola nima napak. Počakano do 134 sekund, konca ni bilo. Naslednje nalaganje običajno steče.
+
+| Kje                                   | Nalaganj | Zastojev |
+| :------------------------------------ | :------- | :------- |
+| objavljena `#8b2ce80`                 | ~40      | 2        |
+| zamrznjena kopija `main` `6230070`    | ~25      | 5        |
+
+Dve obliki. Pri večini zastojev stran še odgovori na branje (`eval`), le zagon ne pride do konca; strežnik
+z vklopljenim dnevnikom je odgovoril na vse zahteve (200 in 304), service worker je aktiven in nadzoruje
+stran. Enkrat (zamrznjena kopija, 00:36) stran ni odgovorila niti na `1+1` prek CDP, brez izvornega okna
+(`Page.handleJavaScriptDialog`: »No dialog is showing«) in brez porabe procesorja.
+
+**Težava in vpliv:** trener med dvema strankama odpre aplikacijo in dobi zaslon, ki ne pove ničesar in
+se ne premakne; ne ve, ali je podatke izgubil. Stranka, ki odpre povabilo, vidi angleški zaslon brez
+obrazca in odneha.
+
+**Predlog:** zagon naj se vedno konča — s ploščo ali s sporočilom v jeziku trenerja, kaj ni uspelo in kaj
+naj stori — opaženo na različicah `#8b2ce80` (objavljena) in `main` `6230070`, 390 × 844, sl.
 
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
