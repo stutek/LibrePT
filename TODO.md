@@ -6704,6 +6704,30 @@ lotiti svojega dela, ne more, ker se gumba ne odzoveta na dotik.
 napačnem zaslonu naj ne izpiše, kadar je trener na zaslonu, kjer korak teče — opaženo na različici
 `8b2ce80`.
 
+### 80.100 [ ] P2 — Berljiv izvoz podatkov za stranko meša prihodnje termine z opravljenimi, je delno angleški, in pogreša obljubljeno spremembo načrta
+
+**Scenarij in koraki:** »Imenik strank« → stranka z zgodovino (John Smith) → »Izvozi podatke (GDPR)«.
+Okno pove: »Opravljeni treningi: 1, termini: 6, spremembe plana: 1.« Tapni »Berljiva kopija«.
+
+**Opaženo:** datoteka je dolga 2047 znakov in ima troje:
+1. Razdelek »## Treningi (6)« našteje termine brez oznake, kateri so bili in kateri bodo: med njimi
+   sta 2026-10-01 in 2026-10-04, ki sta v prihodnosti. Vrstni red ni po datumu (09-29, 10-01, 09-29,
+   10-04, 09-24, 09-29).
+2. Signali s treninga so angleški: »Povratna informacija (Joint Pain / Discomfort): Rahlo ščipanje v
+   desni rami« in »Povratna informacija (Completed reps easily): Odlična povezava z mišico«. Vse
+   drugo v datoteki je slovensko.
+3. Obljubljene »spremembe plana: 1« v datoteki ni: beseda »plan« ali »sprememb« se v njej ne pojavi
+   nikjer.
+
+**Težava in vpliv:** to je dokument, ki ga trener izroči stranki na njeno zahtevo po GDPR, in dokazuje
+tudi, kaj je bilo opravljeno. Stranka bere seznam šestih treningov kot opravljene, čeprav dva še
+nista bila. Tuji jezik sredi dokumenta zmanjša zaupanje v pravilnost, manjkajoči del pa pomeni, da
+izvoz ne vsebuje vsega, kar okno obljubi.
+
+**Predlog:** seznam naj loči opravljene od načrtovanih in naj bo urejen po datumu; signali naj bodo v
+jeziku dokumenta; obljubljena sprememba načrta naj bo v datoteki ali pa naj je okno ne šteje —
+opaženo na različici `8b2ce80`.
+
 **Presoja 2026-09-30 (Claude): čaka na Simona — nasprotuje zapisani odločitvi.** `logQuickSignal` v
 [sessionQuickSignals.js](src/controllers/sessionQuickSignals.js) namerno označi vse serije vaje kot
 opravljene, ko trener tapne signal: »signal na vaji pomeni, da je bila opravljena« (manj dotikov,
