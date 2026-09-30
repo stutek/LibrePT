@@ -6635,6 +6635,16 @@ to je druga napaka kot §80.80.
 **Predlog:** »Pretežko« in »Prelahko« naj zapišeta samo signal, nobene serije — opaženo na različici
 `8b2ce80`.
 
+**Popravljeno 2026-09-30, a ožje od predloga.** Predlog (»nobene serije«) bi odvzel edini način, da se
+samostojna vaja zapiše kot opravljena: taka vaja svoje kljukice nima, njene serije se odštevajo prav s
+tem, da se trener nanje odzove (to je zapisano v §45.9). Zato je popravek razdelil signale: »Prelahko«
+in »Completed reps easily« sta izjavi, da so ponovitve bile, in serije še naprej zapišeta; »Pretežko«,
+bolečina in prekinjena tehnika pa ne, ker na tleh pomenijo prav nasprotno. Pravilo živi pri signalih
+(`src/domain/feedbackTags.js`, `tagImpliesPerformed`), uporablja ga
+`src/controllers/sessionQuickSignals.js`, promesa je preizkušena v obe smeri
+(`tests/medium/test_clipboard_quick_signals.py`). **Odprto ostaja globlje vprašanje iz §45.9:** kako
+se samostojna vaja označi kot opravljena, ko trener ne da nobenega signala.
+
 ### 80.96 [ ] P2 — Prva kartica vodenega ogleda veleva pritisniti »Naprej«, tega gumba pa ni
 
 **Scenarij in koraki:** ☰ → »Nastavitve« → »Vstopi v peskovnik«. Odpri predal na dnu in tapni poglavje
