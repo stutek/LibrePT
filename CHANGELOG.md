@@ -85,6 +85,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 - **Session screens:** a finished session with exercises no longer says "no programme"; the
   off-schedule dialog fits a phone; a session a week away counts down in days, not "870h"; a session
   days ahead names its weekday and date; "Ni se zgodil" agrees with "trening".
+- **The clipboard's done tag is translated, and a routine saved from a session planned without a
+  routine is named after the session**; the routine form's numbers are no longer cut off.
 - **Controls are named in the page's language for a screen reader**, and before a language is
   chosen the page declares English instead of "null".
 - **The Dates calendar marks today and the days that have sessions.**

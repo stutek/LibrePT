@@ -66,8 +66,23 @@
 .routine-builder-row select {
   flex: 1 0 100%;
 }
-.routine-builder-row input {
-  width: 50px;
+/* The four numbers share the line with the remove button and each takes an equal part of it, so a
+   two-digit number is never cut at 390px. Each has a caption that stays when the field is filled. */
+.routine-builder-row .routine-builder-field {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.routine-builder-row .routine-builder-field input {
+  width: 100%;
+  min-width: 0;
+  padding-inline: 6px;
+}
+.routine-builder-caption {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .btn-remove-row {
   background: transparent;

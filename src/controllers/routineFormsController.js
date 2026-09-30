@@ -4,6 +4,7 @@
 // Split 2026-08-01 out of the old formsController.js, which bundled Client, Routine, and Exercise
 // forms in one file despite the three sharing nothing but boilerplate.
 
+import { localDateString } from "../data/calendarDay.js";
 import { libraryExercises } from "../data/exerciseLibrary.js";
 import { newRecordId } from "../data/recordId.js";
 import { parseLoad, parseReps } from "../domain/repsAndLoad.js";
@@ -34,6 +35,19 @@ export function openRoutineCreateDialog() {
   openRoutineCreateForm();
 }
 
+// A history record carries no session id, so the session is found by what the record does hold:
+// the client and the day. Two such sessions on one day are ambiguous, and then no title is used.
+function titleOfSessionBehind(log, state) {
+  const day = localDateString(log.date);
+  const matches = (state.sessions || []).filter(
+    (session) =>
+      session.completed &&
+      session.startDate === day &&
+      session.participants?.includes(log.clientId),
+  );
+  return matches.length === 1 ? matches[0].title || "" : "";
+}
+
 /** "Save as routine" on a performed session: stores the routine built from it, says how many
  *  movements could not be carried over, and opens the routine editor so the trainer can rename it. */
 export async function saveSessionAsRoutine({
@@ -49,6 +63,8 @@ export async function saveSessionAsRoutine({
     library: libraryExercises(state),
     routines: state.routines,
     fallbackName: t("placeholder_routine_name"),
+    emptyPlanName: t("custom_empty_plan"),
+    sessionTitle: titleOfSessionBehind(log, state),
     provenance: t("routine_saved_from_session"),
   });
   state.routines.push(routine);

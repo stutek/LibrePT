@@ -255,3 +255,27 @@ def test_bringing_a_card_into_focus_keeps_the_line_it_was_showing(page, local_se
         "the card in focus adds the Too Easy / Too Hard / Feedback row"
     )
     assert after["timerInHeadRow"], "and its timer joins the head row it already had"
+
+
+def test_the_done_tag_is_in_the_language_of_the_screen(page, local_server):
+    """The tag on a finished card was the English word in the markup, so a Slovenian screen showed
+    "Completed" beside "Prihodnje" and "Krog 1 / 3"."""
+    session = (
+        active_session_fixture(
+            exercises=[
+                exercise_item("exA", "Barbell Back Squat"),
+                exercise_item("exB", "Romanian Deadlift"),
+            ]
+        )
+        .replace(
+            '"logs": {}',
+            '"logs": {"exA": [{"reps": 10, "weight": 20, "completed": true}]}',
+        )
+        .replace('"activeExerciseIndex": 0', '"activeExerciseIndex": 1')
+    )
+    page.add_init_script("globalThis.stubLanguage = 'sl'")
+    load_with_stub(page, local_server, clipboard_stub(session))
+    page.wait_for_selector("#active-exercise-scroll-deck .exercise-deck-card")
+
+    tag = page.locator(".exercise-deck-card.completed .deck-card-status").first
+    assert tag.inner_text().strip() == "Zaključeno"

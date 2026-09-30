@@ -45,7 +45,7 @@ export class ExerciseDeckCard extends DeckCard {
     if (this.isInFocus) {
       statusBadge = "";
     } else if (item.isCompleted) {
-      statusBadge = `<span class="badge badge-success deck-card-status">Completed</span>`;
+      statusBadge = `<span class="badge badge-success deck-card-status">${t("session_completed")}</span>`;
     } else {
       statusBadge = `<span class="badge deck-card-status deck-card-status-upcoming">${t("upcoming")}</span>`;
     }

@@ -103,3 +103,36 @@ def test_routine_builder_row_is_modality_aware(page, local_server):
     assert reps.get_attribute("placeholder") == "cal", (
         "the primary field must relabel to the cardio effort metric"
     )
+
+
+def test_routine_row_numbers_show_whole_and_carry_a_visible_label(page, local_server):
+    page.set_viewport_size({"width": 390, "height": 844})
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#view-routines.active")
+
+    page.click("#btn-add-routine")
+    page.wait_for_selector("#routine-ex-picker:not(.hidden)")
+    page.locator("#routine-ex-picker .picker-item").first.click()
+    page.wait_for_timeout(150)
+
+    row = page.locator("#routine-exercises-list .routine-builder-row").first
+    row.locator(".input-sets").fill("12")
+    row.locator(".input-reps").fill("15")
+    row.locator(".input-rest").fill("90")
+
+    captions = row.locator(".routine-builder-caption")
+    assert captions.count() >= 3, (
+        "sets, reps and rest each need a caption that stays visible"
+    )
+    for i in range(captions.count()):
+        assert captions.nth(i).is_visible()
+        assert captions.nth(i).inner_text().strip()
+
+    for selector in (".input-sets", ".input-reps", ".input-rest"):
+        cut = row.locator(selector).evaluate("el => el.scrollWidth > el.clientWidth")
+        assert not cut, f"{selector} cuts its number off"
+    right = row.evaluate("el => el.getBoundingClientRect().right")
+    remove = row.locator(".btn-remove-row").evaluate(
+        "el => el.getBoundingClientRect().right"
+    )
+    assert remove <= right + 1 and right <= 390

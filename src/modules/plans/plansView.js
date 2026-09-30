@@ -192,13 +192,16 @@ export function addRoutineExerciseRow({ preset = null, state, t }) {
       ${optionsHTML}
     </select>
     <div class="form-group routine-builder-field">
+      <span class="routine-builder-caption" aria-hidden="true">${safeSets}</span>
       <input type="number" min="1" placeholder="${safeSets}" class="form-control input-sets" value="${preset ? preset.sets : "3"}" required aria-label="${safeSetsLabel}">
     </div>
     <div class="form-group routine-builder-field">
+      <span class="routine-builder-caption routine-builder-reps-caption" aria-hidden="true">${safeReps}</span>
       <input type="text" placeholder="${safeReps}" class="form-control input-reps" list="reps-presets" value="${preset ? escapeHTML(String(preset.reps)) : "10"}" required aria-label="${safeRepsLabel}">
     </div>
     <div class="form-group load-cell routine-builder-field"></div>
     <div class="form-group routine-builder-field">
+      <span class="routine-builder-caption" aria-hidden="true">${safeRest}</span>
       <input type="number" min="0" step="5" placeholder="${safeRest}" class="form-control input-rest" value="${preset ? preset.rest : "60"}" required aria-label="${safeRestLabel}">
     </div>
     <button type="button" class="btn-remove-row" aria-label="${safeRemove}"><i class="fa-solid fa-trash-can"></i></button>
@@ -227,6 +230,7 @@ export function addRoutineExerciseRow({ preset = null, state, t }) {
     const metric = primaryMetricOf(ex);
     const label = metric === "reps" ? tr("reps_label", "Reps") : tr(metricLabelKey(metric), metric);
     repsInput.placeholder = label;
+    row.querySelector(".routine-builder-reps-caption").textContent = label;
     if (metric === "reps") repsInput.setAttribute("list", "reps-presets");
     else repsInput.removeAttribute("list"); // reps presets are meaningless for time/distance/cal
     loadCell.classList.toggle("hidden", !usesLoad(modalityOf(ex)));

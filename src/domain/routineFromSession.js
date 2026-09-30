@@ -68,10 +68,20 @@ function routineItemFrom(item, movement) {
  * @param {object[]} args.library  libraryExercises(state)
  * @param {object[]} args.routines the routines that exist, for a name that is not taken
  * @param {string} args.fallbackName name used when the record has no routine name
+ * @param {string} [args.emptyPlanName] the text a session without a routine is recorded under
+ * @param {string} [args.sessionTitle] the title of the session the record came from, if known
  * @param {string} args.provenance text with `{date}`, written into the description
  * @returns {{ routine: object, omitted: number }}
  */
-export function buildRoutineFromRecord({ log, library, routines, fallbackName, provenance }) {
+export function buildRoutineFromRecord({
+  log,
+  library,
+  routines,
+  fallbackName,
+  provenance,
+  emptyPlanName = "",
+  sessionTitle = "",
+}) {
   const find = libraryMatcher(library);
   const exercises = [];
   let omitted = 0;
@@ -94,7 +104,9 @@ export function buildRoutineFromRecord({ log, library, routines, fallbackName, p
 
   const date = localDateString(log.date);
   const taken = new Set(routines.map((routine) => routine.name));
-  const base = `${log.routineName || fallbackName} ${date}`;
+  // A session that had no routine is recorded under the empty-plan text; that is not a name.
+  const recorded = log.routineName && log.routineName !== emptyPlanName ? log.routineName : "";
+  const base = `${recorded || sessionTitle || fallbackName} ${date}`;
   const routine = {
     id: newRecordId(),
     name: uniqueName(base, taken),

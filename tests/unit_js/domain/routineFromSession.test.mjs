@@ -114,3 +114,36 @@ test("a record with no routine name uses the fallback", () => {
   const { routine } = build({ routineName: "", exercises: [] });
   assert.equal(routine.name, "Session 2026-09-30");
 });
+
+test("a record from an empty plan takes the session's title, not the empty-plan text", () => {
+  const { routine } = buildRoutineFromRecord({
+    log: {
+      date: "2026-09-30T10:00:00",
+      routineName: "Empty plan, no routine",
+      exercises: [ex("sq", "Back Squat")],
+    },
+    library,
+    routines: [],
+    fallbackName: "Session",
+    emptyPlanName: "Empty plan, no routine",
+    sessionTitle: "Tuesday group",
+    provenance: PROVENANCE,
+  });
+  assert.equal(routine.name, "Tuesday group 2026-09-30");
+});
+
+test("an empty-plan record with no known session title falls back to the fallback name", () => {
+  const { routine } = buildRoutineFromRecord({
+    log: {
+      date: "2026-09-30T10:00:00",
+      routineName: "Empty plan, no routine",
+      exercises: [ex("sq", "Back Squat")],
+    },
+    library,
+    routines: [],
+    fallbackName: "New routine",
+    emptyPlanName: "Empty plan, no routine",
+    provenance: PROVENANCE,
+  });
+  assert.equal(routine.name, "New routine 2026-09-30");
+});
