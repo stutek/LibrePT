@@ -203,7 +203,7 @@ def run_check(paths):
         if code == 0:
             write_proof(head, digests)
             print(
-                f"\n  ✓ Proof written ({PROOF_PATH}). Commit exactly these paths with:\n"
+                f"\n  ✓ Proof written ({PROOF_PATH}). Commit them, all at once or in parts, with:\n"
                 f"    .venv/bin/python -m build commit -F <message file> -- {' '.join(paths)}"
             )
         else:
@@ -217,19 +217,30 @@ def run_check(paths):
 
 
 def stale_reasons(proof, paths, head, changed_since, current_digest=digest):
-    """Why a commit of `paths` would not be the tree the proof covers — an empty list when it is."""
+    """Why a commit of `paths` would not be the tree the proof covers — an empty list when it is.
+
+    One run may yield several commits, one logical change each: `paths` may be any part of what was
+    proved and not yet committed. The proof remembers what its earlier commits took, so HEAD moving
+    by those is this run's own history, not a change it did not see. Only the LAST commit of a run
+    lands exactly the tree the run proved, as with any gate that yields several commits.
+    """
     reasons = []
-    if sorted(proof["paths"]) != sorted(paths):
+    committed = set(proof.get("committed", []))
+    open_paths = set(proof["paths"]) - committed
+    outside = sorted(set(paths) - open_paths)
+    if not paths or outside:
         reasons.append(
-            "the paths differ from the ones proved: " + " ".join(sorted(proof["paths"]))
+            "not among the paths proved and not yet committed: "
+            + (" ".join(outside) or "(none named)")
         )
         return reasons
-    for path, proved in proof["paths"].items():
-        if current_digest(path) != proved:
+    for path in paths:
+        if current_digest(path) != proof["paths"][path]:
             reasons.append(f"{path} changed after the run")
     if head != proof["head"]:
-        code = [p for p in changed_since if not p.endswith(".md")]
-        overlap = [p for p in changed_since if p in proof["paths"]]
+        foreign = [p for p in changed_since if p not in committed]
+        code = [p for p in foreign if not p.endswith(".md")]
+        overlap = [p for p in foreign if p in open_paths]
         if code:
             reasons.append("HEAD moved by files the run did not see: " + " ".join(code))
         if overlap:
@@ -240,7 +251,7 @@ def stale_reasons(proof, paths, head, changed_since, current_digest=digest):
 
 
 def run_commit(message_file, paths):
-    """`build commit -F <msg> -- <paths>`: commit exactly the proved paths. Returns the exit code."""
+    """`build commit -F <msg> -- <paths>`: commit proved paths, all or some. Returns the exit code."""
     if not os.path.exists(PROOF_PATH):
         print("  ✗ No proof: run  .venv/bin/python -m build check -- <paths>  first.")
         return 1
@@ -272,7 +283,12 @@ def run_commit(message_file, paths):
         _git("commit", "--quiet", "-F", message_file, env=env)
     # The shared index now says these paths are as committed; every other entry is left alone.
     _git("reset", "--quiet", "--", *paths)
-    os.remove(PROOF_PATH)
+    proof["committed"] = sorted(set(proof.get("committed", [])) | set(paths))
+    if set(proof["committed"]) == set(proof["paths"]):
+        os.remove(PROOF_PATH)
+    else:
+        with open(PROOF_PATH, "w", encoding="utf-8") as handle:
+            json.dump(proof, handle, indent=2)
     print(
         _git("show", "--stat", "--format=%h %s%n%(trailers:key=Co-Authored-By)", "HEAD")
     )

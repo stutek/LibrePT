@@ -58,6 +58,20 @@ def test_the_commit_holds_the_proved_paths_and_leaves_another_sessions_staging(r
     assert git("diff", "--cached", "--name-only", cwd=repo).split() == ["theirs.js"]
 
 
+def test_one_run_yields_one_commit_per_change_and_no_path_twice(repo):
+    (repo / "mine.js").write_text("mine\n")
+    (repo / "theirs.js").write_text("second change\n")
+    prove(repo, ["mine.js", "theirs.js"])
+
+    assert snapshot.run_commit(message(repo), ["mine.js"]) == 0
+    assert snapshot.run_commit(message(repo), ["mine.js"]) == 1
+    assert snapshot.run_commit(message(repo), ["theirs.js"]) == 0
+
+    subjects = git("log", "--format=%s", cwd=repo).split("\n")[:3]
+    assert subjects == ["fix: mine", "fix: mine", "base"]
+    assert not (repo / snapshot.PROOF_PATH).exists()
+
+
 def test_a_path_changed_after_the_run_is_refused(repo):
     (repo / "mine.js").write_text("mine\n")
     prove(repo, ["mine.js"])
