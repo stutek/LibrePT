@@ -320,6 +320,40 @@ vaj ali napačno presodi, koliko časa ostane.
 in »150« pri več serijah, skupaj s počitki. Opaženo na objavljeni `8b2ce80`, sl,
 390 × 844, Chrome CDP; brez prestreženih napak in brez pregledovanja kode.
 
+### 92.3 [x] The demo shows a press, a hold and a drag at once — shipped 2026-09-30
+
+`demoTourPlayer.js` can only tap, type, pick a file and point; `demoHand.js` can only move and
+pulse. Neither can show a gesture, so the L would ship undiscoverable — the walkthrough is the only
+place a trainer can learn it.
+
+- A new act in `interactWith`'s vocabulary, declared by the step the way `enter` and `choose` are:
+  a pointer sequence (down, moves, up) on the blanket with one `pointerId`.
+- A hand that stays pressed and travels along the path, rather than arriving and pulsing.
+- New steps in `gymFloorTour.js`: a quick look back, a switch back, and a switch forward. Each
+  keeps the file's rule that the expectation is a behavioural claim.
+- To check before writing: the tour's session must not be started, or `canOpen` refuses to leave it
+  and the switch steps cannot pass.
+
+**What it cost that the plan did not foresee.** Three things, all found by building it rather than
+by reading:
+
+- The peek looked from the WRONG DAY for every session opened from the board — `buildSessionMeta`
+  hands the clipboard a Date object and the neighbour rule reads ten characters of it, so "Tue Sep
+  30" counted as later than every "2026-…". Fixed in the same commit, because the step could not be
+  honest otherwise.
+- A gesture that is let go of leaves nothing behind, so the LOOK cannot be its own step: its
+  expectation would already be true when its card appears, and the guided walkthrough reads such a
+  step as done. It is graded mid-gesture instead, by a new `expectHeld` on the step.
+- Three walkthrough tests were written around the script's length and the step numbers in it. They
+  read the count off the guide now. One of them compared a CSS-uppercased line with `to_have_text`
+  — the trap documented at the top of that same file, walked into while fixing the others.
+
+**Simon asked for three things and this ships two.** The look and the switch BACK are demonstrated;
+the switch FORWARD is not, because it does not work — §92.5. A demonstration of a gesture that does
+nothing is worse than no demonstration.
+
+---
+
 ### 92.2 [x] The deck holds one session, and the peek is aligned to the exercise in focus — shipped 2026-09-30
 
 - Out of `exerciseDeckOfCards.js`: `buildPastExerciseItems`, the `PastDeckCard` branch and the

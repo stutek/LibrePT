@@ -8081,6 +8081,50 @@ Reasoning in [TODO_ARCHIVE.md](TODO_ARCHIVE.md). Commit `97e3226`; `build check`
 Reasoning in [TODO_ARCHIVE.md](TODO_ARCHIVE.md). Commit `53a3fed`; `build check` green 16:13 to
 16:22.
 
+### 92.5 [ ] Stepping FORWARD out of a session the peek opened does nothing
+
+**Found 2026-09-30 by building the walkthrough step for it**, measured in the browser, not reasoned
+from the code. Pull aside and slide up to open the previous session — that works. From there, the
+same gesture mirrored, to step forward again, does nothing at all: the plan moves, the layer
+underneath holds a real next plan, and releasing leaves the clipboard exactly where it was.
+
+What was measured, in this order: the future layer on that screen reads "Core & Stability ·
+2026-08-18", so there IS a next plan and the gesture is armed; the same L in the OTHER direction on
+the same screen opens the session before it ("Finished session · 2026-07-10"), so the gesture, the
+drag and the app's own handlers all work there. The two sides differ in ONE way: backward opens a
+history record (`openSessionFromHistory`), forward opens a scheduled row
+(`launchClipboardDirectly`), and `showSessionView` in `controllers/routerController.js` picks the
+loader by which list holds the id. The scheduled path does not replace a clipboard that is already
+showing a session.
+
+So the feature is half-built rather than broken: you can walk backwards through a client's history
+one session at a time and never walk forward again. Simon asked for the forward switch to be
+demonstrated; the walkthrough ships without it because a demonstration of a gesture that does
+nothing is worse than no demonstration.
+
+Next step: read what `launchClipboardDirectly` does when a session is already open — whether it
+refuses, asks, or silently returns — and make the forward step open a scheduled neighbour the same
+way the backward step opens a record.
+
+### 92.6 [ ] Leaving a session by the peek throws away what was logged in it
+
+**Found 2026-09-30, the same way.** The walkthrough logged Too Easy on the first participant, then
+pulled aside to the previous session and came back with Today. The signal was gone — the control
+no longer showed it set, so a trainer would tap it again and a second tap CLEARS it.
+
+The guard that exists (`canOpen` in `controllers/planPeekController.js`) refuses to leave a session
+that has been STARTED, to protect a running session's logs. A session that has not been started but
+already carries feedback is not protected at all, although the trainer typed into it just as much.
+On the gym floor the plan is open and being marked up long before anyone taps Start.
+
+Two ways out, and the choice is Simon's: widen the guard to any session carrying logs or feedback,
+or keep what was logged when the clipboard is replaced. The second is the better product and the
+larger change.
+
+For now the walkthrough works around it by placing the gesture BEFORE anything is logged, which is
+also the better story — you check what they did last time, then you work — but it is a workaround
+and this is why.
+
 ### 92.4 [ ] A bound group's last sessions are now shown nowhere — Simon's call
 
 **Found by the gate on 2026-09-30, while §92.2 was being written**, and not foreseen when it was
@@ -8106,19 +8150,10 @@ one-client function.
 Until it is answered the gap stands, recorded here rather than in a test that cannot run. The test's
 docstring says the same thing at the place a reader will meet it.
 
-### 92.3 [ ] The demo shows a press, a hold and a drag at once
+### 92.3 [x] The demo shows a press, a hold and a drag at once — shipped 2026-09-30
 
-`demoTourPlayer.js` can only tap, type, pick a file and point; `demoHand.js` can only move and
-pulse. Neither can show a gesture, so the L would ship undiscoverable — the walkthrough is the only
-place a trainer can learn it.
-
-- A new act in `interactWith`'s vocabulary, declared by the step the way `enter` and `choose` are:
-  a pointer sequence (down, moves, up) on the blanket with one `pointerId`.
-- A hand that stays pressed and travels along the path, rather than arriving and pulsing.
-- New steps in `gymFloorTour.js`: a quick look back, a switch back, and a switch forward. Each
-  keeps the file's rule that the expectation is a behavioural claim.
-- To check before writing: the tour's session must not be started, or `canOpen` refuses to leave it
-  and the switch steps cannot pass.
+Reasoning in [TODO_ARCHIVE.md](TODO_ARCHIVE.md). Commit `78c7bb6`; `build check` green 17:46 to
+17:55.
 
 ## 93. [ ] The exploratory-test skill is Claude's alone, and the agent that needed it could not see it
 
