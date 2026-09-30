@@ -6403,16 +6403,16 @@ zavrne), zato ni popravljeno: odločitev je, ali se izbirni seznami odprejo praz
 
 **Ne deluje.** ✕ 12 × 16 — popravljeno v §80.68.
 
+**Dokaz 2026-09-30, prvo odprtje, `main` `12d0e66`:** oba trenerja brez predznanja sta vpisala le ime
+(»Bolgarski počep«, »Dvig na prste«) in dobila vajo »Chest«, »Barbell«, »Horizontal Push«. Prvi: »Brez
+opozorila, da sem pustil privzeto.« Drugi: »Vzorca giba ne razumem«; trije od štirih seznamov so
+angleški.
+
 ### 80.72 [x] P2 — Ocena obrazca »Ustvari rutino« — popravljeno 2026-09-29
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8072-x-p2--ocena-obrazca-ustvari-rutino--popravljeno-2026-09-29).
 
 ### 80.73 [x] P1 — »Sinhroniziraj podatke« je zamenjal trenerjeve treninge z vzorčnimi — popravljeno 2026-09-29
-
-**Dokaz 2026-09-30, prvo odprtje, `main` `12d0e66`:** oba trenerja brez predznanja sta vpisala le ime
-(»Bolgarski počep«, »Dvig na prste«) in dobila vajo »Chest«, »Barbell«, »Horizontal Push«. Prvi: »Brez
-opozorila, da sem pustil privzeto.« Drugi: »Vzorca giba ne razumem«; trije od štirih seznamov so
-angleški.
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8073-x-p1--sinhroniziraj-podatke-je-zamenjal-trenerjeve-treninge-z-vzorčnimi--popravljeno-2026-09-29).
 
@@ -6555,12 +6555,6 @@ dokler Drive ni povezan (`68b56da`). Številka šteje razliko do zadnje sinhroni
 zadnje izvožene datoteke, zato besedilo ne govori o varnostni kopiji. **Odprto, čaka na Simona:** ali
 značko brez povezanega oblaka skriti — isto vprašanje kot §80.11.
 
-### 80.87 [x] P2 — Napačna datoteka pri uvozu odgovori angleško: »Error: Invalid backup file format.« — popravljeno 2026-09-30
-
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8087-x-p2--napačna-datoteka-pri-uvozu-odgovori-angleško-error-invalid-backup-file-format--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
-
-### 80.88 [~] P1 — V oknu, ki briše podatke, sta »Prekliči« in »Odstrani« visoka 21 pik in 4 pike narazen
 **Dokaz za odprto vprašanje, prvo odprtje 2026-09-30, `main` `12d0e66`:** oba trenerja brez
 predznanja sta okno odprla in besedilo prebrala, pa sta vseeno ostala v skrbeh. Prvi: »"!" ne pove,
 kaj je narobe … Za trenerja, ki ne razume Google Drive, je to alarm brez razlage«; skupaj z rumeno
@@ -6568,6 +6562,12 @@ oznako »PREDOGLED«: »pomeni, da ne smem zaupati podatkom«. Drugi, brez raču
 "Vprašaj v glavi" ne razumem. "Izvozi JSON" — beseda JSON mi ne pove nič.« Nobeden ni izvedel, kam
 gredo podatki, če se telefon pokvari.
 
+### 80.87 [x] P2 — Napačna datoteka pri uvozu odgovori angleško: »Error: Invalid backup file format.« — popravljeno 2026-09-30
+
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8087-x-p2--napačna-datoteka-pri-uvozu-odgovori-angleško-error-invalid-backup-file-format--popravljeno-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
+
+### 80.88 [~] P1 — V oknu, ki briše podatke, sta »Prekliči« in »Odstrani« visoka 21 pik in 4 pike narazen
 
 **Scenarij in koraki:** svež zagon z vzorčnimi podatki. Odpri predal z obvestili na dnu in tapni
 »Počisti podatke in zapusti predstavitveni način«. Odpre se okno »Počisti vzorčne podatke«, ki našteje
@@ -6682,16 +6682,16 @@ spremeni rutino, ki jo lahko uporablja več strank. Ali naj prilagoditev velja s
 podatkov, ne popravek. Najmanj, kar velja v obeh primerih: okno naj pove, da se spremeni rutina, in
 koliko strank jo uporablja.
 
+**Dokaz 2026-09-30, prvo odprtje, `main` `12d0e66` (poročilo trenerja-podagenta, vodilna seja ni
+ponovila):** trener je stranki z bolečino v kolenu v »Razreši« zamenjal počep z »Leg Press« 14 kg.
+Naslednja stranka z isto rutino, brez težav s kolenom, je dobila »Leg Press S3 × R10 × 14 kg«. To
+je bila druga od treh stvari, ki so ga v prvi uri najbolj zmedle.
+
 ### 80.93 [ ] P2 — »Kopiraj ta načrt na …« ne kopira na drug dan, ampak na drugo stranko istega treninga
 
 **Scenarij in koraki:** odpri podlogo treninga z eno stranko (»Ponedeljkova moc«, 2026-10-05, Jane
 Doe). Tapni ⋮ »Možnosti treninga«. Meni ponudi »Uredi načrt«, »Vsi na ta načrt«, »Kopiraj ta načrt na
 …« in »Izbriši trening«. Tapni »Kopiraj ta načrt na …«.
-
-**Dokaz 2026-09-30, prvo odprtje, `main` `12d0e66` (poročilo trenerja-podagenta, vodilna seja ni
-ponovila):** trener je stranki z bolečino v kolenu v »Razreši« zamenjal počep z »Leg Press« 14 kg.
-Naslednja stranka z isto rutino, brez težav s kolenom, je dobila »Leg Press S3 × R10 × 14 kg«. To
-je bila druga od treh stvari, ki so ga v prvi uri najbolj zmedle.
 
 **Opaženo:** aplikacija odgovori »V tem treningu ni še nikogar drugega.« Ukaz torej kopira načrt na
 druge stranke istega termina, ne na drug dan. Tri pike v napisu obljubljajo izbiro cilja, ta pa je
@@ -6924,12 +6924,6 @@ ni shranil. »00:01« prebere kot uro zaključka (ob eni minuti čez polnoč), n
 **Predlog:** »Program ni določen« naj velja le za trening brez vaj. Trajanje naj se napiše kot
 trajanje, na primer »trajal 1 min«. Opaženo na `main` `12d0e66`, sl, 390 × 844.
 
-## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
-
-**Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
-first name, last name, phone and email mandatory. The ☰ menu keeps five entries: *Training
-sessions* (the home page), *Client directory*, *Exercises and routines*, *Data management* and
-*Settings*. *Leave the sandbox* is a top-level row only while the sandbox is open. This replaces
 ### 80.115 [ ] P2 — Na slovenski podlogi vaja po »Prelahko« dobi oznako »Completed«
 
 **Scenarij in koraki:** vzorčni podatki, trening za Jane Doe s tremi vajami iz kataloga. Na odprti
@@ -7018,6 +7012,12 @@ desnem kolenu, brez globokih počepov«, polje »Opombe« prazno. Odpreti stran 
 **Opaženo:** »POŠKODBE IN OMEJITVE: Bolečine v desnem kolenu, brez globokih počepov«, takoj pod tem
 »OPOMBE: Brez zabeleženih zdravstvenih težav ali posebnosti.«
 
+**Težava in vpliv:** besedilo za prazno polje »Opombe« trdi, da stranka nima zdravstvenih težav, dve
+vrstici pod njeno poškodbo. Trener, ki stran hitro preleti, lahko prebere zadnje.
+
+**Predlog:** za prazne opombe napisati, da opomb ni, na primer »Ni opomb.« Opaženo na `main`
+`12d0e66`, sl, 390 × 844.
+
 ### 80.121 [ ] P2 — »Zamenjaj vajo« stranki z bolečim kolenom vnaprej izbere Barbell Back Squat
 
 **Scenarij in koraki:** stranka SIM Nina Koleno s »Poškodbe in omejitve: Bolečine v desnem kolenu,
@@ -7038,8 +7038,18 @@ okno pokaže njeno besedilo. Opaženo na `main` `12d0e66`, sl, 390 × 844.
 
 ### 80.122 [ ] P3 — Koledar »Datumi« ne pokaže ne današnjega dne ne dni s treningi
 
-**Predlog:** za prazne opombe napisati, da opomb ni, na primer »Ni opomb.« Opaženo na `main`
-`12d0e66`, sl, 390 × 844.
+**Scenarij in koraki:** prazna aplikacija s treningoma 2026-10-01 in 2026-10-02. Na seznamu
+»Treningi« pritisniti »Datumi«.
+
+**Opaženo:** koledar septembra 2026. Dan 30 (danes) ima isto obliko kot dan 15: brez ozadja, brez
+krepke pisave, brez oznake za bralnik zaslona. Enako 1. in 2. oktober, ko sta vpisana treninga.
+Trenerka brez predznanja: »Koledar ne označi današnjega dne in ne pokaže dni s treningi, zato z njim
+ne vidim, kdaj je kaj.«
+
+**Težava in vpliv:** trener, ki izbira obdobje, ne vidi, kje je danes in kateri dnevi so zasedeni.
+Izbira na slepo, nato preveri na seznamu.
+
+**Predlog:** označiti današnji dan in dneve s treningi. Opaženo na `main` `12d0e66`, sl, 390 × 844.
 
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
@@ -7159,17 +7169,17 @@ Predlog: pri presoji naključnega ujemanja zajeti tudi vzdevke in generične bes
 za kraj, ne le priimke; morebitna sprememba pravila ostaja predmet zgornje odločitve.
 Sl, 390 × 844, brez novih prestreženih napak; brez pregleda kode.
 
+**Dokaz 2026-09-30, `main` `12d0e66`:** priimek, ki je navadna beseda. Za stranko »SIM Nina Koleno«
+je ime treninga »Preizkus koleno« zavrnjeno: »Ime termina ne sme vsebovati imena stranke, koleno pa
+je ime stranke.« Pri rehabilitaciji kolena je beseda »koleno« v imenu treninga naravna; enako bi
+veljalo za Kos, Zajc, Medved, Vrabec.
+
 **Pokritost:** [clientNameWords.test.mjs](tests/unit_js/domain/clientNameWords.test.mjs) preizkuša
 samo čisto funkcijo. Vrstni red »besedilo prej, stranka pozneje« ni pokrit z nobenim testom.
 
 **Predlog, čaka na Simonovo odločitev, ker spreminja obliko §66:** dvoje, ki nista isto.
 
 - **Obrazec zavrne le to, kar trener dodaja.** Primerjaj z shranjeno vrednostjo polja: če je beseda
-**Dokaz 2026-09-30, `main` `12d0e66`:** priimek, ki je navadna beseda. Za stranko »SIM Nina Koleno«
-je ime treninga »Preizkus koleno« zavrnjeno: »Ime termina ne sme vsebovati imena stranke, koleno pa
-je ime stranke.« Pri rehabilitaciji kolena je beseda »koleno« v imenu treninga naravna; enako bi
-veljalo za Kos, Zajc, Medved, Vrabec.
-
   tam bila že prej, shranjevanje ne pade. To odpravi nezmožnost urejanja, GDPR luknje pa ne.
 - **Dodana ali preimenovana stranka pregleda obstoječe termine** in trenerju pokaže, katera besedila
   jo zdaj imenujejo, da jih popravi ali potrdi kot naključje. To zapre GDPR luknjo in je hkrati
@@ -7440,15 +7450,15 @@ na prvi dan, ko se odloča, ali trener aplikacijo obdrži (ocena trenerke, ne me
 dodajanje samo z imenom, ostali podatki pozneje. Paziti na privolitev po GDPR, ki ob vpisu nastane.
 **Presoja: čaka na Simona** — ali stranka sme nastati brez privolitve, je njegova odločitev (§27).
 
+Prvo odprtje 2026-09-30: trener skupine 60+ (deset ljudi) je po treh vpisanih strankah ocenil »vsaj 4
+dotiki na osebo« in dodal, da med vadbo nima gumba »vsi opravili vajo«.
+
 ### 88.3 [ ] Nadomestni trener dobi načrt po WhatsAppu
 
 Dan 01: ko jo nadomesti kolegica, ji načrt pošlje kot sporočilo. **Vrednost:** redka (dopust,
 bolezen). **Cena:** srednja, če naj ga kolegica odpre v svoji aplikaciji; majhna, če je dovolj besedilo
 načrta za deljenje. Več trenerjev na enem računu je EnterprisePT. **Presoja (dan 01): ne izplača se** —
 pogostost je nizka.
-Prvo odprtje 2026-09-30: trener skupine 60+ (deset ljudi) je po treh vpisanih strankah ocenil »vsaj 4
-dotiki na osebo« in dodal, da med vadbo nima gumba »vsi opravili vajo«.
-
 
 Dan 03 isto pokaže z druge strani: trenerka isti večer prevzame stranko bolnega kolega. Dogovor in
 sporočilo po treningu gresta po SMS-u, pojasnilo o nadomeščanju pa v polje za zdravstvene opombe. Dva
@@ -7481,15 +7491,15 @@ Dan 03: ob sestavljanju petih treningov zapored se je po vsakem odprlo okno »Po
 bilo treba zapreti, preden je lahko dodala vaje. **Vrednost:** majhna, a ob vsakem načrtovanju tedna.
 **Cena:** majhna. **Presoja: čaka na Simona** — samodejno odpiranje je bila odločitev (vabilo takoj po
 dodanem udeležencu); vprašanje je, ali ob načrtovanju vnaprej zadošča obvestilo »vabila niso poslana«.
+Prvo odprtje 2026-09-30: oba trenerja brez predznanja sta okno zapisala kot zmedo (»Nisem prosil za
+vabila; okno je skočilo vmes«), drugi tudi, ko stranka ni imela e-pošte in je bil »Pošlji vabilo«
+zbledel.
 
 ### 88.7 [ ] Polje za poškodbe nosi vse, kar trener ve o stranki
 
 Dan 03 je vanj pisal domačo nalogo, dan 04 »stranka pripelje hčerko, potrebuje varovan kotiček«.
 Polje se imenuje »Predhodne poškodbe in opombe« in je edino prosto polje o stranki poleg ciljev. Trener
 tedensko navodilo ali dogovor o otroku zapiše med zdravstvene podatke, in ob naslednjem branju ne loči
-Prvo odprtje 2026-09-30: oba trenerja brez predznanja sta okno zapisala kot zmedo (»Nisem prosil za
-vabila; okno je skočilo vmes«), drugi tudi, ko stranka ni imela e-pošte in je bil »Pošlji vabilo«
-zbledel.
 trajnega od začasnega. **Vrednost:** dva od štirih dni; zdravstveni podatki so tudi občutljivi po GDPR,
 zato je mešanje z logistiko slabo še iz drugega razloga. **Cena:** majhna — ločeno polje »Druge
 opombe« (ali »Dogovori«), prikazano v urejevalniku načrta tako kot poškodbe. **Presoja: izplača se.**
