@@ -17,6 +17,7 @@ import {
   seriesWithEdit,
   sessionsAfterRemoving,
   sessionsWithSeries,
+  storedOccurrenceFor,
   validateSeries,
 } from "../../../src/domain/sessionSeries.js";
 
@@ -239,4 +240,22 @@ test("editing the whole series changes what the rule describes, not which days i
 
 test("an edit that says nothing leaves the rule as it was", () => {
   assert.deepEqual(seriesWithEdit(SERIES, {}), SERIES);
+});
+
+// A stored evening answers to the key the board taps with, which is the DERIVED evening's id. The
+// record itself carries a fresh id, so asking by id alone said "not stored yet" on the second tap and
+// wrote the evening a second time — two identical cards on one day.
+test("an occurrence already written down is found by the key the board taps with", () => {
+  const key = occurrenceKey("ser1", "2026-09-01");
+  const stored = { id: "s-new", seriesId: "ser1", occurrenceDate: "2026-09-01" };
+
+  assert.equal(storedOccurrenceFor([stored], key), stored);
+  assert.equal(storedOccurrenceFor([stored], occurrenceKey("ser1", "2026-09-03")), null);
+  assert.equal(storedOccurrenceFor([], key), null);
+});
+
+test("an ordinary session is still found by its own id", () => {
+  const oneOff = { id: "s1", title: "Monday morning" };
+  assert.equal(storedOccurrenceFor([oneOff], "s1"), oneOff);
+  assert.equal(storedOccurrenceFor([oneOff], "s2"), null);
 });

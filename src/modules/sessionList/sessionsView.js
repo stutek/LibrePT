@@ -6,7 +6,11 @@ import { libraryExercises } from "../../data/exerciseLibrary.js";
 import { filterSessions, hasAnyFilter } from "../../domain/sessionFilters.js";
 import { buildClientStateFromRoutine } from "../../domain/sessionPlanFactory.js";
 import { sessionCalendarDate } from "../../domain/sessionRecord.js";
-import { occurrenceAsSession, sessionsWithSeries } from "../../domain/sessionSeries.js";
+import {
+  occurrenceAsSession,
+  sessionsWithSeries,
+  storedOccurrenceFor,
+} from "../../domain/sessionSeries.js";
 import { renderMarkupOnce } from "../common/dom.js";
 import { buildSessionMeta, escapeHTML, getOverlappingSessions } from "../common/utils.js";
 import { updateSessionBarTimer } from "../session/sessionBar.js";
@@ -274,7 +278,8 @@ export function renderSessions({
   // Done here, at the board, because this is where every tap on a derived evening
   // starts — the alternative is every downstream lookup learning what a series is.
   const store = (sessionId) => {
-    if ((state.sessions || []).some((session) => session.id === sessionId)) return sessionId;
+    const already = storedOccurrenceFor(state.sessions, sessionId);
+    if (already) return already.id;
     const derived = sessions.find((session) => session.id === sessionId && session.fromSeries);
     if (!derived) return sessionId;
     const stored = occurrenceAsSession(derived, newRecordId ? newRecordId() : derived.id);

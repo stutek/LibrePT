@@ -138,6 +138,23 @@ export function seriesOccurrences(series, { from, to } = {}) {
   return occurrences;
 }
 
+/** The stored session that already speaks for what the board tapped, or null.
+ *
+ * The board taps an evening by the id it drew, which for a derived evening is the OCCURRENCE KEY,
+ * while the record written for that evening carries an id of its own. So "have I written this evening
+ * down already?" cannot be asked by id alone: until 2026-09-30 it was, and a second tap on the same
+ * evening — opening it, closing it, opening it again — wrote a second record beside the first, leaving
+ * two identical cards on one day. An ordinary one-off still answers to its own id.
+ */
+export function storedOccurrenceFor(sessions, key) {
+  if (!key) return null;
+  return (
+    (sessions || []).find(
+      (session) => session.id === key || sessionOccurrenceKey(session) === key,
+    ) || null
+  );
+}
+
 /** Everything the board should show for a window: the stored sessions, plus the evenings every
  * series still owes, minus the ones a stored session already speaks for.
  *
