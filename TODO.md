@@ -6959,6 +6959,9 @@ ne vidi in ne ve, da obstaja, zato z »Prilagodi čas« shrani konec, ki ga ni p
 **Predlog:** polji naj stojita drugo pod drugim, kot v obrazcu »Nastavitev treninga«. Opaženo na
 `main` `12d0e66`, sl, 390 × 844; najprej opazil trener-podagent.
 
+Na 320 × 680 je okno široko 288 pik, oznaka »Končni čas« se začne pri 311. piki in polje za konec
+pri 311. do 523. piki: z zaslona se vidi 9 pik oznake, polja nič.
+
 ### 80.117 [ ] P3 — Trening čez teden dni »se začne čez 870h 01m«
 
 **Scenarij in koraki:** vzorčni podatki, seznam »Treningi«, trening »Moč ob torkih in četrtkih«
