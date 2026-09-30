@@ -131,6 +131,15 @@ export function hasLoad(value, unit) {
   return Number.parseFloat(value) > 0;
 }
 
+// The words a load is written with, in the language on screen. The app calls `setLoadWords` when the
+// language is applied (app.js), so the many places that show a load (board, history, deck, routine
+// list) all say "Stopnja 60" in Slovenian without each being handed a translator. English until set.
+const DEFAULT_LOAD_WORDS = { level: "Level", band: "Band", bw: "+kg (BW)" };
+let loadWords = DEFAULT_LOAD_WORDS;
+export function setLoadWords(words) {
+  loadWords = { ...DEFAULT_LOAD_WORDS, ...words };
+}
+
 // Display string for a load value given its unit. Returns "" when there is nothing to show.
 export function formatLoad(value, unit = "kg") {
   const num = Number.parseFloat(value);
@@ -138,7 +147,7 @@ export function formatLoad(value, unit = "kg") {
     case "band":
       return value ? String(value) : "";
     case "level":
-      return num > 0 ? `Lvl ${num}` : "";
+      return num > 0 ? `${loadWords.level} ${num}` : "";
     case "bw":
       return num > 0 ? `BW+${num}kg` : "BW";
     default:
@@ -150,11 +159,11 @@ export function formatLoad(value, unit = "kg") {
 export function loadFieldMeta(unit) {
   switch (unit) {
     case "band":
-      return { label: "Band", kind: "band" };
+      return { label: loadWords.band, kind: "band" };
     case "level":
-      return { label: "Level", kind: "number", placeholder: "Lvl" };
+      return { label: loadWords.level, kind: "number", placeholder: loadWords.level };
     case "bw":
-      return { label: "+kg (BW)", kind: "number", placeholder: "BW" };
+      return { label: loadWords.bw, kind: "number", placeholder: loadWords.bw };
     default:
       return { label: "kg", kind: "number", placeholder: "kg" };
   }
@@ -164,14 +173,21 @@ export function loadFieldMeta(unit) {
 // surface (routine builder, live clipboard editor). Returns a <select> of band strengths for
 // band equipment, otherwise a numeric field (kg / stack level / added bodyweight). The caller
 // passes `cls` (kept stable so its change-binding still matches) and its own `escapeHTML`.
-export function loadInputHTML({ unit, value, cls, escapeHTML, ariaLabel = "Load" }) {
+export function loadInputHTML({
+  unit,
+  value,
+  cls,
+  escapeHTML,
+  ariaLabel = "Load",
+  showUnit = true,
+}) {
   if (unit === "band") {
     const opts = BAND_LEVELS.map(
       (l) => `<option value="${l}" ${String(value) === l ? "selected" : ""}>${l}</option>`,
     ).join("");
-    return `<select class="${cls}" aria-label="${ariaLabel}"><option value="">Band</option>${opts}</select>`;
+    return `<select class="${cls}" aria-label="${ariaLabel}"><option value="">${loadWords.band}</option>${opts}</select>`;
   }
   const meta = loadFieldMeta(unit);
   const v = value === "" || value === undefined || value === null ? "" : value;
-  return `<input type="text" inputmode="decimal" pattern="${DECIMAL_PATTERN}" placeholder="${meta.label}" class="${cls}" value="${escapeHTML(String(v))}" aria-label="${ariaLabel}">`;
+  return `<input type="text" inputmode="decimal" pattern="${DECIMAL_PATTERN}" placeholder="${meta.label}" class="${cls}" value="${escapeHTML(String(v))}" aria-label="${ariaLabel}">${showUnit ? `<span class="load-unit">${escapeHTML(meta.label)}</span>` : ""}`;
 }

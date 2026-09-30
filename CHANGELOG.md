@@ -76,6 +76,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Fixed
 
+- **A load says its unit in the app's language, beside the number.** A machine load read "Lvl 60" and
+  the field named its unit only in English, and only while empty; it now reads "Stopnja 60" in
+  Slovenian and the unit stays visible when a number is typed.
 - **Start makes the first exercise not yet done the active one.** After exercises were added before
   Start, the last one added was active and the first ones read as done.
 - **The notification drawer lists a finished session's signals at once**, not only after a reload.

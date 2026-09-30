@@ -62,7 +62,7 @@ test("reps and load helpers", () => {
   // Equipment → load unit (unlisted equipment is kilograms).
   assert.deepEqual(unit, ["level", "band", "bw", "kg"]);
   // Display strings per unit.
-  assert.deepEqual(formatLoad, ["40 kg", "Lvl 3", "BW", "BW+5kg", "Heavy"]);
+  assert.deepEqual(formatLoad, ["40 kg", "Level 3", "BW", "BW+5kg", "Heavy"]);
   // Visibility: bodyweight always shows; kg needs a positive value; band needs a label.
   assert.deepEqual(hasLoad, [true, false, true, false, true]);
 
@@ -142,4 +142,26 @@ test("a load value goes through the caller's escaping", () => {
     escapeHTML: (s) => s.replaceAll('"', "&quot;").replaceAll("<", "&lt;").replaceAll(">", "&gt;"),
   });
   assert.ok(!html.includes("<script>"));
+});
+
+test("a machine load is written in the language on screen, and the field shows its unit beside the number", () => {
+  m.setLoadWords({ level: "Stopnja", band: "Elastika", bw: "+kg (lastna teža)" });
+  try {
+    assert.equal(m.formatLoad(60, "level"), "Stopnja 60");
+    assert.equal(m.loadFieldMeta("level").label, "Stopnja");
+    const html = m.loadInputHTML({ unit: "level", value: 60, cls: "c", escapeHTML: String });
+    assert.ok(html.includes('<span class="load-unit">Stopnja</span>'), html);
+    const kg = m.loadInputHTML({ unit: "kg", value: 60, cls: "c", escapeHTML: String });
+    assert.ok(kg.includes('<span class="load-unit">kg</span>'), kg);
+    const bare = m.loadInputHTML({
+      unit: "kg",
+      value: 1,
+      cls: "c",
+      escapeHTML: String,
+      showUnit: false,
+    });
+    assert.ok(!bare.includes("load-unit"));
+  } finally {
+    m.setLoadWords({ level: "Level", band: "Band", bw: "+kg (BW)" });
+  }
 });

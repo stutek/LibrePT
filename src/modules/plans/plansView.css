@@ -77,7 +77,8 @@
   min-width: 0;
   padding-inline: 6px;
 }
-.routine-builder-caption {
+.routine-builder-caption,
+.routine-builder-field .load-unit {
   font-size: 11px;
   color: var(--text-muted);
   white-space: nowrap;

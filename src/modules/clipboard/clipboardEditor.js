@@ -162,6 +162,7 @@ function buildLoadFieldHTML(ex, modality, unit, escapeHTML, tr) {
       value,
       cls: "editor-f-weight",
       escapeHTML,
+      showUnit: false, // the label above the field already names it
       ariaLabel: escapeHTML(tr("routine_row_load_label", "Load")),
     },
   )}</label>`;

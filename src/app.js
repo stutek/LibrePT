@@ -84,7 +84,7 @@ import {
 import { claimThisTab, onTabDeactivated } from "./data/tabOwnership.js";
 import { SANDBOX, isSandbox } from "./data/workspace.js";
 import { DEMO_NOTICE_TYPE } from "./domain/notificationItems.js";
-import { repsPresetsDatalistHTML } from "./domain/repsAndLoad.js";
+import { repsPresetsDatalistHTML, setLoadWords } from "./domain/repsAndLoad.js";
 import { clipboardDependsOnRemoved } from "./domain/sessionRecord.js";
 import { applyStaticDOMMappings } from "./i18n/domMappings.js";
 import {
@@ -211,6 +211,8 @@ function applyTranslations(chosen = getState().lang) {
 
   applyThemeSwitcherLabels(lang);
   applyStaticDOMMappings(dictionaryFor(lang));
+  const dict = dictionaryFor(lang);
+  setLoadWords({ level: dict.load_word_level, band: dict.load_word_band, bw: dict.load_label_bw });
 
   renderNotificationArea();
 }
