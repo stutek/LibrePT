@@ -207,6 +207,26 @@ async function openEncryptedBackup(envelope) {
   }
 }
 
+/** A file the import refuses on purpose. It carries the dictionary key of what the trainer reads,
+ *  so the catch below shows a sentence in their language and never an Error's English message. */
+class ImportRefusal extends Error {
+  constructor(key, params = {}) {
+    super(key);
+    this.key = key;
+    this.params = params;
+  }
+}
+
+/** The status-line sentence for whatever stopped an import. Anything that is not a deliberate
+ *  refusal (bad JSON, a file without clients and exercises) is "not a LibrePT backup". */
+function importFailureText(err) {
+  const refusal = err instanceof ImportRefusal;
+  return Object.entries(refusal ? err.params : {}).reduce(
+    (text, [name, value]) => text.replaceAll(`{${name}}`, String(value)),
+    deps.t(refusal ? err.key : "restore_invalid_file"),
+  );
+}
+
 /**
  * The text of a chosen file, turned into a backup payload.
  *
@@ -222,9 +242,7 @@ async function readImportedFile(text) {
   const parsed = JSON.parse(text);
   const format = resolveBackupFormat(parsed);
   if (format.unsupported) {
-    throw new Error(
-      `This backup is format version ${format.formatVersion}, which this version of LibrePT cannot open. Update LibrePT and try again — the file is unchanged.`,
-    );
+    throw new ImportRefusal("restore_unsupported_version", { version: format.formatVersion });
   }
   if (format.container !== AES_GCM_CONTAINER) return parsed;
   return openEncryptedBackup(parsed);
@@ -326,6 +344,9 @@ export function renderBackupDialog() {
         <i class="fa-solid fa-triangle-exclamation"></i>
         <span id="backup-preview-warning-text" data-i18n="backup_preview_warning">This is a preview build. Backups and sync are written in the last stable format, so anything added by this preview is not included. Keep your own copy of anything you cannot lose.</span>
       </p>
+
+      <!-- What the number in the header counts, in words. Filled by driveSyncUi.js on every render. -->
+      <p id="sync-hub-changes" class="status-msg"></p>
 
       <div class="backup-actions">
         <!-- The description, the connect button and the conflicts button are empty here: driveSyncUi.js
@@ -565,7 +586,7 @@ export function setupBackupRestore() {
             // further on for the same class of reason — something that must not come back in.
             // Sample data must never enter the trainer's own database; the other direction is fine.
             if (refusesRestoreInto(importedData, activeWorkspace())) {
-              throw new Error(deps.t("restore_refused_sandbox_file"));
+              throw new ImportRefusal("restore_refused_sandbox_file");
             }
 
             // A backup is restored WHOLE. Rebuilding a fixed set of collections here silently
@@ -576,7 +597,7 @@ export function setupBackupRestore() {
             if (!ok) {
               // A backup from a NEWER build (or one this version cannot migrate) is refused rather
               // than half-imported over the trainer's live database.
-              throw new Error(describeMigration(summary).join("; ") || "Unmigratable backup.");
+              throw new ImportRefusal("restore_unmigratable");
             }
 
             // A restore REPLACES the database — the file is a snapshot, and merging two databases
@@ -612,11 +633,11 @@ export function setupBackupRestore() {
               importStatus.className = "status-msg text-emerald";
             }
           } else {
-            throw new Error("Missing core structure validation.");
+            throw new ImportRefusal("restore_invalid_file");
           }
         } catch (err) {
           if (importStatus) {
-            importStatus.textContent = "Error: Invalid backup file format.";
+            importStatus.textContent = importFailureText(err);
             importStatus.className = "status-msg text-danger";
           }
           console.error("Import file parse error:", err);

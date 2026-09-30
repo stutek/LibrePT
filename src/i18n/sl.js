@@ -947,6 +947,19 @@ export const sl = {
   sync_badge_behind_few: "{count} spremembe v oblaku čakajo na prenos",
   sync_badge_behind_other: "{count} sprememb v oblaku čaka na prenos",
   sync_badge_behind_unknown: "spremembe v oblaku niso znane",
+  sync_hub_ahead_one: "{count} sprememba na tej napravi še ni v Google Drive.",
+  sync_hub_ahead_two: "{count} spremembi na tej napravi še nista v Google Drive.",
+  sync_hub_ahead_few: "{count} spremembe na tej napravi še niso v Google Drive.",
+  sync_hub_ahead_other: "{count} sprememb na tej napravi še ni v Google Drive.",
+  sync_hub_none: "Vse na tej napravi je že v Google Drive.",
+  sync_hub_cloud_unknown:
+    "Vprašaj v glavi pomeni, da spremembe v Google Drive niso znane: ni povezan ali ni dosegljiv.",
+  restore_invalid_file:
+    "Ta datoteka ni varnostna kopija LibrePT. Na tej napravi se ni nič spremenilo. Izberi datoteko, ki jo je LibrePT naredil z »Izvozi JSON«.",
+  restore_unsupported_version:
+    "Ta kopija je v obliki različice {version}, ki je ta različica LibrePT ne more odpreti. Posodobi LibrePT in poskusi znova. Na tej napravi se ni nič spremenilo.",
+  restore_unmigratable:
+    "Te kopije ni mogoče posodobiti za to različico LibrePT. Na tej napravi se ni nič spremenilo.",
   signal_too_easy: "Prelahko",
   signal_too_hard: "Pretežko",
   feedback_tag_too_easy: "Prelahko – povečaj težo",

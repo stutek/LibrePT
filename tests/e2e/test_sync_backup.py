@@ -232,3 +232,26 @@ def test_an_exported_backup_holds_nothing_readable(page, local_server):
     assert "clients" not in written, (
         "the collection names are readable in the exported file"
     )
+
+
+def test_the_backup_dialog_states_the_header_number_in_words(page, local_server):
+    """The header shows "3?" and nothing on screen said what 3 counts. The dialog it opens says it."""
+    page.goto(local_server + "clients")
+    page.wait_for_selector("#view-client-directory.active")
+    page.wait_for_function(
+        """async () => {
+            const s = await import(new URL('data/stateStore.js', document.baseURI).href);
+            return (s.getState().clients || []).length > 0;
+        }"""
+    )
+    for index in range(3):
+        page.locator("#btn-add-client").click()
+        page.locator("#client-name").fill(f"Counted Client {index}")
+        page.locator("#dialog-client button[type='submit']").click()
+
+    page.locator("#backup-btn").click()
+    page.wait_for_selector("#dialog-backup[open]")
+
+    text = page.locator("#sync-hub-changes").inner_text()
+    assert "3 changes on this device are not yet in Google Drive" in text, text
+    assert "not connected" in text, text

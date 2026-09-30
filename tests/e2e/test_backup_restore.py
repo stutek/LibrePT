@@ -136,7 +136,8 @@ def test_a_backup_from_a_newer_build_is_refused(page, local_server):
     after = _state(page)
 
     status = page.locator("#import-status").inner_text()
-    assert "Error" in status
+    assert "Error" not in status
+    assert "Nothing on this device was changed" in status, status
     # The live database is untouched — the demo data is still there.
     assert len(after["clients"]) == len(before["clients"])
     assert after["clients"][0]["name"] != "Restored Client"

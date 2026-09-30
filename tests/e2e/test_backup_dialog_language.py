@@ -64,3 +64,48 @@ def test_what_a_restore_would_replace_is_named_in_slovenian(page, local_server):
     for english in ["clients", "routines", "sessions", "planUpdates", "history"]:
         assert english not in text, text
     assert "strank" in text
+
+
+def _choose_file(page, name, content):
+    page.click("#backup-btn")
+    page.wait_for_selector("#dialog-backup[open]")
+    page.set_input_files(
+        "#import-db-file",
+        files=[{"name": name, "mimeType": "application/json", "buffer": content}],
+    )
+
+
+def test_a_file_that_is_not_a_backup_is_refused_in_slovenian(page, local_server):
+    """It answered "Error: Invalid backup file format." in English, in a Slovenian app."""
+    page.goto(local_server + "?lang=sl")
+    page.wait_for_selector(".session-card")
+
+    _choose_file(page, "seznam.json", json.dumps({"seznam": ["kruh"]}).encode())
+
+    [refused] = _slovenian(page, ["restore_invalid_file"])
+    expect(page.locator("#import-status")).to_have_text(refused)
+    assert "Error" not in page.locator("#import-status").inner_text()
+
+
+def test_a_file_that_is_not_json_is_refused_in_slovenian(page, local_server):
+    page.goto(local_server + "?lang=sl")
+    page.wait_for_selector(".session-card")
+
+    _choose_file(page, "seznam.json", b"kruh, mleko")
+
+    [refused] = _slovenian(page, ["restore_invalid_file"])
+    expect(page.locator("#import-status")).to_have_text(refused)
+
+
+def test_a_backup_of_a_newer_format_is_refused_in_slovenian(page, local_server):
+    page.goto(local_server + "?lang=sl")
+    page.wait_for_selector(".session-card")
+
+    _choose_file(
+        page, "nova.json", json.dumps({"formatVersion": 999, "clients": []}).encode()
+    )
+
+    status = page.locator("#import-status")
+    expect(status).not_to_have_text("")
+    text = status.inner_text()
+    assert "LibrePT" in text and "cannot open" not in text and "Error" not in text, text

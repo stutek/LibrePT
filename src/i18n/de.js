@@ -1000,6 +1000,19 @@ export const de = {
   sync_badge_behind_few: "{count} Änderungen in der Cloud zum Abrufen",
   sync_badge_behind_other: "{count} Änderungen in der Cloud zum Abrufen",
   sync_badge_behind_unknown: "Änderungen in der Cloud sind nicht bekannt",
+  sync_hub_ahead_one: "{count} Änderung auf diesem Gerät ist noch nicht in Google Drive.",
+  sync_hub_ahead_two: "{count} Änderungen auf diesem Gerät sind noch nicht in Google Drive.",
+  sync_hub_ahead_few: "{count} Änderungen auf diesem Gerät sind noch nicht in Google Drive.",
+  sync_hub_ahead_other: "{count} Änderungen auf diesem Gerät sind noch nicht in Google Drive.",
+  sync_hub_none: "Alles auf diesem Gerät ist schon in Google Drive.",
+  sync_hub_cloud_unknown:
+    "Das ? in der Kopfzeile heißt: Die Änderungen in Google Drive sind nicht bekannt, weil es nicht verbunden oder nicht erreichbar ist.",
+  restore_invalid_file:
+    "Diese Datei ist keine LibrePT-Sicherung. Auf diesem Gerät wurde nichts geändert. Wähle die Datei, die LibrePT mit „JSON exportieren“ erstellt hat.",
+  restore_unsupported_version:
+    "Diese Sicherung hat das Format der Version {version}, das diese Version von LibrePT nicht öffnen kann. Aktualisiere LibrePT und versuche es noch einmal. Auf diesem Gerät wurde nichts geändert.",
+  restore_unmigratable:
+    "Diese Sicherung lässt sich für diese Version von LibrePT nicht aktualisieren. Auf diesem Gerät wurde nichts geändert.",
   signal_too_easy: "Zu leicht",
   signal_too_hard: "Zu schwer",
   feedback_tag_too_easy: "Zu leicht – Last erhöhen",

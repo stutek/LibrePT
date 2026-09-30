@@ -42,6 +42,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Fixed
 
+- **The Sync & Backup dialog says what the number on its button counts.** The button showed "7?"
+  and nothing on screen said what it was; the dialog now states in words how many changes on this
+  device are not yet in Google Drive, and that the cloud side is unknown while Drive is not
+  connected.
+- **A wrong file chosen for a restore is refused in the trainer's language.** It answered "Error:
+  Invalid backup file format." in English. Every refusal of the restore now says, in the app's
+  language, what was wrong and what to choose instead.
 - **The mark for "a note is written here" shows on the card.** The dot on the feedback button of an
   exercise or a circuit member with a written note was built on 2026-08-15 but never drawn: the deck
   did not hand the note lookup to its cards. A new test mounts the deck and looks for the dot.

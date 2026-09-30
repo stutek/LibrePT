@@ -18,6 +18,7 @@ import {
 } from "../../data/driveSyncService.js";
 import { preloadGoogleIdentityServices } from "../../data/googleAuth.js";
 import { isSandbox } from "../../data/workspace.js";
+import { countedText } from "../../i18n/plural.js";
 import { askToSet, askToUnlock } from "./backupPassword.js";
 import { closeModal, openModal, renderMarkupOnce } from "./dom.js";
 import { formatClockFromEpoch } from "./utils.js";
@@ -198,9 +199,23 @@ function applyCardState(state) {
   });
 }
 
+/** The header badge's number, said in words: how many of this device's records are not in Drive,
+ *  and, when the badge shows "?", why the Drive side is unknown. */
+function syncHubChangesText(status) {
+  const t = (key) => deps?.t?.(key) || key;
+  const lang = document.documentElement.lang;
+  const ahead =
+    status.ahead === 0 ? t("sync_hub_none") : countedText(t, lang, "sync_hub_ahead", status.ahead);
+  const unknown = !status.configured || !status.reachable;
+  return unknown ? `${ahead} ${t("sync_hub_cloud_unknown")}` : ahead;
+}
+
 export function renderDriveSyncCard() {
   if (!document.getElementById("drive-sync-card")) return;
-  applyCardState(cardStateFor(driveSyncStatus()));
+  const status = driveSyncStatus();
+  const hubLine = document.getElementById("sync-hub-changes");
+  if (hubLine) hubLine.textContent = syncHubChangesText(status);
+  applyCardState(cardStateFor(status));
 }
 
 /** Called by the "backup" route's `open` hook, before the dialog is shown — starts the GIS script
