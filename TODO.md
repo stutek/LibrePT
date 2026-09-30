@@ -4213,6 +4213,42 @@ pravi trening.
 trening ustvarjen — opaženo na različici `main` `6230070` (zamrznjena kopija, vrata 8093), sl,
 390 × 844.
 
+### 80.151 [ ] P2 — Pri urejanju načrta se katalog zapre po vsaki vaji, v »Ustvari rutino« pa ostane odprt
+
+**Scenarij in koraki:** trening »Test D« (stranka »Vesna Lipnik«) → ⋮ → »Uredi načrt« → »Dodaj iz
+kataloga« → »Barbell Back Squat«. Za primerjavo: ☰ → »Vaje in rutine« → »Rutine« → »Ustvari
+rutino« → »Barbell Back Squat«, nato »Barbell Row«.
+
+**Opaženo:** pri urejanju načrta se okno »Dodaj iz kataloga vaj« po prvi vaji zapre; za vsako
+naslednjo vajo je treba znova pritisniti »Dodaj iz kataloga« in znova poiskati vajo. V »Ustvari
+rutino« okno ostane odprto in obe vaji dobita vrstico (3 × 10). Isto trdi dnevnik prvega odprtja 04
+(tri vaje, trikrat odprt katalog).
+
+**Težava in vpliv:** trening s šestimi vajami stane pri urejanju načrta šest odprtij kataloga in
+šestkrat iskanje od začetka seznama. Trener, ki je rutino že sestavil z enim odprtjem, ne ve, zakaj
+tu ne gre.
+
+**Predlog:** katalog pri urejanju načrta naj ostane odprt, dokler trener ne pritisne »Končano«, kot v
+»Ustvari rutino« — opaženo na različici `main` `6230070` (zamrznjena kopija), sl, 390 × 844.
+
+### 80.152 [ ] P3 — Med urejanjem načrta prazna kartica še vedno pravi »izberi Uredi načrt«, namig pa imenuje gumb brez besede
+
+**Scenarij in koraki:** trening brez vaj (»Test D«) → ⋮ → »Uredi načrt«.
+
+**Opaženo:** nad urejevalnikom piše »Ni vstavljenih vaj«, pod vrstico »Vaja · Sklop · Počitek«
+»Pritisni Končano, tipko Esc ali zunaj okna za zaključek.«, pod tem pa kartica »Ni vstavljenih vaj /
+Vaj še ni. Pritisni tri pike (⋮) zgoraj desno in izberi Uredi načrt.« — prav to, kar je trener
+pravkar naredil. Gumb, ki ga namig imenuje »Končano«, na zaslonu kaže samo kljukico ✓ v zelenem krogu
+zgoraj desno; beseda »Končano« je le v njegovem skritem imenu. Posnetek zaslona, ker gre za vidno
+stanje.
+
+**Težava in vpliv:** trener, ki prvič ureja načrt, dobi navodilo, naj stori, kar je že storil, in
+iskati mora gumb z besedo, ki je ni. Dnevnik prvega odprtja 04 navaja oboje kot zmedo.
+
+**Predlog:** med urejanjem naj prazna kartica ne kaže navodila za vstop v urejanje, namig pa naj
+imenuje gumb po tem, kar se vidi (»Pritisni ✓ zgoraj desno …«) — opaženo na različici `main`
+`6230070`, sl, 390 × 844.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
