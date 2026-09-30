@@ -213,6 +213,24 @@ declared there is nothing to pin to and they run on the app's own default.
 tree, because a long-lived server silently outliving its own source once invalidated a full day of
 measurements.
 
+**Wait for the thing the app does, never for a length of time.** A test that sleeps a fixed number of
+milliseconds and then reads the screen passes on a quiet machine and fails under a full gate, and its
+failure names the product rather than the wait. Three in one day, 2026-09-30, all reported as
+defects and none of them one:
+
+- a button's height read 43.9998 against a 44px minimum, 20ms before its view's 0.32s scale-in
+  finished (`getBoundingClientRect` includes the transform; the layout box was always 44);
+- a story walk that waited 8 seconds after *Show me* instead of waiting for *Show me* to come back;
+- a tap on *Show me* after a fixed 800ms, while the guide was still busy with the step before.
+
+Each was fixed by waiting on something the app itself changes: `getAnimations().finished` on the
+view, the control's own `disabled` state, the step number on the card. Where no such signal exists,
+poll for the state you expect rather than sleeping toward it — `demoPace.js` makes every pause zero
+under reduced motion precisely so that no pause can be load-bearing, and a test that needs one is
+testing the clock. **And a fix that makes the assertion unable to fail is not a fix:** the 44px read
+was first "solved" with `offsetHeight`, which rounds to a whole number and would pass a 43.6px
+button — the defect the check exists to catch.
+
 **Two Playwright assertions that lie quietly**, both found on 2026-08-18 when a harness helper let a
 suite race ahead of the app:
 
