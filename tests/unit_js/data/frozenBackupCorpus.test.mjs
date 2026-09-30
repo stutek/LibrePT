@@ -254,6 +254,21 @@ test("a schema 3 field install still gets its language cleared", () => {
   assert.equal(r.state.clients.length, 1);
 });
 
+// A fixture name that starts a version: `schema<N>` followed by nothing or `_suffix`/`.json`.
+const versionOfFixture = (name) => /^schema(\d+)(?:[_.]|$)/.exec(name)?.[1];
+
+test("every version a migration step starts from has a committed fixture", () => {
+  // The required list is DERIVED from MIGRATION_STEPS, never written by hand: a new step means a
+  // new schema left behind, and a real backup of that schema must be frozen before it is
+  // superseded. Without this, a schema could arrive with no fixture and nothing would fail.
+  const onDisk = readdirSync(FIXTURES_DIR).filter((name) => name.endsWith(".json"));
+  const versionsWithFixture = new Set(onDisk.map(versionOfFixture).map(Number));
+  const missing = MIGRATION_STEPS.map((step) => step.from).filter(
+    (version) => !versionsWithFixture.has(version),
+  );
+  assert.deepEqual(missing, [], `no frozen fixture for schema version(s): ${missing.join(", ")}`);
+});
+
 test("every committed fixture is accounted for", () => {
   // A fixture file added to the corpus but never exercised above would silently stop being
   // tested the moment someone forgot to wire it up — this closes that gap structurally.
