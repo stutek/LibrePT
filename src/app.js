@@ -49,6 +49,7 @@ import {
 import {
   editRoutineLive,
   openRoutineCreateDialog,
+  saveSessionAsRoutine,
   setupRoutineForms as setupRoutineFormsController,
 } from "./controllers/routineFormsController.js";
 import { resweepErasedClients } from "./data/clientErasure.js";
@@ -463,6 +464,15 @@ async function init() {
     startWorkoutSession: (cr, bm) => startWorkoutSession(cr, bm),
     launchClipboardDirectly: (arg) => launchClipboardDirectly(arg),
     openSessionFromHistory: (log) => openSessionFromHistory(log),
+    saveSessionAsRoutine: (log) =>
+      saveSessionAsRoutine({
+        log,
+        state: getState(),
+        t,
+        saveToLocalStorage: saveState,
+        navigateToPath,
+        urlFor,
+      }),
     openWorkoutSetupModal: (c, r, b, o) => openWorkoutSetupModal(c, r, b, o),
     focusSessionsColumn,
     scheduleTimelineSettle,

@@ -336,6 +336,16 @@ export const de = {
   routine_row_rest: "Pause",
   routine_row_rest_label: "Pausendauer in Sekunden",
   routine_row_remove: "Übung aus der Routine entfernen",
+  history_save_as_routine: "Als Routine speichern",
+  routine_saved_from_session: "Gespeichert aus dem Training vom {date}",
+  routine_from_session_omitted_one:
+    "{count} Übung ist nicht in deiner Bibliothek und fehlt deshalb in der Routine.",
+  routine_from_session_omitted_two:
+    "{count} Übungen sind nicht in deiner Bibliothek und fehlen deshalb in der Routine.",
+  routine_from_session_omitted_few:
+    "{count} Übungen sind nicht in deiner Bibliothek und fehlen deshalb in der Routine.",
+  routine_from_session_omitted_other:
+    "{count} Übungen sind nicht in deiner Bibliothek und fehlen deshalb in der Routine.",
   // The exercise picker (modules/exercises/exercisePicker.js).
   picker_count: "Übungen: {count}",
   picker_empty: "Keine Übung passt zu diesem Filter.",
@@ -1328,7 +1338,6 @@ export const de = {
   notif_test_data_escaped_desc:
     "Von einem Testlauf geschriebene Einträge ({count}) sind zusammen mit deiner eigenen Arbeit gespeichert, in {collections}. Sie gehören nicht dir, und wenn du sie entfernst, bleibt alles, was du erstellt hast, unverändert.",
   notif_test_data_escaped_btn: "Testeinträge entfernen",
-};
   test_data_collection_clients: "Kunden",
   test_data_collection_exercises: "Übungen",
   test_data_collection_routines: "Routinen",
@@ -1341,3 +1350,4 @@ export const de = {
   test_data_collection_circuits: "Zirkel",
   test_data_collection_previewProbe: "Testeinträge",
   demo_cleanup_reason_depended_on: "Bleibt, weil ein Eintrag von dir noch davon abhängt",
+};

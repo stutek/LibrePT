@@ -141,3 +141,8 @@
   color: var(--primary);
   margin-bottom: 4px;
 }
+
+.history-save-routine {
+  min-height: 44px;
+  margin-top: 8px;
+}

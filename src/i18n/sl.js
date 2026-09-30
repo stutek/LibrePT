@@ -333,6 +333,12 @@ export const sl = {
   routine_row_rest: "Premor",
   routine_row_rest_label: "Premor v sekundah",
   routine_row_remove: "Odstrani vajo iz rutine",
+  history_save_as_routine: "Shrani kot rutino",
+  routine_saved_from_session: "Shranjeno iz treninga z dne {date}",
+  routine_from_session_omitted_one: "{count} vaja ni v tvoji knjižnici, zato je ni v rutini.",
+  routine_from_session_omitted_two: "{count} vaji nista v tvoji knjižnici, zato ju ni v rutini.",
+  routine_from_session_omitted_few: "{count} vaje niso v tvoji knjižnici, zato jih ni v rutini.",
+  routine_from_session_omitted_other: "{count} vaj ni v tvoji knjižnici, zato jih ni v rutini.",
   // The exercise picker (modules/exercises/exercisePicker.js).
   picker_count: "Vaje: {count}",
   picker_empty: "Temu filtru ne ustreza nobena vaja.",
@@ -1273,7 +1279,6 @@ export const sl = {
   notif_test_data_escaped_desc:
     "{count} zapisov, ki jih je ustvaril testni zagon, je shranjenih skupaj s tvojim delom, in sicer v: {collections}. Niso tvoji; ko jih odstraniš, vse, kar si ustvaril sam, ostane nedotaknjeno.",
   notif_test_data_escaped_btn: "Odstrani testne zapise",
-};
   test_data_collection_clients: "stranke",
   test_data_collection_exercises: "vaje",
   test_data_collection_routines: "rutine",
@@ -1286,3 +1291,4 @@ export const sl = {
   test_data_collection_circuits: "sklopi",
   test_data_collection_previewProbe: "preizkusni zapisi",
   demo_cleanup_reason_depended_on: "Ostane, ker je od njega odvisen tvoj zapis",
+};

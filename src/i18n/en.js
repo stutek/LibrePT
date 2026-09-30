@@ -318,6 +318,16 @@ export const en = {
   routine_row_rest: "Rest",
   routine_row_rest_label: "Rest duration in seconds",
   routine_row_remove: "Remove exercise from routine",
+  history_save_as_routine: "Save as routine",
+  routine_saved_from_session: "Saved from the session of {date}",
+  routine_from_session_omitted_one:
+    "{count} movement is not in your library, so it is not in the routine.",
+  routine_from_session_omitted_two:
+    "{count} movements are not in your library, so they are not in the routine.",
+  routine_from_session_omitted_few:
+    "{count} movements are not in your library, so they are not in the routine.",
+  routine_from_session_omitted_other:
+    "{count} movements are not in your library, so they are not in the routine.",
   // The exercise picker (modules/exercises/exercisePicker.js).
   picker_count: "Movements: {count}",
   picker_empty: "No movements match this filter.",
@@ -1340,7 +1350,6 @@ export const en = {
   notif_test_data_escaped_desc:
     "{count} record(s) written by a test run are stored together with your own work, in {collections}. They are not yours, and removing them leaves everything you made untouched.",
   notif_test_data_escaped_btn: "Remove the test records",
-};
   test_data_collection_clients: "clients",
   test_data_collection_exercises: "exercises",
   test_data_collection_routines: "routines",
@@ -1353,3 +1362,4 @@ export const en = {
   test_data_collection_circuits: "circuits",
   test_data_collection_previewProbe: "test records",
   demo_cleanup_reason_depended_on: "Kept because a record you created still depends on it",
+};

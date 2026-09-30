@@ -76,6 +76,7 @@ export class ClientDetailRoute extends Route {
       switchView: ctx.router.switchView,
       openWorkoutSetupModal: ctx.deps.openWorkoutSetupModal,
       openSessionFromHistory: ctx.deps.openSessionFromHistory,
+      saveSessionAsRoutine: ctx.deps.saveSessionAsRoutine,
     });
     return this;
   }

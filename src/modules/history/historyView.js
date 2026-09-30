@@ -77,11 +77,33 @@ function buildExerciseSetsText(ex, metric, modality) {
     .join(", ");
 }
 
+function addSaveAsRoutineButton({ card, log, t, saveAsRoutine }) {
+  if (!saveAsRoutine || log.isPlanning) return;
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "btn secondary-btn btn-sm history-save-routine";
+  button.textContent = t("history_save_as_routine");
+  button.addEventListener("click", (e) => {
+    e.stopPropagation();
+    saveAsRoutine(log);
+  });
+  card.appendChild(button);
+}
+
 // `openSessionFromHistory` arrives as a parameter rather than an import: it lives in
 // activeSessionController, and a view importing its own controller inverts the layering the app is
 // built on (controllers orchestrate views, not the reverse) — gated by
 // agent_tools/import_layers.py. Injected, this file stays independently mountable.
-export function renderHistoryItems({ historyList, container, t, openSessionFromHistory }) {
+//
+// `saveAsRoutine(log)` is injected for the same reason: it stores a routine and opens the editor,
+// which are the controllers' business. Without it, no button is drawn.
+export function renderHistoryItems({
+  historyList,
+  container,
+  t,
+  openSessionFromHistory,
+  saveAsRoutine,
+}) {
   const fragment = document.createDocumentFragment();
   for (const log of historyList) {
     const card = document.createElement("div");
@@ -158,6 +180,9 @@ export function renderHistoryItems({ historyList, container, t, openSessionFromH
     card.addEventListener("click", () => {
       openSessionFromHistory(log);
     });
+
+    // A performed session can seed a routine; a planned one already is a prescription.
+    addSaveAsRoutineButton({ card, log, t, saveAsRoutine });
 
     // Tap a feedback/notes icon to toggle its tooltip; stop the tap from also opening the
     // session (the card's own click). Replaces inline onclick= so CSP can forbid inline script.

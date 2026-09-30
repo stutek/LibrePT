@@ -4,8 +4,12 @@
 // Split 2026-08-01 out of the old formsController.js, which bundled Client, Routine, and Exercise
 // forms in one file despite the three sharing nothing but boilerplate.
 
+import { libraryExercises } from "../data/exerciseLibrary.js";
 import { newRecordId } from "../data/recordId.js";
 import { parseLoad, parseReps } from "../domain/repsAndLoad.js";
+import { buildRoutineFromRecord } from "../domain/routineFromSession.js";
+import { countedText } from "../i18n/plural.js";
+import { tellInApp } from "../modules/common/appQuestion.js";
 import { $id, closeModal, openModal, renderMarkupOnce } from "../modules/common/dom.js";
 import { wireLibraryTabs } from "../modules/common/libraryTabs.js";
 import { keepRecordLive } from "../modules/common/liveRecordForm.js";
@@ -28,6 +32,39 @@ export function editRoutineLive(routine) {
 
 export function openRoutineCreateDialog() {
   openRoutineCreateForm();
+}
+
+/** "Save as routine" on a performed session: stores the routine built from it, says how many
+ *  movements could not be carried over, and opens the routine editor so the trainer can rename it. */
+export async function saveSessionAsRoutine({
+  log,
+  state,
+  t,
+  saveToLocalStorage,
+  navigateToPath,
+  urlFor,
+}) {
+  const { routine, omitted } = buildRoutineFromRecord({
+    log,
+    library: libraryExercises(state),
+    routines: state.routines,
+    fallbackName: t("placeholder_routine_name"),
+    provenance: t("routine_saved_from_session"),
+  });
+  state.routines.push(routine);
+  saveToLocalStorage();
+  if (omitted > 0) {
+    await tellInApp({
+      t,
+      message: countedText(
+        t,
+        document.documentElement.lang,
+        "routine_from_session_omitted",
+        omitted,
+      ),
+    });
+  }
+  navigateToPath(urlFor("routine.edit", { routineId: routine.id }));
 }
 
 export function renderRoutineDialog() {
@@ -171,6 +208,7 @@ export function setupRoutineForms({
         const inputRest = parseInt(row.querySelector(".input-rest").value);
         if (!selectEx?.value) continue;
         routine.exercises.push({
+          ...JSON.parse(row.dataset.kept || "{}"),
           id: selectEx.value,
           // The same three sets a row starts with when the picker adds it.
           sets: isNaN(inputSets) ? 3 : inputSets,
@@ -191,4 +229,3 @@ export function setupRoutineForms({
   });
   openRoutineEditForm = (routine) => live.openExisting(routine);
 }
-          ...JSON.parse(row.dataset.kept || "{}"),

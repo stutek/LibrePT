@@ -22,6 +22,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Added
 
+- **A finished session can be saved as a routine.** Each performed session on a client's page has
+  *Save as routine*. The routine keeps the exercises, set counts, reps, rests and circuits, and drops
+  the day's loads; its description says which session it came from, and the routine editor opens
+  so it can be renamed. A movement that is not in the library is left out, and the trainer is told
+  how many.
 - **A search for an exercise the catalogue does not have leads on.** When the typed text matches
   nothing, the exercise library and the pickers offer *Add "…" as a new exercise*, which opens the
   exercise form with the name filled in, and *Import a larger exercise library*. In a picker the new

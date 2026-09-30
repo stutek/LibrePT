@@ -23,6 +23,7 @@ import { openClientEraseDialog, openClientExportDialog } from "./clientDataRight
 import { renderClientsDirectory } from "./clientsDirectory.js";
 
 let activeDetailClientId = null;
+let historyActions = {};
 
 export function getActiveDetailClientId() {
   return activeDetailClientId;
@@ -200,7 +201,13 @@ export function showClientDetails({
   switchView,
   openWorkoutSetupModal,
   openSessionFromHistory,
+  saveSessionAsRoutine,
 }) {
+  // A repaint after the client was edited arrives without these; the last ones given still apply.
+  historyActions = {
+    openSessionFromHistory: openSessionFromHistory || historyActions.openSessionFromHistory,
+    saveSessionAsRoutine: saveSessionAsRoutine || historyActions.saveSessionAsRoutine,
+  };
   const client = state.clients.find((c) => c.id === clientId);
   if (!client) {
     showErrorView(window.location.pathname);
@@ -274,7 +281,7 @@ export function showClientDetails({
     });
   }
 
-  renderClientWorkoutHistory({ client, state, t, openSessionFromHistory });
+  renderClientWorkoutHistory({ client, state, t, ...historyActions });
   switchView("client-detail");
 }
 
@@ -327,7 +334,13 @@ function renderConsentDelivery(client, lang, t) {
   if (label) label.textContent = t(href ? "profile_send_consent" : "consent_no_email");
 }
 
-export function renderClientWorkoutHistory({ client, state, t, openSessionFromHistory }) {
+export function renderClientWorkoutHistory({
+  client,
+  state,
+  t,
+  openSessionFromHistory,
+  saveSessionAsRoutine,
+}) {
   const container = document.getElementById("client-history-list");
   if (!container) return;
   container.innerHTML = "";
@@ -343,5 +356,11 @@ export function renderClientWorkoutHistory({ client, state, t, openSessionFromHi
     return;
   }
 
-  renderHistoryItems({ historyList: clientHistory, container, t, openSessionFromHistory });
+  renderHistoryItems({
+    historyList: clientHistory,
+    container,
+    t,
+    openSessionFromHistory,
+    saveAsRoutine: saveSessionAsRoutine,
+  });
 }
