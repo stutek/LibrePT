@@ -42,6 +42,12 @@ let readUiLang = () => null;
 // The client currently in the form, so a language change can rebuild the delivery links without the
 // controller having to re-open the dialog.
 let editedClient = null;
+// The consent AS THE DIALOG OPENED IT, copied rather than referenced. The form writes into the
+// record on every keystroke, and unticking the box fires `input` before `change` — so by the time
+// this section hears the tick, the record it could read already says "withdrawn" and nothing could
+// tell a withdrawal being made from one made long ago. The same reason writeFields compares against
+// recordBeforeEdit.
+let openedConsent = null;
 
 export function initClientConsentSection({ t, getLang } = {}) {
   if (typeof t === "function") translate = (key, fallback) => t(key) || fallback;
@@ -168,6 +174,7 @@ export function todayDateString(now = new Date()) {
 export function fillConsentSection(client) {
   editedClient = client;
   const consent = client?.gdprConsent;
+  openedConsent = consent ? { ...consent } : null;
   const checkbox = $id("client-gdpr-consent");
   if (checkbox) checkbox.checked = Boolean(consent?.cloudSync);
 
@@ -187,6 +194,22 @@ export function fillConsentSection(client) {
 
 export function withdrawalDateFromSection() {
   return $id("client-withdrawn-date")?.value || todayDateString();
+}
+
+/** Put the withdrawal date in front of the trainer, or take it away, prefilled with today.
+ *
+ * Separate from `syncWithdrawalVisibility` below, which answers the same question from the STORED
+ * record when the dialog opens; this one answers it from the tick as the trainer works. Today is a
+ * default, not an answer: it is right for the common case (the client just said so) and correctable
+ * for the one that matters (they said so last week).
+ */
+function askWithdrawalDate(asking) {
+  const group = $id("client-withdrawn-date-group");
+  const dateInput = $id("client-withdrawn-date");
+  if (!group || !dateInput) return;
+  if (!asking) return;
+  group.hidden = false;
+  if (!dateInput.value) dateInput.value = todayDateString();
 }
 
 // Shown only when there is something to end or something already ended. A date-withdrawn field on a
@@ -228,6 +251,12 @@ function syncConsentDateVisibility(storedVersion) {
   if (!checkbox || !group) return;
 
   group.hidden = !checkbox.checked;
+  // Unticking a client who HAD consent IS the withdrawal, so the day it happened on becomes a
+  // question right then. Until 2026-09-30 the field appeared only once the record already carried a
+  // withdrawal, which is never true at the moment of the tap: the app stamped the day of the tap
+  // instead, and a client who withdrew last week was recorded as withdrawing today. That date is the
+  // one a supervisory authority asks about, and it decides from when processing was unlawful.
+  askWithdrawalDate(!checkbox.checked && isConsentActive(openedConsent));
   if (!checkbox.checked) return;
 
   const dateInput = $id("client-consent-date");

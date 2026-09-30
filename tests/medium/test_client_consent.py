@@ -232,6 +232,28 @@ def test_unticking_consent_records_a_withdrawal_and_keeps_the_evidence(
     assert consent["formLang"] == "sl"
 
 
+def test_the_day_a_withdrawal_happened_can_be_entered(page, local_server):
+    """A client who withdrew last week was recorded as withdrawing on the day the trainer got round
+    to the app: the field for the date existed but appeared only once the record already carried a
+    withdrawal, which is never true at the moment of the tap. It is the date that decides from when
+    processing was unlawful, so it is asked at the tick, with today as a correctable default."""
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#view-client-directory.active")
+    _open_edit(page, "c-signed")
+
+    page.locator("#client-gdpr-consent").uncheck()
+    expect(page.locator("#client-withdrawn-date-group")).to_be_visible()
+    assert page.locator("#client-withdrawn-date").input_value() == _today()
+
+    page.locator("#client-withdrawn-date").fill("2026-09-21")
+    page.locator("#form-client button[type=submit]").click()
+
+    consent = page.evaluate("() => window.__consentOf('c-signed')")
+    assert consent["withdrawnDate"] == "2026-09-21"
+    # And the signature it ends is still on the record.
+    assert consent["consentDate"] == "2026-02-28"
+
+
 def test_a_withdrawal_survives_typing_after_it(page, local_server):
     """The dialog writes the record on every keystroke. Each write must judge consent
     against the record as the dialog opened it: judged against the previous keystroke, the second

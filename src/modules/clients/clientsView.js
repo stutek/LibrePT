@@ -310,7 +310,16 @@ function renderConsentStatus(client, t) {
   if (isConsentWithdrawn(consent)) {
     // Distinct from "never consented": processing must stop for both, but only one of them is a
     // client the trainer must still be able to prove once agreed (Art. 7(1)).
-    const dates = [consentSignedDate(consent), consent.withdrawnDate].filter(Boolean).join(" → ");
+    // Both dates say which one they are. They used to be joined by an arrow alone — "2026-06-15 →
+    // 2026-09-30" — and a reader had to guess which end was the signature and which the withdrawal,
+    // on the one line that has to be right if a supervisory authority ever asks.
+    const dates = [
+      [t("consent_date_label"), consentSignedDate(consent)],
+      [t("consent_withdrawn_label"), consent.withdrawnDate],
+    ]
+      .filter(([, value]) => Boolean(value))
+      .map(([label, value]) => `${label}: ${value}`)
+      .join(" · ");
     const safeLabel = escapeHTML(t("consent_badge_withdrawn").replace("{dates}", dates));
     statusEl.innerHTML = `<span class="badge badge-warning"><i class="fa-solid fa-ban mr-1"></i> ${safeLabel}</span>`;
     return;
