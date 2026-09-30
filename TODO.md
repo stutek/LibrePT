@@ -7232,7 +7232,10 @@ enoznačen.
   povratne informacije« se glasi »🔥 Bolečina ali nelagodje v sklepu«. Pravilo izdelka: korak imenuje
   gumb z napisom, ki ga gumb kaže v tem jeziku. Odprta Simonova odločitev o angleških imenih v vodenem
   ogledu (»all three personas named the English note-type button …«) izhaja iz časa, ko je bil gumb še
-  angleški; zdaj je slovenski, angleški je le še korak (ključ `story_step_capture_tag`).
+  angleški; zdaj je slovenski, angleški je le še korak (ključ `story_step_capture_tag`). Enako v
+  drugih jezikih: angleški korak »Tap 🔥 Joint Pain / Discomfort.«, gumb »Joint pain or discomfort«;
+  nemški »Tippe auf 🔥 Joint Pain / Discomfort — Gelenkschmerzen.«, gumb »Gelenkschmerz oder
+  Beschwerden«. Meritev: v vseh 53 korakih vsakega jezika je to edini napis gumba, ki ga slovar nima.
 - **Korak 12** (P2): »Pritisni Uredi načrt. Odpre se Johnov načrt; opomba je v njem, ob vaji.« V
   urejevalniku opombe »levo koleno, tretja runda« ob vaji ni (vrstica nima polja za opombo, §80.134);
   besedilo je le v pogledu prejšnjega načrta nad robom zaslona.
@@ -7301,6 +7304,8 @@ telefon v 041 222 333.
 - Po vpisu se ogled ustavi: »Ogled čaka. Zadnje dejanje ni bilo korak ogleda. Z »Nazaj v demo«
   nadaljuješ tam, kjer si bil, s »Končaj demo« ga končaš.« Gumba sta »Nazaj v demo« in **»Ustavi
   demo«**; »Končaj demo« ni nikjer. Isto okno ogled pokaže ob vsakem odstopu, torej v vseh poglavjih.
+  V angleščini enako (besedilo »End the demo stops it«, gumb »Stop the demo«); v nemščini se ujemata
+  (»Demo beenden«). Gumb je bil preimenovan, besedilo, ki ga navaja (`walkthrough_off_track`), ne.
 - Korak 1: »Pritisni ☰ … zgoraj desno v temni vrstici.« Pri temi »Dan« je glava bela
   (`rgba(255, 255, 255, 0.96)`).
 - Drži: »Shrani moje podatke« shrani telefon in ta ostane tudi po »Zapusti peskovnik«.
