@@ -74,6 +74,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   page itself does not scroll.
 - **The notification bar itself opens the drawer.** It has always looked tappable; only the 23px
   pill inside it answered, which is the whole target while a session is running.
+- **An erased client's page offers only reading.** Edit, plan a programme, the anonymous copy and the
+  data export all stayed on it after the erasure, and the export opened on the logged workouts of
+  somebody the app had just stopped being able to name. The anonymised history stays, as it should.
+- **The day a consent was withdrawn can be entered.** The field for it appeared only once the record
+  already carried a withdrawal, so the app stamped the day of the tap and a client who withdrew last
+  week was recorded as withdrawing today. The badge also names both dates instead of joining them
+  with an arrow.
+- **The client's data export says which sessions happened, in date order.** Sessions the trainer had
+  only booked sat among the ones the client trained, in no order. Its feedback lines are in the
+  document's language, and the programme changes the dialog counts are now in the file.
+- **An unscheduled programme's row carries the day it was for.** A cancelled course left one per
+  evening, all reading the same, so none of them could be told from the others.
+- **The guided tour stops claiming you are on the wrong screen when you are not.** Interrupting a step
+  said the screen was not part of the demo, named a button that does not exist, and left the card over
+  the screen's own controls.
 - **Editing a routine keeps its circuits.** The routine form has no field for an exercise's circuit
   and wrote every exercise back from its fields alone, so one keystroke in a routine's name turned
   its circuits into a flat list.

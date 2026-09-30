@@ -158,6 +158,162 @@ opravljene, zato zapis po umiku ni tak kot pred tapom.
 besedilu, tako da je gumb ob odprtju cel na zaslonu; preizkušeno pri 320 × 680
 (`tests/e2e/test_first_run_terms.py`).
 
+### 80.99 [x] P2 — Kartica »Ta zaslon ni del demota« pokrije oba gumba zaslona, na katerem stoji — popravljeno 2026-09-30
+
+**Scenarij in koraki:** v poglavju »Sprejem treh novih strank« pridi do koraka 9 od 10, kjer kartica
+pravi »Pritisni Shrani na dnu obrazca«. Namesto tega tapni »Prekliči«.
+
+**Opaženo:** kartica se preseli na vrh zaslona (od 69. do 277. pike navpično) in pravi »Ta zaslon ni
+del demota. Demo se odvija drugje v aplikaciji. Pritisni Nazaj v demo ali Ustavi demo.« Zaslon je pri
+tem »Imenik strank«, torej prav tisti, na katerem se poglavje dogaja. Gumba »Povabi stranko« (pri 75.
+piki, visok 62) in »Dodaj stranko« (pri 76. piki, visok 60) sta v celoti pod kartico: `elementFromPoint`
+na sredini obeh vrne kartico, ne gumba. Izhod obstaja — »Nazaj v demo« pri meni deluje in obrazec
+ponovno odpre, tako da se ogled nadaljuje.
+
+**Težava in vpliv:** trener, ki je prekinil korak, dobi dvoje hkrati: trditev, da je na napačnem
+zaslonu, čeprav je na pravem, in kartico, ki mu zakrije edina dva gumba tega zaslona. Če se hoče
+lotiti svojega dela, ne more, ker se gumba ne odzoveta na dotik.
+
+**Predlog:** kartica naj ne pokriva kontrol zaslona (naj se postavi pod nje ali ob rob), in stavka o
+napačnem zaslonu naj ne izpiše, kadar je trener na zaslonu, kjer korak teče — opaženo na različici
+`8b2ce80`.
+
+**Popravljeno 2026-09-30, z eno pridržano točko.** Kartica ob odstopu zdaj ne trdi več, da je
+trener na napačnem zaslonu — to je bilo neresnično prav v izmerjenem primeru, ko je bil na pravem in
+je le prekinil korak. Novo besedilo v vseh treh jezikih pove, kaj se je zgodilo in kaj storita gumba,
+ki sta na kartici: »Ogled čaka. Zadnje dejanje ni bilo korak ogleda. Z »Nazaj v demo« nadaljuješ tam,
+kjer si bil, s »Končaj demo« ga končaš.« (Staro besedilo je imenovalo »Ustavi demo«, gumba s tem
+napisom pa ni.) Postavitev: ob odstopu se kartica usede na dno, po istem pravilu, ki ga že ima obroč —
+nihče ni na nič usmerjen, torej se ni čemu umikati; presoja o odstopu se zdaj zgodi pred postavitvijo,
+ne za njo. **Ta polovica gre brez lastne preverbe:** stanje, v katerem je napaka vidna (korak, čigar
+kontrola je nizko v oknu, nato zaprto okno), se v štiristopenjskem ogledu, ki ga test lahko odpelje,
+ne pojavi, in izsiliti ga v poglavju zgodbe je delo zase. Preizkušeno je z roko na objavljeni
+različici.
+
+### 80.100 [x] P2 — Berljiv izvoz podatkov za stranko meša prihodnje termine z opravljenimi, je delno angleški, in pogreša obljubljeno spremembo načrta — popravljeno 2026-09-30
+
+**Scenarij in koraki:** »Imenik strank« → stranka z zgodovino (John Smith) → »Izvozi podatke (GDPR)«.
+Okno pove: »Opravljeni treningi: 1, termini: 6, spremembe plana: 1.« Tapni »Berljiva kopija«.
+
+**Opaženo:** datoteka je dolga 2047 znakov in ima troje:
+1. Razdelek »## Treningi (6)« našteje termine brez oznake, kateri so bili in kateri bodo: med njimi
+   sta 2026-10-01 in 2026-10-04, ki sta v prihodnosti. Vrstni red ni po datumu (09-29, 10-01, 09-29,
+   10-04, 09-24, 09-29).
+2. Signali s treninga so angleški: »Povratna informacija (Joint Pain / Discomfort): Rahlo ščipanje v
+   desni rami« in »Povratna informacija (Completed reps easily): Odlična povezava z mišico«. Vse
+   drugo v datoteki je slovensko.
+3. Obljubljene »spremembe plana: 1« v datoteki ni: beseda »plan« ali »sprememb« se v njej ne pojavi
+   nikjer.
+
+**Težava in vpliv:** to je dokument, ki ga trener izroči stranki na njeno zahtevo po GDPR, in dokazuje
+tudi, kaj je bilo opravljeno. Stranka bere seznam šestih treningov kot opravljene, čeprav dva še
+nista bila. Tuji jezik sredi dokumenta zmanjša zaupanje v pravilnost, manjkajoči del pa pomeni, da
+izvoz ne vsebuje vsega, kar okno obljubi.
+
+**Predlog:** seznam naj loči opravljene od načrtovanih in naj bo urejen po datumu; signali naj bodo v
+jeziku dokumenta; obljubljena sprememba načrta naj bo v datoteki ali pa naj je okno ne šteje —
+opaženo na različici `8b2ce80`.
+
+**Popravljeno 2026-09-30.** Troje: seznam terminov je urejen po datumu in vsaka vrstica pove,
+ali je bil trening opravljen ali je načrtovan; signali s treninga so zapisani v jeziku dokumenta
+(mapiranje oznake je domenino, zato se v plast `data` vbrizga — `feedbackTagTextFor`); obljubljene
+spremembe programa imajo zdaj svoj razdelek, ker jih je okno štelo, datoteka pa jih ni imela.
+Preizkušeno v `tests/unit_js/data/clientDataExport.test.mjs`.
+
+### 80.101 [x] P2 — Izbrisana stranka ima še vedno cel zaslon stranke in ponuja izvoz svojih podatkov — popravljeno 2026-09-30
+
+**Scenarij in koraki:** »Imenik strank« → stranka z zgodovino → »Izbriši stranko (GDPR)« → v polje
+vpiši »IZBRIŠI« → »Izbriši dokončno«. Nato to stranko odpri znova iz imenika.
+
+**Opaženo:** zaslon pravi »Client #BYDL7Y« in »Izbrisano 2026-09-30 na zahtevo stranke. Spodnji zapisi
+treningov so anonimni.« Pod tem so isti gumbi kot pri živi stranki: »Uredi profil«, »Načrtuj
+program«, »Anonimna kopija za AI«, »Izvozi podatke (GDPR)« in »Izbriši stranko (GDPR)«. Dotik na
+»Izvozi podatke (GDPR)« odpre okno »Izvozi podatke te stranke — Client #BYDL7Y … Opravljeni treningi:
+3, termini: 6, spremembe plana: 1«. Izbrisana oseba ostane tudi v imeniku strank in v obvestilu
+»Treningi, ki čakajo na pregled«: »Client #BYDL7Y — Skupinska moč in kondicija (1)«. Oznaka »Client
+#BYDL7Y« je angleška, aplikacija pa je slovenska.
+
+**Težava in vpliv:** trener po izbrisu na zahtevo stranke še vedno vidi vrstico v imeniku in nalogo v
+pregledu, ki ju ne more zapreti, ker za njima ni več osebe. Aplikacija mu ponudi, da izvozi podatke
+osebe, ki je bila izbrisana — komu naj jih izroči, ni jasno, privolitve pa ni več. »Načrtuj program«
+za izbrisano osebo je v isti vrsti.
+
+**Predlog:** po izbrisu naj zaslon ponudi samo pogled na anonimne zapise; »Uredi profil«, »Načrtuj
+program«, »Anonimna kopija za AI« in »Izvozi podatke (GDPR)« naj izginejo, oznaka pa naj bo slovenska
+(»Stranka #BYDL7Y«). Vrstica v imeniku in naloga v pregledu naj bosta označeni kot izbrisani ali
+odstranjeni — opaženo na različici `8b2ce80`.
+
+**Popravljeno 2026-09-30 za dejanja, ne za oznako.** Po izbrisu zaslon ponudi samo branje:
+»Uredi profil« in vrstica z dejanji (»Načrtuj program«, »Anonimna kopija za AI«, »Izvozi podatke
+(GDPR)«, »Izbriši stranko (GDPR)«) izginejo, anonimna zgodovina ostane, ker je prav ona tisto, kar
+izbris namerno obdrži (`tests/medium/test_client_data_rights.py`). **Odprto, čaka na Simona:** oznaka
+»Client #BYDL7Y« je angleška, a ni besedilo vmesnika — je shranjena v zapisu in gre v sinhronizacijo
+in v izvoz, zato je njena sprememba odločitev o podatkih (ali sme shranjena oznaka nositi jezik), ne
+popravek besedila.
+
+### 80.102 [x] P2 — Preklic privolitve nima polja za datum in ne pove, kaj se z njim ustavi — popravljeno 2026-09-30
+
+**Scenarij in koraki:** »Imenik strank« → stranka → »Uredi profil«. Obkljukaj »Stranka je podpisala
+privolitev (hramba podatkov in sinhronizacija v oblak)«, v polje »Datum podpisa« vpiši pretekli datum
+2026-06-15 in shrani. Nato znova odpri »Uredi profil«, kljukico odstrani in shrani.
+
+**Opaženo:** troje.
+1. Ko kljukico odstraniš, polje za datum izgine in drugega polja ni. Datum preklica aplikacija zapiše
+   sama, na dan dotika: zaslon pravi »Privolitev preklicana (2026-06-15 → 2026-09-30)«. Stranka, ki je
+   privolitev preklicala prejšnji teden, dobi današnji datum.
+2. Puščica med datumoma ni pojasnjena. Nikjer ne piše, da je prvi datum podpis in drugi preklic.
+3. Po shranitvi se na zaslonu stranke ne spremeni nič drugega: nobenega opozorila, kaj se je s
+   preklicem ustavilo. Razdelek se imenuje »PRIVOLITEV GDPR ZA SINHRONIZACIJO V OBLAK«, o
+   sinhronizaciji po preklicu pa ni besede. Edino navodilo je v majhnem pojasnilu »Kdo hrani obrazec?«:
+   »Če stranka privolitev prekliče, tukaj izbriši njene zapise in preklic zabeleži na svojem izvodu.«
+
+**Težava in vpliv:** preklic je datum, ki šteje — od njega naprej obdelava ni več dovoljena. Trener ga
+ne more vpisati, zato je zapis napačen pri vsaki stranki, ki ne prekliče ravno tisti dan, ko trener
+sedi pri telefonu. In ker aplikacija ne pove, kaj se je ustavilo, trener misli, da je s kljukico
+opravil vse.
+
+**Predlog:** ob odstranitvi kljukice naj se pokaže polje »Datum preklica« s privzetim današnjim
+datumom; zaslon naj obe datuma poimenuje z besedami; in naj z eno vrstico pove, kaj se s preklicem
+ustavi — opaženo na različici `8b2ce80`.
+
+Ob tem opažena manjša neskladnost na istem zaslonu: pri podpisu z datumom 2026-06-15 zaslon pravi
+»Privolitev dana (2026-06-15 · v2026-08-09)«, torej pripiše različico obrazca iz avgusta podpisu iz
+junija.
+
+**Popravljeno 2026-09-30 za datum in za besede.** Ob odstranitvi kljukice se zdaj pokaže polje
+»Datum preklica«, prednastavljeno na danes in popravljivo; presoja teče po privolitvi, kakršna je bila
+ob odprtju obrazca, ker obrazec piše v zapis že ob dogodku `input`, torej pred `change`
+(`tests/medium/test_client_consent.py`). Značka na zaslonu stranke oba datuma poimenuje z besedami
+namesto s puščico: »Datum podpisa: … · Datum preklica: …«. **Odprto:** kaj se s preklicem ustavi, na
+zaslonu še ni povedano — to je besedilo, ki ga je treba napisati skupaj z odločitvijo, kaj se z
+preklicem res zgodi (sinhronizacija, izvozi).
+
+### 80.104 [x] P2 — Izbrisana serija pusti za sabo programe brez datuma, ki jih ni mogoče razločiti — popravljeno 2026-09-30
+
+**Scenarij in koraki:** ustvari tedensko serijo s stranko (šest večerov), nato izbriši vse njene
+večere enega za drugim (kartica → svinčnik → »Odpri v beležki« → ⋮ »Možnosti treninga« → »Izbriši
+trening«). Nato poglej predal z obvestili.
+
+**Opaženo:** urnik je prazen, predal pa pravi: »Nenačrtovani programi — 7 programov je pripravljenih,
+a še niso dodeljeni treningu«, in pod tem sedemkrat isto vrstico »Jutranja serija · Sarah Jenkins«.
+Vrstice nimajo datuma in se med sabo ne razlikujejo v ničemer. Ostanejo tudi po osvežitvi strani. (Da
+se dajo odstraniti, nisem našel; poti nisem izčrpal, zato tega ne trdim.)
+
+**Težava in vpliv:** trener, ki odpove tečaj, ima potem v predalu sedem enakih opravil, ki jih ne more
+ne razločiti ne zapreti. Predal je mesto, kjer bere, kaj ga čaka, zato ga sedem praznih vrstic zmoti
+pri vsakem pogledu.
+
+**Predlog:** ko se izbriše večer serije, naj njegov program ne ostane med nenačrtovanimi, ali pa naj
+vrstica nosi datum večera, iz katerega je prišla, in pot, po kateri se odstrani — opaženo na različici
+`8b2ce80`.
+
+**Popravljeno 2026-09-30 za razločevanje, ne za odstranitev.** Vrstica nenačrtovanega programa
+zdaj nosi dan, za katerega je bil pripravljen, tako da sedem vrstic ene odpovedane serije ni več
+enakih (`buildUnscheduledPlansItem` v `src/domain/notificationItems.js`, preizkušeno v
+`tests/unit_js/domain/notificationItems.test.mjs`). **Odprto:** poti, po kateri trener nenačrtovan
+program odstrani, ni; ali naj obstaja in kje, je odločitev zase — program se namerno ohrani, ko se
+termin izbriše (to pove okno za brisanje).
+
 ### 80.95 [x] P1 — Dotik »Pretežko« zapiše vajo kot opravljeno z vsemi načrtovanimi serijami — popravljeno 2026-09-30
 
 **Scenarij in koraki:** odpri podlogo treninga (»Ponedeljkova moc«, stranka Jane Doe, rutina »Zgornji

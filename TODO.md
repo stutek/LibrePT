@@ -6641,125 +6641,35 @@ what shipped is in [CHANGELOG.md](CHANGELOG.md).
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8098-x-p2--korak-ogleda-imenuje-polje-ime-stranke-obrazec-pa-ima-ime-in-priimek--popravljeno-2026-09-30);
 what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-### 80.99 [ ] P2 — Kartica »Ta zaslon ni del demota« pokrije oba gumba zaslona, na katerem stoji
+### 80.99 [x] P2 — Kartica »Ta zaslon ni del demota« pokrije oba gumba zaslona, na katerem stoji — popravljeno 2026-09-30
 
-**Scenarij in koraki:** v poglavju »Sprejem treh novih strank« pridi do koraka 9 od 10, kjer kartica
-pravi »Pritisni Shrani na dnu obrazca«. Namesto tega tapni »Prekliči«.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8099-x-p2--kartica-ta-zaslon-ni-del-demota-pokrije-oba-gumba-zaslona-na-katerem-stoji--popravljeno-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-**Opaženo:** kartica se preseli na vrh zaslona (od 69. do 277. pike navpično) in pravi »Ta zaslon ni
-del demota. Demo se odvija drugje v aplikaciji. Pritisni Nazaj v demo ali Ustavi demo.« Zaslon je pri
-tem »Imenik strank«, torej prav tisti, na katerem se poglavje dogaja. Gumba »Povabi stranko« (pri 75.
-piki, visok 62) in »Dodaj stranko« (pri 76. piki, visok 60) sta v celoti pod kartico: `elementFromPoint`
-na sredini obeh vrne kartico, ne gumba. Izhod obstaja — »Nazaj v demo« pri meni deluje in obrazec
-ponovno odpre, tako da se ogled nadaljuje.
+### 80.100 [x] P2 — Berljiv izvoz podatkov za stranko meša prihodnje termine z opravljenimi, je delno angleški, in pogreša obljubljeno spremembo načrta — popravljeno 2026-09-30
 
-**Težava in vpliv:** trener, ki je prekinil korak, dobi dvoje hkrati: trditev, da je na napačnem
-zaslonu, čeprav je na pravem, in kartico, ki mu zakrije edina dva gumba tega zaslona. Če se hoče
-lotiti svojega dela, ne more, ker se gumba ne odzoveta na dotik.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80100-x-p2--berljiv-izvoz-podatkov-za-stranko-meša-prihodnje-termine-z-opravljenimi-je-delno-angleški-in-pogreša-obljubljeno-spremembo-načrta--popravljeno-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-**Predlog:** kartica naj ne pokriva kontrol zaslona (naj se postavi pod nje ali ob rob), in stavka o
-napačnem zaslonu naj ne izpiše, kadar je trener na zaslonu, kjer korak teče — opaženo na različici
-`8b2ce80`.
+### 80.101 [x] P2 — Izbrisana stranka ima še vedno cel zaslon stranke in ponuja izvoz svojih podatkov — popravljeno 2026-09-30
 
-### 80.100 [ ] P2 — Berljiv izvoz podatkov za stranko meša prihodnje termine z opravljenimi, je delno angleški, in pogreša obljubljeno spremembo načrta
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80101-x-p2--izbrisana-stranka-ima-še-vedno-cel-zaslon-stranke-in-ponuja-izvoz-svojih-podatkov--popravljeno-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-**Scenarij in koraki:** »Imenik strank« → stranka z zgodovino (John Smith) → »Izvozi podatke (GDPR)«.
-Okno pove: »Opravljeni treningi: 1, termini: 6, spremembe plana: 1.« Tapni »Berljiva kopija«.
+### 80.102 [x] P2 — Preklic privolitve nima polja za datum in ne pove, kaj se z njim ustavi — popravljeno 2026-09-30
 
-**Opaženo:** datoteka je dolga 2047 znakov in ima troje:
-1. Razdelek »## Treningi (6)« našteje termine brez oznake, kateri so bili in kateri bodo: med njimi
-   sta 2026-10-01 in 2026-10-04, ki sta v prihodnosti. Vrstni red ni po datumu (09-29, 10-01, 09-29,
-   10-04, 09-24, 09-29).
-2. Signali s treninga so angleški: »Povratna informacija (Joint Pain / Discomfort): Rahlo ščipanje v
-   desni rami« in »Povratna informacija (Completed reps easily): Odlična povezava z mišico«. Vse
-   drugo v datoteki je slovensko.
-3. Obljubljene »spremembe plana: 1« v datoteki ni: beseda »plan« ali »sprememb« se v njej ne pojavi
-   nikjer.
-
-**Težava in vpliv:** to je dokument, ki ga trener izroči stranki na njeno zahtevo po GDPR, in dokazuje
-tudi, kaj je bilo opravljeno. Stranka bere seznam šestih treningov kot opravljene, čeprav dva še
-nista bila. Tuji jezik sredi dokumenta zmanjša zaupanje v pravilnost, manjkajoči del pa pomeni, da
-izvoz ne vsebuje vsega, kar okno obljubi.
-
-**Predlog:** seznam naj loči opravljene od načrtovanih in naj bo urejen po datumu; signali naj bodo v
-jeziku dokumenta; obljubljena sprememba načrta naj bo v datoteki ali pa naj je okno ne šteje —
-opaženo na različici `8b2ce80`.
-
-### 80.101 [ ] P2 — Izbrisana stranka ima še vedno cel zaslon stranke in ponuja izvoz svojih podatkov
-
-**Scenarij in koraki:** »Imenik strank« → stranka z zgodovino → »Izbriši stranko (GDPR)« → v polje
-vpiši »IZBRIŠI« → »Izbriši dokončno«. Nato to stranko odpri znova iz imenika.
-
-**Opaženo:** zaslon pravi »Client #BYDL7Y« in »Izbrisano 2026-09-30 na zahtevo stranke. Spodnji zapisi
-treningov so anonimni.« Pod tem so isti gumbi kot pri živi stranki: »Uredi profil«, »Načrtuj
-program«, »Anonimna kopija za AI«, »Izvozi podatke (GDPR)« in »Izbriši stranko (GDPR)«. Dotik na
-»Izvozi podatke (GDPR)« odpre okno »Izvozi podatke te stranke — Client #BYDL7Y … Opravljeni treningi:
-3, termini: 6, spremembe plana: 1«. Izbrisana oseba ostane tudi v imeniku strank in v obvestilu
-»Treningi, ki čakajo na pregled«: »Client #BYDL7Y — Skupinska moč in kondicija (1)«. Oznaka »Client
-#BYDL7Y« je angleška, aplikacija pa je slovenska.
-
-**Težava in vpliv:** trener po izbrisu na zahtevo stranke še vedno vidi vrstico v imeniku in nalogo v
-pregledu, ki ju ne more zapreti, ker za njima ni več osebe. Aplikacija mu ponudi, da izvozi podatke
-osebe, ki je bila izbrisana — komu naj jih izroči, ni jasno, privolitve pa ni več. »Načrtuj program«
-za izbrisano osebo je v isti vrsti.
-
-**Predlog:** po izbrisu naj zaslon ponudi samo pogled na anonimne zapise; »Uredi profil«, »Načrtuj
-program«, »Anonimna kopija za AI« in »Izvozi podatke (GDPR)« naj izginejo, oznaka pa naj bo slovenska
-(»Stranka #BYDL7Y«). Vrstica v imeniku in naloga v pregledu naj bosta označeni kot izbrisani ali
-odstranjeni — opaženo na različici `8b2ce80`.
-
-### 80.102 [ ] P2 — Preklic privolitve nima polja za datum in ne pove, kaj se z njim ustavi
-
-**Scenarij in koraki:** »Imenik strank« → stranka → »Uredi profil«. Obkljukaj »Stranka je podpisala
-privolitev (hramba podatkov in sinhronizacija v oblak)«, v polje »Datum podpisa« vpiši pretekli datum
-2026-06-15 in shrani. Nato znova odpri »Uredi profil«, kljukico odstrani in shrani.
-
-**Opaženo:** troje.
-1. Ko kljukico odstraniš, polje za datum izgine in drugega polja ni. Datum preklica aplikacija zapiše
-   sama, na dan dotika: zaslon pravi »Privolitev preklicana (2026-06-15 → 2026-09-30)«. Stranka, ki je
-   privolitev preklicala prejšnji teden, dobi današnji datum.
-2. Puščica med datumoma ni pojasnjena. Nikjer ne piše, da je prvi datum podpis in drugi preklic.
-3. Po shranitvi se na zaslonu stranke ne spremeni nič drugega: nobenega opozorila, kaj se je s
-   preklicem ustavilo. Razdelek se imenuje »PRIVOLITEV GDPR ZA SINHRONIZACIJO V OBLAK«, o
-   sinhronizaciji po preklicu pa ni besede. Edino navodilo je v majhnem pojasnilu »Kdo hrani obrazec?«:
-   »Če stranka privolitev prekliče, tukaj izbriši njene zapise in preklic zabeleži na svojem izvodu.«
-
-**Težava in vpliv:** preklic je datum, ki šteje — od njega naprej obdelava ni več dovoljena. Trener ga
-ne more vpisati, zato je zapis napačen pri vsaki stranki, ki ne prekliče ravno tisti dan, ko trener
-sedi pri telefonu. In ker aplikacija ne pove, kaj se je ustavilo, trener misli, da je s kljukico
-opravil vse.
-
-**Predlog:** ob odstranitvi kljukice naj se pokaže polje »Datum preklica« s privzetim današnjim
-datumom; zaslon naj obe datuma poimenuje z besedami; in naj z eno vrstico pove, kaj se s preklicem
-ustavi — opaženo na različici `8b2ce80`.
-
-Ob tem opažena manjša neskladnost na istem zaslonu: pri podpisu z datumom 2026-06-15 zaslon pravi
-»Privolitev dana (2026-06-15 · v2026-08-09)«, torej pripiše različico obrazca iz avgusta podpisu iz
-junija.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80102-x-p2--preklic-privolitve-nima-polja-za-datum-in-ne-pove-kaj-se-z-njim-ustavi--popravljeno-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ### 80.103 [x] P1 — Odprtje in zapiranje enega večera serije ustvari drugo, enako kartico istega večera — popravljeno 2026-09-30
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80103-x-p1--odprtje-in-zapiranje-enega-večera-serije-ustvari-drugo-enako-kartico-istega-večera--popravljeno-2026-09-30);
 what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-### 80.104 [ ] P2 — Izbrisana serija pusti za sabo programe brez datuma, ki jih ni mogoče razločiti
+### 80.104 [x] P2 — Izbrisana serija pusti za sabo programe brez datuma, ki jih ni mogoče razločiti — popravljeno 2026-09-30
 
-**Scenarij in koraki:** ustvari tedensko serijo s stranko (šest večerov), nato izbriši vse njene
-večere enega za drugim (kartica → svinčnik → »Odpri v beležki« → ⋮ »Možnosti treninga« → »Izbriši
-trening«). Nato poglej predal z obvestili.
-
-**Opaženo:** urnik je prazen, predal pa pravi: »Nenačrtovani programi — 7 programov je pripravljenih,
-a še niso dodeljeni treningu«, in pod tem sedemkrat isto vrstico »Jutranja serija · Sarah Jenkins«.
-Vrstice nimajo datuma in se med sabo ne razlikujejo v ničemer. Ostanejo tudi po osvežitvi strani. (Da
-se dajo odstraniti, nisem našel; poti nisem izčrpal, zato tega ne trdim.)
-
-**Težava in vpliv:** trener, ki odpove tečaj, ima potem v predalu sedem enakih opravil, ki jih ne more
-ne razločiti ne zapreti. Predal je mesto, kjer bere, kaj ga čaka, zato ga sedem praznih vrstic zmoti
-pri vsakem pogledu.
-
-**Predlog:** ko se izbriše večer serije, naj njegov program ne ostane med nenačrtovanimi, ali pa naj
-vrstica nosi datum večera, iz katerega je prišla, in pot, po kateri se odstrani — opaženo na različici
-`8b2ce80`.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80104-x-p2--izbrisana-serija-pusti-za-sabo-programe-brez-datuma-ki-jih-ni-mogoče-razločiti--popravljeno-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ### 80.105 [ ] P1 — Stranka brez imena se shrani kot »Nova stranka«, čeprav je ime obvezno
 
