@@ -6641,6 +6641,28 @@ je napisal trener.
 `8b2ce80`. Isti napis je bil na zaslonu za pregled popravljen z §80.26 (2026-09-27), v kartoteki pa
 ne.
 
+### 80.95 [ ] P1 — Dotik »Pretežko« zapiše vajo kot opravljeno z vsemi načrtovanimi serijami
+
+**Scenarij in koraki:** odpri podlogo treninga (»Ponedeljkova moc«, stranka Jane Doe, rutina »Zgornji
+del A«), tapni »Začni trening« in »Ohrani urnik«. Odpri sklop »Sklop za moč prsi in hrbta«. Pri vaji
+Barbell Bench Press tapni samo »Pretežko«. Ne zaključuj nobenega kroga in ne vpiši nobene serije.
+Tapni »Zaključi vadbo« in »Zaključi zdaj«.
+
+**Opaženo:** shranjeni zapis vadbe pravi »Barbell Bench Press: opravljeno, 3/3 serije«, vse tri z
+načrtovano težo 62.5 kg. Vse druge vaje istega treninga so pravilno »0/3, preskočeno«. Isto se pokaže
+na zaslonu stranke: »Barbell Back Squat: 80 kg×5, 80 kg×5, 80 kg×5, 80 kg×5« pri vaji, kjer je bil
+tapnjen samo »Pretežko«, medtem ko ostale pišejo »PRESKOČENO«. Po dotiku na »Pretežko« na podlogi ni
+nobenega sporočila, da je bilo kaj zapisano.
+
+**Težava in vpliv:** »Pretežko« je gumb, s katerim trener pove, da je bilo breme previsoko — pogosto
+prav zato, ker je stranka serijo predčasno prekinila. Aplikacija iz tega naredi zapis, da je vajo
+opravila v celoti, z bremenom, ki ga ni zmogla. Ta zapis je potem zgodovina stranke in številka
+»Zadnjič«, po kateri trener naslednjič nastavi težo. Zapis je napačen v shrambi, ne le na zaslonu —
+to je druga napaka kot §80.80.
+
+**Predlog:** »Pretežko« in »Prelahko« naj zapišeta samo signal, nobene serije — opaženo na različici
+`8b2ce80`.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
