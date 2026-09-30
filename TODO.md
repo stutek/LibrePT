@@ -7148,6 +7148,25 @@ nedotaknjen.
 **Predlog:** pri treningu, ki teče ali je končan, naj »Uredi« datum ne ponudi ali naj vpraša, ali gre
 za drug termin. Opaženo na `main` `e8e90d8`, sl, 390 × 844; najprej opazila trenerka dneva 08.
 
+### 80.136 [ ] P1? — Šifrirana varnostna kopija v brskalniku orodja ne pride do datoteke; preveriti na telefonu
+
+**Scenarij in koraki:** ☰ → »Upravljanje podatkov« → »Izvozi JSON« → okno »Geslo za varnostne
+kopije« → »Zapisal sem si ga, shrani« → »Izvozi JSON«.
+
+**Opaženo:** na zaslonu »Izvoženo in šifrirano.« in gumb »Odpri šifrirano datoteko«. Brskalnik orodja
+(Chromium brez zaslona) prenos začne in ga prekine: `Download.save_as: canceled`, datoteke ni. Enako
+na `main` `e8e90d8` in na objavljeni `8b2ce80`, tudi ko stran naslova datoteke ne sprosti
+(`URL.revokeObjectURL` onemogočen). Na objavljeni `0625bd6` (pred šifriranjem) je isti ukaz datoteko
+prenesel. Trenerka dneva 08 zato ni mogla preskusiti prenosa na nov telefon. Ob tem sta v istem oknu
+hkrati vidni »Varnostne kopije s te naprave še niso šifrirane.« in »Izvoženo in šifrirano.« (P3).
+
+**Težava in vpliv:** če se to zgodi tudi na telefonu, trener misli, da ima kopijo, pa je nima; na dan,
+ko telefon izgubi, izgubi vse stranke. Iz brskalnika orodja tega ni mogoče ločiti od njegove omejitve.
+
+**Preverba za Simona (ročno, na telefonu, `LibrePT.test@gmail.com` ni potreben):** v Chromu na
+Androidu in v Safariju na iPhonu izvoziti kopijo in pogledati, ali je v »Prenosi« datoteka. Če je,
+se zapis zapre kot omejitev orodja in ostane le protislovje sporočil (P3).
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
