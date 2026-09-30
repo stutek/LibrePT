@@ -7647,6 +7647,10 @@ presoja: izplača se majhen del** — besedilo načrta in zapisa treninga za del
 brez drugega trenerja v aplikaciji; več trenerjev ostaja EnterprisePT. Dan 04, trener v klubu s kolegoma: nadomeščanje
 prek sporočila ali tabele kluba, tretji dan od štirih.
 
+Dan 09 (2026-09-30): fizioterapevtka stranke želi videti program, ki ga trener daje. Edini izvoz pri
+stranki je šifriran izvoz po GDPR; ocena 0, 3 minute v aplikaciji in 4 zunaj nje (trenerjeva ocena).
+Isti »Deli kot besedilo« bi pokril tudi to.
+
 ### 88.4 [ ] Trening, vpisan za nazaj, aplikacija imenuje »Zamuja«
 
 Dan 02: trener je jutranje treninge vpisoval popoldne, ker jih je vodil brez telefona v roki.
@@ -7786,6 +7790,19 @@ aplikaciji še zaupa; uvod pri tem stane okoli minute in vodi v napačno smer (�
 aplikacijo«). **Cena:** majhna: na prvem zaslonu »Obnovi iz varnostne kopije« pred uvodom.
 **Presoja: čaka na Simona**, ker spremeni uvod, o katerem je odločil v §81 (podatki obvezni na vsaki
 poti); kopija te podatke že nosi.
+
+### 88.15 [ ] Serija se ne da ustaviti za dopust stranke ne spremeniti od nekega dne naprej
+
+Dan 09 (2026-09-30, `main` `e2daf5e`; samostojni trener v Novem mestu, 14 strank): stranka gre za dva
+tedna na dopust, njeni sredini termini naj izpadejo in se nato nadaljujejo. Premora ali preskoka
+večerov ni; poskus s koncem serije je naletel na §80.138. **6 minut v aplikaciji, 1 na papirju, ocena
+0.** Isti dan: od novembra so vsi torki uro pozneje. Uspelo je le kot dva koraka na stranko (stara
+serija do 27. 10., nova od 3. 11.): **8 minut proti 4**, ocena 1 (minute so trenerjeve ocene).
+**Vrednost:** dopusti strank so pogosti (predpostavka: vsaka redna stranka dva- do trikrat na leto),
+sprememba urnika telovadnice nekajkrat na leto; brez tega trener serijo ali briše ali pušča napačne
+termine, ki jih vabila pošljejo naprej. **Cena:** srednja: »izpusti večere od–do« in »spremeni od tega
+dne naprej« pri seriji. **Presoja: izplača se**, ko je §80.138 popravljena, ker gre za isti zapis serije;
+obseg (kaj se zgodi z vabili, ki so že poslana) čaka na Simona.
 
 ## 89. [~] Pregled 2026-09-28: isti podatek na več mestih
 
