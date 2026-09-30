@@ -165,9 +165,24 @@ export function startWorkoutSession(clientRoutines, sessionMeta = null, deps = {
 // Explicit trainer action, mirroring finishWorkoutSession: opening the clipboard only stages the
 // session (plan visible, nothing running yet) — the timer, duration, and "live" status only begin
 // once the trainer taps Start, same way a session only ends when they tap Complete.
+// Editing the plan before Start leaves the LAST added exercise as the active card. A session starts
+// at the first exercise that still has a set to log; when everything is done the index stays.
+function pointAtFirstExerciseNotDone(clientState) {
+  const exercises = clientState?.exercises || [];
+  const isDone = (exercise) => {
+    const sets = clientState.logs?.[exercise.id] || [];
+    return sets.length > 0 && sets.every((set) => set.completed);
+  };
+  const index = exercises.findIndex((exercise) => !isDone(exercise));
+  if (index >= 0) clientState.activeExerciseIndex = index;
+}
+
 export function beginWorkoutSession() {
   const activeSession = getActiveSession();
   if (!activeSession || activeSession.started) return;
+  for (const clientState of Object.values(activeSession.clientRoutines || {})) {
+    pointAtFirstExerciseNotDone(clientState);
+  }
   activeSession.started = true;
   activeSession.startTime = Date.now();
   activeSession.duration = 0;

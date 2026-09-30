@@ -254,3 +254,33 @@ def test_the_off_schedule_dialog_fits_a_phone_and_agrees_in_gender(page, local_s
     start = page.locator("#session-start-time-start").bounding_box()
     end = page.locator("#session-start-time-end").bounding_box()
     assert end["y"] > start["y"], "the two fields stand one under the other"
+
+
+def test_start_opens_the_first_exercise_not_yet_done(page, local_server):
+    """Adding exercises before Start leaves the last added one as the active card. Start must
+    hand the trainer the first exercise that is not done."""
+    page.goto(local_server)
+    page.wait_for_selector("#view-clients.active")
+    page.locator('.session-card[data-session-id="s01f2e3d"]').click()
+    page.wait_for_selector("#active-session-overlay:not(.hidden)")
+    page.evaluate(
+        """async () => {
+          const ctl = await import(new URL('controllers/activeSessionController.js', document.baseURI).href);
+          const session = ctl.getActiveSession();
+          const cs = session.clientRoutines[session.activeClientId];
+          cs.activeExerciseIndex = cs.exercises.length - 1;
+          cs.deckAllCollapsed = false;
+          const first = cs.exercises[0];
+          cs.logs[first.id] = (cs.logs[first.id] || []).map((set) => ({ ...set, completed: true }));
+        }"""
+    )
+    page.click("#btn-start-session")
+    page.wait_for_selector(f"{DIALOG}[open]")
+    index = page.evaluate(
+        """async () => {
+          const ctl = await import(new URL('controllers/activeSessionController.js', document.baseURI).href);
+          const session = ctl.getActiveSession();
+          return session.clientRoutines[session.activeClientId].activeExerciseIndex;
+        }"""
+    )
+    assert index == 1

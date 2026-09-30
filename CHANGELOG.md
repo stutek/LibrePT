@@ -76,6 +76,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Fixed
 
+- **Start makes the first exercise not yet done the active one.** After exercises were added before
+  Start, the last one added was active and the first ones read as done.
 - **The notification drawer lists a finished session's signals at once**, not only after a reload.
 - **An invitation is written in the client's language.** The e-mail, the SMS and the reply page follow
   the language of the client's consent form; the dialog the trainer sees stays in the app's language.
