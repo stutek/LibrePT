@@ -6960,6 +6960,32 @@ naprej ne preračunam; dneva bi razumel.« Datum nad kartico to že pove, zato j
 **Predlog:** nad 24 ur pisati dneve (»čez 36 dni«) ali števca ne kazati. Opaženo na `main`
 `12d0e66`, sl, 390 × 844.
 
+### 80.118 [ ] P2 — Zaslon treninga ima dve imeni, »beležka« in »podloga«, in nobeno ni razloženo
+
+**Scenarij in koraki:** prvi zagon. Prebrati prvi stavek aplikacije, nato ustvariti trening in
+pritisniti »Odpri v beležki«.
+
+**Opaženo:** prvi stavek pravi »Lahek in brezplačen pripomoček za tvojo podlogo, treninge in
+programe vadbe.« Gumb, ki odpre zaslon treninga, pravi »Odpri v beležki«; ročica istega zaslona
+»Odpri podlogo treninga«; obrazec »Poteka vzporedno — odpre se kot ena podloga«; vodeni ogled
+»beležka med vadbo«. Slovenski slovar aplikacije ima »beležk« trikrat in »podlog« petkrat. Oba
+trenerja brez predznanja sta se ustavila: »ne vem, kaj je podloga. Mislim, da podlaga za vadbo
+(preproga?)«; »"Odpri v beležki" — beležka? Mislil sem, da je to zvezek«; »kaj je podloga?«.
+
+**Težava in vpliv:** prvi stavek aplikacije trenerju ne pove, kaj aplikacija je. Ko prebere
+»podloga« in »beležka«, ne ve, da gre za isti zaslon. Sledi navodilu, ki imenuje eno, na zaslonu
+pa vidi drugo.
+
+**Predlog:** en izraz za ta zaslon v vseh besedilih, in tak, ki ga trener pozna brez razlage
+(na primer »trening« ali »vadba«: »Odpri trening«). Izbira besede je Simonova. Opaženo na `main`
+`12d0e66`, sl, 390 × 844.
+
+## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
+
+**Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
+first name, last name, phone and email mandatory. The ☰ menu keeps five entries: *Training
+sessions* (the home page), *Client directory*, *Exercises and routines*, *Data management* and
+*Settings*. *Leave the sandbox* is a top-level row only while the sandbox is open. This replaces
 §11.3's plan to fold the menu from 21 rows to 14.
 
 **Ruled the same day (Simon):**
