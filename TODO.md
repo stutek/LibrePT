@@ -8283,45 +8283,42 @@ Reasoning in [TODO_ARCHIVE.md](TODO_ARCHIVE.md). Commit `97e3226`; `build check`
 Reasoning in [TODO_ARCHIVE.md](TODO_ARCHIVE.md). Commit `53a3fed`; `build check` green 16:13 to
 16:22.
 
-### 92.5 [ ] Stepping FORWARD out of a session the peek opened does nothing
+### 92.5 [ ] The walkthrough's forward switch does nothing — in the DEMO, not in the app
 
-**Found 2026-09-30 by building the walkthrough step for it**, measured in the browser, not reasoned
-from the code. Pull aside and slide up to open the previous session — that works. From there, the
-same gesture mirrored, to step forward again, does nothing at all: the plan moves, the layer
-underneath holds a real next plan, and releasing leaves the clipboard exactly where it was.
+**Corrected 2026-09-30, the same day it was written.** This was first recorded as a product defect:
+"stepping forward out of a session the peek opened does nothing". That claim was wrong and it was
+told to Simon before it was checked against real input. librept-02 could not reproduce it and wrote
+an e2e test that drives a real mouse: the forward gesture opens the next session, twice in a row,
+from a session the gesture itself had opened. The app is fine.
 
-What was measured, in this order: the future layer on that screen reads "Core & Stability ·
-2026-08-18", so there IS a next plan and the gesture is armed; the same L in the OTHER direction on
-the same screen opens the session before it ("Finished session · 2026-07-10"), so the gesture, the
-drag and the app's own handlers all work there. The two sides differ in ONE way: backward opens a
-history record (`openSessionFromHistory`), forward opens a scheduled row
-(`launchClipboardDirectly`), and `showSessionView` in `controllers/routerController.js` picks the
-loader by which list holds the id. The scheduled path does not replace a clipboard that is already
-showing a session.
+**What was actually measured, and still stands.** Inside the guided demo (`?demo=tour`), the forward
+L did nothing three times over, while on the SAME screen the mirrored backward L opened the session
+before. The uncovered layer held a real next plan, so the gesture was armed. That asymmetry is real
+and unexplained.
 
-So the feature is half-built rather than broken: you can walk backwards through a client's history
-one session at a time and never walk forward again. Simon asked for the forward switch to be
-demonstrated; the walkthrough ships without it because a demonstration of a gesture that does
-nothing is worse than no demonstration.
+**Why the two disagree.** Every drag in the demo is a SYNTHETIC pointer sequence built in
+JavaScript by `performDrag` in `modules/demo/demoTourPlayer.js` — not the browser's own input. A
+synthetic pointer is not a real one: `setPointerCapture` refuses an id the browser never issued,
+`elementFromPoint` returns nothing past the screen edge, and nothing coalesces the moves. One of
+those differences is the cause, and it belongs to the demo's drag act rather than to the clipboard.
 
-Next step: read what `launchClipboardDirectly` does when a session is already open — whether it
-refuses, asks, or silently returns — and make the forward step open a scheduled neighbour the same
-way the backward step opens a record.
+**One thing seen along the way that may be an app defect, and is NOT established.** The same
+starting session gave two different previous neighbours: mine landed on the series row `ss081326`,
+librept-02's on the history record `h010f2e3` (2026-07-20). If the peek's neighbours depend on how
+the trainer arrived at a session, that is the clipboard's defect and a real one — the sideways deck
+would mean different things on two routes to the same screen (librept-02's point, 2026-09-30). But
+our runs differed in more than the route: the demo tour carries its own clock and its own navigation,
+and the seeded sessions are generated relative to "now". Establish it before believing it — open one
+session from the board and the same session by its `/session/:id/client/:id` address under one clock,
+and compare what the past layer holds. Written down as a question because the last thing recorded
+here as a defect was not one.
 
-**Stanje 2026-09-30 19:06 (librept-02): ne ponovi se.** `launchClipboardDirectly` odprtega treninga
-ne zavrne: `startWorkoutSession` vedno zamenja aktivni trening. Po zgornjih korakih (demo podatki,
-zamrznjena ura testov, 390×844, poteza s krožne kartice) prva poteza nazaj z današnjega »Group
-Strength & Conditioning« odpre zapis iz zgodovine `h010f2e3` (2026-07-20), ne vrstice serije. Korak
-naprej od tam odpre shranjeni večer serije `ss081326`. Še en korak naprej odpre »Core & Stability«
-`s12f2e3d`. Oba koraka sta izmerjena tudi z začetkom na sredini prve kartice. Test
-`test_the_mirrored_stroke_walks_forward_again_through_both_kinds_of_session` v
-`tests/e2e/test_plan_peek_open.py` ta dva koraka drži. Napaka je bila torej izmerjena v drugem
-stanju, verjetno v vodenem ogledu (`demo=tour`), kjer plast ogleda lahko prestreže potezo. **Naslednji
-korak:** librept-69 ponovi meritev in zapiše, ali je bil ogled odprt.
-
-Opažanje ob tem: naslov vrstice serije pravi »Yesterday · 18:00« za večer 2026-08-13, šest dni
-pred zamrznjenim »danes«. `sessionSeriesSeed.js` shranjenim večerom da `day: "yesterday"` kot grobo
-oznako za vsak pretekli dan, vrstica pod planom pa pravi 2026-08-13.
+**Which is why the walkthrough ships the look and the switch back, but not the switch forward** —
+Simon asked for all three. Next step, in `demoTourPlayer.js` and not in `planPeek.js`: find which of
+those differences bites, by sending the same path through Playwright's real mouse in a test and then
+through `performDrag`, and comparing what `planPeek.js` sees. The lesson is already paid for —
+a measurement taken through the demo's own machinery measures the demo too, and saying "the app does
+not do this" needs the app, not a script driving it.
 
 ### 92.6 [ ] Leaving a session by the peek throws away what was logged in it
 
