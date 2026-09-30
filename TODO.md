@@ -4309,6 +4309,39 @@ povezavo povabila preizkusi na svojem telefonu, ne pride do obrazca.
 istem brskalniku odpri povezavo iz »Povabi stranko« in stran nekajkrat osveži. Če obrazec vedno pride,
 je bil zastoj orodje in se ta točka zapre — opaženo na `#8b2ce80` in `main` `6230070`, 390 × 844, sl.
 
+### 80.155 [ ] P3 — Ocena obrazca »Dodaj stranko iz podatkov, ki jih je poslala«
+
+Naloga (podagent brez konteksta, pred ogledom obrazca): stranka »Maja Kovač« je na svojem telefonu
+izpolnila podatke in privolitev in poslala datoteko; trener hoče, da postane stranka, in ne želi
+prepisovati ničesar, kar je v datoteki. Datoteka je nastala na obrazcu `/intake` iste kopije. Pregled
+na `main` `6230070` (zamrznjena kopija), sl, 390 × 844 in 320 × 680.
+
+**Kar drži:** en izbor datoteke in en gumb; vsi podatki iz datoteke se pokažejo za branje; stranka se
+pokaže enkrat, z enakimi podatki in z »Privolitev dana (2026-10-01 · v2026-09-30)«. Pokvarjena datoteka:
+»Ta datoteka ni LibrePT predstavitev stranke …«, gumb ostane onemogočen, nihče ni dodan. Ista datoteka
+drugič: »Posodobi stranko, ki jo že imaš: Maja Kovač«, že obkljukano, druge Maje ni. Pri 320 × 680 je
+gumb na zaslonu, cilji niso manjši od palca.
+
+**1. Odveč:** nič. Obrazec ne vpraša ničesar, česar naloga ne bi imela.
+
+**2. Manjka:**
+- Popravek napake pred dodajanjem: naloga pravi »popravim le, če je napaka«, pregled pa je samo za
+  branje; datoteka z e-pošto »x« doda stranko z e-pošto »x«, popravek šele v »Uredi profil«. P3,
+  **čaka na Simona** (spremeni, kaj obrazec je).
+
+**3. Ne deluje:**
+- Ob obstoječi stranki gumb še vedno pravi »Dodaj med moje stranke«, čeprav stranko posodobi. P3.
+- Datoteka brez privolitve: pregled pravi »Ni dana — podatkov še ne smeš hraniti«, gumb »Dodaj med moje
+  stranke« pa je omogočen in stranko doda. Besedilo in gumb si nasprotujeta. P3, **čaka na Simona**
+  (ali naj gumb v tem primeru ustavi ali naj besedilo pove, kaj trener sme).
+- Sporočilo pokvarjene datoteke »preveri, ali si izbral pravo priponko« predpostavi trenerja moškega
+  spola; drugod slovenski vmesnik to obide. P3.
+
+**4. Napačen tip ali vrstni red:**
+- »Jezik, v katerem je brala« pokaže kodo »sl«, ne »Slovenščina«, kot jo pokaže izbira jezika obrazca. P3.
+- »Besedilo privolitve« pokaže »2026-09-30«, torej različico, ne besedila. Bolje »Različica besedila
+  privolitve«. P3.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
