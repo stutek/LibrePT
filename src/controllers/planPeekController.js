@@ -22,7 +22,7 @@
 //   "Plan Program" button opens (`openPlanningForClient`, injected by app.js).
 // - Today: the client's session today, derived by clientSessionToday from the same history and
 //   schedule — no separate "launched today" record to fall out of step.
-// A STARTED session is never left by a pull (`canOpen`): opening another session replaces the one
+// A STARTED session is never left by the gesture (`canOpen`): opening another session replaces the one
 // clipboard slot, and a running session's logs would go with it. Uncovering still works — comparing
 // is the point of the gesture; leaving is not.
 
@@ -77,25 +77,26 @@ function planFor(entry, { state, t }) {
   };
 }
 
-// The line under the header that says what releasing will do. BOTH wordings are in the markup, and
-// planPeek.css shows one by the `is-release-ready` class planPeek.js toggles — so a pull crossing the
-// threshold changes a class, never re-renders the layer mid-drag.
-function buildReleaseLabel(restText, releaseText) {
+// The line under the header: which plan this is while the trainer is only looking, and what the
+// upward stroke will do once the pull has uncovered enough of it. BOTH wordings are in the markup,
+// and planPeek.css shows one by the `is-open-ready` class planPeek.js toggles — so arming the
+// gesture changes a class, never re-renders the layer mid-drag.
+function buildUnderLabel(restText, openText) {
   const label = document.createElement("div");
   label.className = "plan-peek-under-label";
   const rest = document.createElement("span");
   rest.className = "plan-peek-label-rest";
   rest.textContent = restText;
-  const release = document.createElement("span");
-  release.className = "plan-peek-label-release";
-  release.textContent = releaseText;
-  label.append(rest, release);
+  const open = document.createElement("span");
+  open.className = "plan-peek-label-open";
+  open.textContent = openText;
+  label.append(rest, open);
   return label;
 }
 
 // No next plan: a card offering to create one (approved with the prototype, 2026-09-14). It looks
-// like a button but is not one — nothing under the blanket is tapped; the pull past the threshold is
-// what opens the planning form.
+// like a button but is not one — nothing under the blanket is tapped; the upward stroke after the
+// pull is what opens the planning form.
 function buildCreateCard(clientName, t) {
   const card = document.createElement("div");
   card.className = "plan-peek-create-card";
@@ -145,10 +146,10 @@ function renderUnderLayer(el, entry, { clientId, clientName, when, appDeps }) {
   const plan = planFor(entry, appDeps);
   el.classList.toggle("has-plan", !!plan);
   el.classList.toggle("has-create-card", !plan && when === "future");
-  el.classList.remove("is-release-ready");
+  el.classList.remove("is-open-ready");
 
   if (!plan && when === "future") {
-    el.appendChild(buildReleaseLabel(t("plan_peek_next"), t("plan_peek_release_create")));
+    el.appendChild(buildUnderLabel(t("plan_peek_next"), t("plan_peek_up_create")));
     el.appendChild(buildCreateCard(clientName, t));
     return;
   }
@@ -163,11 +164,11 @@ function renderUnderLayer(el, entry, { clientId, clientName, when, appDeps }) {
   el.appendChild(buildUnderHeader(plan, clientName));
   const date = isoDay(plan.date);
   el.appendChild(
-    buildReleaseLabel(
+    buildUnderLabel(
       [t(when === "past" ? "plan_peek_previous" : "plan_peek_next"), date]
         .filter(Boolean)
         .join(" · "),
-      [t("plan_peek_release_open"), date].filter(Boolean).join(" · "),
+      [t("plan_peek_up_open"), date].filter(Boolean).join(" · "),
     ),
   );
   el.appendChild(

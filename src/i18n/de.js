@@ -1210,8 +1210,8 @@ export const de = {
   // The sideways deck of a client's plans on the clipboard.
   plan_peek_previous: "Vorheriger Plan",
   plan_peek_next: "Nächster Plan",
-  plan_peek_release_open: "Loslassen zum Öffnen",
-  plan_peek_release_create: "Loslassen, um einen Plan anzulegen",
+  plan_peek_up_open: "Nach oben streichen zum Öffnen",
+  plan_peek_up_create: "Nach oben streichen, um einen Plan anzulegen",
   plan_peek_no_previous: "Kein vorheriger Plan.",
   plan_peek_no_next: "{client} hat noch keinen nächsten Plan.",
   plan_peek_create: "Plan anlegen",

@@ -34,6 +34,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Changed
 
+- **Looking at another session on the clipboard no longer risks opening it.** Pulling the plan
+  aside now only uncovers the neighbouring session, at any distance, and opening it is a second
+  stroke: pull aside, then slide up without lifting the finger. The uncovered plan says *Slide up to
+  open* once enough of it shows, and it stays where it was pulled to while the finger travels up.
+  Letting go always closes the look. Before, letting go past a long pull was what opened the
+  session, so reading the previous session properly and leaving the current one were the same
+  movement.
 - **The client's signup page is two numbered steps: save the trainer's contact, then fill in the
   form**, as ruled on 2026-09-15; a page with no contact card to save shows no numbers. *Save the
   file to share* now keeps what the client typed, as the automatic save after a failed share

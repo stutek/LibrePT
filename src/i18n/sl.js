@@ -1155,8 +1155,8 @@ export const sl = {
   // Stranski kup načrtov stranke na odložišču.
   plan_peek_previous: "Prejšnji načrt",
   plan_peek_next: "Naslednji načrt",
-  plan_peek_release_open: "Spusti za odprtje",
-  plan_peek_release_create: "Spusti za nov načrt",
+  plan_peek_up_open: "Podrsaj navzgor za odprtje",
+  plan_peek_up_create: "Podrsaj navzgor za nov načrt",
   plan_peek_no_previous: "Ni prejšnjega načrta.",
   plan_peek_no_next: "Za {client} še ni naslednjega načrta.",
   plan_peek_create: "Ustvari načrt",

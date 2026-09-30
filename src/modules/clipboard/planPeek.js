@@ -11,10 +11,19 @@
 // "create a plan" card the controller draws when there is no next plan). That decides the
 // quarter-distance rubber band with nothing there.
 //
-// Step 4: a pull past COMMIT_PCT marks that under-layer `is-release-ready` (its header swaps to
-// "Release to open"), and releasing there slides the blanket off and calls `onOpen(side)`. WHAT
-// opening means — a route, the planning form — is the controller's; so is whether this session may
-// be left by a pull at all (`canOpen`).
+// Opening is a SECOND stroke, upward, and not a release (ruled 2026-09-30). Once the pull has
+// uncovered at least OPEN_PULL_PCT of the width, that under-layer is marked `is-open-ready` (its
+// header swaps to "Slide up to open"); an upward stroke of OPEN_UP_PX from the deepest point of the
+// pull then slides the blanket off and calls `onOpen(side)`. Every release springs back.
+//
+// Until that ruling the RELEASE opened, past 70 % of the width. Reading the neighbour properly and
+// leaving the current session were then the same movement: the widest look the gesture allows
+// (MAX_PULL_PCT) could only be taken from inside the state where letting go navigated, so the
+// trainer had to pull the plan back before lifting the thumb. The two strokes separate the look from
+// the leaving, and the look is now free at every distance.
+//
+// WHAT opening means — a route, the planning form — is the controller's; so is whether this session
+// may be left at all (`canOpen`).
 //
 // The one inline style this module sets is `--plan-pull` (docs/ARCHITECTURE.md "look and layout
 // live only in CSS" — a drag offset is exactly the kind of runtime number that rule carves out for
@@ -30,10 +39,19 @@ const MAX_PULL_PCT = 0.85; // of the blanket's own width
 const RUBBER_START_PCT = 0.8; // of MAX_PULL_PCT — beyond this the pull resists further movement
 const NO_NEIGHBOUR_FACTOR = 0.25; // how far the blanket still moves with nothing to reveal
 const SPRING_MS = 280; // must match planPeek.css's `.is-springing` transition
-// Step 4. Both measured against the overlay's width, not the narrowed blanket's, as the prototype
-// measures its phone: 70 % of a 390px phone is a 273px pull — a deliberate sweep, not a thumb
-// brushing the plan between sets.
-const COMMIT_PCT = 0.7;
+// Opening: the pull that ARMS it, and the upward stroke that PERFORMS it. The pull is measured
+// against the overlay's width, not the narrowed blanket's, as the prototype measures its phone: a
+// quarter of a 390px phone is 98px — far enough that a thumb brushing the plan between sets has
+// armed nothing, and near enough that the trainer never has to sweep the plan almost off the screen
+// to be allowed to leave.
+const OPEN_PULL_PCT = 0.25;
+// The upward stroke, measured from the DEEPEST point of the pull and never from where the press
+// began: measured from the press, a single diagonal sweep would satisfy both directions at once and
+// open something the trainer only meant to look at.
+const OPEN_UP_PX = 64;
+// Where the sideways offset stops following the finger. From here on the plan stays where it was
+// pulled to, so it does not slide back out from under the second stroke while that stroke is made.
+const PIN_UP_PX = 8;
 const LEAVE_MS = 220; // must match planPeek.css's `.is-leaving` transition
 
 // Rows denser while held/dragging, eased back the same way (planPeek.css's `.is-held` transition).
@@ -62,7 +80,7 @@ function prefersReducedMotion() {
  * clipboard body (#active-session-blanket). `deps`:
  *   getUnderLayers()  — () => { past: HTMLElement|null, future: HTMLElement|null }
  *   isDisabled()      — () => bool; true in edit mode, where the reorder drag owns the surface
- *   canOpen()         — () => bool; false when a release past the threshold must not leave
+ *   canOpen()         — () => bool; false when the upward stroke must not leave this session
  *   onOpen(side)      — ("past"|"future") => void; called once the blanket has slid off
  * Idempotent: wiring twice on the same element is a no-op (the controller calls this once).
  */
@@ -102,10 +120,12 @@ export function initPlanPeek(blanket, { getUnderLayers, isDisabled, canOpen, onO
     return !!(el?.classList.contains("has-plan") || el?.classList.contains("has-create-card"));
   }
 
-  function setReady(side, ready) {
+  // Armed: this side is uncovered far enough that an upward stroke would open it. The layer's
+  // header swaps to "Slide up to open" by this class alone, so arming never re-renders it mid-drag.
+  function setOpenReady(side, ready) {
     const { past, future } = getUnderLayers() || {};
-    past?.classList.toggle("is-release-ready", ready && side === "past");
-    future?.classList.toggle("is-release-ready", ready && side === "future");
+    past?.classList.toggle("is-open-ready", ready && side === "past");
+    future?.classList.toggle("is-open-ready", ready && side === "future");
   }
 
   // The overlay's width: the blanket itself is 120px narrower while held.
@@ -134,6 +154,12 @@ export function initPlanPeek(blanket, { getUnderLayers, isDisabled, canOpen, onO
       side: null,
       ready: false,
       anchorEl,
+      // The deepest point of the sideways pull so far, and the height the finger was at when it
+      // reached it: the upward stroke is measured from there (OPEN_UP_PX). `pinned` says that
+      // stroke has begun, so the offset stops following the finger sideways (PIN_UP_PX).
+      peakDx: 0,
+      peakY: e.clientY,
+      pinned: false,
     };
     drag = pressed;
     blanket.classList.remove("is-springing");
@@ -142,43 +168,77 @@ export function initPlanPeek(blanket, { getUnderLayers, isDisabled, canOpen, onO
     }, HOLD_MS);
   }
 
+  // Which way the finger went FIRST decides whose gesture this is: sideways is ours to pull, and
+  // anything else stays the browser's own scroll.
+  function lockAxis(e, dx, dy) {
+    if (Math.hypot(dx, dy) < LOCK_PX) return;
+    drag.axis = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
+    clearTimeout(drag.hold);
+    if (drag.axis === "x") {
+      blanket.setPointerCapture?.(e.pointerId);
+      setHeld(true);
+      return;
+    }
+    // A vertical move is a normal scroll; if the hold had already shrunk the blanket, undo it —
+    // the trainer is reading the deck, not asking to see a neighbour.
+    setHeld(false);
+  }
+
+  // How far the finger has risen since the pull was at its deepest, which is what the second stroke
+  // is measured by. The deepest point stops moving once that rise has begun, so a thumb drifting
+  // sideways as it travels up neither deepens the pull nor moves the point the rise is measured
+  // from.
+  function riseSincePeak(e, dx) {
+    if (!drag.pinned && Math.abs(dx) > Math.abs(drag.peakDx)) {
+      drag.peakDx = dx;
+      drag.peakY = e.clientY;
+    }
+    const up = drag.peakY - e.clientY;
+    if (up >= PIN_UP_PX) drag.pinned = true;
+    return up;
+  }
+
+  // The L is complete. The second stroke opens, not the release that follows it: a finished gesture
+  // waiting for the finger to lift would still be cancellable by moving back down, and nothing on
+  // the screen would say so.
+  function openAfterStroke() {
+    const finished = drag;
+    clearTimeout(finished.hold);
+    drag = null;
+    setOpenReady(null, false);
+    leave(finished.side);
+  }
+
   function pointermove(e) {
     if (!drag || e.pointerId !== drag.id) return;
     const dx = e.clientX - drag.x;
     const dy = e.clientY - drag.y;
 
-    if (!drag.axis) {
-      if (Math.hypot(dx, dy) < LOCK_PX) return;
-      drag.axis = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
-      clearTimeout(drag.hold);
-      if (drag.axis === "x") {
-        blanket.setPointerCapture?.(e.pointerId);
-        setHeld(true);
-      } else {
-        // A vertical move is a normal scroll; if the hold had already shrunk the blanket, undo it —
-        // the trainer is reading the deck, not asking to see a neighbour.
-        setHeld(false);
-      }
-    }
+    if (!drag.axis) lockAxis(e, dx, dy);
     if (drag.axis !== "x") return;
     e.preventDefault();
 
-    const side = dx > 0 ? "past" : "future";
+    const up = riseSincePeak(e, dx);
+    // Once pinned the side is settled too: the gesture is already committed to the neighbour it
+    // uncovered, and reading the side off a drifting dx could swap it mid-stroke.
+    const side = drag.pinned && drag.side ? drag.side : dx > 0 ? "past" : "future";
     const width = fullWidth();
     const neighbour = hasNeighbour(side);
-    const pull = clampPull(dx, width, neighbour);
+    const pull = clampPull(drag.pinned ? drag.peakDx : dx, width, neighbour);
     if (side !== drag.side) {
       drag.side = side;
       setSide(side);
     }
-    const ready = neighbour && Math.abs(pull) >= width * COMMIT_PCT && canOpen?.() !== false;
+    const ready = neighbour && Math.abs(pull) >= width * OPEN_PULL_PCT && canOpen?.() !== false;
     if (ready !== drag.ready) {
       drag.ready = ready;
-      setReady(side, ready);
+      setOpenReady(side, ready);
     }
     blanket.classList.toggle("pulled-right", pull > 0);
     blanket.classList.toggle("pulled-left", pull < 0);
     setPull(pull);
+
+    if (ready && up >= OPEN_UP_PX) openAfterStroke();
   }
 
   function release(e) {
@@ -187,13 +247,11 @@ export function initPlanPeek(blanket, { getUnderLayers, isDisabled, canOpen, onO
     clearTimeout(finished.hold);
     drag = null;
 
-    setReady(null, false);
-    // A pointercancel is the browser taking the gesture back (a scroll, a system swipe): never an
-    // instruction to open anything.
-    if (finished.axis === "x" && finished.ready && e.type === "pointerup") {
-      leave(finished.side);
-      return;
-    }
+    // EVERY release springs back, whatever it was armed for: opening happens on the upward stroke
+    // (pointermove), so by the time a finger lifts, a gesture that was going to open has already
+    // opened and taken `drag` with it. A release reaching here is a look that is over — including a
+    // pointercancel, the browser taking the gesture back for a scroll or a system swipe.
+    setOpenReady(null, false);
     blanket.classList.remove("pulled-right", "pulled-left");
     setSide(null);
     setHeld(false);

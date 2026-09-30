@@ -8,7 +8,7 @@
    What planPeek.js's classes look like: the blanket's narrow, dense `.is-held` state (denser by the
    cards' own padding, never by a deeper stack overlap, which would hide the row a collapsed card
    needs read); the spring-back transition; the clipped-preview and chosen-side visibility of the two
-   under-layers; the "Release to open" label; the create-a-plan card; the Today button. It also sets
+   under-layers; the "Slide up to open" label; the create-a-plan card; the Today button. It also sets
    `touch-action: pan-y` on the clipboard body, because touch-action stops at the nearest scroll
    container. It honours prefers-reduced-motion. */
 
@@ -161,10 +161,10 @@
   transition: transform 0.22s ease-in;
 }
 
-/* What releasing does. Both wordings are in the markup; `is-release-ready` (planPeek.js) picks one,
-   so crossing the threshold never re-renders the layer mid-drag. The release wording sits on a
-   filled --primary cell, as in the prototype, so it reads as a different state and not a new line of
-   the plan. */
+/* What the upward stroke will do. Both wordings are in the markup; `is-open-ready` (planPeek.js)
+   picks one, so arming the gesture never re-renders the layer mid-drag. The "slide up" wording sits
+   on a filled --primary cell, as in the prototype, so it reads as a different state and not a new
+   line of the plan. */
 .plan-peek-under-label {
   display: flex;
   padding: 0 4px 6px;
@@ -182,17 +182,17 @@
   color: var(--temporal-future);
   justify-content: flex-end;
 }
-.plan-peek-label-release {
+.plan-peek-label-open {
   display: none;
   padding: 3px 8px;
   border-radius: 4px;
   background: var(--primary);
   color: var(--on-primary);
 }
-.plan-peek-under.is-release-ready .plan-peek-label-rest {
+.plan-peek-under.is-open-ready .plan-peek-label-rest {
   display: none;
 }
-.plan-peek-under.is-release-ready .plan-peek-label-release {
+.plan-peek-under.is-open-ready .plan-peek-label-open {
   display: inline-block;
 }
 
@@ -206,7 +206,7 @@
 
 /* No next plan: the card offering to create one, right-aligned like the next plan it stands in for.
    The "Create a plan" cell looks like a button without being one — nothing under the blanket is
-   tapped; the pull past the threshold opens the planning form. */
+   tapped; the upward stroke after the pull opens the planning form. */
 .plan-peek-create-card {
   display: flex;
   flex-direction: column;
@@ -232,7 +232,7 @@
   color: var(--temporal-future);
   font-weight: 700;
 }
-.plan-peek-under.is-release-ready .plan-peek-create-cell {
+.plan-peek-under.is-open-ready .plan-peek-create-cell {
   background: var(--primary);
   border-color: var(--primary);
   color: var(--on-primary);

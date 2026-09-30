@@ -28,10 +28,17 @@ def _where(page):
     return SESSION_URL.search(page.evaluate("() => location.pathname")).groups()
 
 
-def _pull_and_release(page, start_x, dx):
+UP = 90  # past planPeek.js's OPEN_UP_PX of 64
+
+
+def _pull_then_up(page, start_x, dx):
+    """The L: pull the plan aside, then up without lifting the finger. The upward stroke is what
+    opens (Simon, 2026-09-30) — a release on its own only springs the plan back."""
     page.mouse.move(start_x, Y)
     page.mouse.down()
     page.mouse.move(start_x + dx, Y, steps=20)
+    page.wait_for_timeout(50)
+    page.mouse.move(start_x + dx, Y - UP, steps=10)
     page.wait_for_timeout(50)
     page.mouse.up()
     page.wait_for_timeout(800)
@@ -41,16 +48,18 @@ def _text(page, selector):
     return page.locator(selector).first.evaluate("el => el.textContent")
 
 
-def test_a_pull_opens_the_previous_plan_and_today_leads_back(page, local_server):
+def test_an_upward_stroke_opens_the_previous_plan_and_today_leads_back(
+    page, local_server
+):
     _open(page, local_server, "Group Strength & Conditioning")
     today_id, client_id = _where(page)
     assert not page.locator("#btn-plan-today").is_visible()
     previous_exercise = _text(page, "#plan-peek-under-past .plan-sheet-name")
 
-    _pull_and_release(page, LEFT_START, 300)
+    _pull_then_up(page, LEFT_START, 200)
 
     session_id, same_client = _where(page)
-    assert session_id != today_id, "the pull did not open another session"
+    assert session_id != today_id, "the upward stroke did not open another session"
     assert same_client == client_id, "the previous plan opened for another client"
     deck_names = page.locator(
         "#active-exercise-scroll-deck .exercise-deck-card"
@@ -72,19 +81,21 @@ def test_a_pull_opens_the_previous_plan_and_today_leads_back(page, local_server)
     assert not today.is_visible()
 
 
-def test_with_no_next_plan_the_pull_opens_the_clients_planning_form(page, local_server):
+def test_with_no_next_plan_the_gesture_opens_the_clients_planning_form(
+    page, local_server
+):
     # The demo's 1:1 client has no history, no later session and no draft.
     _open(page, local_server, "1:1 Personal Training")
     _, client_id = _where(page)
     assert page.locator("#plan-peek-under-future.has-create-card").count() == 1
     assert page.locator("#plan-peek-under-past .plan-peek-under-empty").count() == 1
 
-    _pull_and_release(page, LEFT_START, 300)
+    _pull_then_up(page, LEFT_START, 200)
     assert page.locator("#active-session-overlay").is_visible(), (
-        "with no previous plan a pull still left the clipboard"
+        "with no previous plan the gesture still left the clipboard"
     )
 
-    _pull_and_release(page, RIGHT_START, -300)
+    _pull_then_up(page, RIGHT_START, -200)
     page.wait_for_selector("#view-workout-setup.active")
     assert page.locator("#active-session-overlay").is_hidden()
     assert _text(page, "#workout-setup-view-title") == "Plan Upcoming Program"
@@ -94,7 +105,7 @@ def test_with_no_next_plan_the_pull_opens_the_clients_planning_form(page, local_
     ], "the planning form did not open for this client"
 
 
-def test_a_finger_pulls_the_plan_as_a_mouse_does(page, local_server):
+def test_a_finger_makes_the_L_as_a_mouse_does(page, local_server):
     """On a phone the press lands on a deck card inside .clipboard-body, a scroll container, and
     touch-action is only read up to the nearest one: without pan-y on the body itself the browser
     took the sideways move as its own pan, cancelled the pointer at 20px, and the plan never moved.
@@ -107,17 +118,20 @@ def test_a_finger_pulls_the_plan_as_a_mouse_does(page, local_server):
     _open(page, local_server, "Group Strength & Conditioning")
     today_id, client_id = _where(page)
 
-    def touch(kind, x=None):
-        points = [] if x is None else [{"x": x, "y": Y}]
+    def touch(kind, x=None, y=Y):
+        points = [] if x is None else [{"x": x, "y": y}]
         cdp.send("Input.dispatchTouchEvent", {"type": kind, "touchPoints": points})
 
     touch("touchStart", LEFT_START)
-    for x in range(LEFT_START + 10, LEFT_START + 301, 10):
+    for x in range(LEFT_START + 10, LEFT_START + 201, 10):
         touch("touchMove", x)
     page.wait_for_timeout(50)
-    assert page.locator("#plan-peek-under-past.is-release-ready").count() == 1, (
-        "a finger could not pull the plan past the threshold"
+    assert page.locator("#plan-peek-under-past.is-open-ready").count() == 1, (
+        "a finger could not pull the plan far enough to arm the gesture"
     )
+    # The second stroke, with the same finger still down.
+    for y in range(Y - 10, Y - UP - 1, -10):
+        touch("touchMove", LEFT_START + 200, y)
     touch("touchEnd")
     page.wait_for_timeout(800)
 

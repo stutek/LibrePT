@@ -1,8 +1,9 @@
 # tests/medium/test_plan_peek.py — the blanket drag: press-and-hold narrows
 # and densifies the current plan; a sideways drag pulls it aside to reveal the previous/next plan
 # drawn underneath (planSheet.js, step 2) via controllers/planPeekController.js and
-# modules/clipboard/planPeek.js. Step 4: a pull past the threshold opens what it uncovered, Today
-# leads back, and a client with no next plan is offered one. There is no router in this tier, so
+# modules/clipboard/planPeek.js. Opening is an L (Simon, 2026-09-30): the sideways pull only
+# uncovers, and a second, upward stroke opens what it uncovered. Today leads back, and a client with
+# no next plan is offered one. There is no router in this tier, so
 # those tests assert what the clipboard ASKED to open; tests/e2e/test_plan_peek_open.py opens it.
 #
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
@@ -295,18 +296,35 @@ def test_a_vertical_drag_is_left_as_a_scroll(page, local_server):
     page.mouse.up()
 
 
-# ---- Step 4: opening what the pull uncovered -----------------------------------------------------
+# ---- Opening what the pull uncovered: the L ------------------------------------------------------
 
-# 70 % of a 390px phone is 273px of pull; a 300px drag lands past it under the rubber band, a 200px
-# drag well short of it. Both start clear of the 24px edge strip.
+# A quarter of a 390px phone is 98px of pull, so a 200px drag arms the gesture and a 60px one does
+# not. Both start clear of the 24px edge strip. The upward stroke is 64px (planPeek.js OPEN_UP_PX),
+# so 90px is clearly past it and 30px clearly short.
 LEFT_START = 40
 RIGHT_START = PHONE["width"] - 40
+UP_ENOUGH = 90
+UP_TOO_LITTLE = 30
 
 
 def _drag(page, start_x, dx, *, release=True):
+    """The sideways stroke on its own: the look. It opens nothing, however far it goes."""
     page.mouse.move(start_x, CENTER_Y)
     page.mouse.down()
     page.mouse.move(start_x + dx, CENTER_Y, steps=20)
+    page.wait_for_timeout(50)
+    if release:
+        page.mouse.up()
+        page.wait_for_timeout(450)
+
+
+def _drag_then_up(page, start_x, dx, up=UP_ENOUGH, *, release=True):
+    """The whole L: pull aside, then up without lifting the finger."""
+    page.mouse.move(start_x, CENTER_Y)
+    page.mouse.down()
+    page.mouse.move(start_x + dx, CENTER_Y, steps=20)
+    page.wait_for_timeout(50)
+    page.mouse.move(start_x + dx, CENTER_Y - up, steps=10)
     page.wait_for_timeout(50)
     if release:
         page.mouse.up()
@@ -323,68 +341,110 @@ def _label_shown(page, layer, part):
     )
 
 
-def test_a_pull_past_the_threshold_says_release_to_open(page, local_server):
-    """Past 70 % of the width the uncovered plan's header swaps to "Release to open" with the plan's
-    ISO date; short of it the header keeps saying which plan this is."""
+def test_a_pull_that_uncovers_enough_says_slide_up_to_open(page, local_server):
+    """Once a quarter of the width is uncovered, the plan's header swaps to "Slide up to open" with
+    its ISO date; short of that the header keeps saying which plan this is."""
     _mount(page, local_server, started=False)
 
-    _drag(page, LEFT_START, 200, release=False)
+    _drag(page, LEFT_START, 60, release=False)
     assert _label_shown(page, "past", "rest")
-    assert not _label_shown(page, "past", "release")
+    assert not _label_shown(page, "past", "open")
     assert "Previous plan · 2026-09-10" in page.locator(
         "#plan-peek-under-past .plan-peek-label-rest"
     ).evaluate("el => el.textContent")
 
-    page.mouse.move(LEFT_START + 300, CENTER_Y, steps=10)
+    page.mouse.move(LEFT_START + 200, CENTER_Y, steps=10)
     page.wait_for_timeout(50)
-    assert _label_shown(page, "past", "release"), "no release label past the threshold"
+    assert _label_shown(page, "past", "open"), "the gesture was not armed by the pull"
     assert not _label_shown(page, "past", "rest")
     assert (
-        page.locator("#plan-peek-under-past .plan-peek-label-release").evaluate(
+        page.locator("#plan-peek-under-past .plan-peek-label-open").evaluate(
             "el => el.textContent"
         )
-        == "Release to open · 2026-09-10"
+        == "Slide up to open · 2026-09-10"
     )
     page.mouse.up()
 
 
-def test_releasing_past_the_threshold_opens_the_previous_plan_for_the_same_client(
+def test_an_upward_stroke_opens_the_previous_plan_for_the_same_client(
     page, local_server
 ):
+    """The L: pulled aside, then up. The second stroke is what opens."""
     _mount(page, local_server, started=False)
-    _drag(page, LEFT_START, 300)
+    _drag_then_up(page, LEFT_START, 200)
     assert _opened(page) == [["route", f"/session.client/hprev1/{CLIENT_ID}"]]
     assert _pull(page) == 0, "the blanket was not put back after opening"
     assert not _is_held(page)
 
 
-def test_releasing_past_the_threshold_to_the_left_opens_the_next_plan(
-    page, local_server
-):
+def test_an_upward_stroke_to_the_left_opens_the_next_plan(page, local_server):
     _mount(page, local_server, started=False)
-    _drag(page, RIGHT_START, -300)
+    _drag_then_up(page, RIGHT_START, -200)
     assert _opened(page) == [["route", f"/session.client/hnext1/{CLIENT_ID}"]]
 
 
-def test_releasing_short_of_the_threshold_springs_back_and_opens_nothing(
-    page, local_server
-):
+def test_a_release_never_opens_however_far_the_pull_went(page, local_server):
+    """The whole point of the change (Simon, 2026-09-30): looking is free at every distance. A pull
+    of 300px on a 390px phone is as far as the gesture goes, and letting go there still opens
+    nothing — before, that release navigated."""
     _mount(page, local_server, started=False)
-    _drag(page, LEFT_START, 200)
+    _drag(page, LEFT_START, 300)
     assert _opened(page) == []
     assert _pull(page) == 0
 
 
+def test_an_upward_stroke_after_too_little_pull_opens_nothing(page, local_server):
+    """Up alone is not the gesture: with almost nothing uncovered there is nothing to open, so a
+    thumb flicking up off a barely-moved plan leaves the session where it is."""
+    _mount(page, local_server, started=False)
+    _drag_then_up(page, LEFT_START, 60)
+    assert _opened(page) == []
+    assert _pull(page) == 0
+
+
+def test_an_upward_stroke_that_is_too_short_opens_nothing(page, local_server):
+    """The rise has to be deliberate. 30px is the thumb drifting as it lets go of a long pull, not
+    a second stroke."""
+    _mount(page, local_server, started=False)
+    _drag_then_up(page, LEFT_START, 200, up=UP_TOO_LITTLE)
+    assert _opened(page) == []
+
+
+def test_the_plan_stays_where_it_was_pulled_while_the_finger_travels_up(
+    page, local_server
+):
+    """The finger leaves the horizontal line it pulled along, and a plan that followed it back would
+    close over the very rows the trainer is reading. It stays where it was pulled to."""
+    _mount(page, local_server, started=False)
+    page.mouse.move(LEFT_START, CENTER_Y)
+    page.mouse.down()
+    page.mouse.move(LEFT_START + 200, CENTER_Y, steps=20)
+    page.wait_for_timeout(50)
+    assert _pull(page) == 200
+
+    # Up and sideways at once — the thumb's own arc. Only the rise counts.
+    page.mouse.move(LEFT_START + 140, CENTER_Y - 40, steps=10)
+    page.wait_for_timeout(50)
+    assert _pull(page) == 200, (
+        "the plan slid back while the second stroke was being made"
+    )
+    assert _opened(page) == [], "40px of rise is not the stroke"
+    page.mouse.up()
+
+
 def test_a_running_session_is_never_left_by_a_pull(page, local_server):
     """Opening another session replaces the one clipboard slot, so a pull from a STARTED session
-    uncovers the plan but offers no release and opens nothing — a sweep between sets cannot throw
-    away the session's logs."""
+    uncovers the plan but is never armed and opens nothing — a sweep between sets cannot throw away
+    the session's logs."""
     _mount(page, local_server, started=True)
-    _drag(page, LEFT_START, 300, release=False)
-    assert not _label_shown(page, "past", "release")
+    _drag(page, LEFT_START, 200, release=False)
+    assert not _label_shown(page, "past", "open")
     page.mouse.up()
     page.wait_for_timeout(450)
     assert _opened(page) == []
+
+    _drag_then_up(page, LEFT_START, 200)
+    assert _opened(page) == [], "an upward stroke left a running session"
 
 
 def test_with_no_next_plan_the_future_layer_offers_to_create_one(page, local_server):
@@ -398,16 +458,19 @@ def test_with_no_next_plan_the_future_layer_offers_to_create_one(page, local_ser
         == "Create a plan"
     )
 
-    _drag(page, RIGHT_START, -300, release=False)
-    assert _label_shown(page, "future", "release")
+    _drag(page, RIGHT_START, -200, release=False)
+    assert _label_shown(page, "future", "open")
     assert (
-        page.locator("#plan-peek-under-future .plan-peek-label-release").evaluate(
+        page.locator("#plan-peek-under-future .plan-peek-label-open").evaluate(
             "el => el.textContent"
         )
-        == "Release to create a plan"
+        == "Slide up to create a plan"
     )
     page.mouse.up()
     page.wait_for_timeout(450)
+    assert _opened(page) == [], "letting go of the pull opened the planning form"
+
+    _drag_then_up(page, RIGHT_START, -200)
     assert _opened(page) == [["plan", CLIENT_ID]]
 
 
@@ -426,6 +489,9 @@ def test_with_no_previous_plan_the_past_layer_says_so_and_nothing_opens(
     page.mouse.up()
     page.wait_for_timeout(450)
     assert _opened(page) == []
+
+    _drag_then_up(page, LEFT_START, 300)
+    assert _opened(page) == [], "an upward stroke opened a side with no plan on it"
 
 
 # The frozen clock's day (tests/conftest.py FROZEN_NOW) — the fixture's own session is 2026-09-14,
