@@ -5529,5 +5529,6 @@ kljukico in obvestilo, ne pa napisov v vmesniku trenerja, ki trdijo drugače:
   da brez nje trener podatke sme hraniti na napravi. Pismo pravi: »Brez privolitve o tebi v aplikaciji ne
   smem voditi zapisov.« **Čaka na Simona**, ker je to vprašanje 97.2: ali aplikacija brez privolitve
   podatke hrani (in bi moralo pismo reči drugače) ali ne.
-- Gumb »Anonimna kopija za AI« (`profile_ai_safe_copy`; en »AI Safe Copy«) trdi anonimnost, ki je ni.
-  Popravek naslova gumba zahteva iskanje vseh besedil, ki ga imenujejo, v vseh jezikih.
+- Gumb »Anonimna kopija za AI« je trdil anonimnost, ki je ni. **Popravljeno 2026-10-01 (da929f9):** »Kopija
+  za AI brez imen«, »Copy for AI, without names«, »Kopie für KI ohne Namen«, tudi v PRIVACY.md in
+  vodniku za trenerje.
