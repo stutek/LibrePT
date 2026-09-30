@@ -7130,6 +7130,24 @@ sam, ker stran ne pove, v katerem jeziku je.
 **Predlog:** stran naj ima `lang` jezika, v katerem je besedilo za oknom (`en`). Opaženo na `main`
 `12d0e66`, 390 × 844.
 
+### 80.127 [ ] P1 — Datum, vpisan po slovensko »6.10.2026«, se tiho shrani kot 6102-02-06
+
+**Scenarij in koraki:** »Ustvari trening«, tapniti polje »DATUM« in vpisati »6.10.2026«, kot se datum
+piše v Sloveniji. Zapustiti polje, dodati stranko Maja Kranjc, »Shrani«.
+
+**Opaženo:** polje pokaže »6102-02-06«. Opozorila ni, polje ni označeno kot napačno. Po »Shrani« se
+odpre okno z vabili, nato seznam na naslovu `/sessions/6102-02-06`: trening je shranjen v leto 6102.
+Za primerjavo: »20261006« da pravilno 2026-10-06. Polje ima številsko tipkovnico
+(`inputmode=numeric`); na mnogih telefonih ta nima vezaja, pika pa je na njej.
+
+**Težava in vpliv:** trener vpiše termin za naslednji torek po navadi, ki jo ima, in trening izgine
+s seznama tega tedna. Stranka pride, trener pa termina nima. Vabilo v koledar bi stranki poslalo
+datum 6102.
+
+**Predlog:** polje naj sprejme »6.10.2026« in »6. 10.« kot 2026-10-06, ali pa vnos zavrne in pove,
+kako se piše. Nikoli naj ne shrani drugega datuma brez besede (isto načelo kot zaprta §80.59).
+Opaženo na `main` `12d0e66`, sl, 390 × 844.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
