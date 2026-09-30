@@ -4257,39 +4257,35 @@ iskati mora gumb z besedo, ki je ni. Dnevnik prvega odprtja 04 navaja oboje kot 
 imenuje gumb po tem, kar se vidi (»Pritisni ✓ zgoraj desno …«) — opaženo na različici `main`
 `6230070`, sl, 390 × 844.
 
-### 80.153 [ ] P1 — Pri slabem signalu se aplikacija odpira minuto in pol, brez signala pa v treh sekundah
+### 80.153 [ ] P3 — Pri slabem signalu aplikacija počaka na odgovor strani, čeprav je vse na telefonu
+
+**Popravek 2026-10-01 01:05 (Claude):** prva različica te točke je bila P1 s številkama 96,9 s in več kot
+150 s. Napačni sta: čas sem meril od začetka ukaza `goto` v explore.py, ta pa čaka, da omrežje utihne,
+kar pri zadržanih odgovorih traja do 60 sekund. Spodnje številke so izmerjene znova, s štoparico od
+začetka navigacije do slovenske plošče ali uvodne izbire.
 
 **Scenarij in koraki:** zamrznjena kopija `main` na strežniku, ki vsak odgovor zadrži za nastavljivo
-število sekund (telovadnica z eno črtico signala: zahteve odidejo, odgovori pridejo pozno). Prvi obisk
-brez zamika: »Se strinjam«, tema, podatki trenerke »Tara Zorko«, »Začni s prazno aplikacijo«; service
-worker je nameščen, predpomnilnik `librept-v148`. Nato stran znova odpreti pri različnih zamikih in
-meriti čas, dokler ni vidna slovenska plošča »Treningi«.
+število sekund (telovadnica z eno črtico signala). Prvi obisk brez zamika: »Se strinjam«, tema,
+podatki trenerke »Tara Zorko«, »Začni s prazno aplikacijo«; service worker je nameščen. Nato stran
+znova odpreti pri različnih zamikih, vsakič dvakrat.
 
 **Opaženo:**
 
-| Omrežje                  | Čas do plošče                                             |
-| :----------------------- | :-------------------------------------------------------- |
-| brez zamika              | 3,5 s                                                     |
-| strežnik ustavljen       | 3,2 s                                                     |
-| vsak odgovor zamuja 2 s  | 96,9 s                                                    |
-| vsak odgovor zamuja 10 s | več kot 150 s, ves čas angleški zaslon za nalaganje       |
+| Omrežje                  | Čas do plošče |
+| :----------------------- | :------------ |
+| brez zamika              | 0,1–0,5 s     |
+| strežnik ustavljen       | 0,1 s         |
+| vsak odgovor zamuja 2 s  | 2,1 s         |
+| vsak odgovor zamuja 10 s | 10,1 s        |
 
-Med čakanjem je na zaslonu le »LibrePT / A lightweight, free app for your clipboard …« v angleščini,
-brez sporočila, da aplikacija čaka na omrežje. Napak v konzoli ni. Na zamrznjeni kopiji z običajnim
-strežnikom sta se dvakrat zgodila enaka zastoja, oba takrat, ko je glava pisala »Brez povezave«
-(»Strežnik HTTP ni dosegljiv. Zagon iz predpomnjene kode …«); naslednje nalaganje je steklo. Tretjič
-(00:31) se stran v 134 sekundah ni naložila. **Ti zastoji morda niso omrežje:** ob četrtem (00:35,
-stran `/intake`, ki jo odpre stranka iz povabila) je strežnik z vklopljenim dnevnikom odgovoril na vse
-zahteve (200 in 304), service worker je bil aktiven, stran pa je ostala na angleškem zaslonu za
-nalaganje. Glej §80.154.
+Aplikacija čaka na en odgovor, na samo stran; moduli pridejo iz predpomnilnika. Med čakanjem je na
+zaslonu angleški zaslon za nalaganje.
 
-**Težava in vpliv:** v kleti brez signala aplikacija dela, v telovadnici s slabim signalom, kar je
-pogostejše, pa trener med dvema strankama čaka minuto in pol na angleški zaslon, ki ne pove ničesar.
-Koda in podatki so že na telefonu.
+**Težava in vpliv:** pri zelo slabem signalu trener čaka toliko, kolikor traja en odgovor omrežja, brez
+signala pa nič. Pri odgovoru, ki ne pride, bi čakal, dokler telefon ne obupa — tega nisem izmeril.
 
-**Predlog:** ko sta koda in podatki na telefonu, naj se aplikacija odpre iz njih enako hitro kot brez
-signala, posodobitev pa naj počaka v ozadju — opaženo na različici `main` `6230070` (zamrznjena
-kopija), 390 × 844, sl.
+**Predlog:** ko je stran na telefonu, naj se odpre iz njega in omrežje vpraša v ozadju — opaženo na
+različici `main` `6230070` (zamrznjena kopija), 390 × 844, sl.
 
 ### 80.154 [ ] P1 — Občasno se aplikacija ne naloži nikoli: ostane na angleškem zaslonu za nalaganje
 
