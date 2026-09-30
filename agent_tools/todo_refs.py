@@ -109,8 +109,20 @@ def findings_in(path, text):
 
 
 def tracked_files():
+    """Every file git tracks, and every new one it would add — untracked but not ignored. A new file
+    is the one a commit is about to bring in, so it is checked before it is committed; reading only
+    the tracked files let a test file carrying "(TODO 1.3)" through the check and the gate, and the
+    commit that added it failed the build for every session."""
     out = subprocess.run(
-        ["git", "-C", str(REPO_ROOT), "ls-files"],
+        [
+            "git",
+            "-C",
+            str(REPO_ROOT),
+            "ls-files",
+            "--cached",
+            "--others",
+            "--exclude-standard",
+        ],
         capture_output=True,
         text=True,
         check=True,

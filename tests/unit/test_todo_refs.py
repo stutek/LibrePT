@@ -56,6 +56,31 @@ def test_naming_todo_as_the_home_of_open_work_passes():
     assert findings("src/app.js", "// The public part is in TODO.md.") == []
 
 
+def test_a_new_file_not_yet_added_to_git_is_checked_too(tmp_path, monkeypatch):
+    """A new test file carried "(TODO 1.3)" through the check and the gate, because both read only
+    the files git already tracked; the commit that added it then turned main red for everyone. A file
+    about to be committed is exactly the one to check, so untracked files count, ignored ones do not."""
+    import subprocess
+
+    def run(*args):
+        subprocess.run(
+            ["git", "-C", str(tmp_path), *args], check=True, capture_output=True
+        )
+
+    run("init", "-q")
+    (tmp_path / ".gitignore").write_text("scratch/\n", encoding="utf-8")
+    (tmp_path / "tracked.py").write_text("x = 1\n", encoding="utf-8")
+    run("add", "tracked.py", ".gitignore")
+    (tmp_path / "new_test.py").write_text(
+        "# Stacked lanes (TODO 1.3).\n", encoding="utf-8"
+    )
+    (tmp_path / "scratch").mkdir()
+    (tmp_path / "scratch" / "notes.py").write_text("# see TODO §4\n", encoding="utf-8")
+    monkeypatch.setattr(todo_refs, "REPO_ROOT", tmp_path)
+
+    assert [path for path, _line, _text in todo_refs.find_all()] == ["new_test.py"]
+
+
 def test_the_repository_holds_no_pointer_into_todo():
     """The check itself, run over the real tree, naming what it found."""
     found = todo_refs.find_all()
