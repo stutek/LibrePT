@@ -434,7 +434,7 @@ export const de = {
   routine_desc: "Beschreibung",
   joined: "Dabei seit",
   no_goals_specified: "Keine Ziele angegeben.",
-  no_notes_specified: "Keine gesundheitlichen Probleme oder Besonderheiten notiert.",
+  no_notes_specified: "Keine Notizen.",
   log_weights_progression: "Zeichne Gewichte auf, um den Fortschritt zu sehen.",
   no_workouts_logged: "Noch keine Trainings aufgezeichnet.",
   no_routines_found: "Noch keine Routinen. Tippe auf „Routine anlegen“ und erstelle die erste.",

@@ -413,7 +413,7 @@ export const en = {
   routine_desc: "Description",
   joined: "Joined",
   no_goals_specified: "No goals specified.",
-  no_notes_specified: "No health issues or custom caveats noted.",
+  no_notes_specified: "No notes.",
   log_weights_progression: "Log weights to see progression.",
   no_workouts_logged: "No workouts logged yet.",
   no_routines_found: 'No routines yet. Tap "Create Routine" and build the first one.',

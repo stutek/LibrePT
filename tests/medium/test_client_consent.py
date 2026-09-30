@@ -335,6 +335,26 @@ def test_a_client_keeps_the_language_they_were_already_sent(page, local_server):
     )
 
 
+def test_delivery_buttons_follow_the_address_typed_into_the_form(page, local_server):
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#view-client-directory.active")
+    # A client with no way to be reached: both buttons start out saying so.
+    _open_edit(page, "c-nocontact")
+    email_btn = page.locator("#btn-consent-email")
+    sms_btn = page.locator("#btn-consent-sms")
+    expect(email_btn).to_contain_text("No email on file")
+
+    page.locator("#client-email").fill("ana@example.com")
+    page.locator("#client-phone").fill("+386 40 999 888")
+    expect(email_btn).not_to_contain_text("No email on file")
+    expect(sms_btn).not_to_contain_text("No phone on file")
+    assert email_btn.get_attribute("href").startswith("mailto:ana%40example.com?")
+    assert sms_btn.get_attribute("href").startswith("sms:+38640999888?&body=")
+
+    page.locator("#client-email").fill("")
+    expect(email_btn).to_contain_text("No email on file")
+
+
 def test_changing_the_language_rebuilds_both_delivery_links(page, local_server):
     load_with_stub(page, local_server, STUB)
     page.wait_for_selector("#view-client-directory.active")

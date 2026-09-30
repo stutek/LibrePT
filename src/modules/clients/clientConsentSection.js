@@ -145,6 +145,11 @@ export function setupClientConsentSection() {
 
   const langSelect = $id("client-consent-lang");
   if (langSelect) langSelect.addEventListener("change", () => applyDeliveryLinks(editedClient));
+  // The buttons read the address and number as they stand in the form, not as they were when the
+  // dialog opened: a new client has none stored, and typing one must change the buttons.
+  for (const id of ["client-email", "client-phone", "client-name"]) {
+    $id(id)?.addEventListener("input", () => applyDeliveryLinks(editedClient));
+  }
 
   const infoBtn = $id("btn-consent-info");
   if (infoBtn) infoBtn.addEventListener("click", () => openModal("dialog-consent-info"));
@@ -273,12 +278,22 @@ function syncConsentDateVisibility(storedVersion) {
 // no phone number for them yet" is the useful message, and it explains itself in the label instead
 // of only in a tooltip no touch device can reach.
 function applyDeliveryLinks(client) {
+  const typed = (id, stored) => {
+    const field = $id(id);
+    return field ? field.value.trim() : stored;
+  };
+  const live = {
+    ...client,
+    name: typed("client-name", client?.name),
+    email: typed("client-email", client?.email),
+    phone: typed("client-phone", client?.phone),
+  };
   const lang = selectedConsentLang();
-  applyDeliveryLink($id("btn-consent-email"), consentEmailHref(client, lang), {
+  applyDeliveryLink($id("btn-consent-email"), consentEmailHref(live, lang), {
     ready: translate("consent_send_email", "Email form"),
     missing: translate("consent_no_email", "No email on file"),
   });
-  applyDeliveryLink($id("btn-consent-sms"), consentSmsHref(client, lang), {
+  applyDeliveryLink($id("btn-consent-sms"), consentSmsHref(live, lang), {
     ready: translate("consent_send_sms", "Send link by SMS"),
     missing: translate("consent_no_phone", "No phone on file"),
   });

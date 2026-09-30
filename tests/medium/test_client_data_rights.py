@@ -238,3 +238,19 @@ def test_the_compose_link_never_carries_the_passphrase(page, local_server):
     assert passphrase not in href
     # And the email must tell the client how to open it, since an app cannot attach the file itself.
     assert "encrypted" in href
+
+
+def test_empty_notes_do_not_claim_the_client_is_healthy(page, local_server):
+    """The empty "Notes" line read "No health issues or custom caveats noted", two lines under a
+    recorded knee injury. An empty field says only that it is empty."""
+    page.add_init_script("globalThis.stubLanguage = 'sl'")
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#view-client-detail.active")
+
+    page.evaluate(
+        "() => { window.__clientOf('c-jane-b').injury = 'Bolečine v kolenu'; }"
+    )
+    _open_detail(page, "c-jane-b")
+
+    expect(page.locator("#profile-injury")).to_have_text("Bolečine v kolenu")
+    expect(page.locator("#profile-notes")).to_have_text("Ni opomb.")

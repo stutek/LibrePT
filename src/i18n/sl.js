@@ -424,7 +424,7 @@ export const sl = {
   routine_desc: "Opis",
   joined: "V imeniku od",
   no_goals_specified: "Cilji niso določeni.",
-  no_notes_specified: "Brez zabeleženih zdravstvenih težav ali posebnosti.",
+  no_notes_specified: "Ni opomb.",
   log_weights_progression: "Zabeleži teže za spremljanje napredka.",
   no_workouts_logged: "Ni še zabeleženih vadb.",
   no_routines_found: 'Rutin še ni. Pritisni "Ustvari rutino" in sestavi prvo.',
