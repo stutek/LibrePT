@@ -7185,6 +7185,27 @@ slovenska. Trener mora vsako vabilo prevesti na roke ali ga ne pošlje.
 **Predlog:** vabilo in povezava naj uporabita jezik, ki ga ima stranka zapisan (»Jezik obrazca«),
 kot ga že obrazec za privolitev. Opaženo na `main` `e8e90d8`, sl, 390 × 844.
 
+### 80.138 [ ] P1 — Konec serije, vpisan pri današnjem večeru, podvoji današnji večer in serije ne konča
+
+**Scenarij in koraki:** tedenska serija »Hipertrofija« ob sredah ob 07:00 od danes (2026-09-30) za
+Petro Zupan. Večer 7. 10. odpreti s svinčnikom »Uredi« in »Shrani« (nič spremenjeno). Nato današnji
+večer »Uredi«: obkljukati »Spremeni vse večere tega treninga«, nato »Ponovi vsak teden« (pri večeru
+serije je prikazan neobkljukan), v »DO (NEOBVEZNO)« vpisati 20261006, »Shrani«.
+
+**Opaženo:** na seznamu je današnji večer dvakrat, obe kartici »07:00 - 08:00 Hipertrofija … Zamuja«
+(eden je shranjen zapis, drugi večer serije `…@2026-09-30`). Serija teče dalje: 7., 14., 21. 10. in
+naprej. Po »Izbriši trening« pri eni od kartic (okno: »Izbriše se samo ta večer, ostali ostanejo«)
+izgineta obe; današnjega treninga ni več. Trener dneva 09 je hotel ustaviti serijo za dva tedna
+stranke na dopustu.
+
+**Težava in vpliv:** trener misli, da je serijo končal, termini pa se še naprej pojavljajo; na
+današnji dan ima dva enaka termina, in ko enega izbriše, izgubi oba. Stranka na dopustu ostane v
+urniku.
+
+**Predlog:** »Do« pri »Spremeni vse večere« naj serijo konča na tem dnevu in ne ustvari novega večera;
+izbris enega večera naj pusti drugi. Pri večeru serije naj bo »Ponovi vsak teden« prikazan kot
+obkljukan. Opaženo na `main` `e2daf5e`, sl, 390 × 844; najprej opazil trener dneva 09.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
