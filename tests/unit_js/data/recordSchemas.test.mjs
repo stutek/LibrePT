@@ -304,3 +304,49 @@ test("reading an older schema hides the newer fields; reading the newest hides n
   assert.deepEqual(m.fieldsHiddenFrom(5, 4, "exercises"), []);
   assert.deepEqual(m.fieldsHiddenFrom(4, 5, "circuits"), [], "4 never holds circuits in memory");
 });
+
+test("the two entities a session cannot express today are declared, and only in PREVIEW", () => {
+  // Expand-first: storage for a field exists in a schema before anything writes it, and
+  // SCHEMA_PREVIEW is where a shape waits until it is ready for a number. These two are waiting.
+  //
+  // `bindings` is which clients inside one session share ONE program — not the same question as
+  // `sessions.participants`, and the one part of a live session that was never written down: it
+  // exists only on the in-memory session object and dies with the clipboard cache.
+  // `notes` is everything the trainer writes about a client, which today has three homes and no
+  // record: a field on the client, an untyped array inside a history record, and `planUpdates`.
+  for (const collection of ["bindings", "notes"]) {
+    assert.ok(m.SCHEMA_PREVIEW[collection], `${collection} is not declared in the preview shape`);
+    for (const numbered of [4, 5]) {
+      assert.equal(
+        m.LIVE_SCHEMAS[numbered][collection],
+        undefined,
+        `${collection} reached schema ${numbered} before anything writes it`,
+      );
+    }
+  }
+});
+
+test("a binding and a note validate clean in the shape that will carry them", () => {
+  // The records the app would write if it wrote them today: a binding is the grouping
+  // `boundClientRoutines` re-applies at recovery, and a note is a quick signal tapped on the
+  // clipboard — the case with no text at all, which is why only the client is required.
+  const binding = {
+    id: "b1",
+    sessionId: "s01f2e3d",
+    clientIds: ["c1a9f0e2", "c2b8e1d3"],
+  };
+  const signal = {
+    id: "n1",
+    clientId: "c1a9f0e2",
+    createdAt: "2026-09-30T18:00:00.000Z",
+    sessionId: "s01f2e3d",
+    exerciseName: "Barbell Back Squat",
+    tag: "Too Easy - Increase Load",
+    resolved: false,
+  };
+  const aboutThePerson = { id: "n2", clientId: "c1a9f0e2", text: "Shoulder still sore." };
+
+  assert.deepEqual(m.fieldIssues(binding, m.SCHEMA_PREVIEW.bindings), []);
+  assert.deepEqual(m.fieldIssues(signal, m.SCHEMA_PREVIEW.notes), []);
+  assert.deepEqual(m.fieldIssues(aboutThePerson, m.SCHEMA_PREVIEW.notes), []);
+});

@@ -20,7 +20,7 @@
 //
 // **A circuit and a routine point at exercises by id.** In the file they name them; a name the library
 // does not know becomes a new exercise of the same import, so neither ever refers to nothing. A
-// routine keeps its entries' grouping (circuitId, circuitTitle, circuitSeries, comboGroupId), and a
+// routine keeps its entries' grouping (circuitId, circuitTitle, circuitSeries), and a
 // routine whose name the trainer already has is a duplicate. Routines carry no source: schema 5 gives
 // a routine no such field, so an imported routine is the trainer's own.
 //
@@ -64,7 +64,13 @@ const ITEM_NUMBERS = ["sets", "rest"];
 const ITEM_TARGETS = { reps: parseReps, weight: parseLoad };
 // How a routine's entries are grouped. Kept as they are: they are tokens local to the routine's own
 // entries, not ids of other records.
-const ROUTINE_GROUPING = ["circuitId", "circuitTitle", "comboGroupId"];
+//
+// `comboGroupId` was a third one until 2026-09-30 and is gone. The app groups by `circuitId` alone
+// (`controllers/sessionCircuits.js`); nothing anywhere read the other, yet every seed routine
+// carried it and this list copied it faithfully into every import. Data already stored keeps it —
+// the store round-trips undeclared fields and the frozen fixtures still hold it — it simply stops
+// being made.
+const ROUTINE_GROUPING = ["circuitId", "circuitTitle"];
 
 function pick(raw, field) {
   for (const key of ALIASES[field]) {

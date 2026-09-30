@@ -276,6 +276,44 @@ export const SCHEMA_PREVIEW = {
     ...SCHEMA_5.sessions,
     startDate: { required: true, type: "string" },
   },
+  // WHICH CLIENTS SHARE ONE PROGRAM inside one session — the M:N `sessions.participants` does not
+  // express. Two clients in a group of five may be given the same plan and logged together; the
+  // other three each have their own. That grouping exists today only as `bindings` on the live
+  // session object in memory: no schema declares it, `boundClientRoutines` re-applies it at
+  // recovery, and it dies with the clipboard cache. It is the one part of a session never written
+  // down, which is why it is declared here first and written by nothing yet.
+  //
+  // A record per group rather than a field on the client or the session: a client is in one group
+  // per session and in different groups across sessions, which is precisely what neither of those
+  // two can hold without repeating itself.
+  bindings: {
+    id: { required: true, type: "string" },
+    sessionId: { required: true, type: "string" },
+    clientIds: { required: true, type: "array" },
+  },
+
+  // ZAZNAMKI — everything the trainer notes about a client, which today has three homes and no
+  // record of its own: a free-text `notes` field on the client, an untyped `feedback` array inside
+  // each history record, and the `planUpdates` collection for the ones that should change the next
+  // plan. The three already share a signature — `(clientId, exerciseName, tag)` is what
+  // `controllers/sessionQuickSignals.js` matches on and what a planUpdates row carries — so they are
+  // one thing filed three ways, and only the third can be found, listed or resolved.
+  //
+  // Everything but the client is optional because the three sources carry different subsets: a note
+  // about a person has no exercise, a signal tapped on the clipboard has no text, and only a plan
+  // update has a resolved state.
+  notes: {
+    id: { required: true, type: "string" },
+    clientId: { required: true, type: "string" },
+    createdAt: { required: false, type: "string" }, // ISO-8601 UTC instant, never a local date
+    text: { required: false, type: "string" },
+    tag: { required: false, type: "string" },
+    sessionId: { required: false, type: "string" },
+    exerciseName: { required: false, type: "string" },
+    resolved: { required: false, type: "boolean" },
+    hasVoiceNote: { required: false, type: "boolean" },
+  },
+
   // A collection ONLY this shape declares, so staging is always exercised by the real schemas: a
   // record of it goes into the PREVIEW store alone, a backup (written at a numbered schema) leaves it out, and a
   // restore names it as lost. Written by tests; no screen writes it, so an install never holds one.
