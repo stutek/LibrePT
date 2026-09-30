@@ -4257,6 +4257,36 @@ iskati mora gumb z besedo, ki je ni. Dnevnik prvega odprtja 04 navaja oboje kot 
 imenuje gumb po tem, kar se vidi (»Pritisni ✓ zgoraj desno …«) — opaženo na različici `main`
 `6230070`, sl, 390 × 844.
 
+### 80.153 [ ] P1 — Pri slabem signalu se aplikacija odpira minuto in pol, brez signala pa v treh sekundah
+
+**Scenarij in koraki:** zamrznjena kopija `main` na strežniku, ki vsak odgovor zadrži za nastavljivo
+število sekund (telovadnica z eno črtico signala: zahteve odidejo, odgovori pridejo pozno). Prvi obisk
+brez zamika: »Se strinjam«, tema, podatki trenerke »Tara Zorko«, »Začni s prazno aplikacijo«; service
+worker je nameščen, predpomnilnik `librept-v148`. Nato stran znova odpreti pri različnih zamikih in
+meriti čas, dokler ni vidna slovenska plošča »Treningi«.
+
+**Opaženo:**
+
+| Omrežje                  | Čas do plošče                                             |
+| :----------------------- | :-------------------------------------------------------- |
+| brez zamika              | 3,5 s                                                     |
+| strežnik ustavljen       | 3,2 s                                                     |
+| vsak odgovor zamuja 2 s  | 96,9 s                                                    |
+| vsak odgovor zamuja 10 s | več kot 150 s, ves čas angleški zaslon za nalaganje       |
+
+Med čakanjem je na zaslonu le »LibrePT / A lightweight, free app for your clipboard …« v angleščini,
+brez sporočila, da aplikacija čaka na omrežje. Napak v konzoli ni. Na zamrznjeni kopiji z običajnim
+strežnikom sta se dvakrat zgodila enaka zastoja, oba takrat, ko je glava pisala »Brez povezave«
+(»Strežnik HTTP ni dosegljiv. Zagon iz predpomnjene kode …«); naslednje nalaganje je steklo.
+
+**Težava in vpliv:** v kleti brez signala aplikacija dela, v telovadnici s slabim signalom, kar je
+pogostejše, pa trener med dvema strankama čaka minuto in pol na angleški zaslon, ki ne pove ničesar.
+Koda in podatki so že na telefonu.
+
+**Predlog:** ko sta koda in podatki na telefonu, naj se aplikacija odpre iz njih enako hitro kot brez
+signala, posodobitev pa naj počaka v ozadju — opaženo na različici `main` `6230070` (zamrznjena
+kopija), 390 × 844, sl.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
