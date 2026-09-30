@@ -7337,6 +7337,25 @@ na zaslonu, nobena tarča pod 44 pik).
 
 **Napačen tip ali vrstni red.** Vrstni red (stranka, trening, besedilo) ustreza nalogi.
 
+### 80.148 [ ] P2 — Zamenjava vaje obdrži težo prejšnje: Wall Sit dobi »BW+80kg«
+
+**Scenarij in koraki:** trening »Noge« za Barbaro Kos, v »Uredi načrt« Leg Press 3 × 10 × 80 kg. V
+vrstici Leg Press ikona odprte knjige (»Prebrskaj katalog vaj«), poiskati »wall«, izbrati Wall Sit,
+»Končano z urejanjem načrta«.
+
+**Opaženo:** vrstica ima zdaj Wall Sit s 3 serijami, »10« in težo 80; polje za težo ima namig »+kg
+(BW)«. Podloga: »Wall Sit S3 × 0:10 × BW+80kg«. Ponovitve so postale sekunde drže, 80 kg z naprave je
+postalo dodatna teža na telesu. Trener dneva 10, ko je bila naprava zasedena: »Wall Sit je dobil
+"BW+80kg" in 0:12; Goblet Squat je obdržal 100 kg. Trener to na telovadnici zlahka spregleda.«
+
+**Težava in vpliv:** zamenjava se dela v naglici, med dvema strankama. Če trener številk ne preveri,
+stranka dobi drža ob steni z 80 kg ali počep z utežjo z 100 kg, ker sta bila tista kilograma
+postavljena za napravo.
+
+**Predlog:** ko se vaja zamenja z vajo druge vrste (naprava → lastna teža, ponovitve → čas), naj se
+teža in cilj ponastavita na privzeto vrednost nove vaje ali naj vrstica na številke opozori. Opaženo na
+`main` `d12646c`, sl, 390 × 844; najprej opazil trener dneva 10.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
