@@ -6403,6 +6403,11 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8072-x-p2--ocen
 
 ### 80.73 [x] P1 — »Sinhroniziraj podatke« je zamenjal trenerjeve treninge z vzorčnimi — popravljeno 2026-09-29
 
+**Dokaz 2026-09-30, prvo odprtje, `main` `12d0e66`:** oba trenerja brez predznanja sta vpisala le ime
+(»Bolgarski počep«, »Dvig na prste«) in dobila vajo »Chest«, »Barbell«, »Horizontal Push«. Prvi: »Brez
+opozorila, da sem pustil privzeto.« Drugi: »Vzorca giba ne razumem«; trije od štirih seznamov so
+angleški.
+
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8073-x-p1--sinhroniziraj-podatke-je-zamenjal-trenerjeve-treninge-z-vzorčnimi--popravljeno-2026-09-29).
 
 ### 80.74 [x] P2 — Vaja, ki je v rutini dvakrat, si deli zapis serij — popravljeno 2026-09-30
@@ -6669,6 +6674,11 @@ koliko strank jo uporablja.
 **Scenarij in koraki:** odpri podlogo treninga z eno stranko (»Ponedeljkova moc«, 2026-10-05, Jane
 Doe). Tapni ⋮ »Možnosti treninga«. Meni ponudi »Uredi načrt«, »Vsi na ta načrt«, »Kopiraj ta načrt na
 …« in »Izbriši trening«. Tapni »Kopiraj ta načrt na …«.
+
+**Dokaz 2026-09-30, prvo odprtje, `main` `12d0e66` (poročilo trenerja-podagenta, vodilna seja ni
+ponovila):** trener je stranki z bolečino v kolenu v »Razreši« zamenjal počep z »Leg Press« 14 kg.
+Naslednja stranka z isto rutino, brez težav s kolenom, je dobila »Leg Press S3 × R10 × 14 kg«. To
+je bila druga od treh stvari, ki so ga v prvi uri najbolj zmedle.
 
 **Opaženo:** aplikacija odgovori »V tem treningu ni še nikogar drugega.« Ukaz torej kopira načrt na
 druge stranke istega termina, ne na drug dan. Tri pike v napisu obljubljajo izbiro cilja, ta pa je
@@ -7068,6 +7078,11 @@ samo čisto funkcijo. Vrstni red »besedilo prej, stranka pozneje« ni pokrit z 
 **Predlog, čaka na Simonovo odločitev, ker spreminja obliko §66:** dvoje, ki nista isto.
 
 - **Obrazec zavrne le to, kar trener dodaja.** Primerjaj z shranjeno vrednostjo polja: če je beseda
+**Dokaz 2026-09-30, `main` `12d0e66`:** priimek, ki je navadna beseda. Za stranko »SIM Nina Koleno«
+je ime treninga »Preizkus koleno« zavrnjeno: »Ime termina ne sme vsebovati imena stranke, koleno pa
+je ime stranke.« Pri rehabilitaciji kolena je beseda »koleno« v imenu treninga naravna; enako bi
+veljalo za Kos, Zajc, Medved, Vrabec.
+
   tam bila že prej, shranjevanje ne pade. To odpravi nezmožnost urejanja, GDPR luknje pa ne.
 - **Dodana ali preimenovana stranka pregleda obstoječe termine** in trenerju pokaže, katera besedila
   jo zdaj imenujejo, da jih popravi ali potrdi kot naključje. To zapre GDPR luknjo in je hkrati
@@ -7344,6 +7359,9 @@ Dan 01: ko jo nadomesti kolegica, ji načrt pošlje kot sporočilo. **Vrednost:*
 bolezen). **Cena:** srednja, če naj ga kolegica odpre v svoji aplikaciji; majhna, če je dovolj besedilo
 načrta za deljenje. Več trenerjev na enem računu je EnterprisePT. **Presoja (dan 01): ne izplača se** —
 pogostost je nizka.
+Prvo odprtje 2026-09-30: trener skupine 60+ (deset ljudi) je po treh vpisanih strankah ocenil »vsaj 4
+dotiki na osebo« in dodal, da med vadbo nima gumba »vsi opravili vajo«.
+
 
 Dan 03 isto pokaže z druge strani: trenerka isti večer prevzame stranko bolnega kolega. Dogovor in
 sporočilo po treningu gresta po SMS-u, pojasnilo o nadomeščanju pa v polje za zdravstvene opombe. Dva
@@ -7382,6 +7400,9 @@ dodanem udeležencu); vprašanje je, ali ob načrtovanju vnaprej zadošča obves
 Dan 03 je vanj pisal domačo nalogo, dan 04 »stranka pripelje hčerko, potrebuje varovan kotiček«.
 Polje se imenuje »Predhodne poškodbe in opombe« in je edino prosto polje o stranki poleg ciljev. Trener
 tedensko navodilo ali dogovor o otroku zapiše med zdravstvene podatke, in ob naslednjem branju ne loči
+Prvo odprtje 2026-09-30: oba trenerja brez predznanja sta okno zapisala kot zmedo (»Nisem prosil za
+vabila; okno je skočilo vmes«), drugi tudi, ko stranka ni imela e-pošte in je bil »Pošlji vabilo«
+zbledel.
 trajnega od začasnega. **Vrednost:** dva od štirih dni; zdravstveni podatki so tudi občutljivi po GDPR,
 zato je mešanje z logistiko slabo še iz drugega razloga. **Cena:** majhna — ločeno polje »Druge
 opombe« (ali »Dogovori«), prikazano v urejevalniku načrta tako kot poškodbe. **Presoja: izplača se.**
