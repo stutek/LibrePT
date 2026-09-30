@@ -7377,6 +7377,36 @@ izbirati znova in ne ve, ali se je prva izbira sploh prijela.
 
 **Predlog:** izbira naj velja, ko je enkrat narejena. Opaženo na `main` `e2daf5e`, sl, 390 × 844.
 
+### 80.147 [ ] P2 — Ocena obrazca »Uvozi program«: obljubi program iz klepeta, sprejme le obliko JSON
+
+Način 3. Naloga (podagent, pred ogledom obrazca): štiritedenski program, ki ga trener že ima zapisan
+drugje (»Počep 3x10 40kg, Potisk s prsi 3x8 30kg, Veslanje 3x12 25kg, Plank 3x40s«), spraviti k
+stranki, ne da bi ga pretipkal. Naloga podagenta: `.private/exploratory-test/forms/2026-09-30-08-task.md`.
+Pot: ☰ → »Vaje in rutine« → »Rutine« → »Uvozi program«. `main` `e2daf5e`, sl, 390 × 844 (okno cele
+na zaslonu, nobena tarča pod 44 pik).
+
+**Odveč.** Nič.
+
+**Manjka.**
+- **Program v obliki, kot ga trener ima** (P2, naprej čaka na Simona). Opis okna: »Prilepi program,
+  napisan drugje — v klepetu, preglednici, datoteki od kolega.« Za besedilo iz naloge okno že med
+  tipkanjem odgovori »V tem besedilu ni programa. Pritisni »Pokaži obliko« in primerjaj.« »Pokaži
+  obliko« pokaže JSON (`"format": "librept.program/1"`), ki ga trener ne napiše. Pot prek »Kopiraj
+  navodilo« (besedilo za pomočnika z umetno inteligenco) okno ne razloži. Opis obljublja več, kot
+  obrazec sprejme; ali naj uvoz bere navadno besedilo, je odločitev o izdelku.
+- **Dnevi, začetni datum, število tednov** (čaka na Simona): naloga pričakuje osem treningov (pon +
+  čet, 4 tedne); uvoz odpre en nenačrtovan načrt (»Zaenkrat brez treninga«).
+- **Časovna vaja v primeru:** »Pokaži obliko« nima vaje na čas, zato trener ne ve, kako zapisati
+  »Plank 3x40s«.
+
+**Ne deluje.**
+- **Esc in ✕ zavržeta prilepljeno besedilo** (P3): ponovno odprto okno ima prazno polje in prazno
+  »Za koga«. Pravilo 2026-09-17: zavrže le »Prekliči«.
+- Popravljeno od §80.113: primer se uvozi s pravimi številkami (Barbell Bench Press 4 × 5 × 60 kg,
+  »S4 × R8 × 45 kg«, »S3 × R12«); »Prebranih 4 postavk, 2 jih ni v tvojem katalogu.«
+
+**Napačen tip ali vrstni red.** Vrstni red (stranka, trening, besedilo) ustreza nalogi.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
