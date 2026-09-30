@@ -90,6 +90,28 @@ def test_collapsed_footer_is_a_single_line(page, local_server):
     )
 
 
+def test_the_bar_itself_opens_the_drawer(page, local_server):
+    """The handle bar has carried `cursor: pointer` all along, and it is the target a thumb actually
+    lands on: the grabber pill answers a tap in a band 23px tall, while a thumb is about 44. It
+    matters most while a session is running, when the summary preview — the other big target — is
+    hidden and the pill is all that is left."""
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#notification-area")
+    assert not page.locator("#notification-area").evaluate(
+        "(el) => el.classList.contains('is-expanded')"
+    )
+
+    bar = page.locator("#notification-handle-bar")
+    box = bar.bounding_box()
+    # Beside the pill, not on it: the bar's own empty space, which is what a low thumb hits.
+    page.mouse.click(box["x"] + 12, box["y"] + box["height"] / 2)
+    page.wait_for_timeout(400)
+
+    assert page.locator("#notification-area").evaluate(
+        "(el) => el.classList.contains('is-expanded')"
+    )
+
+
 def test_expanded_footer_covers_the_whole_area_below_the_header(page, local_server):
     load_with_stub(page, local_server, STUB)
     page.wait_for_selector("#notification-area")

@@ -463,6 +463,15 @@ export function setupNotificationGestures() {
   if (toggleBtn) toggleBtn.addEventListener("click", toggleHandler);
   if (summaryPreview) summaryPreview.addEventListener("click", toggleHandler);
 
+  // The bar's own empty space toggles too, which is what its `cursor: pointer` has always promised.
+  // It matters while a session is running: the summary preview is hidden then, so the only target
+  // left was the grabber, whose tappable band is 23px tall on a 44px thumb. Only a tap that landed
+  // on the bar ITSELF counts — the clipboard bar and the buttons inside it keep their own taps.
+  handleBar.addEventListener("click", (e) => {
+    if (e.target !== handleBar) return;
+    toggleHandler(e);
+  });
+
   if (markAllBtn) {
     markAllBtn.addEventListener("click", (e) => {
       e.stopPropagation();
