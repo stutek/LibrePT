@@ -170,20 +170,10 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#11-x-pt-side-cl
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#12-x-simultaneous-sessions-merged-into-one-clipboard-multi-line-titles--per-participant-tags--dots-shipped-2026-09-30);
 what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-### 1.3 [ ] Session list must model partial overlaps
+### 1.3 [x] Session list must model partial overlaps — shipped 2026-09-30
 
-**Narrowed 2026-09-27: the room half left this app.** Other trainers' room occupancy was read from
-one Google resource calendar per room, and every Google Calendar integration is now a paid
-capability — the ruling and its reasoning are in the private `~/Projects/EnterprisePT` project,
-`TODO.md` §19, and what has to leave this repository is §68.3 below. What stays here is the trainer's
-own sessions overlapping, which needs no calendar at all.
-
-- **Partial overlaps** (10:00–11:00 vs 10:30–11:30) must both render, showing the overlap rather than
-  stacking as if sequential. Render it the way calendar apps do: a vertical time grid, blocks whose
-  top/height map to start/end, overlapping blocks side by side in columns.
-- The lane arithmetic is built and tested — [src/domain/overlapLanes.js](src/domain/overlapLanes.js)
-  decides which column a block takes and how many it shares width with. What remains is the renderer.
-- Must be legible inside the continuous timeline §4.3 shipped.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#13-x-session-list-must-model-partial-overlaps--shipped-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ### 1.4 [ ] Calendar preferences — holidays and non-working days
 Import a holiday calendar (public holidays, gym closures) and colour-code off days on the date-jump
@@ -1044,6 +1034,14 @@ surface yet.
 štirje krogi, in intervali 6 × 400 m. Čas in razdaljo je trenerka vpisala v polje za ponovitve (»40s«,
 »400m«), pregled pa je izpisal »S4 × R40s«, kar stranka ne razume. Merilo po vaji (čas, razdalja) pri
 vaji z lastnim imenom ni ponujeno.
+
+**State 2026-09-30 (Claude):** two of the three open items were already done: the history snapshot
+carries `modality` and `metric` (`buildExerciseSnapshotItem` in
+[sessionItemRecord.js](src/domain/sessionItemRecord.js)), and the routine builder authors each
+exercise's own metric ([plansView.js](src/modules/plans/plansView.js)). The day-05 evidence is fixed at
+the display (`3caf281`): a time or distance typed where the reps go reads "S4 × 40s", not
+"S4 × R40s". **Open, a design question for Simon:** logging for `hiit` (rounds), and whether a movement
+with its own name, typed inline, is offered a measure (time, distance) at all.
 
 ### 17.2 [ ] Edit rules for a completed, dated session — immutable except three narrow cases
 A completed dated session is an **immutable execution record**; anything forward-looking is
@@ -2864,6 +2862,15 @@ Both are the player, not the script: the hand is what makes a demonstration a de
   never runs: on the welcome card, the ☰ menu stays open. A trainer does not reach this on the
   welcome card (see §91.5 for how the tests did), but any failed demonstration does the same. One
   way: run a sequence's closing beat even after a failure.
+
+**State 2026-09-30:** the reported part is fixed (`5c269da`). Walking Back rebuilt the ground under a
+step by replaying the earlier steps without the hand, which is how two fields were filled as one and
+the ✕ was closed undrawn; a control not drawn yet was taken as settled at 0,0; and a control that
+moved while the hand travelled was tapped where the hand was not. Replays now carry the hand, a
+zero box is not settled, and the hand goes back and presses again before a tap if the control
+moved. `test_every_tap_show_me_performs_is_drawn_by_the_hand_first` walks the whole story forward and
+every chapter back with Show me and fails on any undrawn tap (about ninety before the fix). What
+stays open is the bullet above, whether a failed sequence should still run its closing beat.
 
 ### 39.10 [x] CHANGE — the intake-link button is named for the intent
 
@@ -6820,27 +6827,10 @@ what shipped is in [CHANGELOG.md](CHANGELOG.md).
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80108-x-p3--na-320-×-680-je-od-gumba-shrani-in-nadaljuj-na-uvodnem-zaslonu-vidne-štiri-pike--popravljeno-2026-09-30);
 what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-### 80.109 [ ] P2 — Ocena trajanja istega intervala je odvisna od zapisa časa
+### 80.109 [x] P2 — Ocena trajanja istega intervala je odvisna od zapisa časa — popravljeno 2026-09-30
 
-**Scenarij in koraki:** v »SIM Previdna vadba« za TEST Maja Omejitev (jutri
-10:00–10:45, Telovadnica B) odpreti »Uredi načrt«. Obstoječemu Dumbbell Bicep Curl
-3×10×6 kg in počitku 60 s dodati Treadmill Run iz kataloga. Nastaviti 4 serije in
-v polje »ČAS« vpisati »2:30«. Končati urejanje, nato ga ponovno odpreti. Za primerjavo
-v isti vaji zamenjati samo čas s »150«, končati urejanje in ga ponovno odpreti.
-
-**Opaženo:** pri obeh vnosih kartica vaje kaže »S4 × 2:30«. Pri vnosu »2:30« ocena
-načrta kaže »2 / 45 min«, pri enakovrednem vnosu »150« pa »12 / 45 min«. V načrtu
-sta tudi dva počitka po 60 s. Že štirje tekaški intervali sami trajajo deset minut,
-zato dvominutna ocena celotnega načrta ne more držati. Obrazec »2:30« sprejme brez
-opozorila in ga ob ponovnem odprtju ohrani.
-
-**Težava in vpliv:** trener dobi deset minut razlike pri oceni zasedenosti termina,
-čeprav obe kartici predpisujeta isto vadbo. Na tej osnovi lahko v termin doda preveč
-vaj ali napačno presodi, koliko časa ostane.
-
-**Predlog:** sprejeti zapisi časa naj dajo isto oceno trajanja; primerjati »2:30«
-in »150« pri več serijah, skupaj s počitki. Opaženo na objavljeni `8b2ce80`, sl,
-390 × 844, Chrome CDP; brez prestreženih napak in brez pregledovanja kode.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80109-x-p2--ocena-trajanja-istega-intervala-je-odvisna-od-zapisa-časa--popravljeno-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ### 80.110 [ ] P2 — »Shrani kot rutino« pozabi težo, številke v poljih so odrezane, polja nimajo oznak
 

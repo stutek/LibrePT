@@ -20,6 +20,43 @@ Read [CHANGELOG.md](CHANGELOG.md) for what shipped and when. This file is why.
 
 ---
 
+### 1.3 [x] Session list must model partial overlaps — shipped 2026-09-30
+
+**Narrowed 2026-09-27: the room half left this app.** Other trainers' room occupancy was read from
+one Google resource calendar per room, and every Google Calendar integration is now a paid
+capability — the ruling and its reasoning are in the private `~/Projects/EnterprisePT` project,
+`TODO.md` §19, and what has to leave this repository is §68.3 below. What stays here is the trainer's
+own sessions overlapping, which needs no calendar at all.
+
+- **Partial overlaps** (10:00–11:00 vs 10:30–11:30) must both render, showing the overlap rather than
+  stacking as if sequential. Render it the way calendar apps do: a vertical time grid, blocks whose
+  top/height map to start/end, overlapping blocks side by side in columns.
+- The lane arithmetic is built and tested — [src/domain/overlapLanes.js](src/domain/overlapLanes.js)
+  decides which column a block takes and how many it shares width with. What remains is the renderer.
+- Must be legible inside the continuous timeline §4.3 shipped.
+
+### 80.109 [x] P2 — Ocena trajanja istega intervala je odvisna od zapisa časa — popravljeno 2026-09-30
+
+**Scenarij in koraki:** v »SIM Previdna vadba« za TEST Maja Omejitev (jutri
+10:00–10:45, Telovadnica B) odpreti »Uredi načrt«. Obstoječemu Dumbbell Bicep Curl
+3×10×6 kg in počitku 60 s dodati Treadmill Run iz kataloga. Nastaviti 4 serije in
+v polje »ČAS« vpisati »2:30«. Končati urejanje, nato ga ponovno odpreti. Za primerjavo
+v isti vaji zamenjati samo čas s »150«, končati urejanje in ga ponovno odpreti.
+
+**Opaženo:** pri obeh vnosih kartica vaje kaže »S4 × 2:30«. Pri vnosu »2:30« ocena
+načrta kaže »2 / 45 min«, pri enakovrednem vnosu »150« pa »12 / 45 min«. V načrtu
+sta tudi dva počitka po 60 s. Že štirje tekaški intervali sami trajajo deset minut,
+zato dvominutna ocena celotnega načrta ne more držati. Obrazec »2:30« sprejme brez
+opozorila in ga ob ponovnem odprtju ohrani.
+
+**Težava in vpliv:** trener dobi deset minut razlike pri oceni zasedenosti termina,
+čeprav obe kartici predpisujeta isto vadbo. Na tej osnovi lahko v termin doda preveč
+vaj ali napačno presodi, koliko časa ostane.
+
+**Predlog:** sprejeti zapisi časa naj dajo isto oceno trajanja; primerjati »2:30«
+in »150« pri več serijah, skupaj s počitki. Opaženo na objavljeni `8b2ce80`, sl,
+390 × 844, Chrome CDP; brez prestreženih napak in brez pregledovanja kode.
+
 ### 92.1 [x] The L: sideways looks, up opens — shipped 2026-09-30
 
 `planPeek.js` after the axis locks to x (8px, `LOCK_PX`) already captures the pointer, so vertical
