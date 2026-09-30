@@ -4656,6 +4656,18 @@ passed 10 of 10. CPU load alone does not reproduce it, so the cause is something
 run has — other browser workers, or the stage's own order. Next step unchanged: record where the
 wheel lands (listen on the deck's scroller, not the window) and trace one failing full run.
 
+**Changed 2026-09-30 (Simon's ruling: an exploring browser and the pipeline run at the same time).**
+The gate no longer waits for a quiet machine. It measures the load it did not cause once, before
+the first stage, runs its browser tests on half of the FREE cores, and waits and refuses only above
+half the machine, naming the busiest processes (`ed041fd`,
+[quiet_machine.py](build/quiet_machine.py)). This reopens the ground this section stands on: fewer
+workers beside load is not yet measured as a cure. First run: foreign load 2.92, six workers, green
+in 8m48s. The re-check condition is in the module: a shared run that goes red while the same tree
+is green started quiet means the cure fails at that load. Exploratory browsers also close themselves
+after 15 minutes without a command (the exploratory-test skill's explore.py), so a forgotten one no
+longer holds a core for hours; the Chrome on port 9223 forgotten at 09:16 came from a different CDP
+tool outside this repository, which that change does not reach.
+
 ## 54. [x] The past cards on the clipboard write their date as "20. jul." — fixed 2026-09-20
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#54-x-the-past-cards-on-the-clipboard-write-their-date-as-20-jul--fixed-2026-09-20);
