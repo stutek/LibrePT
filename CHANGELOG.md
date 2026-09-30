@@ -51,6 +51,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Fixed
 
+- **Too Hard records the load, not three finished sets.** Signalling that an exercise was too heavy
+  ticked off every planned set for it, so a set the client had just failed was written down as
+  performed at the planned weight, and the client's history and the clipboard's *Last time* row
+  quoted it back. Too Easy and *Completed reps easily* still tick the sets off — a standalone
+  exercise has no tick of its own, and that is what records the work when it really happened.
+- **Opening one evening of a repeating session no longer duplicates it.** Opening an evening,
+  closing it without a change and opening it again left two identical cards on the same day, both
+  with the client on them, and they survived a reload.
 - **Editing a routine keeps its circuits.** The routine form has no field for an exercise's circuit
   and wrote every exercise back from its fields alone, so one keystroke in a routine's name turned
   its circuits into a flat list.

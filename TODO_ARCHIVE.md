@@ -33,6 +33,56 @@ real sessions**, removing the blank-page chore that blocks ramp-up.
   create the first cycle in the reference graph (`history → routine → history`), which the topological
   migration order forbids. Keep provenance soft/denormalised.
 
+### 80.95 [x] P1 — Dotik »Pretežko« zapiše vajo kot opravljeno z vsemi načrtovanimi serijami — popravljeno 2026-09-30
+
+**Scenarij in koraki:** odpri podlogo treninga (»Ponedeljkova moc«, stranka Jane Doe, rutina »Zgornji
+del A«), tapni »Začni trening« in »Ohrani urnik«. Odpri sklop »Sklop za moč prsi in hrbta«. Pri vaji
+Barbell Bench Press tapni samo »Pretežko«. Ne zaključuj nobenega kroga in ne vpiši nobene serije.
+Tapni »Zaključi vadbo« in »Zaključi zdaj«.
+
+**Opaženo:** shranjeni zapis vadbe pravi »Barbell Bench Press: opravljeno, 3/3 serije«, vse tri z
+načrtovano težo 62.5 kg. Vse druge vaje istega treninga so pravilno »0/3, preskočeno«. Isto se pokaže
+na zaslonu stranke: »Barbell Back Squat: 80 kg×5, 80 kg×5, 80 kg×5, 80 kg×5« pri vaji, kjer je bil
+tapnjen samo »Pretežko«, medtem ko ostale pišejo »PRESKOČENO«. Po dotiku na »Pretežko« na podlogi ni
+nobenega sporočila, da je bilo kaj zapisano.
+
+**Težava in vpliv:** »Pretežko« je gumb, s katerim trener pove, da je bilo breme previsoko — pogosto
+prav zato, ker je stranka serijo predčasno prekinila. Aplikacija iz tega naredi zapis, da je vajo
+opravila v celoti, z bremenom, ki ga ni zmogla. Ta zapis je potem zgodovina stranke in številka
+»Zadnjič«, po kateri trener naslednjič nastavi težo. Zapis je bil napačen v shrambi, ne le na zaslonu.
+
+**Popravljeno 2026-09-30, a ožje od prvotnega predloga** (»naj zapišeta samo signal, nobene serije«).
+Tak popravek bi odvzel edini način, da se samostojna vaja zapiše kot opravljena: taka vaja svoje
+kljukice nima, njene serije se odštevajo prav s tem, da se trener nanje odzove. Zato popravek deli
+signale: »Prelahko« in »Completed reps easily« sta izjavi, da so ponovitve bile, in serije še naprej
+zapišeta; »Pretežko«, bolečina in prekinjena tehnika pa ne, ker na tleh pomenijo prav nasprotno.
+Pravilo živi pri signalih (`src/domain/feedbackTags.js`, `tagImpliesPerformed`), uporablja ga
+`src/controllers/sessionQuickSignals.js`, obljuba je preizkušena v obe smeri
+(`tests/medium/test_clipboard_quick_signals.py`). Odprto ostaja globlje vprašanje: kako se samostojna
+vaja označi kot opravljena, ko trener ne da nobenega signala.
+
+### 80.103 [x] P1 — Odprtje in zapiranje enega večera serije ustvari drugo, enako kartico istega večera — popravljeno 2026-09-30
+
+**Scenarij in koraki:** »Ustvari trening«: ime »Jutranja vaja«, datum 2026-10-05, 07:15 - 08:15,
+stranka Sarah Jenkins, obkljukaj »PONOVI VSAK TEDEN«, v »DO (NEOBVEZNO)« vpiši 2026-10-19, »Shrani«,
+nato »Končano« v oknu za vabila. Seznam pokaže tri ponedeljke: 5., 12. in 19. oktober. Zdaj na kartici
+12. oktobra tapni svinčnik, v obrazcu tapni »Zavrzi spremembe«, isto kartico odpri še enkrat s
+svinčnikom in tapni »Odpri v beležki«.
+
+**Opaženo:** kartic je zdaj štiri. Pri 12. oktobru sta dve enaki: obe »07:15 - 08:15 Jutranja vaja
+1/1 mest zasedenih«, obe visoki 102 pike. Ostaneta tudi po osvežitvi strani. Naslov podloge, ki se je
+odprla, nosi drug id treninga kot tisti, ki je bil urejan.
+
+**Težava in vpliv:** trener pogleda v termin serije in ga zapre, ne da bi kaj spremenil, pa ima v
+urniku dva treninga isto uro. Stranka je na obeh, mesto je zasedeno dvakrat, in vsakega je treba
+izbrisati posebej. Če na napačnem zabeleži vadbo, je zapis na terminu, ki ga ne bo pogledal.
+
+**Popravljeno 2026-09-30.** Ploščica večer tapne z id-jem, ki ga je narisala, pri izpeljanem večeru
+torej s ključem tega večera, zapis zanj pa dobi svoj id; vprašanje »ali je ta večer že zapisan« se je
+postavljalo samo po id-ju in je zato vedno odgovorilo z ne. Zdaj na to odgovarja domena po večeru, ki
+ga zapis zastopa (`storedOccurrenceFor` v `src/domain/sessionSeries.js`, preizkušeno v
+`tests/unit_js/domain/sessionSeries.test.mjs`).
+
 ### 80.94 [x] P2 — V kartoteki stranke je signal s treninga še vedno angleški: »Too Hard - Reduce Load« — popravljeno 2026-09-30
 
 **Scenarij in koraki:** na podlogi pri vaji tapni »Pretežko«, nato »Dodaj opombo«, izberi »Pretežko –

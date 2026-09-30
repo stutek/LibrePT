@@ -6613,37 +6613,10 @@ istega treninga. Napis gumba bi lahko to povedal jasneje; to sodi k §88.5.
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8094-x-p2--v-kartoteki-stranke-je-signal-s-treninga-še-vedno-angleški-too-hard---reduce-load--popravljeno-2026-09-30);
 what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-### 80.95 [x] P1 — Dotik »Pretežko« zapiše vajo kot opravljeno z vsemi načrtovanimi serijami
+### 80.95 [x] P1 — Dotik »Pretežko« zapiše vajo kot opravljeno z vsemi načrtovanimi serijami — popravljeno 2026-09-30
 
-**Scenarij in koraki:** odpri podlogo treninga (»Ponedeljkova moc«, stranka Jane Doe, rutina »Zgornji
-del A«), tapni »Začni trening« in »Ohrani urnik«. Odpri sklop »Sklop za moč prsi in hrbta«. Pri vaji
-Barbell Bench Press tapni samo »Pretežko«. Ne zaključuj nobenega kroga in ne vpiši nobene serije.
-Tapni »Zaključi vadbo« in »Zaključi zdaj«.
-
-**Opaženo:** shranjeni zapis vadbe pravi »Barbell Bench Press: opravljeno, 3/3 serije«, vse tri z
-načrtovano težo 62.5 kg. Vse druge vaje istega treninga so pravilno »0/3, preskočeno«. Isto se pokaže
-na zaslonu stranke: »Barbell Back Squat: 80 kg×5, 80 kg×5, 80 kg×5, 80 kg×5« pri vaji, kjer je bil
-tapnjen samo »Pretežko«, medtem ko ostale pišejo »PRESKOČENO«. Po dotiku na »Pretežko« na podlogi ni
-nobenega sporočila, da je bilo kaj zapisano.
-
-**Težava in vpliv:** »Pretežko« je gumb, s katerim trener pove, da je bilo breme previsoko — pogosto
-prav zato, ker je stranka serijo predčasno prekinila. Aplikacija iz tega naredi zapis, da je vajo
-opravila v celoti, z bremenom, ki ga ni zmogla. Ta zapis je potem zgodovina stranke in številka
-»Zadnjič«, po kateri trener naslednjič nastavi težo. Zapis je napačen v shrambi, ne le na zaslonu —
-to je druga napaka kot §80.80.
-
-**Predlog:** »Pretežko« in »Prelahko« naj zapišeta samo signal, nobene serije — opaženo na različici
-`8b2ce80`.
-
-**Popravljeno 2026-09-30, a ožje od predloga.** Predlog (»nobene serije«) bi odvzel edini način, da se
-samostojna vaja zapiše kot opravljena: taka vaja svoje kljukice nima, njene serije se odštevajo prav s
-tem, da se trener nanje odzove (to je zapisano v §45.9). Zato je popravek razdelil signale: »Prelahko«
-in »Completed reps easily« sta izjavi, da so ponovitve bile, in serije še naprej zapišeta; »Pretežko«,
-bolečina in prekinjena tehnika pa ne, ker na tleh pomenijo prav nasprotno. Pravilo živi pri signalih
-(`src/domain/feedbackTags.js`, `tagImpliesPerformed`), uporablja ga
-`src/controllers/sessionQuickSignals.js`, promesa je preizkušena v obe smeri
-(`tests/medium/test_clipboard_quick_signals.py`). **Odprto ostaja globlje vprašanje iz §45.9:** kako
-se samostojna vaja označi kot opravljena, ko trener ne da nobenega signala.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8095-x-p1--dotik-pretežko-zapiše-vajo-kot-opravljeno-z-vsemi-načrtovanimi-serijami--popravljeno-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ### 80.96 [ ] P2 — Prva kartica vodenega ogleda veleva pritisniti »Naprej«, tega gumba pa ni
 
@@ -6790,30 +6763,10 @@ Ob tem opažena manjša neskladnost na istem zaslonu: pri podpisu z datumom 2026
 »Privolitev dana (2026-06-15 · v2026-08-09)«, torej pripiše različico obrazca iz avgusta podpisu iz
 junija.
 
-### 80.103 [x] P1 — Odprtje in zapiranje enega večera serije ustvari drugo, enako kartico istega večera
+### 80.103 [x] P1 — Odprtje in zapiranje enega večera serije ustvari drugo, enako kartico istega večera — popravljeno 2026-09-30
 
-**Scenarij in koraki:** »Ustvari trening«: ime »Jutranja vaja«, datum 2026-10-05, 07:15 - 08:15,
-stranka Sarah Jenkins, obkljukaj »PONOVI VSAK TEDEN«, v »DO (NEOBVEZNO)« vpiši 2026-10-19, »Shrani«,
-nato »Končano« v oknu za vabila. Seznam pokaže tri ponedeljke: 5., 12. in 19. oktober. Zdaj na kartici
-12. oktobra tapni svinčnik, v obrazcu tapni »Zavrzi spremembe«, isto kartico odpri še enkrat s
-svinčnikom in tapni »Odpri v beležki«.
-
-**Opaženo:** kartic je zdaj štiri. Pri 12. oktobru sta dve enaki: obe »07:15 - 08:15 Jutranja vaja
-1/1 mest zasedenih«, obe visoki 102 pike. Ostaneta tudi po osvežitvi strani. Naslov podloge, ki se je
-odprla, nosi drug id treninga kot tisti, ki sem ga urejal.
-
-**Težava in vpliv:** trener pogleda v termin serije in ga zapre, ne da bi kaj spremenil, pa ima v
-urniku dva treninga isto uro. Stranka je na obeh, mesto je zasedeno dvakrat, in vsakega je treba
-izbrisati posebej. Če na napačnem zabeleži vadbo, je zapis na terminu, ki ga ne bo pogledal.
-
-**Predlog:** odprtje večera serije, brez shranjene spremembe, naj ne ustvari novega treninga —
-opaženo na različici `8b2ce80`.
-
-**Popravljeno 2026-09-30.** Ploščica večer tapne z id-jem, ki ga je narisala, pri izpeljanem večeru
-torej s ključem tega večera, zapis zanj pa dobi svoj id; vprašanje »ali je ta večer že zapisan« se je
-postavljalo samo po id-ju in je zato vedno odgovorilo z ne. Zdaj na to odgovarja domena po večeru, ki
-ga zapis zastopa (`storedOccurrenceFor` v `src/domain/sessionSeries.js`, preizkušeno v
-`tests/unit_js/domain/sessionSeries.test.mjs`).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80103-x-p1--odprtje-in-zapiranje-enega-večera-serije-ustvari-drugo-enako-kartico-istega-večera--popravljeno-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ### 80.104 [ ] P2 — Izbrisana serija pusti za sabo programe brez datuma, ki jih ni mogoče razločiti
 
