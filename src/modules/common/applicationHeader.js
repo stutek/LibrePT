@@ -205,7 +205,7 @@ export function renderSyncBadge() {
     // means no sync can succeed whatever the grant says, which is the not-connected glyph.
     renderSyncCloudIcon({ configured: false });
     badge.classList.remove("hidden");
-    badge.innerHTML = `<span class="sync-offline" title="${deps?.t ? deps.t("offline_cached_desc") : "HTTP server unreachable. Running on cached code."}"><i class="fa-solid fa-plug-circle-xmark"></i> Offline</span>`;
+    badge.innerHTML = `<span class="sync-offline" title="${deps?.t ? deps.t("offline_cached_desc") : "HTTP server unreachable. Running on cached code."}"><i class="fa-solid fa-plug-circle-xmark"></i> ${deps?.t ? deps.t("offline_badge") : "Offline"}</span>`;
     badge.setAttribute(
       "aria-label",
       deps?.t ? deps.t("offline_cached_desc") : "HTTP server unreachable. Running on cached code.",

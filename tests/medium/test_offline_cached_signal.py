@@ -15,7 +15,9 @@ from tests.medium._harness import HEADER_STUB, load_with_stub
 
 pytestmark = pytest.mark.clean_start
 
-STUB = HEADER_STUB
+# The stub's `t` reads `state.lang`, which is module-private; this lets a test choose the language
+# the badge is written in.
+STUB = HEADER_STUB + "\nwindow.__setUiLang = (lang) => { state.lang = lang; };\n"
 
 
 def test_offline_cached_signal(page, local_server):
@@ -33,3 +35,20 @@ def test_offline_cached_signal(page, local_server):
     badge = page.locator("#sync-badge")
     assert badge.is_visible()
     assert "Offline" in badge.inner_text()
+
+
+def test_the_offline_badge_is_written_in_the_chosen_language(page, local_server):
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#app-header")
+
+    page.evaluate("""() => {
+        window.__setUiLang('sl');
+        return import('./modules/common/applicationHeader.js').then((mod) => {
+            mod.setOfflineCachedState(true);
+        });
+    }""")
+    page.wait_for_timeout(300)
+
+    assert page.locator("#sync-badge .sync-offline").inner_text().strip() == (
+        "Brez povezave"
+    )
