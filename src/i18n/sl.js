@@ -276,7 +276,7 @@ export const sl = {
   circuit_none: "Brez sklopa",
   circuit_new: "Nov sklop",
   add_to_circuit: "Dodaj vajo v sklop",
-  rounds: "Runde",
+  rounds: "Krogi",
   ungroup: "Razdruži sklop",
   rest_timer: "Časomer premora",
   start_rest: "Začni premor",

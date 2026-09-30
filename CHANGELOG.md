@@ -76,6 +76,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Fixed
 
+- **The rounds counter says "Krogi" in Slovenian**, not the German "Runde".
 - **A date typed the Slovenian way is read as that date.** "6.10.2026" was saved as 6102-02-06.
   Day, month and year written with dots, slashes or dashes are now read as such, and a day that does
   not exist, such as 31.2.2026, is refused with a note rather than saved as another day.
