@@ -31,10 +31,11 @@ DIALOG = "#dialog-session-start-time"
 CARD_TITLE = "Group Strength & Conditioning"
 
 
-def _launch_and_start(page, local_server):
-    page.goto(local_server)
+def _launch_and_start(page, local_server, query=""):
+    page.goto(local_server + query)
     page.wait_for_selector("#view-clients.active")
-    page.locator(".session-card", has_text=CARD_TITLE).first.click()
+    # By id, not by title: in another language the demo's titles are translated.
+    page.locator('.session-card[data-session-id="s01f2e3d"]').click()
     page.wait_for_selector("#active-session-overlay:not(.hidden)")
     page.click("#btn-start-session")
     page.wait_for_selector(f"{DIALOG}[open]")
@@ -230,3 +231,26 @@ def test_keeping_the_schedule_leaves_the_slot_and_counts_up(page, local_server):
     # Still inside the scheduled window here (it ends currentHour+1), so a real countdown is what
     # the trainer keeps — declining the offer changes nothing about the session.
     assert not _overlay_timer(page).startswith("-")
+
+
+def test_the_off_schedule_dialog_fits_a_phone_and_agrees_in_gender(page, local_server):
+    """At 390 px "Končni čas" started at the dialog's right edge and ran off the screen, and the
+    button that removes the session said "Ni se zgodila" (feminine) about a "trening" (masculine)."""
+    page.set_viewport_size({"width": 390, "height": 844})
+    _launch_and_start(page, local_server, "?lang=sl")
+
+    assert page.inner_text("#btn-session-start-time-delete").strip() == "Ni se zgodil"
+
+    dialog = page.locator(DIALOG).bounding_box()
+    for field in ("#session-start-time-start", "#session-start-time-end"):
+        box = page.locator(field).bounding_box()
+        assert box["x"] >= dialog["x"], field
+        assert box["x"] + box["width"] <= dialog["x"] + dialog["width"] + 1, (
+            f"{field} runs past the dialog's right edge"
+        )
+    for label in ("#session-start-time-start-label", "#session-start-time-end-label"):
+        box = page.locator(label).bounding_box()
+        assert box["x"] + box["width"] <= 390, f"{label} is off the screen"
+    start = page.locator("#session-start-time-start").bounding_box()
+    end = page.locator("#session-start-time-end").bounding_box()
+    assert end["y"] > start["y"], "the two fields stand one under the other"

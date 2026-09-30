@@ -66,7 +66,7 @@ function ensureStartTimeDialog(t) {
     <form id="form-session-start-time" class="modal-form">
       <div class="modal-body-scroll">
         <p id="session-start-time-desc" class="dialog-desc"></p>
-        <div class="form-row">
+        <div class="form-row session-start-time-fields">
           <div class="form-group col">
             <label id="session-start-time-start-label" for="session-start-time-start"></label>
             <input type="text" id="session-start-time-start" class="form-control" required>

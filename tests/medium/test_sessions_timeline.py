@@ -151,3 +151,39 @@ def test_a_session_without_a_routine_says_which_thing_is_missing(page, local_ser
     text = card.inner_text()
     assert text.count("Program Not Defined") == 1, text
     assert "Undefined" not in text, text
+
+
+SEED_PLANLESS_SESSIONS = """
+// Two finished sessions with no routine. The first was run from a hand-built plan of three
+// exercises, which is kept in its participant's history record; the second has nothing anywhere.
+const withPlan = state.sessions.find((s) => s.id === 's00f2e3d');
+const withoutPlan = state.sessions.find((s) => s.id === 's07f2e3d');
+withPlan.routineId = '';
+withoutPlan.routineId = '';
+state.history.push({
+  id: 'h-built', clientId: withPlan.participants[0], routineName: 'Empty plan, no routine',
+  date: withPlan.startDate, duration: 3600, feedback: [],
+  exercises: ['a', 'b', 'c'].map((id) => ({
+    id, type: 'exercise', name: 'Move ' + id, metric: 'reps', completed: true,
+    sets: [{ reps: 10, weight: 0, completed: true }],
+  })),
+});
+renderClientsViewShell();
+initSessionTimeline({"""
+
+
+def test_no_program_warning_only_when_the_session_had_no_exercises(page, local_server):
+    """A finished session run from three hand-added exercises said "Program Not Defined": the
+    warning looked only at the routine. It now also looks at the record of what was done."""
+    stub = SESSIONS_STUB.replace(
+        "renderClientsViewShell();\ninitSessionTimeline({", SEED_PLANLESS_SESSIONS, 1
+    )
+    assert stub != SESSIONS_STUB
+    load_with_stub(page, local_server, stub)
+    page.wait_for_selector(".sessions-day-group")
+
+    built = page.locator('.session-card[data-session-id="s00f2e3d"]')
+    empty = page.locator('.session-card[data-session-id="s07f2e3d"]')
+    assert built.count() == 1 and empty.count() == 1
+    assert "Program Not Defined" not in built.inner_text()
+    assert "Program Not Defined" in empty.inner_text()

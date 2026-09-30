@@ -13,6 +13,7 @@ import {
   buildSessionMeta,
   escapeHTML,
   formatDateStr,
+  formatDurationHourMin,
   getInitials,
   getOverlappingSessions,
 } from "../../../../src/modules/common/utils.js";
@@ -243,4 +244,14 @@ test("a missing or unreadable date is written as nothing, not as a broken one", 
   assert.equal(formatDateStr(null), "");
   assert.equal(formatDateStr(undefined), "");
   assert.equal(formatDateStr("not a date"), "");
+});
+
+test("a span under two days is hours and minutes, a longer one is days and hours", () => {
+  assert.equal(formatDurationHourMin(92 * 60), "01h 32m");
+  assert.equal(formatDurationHourMin(47 * 3600 + 59 * 60), "47h 59m");
+  assert.equal(formatDurationHourMin(-90 * 60), "-01h 30m");
+  // 870 h 01 m, the countdown to a session more than a month away, was shown as "870h 01m".
+  assert.equal(formatDurationHourMin(870 * 3600 + 60), "36d 06h");
+  assert.equal(formatDurationHourMin(197 * 3600 + 60), "08d 05h");
+  assert.equal(formatDurationHourMin(-197 * 3600), "-08d 05h");
 });

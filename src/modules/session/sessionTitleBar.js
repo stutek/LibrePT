@@ -24,6 +24,7 @@
 // }
 
 import { sessionSlotOfTitle } from "../common/utils.js";
+import { formatCalendarDayLabel } from "../sessionList/sessionTimeline.js";
 
 let deps = null;
 
@@ -40,9 +41,17 @@ function whenAndWhere(sourceSession, activeSession) {
   // The DAY as a person says it where the app has one ("today", "tomorrow"); the date otherwise,
   // which is what a session further out has. A trainer standing in the gym reads the first and
   // never needs the second.
-  const day = sourceSession?.day
-    ? deps.t?.(sourceSession.day) || sourceSession.day
-    : deps.getISODateString(start);
+  // "Upcoming" is every day from the day after tomorrow on, so it names no day: the weekday and the
+  // ISO date say which one it is.
+  const isoDay = deps.getISODateString(start);
+  let day;
+  if (sourceSession?.day === "upcoming") {
+    day = `${formatCalendarDayLabel(isoDay).weekdayShort} ${isoDay}`;
+  } else if (sourceSession?.day) {
+    day = deps.t?.(sourceSession.day) || sourceSession.day;
+  } else {
+    day = isoDay;
+  }
   const time =
     sourceSession?.timeLabel ||
     deps.formatClockFromMinutes(start.getHours() * 60 + start.getMinutes());

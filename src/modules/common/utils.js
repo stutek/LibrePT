@@ -95,7 +95,14 @@ export function formatDurationHourMin(totalSeconds) {
   const totalMin = Math.floor(Math.abs(totalSeconds) / 60);
   const hrs = Math.floor(totalMin / 60);
   const mins = totalMin % 60;
-  return `${negative ? "-" : ""}${String(hrs).padStart(2, "0")}h ${String(mins).padStart(2, "0")}m`;
+  const sign = negative ? "-" : "";
+  // From two days on, days and hours: "870h 01m" for a session a month away had to be divided to be
+  // read. Under two days stays hours, so "tomorrow at 09:00" is still counted in hours.
+  if (hrs >= 48) {
+    const days = Math.floor(hrs / 24);
+    return `${sign}${String(days).padStart(2, "0")}d ${String(hrs % 24).padStart(2, "0")}h`;
+  }
+  return `${sign}${String(hrs).padStart(2, "0")}h ${String(mins).padStart(2, "0")}m`;
 }
 
 // Inverse of formatDurationHM, for reading back a trainer-edited "HH:MM" elapsed-time value.

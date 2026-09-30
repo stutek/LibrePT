@@ -257,3 +257,14 @@
   background: var(--card-bg);
   backdrop-filter: var(--glass-blur);
 }
+
+/* The "started off schedule" dialog: start and end each carry a row of time buttons, so two side by
+   side need 570px. They stand one under the other; min-width 0 lets each shrink to the dialog. */
+.form-row.session-start-time-fields {
+  flex-direction: column;
+  align-items: stretch;
+}
+.form-row.session-start-time-fields > .form-group {
+  min-width: 0;
+  width: 100%;
+}

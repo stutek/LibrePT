@@ -82,6 +82,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 - **Consent buttons in a new client's form follow the e-mail and phone typed**; they said "not
   entered" with both filled in. An empty notes field says there are no notes, not "no health
   issues noted" under a recorded injury.
+- **Session screens:** a finished session with exercises no longer says "no programme"; the
+  off-schedule dialog fits a phone; a session a week away counts down in days, not "870h"; a session
+  days ahead names its weekday and date; "Ni se zgodil" agrees with "trening".
 - **Controls are named in the page's language for a screen reader**, and before a language is
   chosen the page declares English instead of "null".
 - **The Dates calendar marks today and the days that have sessions.**

@@ -620,7 +620,7 @@ export const sl = {
   session_start_time_early: "prezgodaj",
   session_start_time_keep: "Ohrani urnik",
   session_start_time_apply: "Prilagodi čas",
-  session_start_time_delete: "Ni se zgodila",
+  session_start_time_delete: "Ni se zgodil",
   demo_cleanup_title: "Počisti vzorčne podatke",
   demo_cleanup_desc:
     "Tvoje stranke, termini in zapisi ostanejo nedotaknjeni. Katalog vaj ohranimo, da tvoji programi še naprej delujejo.",

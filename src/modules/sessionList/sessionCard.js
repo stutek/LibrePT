@@ -6,6 +6,7 @@
 // deps: { state, t, escapeHTML, launchClipboardDirectly, sessionDayTemporal,
 //         saveToLocalStorage, rerenderSessions }
 
+import { localDateString } from "../../data/calendarDay.js";
 import { computeActiveSessionCountdown } from "../../domain/sessionClock.js";
 import { parseTimeRange } from "../../domain/timeRange.js";
 import { formatDurationHM, formatDurationHourMin, parseDurationHM } from "../common/utils.js";
@@ -106,15 +107,30 @@ export function isRunningOn(activeSession, sessionId) {
   return !!(ss && Array.isArray(ss.ids) && ss.ids.includes(sessionId));
 }
 
+// A session has a plan when it names a routine, or when a finished one was run from exercises the
+// trainer added by hand: those live only in its participants' history records for that day.
+function sessionHasPlan(b, routineName, state) {
+  if (routineName) return true;
+  if (!b.completed || !b.startDate) return false;
+  const day = localDateString(b.startDate);
+  return (state.history || []).some(
+    (log) =>
+      !log.isPlanning &&
+      b.participants.includes(log.clientId) &&
+      localDateString(log.date) === day &&
+      (log.exercises || []).some((item) => item.type === "exercise"),
+  );
+}
+
 // Readiness warnings — a session needs both a program and at least one participant.
-function buildReadinessWarningsHTML(routineName, clientCount, t) {
+function buildReadinessWarningsHTML(hasPlan, clientCount, t) {
   const pill = (label) => `
     <div class="session-warning-pill">
       <i class="fa-solid fa-triangle-exclamation"></i>
       <span>${label}</span>
     </div>`;
   const warnings = [];
-  if (!routineName) warnings.push(pill(t("program_not_defined")));
+  if (!hasPlan) warnings.push(pill(t("program_not_defined")));
   if (clientCount === 0) warnings.push(pill(t("no_members_assigned")));
   return warnings.length ? `<div class="session-warning-list">${warnings.join("")}</div>` : "";
 }
@@ -346,7 +362,11 @@ export function renderSessionCard(b, colContainer, deps) {
   const routine = state.routines.find((r) => r.id === b.routineId);
   const routineName = routine ? routine.name : "";
 
-  const warningHTML = buildReadinessWarningsHTML(routineName, clients.length, t);
+  const warningHTML = buildReadinessWarningsHTML(
+    sessionHasPlan(b, routineName, state),
+    clients.length,
+    t,
+  );
 
   // A finished session is de-emphasised rather than shown as launchable. The badge that used to say
   // so moved into the status bar at the foot: in the heading row it pushed the edit button

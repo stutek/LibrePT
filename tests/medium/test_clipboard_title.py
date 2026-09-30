@@ -377,3 +377,33 @@ def test_a_finished_session_with_no_name_says_that_it_is_finished(page, local_se
     assert names == ["finished_session"], (
         f"an unnamed record says what it is, from the dictionary: {names!r}"
     )
+
+
+def test_a_session_days_ahead_names_its_weekday_and_date(page, local_server):
+    """Two days or more ahead, the line under the name said only "Prihodnje" ("Upcoming"): the
+    trainer building Saturday's plan could not see on that screen that it was Saturday's."""
+    _mount(page, local_server)
+    page.evaluate(
+        """async () => {
+          const bar = await import(new URL('modules/session/sessionTitleBar.js', document.baseURI).href);
+          const timeline = await import(new URL('modules/sessionList/sessionTimeline.js', document.baseURI).href);
+          timeline.initSessionTimeline({
+            getState: () => ({ lang: 'sl' }), t: (key) => key, activeRouteName: () => 'sessions',
+            pushRoute: () => {}, urlFor: (name) => `/${name}`,
+          });
+          bar.initSessionTitleBar({
+            getActiveSession: () => ({
+              sourceSession: {
+                titles: ['Par'], day: 'upcoming', timeLabel: '13:30 - 14:30', location: 'Studio',
+                startDate: '2026-10-03T12:00:00.000Z',
+              },
+            }),
+            getISODateString: (d) => new Date(d).toISOString().slice(0, 10),
+            formatClockFromMinutes: () => '13:30',
+            t: (key) => (key === 'upcoming' ? 'Prihodnje' : key),
+          });
+          bar.renderSessionTitle();
+        }"""
+    )
+    under = page.locator(".clipboard-title-when").inner_text()
+    assert under == "sob. 2026-10-03 · 13:30 - 14:30 · Studio", under
