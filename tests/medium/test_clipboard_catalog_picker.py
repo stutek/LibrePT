@@ -233,3 +233,21 @@ def test_editor_catalog_button_adds_a_movement_and_returns(page, local_server):
     assert page.locator(".editor-row").count() == before + 1, (
         "the chosen movement is injected into the plan"
     )
+
+
+def test_a_movement_added_from_the_catalog_brings_no_rest_the_trainer_did_not_ask_for(
+    page, local_server
+):
+    """Two movements picked for a circuit used to leave two "Rest 60s" rows behind them: the picker
+    gave each a rest of 60 seconds, and the plan turned that into a rest row. A rest is the
+    trainer's to add, with the +Rest button."""
+    _open_editor(page, local_server)
+    rests_before = page.locator(".editor-rest-row").count()
+
+    for _ in range(2):
+        page.click(".editor-catalog-btn")
+        page.wait_for_selector("#dialog-catalog-picker[open]")
+        page.locator("#catalog-picker-mount .picker-item").first.click()
+        page.wait_for_selector("#dialog-catalog-picker[open]", state="detached")
+
+    assert page.locator(".editor-rest-row").count() == rests_before

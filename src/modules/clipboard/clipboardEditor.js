@@ -185,6 +185,18 @@ function buildCollapsedSummaryHTML(ex, modality, metric, unit, escapeHTML) {
   return `<span class="editor-row-fields-summary">${setsPart}${primaryPart}${compactLoad}</span>`;
 }
 
+// A movement typed in by hand has no catalogue entry to say it is held for time, so the trainer says
+// it here. Timed is the catalogue's own mechanism, not a second one: an isometric modality whose
+// primary metric reads "hold" (exerciseModality.js), so the card and the duration estimate treat
+// "8:00" as eight minutes exactly as they do a catalogue plank.
+function buildMeasureFieldHTML(ex, isCustom, tr, escapeHTML) {
+  if (!isCustom) return "";
+  const timed = ex.metric === "hold";
+  const option = (value, label) =>
+    `<option value="${value}"${(value === "hold") === timed ? " selected" : ""}>${escapeHTML(label)}</option>`;
+  return `<label class="editor-field"><span>${tr("measured_in", "Measured in")}</span><select class="editor-f-measure">${option("reps", tr("reps_label", "Reps"))}${option("hold", tr("metric_hold", "Hold"))}</select></label>`;
+}
+
 export function renderClipboardEditor(container, deps) {
   const {
     activeClientState,
@@ -309,6 +321,12 @@ export function renderClipboardEditor(container, deps) {
     const escapedReps = escapeHTML(reps);
     const setsField = buildSetsFieldHTML(ex, tr, escapeHTML);
     const loadField = buildLoadFieldHTML(ex, modality, unit, escapeHTML, tr);
+    const measureField = buildMeasureFieldHTML(
+      ex,
+      !(allExerciseNames || []).includes(ex.name),
+      tr,
+      escapeHTML,
+    );
     // A row just inserted/swapped/restored (isCalledOut) is already the accordion's sole expanded
     // row (editorExpandedId was forced to callout.id above) — the trainer either needs to type its
     // name right now (a blank insert, the scroll+focus logic below targets .editor-row-name) or just
@@ -323,6 +341,7 @@ export function renderClipboardEditor(container, deps) {
           <div class="editor-row-fields">
             ${setsField}
             <label class="editor-field"><span>${escapeHTML(primaryLabel)}</span><input type="text" list="${repsListId}" class="editor-f-reps" value="${escapedReps}"></label>
+            ${measureField}
             ${loadField}
             <label class="editor-field editor-field-circuit"><span><i class="fa-solid fa-layer-group"></i></span>${circuitSelect(ex)}</label>
           </div>`
@@ -509,6 +528,19 @@ export function renderClipboardEditor(container, deps) {
     // A half-typed load ("2,5,5") stays on the field, marked invalid; it is not written into a set.
     if (typeof ex.weightTarget === "number") setOnPendingLogs(ex, "weight", ex.weightTarget);
   });
+
+  // A typed-in movement is reps or timed. Changing it changes the field's label, so repaint.
+  for (const select of listEl.querySelectorAll(".editor-f-measure")) {
+    select.addEventListener("click", (e) => e.stopPropagation());
+    select.addEventListener("change", () => {
+      const ex = items[rowKeyOf(select.closest(".editor-row"))];
+      if (!ex) return;
+      const timed = select.value === "hold";
+      ex.modality = timed ? "isometric" : "strength";
+      ex.metric = timed ? "hold" : "reps";
+      commit();
+    });
+  }
 
   // ---------- fields collapse/expand: the chevron next to the name toggles that one row's
   // sets/reps/load/circuit fields only, leaving every other row's state untouched. ----------

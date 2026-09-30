@@ -495,3 +495,80 @@ def test_a_load_and_reps_typed_in_the_editor_reach_the_sets_not_yet_done(
         }"""
     )
     assert logs == [[8, 5, True], [9, 12, False], [9, 12, False]]
+
+
+# --- a movement typed in by hand can be timed -----------------------------------------------------
+
+
+def _timed_plan_item(name="Bike warm-up"):
+    return exercise_item(
+        "w1", name, setsTargetCount=1, repsTarget="8:00", metric="reps"
+    )
+
+
+def test_a_typed_in_movement_can_be_made_timed(page, local_server):
+    """A movement that is not in the catalogue has no entry to say it is held for time, so the row
+    offers the choice. Timed is the catalogue's own mechanism (isometric, metric hold)."""
+    _mount(page, local_server, [_timed_plan_item()])
+    measure = page.locator(".editor-f-measure")
+    assert measure.input_value() == "reps"
+
+    measure.select_option("hold")
+
+    page.wait_for_selector(".editor-f-measure")
+    row = page.locator(".editor-row").first
+    assert row.locator(".editor-f-measure").input_value() == "hold"
+    assert (
+        "hold" in row.locator(".editor-f-reps").locator("xpath=..").inner_text().lower()
+    )
+    page.locator(".editor-row-toggle").first.click()
+    assert row.locator(".editor-row-fields-summary").inner_text() == "S1 × 8:00"
+
+
+def test_a_catalogue_movement_does_not_offer_the_timed_choice(page, local_server):
+    _mount(page, local_server, [exercise_item("exA", "Barbell Bench Press")])
+    page.wait_for_selector(".editor-f-reps")
+    assert page.locator(".editor-f-measure").count() == 0
+
+
+def test_a_timed_typed_in_movement_counts_its_minutes_in_the_estimate(
+    page, local_server
+):
+    # A booked slot, because the meter is silent without one.
+    _mount(
+        page,
+        local_server,
+        [_timed_plan_item()],
+        source_session={
+            "timeLabel": "17:00 - 18:00",
+            "titles": ["Group Strength"],
+            "day": "today",
+        },
+    )
+    before = page.locator(".editor-plan-fit").inner_text()
+    page.locator(".editor-f-measure").select_option("hold")
+    page.wait_for_selector(".editor-f-measure")
+    after = page.locator(".editor-plan-fit").inner_text()
+    assert before.startswith("1 /"), before
+    assert after.startswith("8 /"), after
+
+
+# --- a new circuit starts without a nameless row ---------------------------------------------------
+
+
+def test_a_new_circuit_left_empty_leaves_no_nameless_row(page, local_server):
+    """A circuit exists only through its members, so the editor holds one blank row while the
+    trainer names it. Leaving the editor without a name must not keep that row."""
+    _mount(page, local_server, [exercise_item("exA", "Exercise A")])
+    _click_last_insert_bar(page, ".ins-circuit")
+    page.wait_for_selector(".editor-circuit .editor-row")
+
+    page.click("#btn-done-edit")
+    page.wait_for_selector(".clipboard-editor", state="detached")
+    page.click("#btn-session-menu")
+    page.click("#btn-edit-plan")
+    page.wait_for_selector(".clipboard-editor")
+
+    assert page.locator(".editor-row").count() == 1
+    assert page.locator(".editor-circuit").count() == 0
+    assert page.locator(".editor-row-name").first.input_value() == "Exercise A"

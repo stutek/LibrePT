@@ -282,6 +282,7 @@ export const de = {
   circuit_new: "Neuer Zirkel",
   add_to_circuit: "Übung zum Zirkel hinzufügen",
   rounds: "Runden",
+  measured_in: "Gemessen in",
   ungroup: "Zirkel auflösen",
   rest_timer: "Pausentimer",
   start_rest: "Pause starten",
@@ -762,6 +763,7 @@ export const de = {
   intake_invite_title: "Kunden einladen",
   intake_invite_lede:
     "Der Kunde trägt seine Angaben und seine Einwilligung auf seinem eigenen Telefon ein und schickt sie dir zurück. Hier wird nichts angelegt, bevor du gelesen hast, was er schickt.",
+  intake_invite_lang_label: "Sprache, in der der Kunde liest",
   intake_invite_contact_label: "Telefonnummer oder E-Mail-Adresse des Kunden",
   intake_invite_send_sms: "SMS schreiben",
   intake_invite_send_email: "E-Mail schreiben",

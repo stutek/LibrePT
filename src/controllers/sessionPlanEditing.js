@@ -148,7 +148,9 @@ export function openCatalogPicker({ slotId = null, query = "", category = "" } =
     ...pickerEmptyWays(),
     onSelect: (ex) => {
       if (slotId) swapPlanItemMovement(slotId, ex);
-      else injectExerciseIntoActivePlan(ex, { sets: 3, reps: 10, weight: 0, rest: 60 });
+      // No rest: the plan turns a rest on an exercise into a rest row behind it, and the picker
+      // shows no such field. A rest is added with +Rest.
+      else injectExerciseIntoActivePlan(ex, { sets: 3, reps: 10, weight: 0, rest: 0 });
       dialog.close();
     },
   });

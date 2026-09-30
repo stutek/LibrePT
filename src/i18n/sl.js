@@ -280,6 +280,7 @@ export const sl = {
   circuit_new: "Nov sklop",
   add_to_circuit: "Dodaj vajo v sklop",
   rounds: "Krogi",
+  measured_in: "Merjeno v",
   ungroup: "Razdruži sklop",
   rest_timer: "Časomer premora",
   start_rest: "Začni premor",
@@ -722,6 +723,7 @@ export const sl = {
   intake_invite_title: "Povabi stranko",
   intake_invite_lede:
     "Stranka izpolni svoje podatke in privolitev na svojem telefonu in ti jih pošlje nazaj. Tu se ne ustvari nič, dokler ne prebereš, kar je poslala.",
+  intake_invite_lang_label: "Jezik, v katerem stranka bere",
   intake_invite_contact_label: "Telefonska številka ali e-naslov stranke",
   intake_invite_send_sms: "Napiši sporočilo SMS",
   intake_invite_send_email: "Napiši e-pošto",

@@ -265,6 +265,7 @@ export const en = {
   circuit_new: "New circuit",
   add_to_circuit: "Add exercise to circuit",
   rounds: "Rounds",
+  measured_in: "Measured in",
   ungroup: "Break up circuit",
   rest_timer: "Rest Timer",
   start_rest: "Start Rest",
@@ -765,6 +766,7 @@ export const en = {
   intake_invite_title: "Invite a client",
   intake_invite_lede:
     "They fill in their own details and their consent on their own phone, and send it back to you. Nothing is created here until you have read what they send.",
+  intake_invite_lang_label: "Language the client reads",
   intake_invite_contact_label: "Their phone number or email address",
   intake_invite_send_sms: "Write the text message",
   intake_invite_send_email: "Write the email",
