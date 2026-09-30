@@ -44,3 +44,46 @@ def test_an_erased_client_is_gone_from_the_profile_behind_the_receipt(
     assert page.locator("#client-erase-receipt").is_visible()
     assert "Jane Doe" not in page.locator("#detail-client-name").inner_text()
     assert "Jane Doe" not in page.locator("#view-client-detail").inner_text()
+
+
+def test_a_signal_logged_in_a_session_is_in_the_drawer_when_the_session_ends(
+    page, local_server
+):
+    """Finishing a session turns its Too Hard signal into a waiting item. The drawer must show it
+    at once, not say everything is reviewed until the page is reloaded."""
+    from tests.conftest import answer_app_questions
+
+    answer_app_questions(page)
+    page.goto(local_server)
+    page.wait_for_selector("#view-clients.active")
+    # Start from an empty drawer, so that any waiting item is the one this session made.
+    page.evaluate(
+        """async () => {
+          const store = await import(new URL('data/stateStore.js', document.baseURI).href);
+          for (const update of store.getState().planUpdates || []) update.resolved = true;
+          store.saveToLocalStorage();
+          const queue = await import(new URL('data/writeQueue.js', document.baseURI).href);
+          await queue.flushWrites();
+        }"""
+    )
+    page.reload()
+    page.wait_for_selector("#view-clients.active")
+    assert page.locator(PENDING).count() == 0
+
+    page.locator('.session-card[data-session-id="s01f2e3d"]').click()
+    page.wait_for_selector("#active-session-overlay:not(.hidden)")
+    page.click("#btn-start-session")
+    page.wait_for_selector("#dialog-session-start-time[open]")
+    page.click("#btn-session-start-time-keep")
+    page.wait_for_selector("#dialog-session-start-time[open]", state="detached")
+
+    page.locator(".exercise-deck-card").first.click(force=True)
+    page.locator(".deck-action-hard").first.click()
+    page.locator("#btn-finish-session").click()
+    page.wait_for_selector("#view-clients.active")
+    page.wait_for_timeout(300)
+
+    page.locator("#btn-toggle-notifications").click()
+    assert page.locator(PENDING).count() == 1, (
+        "the drawer does not list the signal the session just produced"
+    )
