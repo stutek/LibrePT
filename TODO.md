@@ -6999,8 +6999,9 @@ pa vidi drugo.
 Dumbbell Goblet Squat 3 × 10 × 12 kg (podloga kaže »S3 × R10 × 12 kg«). Začeti, pritisniti
 »Prelahko«, zaključiti. ☰ → »Imenik strank« → SIM Nina Koleno.
 
-**Opaženo:** »ZGODOVINA ZABELEŽENIH VADB«: »Dumbbell Goblet Squat: 10, 10, 10«. Teže ni. Vrstica
-»Zadnjič« pri vzorčni stranki Jane Doe pa piše »18 kg x 10, 18 kg x 10, 18 kg x 9«. Trenerka brez
+**Opaženo:** »ZGODOVINA ZABELEŽENIH VADB«: »Dumbbell Goblet Squat: 10, 10, 10«. Teže ni. Tudi vrstica
+»Zadnjič« na naslednjem treningu te stranke piše le »10, 10, 10«. Pri vzorčni stranki Jane Doe pa
+»Zadnjič« piše »18 kg x 10, 18 kg x 10, 18 kg x 9«. Trenerka brez
 predznanja: »Teže (12 kg) ni v zgodovini. … napredek po teži ne vidim.«
 
 **Težava in vpliv:** napredek pri vaji z utežjo je teža. Iz zgodovine trener ne vidi, s koliko je
@@ -7016,6 +7017,24 @@ desnem kolenu, brez globokih počepov«, polje »Opombe« prazno. Odpreti stran 
 
 **Opaženo:** »POŠKODBE IN OMEJITVE: Bolečine v desnem kolenu, brez globokih počepov«, takoj pod tem
 »OPOMBE: Brez zabeleženih zdravstvenih težav ali posebnosti.«
+
+### 80.121 [ ] P2 — »Zamenjaj vajo« stranki z bolečim kolenom vnaprej izbere Barbell Back Squat
+
+**Scenarij in koraki:** stranka SIM Nina Koleno s »Poškodbe in omejitve: Bolečine v desnem kolenu,
+brez globokih počepov«. Na treningu pri Dumbbell Goblet Squat »Opombe« → »Prelahko – povečaj
+težo« → »Zapiši opozorilo«. Zaključiti. »Treningi, ki čakajo na pregled« → vnos stranke →
+»Razreši« → »Zamenjaj vajo (lažja ali težja različica)«.
+
+**Opaženo:** seznam »Vaje: 9« za noge je po abecedi, izbrana je prva: Barbell Back Squat. Okno ne
+omeni poškodbe. Nad seznamom piše »Nadomestna vaja — ista mišična skupina ohrani sledenje obsegu«.
+Trenerka brez predznanja je pri signalu »Bolečina ali nelagodje v sklepu« dobila isto izbiro:
+»pri stranki s poškodbo kolena in zabeleženo bolečino. Trener to lahko spregleda.«
+
+**Težava in vpliv:** en dotik na »Uveljavi in razreši« stranki, ki ne sme delati globokih počepov,
+vpiše počep s palico v program. Izbira ni trenerjeva, naredila jo je abeceda.
+
+**Predlog:** nobena vaja naj ne bo izbrana vnaprej, dokler je trener ne izbere; ob poškodbi naj
+okno pokaže njeno besedilo. Opaženo na `main` `12d0e66`, sl, 390 × 844.
 
 **Težava in vpliv:** besedilo za prazno polje »Opombe« trdi, da stranka nima zdravstvenih težav, dve
 vrstici pod njeno poškodbo. Trener, ki stran hitro preleti, lahko prebere zadnje.
