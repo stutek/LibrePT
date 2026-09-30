@@ -4193,6 +4193,26 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80148-x-p2--zam
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80149-x-p3--brez-povezave-glava-slovenske-aplikacije-napiše-offline--popravljeno-2026-09-30).
 
+### 80.150 [ ] P2 — Trening, ustvarjen s čipom »jutri«, na podlogi ostane »Jutri« tudi naslednji dan
+
+**Scenarij in koraki:** 2026-09-30 ob 23:59 »Ustvari trening«, ime »Test B«, obrazec sam izbere
+jutri 00:00–01:00, stranka »Vesna Lipnik«, »Odpri v beležki«, v oknu vabil »Končano«. Po polnoči
+(2026-10-01 00:02) trening znova odpreti s kartice na plošči, nato stran še osvežiti. Za primerjavo
+po polnoči ustvariti »Test D« za danes 00:30 in »Test C« za včeraj 23:00.
+
+**Opaženo:** glava podloge »Test B« še ob 00:02 in po osvežitvi piše »Jutri · 00:00 - 01:00«, plošča
+pa isti trening pravilno pokaže pod »četrtek 2026-10-01« z »Zamuja 00h 01m«. »Test D« ima »Danes ·
+00:30 - 01:30«, »Test C« »Včeraj · 23:00 - 23:30«. V bazi ima zapis »Test B« poleg pravilnega
+`startDate` tudi `"day":"tomorrow"`.
+
+**Težava in vpliv:** trener zvečer pripravi jutrišnji trening, naslednji dan pa podloga za današnji
+trening piše »Jutri«. Na telovadnici, kjer je glava podloge edini kraj s časom, ne ve, ali je odprl
+pravi trening.
+
+**Predlog:** dan v glavi podloge naj pove odnos do današnjega dne ob odprtju, ne do dneva, ko je bil
+trening ustvarjen — opaženo na različici `main` `6230070` (zamrznjena kopija, vrata 8093), sl,
+390 × 844.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
