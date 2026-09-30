@@ -5813,6 +5813,16 @@ odstranjena (§81.7), stran stranke pa osnutke načrtov izpusti (`!log.isPlannin
 bila preizkušena — ali zaključen trening z vajami, ki jih ni odkljukal, na strani stranke pokaže
 vse kot preskočene.
 
+**Odgovor 2026-09-30, `main` `12d0e66`, 390 × 844, sl:** da. Trening »Skupina torek« s tremi
+vajami za SIM Vera Kos. Na prvi vaji nič, na drugi »Prelahko«, na tretji nič, nato »Zaključi
+vadbo«. Stran stranke: »Dumbbell Goblet Squat PRESKOČENO«, »Dumbbell Bench Press: 10, 10, 10«,
+»Barbell Row PRESKOČENO«. Odprta kartica vaje ponudi le »Časomer premora«, »Prelahko«,
+»Pretežko« in »Opombe«. Dotik na »S3 × R10 × 12 kg« ne naredi ničesar. Premik na naslednjo
+vajo prejšnje ne označi: ta spet piše »Prihodnje«. **Vaje, ki jo je stranka naredila po načrtu,
+trener torej nima s čim zapisati kot opravljene; edini zapis je signal »Prelahko«.** Trener
+brez predznanja je iskal »serija opravljena« in dejansko težo; po treh poskusih je zapisal:
+»V telovadnici bi nazaj na zvezek.«
+
 ### 80.7 [x] P2 — Prvi prikaz novega termina pokaže 1970-01-01 — popravljeno 2026-09-27
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#807-x-p2--prvi-prikaz-novega-termina-pokaže-1970-01-01--popravljeno-2026-09-27).
@@ -6797,6 +6807,58 @@ vaj ali napačno presodi, koliko časa ostane.
 **Predlog:** sprejeti zapisi časa naj dajo isto oceno trajanja; primerjati »2:30«
 in »150« pri več serijah, skupaj s počitki. Opaženo na objavljeni `8b2ce80`, sl,
 390 × 844, Chrome CDP; brez prestreženih napak in brez pregledovanja kode.
+
+### 80.110 [ ] P2 — »Shrani kot rutino« pozabi težo, številke v poljih so odrezane, polja nimajo oznak
+
+**Scenarij in koraki:** prazna aplikacija, trening »Skupina torek« za SIM Vera Kos. V »Uredi načrt«
+iz kataloga dodati Dumbbell Goblet Squat (3 × 10, 12 kg), Dumbbell Bench Press in Barbell Row.
+Začeti in zaključiti trening. ☰ → »Imenik strank« → SIM Vera Kos → pod »ZGODOVINA ZABELEŽENIH
+VADB« pritisniti »Shrani kot rutino«.
+
+**Opaženo:** okno »Uredi rutino« ima ime »Prazen načrt, brez rutine 2026-09-30«. Pri vseh treh
+vajah je teža 0, tudi pri počepu, ki je bil načrtovan z 12 kg. Polja za serije, ponovitve, težo
+in premor so široka 50 pik: namesto »10« se vidi »1«, namesto »60« »6« (posnetek zaslona).
+Nad polji ni nobene oznake. Napis »Serije«, »pon.«, »kg« in »Premor« je le namig v praznem
+polju, zato izpolnjeno polje ne pove, kaj pomeni.
+
+**Težava in vpliv:** trener shrani program, ki ga je stranka pravkar delala, in dobi rutino brez
+tež. Če tega ne opazi, naslednja stranka dobi počep z 0 kg. Ne vidi, katera številka je
+ponovitev in katera premor, in ne vidi celih številk.
+
+**Predlog:** rutina naj prevzame težo iz načrta. Ime naj bo ime treninga, ne »Prazen načrt, brez
+rutine«. Polja naj pokažejo cele številke in stalno oznako. Opaženo na `main` `12d0e66`
+(zamrznjena kopija na lokalnem strežniku), sl, 390 × 844; najprej opazil trener-podagent.
+
+### 80.111 [ ] P2 — Nova stranka: gumba pravita »E-pošta ni vpisana« in »Telefon ni vpisan«, čeprav sta vpisana
+
+**Scenarij in koraki:** »Ustvari trening« → v polje »Poišči stranko po imenu...« vpisati
+»SIM Vera Kos« → »Dodaj »SIM Vera Kos« kot novo stranko«. Vpisati e-pošto in telefon, nato
+označiti »Stranka je podpisala privolitev (hramba podatkov in sinhronizacija v oblak)«.
+Tipkati v polje »E-pošta« in ga zapustiti.
+
+**Opaženo:** pod privolitvijo sta sivi, onemogočeni gumbi z napisom »E-pošta ni vpisana« in
+»Telefon ni vpisan«. Napisa se ne spremenita, ko sta polji izpolnjeni, ne ob tipkanju in ne
+ob izhodu iz polja.
+
+**Težava in vpliv:** trener prebere, da e-pošte ni vpisal, čeprav jo je. Ne ve, ali je polje
+sprejelo naslov in ali bo obrazec za privolitev lahko poslal.
+
+**Predlog:** gumba naj se odzoveta na vpisani naslov in številko. Če obrazca pred shranjevanjem
+stranke ni mogoče poslati, naj to piše: na primer »Obrazec pošlješ, ko stranko shraniš«.
+Opaženo na `main` `12d0e66`, sl, 390 × 844.
+
+### 80.112 [ ] P3 — Gumb »Ni se zgodila« v oknu, ki govori o »treningu«
+
+**Scenarij in koraki:** trening za danes ob 18:00 začeti ob 12:30 z »Začni trening«.
+
+**Opaženo:** okno »Trening se je začel izven urnika« ponudi »Ni se zgodila«, »Ohrani urnik« in
+»Prilagodi čas«. »Trening« je moškega spola, gumb je ženskega. Trener-podagent je zapisal:
+»ne vem, kaj se ni zgodilo: vadba?«
+
+**Težava in vpliv:** trener se ustavi pri gumbu, ki odstrani termin. Pri gumbu z nepovratno
+posledico ne sme ugibati, na kaj se nanaša.
+
+**Predlog:** »Ni se zgodil« ali »Trening ni bil«. Opaženo na `main` `12d0e66`, sl, 390 × 844.
 
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
