@@ -902,15 +902,22 @@ def _undrawn(taps):
     ]
 
 
+def _guide_idle(page):
+    """The guide is done with whatever it was doing — a rebuild after Back, a demonstration — once
+    it lets the viewer move on again. Waited for, not slept on: under a full gate a fixed pause
+    tapped Show me in the moment it was being taken away. Show me is disabled exactly while the guide
+    is demonstrating (walkthroughOverlay.js), which Next is not: Next also waits for the step."""
+    page.wait_for_function(
+        "() => !document.querySelector('#walkthrough-show')?.disabled", timeout=15_000
+    )
+
+
 def test_every_tap_show_me_performs_is_drawn_by_the_hand_first(page, local_server):
     """Reported 2026-08-31: "show me fills both number and mail, never animates the x click", and on
     another card "show me shows no click animation". The hand is what makes a demonstration a
     demonstration, so a tap the player performs without the hand having travelled to the control and
-    pulsed there is the guide doing something behind the viewer's back.
-
-    Walked forward through the whole story, and then BACKWARD one step at a time with Show me on
-    each card, because Back is what makes the guide rebuild the ground under a step by replaying the
-    steps before it."""
+    pulsed there is the guide doing something behind the viewer's back. Walked forward here; each
+    chapter walked BACK is its own test below."""
     page.add_init_script(TAP_RECORDER)
     _open_story(page, local_server)
 
@@ -922,30 +929,32 @@ def test_every_tap_show_me_performs_is_drawn_by_the_hand_first(page, local_serve
     _walk_the_whole_story(page, on_step=collect)
     taps.extend(_drain_taps(page))
     assert taps, "the recorder saw no tap: it is not watching the player"
-    forward = _undrawn(taps)
+    undrawn = _undrawn(taps)
+    assert not undrawn, "taps without the hand:\n" + "\n".join(undrawn)
 
-    backward = []
-    for chapter in page.evaluate(CHAPTER_INDEX):
-        _open_story(page, local_server, chapter=chapter)
-        _, last = _step_numbers(page)
-        while _step_numbers(page)[0] < last:
-            _do_step(page)
-        _drain_taps(page)
-        while _step_numbers(page)[0] > 1:
-            if not page.locator(BACK).is_visible():
-                break
+
+@pytest.mark.parametrize("chapter", _offered_chapter_ids())
+def test_walking_back_every_tap_show_me_makes_is_drawn(page, local_server, chapter):
+    """Back is what makes the guide rebuild the ground under a step, by replaying the steps before
+    it — and those replays were the taps made without the hand. One chapter per test, so the gate's
+    workers share the walk."""
+    page.add_init_script(TAP_RECORDER)
+    _open_story(page, local_server, chapter=chapter)
+    _, last = _step_numbers(page)
+    while _step_numbers(page)[0] < last:
+        _do_step(page)
+    _drain_taps(page)
+
+    undrawn = []
+    while _step_numbers(page)[0] > 1 and page.locator(BACK).is_visible():
+        page.locator(BACK).click()
+        _guide_idle(page)
+        here = _step_numbers(page)[0]
+        _show_me_if_offered(page)
+        _guide_idle(page)
+        # Show me on a card walked back to can carry the guide on; the walk goes back to it.
+        if _step_numbers(page)[0] > here and page.locator(BACK).is_visible():
             page.locator(BACK).click()
-            # The rebuild runs as the card arrives, and Show me after it.
-            page.wait_for_timeout(800)
-            here = _step_numbers(page)[0]
-            _show_me_if_offered(page)
-            page.wait_for_timeout(800)
-            # Show me on a card walked back to can carry the guide on; the walk goes back to it.
-            if _step_numbers(page)[0] > here and page.locator(BACK).is_visible():
-                page.locator(BACK).click()
-                page.wait_for_timeout(800)
-            backward += [f"{chapter}/{line}" for line in _undrawn(_drain_taps(page))]
-    backward = sorted(set(backward))
-    assert not forward + backward, "taps without the hand:\n" + "\n".join(
-        forward + backward
-    )
+            _guide_idle(page)
+        undrawn += _undrawn(_drain_taps(page))
+    assert not undrawn, "taps without the hand:\n" + "\n".join(sorted(set(undrawn)))

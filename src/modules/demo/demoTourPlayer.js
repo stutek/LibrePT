@@ -101,6 +101,9 @@ async function waitForBoxToSettle(target, wait) {
   }
 }
 
+// How many times the hand goes back to a control that moved while it travelled.
+const HAND_RETRIES = 3;
+
 /** Whether the hand is over the control now — the last check before the tap. */
 function handIsOver(hand, target) {
   const x = Number.parseFloat(hand.style.getPropertyValue("--hand-x"));
@@ -294,9 +297,16 @@ export async function performStep(
   if (hand) {
     await waitForBoxToSettle(target, wait);
     await pointAndPress(hand, target, wait, travelMs, pace.tapLeadMs);
-    // The control can still move while the hand travels (a slow phone finishing a layout). The tap
-    // is never sent to a place the hand is not: it goes back and presses again first.
-    if (isOnScreen(target) && !handIsOver(hand, target)) {
+    // The control can still move while the hand travels (a slow phone finishing a layout, a card
+    // sliding open). The tap is never sent to a place the hand is not: it waits for the control to
+    // stand still and presses again, a few times at most, so a control that never stops cannot hold
+    // the step up.
+    for (
+      let retry = 0;
+      retry < HAND_RETRIES && isOnScreen(target) && !handIsOver(hand, target);
+      retry += 1
+    ) {
+      await waitForBoxToSettle(target, wait);
       await pointAndPress(hand, target, wait, travelMs, pace.tapLeadMs);
     }
   }
