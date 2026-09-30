@@ -80,3 +80,24 @@ def test_a_note_logged_offline_is_still_there_after_a_restart(page, local_server
     assert any("no signal down here" in note for note in _notes_on_review(page)), (
         "the note typed offline did not survive the restart"
     )
+
+
+def test_a_static_page_opens_while_the_worker_controls_the_app(page, local_server):
+    """The PREVIEW badge and the privacy links open real .html pages. The worker answers a
+    navigation with the app, so these pages must be let through, not shown as 'not found'."""
+    page.goto(local_server)
+    page.wait_for_selector(".session-card")
+    page.evaluate("() => navigator.serviceWorker.ready.then(() => true)")
+    page.reload()  # from here on the worker controls the page
+    for name in ("preview.html", "privacy.html", "consent-form-sl.html"):
+        page.goto(local_server + name)
+        assert page.locator("#view-not-found.active, .not-found").count() == 0, name
+        assert page.locator("main, article, h1").first.is_visible(), name
+        assert page.locator("#session-list, .session-card").count() == 0, name
+
+
+def test_a_static_page_opens_with_no_network(page, local_server):
+    _install_then_go_offline(page, local_server)
+    page.goto(local_server + "preview.html")
+    assert page.locator("#session-list, .session-card").count() == 0
+    assert "Preview" in page.title()

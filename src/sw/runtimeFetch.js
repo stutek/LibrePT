@@ -25,6 +25,16 @@ self.swRuntimeFetch = (() => {
     });
   }
 
+  // The generated documentation pages (privacy notice, consent forms, preview notice, ...) are real
+  // files, not app routes. They are the .html entries of the precache list other than index.html, so
+  // the list stays the one place that names them. A navigation to one goes through the network-first
+  // branch below like any other file, instead of being answered with the app.
+  function isStaticPage(url) {
+    const name = url.pathname.split("/").pop();
+    if (!name.endsWith(".html") || name === "index.html") return false;
+    return self.swCacheManifest.ASSETS.includes(`./${name}`);
+  }
+
   function handleFetch(event) {
     const request = event.request;
     if (request.method !== "GET") return;
@@ -42,7 +52,7 @@ self.swRuntimeFetch = (() => {
     if (url.origin === self.location.origin) {
       // Navigations resolve to the SPA shell so a clean deep-link URL boots the app, which then
       // resolves the route client-side (or shows the in-app not-found view for an unknown one).
-      if (request.mode === "navigate") {
+      if (request.mode === "navigate" && !isStaticPage(url)) {
         event.respondWith(
           fetch("./index.html", { cache: "no-store" })
             .then((response) => putInCache(new Request("./index.html"), response))
