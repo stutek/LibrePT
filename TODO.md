@@ -7612,3 +7612,84 @@ Last green CI run (36063598211): 20 min. Stage 3 alone is 12 min: e2e 675s, demo
 6. **[ ] Low priority: the demo task is still the longest in local Stage 3** (331s against e2e
    292s in the gate after item 2), so any change to e2e does not shorten the stage until item 5
    does.
+
+## 92. [ ] The peek gesture becomes an L, the deck holds one session, and the demo shows a drag
+
+Ruled by Simon 2026-09-30, after a red-team reading of the three proposals. All three are to be
+built. What the gesture is today: `modules/clipboard/planPeek.js` pulls the live plan aside on a
+sideways drag (the "blanket"), and a RELEASE past 70 % of the screen width
+(`COMMIT_PCT`) opens the plan it uncovered. So reading the previous session properly and leaving
+the current one are the same movement, and the widest look (`MAX_PULL_PCT`, 85 %) can only be taken
+from inside the state where letting go navigates.
+
+**Simon's three rulings, verbatim in substance:**
+
+1. Sideways uncovers; only a second, upward stroke opens ("obrnjena črka L"). The same, mirrored,
+   for the next session.
+2. Focus means *the previous session replaces the current session's cards on the screen* — what
+   releasing does today.
+3. For the peek, the past session is aligned so that the exercise with the same name sits level
+   with the exercise now in focus, when there is one. This is Simon's answer to the objection
+   below, and a better one than the answer proposed: it needs no second rendering of last time's
+   numbers.
+
+**The objection it answers.** Taking the previous session out of the vertical deck costs the
+trainer "what did they lift last time", which is the number read most often on the gym floor and is
+one scroll away today. Aligning the peeked sheet puts it beside the current exercise instead, so
+the vertical axis can be emptied without that loss.
+
+**A defect the removal also fixes, read from the code and not measured:** the past cards carry no
+`data-plan-index`, so when the trainer scrolls up into them `cardAt` in
+`modules/clipboard/deckScrollFocus.js` matches no card and returns the first one. Looking back
+therefore moves the active exercise to the first of the session.
+
+**Correction to the proposal:** there is nothing "future" in the deck to remove. `isFutureSession`
+(`modules/clipboard/exerciseDeckOfCards.js`) only marks the cards of the open session when that
+session is a later day. Only the past block leaves.
+
+### 92.1 [ ] The L: sideways looks, up opens
+
+`planPeek.js` after the axis locks to x (8px, `LOCK_PX`) already captures the pointer, so vertical
+movement from that moment on is free to carry meaning and cannot be confused with the deck's own
+scroll. A release with no upward stroke always springs back.
+
+- Opening asks for both: a horizontal pull of at least a quarter of the width, and an upward stroke
+  of at least 64px measured from the DEEPEST point of the horizontal pull, not from where the
+  press began.
+- The horizontal offset is pinned at its deepest value while the finger travels up, so the plan
+  does not slide back during the second stroke.
+- `is-release-ready` is renamed `is-open-ready`: a class named for releasing, on a gesture that no
+  longer opens on release, is a lie in the code. It now turns on as soon as an openable neighbour is
+  uncovered at all, not at a distance threshold.
+- Wording: `plan_peek_release_open` / `plan_peek_release_create` are replaced by
+  `plan_peek_up_open` / `plan_peek_up_create` in sl, en and de — the old keys are deleted, since a
+  step that names a control names what the control says.
+- Tests: `tests/medium/test_plan_peek.py` (the threshold, the two open cases, the spring-back, the
+  started-session refusal) and `tests/e2e/test_plan_peek_open.py`.
+
+### 92.2 [ ] The deck holds one session, and the peek is aligned to the exercise in focus
+
+- Out of `exerciseDeckOfCards.js`: `buildPastExerciseItems`, the `PastDeckCard` branch,
+  `pastExpanded` and `expandedPastId`, with `pastDeckCard.js` deleted and the review panel in
+  `activeSessionOverlayView.js` with it. `exerciseDeckOfCards.css` and `themes/spreadsheet.css`
+  lose their `.past-session` rules, and the nine tests that select
+  `.exercise-deck-card:not(.past-session)` drop a qualifier that can no longer match.
+- Alignment: `planSheet.js` marks each exercise row with its normalised name,
+  `planPeekController.js` finds the row matching the card in focus and offsets the sheet by one
+  custom property (`--peek-align`), the same carve-out `--plan-pull` already uses. No match, no
+  offset.
+- `docs/SRC_MODULES.md` loses `pastDeckCard.js` in the same change.
+
+### 92.3 [ ] The demo shows a press, a hold and a drag at once
+
+`demoTourPlayer.js` can only tap, type, pick a file and point; `demoHand.js` can only move and
+pulse. Neither can show a gesture, so the L would ship undiscoverable — the walkthrough is the only
+place a trainer can learn it.
+
+- A new act in `interactWith`'s vocabulary, declared by the step the way `enter` and `choose` are:
+  a pointer sequence (down, moves, up) on the blanket with one `pointerId`.
+- A hand that stays pressed and travels along the path, rather than arriving and pulsing.
+- New steps in `gymFloorTour.js`: a quick look back, a switch back, and a switch forward. Each
+  keeps the file's rule that the expectation is a behavioural claim.
+- To check before writing: the tour's session must not be started, or `canOpen` refuses to leave it
+  and the switch steps cannot pass.
