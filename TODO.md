@@ -6838,6 +6838,20 @@ Na istem zaslonu opaženo še: stranka, ki je bila preimenovana iz »Nova strank
 ima v imeniku še vedno začetnici »NS«, torej začetnici starega imena. (Preimenovanje je opravil prejšnji
 zagon; sam sem videl izid v imeniku.)
 
+**Stanje 2026-09-30 — čaka na Simona, ker predlog nasprotuje tvojemu pravilu.** Obrazci od 2026-09-17
+pišejo v bazo med tipkanjem, in isti dan si odločil: »A new record exists from the first typed
+character. An empty required field is written as a placeholder ("New client", "New exercise", "New
+routine", 3 sets) — no alert, no refusal.« Zato okna ne popravljam: opažanje je posledica tega
+pravila, ne napake v izvedbi. Odprto vprašanje zate je ožje: ali sme trener zapustiti obrazec z
+neimenovano stranko **brez besede**. Tri poti, brez zavrnitve shranjevanja:
+1. ime ostane obvezno le za prikaz — vrstica v imeniku brez imena je označena (»brez imena«), da jo
+   trener najde in dopolni;
+2. polje že ob odprtju kaže podomestek kot vrednost, tako da trener vidi, kaj bo shranjeno;
+3. pravilo se zoži: podomestek velja za vse razen imena, ime pa zadrži zapiranje z besedilom pri
+   polju, kot ga ima uvodni obrazec (»Izpolni to polje.«).
+Začetnice, ki ostanejo »NS« po preimenovanju, so navadna napaka in ne čakajo na nič; popravljene bodo
+posebej.
+
 ### 80.106 [ ] P3 — Vprašanje pred zaključkom treninga šteje čas v minutah: »še približno 3812 minut«
 
 **Scenarij in koraki:** ustvari trening za čez dva dni (»Vecerna vadba«, 2026-10-02, 18:00 - 19:00),
