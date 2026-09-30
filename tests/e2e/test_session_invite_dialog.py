@@ -3,6 +3,8 @@
 # client self-subscription) offers a "Send calendar invites" dialog for newly-assigned
 # participants, and re-saving the same assignment must not re-prompt.
 
+from urllib.parse import unquote
+
 from playwright.sync_api import expect
 
 
@@ -127,3 +129,42 @@ def test_resaving_unchanged_participants_does_not_reopen_invite_dialog(
     page.click("#btn-setup-open")
     page.wait_for_timeout(300)
     expect(dialog).not_to_be_visible()
+
+
+def test_the_invite_is_written_in_the_language_the_client_has_on_record(
+    page, local_server
+):
+    """A client whose consent form language is English reads an English invite and an English
+    reply page, although the trainer works in Slovenian. The dialog itself stays Slovenian."""
+    page.goto(f"{local_server}?lang=sl")
+    page.wait_for_selector("#view-clients.active")
+    page.evaluate(
+        """async () => {
+          const store = await import(new URL('data/stateStore.js', document.baseURI).href);
+          const jane = store.getState().clients.find((c) => c.id === 'c1a9f0e2');
+          jane.email = 'jane@example.com';
+          jane.phone = '+38640111222';
+          jane.gdprConsent = { ...(jane.gdprConsent || {}), formLang: 'en' };
+          store.saveToLocalStorage();
+          const queue = await import(new URL('data/writeQueue.js', document.baseURI).href);
+          await queue.flushWrites();
+        }"""
+    )
+    _create_session_with_participants(
+        page, local_server, [JANE], "Jutranja vadba", query="?lang=sl"
+    )
+
+    dialog = page.locator("#dialog-session-invite")
+    expect(dialog).to_be_visible()
+    expect(dialog.locator(".modal-cancel")).to_have_text("Končano")
+    row = dialog.locator(".session-invite-row", has_text="Jane Doe")
+    mail = row.locator(".session-invite-send-btn").get_attribute("href")
+    sms = row.locator(".session-invite-sms-btn").get_attribute("href")
+
+    mail = unquote(mail)
+    assert "Training session: Jutranja vadba" in mail
+    assert "Hi Jane Doe," in mail
+    assert "Let me know if you can make it:" in mail
+    assert "lang=en" in mail and "lang=sl" not in mail
+    sms = unquote(sms)
+    assert "lang=en" in sms and "lang=sl" not in sms

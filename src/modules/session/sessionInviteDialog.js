@@ -29,6 +29,7 @@ import {
 import { inviteExpiresAt } from "../../domain/inviteExpiry.js";
 import { occurrenceCalendarFields } from "../../domain/sessionSeries.js";
 import { translateMarkup } from "../../i18n/domMappings.js";
+import { dictionaryFor, isSupportedLang } from "../../i18n/index.js";
 import { closeModal, openModal, renderMarkupOnce } from "../common/dom.js";
 import { downloadFile } from "../common/download.js";
 import { buildEventLink } from "../common/eventTransports.js";
@@ -197,11 +198,28 @@ function appUrl() {
   return new URL(".", new URL("../../", import.meta.url)).toString();
 }
 
-// The reply page speaks the language of the invitation that carried the link, which is the app's.
+// The language the CLIENT reads: the one their consent form was filled in, else the app's. The
+// invitation text, the text message and the reply page are all written for the client, so all three
+// use it; the dialog's own words stay in the trainer's language.
+function clientLang(client) {
+  const formLang = client.gdprConsent?.formLang;
+  return isSupportedLang(formLang) ? formLang : document.documentElement.lang;
+}
+
+// A translator for the client's language. The trainer's own `t` where the two languages are the same,
+// so a missing key falls back exactly as it does everywhere else.
+function clientTranslator(client, t) {
+  const lang = clientLang(client);
+  if (!isSupportedLang(lang) || lang === document.documentElement.lang) return t;
+  const dictionary = dictionaryFor(lang);
+  return (key) => dictionary[key];
+}
+
+// The reply page speaks the language of the invitation that carried the link, which is the client's.
 // Without it the page followed the client's phone, and a Slovenian invite opened an English page.
-function replyPageUrl() {
+function replyPageUrl(client) {
   const url = new URL(appUrl());
-  const lang = document.documentElement.lang;
+  const lang = clientLang(client);
   if (lang) url.searchParams.set("lang", lang);
   return url.toString();
 }
@@ -239,7 +257,7 @@ function inviteEmailBody(client, sessionInfo, replyLink, t) {
 // One click both downloads the .ics (so the trainer has a file to attach) and, via the anchor's own
 // href, opens the device's mail client on a prefilled compose — mirrors the consent-email button in
 // clientsView.js, the app's one other mailto precedent.
-function buildEmailInviteButton(client, sessionInfo, replyLink, t) {
+function buildEmailInviteButton(client, sessionInfo, replyLink, t, clientT) {
   const btn = document.createElement("a");
   btn.className = "btn secondary-btn session-invite-send-btn";
   btn.textContent = t("session_invite_send") || "Send invite";
@@ -252,9 +270,9 @@ function buildEmailInviteButton(client, sessionInfo, replyLink, t) {
   }
 
   const subject = encodeURIComponent(
-    `${t("session_invite_subject") || "Training session"}: ${sessionInfo.sessionName}`,
+    `${clientT("session_invite_subject") || "Training session"}: ${sessionInfo.sessionName}`,
   );
-  const body = encodeURIComponent(inviteEmailBody(client, sessionInfo, replyLink, t));
+  const body = encodeURIComponent(inviteEmailBody(client, sessionInfo, replyLink, clientT));
   btn.href = `mailto:${encodeURIComponent(client.email)}?subject=${subject}&body=${body}`;
   btn.title = `${t("session_invite_send_to") || "Send invite to"} ${client.email}`;
   btn.addEventListener("click", () => {
@@ -302,7 +320,7 @@ function recurrenceFieldsFor(sessionInfo) {
  *  SMS cannot carry the .ics, so email keeps the calendar file and the text carries the link a client
  *  is far more likely to answer. Returns null where the client has no number, so most rows stay a
  *  single button rather than growing a dead one. */
-function buildSmsInviteButton(client, sessionInfo, replyLink, t) {
+function buildSmsInviteButton(client, sessionInfo, replyLink, t, clientT) {
   if (!client.phone || !replyLink) return null;
 
   const sms = document.createElement("a");
@@ -310,7 +328,7 @@ function buildSmsInviteButton(client, sessionInfo, replyLink, t) {
   sms.textContent = t("session_invite_send_sms") || "Text it";
   // `?&body=` is the shape both iOS and Android honour — the same form eventTransports.js uses.
   sms.href = `sms:${encodeURIComponent(client.phone)}?&body=${encodeURIComponent(
-    `${t("session_invite_sms_text") || "Training session"}: ${sessionInfo.sessionName} — ${replyLink}`,
+    `${clientT("session_invite_sms_text") || "Training session"}: ${sessionInfo.sessionName} — ${replyLink}`,
   )}`;
   sms.addEventListener("click", () => {
     rememberOrganizer();
@@ -320,7 +338,8 @@ function buildSmsInviteButton(client, sessionInfo, replyLink, t) {
 }
 
 function buildInviteRow(client, sessionInfo, t) {
-  const replyLink = buildEventLink(inviteEventFor(client, sessionInfo), replyPageUrl());
+  const replyLink = buildEventLink(inviteEventFor(client, sessionInfo), replyPageUrl(client));
+  const clientT = clientTranslator(client, t);
   const row = document.createElement("div");
   row.className = "session-invite-row card";
 
@@ -328,9 +347,9 @@ function buildInviteRow(client, sessionInfo, t) {
   name.className = "session-invite-name";
   // Two clients with one name get one row each; the alias is what tells the trainer which is which.
   name.textContent = clientDisplayName(client);
-  row.append(name, buildEmailInviteButton(client, sessionInfo, replyLink, t));
+  row.append(name, buildEmailInviteButton(client, sessionInfo, replyLink, t, clientT));
 
-  const sms = buildSmsInviteButton(client, sessionInfo, replyLink, t);
+  const sms = buildSmsInviteButton(client, sessionInfo, replyLink, t, clientT);
   if (sms) row.appendChild(sms);
   return row;
 }
