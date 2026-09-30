@@ -6165,6 +6165,11 @@ filtra ostane angleška. Preizkus naj v slovenščini zahteva, da noben gumb fil
 vsakem jeziku, tako v obrazcu za vajo kot na čipih izbirnika. Popravek je pripravljen v glavi,
 ne v drevesu: ključi `muscle_*` in `equipment_*` v treh slovarjih, vrednost filtra ostane angleška.
 
+**Še dve angleški besedili na istih zaslonih, opaženi na objavljeni `8b2ce80` (2026-09-30):** kartica
+rutine na zaslonu »Rutine« skrajša seznam vaj z »+2 more«, opisi vzorčnih rutin pa so angleški
+(»Strength-focused upper body session prioritizing compound presses and rows.«). Prvo je besedilo
+vmesnika in sodi v isti popravek; drugo je vzorčni podatek.
+
 ### 80.55 [x] P3 — Kartica treninga pravi samo »Nedoločen«, trener pa to bere kot stanje — popravljeno 2026-09-29
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8055-x-p3--kartica-treninga-pravi-samo-nedoločen-trener-pa-to-bere-kot-stanje--popravljeno-2026-09-29).
