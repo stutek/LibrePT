@@ -8308,6 +8308,21 @@ Next step: read what `launchClipboardDirectly` does when a session is already op
 refuses, asks, or silently returns — and make the forward step open a scheduled neighbour the same
 way the backward step opens a record.
 
+**Stanje 2026-09-30 19:06 (librept-02): ne ponovi se.** `launchClipboardDirectly` odprtega treninga
+ne zavrne: `startWorkoutSession` vedno zamenja aktivni trening. Po zgornjih korakih (demo podatki,
+zamrznjena ura testov, 390×844, poteza s krožne kartice) prva poteza nazaj z današnjega »Group
+Strength & Conditioning« odpre zapis iz zgodovine `h010f2e3` (2026-07-20), ne vrstice serije. Korak
+naprej od tam odpre shranjeni večer serije `ss081326`. Še en korak naprej odpre »Core & Stability«
+`s12f2e3d`. Oba koraka sta izmerjena tudi z začetkom na sredini prve kartice. Test
+`test_the_mirrored_stroke_walks_forward_again_through_both_kinds_of_session` v
+`tests/e2e/test_plan_peek_open.py` ta dva koraka drži. Napaka je bila torej izmerjena v drugem
+stanju, verjetno v vodenem ogledu (`demo=tour`), kjer plast ogleda lahko prestreže potezo. **Naslednji
+korak:** librept-69 ponovi meritev in zapiše, ali je bil ogled odprt.
+
+Opažanje ob tem: naslov vrstice serije pravi »Yesterday · 18:00« za večer 2026-08-13, šest dni
+pred zamrznjenim »danes«. `sessionSeriesSeed.js` shranjenim večerom da `day: "yesterday"` kot grobo
+oznako za vsak pretekli dan, vrstica pod planom pa pravi 2026-08-13.
+
 ### 92.6 [ ] Leaving a session by the peek throws away what was logged in it
 
 **Found 2026-09-30, the same way.** The walkthrough logged Too Easy on the first participant, then
