@@ -210,6 +210,10 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
   [TODO_ARCHIVE.md](TODO_ARCHIVE.md), and open subsections stay behind. Every Markdown file
   carries frontmatter, every knowledge directory an `INDEX.md`, and concepts link to each other.
   Navigate by that graph rather than grepping for a concept.
+- **Read the skill before doing work it covers** — [.agents/skills/INDEX.md](.agents/skills/INDEX.md)
+  lists them, and they bind every agent, not the one whose directory they happen to sit in. A skill
+  kept in `.claude/` or `.gemini/` is invisible to the others: one was, and the agent that could not
+  read it left a browser running for three and a half hours doing what that skill already prevents.
 - Check [agent_tools/INDEX.md](agent_tools/INDEX.md) before improvising, and ask first whether the
   thing is a TEST. A script becomes a tool when it will run again, fails silently otherwise, and is
   cheap and deterministic — then it ships complete and gates something in CI.

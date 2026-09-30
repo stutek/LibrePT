@@ -11,7 +11,15 @@ Thumbs.db
 # Cache and local databases
 .claude/
 .gemini/
-.agents/
+# Everything an agent keeps for itself stays local — except the skills, which are the point of the
+# directory: a skill every agent must read before doing the work it covers cannot live where only
+# one agent can see it. `.claude/` held the exploratory-test skill until 2026-09-30, so Codex and
+# Gemini could not read it, and a Codex session left a headless browser running for three and a half
+# hours because the watchdog that skill already had was invisible to it.
+.agents/*
+!.agents/skills/
+# The skill's own runtime state: a throwaway browser profile, wiped at every start.
+.agents/skills/*/.session/
 *.log
 __pycache__/
 *.pyc
