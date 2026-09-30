@@ -1,6 +1,7 @@
 # tests/medium/test_sessions_overlap_lanes.py
 # Sessions that overlap in time sit side by side on the board, the way a calendar shows them, instead
-# of stacking as if one followed the other (TODO 1.3). The lane arithmetic is unit-tested in
+# of stacking as if one followed the other — which read as a day with twice as many hours in it, and
+# hid that two sessions want the same trainer at once. The lane arithmetic is unit-tested in
 # tests/unit_js/domain/overlapLanes.test.mjs; this file pins what the trainer SEES: boxes.
 #
 # Mounted on SESSIONS_STUB's board with the sessions replaced by a known set, so no seeded evening
