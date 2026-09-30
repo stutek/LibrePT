@@ -7148,6 +7148,26 @@ datum 6102.
 kako se piše. Nikoli naj ne shrani drugega datuma brez besede (isto načelo kot zaprta §80.59).
 Opaženo na `main` `12d0e66`, sl, 390 × 844.
 
+### 80.128 [ ] P2 — Prazna slovenska aplikacija predlaga angleška imena treningov in krajev
+
+**Scenarij in koraki:** svež brskalnik, `?lang=sl`, »Začni s prazno aplikacijo« (vzorčni podatki
+nikoli naloženi). Trener vpiše treninga »Moč« in »Moč A« in kraj »Studio«. Nato »Ustvari trening« in
+dotik polja »Izberi ali vpiši ime treninga ...«.
+
+**Opaženo:** seznam predlogov imena: »Morning Strength«, »Hypertrophy Upper«, »Full Body
+Conditioning«, »Cardio & Core«, »Athletic Performance«, »Mobility & Recovery«, »Lower Body Power«,
+»Personal Training 1-on-1«, šele nato »Moč« in »Moč A«. Predlogi kraja: »Trib gym base«,
+»playground outside«, »city park«, »Studio A«, »Main Gym Floor«, »Client Home Studio«, nato
+»Studio«. Zaprta §46.4 je prevedla vzorčne podatke; tu vzorca ni, besede so vseeno tam.
+
+**Težava in vpliv:** trener v slovenski aplikaciji dobi osem angleških imen pred svojim. Svoj
+»Moč« najde na devetem mestu. Kraja »Trib gym base« in »city park« nista njegova in ga zmedeta,
+ali je aplikacija pomešala njegove podatke s tujimi.
+
+**Predlog:** v prazni aplikaciji naj predlogi vsebujejo le imena in kraje, ki jih je trener že
+vpisal; ali pa naj bodo vzorčni predlogi v jeziku aplikacije in za trenerjevimi. Opaženo na `main`
+`12d0e66`, 390 × 844.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
