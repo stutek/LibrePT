@@ -6566,6 +6566,24 @@ imeniku poleg resničnih strank, zato ne ve, ali je aplikacija pripravljena za r
 zapis), naj bo v slovenščini z imeni, ki jih trener pozna, in naj obdrži pot, po kateri ohranjeno
 odstrani, ko zapisa ne potrebuje več — opaženo na različici `8b2ce80`.
 
+### 80.91 [ ] P1 — Sprememba teže v načrtu prihodnjega treninga po osvežitvi izgine brez besede
+
+**Scenarij in koraki:** odpri podlogo prihodnjega treninga (»Ponedeljkova moc«, 2026-10-05, 09:00 -
+10:00, stranka Jane Doe, rutina »Zgornji del A«). Tapni ⋮ »Možnosti treninga« → »Uredi načrt«. Pri
+vaji Barbell Bench Press popravi težo z 62.5 na 90 in tapni »Končano z urejanjem načrta«. Nato osveži
+stran in trening odpri znova s kartice.
+
+**Opaženo:** takoj po zaprtju urejevalnika podloga pravi »Barbell Bench Press · 5 · 90 kg«. Po
+osvežitvi pravi »5 · 62.5 kg«. Nobenega opozorila ni bilo, ne pri zapiranju urejevalnika ne po
+osvežitvi. V shrambi ni nikjer zapisa s to težo — ne med `sessions`, ne med `planUpdates`.
+
+**Težava in vpliv:** trener za mizo pripravi obremenitve za naslednji teden. Ko naslednjič odpre
+telefon, so nazaj stare številke, in tega ne izve: podloga po urejanju kaže novo težo, torej ni
+razloga za dvom. Delo, ki ga je opravil, je izgubljeno tiho.
+
+**Predlog:** »Končano z urejanjem načrta« naj spremembo zapiše, in dokler ni zapisana, naj podloga ne
+kaže nove številke — opaženo na različici `8b2ce80`.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
