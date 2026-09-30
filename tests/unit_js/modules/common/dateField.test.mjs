@@ -9,6 +9,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   dateFromDigits,
+  dateFromDotted,
   dayMarks,
   isoToDate,
   normalizeDateEntry,
@@ -82,4 +83,36 @@ test("the marks cross a month end without arithmetic of their own", () => {
     "2026-10-01",
     "2026-10-02",
   ]);
+});
+
+test("a date written day first with dots is read as that day, not as digits", () => {
+  // "6.10.2026" used to lose its separators and become year 6102, month 02, day 06, without a word.
+  assert.equal(normalizeDateEntry("6.10.2026", ON_SCREEN), "2026-10-06");
+  assert.equal(normalizeDateEntry("06.10.2026", ON_SCREEN), "2026-10-06");
+  assert.equal(normalizeDateEntry("6. 10. 2026", ON_SCREEN), "2026-10-06");
+  assert.equal(normalizeDateEntry("6/10/2026", ON_SCREEN), "2026-10-06");
+  assert.equal(normalizeDateEntry("6-10-2026", ON_SCREEN), "2026-10-06");
+});
+
+test("day and month without a year take the year on screen", () => {
+  assert.equal(normalizeDateEntry("6.10.", ON_SCREEN), "2026-10-06");
+  assert.equal(normalizeDateEntry("6. 10.", ON_SCREEN), "2026-10-06");
+  assert.equal(normalizeDateEntry("6.10", "2027-01-01"), "2027-10-06");
+});
+
+test("a day typed apart that is not real is refused, never turned into another day", () => {
+  assert.equal(dateFromDotted("31.2.2026", ON_SCREEN), null);
+  assert.equal(dateFromDotted("6.13.2026", ON_SCREEN), null);
+  assert.equal(dateFromDotted("0.10.2026", ON_SCREEN), null);
+  assert.equal(dateFromDotted("6.10.26", ON_SCREEN), null);
+  assert.equal(dateFromDotted("29.2.2027", ON_SCREEN), null);
+  assert.equal(normalizeDateEntry("31.2.2026", ON_SCREEN), "");
+  assert.equal(dateFromDotted("29.2.2028", ON_SCREEN), "2028-02-29");
+});
+
+test("entries without separators, and ISO days, keep the digit rules", () => {
+  assert.equal(dateFromDotted("20260912", ON_SCREEN), "");
+  assert.equal(dateFromDotted("17", ON_SCREEN), "");
+  assert.equal(dateFromDotted("2026-09-12", ON_SCREEN), "");
+  assert.equal(normalizeDateEntry("2026-09-12", ON_SCREEN), "2026-09-12");
 });

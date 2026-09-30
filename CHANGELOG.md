@@ -76,6 +76,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Fixed
 
+- **A date typed the Slovenian way is read as that date.** "6.10.2026" was saved as 6102-02-06.
+  Day, month and year written with dots, slashes or dashes are now read as such, and a day that does
+  not exist, such as 31.2.2026, is refused with a note rather than saved as another day.
 - **The previous and next session were worked out from the wrong day for any session opened from
   the board.** The clipboard carried its start as a date object rather than as a written date, and
   the comparison read the first ten characters of it — "Tue Sep 30" instead of "2026-09-30". Letters

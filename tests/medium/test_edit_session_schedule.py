@@ -485,6 +485,37 @@ def test_a_day_that_does_not_exist_is_moved_and_the_field_says_so(page, local_se
     expect(note).to_be_hidden()
 
 
+def test_a_day_written_with_dots_is_read_day_first_and_an_impossible_one_is_refused(
+    page, local_server
+):
+    """ "6.10.2026" was saved as 6102-02-06 without a word: the dots were dropped and the digits read
+    as year, month, day. It is the sixth of October. A day that does not exist is refused, never
+    moved to another one: the text stays, the note says so, and the form cannot be sent with it."""
+    load_with_stub(
+        page, local_server, setup_stub(SCHEDULED_SESSION, target_session="'s-edit'")
+    )
+    field = page.locator("#setup-session-date")
+    note = page.locator(".stepped-field:has(#setup-session-date) .stepped-field-note")
+
+    field.click()
+    field.press_sequentially("6.10.2026")
+    page.locator("#setup-location").click()
+    assert field.input_value() == "2026-10-06"
+
+    field.click()
+    field.press_sequentially("31.2.2026")
+    page.locator("#setup-location").click()
+    assert field.input_value() == "31.2.2026"
+    expect(note).to_contain_text("31.2.2026 is not a date")
+    assert field.evaluate("el => el.validity.valid") is False
+
+    field.click()
+    field.press_sequentially("6.10.")
+    page.locator("#setup-location").click()
+    assert field.input_value() == "2026-10-06"
+    assert field.evaluate("el => el.validity.valid") is True
+
+
 def test_the_day_marks_are_today_tomorrow_and_the_two_days_after(page, local_server):
     """Named, not four ISO strings: a row of dates the trainer has to decode is no faster than typing
     one. Counted from the CLOCK, so they are the days a session is actually being booked for."""

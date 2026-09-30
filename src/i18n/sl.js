@@ -143,6 +143,7 @@ export const sl = {
   date_field_earlier: "Dan prej",
   date_field_set: "Nastavi {date}",
   date_field_moved: "{typed} ne obstaja. Izbran je {date}.",
+  date_field_invalid: "{typed} ni datum. Napiši ga kot 6.10.2026 ali 2026-10-06.",
   date_field_today: "danes",
   date_field_tomorrow: "jutri",
   date_field_yesterday: "včeraj",

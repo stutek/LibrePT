@@ -143,6 +143,7 @@ export const de = {
   date_field_earlier: "Einen Tag früher",
   date_field_set: "{date} einstellen",
   date_field_moved: "{typed} gibt es nicht. Gewählt ist der {date}.",
+  date_field_invalid: "{typed} ist kein Datum. Schreibe es als 6.10.2026 oder 2026-10-06.",
   date_field_today: "heute",
   date_field_tomorrow: "morgen",
   date_field_yesterday: "gestern",

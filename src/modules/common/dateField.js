@@ -80,7 +80,36 @@ export function dateFromDigits(digits, reference) {
   return `${pad(year, 4)}-${pad(month, 2)}-${pad(day, 2)}`;
 }
 
+// Day, month, optionally a year, with ".", "/" or "-" between and optional spaces: "6.10.2026",
+// "06. 10. 2026", "6/10/2026", "6.10." (the year already on screen). The year is four digits; a
+// two-digit year is refused rather than guessed.
+const DOTTED_DATE = /^(\d{1,2})\s*[./-]\s*(\d{1,2})(?:\s*[./-]\s*(\d{4})?)?\.?$/;
+// A separator anywhere, unless the entry starts with a four-digit year (an ISO day, handled as digits).
+const HAS_SEPARATOR = /[./-]/;
+const STARTS_WITH_YEAR = /^\d{4}(?!\d)\s*[./-]|^\d{5,}/;
+
+/** A day written the way it is spoken in Slovenia, Germany and most of Europe (day first), read as
+ * ISO. Returns "" when the entry is not written with separators at all (the digit rules apply),
+ * and null when it is written that way but is not a real day: "31.2.2026", "6.10.26", "6.13.2026".
+ * Never another date: the digit rules clamp, which is right for a slipped finger on eight digits and
+ * wrong for a day and month that were typed apart on purpose. */
+export function dateFromDotted(raw, reference) {
+  const text = String(raw || "").trim();
+  if (!HAS_SEPARATOR.test(text) || STARTS_WITH_YEAR.test(text)) return "";
+  const parsed = DOTTED_DATE.exec(text);
+  if (!parsed) return null;
+  const year = parsed[3]
+    ? parseInt(parsed[3], 10)
+    : (isoToDate(reference) || new Date()).getFullYear();
+  const month = parseInt(parsed[2], 10);
+  const day = parseInt(parsed[1], 10);
+  if (month < 1 || month > 12 || day < 1 || day > daysInMonth(year, month)) return null;
+  return `${String(year).padStart(4, "0")}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
 export function normalizeDateEntry(raw, reference) {
+  const dotted = dateFromDotted(raw, reference);
+  if (dotted !== "") return dotted === null ? "" : dotted;
   const digits = String(raw || "")
     .replace(/\D/g, "")
     .slice(0, 8);
@@ -118,8 +147,9 @@ class DateField extends SteppedField {
     this.showMarks = marks;
   }
 
+  // Ten for "2026-10-06", room for "06. 10. 2026" with its spaces.
   get maxLength() {
-    return 10;
+    return 12;
   }
 
   get kindClass() {
@@ -146,6 +176,8 @@ class DateField extends SteppedField {
   // because "12" is a complete instruction ("the 12th of this month") and also the first half of
   // "1209" — acting on it mid-word would move the field under the next keystroke.
   liveValue(raw) {
+    this.input.setCustomValidity("");
+    if (dateFromDotted(raw, this.settledValue) !== "") return null;
     const digits = String(raw || "").replace(/\D/g, "");
     return digits.length === 8 ? dateFromDigits(digits, this.settledValue) : null;
   }
@@ -154,11 +186,26 @@ class DateField extends SteppedField {
   // real one (see dateFromDigits), and it says so: 2027-02-29 becoming 2027-02-28 in silence is a
   // client invited for a day nobody chose.
   noteFor(raw, value) {
+    if (dateFromDotted(raw, this.settledValue) !== "") return "";
     const digits = String(raw || "").replace(/\D/g, "");
     if (digits.length !== 8) return "";
     const typed = `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6, 8)}`;
     if (typed === value) return "";
     return this.label("date_field_moved").replace("{typed}", typed).replace("{date}", value);
+  }
+
+  // A day and month typed apart that are not a real day are refused, not moved: the text stays in
+  // the field, the note says what is wrong, and the form cannot be sent with it.
+  settle() {
+    const raw = this.input.value;
+    this.input.setCustomValidity("");
+    if (dateFromDotted(raw, this.settledValue) === null) {
+      const message = this.label("date_field_invalid").replace("{typed}", raw.trim());
+      this.input.setCustomValidity(message);
+      this.showNote(message);
+      return;
+    }
+    super.settle();
   }
 
   stepped(value, direction) {
