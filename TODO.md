@@ -3075,6 +3075,14 @@ treh poskusih: »V telovadnici bi nazaj na zvezek.«
 (§94, točka 1, čaka na Simona). Preizkus: ista vaja kot samo načrtovana, opravljena po načrtu in
 izrecno preskočena da tri različne zapise.
 
+**Dokaz 2026-10-01** na `main` `6230070` (zamrznjena kopija), 390 × 844, sl, stranka »Nika Rozman«,
+trening »Jutranji« s tremi vajami (»Barbell Back Squat« 3 × 10 × 60 kg, »Barbell Row«, »Barbell
+Bench Press«). Na počepu »Pretežko«, nato »Zaključi vadbo« → »Zaključi zdaj«. Drugo vprašanje: »Ni
+zabeleženih zaključenih serij. Res želiš zaključiti in shraniti prazno vadbo?« Trener, ki je vse
+naredil po načrtu, ima na izbiro le »prazno vadbo«. Po »Zaključi zdaj« plošča pri treningu piše
+»Program ni določen«, odprta kartica pa »Ni vstavljenih vaj / Vaj še ni. Pritisni tri pike (⋮) …«.
+Načrt s tremi vajami ni nikjer več viden. Isto opiše dnevnik prvega odprtja 04.
+
 ### 80.7 [x] P2 — Prvi prikaz novega termina pokaže 1970-01-01 — popravljeno 2026-09-27
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#807-x-p2--prvi-prikaz-novega-termina-pokaže-1970-01-01--popravljeno-2026-09-27).
