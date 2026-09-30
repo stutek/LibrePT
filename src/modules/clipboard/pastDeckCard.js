@@ -9,8 +9,53 @@
 // know that THIS card type answers "am I focused?" a different way than every other card does.
 //
 // ctx: { activeSession, t, escapeHTML, formatLoad, formatReps, formatMetricValue, usesLoad, onRerender }
+//
+// **Not drawn anywhere at the moment.** Until 2026-09-30 the live deck put the client's last
+// session at the top of the exercise stack; it now holds one session's plan and nothing else, and
+// the previous session is reached sideways instead. The card is kept whole, with the builder that
+// feeds it, for the client's history view: that view draws the same records with a renderer of its
+// own today, and is to mount these cards instead.
 
+import { exerciseRecordsOf, isSkippedRecord } from "../../domain/sessionItemRecord.js";
+import { formatDateStr } from "../common/utils.js";
 import { DeckCard } from "./deckCard.js";
+
+// The items this card is built from. It lists movements only — flatten past rests/circuit
+// scaffolding to their exercise leaves (structured records) while legacy flat rows pass through
+// unchanged.
+//
+// It shows what was DONE: a record keeps a skipped movement's prescription as uncompleted sets, and
+// listing those read as sets the client performed. A skipped movement says so instead, as the
+// client's history page does, and an unfinished set is left out. A set with no flag is a legacy row,
+// which only ever stored performed work.
+//
+// The date is ISO, like every other date in the app. It was once written with
+// `toLocaleDateString(..., { month: "short", day: "numeric" })`, which asked the DEVICE how to write
+// it and dropped the year: a Slovenian screen read "20. jul." and an English one "Jul 20", neither
+// saying which year the set was lifted in.
+export function buildPastExerciseItems(pastSession, clientName = "") {
+  const dateStr = formatDateStr(pastSession.date);
+  const items = [];
+  let pIdx = 0;
+  for (const ex of exerciseRecordsOf(pastSession.exercises)) {
+    const skipped = isSkippedRecord(ex);
+    items.push({
+      id: `past-${pastSession.id}-${ex.id}-${pIdx}`,
+      name: ex.name,
+      type: "past",
+      sessionDate: dateStr,
+      clientName,
+      skipped,
+      sets: skipped ? [] : (ex.sets || []).filter((set) => set.completed !== false),
+      loadUnit: ex.loadUnit || "kg",
+      metric: ex.metric || "reps",
+      modality: ex.modality || "strength",
+      routineName: pastSession.routineName,
+    });
+    pIdx++;
+  }
+  return items;
+}
 
 export class PastDeckCard extends DeckCard {
   get isInFocus() {

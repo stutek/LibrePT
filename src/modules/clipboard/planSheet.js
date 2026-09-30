@@ -16,6 +16,18 @@ import { compactTargetString } from "../../domain/exerciseModality.js";
 import { hasExerciseNote } from "../../domain/quickSignals.js";
 import { isRestRecord } from "../../domain/sessionItemRecord.js";
 
+/** One movement's name, reduced to what two sessions can be compared by: case and stray spacing
+ * differ between a name typed into a plan and the same name chosen from the catalogue, and a
+ * trainer reading "Bench Press" beside "bench press" would rightly call them the same exercise.
+ * Exported because the caller needs the SAME key for the live card it is aligning to — two spellings
+ * of one rule is how alignment silently stops working. */
+export function planSheetKey(name) {
+  return String(name || "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLowerCase();
+}
+
 const TOO_EASY_TAG = "Too Easy - Increase Load";
 const TOO_HARD_TAG = "Too Hard - Reduce Load";
 
@@ -64,6 +76,10 @@ function buildSignalIcons({ feedback, clientId, name, t }) {
 function buildExerciseRow(item, { feedback, clientId, t }) {
   const row = document.createElement("div");
   row.className = "plan-sheet-row";
+  // What the peek is aligned BY: the controller looks for the row naming the same movement as the
+  // card in focus and slides the sheet until the two sit level. Written here, beside the name it
+  // comes from, so a row can never carry a key that says something other than what it shows.
+  row.dataset.exerciseName = planSheetKey(item.name);
 
   const name = document.createElement("span");
   name.className = "plan-sheet-name";

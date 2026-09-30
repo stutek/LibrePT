@@ -34,7 +34,7 @@ def _open_session_with_one_exercise(page, local_server):
     page.wait_for_timeout(400)
     # The deck opens collapsed and Add Note renders only on the in-focus card; force=True because
     # collapsed cards overlap.
-    page.locator(".exercise-deck-card:not(.past-session)").first.click(force=True)
+    page.locator(".exercise-deck-card").first.click(force=True)
     page.wait_for_timeout(300)
 
 

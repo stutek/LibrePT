@@ -10,7 +10,7 @@
 // skeleton (the one design, then what focus adds, then wire); this file supplies the hooks.
 //
 // ctx: {
-//   round, activeClientId, pastExpanded, isFutureSession,
+//   round, activeClientId, isFutureSession,
 //   t, escapeHTML, getExerciseSignalColor, hasQuickSignal(clientId, exerciseName, tag),
 //   logQuickSignal(tag, exId), openFeedbackModal(exId),
 //   completeCircuitRound(circuitId), onFocus(firstExerciseIndex)
@@ -97,12 +97,6 @@ function buildCircuitActionsHTML(ex, ctx, isFirstExercise) {
 }
 
 export class CircuitDeckCard extends DeckCard {
-  // An open past log defocuses the live card too, so the circuit renders compact — the same rule
-  // ExerciseDeckCard applies, and the one place this card's focus differs from the plain base.
-  get isInFocus() {
-    return this.item.isInFocus && !this.ctx.pastExpanded;
-  }
-
   get className() {
     const checkedClass = this.isInFocus ? "in-focus" : this.item.isCompleted ? "completed" : "";
     return `exercise-deck-card circuit-card ${checkedClass}${this.ctx.isFutureSession ? " future-session" : ""}`;

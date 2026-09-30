@@ -170,12 +170,17 @@ renderActiveGroupBoard();
 """ % (JANE, JOHN)
 
 
-def test_one_plan_for_several_names_each_injury_and_each_last_session(
+def test_one_plan_for_several_names_lists_each_injury_under_its_name(
     page, local_server
 ):
-    """Bound to one plan, the group showed one injury and one "Last time" row, both the tapped
-    client's and neither named: a trainer could apply one person's limit to another and miss the
-    rest. Each member's injury and last session is listed, under the client's name."""
+    """Bound to one plan, the group showed one injury, the tapped client's and unnamed: a trainer
+    could apply one person's limit to another and miss the rest. Each member's injury is listed,
+    under the client's name.
+
+    It also showed one "Last time" row, with the same defect, and that half of this test is gone:
+    the clipboard's card stack stopped carrying past sessions on 2026-09-30, so there is no surface
+    left that shows a bound group's last sessions at all. The gap is written down where open work
+    lives; it is not covered here, because nothing draws it."""
     page.set_viewport_size({"width": 390, "height": 844})
     load_with_stub(
         page,
@@ -193,8 +198,3 @@ def test_one_plan_for_several_names_each_injury_and_each_last_session(
         "Jane Doe: Left shoulder",
         "John Smith: Right knee",
     ]
-    badges = page.locator(".deck-card-status-past").all_inner_texts()
-    assert sorted(badges) == [
-        "Last time · Jane Doe: 2026-07-20",
-        "Last time · John Smith: 2026-07-20",
-    ], badges

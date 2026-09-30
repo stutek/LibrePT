@@ -28,13 +28,14 @@
 
 import { libraryExercises } from "../data/exerciseLibrary.js";
 import { clientSessionNeighbours, clientSessionToday } from "../domain/clientSessionNeighbours.js";
+import { isRestRecord } from "../domain/sessionItemRecord.js";
 import {
   buildClientStateFromHistoryLog,
   buildClientStateFromRoutine,
 } from "../domain/sessionPlanFactory.js";
 import { isClipboardEditMode } from "../modules/clipboard/editModeState.js";
 import { initPlanPeek } from "../modules/clipboard/planPeek.js";
-import { renderPlanSheet } from "../modules/clipboard/planSheet.js";
+import { planSheetKey, renderPlanSheet } from "../modules/clipboard/planSheet.js";
 import { getActiveSession, getAppDeps } from "./activeSessionStore.js";
 import { buildCircuitUnits } from "./sessionCircuits.js";
 
@@ -111,6 +112,46 @@ function buildCreateCard(clientName, t) {
 
 function isoDay(date) {
   return date ? String(date).slice(0, 10) : "";
+}
+
+// Which movement the trainer is standing at, as a comparison key — read from the SESSION, never from
+// the deck's DOM: the active exercise is state, and the card that shows it is one rendering of that
+// state. Returns "" for a rest, which names no movement to line anything up with.
+function focusedExerciseKey(activeSession, clientId) {
+  const clientState = activeSession.clientRoutines?.[clientId];
+  const item = clientState?.exercises?.[clientState?.activeExerciseIndex];
+  return item && !isRestRecord(item) ? planSheetKey(item.name) : "";
+}
+
+// Slide the uncovered plan until the SAME movement sits level with the card in focus (Simon,
+// 2026-09-30). Without this the neighbour opens at its own top, and "what did they lift last time"
+// — the number read most often on the gym floor — could be anywhere on the sheet relative to the
+// exercise asking the question.
+//
+// The offset is measured, so it rides on a custom property, the one thing docs/ARCHITECTURE.md's
+// "look lives only in CSS" carves out for a runtime number (`--plan-pull` in planPeek.js is the
+// same case). planPeek.css owns what the property DOES.
+//
+// No matching movement, no rest to align to, or nothing rendered yet: the offset is cleared and the
+// sheet shows from its top, as it always did.
+function alignSheetToFocus(el, key) {
+  const sheet = el?.querySelector(".plan-sheet");
+  if (!sheet) return;
+  const row = key
+    ? sheet.querySelector(`.plan-sheet-row[data-exercise-name="${CSS.escape(key)}"]`)
+    : null;
+  const card = document.querySelector(
+    "#active-exercise-scroll-deck .exercise-deck-card.is-active, #active-exercise-scroll-deck .exercise-deck-card.in-focus",
+  );
+  if (!row || !card) {
+    sheet.style.removeProperty("--peek-align");
+    return;
+  }
+  // Both boxes are read with the sheet already offset by whatever it carried, so the shift is
+  // measured from where the row IS rather than from where it started.
+  const current = Number.parseFloat(sheet.style.getPropertyValue("--peek-align")) || 0;
+  const shift = card.getBoundingClientRect().top - row.getBoundingClientRect().top;
+  sheet.style.setProperty("--peek-align", `${Math.round(current + shift)}px`);
 }
 
 // The neighbour's own title bar + tab (ruled 2026-09-14: "the plan underneath shows its own").
@@ -205,6 +246,10 @@ export function refreshPlanPeek() {
   renderUnderLayer(pastEl, previous, { clientId, clientName, when: "past", appDeps });
   renderUnderLayer(futureEl, next, { clientId, clientName, when: "future", appDeps });
   refreshTodayButton(activeSession, clientId, state);
+
+  // Alignment is NOT done here. It is geometry, and at render time the deck has not finished
+  // placing its cards — it scrolls the active one into view a tenth of a second later, which left
+  // the peek 12px out. It is measured when the peek begins instead (`onPeekBegin`).
 }
 
 function activeClientOf(activeSession) {
@@ -225,6 +270,16 @@ function refreshTodayButton(activeSession, clientId, state) {
   if (!button) return;
   const today = clientSessionToday(state, clientId, Date.now());
   button.classList.toggle("hidden", !today || isShowing(activeSession, today));
+}
+
+/** Line both uncovered plans up with the movement in focus. Called as the peek BEGINS, because that
+ *  is when the deck has finished moving and when the layers are about to be seen. */
+function alignBothSheetsToFocus() {
+  const activeSession = getActiveSession();
+  if (!activeSession) return;
+  const key = focusedExerciseKey(activeSession, activeClientOf(activeSession));
+  alignSheetToFocus(document.getElementById("plan-peek-under-past"), key);
+  alignSheetToFocus(document.getElementById("plan-peek-under-future"), key);
 }
 
 function openRoute(sessionId, clientId) {
@@ -266,6 +321,7 @@ export function initPlanPeekController() {
     isDisabled: () => isClipboardEditMode(),
     canOpen: () => !getActiveSession()?.started,
     onOpen: openNeighbour,
+    onPeekBegin: alignBothSheetsToFocus,
   });
   document.getElementById("btn-plan-today")?.addEventListener("click", returnToToday);
 }

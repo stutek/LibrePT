@@ -1,6 +1,6 @@
 // src/modules/clipboard/exerciseDeckOfCards.js
-// Renders the active-session exercise stack (the vertical scroll deck): the client's most-recent
-// past session as tappable history cards, then the current routine folded into circuit units
+// Renders the active-session exercise stack (the vertical scroll deck): ONE session's own plan and
+// nothing else — the current routine folded into circuit units
 // (one card per circuit), standalone exercise cards, and standalone rest cards. Every card type is
 // a DeckCard subclass (see deckCard.js) — this module builds the deck items, constructs the right
 // subclass per item, and calls `.render(card)` uniformly; it wires no click/focus/timer behaviour
@@ -14,54 +14,16 @@
 //   logQuickSignal, openFeedbackModal, completeCircuitRound, focusExerciseByIndex,
 //   activateExerciseByScroll(index)   // the trainer scrolled another card to the focus line
 //   saveActiveSessionToCache, saveToLocalStorage,
-//   onRerender()   // re-render the whole board (past-card toggle / circuit save)
+//   onRerender()   // re-render the whole board (a circuit save)
 // }
 
 import { newRecordId } from "../../data/recordId.js";
-import { formatMetricValue, usesLoad } from "../../domain/exerciseModality.js";
-import { bindingFor, bindingMembers } from "../../domain/participantBinding.js";
-import { formatLoad, formatReps } from "../../domain/repsAndLoad.js";
-import {
-  exerciseRecordsOf,
-  isRestRecord,
-  isSkippedRecord,
-} from "../../domain/sessionItemRecord.js";
+import { isRestRecord } from "../../domain/sessionItemRecord.js";
 import { blankExercise } from "../../domain/sessionPlanFactory.js";
-import { clientDisplayName, formatDateStr } from "../common/utils.js";
 import { CircuitDeckCard } from "./circuitCard.js";
 import { trackDeckScroll } from "./deckScrollFocus.js";
 import { ExerciseDeckCard } from "./exerciseCard.js";
-import { PastDeckCard } from "./pastDeckCard.js";
 import { RestDeckCard } from "./restDeckCard.js";
-
-// The last-performance reference lists movements only — flatten past rests/circuit scaffolding
-// to their exercise leaves (structured records) while legacy flat rows pass through unchanged.
-// It shows what was DONE: a record keeps a skipped movement's prescription as uncompleted sets, and
-// listing those read as sets the client performed. A skipped movement says so instead, as the
-// client's history page does, and an unfinished set is left out. A set with no flag is a legacy row,
-// which only ever stored performed work.
-function buildPastExerciseItems(pastSession, dateStr, clientName = "") {
-  const items = [];
-  let pIdx = 0;
-  for (const ex of exerciseRecordsOf(pastSession.exercises)) {
-    const skipped = isSkippedRecord(ex);
-    items.push({
-      id: `past-${pastSession.id}-${ex.id}-${pIdx}`,
-      name: ex.name,
-      type: "past",
-      sessionDate: dateStr,
-      clientName,
-      skipped,
-      sets: skipped ? [] : (ex.sets || []).filter((set) => set.completed !== false),
-      loadUnit: ex.loadUnit || "kg",
-      metric: ex.metric || "reps",
-      modality: ex.modality || "strength",
-      routineName: pastSession.routineName,
-    });
-    pIdx++;
-  }
-  return items;
-}
 
 function buildRestDeckItem(ex, idx, currentExIdx, activeIdx) {
   return {
@@ -246,36 +208,17 @@ export function renderExerciseDeck(deckContainer, deps) {
   const launchedDay = activeSession.sourceSession ? activeSession.sourceSession.day : null;
   const isFutureSession = launchedDay === "tomorrow" || launchedDay === "upcoming";
 
-  // Single focus across the whole deck: while a past log is open, the live exercise card
-  // collapses too, so exactly one card is ever expanded (the active-exercise pointer is
-  // untouched, so it re-expands the moment the past card is closed).
-  const pastExpanded = !!activeSession.expandedPastId;
-  // The date on a past card is ISO, like every other date in the app. It used to be
-  // `toLocaleDateString(..., { month: "short", day: "numeric" })`, which asked the DEVICE how to
-  // write it and dropped the year: a Slovenian screen read "20. jul." and an English one "Jul 20",
-  // neither of them saying which year the set was lifted in.
+  // ONE session's worth of cards, and nothing else (Simon, 2026-09-30). The client's most recent
+  // past session used to be drawn at the top of this deck, which gave the vertical axis two
+  // meanings at once: where the trainer is in today's session, and what happened last time. It now
+  // has one. The previous session is reached sideways instead, by the blanket gesture
+  // (modules/clipboard/planPeek.js), where it is aligned so the same movement sits level with the
+  // exercise in focus — the question "what did they lift last time" answered beside the card that
+  // asks it, rather than above it.
   //
-  // That guard was written here because `utils.js`'s shared `formatDateStr` was still building
-  // "Jul 20, 2026" and could not be called. It is ISO now, so this file uses it.
-
-  // Past session exercises. Excludes isPlanning drafts (syncPlanningSnapshotToHistory writes them
-  // with an ever-fresh `date` on every save) — a drafted-but-unrun plan is not a performed session,
-  // and would otherwise eclipse the client's actual most recent workout here.
-  //
-  // Clients bound to one plan share one tab, so each member's last session is listed, under the
-  // client's name. The tapped client's alone, unnamed, read as the whole group's.
-  const group = bindingFor(activeSession.bindings, activeClientId);
-  const historyOwners = group
-    ? bindingMembers(group, activeSession.participants)
-    : [activeClientId];
-  const pastExList = historyOwners.flatMap((clientId) => {
-    const latest = (state.history || [])
-      .filter((h) => h.clientId === clientId && !h.isPlanning)
-      .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-    if (!latest) return [];
-    const owner = group ? clientDisplayName(state.clients?.find((c) => c.id === clientId)) : "";
-    return buildPastExerciseItems(latest, formatDateStr(latest.date), owner);
-  });
+  // It also cost a defect: the past cards carried no `data-plan-index`, so scrolling up into them
+  // matched no card in deckScrollFocus.js and the ACTIVE exercise jumped back to the first of the
+  // session. Looking back moved the trainer's place in the session.
 
   // Current routine exercises. activeExerciseIndex is the ACTIVE card, always marked; deckAllCollapsed
   // says no card is OPEN. A fresh open starts collapsed (startWorkoutSession /
@@ -294,28 +237,15 @@ export function renderExerciseDeck(deckContainer, deps) {
   // Fold consecutive exercises that share a circuitId into a single circuit/giantset unit; ungrouped
   // exercises stay as their own 'current' cards. Circuits render one card per group.
   const renderUnits = buildCircuitUnits(currentExList);
-  const allDeckItems = [...pastExList, ...renderUnits];
-
   const onFocus = (index) => focusExerciseByIndex(index);
 
-  for (const item of allDeckItems) {
+  for (const item of renderUnits) {
     const card = document.createElement("div");
 
     // Which DeckCard subclass owns this item — the only place item.type is branched on. Every
     // decision after this point (render, focus rule, click wiring) is polymorphic, not branchy.
     let deckCard;
-    if (item.type === "past") {
-      deckCard = new PastDeckCard(item, {
-        activeSession,
-        t,
-        escapeHTML,
-        formatLoad,
-        formatReps,
-        formatMetricValue,
-        usesLoad,
-        onRerender,
-      });
-    } else if (item.type === "rest") {
+    if (item.type === "rest") {
       deckCard = new RestDeckCard(item, {
         t,
         escapeHTML,
@@ -329,7 +259,6 @@ export function renderExerciseDeck(deckContainer, deps) {
         round,
         activeClientId,
         activeClientState,
-        pastExpanded,
         isFutureSession,
         t,
         escapeHTML,
@@ -351,7 +280,6 @@ export function renderExerciseDeck(deckContainer, deps) {
       deckCard = new ExerciseDeckCard(item, {
         currentCount: currentExList.length,
         activeClientId,
-        pastExpanded,
         isFutureSession,
         t,
         escapeHTML,
@@ -383,12 +311,10 @@ export function renderExerciseDeck(deckContainer, deps) {
     trackDeckScroll(deckContainer, { onScrollActivate: activateExerciseByScroll });
   }
 
-  // Bring whatever the trainer just acted on into view: a freshly expanded past card if
-  // there is one, otherwise the open card, otherwise the active one — which is what a switch back
-  // to this client returns to when nothing was open.
+  // Bring whatever the trainer just acted on into view: the open card, otherwise the active one —
+  // which is what a switch back to this client returns to when nothing was open.
   setTimeout(() => {
     const focusEl =
-      deckContainer.querySelector(".exercise-deck-card.past-expanded") ||
       deckContainer.querySelector(".exercise-deck-card.in-focus") ||
       deckContainer.querySelector(".exercise-deck-card.is-active");
     if (focusEl) {

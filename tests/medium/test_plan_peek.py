@@ -65,7 +65,14 @@ mergeAppDeps({
 
 
 def _mount(
-    page, local_server, *, previous=True, following=True, started=True, extra=""
+    page,
+    local_server,
+    *,
+    previous=True,
+    following=True,
+    started=True,
+    extra="",
+    live_exercises=None,
 ):
     """`started` defaults to the fixture's own True (a running session), which is what the step 3
     tests were written against; the step 4 tests that open something pass False."""
@@ -79,7 +86,8 @@ def _mount(
     )
     session = active_session_fixture(
         client_id=CLIENT_ID,
-        exercises=[exercise_item(f"ex{n}", f"Live Exercise {n}") for n in range(6)],
+        exercises=live_exercises
+        or [exercise_item(f"ex{n}", f"Live Exercise {n}") for n in range(6)],
         started=started,
         sourceSession={
             "id": "todaySession",
@@ -294,6 +302,92 @@ def test_a_vertical_drag_is_left_as_a_scroll(page, local_server):
     assert _active_index(page) == before
 
     page.mouse.up()
+
+
+# ---- Aligned to the exercise in focus -------------------------------------------------------------
+
+
+def _begin_a_peek(page):
+    """Press and hold until the plan narrows and the neighbours show. Alignment is measured as the
+    peek BEGINS, not when the sheets were drawn, so nothing is lined up before this."""
+    page.mouse.move(CENTER_X, CENTER_Y)
+    page.mouse.down()
+    page.wait_for_timeout(400)
+
+
+def _row_and_card_tops(page, name):
+    """Where last time's row for this movement sits, and where the card in focus sits — both in
+    screen coordinates, which is the only place the two can be compared."""
+    return page.evaluate(
+        """(name) => {
+          const key = name.trim().replace(/\\s+/g, ' ').toLowerCase();
+          const row = document.querySelector(
+            `#plan-peek-under-past .plan-sheet-row[data-exercise-name="${key}"]`);
+          const card = document.querySelector(
+            '#active-exercise-scroll-deck .exercise-deck-card.is-active, ' +
+            '#active-exercise-scroll-deck .exercise-deck-card.in-focus');
+          return row && card
+            ? [row.getBoundingClientRect().top, card.getBoundingClientRect().top]
+            : null;
+        }""",
+        name,
+    )
+
+
+# The live plan and the previous one share ONE movement name, in different positions: the shared
+# row is the whole basis of the alignment, and a plan that shared every name would not show whether
+# the right row was chosen.
+SHARED_MOVEMENT = "Barbell Back Squat"
+PREVIOUS_WITH_SHARED_MOVEMENT = """
+state.history.push({
+  id: 'hprev1', clientId: '%(client)s', routineName: 'Prev Plan', date: '2026-09-10T18:00:00.000Z',
+  duration: 1800, feedback: [],
+  exercises: [%(first)s, %(second)s, %(third)s],
+});
+""" % {
+    "client": CLIENT_ID,
+    "first": json.dumps(exercise_item("px1", "Prev Exercise One")),
+    "second": json.dumps(exercise_item("px2", "Prev Exercise Two")),
+    "third": json.dumps(exercise_item("px3", SHARED_MOVEMENT)),
+}
+
+
+def test_the_previous_plan_is_aligned_to_the_movement_in_focus(page, local_server):
+    """ "What did they lift last time" is the number read most often on the gym floor, and it is now
+    read beside the card that asks it: the uncovered plan slides until the row naming the same
+    movement sits level with the exercise in focus. Here that movement is LAST in the previous plan
+    and FIRST in the live one, so an unaligned sheet would put them far apart."""
+    _mount(
+        page,
+        local_server,
+        previous=False,
+        started=False,
+        live_exercises=[exercise_item("ex0", SHARED_MOVEMENT)]
+        + [exercise_item(f"ex{n}", f"Live Exercise {n}") for n in range(1, 6)],
+        extra=PREVIOUS_WITH_SHARED_MOVEMENT,
+    )
+    _begin_a_peek(page)
+
+    tops = _row_and_card_tops(page, SHARED_MOVEMENT)
+    assert tops is not None, (
+        "the shared movement is not in both the plan sheet and the deck"
+    )
+    row_top, card_top = tops
+    assert abs(row_top - card_top) <= 1, (
+        f"last time's {SHARED_MOVEMENT} is {abs(row_top - card_top):.0f}px from the card in focus"
+    )
+
+
+def test_a_plan_with_no_movement_in_common_is_not_moved(page, local_server):
+    """No shared row, nothing to line up: the plan shows from its top, as it did before any of this."""
+    _mount(page, local_server, started=False)
+    _begin_a_peek(page)
+
+    offset = page.evaluate(
+        "() => document.querySelector('#plan-peek-under-past .plan-sheet')"
+        ".style.getPropertyValue('--peek-align')"
+    )
+    assert offset == "", f"a plan sharing no movement was shifted by {offset!r}"
 
 
 # ---- Opening what the pull uncovered: the L ------------------------------------------------------

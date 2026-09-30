@@ -42,7 +42,7 @@ def _open_session_with_one_exercise(page, local_server, log_id="keep-on-record-l
     page.wait_for_timeout(400)
     # The deck opens fully collapsed and the Feedback button only renders on the in-focus card.
     # force=True: collapsed cards overlap, so a sibling can intercept the pointer.
-    page.locator(".exercise-deck-card:not(.past-session)").first.click(force=True)
+    page.locator(".exercise-deck-card").first.click(force=True)
     page.wait_for_timeout(300)
 
 

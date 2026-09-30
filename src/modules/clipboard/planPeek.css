@@ -77,9 +77,16 @@
   white-space: nowrap;
 }
 
-/* The neighbour plans, drawn behind the blanket. Each owns its own vertical scroll — the plan
-   underneath shows from its top; aligning it with the deck's scroll position would be comparing two
-   scrolls that share no rows (chosen 2026-09-14). */
+/* The neighbour plans, drawn behind the blanket. Each owns its own vertical scroll.
+
+   ALIGNED BY THE MOVEMENT, not by the scroll (Simon, 2026-09-30, replacing the choice of
+   2026-09-14 to show the plan from its top). That earlier choice refused to align the two plans by
+   SCROLL POSITION, and it was right to: two sessions' scrolls share no rows, so matching them
+   compares nothing. A movement with the same name in both plans is a shared row, which is what
+   makes this alignment mean something — the sheet slides until last time's bench press sits level
+   with the bench press card in focus. planPeekController.js measures the shift into
+   `--peek-align`; with no matching movement the property is absent and the plan shows from its top,
+   exactly as before. */
 .plan-peek-under {
   position: absolute;
   inset: 0;
@@ -89,6 +96,13 @@
   padding: 8px 10px calc(24px + var(--safe-bottom, 0px));
   visibility: hidden;
   background: var(--bg-color);
+}
+
+/* The alignment itself, and only under the blanket: the same sheet drawn anywhere else is not
+   being compared with a card in focus, so it is never shifted. Transform rather than a margin, so
+   nothing above the sheet moves and no scroll height changes as the focus moves from card to card. */
+.plan-peek-under .plan-sheet {
+  transform: translateY(var(--peek-align, 0px));
 }
 
 /* Held with no side chosen yet: both neighbours show, each clipped to the half nearest its edge —

@@ -7,7 +7,7 @@
 // skeleton (the one design, then what focus adds, then wire); this file supplies the hooks.
 //
 // ctx: {
-//   currentCount, activeClientId, pastExpanded, isFutureSession,
+//   currentCount, activeClientId, isFutureSession,
 //   t, escapeHTML, getExerciseSignalColor, hasQuickSignal(clientId, exerciseName, tag),
 //   logQuickSignal(tag), openFeedbackModal(), onFocus(index)
 // }
@@ -20,12 +20,6 @@ import {
 import { DeckCard } from "./deckCard.js";
 
 export class ExerciseDeckCard extends DeckCard {
-  // An open past log defocuses the live card too, so the active exercise renders compact — the one
-  // place this card's focus rule differs from the base class's plain item.isInFocus.
-  get isInFocus() {
-    return this.item.isInFocus && !this.ctx.pastExpanded;
-  }
-
   get className() {
     const checkedClass = this.isInFocus ? "in-focus" : this.item.isCompleted ? "completed" : "";
     return `exercise-deck-card ${checkedClass}${this.ctx.isFutureSession ? " future-session" : ""}`;

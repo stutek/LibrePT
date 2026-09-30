@@ -40,7 +40,7 @@ def test_the_feedback_dialog_is_in_slovenian_when_slovenian_is_chosen(
     page.evaluate(OPEN_ONE_EXERCISE)
     page.wait_for_timeout(400)
     # force=True: collapsed cards overlap, so a sibling can intercept the pointer.
-    page.locator(".exercise-deck-card:not(.past-session)").first.click(force=True)
+    page.locator(".exercise-deck-card").first.click(force=True)
     page.locator("#btn-log-feedback").click()
     page.wait_for_selector("#dialog-feedback[open]")
 

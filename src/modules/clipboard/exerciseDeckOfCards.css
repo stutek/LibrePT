@@ -253,7 +253,12 @@
 .exercise-deck-card.completed:not(.in-focus) {
   border-color: rgba(16, 185, 129, 0.3);
 }
-/* A past card takes its colour from the THEME's own past token, not from a violet written in here.
+/* The past card's own look. Since 2026-09-30 the live deck does not draw one — it holds one
+   session's plan and nothing else, and the previous session is reached sideways instead. The card
+   itself (pastDeckCard.js) is kept whole for the client's history view, which is to stop drawing
+   its own records and mount these cards instead, so its styles are kept with it.
+
+   A past card takes its colour from the THEME's own past token, not from a violet written in here.
    The hardcoded #8b5cf6 was nebula's primary spelled out: in midnight it painted
    nebula's violet over an emerald app, and in nebula itself it painted the accent — so the session
    the trainer is running and the session they ran in July wore the same colour. The badge in the

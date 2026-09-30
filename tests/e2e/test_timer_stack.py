@@ -21,7 +21,7 @@ def _open_session(page, local_server):
     # (.circuit-break-play) is only ADDED to the focused circuit card, so bring one into focus first.
     # force=True: collapsed cards use margin-bottom:-24px overlap — the first non-past card may
     # sit behind a stacked card that physically intercepts the pointer; force bypasses it.
-    page.locator(".exercise-deck-card:not(.past-session)").first.click(force=True)
+    page.locator(".exercise-deck-card").first.click(force=True)
     page.wait_for_timeout(300)
 
 

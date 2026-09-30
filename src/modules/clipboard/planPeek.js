@@ -82,9 +82,14 @@ function prefersReducedMotion() {
  *   isDisabled()      — () => bool; true in edit mode, where the reorder drag owns the surface
  *   canOpen()         — () => bool; false when the upward stroke must not leave this session
  *   onOpen(side)      — ("past"|"future") => void; called once the blanket has slid off
+ *   onPeekBegin()     — () => void; the under-layers are about to become visible. Whatever has to
+ *                       be MEASURED about them is measured here, not when they were drawn.
  * Idempotent: wiring twice on the same element is a no-op (the controller calls this once).
  */
-export function initPlanPeek(blanket, { getUnderLayers, isDisabled, canOpen, onOpen }) {
+export function initPlanPeek(
+  blanket,
+  { getUnderLayers, isDisabled, canOpen, onOpen, onPeekBegin },
+) {
   if (!blanket || blanket.dataset.planPeekWired) return;
   blanket.dataset.planPeekWired = "1";
 
@@ -97,6 +102,11 @@ export function initPlanPeek(blanket, { getUnderLayers, isDisabled, canOpen, onO
 
   function setHeld(on) {
     if (blanket.classList.contains("is-held") === on) return;
+    // The under-layers become visible on this exact class, so this is the moment anything measured
+    // ABOUT them has to be measured: the deck settles its own scroll a tenth of a second after it
+    // renders, and a position read before that is out by however far the active card still had to
+    // travel (12px, seen in the alignment test).
+    if (on) onPeekBegin?.();
     blanket.classList.add("is-animating-held");
     blanket.classList.toggle("is-held", on);
     setTimeout(() => blanket.classList.remove("is-animating-held"), DENSE_SETTLE_MS);

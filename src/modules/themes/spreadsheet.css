@@ -87,15 +87,14 @@ html.spreadsheet-theme .exercise-deck-card.past-session.past-expanded {
 
 /* Blocks of the plan are set apart by an empty strip, as the trainer's sheet leaves an empty row
    between sections. A circuit is one block; an exercise or a rest outside a circuit is a block of
-   its own. A past card is one movement pulled out of an old session, not a block, so past cards
-   stay joined by the thin grid line.
+   its own. Every card in the deck is one of those since 2026-09-30, when the past session left it,
+   so this no longer has to exclude past cards.
    It was a 2px dark border until 2026-09-14: Simon found it drowned the active card, whose
    own mark is a line too. With thin lines everywhere else, the active card is the one heavy edge.
    4px, measured on a 390px phone against 3px and 6px: a circuit reads as its own block already at
    3px, because its grey name row starts it, but an exercise outside a circuit has no such row and
    the strip is all that separates it. */
-html.spreadsheet-theme .exercise-deck-card:not(.past-session):not(.in-focus),
-html.spreadsheet-theme .exercise-deck-card:not(.past-session).in-focus {
+html.spreadsheet-theme .exercise-deck-card {
   margin-bottom: 4px;
 }
 /* The active card and the open card: a 2px petrol edge, the only heavy line on the sheet. */

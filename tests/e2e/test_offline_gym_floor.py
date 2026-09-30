@@ -58,7 +58,7 @@ def test_a_note_logged_offline_is_still_there_after_a_restart(page, local_server
     page.locator(LIVE_SESSION).first.click()
     page.wait_for_selector("#active-session-overlay:not(.hidden)")
     page.wait_for_timeout(400)
-    page.locator(".exercise-deck-card:not(.past-session)").first.click(force=True)
+    page.locator(".exercise-deck-card").first.click(force=True)
     page.wait_for_timeout(300)
     page.locator("#btn-log-feedback").click()
     page.wait_for_selector("#dialog-feedback[open]")

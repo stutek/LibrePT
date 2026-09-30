@@ -456,9 +456,9 @@ function renderDeckOrEditor(activeClientId, activeClientState) {
   renderLiveDeck(deckContainer, activeClientId, activeClientState);
 }
 
-// The historical-review panel (repurposed as an empty-state placeholder when the active client
-// has no plan at all — see showPastExerciseInFocus for its other use, populating it with a past
-// session's read-only detail).
+// The one card under the deck, which says the active client has no plan at all. It was built as a
+// historical-review panel and is nothing else now: the function that filled it with a past
+// session's detail is long gone, and the deck holds one session's plan and nothing else.
 function renderClipboardLoggerContainer(activeClientState) {
   const { t } = deps.getAppDeps();
   const container = document.getElementById("clipboard-logger-container");

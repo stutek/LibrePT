@@ -97,7 +97,7 @@ def test_interactive_dashboard_flow(page, local_server):
     page.evaluate(
         """() => {
             const card = document.querySelector(
-                '#active-exercise-scroll-deck .exercise-deck-card:not(.past-session)'
+                '#active-exercise-scroll-deck .exercise-deck-card'
             );
             if (card) { card.scrollIntoView({ block: 'center' }); card.click(); }
         }"""

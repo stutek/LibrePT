@@ -234,9 +234,8 @@ export function renderActiveSessionOverlayShell() {
         <!-- Dynamically populated card elements: Past Session Exercises, Current Exercises (Completed/In-Focus/Upcoming) -->
       </div>
 
-      <!-- Historical review panel: only shown when a past-session card is tapped -->
+      <!-- Shown only when the active client has no plan at all; filled by activeSessionBoard.js -->
       <div id="clipboard-logger-container" class="clipboard-grid-card card glassmorphic hidden">
-        <!-- Populated by showPastExerciseInFocus() -->
       </div>
 
       <!-- Active Client Level Controls -->
