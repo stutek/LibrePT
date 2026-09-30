@@ -142,7 +142,7 @@ date you got round to it.
 
 - **Pasting identifiable client data into an AI assistant.** Names plus health notes in a chat
   prompt is a transfer of Art. 9 data to a processor you have no agreement with. Use the app's
-  **AI Safe Copy** action on the client's profile instead. The copy carries the client's number,
+  **Copy for AI, without names** action on the client's profile instead. The copy carries the client's number,
   session dates and sets, and no name, contact details, goals or notes. That makes it
   *pseudonymised* (Art. 4(5)), not anonymous: your device can still link the number to the client,
   and the notice tells the client so ([PRIVACY.md §3.2](../PRIVACY.md)).

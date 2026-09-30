@@ -1339,7 +1339,7 @@ export const de = {
   view_grabber_clipboard: "Klemmbrett des Trainings öffnen",
   view_grabber_close_session: "Training schließen und zur Startseite",
   profile_consent_label: "DSGVO-Einwilligung zur Cloud-Synchronisierung",
-  profile_ai_safe_copy: "Anonyme Kopie für KI",
+  profile_ai_safe_copy: "Kopie für KI ohne Namen",
   profile_export_data: "Daten exportieren (DSGVO)",
   profile_erase_client: "Kunden löschen (DSGVO)",
   profile_send_consent: "Einwilligung anfragen",

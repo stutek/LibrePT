@@ -1354,7 +1354,7 @@ export const en = {
   view_grabber_clipboard: "Open session clipboard",
   view_grabber_close_session: "Close session and return to home",
   profile_consent_label: "GDPR Cloud Sync Consent",
-  profile_ai_safe_copy: "AI Safe Copy",
+  profile_ai_safe_copy: "Copy for AI, without names",
   profile_export_data: "Export data (GDPR)",
   profile_erase_client: "Erase client (GDPR)",
   profile_send_consent: "Send Consent Form",

@@ -51,7 +51,7 @@ Many trainers utilize AI assistants (such as ChatGPT, Claude, or DeepSeek) to an
 - **The Legal Risk:** Pasting unencrypted, identifiable client health records (`"Jane Doe, 34yo, chronic L4 disc herniation, struggles with overhead squats..."`) into third-party AI prompts transfers Special Category Data to external data processors without a Data Processing Agreement (DPA), which constitutes a GDPR violation.
 - **How to stay compliant:**
   1. **Use Anonymization:** Never include client names, email addresses, phone numbers, exact birthdates, or uniquely identifying medical histories in AI prompts.
-  2. **Use LibrePT's AI Safe Copy Tool:** Use LibrePT's built-in `AI Safe Copy` action on the client's profile. The copy carries the client's record id (`Client #…`), the session dates and the sets, and no name, contact details, goals or notes. That is *pseudonymised* data (Art. 4(5)), not anonymous: your device still links the id to the person, and the client notice says so.
+  2. **Use LibrePT's AI Safe Copy Tool:** Use LibrePT's built-in `Copy for AI, without names` action on the client's profile. The copy carries the client's record id (`Client #…`), the session dates and the sets, and no name, contact details, goals or notes. That is *pseudonymised* data (Art. 4(5)), not anonymous: your device still links the id to the person, and the client notice says so.
 
 ### 3.3 Supporting Client Data Rights
 Under GDPR, your clients have the right to:

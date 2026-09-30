@@ -158,7 +158,7 @@ export function renderClientDetailViewShell() {
             <i class="fa-solid fa-envelope"></i> <span id="btn-send-consent-email-text"></span>
           </a>
           <button id="btn-ai-safe-copy" class="btn secondary-btn">
-            <i class="fa-solid fa-user-shield"></i> <span data-i18n="profile_ai_safe_copy">AI Safe Copy</span>
+            <i class="fa-solid fa-user-shield"></i> <span data-i18n="profile_ai_safe_copy">Copy for AI, without names</span>
           </button>
           <button id="btn-client-export" class="btn secondary-btn">
             <i class="fa-solid fa-file-export"></i> <span data-i18n="profile_export_data">Export data (GDPR)</span>

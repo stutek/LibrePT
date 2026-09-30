@@ -1279,7 +1279,7 @@ export const sl = {
   view_grabber_clipboard: "Odpri podlogo treninga",
   view_grabber_close_session: "Zapri trening in se vrni na začetek",
   profile_consent_label: "Privolitev GDPR za sinhronizacijo v oblak",
-  profile_ai_safe_copy: "Anonimna kopija za AI",
+  profile_ai_safe_copy: "Kopija za AI brez imen",
   profile_export_data: "Izvozi podatke (GDPR)",
   profile_erase_client: "Izbriši stranko (GDPR)",
   profile_send_consent: "Pošlji obrazec za privolitev",
