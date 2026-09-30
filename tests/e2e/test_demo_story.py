@@ -46,6 +46,29 @@ def _chapter_ids():
     return re.findall(r'^\s*id: "([^"]+)",\n\s*titleKey:', source, re.M)
 
 
+# A chapter's own head: its id, then its keys up to its steps. What the offer leaves out is written
+# there — played on the client's page, or unable to start without an earlier chapter.
+CHAPTER_HEAD = re.compile(
+    r'^const \w+ = \{\n  id: "([^"]+)",\n(.*?)^  steps:', re.M | re.S
+)
+NOT_OFFERED = re.compile(
+    r'^  (surface: "(?!trainer")|needsEarlierChapters: true)', re.M
+)
+
+
+def _offered_chapter_ids():
+    """The chapters the sandbox card and the splash offer as a way in, known before any browser
+    starts, so each can be its own test. The same rule as `storyChapterIndex` in
+    `domain/demoStory.js`, read from the script's source;
+    `test_the_chapters_walked_are_the_chapters_offered` holds the two to each other."""
+    source = STORY_SOURCE.read_text(encoding="utf-8")
+    return [
+        chapter
+        for chapter, head in CHAPTER_HEAD.findall(source)
+        if not NOT_OFFERED.search(head)
+    ]
+
+
 def _open_story(page, local_server, query="?init=demo_data_load&demo=story"):
     page.goto(f"{local_server}{query}")
     page.locator(PANEL).wait_for(state="visible", timeout=30_000)
@@ -175,6 +198,12 @@ def _card_moved_on(page, progress_before, shown, timeout=8_000):
     If a card ever did move on by itself, the walk would tap Next on the step after it, and the
     count of steps walked would stop matching the story's length.
 
+    After a Show me the walk still waits the whole 8s where the card does not move (the last step of
+    a leg). Waiting instead until Show me is enabled again — the guide's own sign that the
+    demonstration is over — was tried on 2026-09-30, and it showed that this wait also HIDES a
+    defect: Show me on the welcome card opens the ☰ menu and fails to close it, the guide says the
+    step did not complete, and 0.2s later hides that message itself. Read 8s later, it is gone.
+
     Compared against the progress line's OWN words, not against "step N of" — that pattern is
     English, so in every other language it never matched, the helper answered "yes, it moved on" to
     every step, and a walk in Slovenian silently stopped tapping Next (found 2026-08-31 writing the
@@ -212,7 +241,7 @@ def _walk_the_whole_story(page, limit=60, on_step=None):
         _past_the_splash(page)
         page.locator(PANEL).wait_for(state="visible", timeout=30_000)
         progress_before = _progress_text(page)
-        step_now, _ = _step_numbers(page)
+        step_now, step_count = _step_numbers(page)
         caption = page.locator(CAPTION).inner_text()
         seen.append(caption)
         if on_step:
@@ -231,10 +260,14 @@ def _walk_the_whole_story(page, limit=60, on_step=None):
             assert page.locator(PROBLEM).is_hidden(), _stuck(page, step_now, caption)
             page.locator(NEXT).click()
         assert page.locator(PROBLEM).is_hidden(), _stuck(page, step_now, caption)
-        # The last step of a SEQUENCE is not the end of the story: the handover and the hand back are
-        # both last steps that navigate, and the guide comes back up on the other side. So the end is
-        # "no panel returned", never "this was step n of n" — reading it the other way stopped the
-        # walk at the client's phone and called the story finished.
+        # Step n of n is the end. The count runs across the whole story, or the whole chapter, both
+        # phones included (2026-08-27), so the handover and the hand back, which are the last steps
+        # of their LEGS and navigate, are never n of n. It was once counted per leg, and reading n of n
+        # then stopped the walk at the client's phone; the step count every walk asserts would say so
+        # again. Ending here saves the 6s wait below for a panel that is not coming back.
+        if step_now == step_count:
+            return seen
+        # The last step of a leg: the guide comes back up on the other side.
         _past_the_splash(page)
         try:
             page.locator(PANEL).wait_for(state="visible", timeout=6_000)
@@ -723,9 +756,9 @@ def test_crossing_to_the_client_phone_carries_the_language(page, local_server):
 
 
 # The chapters the app OFFERS as starting points, read from the shipped script through the same
-# function the two tables of contents draw from (domain/demoStory.js). Read in the browser rather
-# than by a regex over the source: the promise being tested is about what the index lists, and a
-# second reading of the script is a second thing that can be wrong.
+# function the two tables of contents draw from (domain/demoStory.js). The walk below needs the list
+# before a browser starts, so it reads the source (`_offered_chapter_ids`); this is the reading that
+# holds that one to what the index actually lists.
 CHAPTER_INDEX = """async () => {
     const [{ DEMO_STORY }, { storyChapterIndex }] = await Promise.all([
       import(new URL('modules/demo/storyTour.js', document.baseURI).href),
@@ -735,33 +768,37 @@ CHAPTER_INDEX = """async () => {
 }"""
 
 
-def test_every_offered_chapter_can_be_walked_from_a_cold_start(page, local_server):
+def test_the_chapters_walked_are_the_chapters_offered(page, local_server):
+    """A chapter the index offers but the source reading missed would be walked by nobody. Compared
+    as sets: the index lists the story's order, the source its order of declaration, and each
+    chapter is walked alone."""
+    _open_story(page, local_server)
+
+    assert sorted(page.evaluate(CHAPTER_INDEX)) == sorted(_offered_chapter_ids())
+
+
+@pytest.mark.parametrize("chapter", _offered_chapter_ids())
+def test_every_offered_chapter_can_be_walked_from_a_cold_start(
+    page, local_server, chapter
+):
     """The sandbox card and the splash list the chapters and let any one of them be the way in
     (2026-09-21). That is a promise about EVERY line of the list: tapped on a freshly seeded
     sandbox, the chapter has to run to its end.
 
     A chapter that assumes what an earlier one did — a client who has already filled in her form, a
     plan that was already written — stops the guide on a step it cannot perform, in front of the
-    person being shown the product. This walks each one on its own, from a store that has seen none
-    of the others, and names the chapter that broke.
+    person being shown the product. Each chapter is its own test, so it starts from a store that has
+    seen none of the others, a broken one is named by its test, and the workers share the chapters
+    rather than one of them walking all six in a row (99s, 2026-09-30).
     """
-    _open_story(page, local_server)
-    chapters = page.evaluate(CHAPTER_INDEX)
-    assert chapters, "the index offers no chapters"
-
-    broken = {}
-    for chapter in chapters:
-        _open_story(
-            page, local_server, f"?init=demo_data_load&demo=story&chapter={chapter}"
-        )
-        try:
-            assert _walk_the_whole_story(page), "the chapter opened on nothing"
-            expect(page.locator(PANEL)).to_be_hidden()
-        except AssertionError as stuck:
-            # Every chapter is walked, not just the ones before the first failure: the list is what
-            # the trainer is shown, so what they need to know is which LINES of it are broken.
-            broken[chapter] = str(stuck)
-
-    assert not broken, "\n\n".join(
-        f"=== {chapter} ===\n{why}" for chapter, why in broken.items()
+    _open_story(
+        page, local_server, f"?init=demo_data_load&demo=story&chapter={chapter}"
     )
+    _, chapter_length = _step_numbers(page)
+
+    captions = _walk_the_whole_story(page)
+
+    assert len(captions) == chapter_length, (
+        captions[-1] if captions else "nothing walked"
+    )
+    expect(page.locator(PANEL)).to_be_hidden()
