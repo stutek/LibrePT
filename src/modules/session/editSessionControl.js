@@ -44,9 +44,12 @@ import { askInApp, tellInApp } from "../common/appQuestion.js";
 import { mountDateField } from "../common/dateField.js";
 import { mountTimeField } from "../common/timeField.js";
 import { clientNameMatches, formatClockFromEpoch } from "../common/utils.js";
+import { isRunningOn } from "../sessionList/sessionCard.js";
 import {
+  fillRepeatControls,
   readRepeatFields,
   resetRepeatControls,
+  selectedWeekdays,
   setupRepeatControls,
 } from "./sessionRepeatControls.js";
 
@@ -420,11 +423,24 @@ function commitSeriesIfRepeating(
   return series;
 }
 
-/** Applies this evening's edit to the RULE, when the trainer asked for it.
+/** Never a second series from an evening of one: its "repeat" is that series' own rule, edited
+ * through "change every evening", and a second series beside it made the evening appear twice. */
+function commitSeriesUnlessEveningOfOne(deps, sessionId, fields) {
+  return editedEveningOfSeries(deps, sessionId) ? null : commitSeriesIfRepeating(deps, fields);
+}
+
+/** The stored evening of a series that the form is editing, or undefined. */
+function editedEveningOfSeries(deps, sessionId) {
+  if (!sessionId) return undefined;
+  return (deps.getState().sessions || []).find((row) => row.id === sessionId && row.seriesId);
+}
+
+/** Applies this evening's edit to the RULE, when the trainer asked for it: the title, slot, place,
+ * people, plan, and the weekdays and last day the repeat controls show.
  *
- * The exception row is dropped afterwards: it existed to say "this evening is different", and the
- * trainer has just said it is not. Leaving it would show the old values on the one evening they
- * edited, which is the exact opposite of what they asked for.
+ * The evening's own record stays, still marked as that series' evening. Dropping it made the
+ * form's save write it again as a plain one-off, and the series then produced the same evening a
+ * second time beside it. Kept, it carries the values the form has just saved, which are the rule's.
  */
 function applyEditToSeriesIfAsked(
   deps,
@@ -438,6 +454,8 @@ function applyEditToSeriesIfAsked(
   state.sessionSeries = (state.sessionSeries || []).map((series) =>
     series.id === session.seriesId
       ? seriesWithEdit(series, {
+          weekdays: selectedWeekdays(),
+          until: document.getElementById("setup-repeat-until")?.value.trim() ?? undefined,
           title: sessionName || series.title,
           time: timeLabel,
           location,
@@ -446,7 +464,6 @@ function applyEditToSeriesIfAsked(
         })
       : series,
   );
-  state.sessions = (state.sessions || []).filter((row) => row.id !== sessionId);
   deps.saveToLocalStorage?.();
   deps.rerenderSessions?.();
 }
@@ -658,6 +675,12 @@ export function setupEditSessionControl() {
   form.addEventListener("change", refreshScheduleConflictNotice);
 
   setupRepeatControls({ lang: deps.getState?.().lang || "en" });
+  // Changing the days or the last day of a series' rule is asking to change the series: the box is
+  // ticked for the trainer, so the change is not silently dropped on save.
+  document.getElementById("setup-repeat-detail")?.addEventListener("input", () => {
+    const apply = document.getElementById("setup-apply-to-series");
+    if (apply && !document.getElementById("setup-occurrence-scope")?.hidden) apply.checked = true;
+  });
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -700,7 +723,7 @@ export function setupEditSessionControl() {
     // there is nothing to write into `sessions` for the weeks ahead, and editing "Tuesdays at six"
     // later is one record rather than a sweep. The session in front of the trainer is still created
     // and still launches, because they filled this form in to run something now.
-    const series = commitSeriesIfRepeating(deps, {
+    const series = commitSeriesUnlessEveningOfOne(deps, editingSessionId, {
       sessionName,
       sessionDate,
       timeLabel,
@@ -780,20 +803,12 @@ function returnToBoard(isoDate) {
 }
 export const setupWorkoutSetup = setupEditSessionControl;
 
-// Session Name / Location comboboxes are seeded with a fixed set of common presets, topped up with
-// whatever titles/locations already exist in state so the trainer's own past entries resurface.
+// Session Name / Location comboboxes offer only what the trainer has already written: the titles
+// and places of their sessions, and their routine names. Fixed English presets were offered to
+// trainers in every language and read as someone else's data.
 function populateSessionNameSuggestions(nameDatalist, state, deps) {
   if (!nameDatalist || !state) return;
-  const suggestions = new Set([
-    "Morning Strength",
-    "Hypertrophy Upper",
-    "Full Body Conditioning",
-    "Cardio & Core",
-    "Athletic Performance",
-    "Mobility & Recovery",
-    "Lower Body Power",
-    "Personal Training 1-on-1",
-  ]);
+  const suggestions = new Set();
   for (const b of state.sessions || []) {
     const title = b.title || b.titles?.[0];
     if (title) suggestions.add(title);
@@ -808,14 +823,7 @@ function populateSessionNameSuggestions(nameDatalist, state, deps) {
 
 function populateLocationSuggestions(locDatalist, state, deps) {
   if (!locDatalist || !state) return;
-  const locSuggestions = new Set([
-    "Trib gym base",
-    "playground outside",
-    "city park",
-    "Studio A",
-    "Main Gym Floor",
-    "Client Home Studio",
-  ]);
+  const locSuggestions = new Set();
   for (const b of state.sessions || []) {
     if (b.location) locSuggestions.add(b.location);
   }
@@ -918,8 +926,6 @@ function participantsOnOpen(clients, draft, targetSession, preselectedClientId) 
     .filter((client) => client !== undefined);
 }
 
-// null means "leave the <select> unset" (its default: the first non-disabled option) — matches the
-// original behaviour where no branch assigning select.value ran at all.
 function determineParticipantRoutineValue(
   client,
   draft,
@@ -927,7 +933,6 @@ function determineParticipantRoutineValue(
   targetSession,
   preselectedRoutineId,
   preselectedClientId,
-  state,
 ) {
   if (draft?.clientRoutines?.[client.id]) return draft.clientRoutines[client.id];
   if (isPlanningModeActive) return "empty_plan";
@@ -936,10 +941,9 @@ function determineParticipantRoutineValue(
   // Someone added to a session that already has a programme joins that programme. Offering the
   // library's first routine instead replaced the session's plan when the form was saved.
   if (targetSession?.routineId) return targetSession.routineId;
-  if (client.id === "c1a9f0e2") return "r10d5e6f";
-  if (client.id === "c2b8e1d3") return "r11d5e6f";
-  if (state.routines.length > 0) return state.routines[0].id;
-  return null;
+  // No routine is chosen for someone the trainer has not picked one for: the library's first
+  // routine was written for another client.
+  return "empty_plan";
 }
 
 function buildParticipantRow(client, ctx) {
@@ -987,9 +991,8 @@ function buildParticipantRow(client, ctx) {
     targetSession,
     preselectedRoutineId,
     preselectedClientId,
-    state,
   );
-  if (routineValue != null) select.value = routineValue;
+  select.value = routineValue;
 
   // Taking someone off the session is one tap, next to their name, and says so out loud for a
   // screen reader — the trainer who added the wrong Ana must not have to hunt for how to undo it.
@@ -1169,6 +1172,32 @@ function renderRepeatSection(targetSession, t) {
   // A repeating slot is authored on the session being CREATED; an existing evening is edited on its
   // own, so the controls start clean every time.
   resetRepeatControls();
+  // An evening of a series shows the series' own rule. "Repeat" stays ticked and cannot be
+  // unticked here: ending the series is the last day, and a box that did nothing would lie.
+  if (partOfSeries) {
+    fillRepeatControls(
+      (deps.getState().sessionSeries || []).find((s) => s.id === targetSession.seriesId),
+    );
+  }
+}
+
+/** Date and time are read-only for a session that has started or finished, with a line saying why.
+ * Moving a session already run wrote a finished session onto another day. */
+function renderSlotLock(targetSession, t) {
+  const locked = Boolean(
+    targetSession &&
+      (targetSession.completed || isRunningOn(deps.getActiveSession?.(), targetSession.id)),
+  );
+  const note = document.getElementById("setup-slot-locked-note");
+  if (note) {
+    note.textContent = locked ? t("session_slot_locked") : "";
+    note.hidden = !locked;
+  }
+  document.getElementById("form-workout-setup")?.classList.toggle("is-slot-locked", locked);
+  for (const id of ["setup-session-date", "setup-start-time", "setup-end-time"]) {
+    const field = document.getElementById(id);
+    if (field) field.readOnly = locked;
+  }
 }
 
 export function openEditSessionControlModal(
@@ -1212,6 +1241,7 @@ export function openEditSessionControlModal(
     : null;
 
   renderRepeatSection(targetSession, t);
+  renderSlotLock(targetSession, t);
 
   const draft = getEditSessionDraft();
   const defaults = computeDefaultSessionTimes();

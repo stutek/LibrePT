@@ -76,6 +76,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Fixed
 
+- **The session form no longer decides for the trainer.** A client added to a session gets the empty
+  plan instead of the library's first routine; the name and place suggestions are the trainer's own
+  instead of English presets; a started or finished session keeps its date and times, and the form
+  says why; and ending a series from one of its evenings ends that series instead of duplicating the
+  evening.
 - **The plan-change dialog names the exercise it changes**, and its target field is labelled in the
   exercise's own unit (level, band, added weight or kg) instead of always "(kg)".
 - **A load says its unit in the app's language, beside the number.** A machine load read "Lvl 60" and

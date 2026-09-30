@@ -242,6 +242,26 @@ test("an edit that says nothing leaves the rule as it was", () => {
   assert.deepEqual(seriesWithEdit(SERIES, {}), SERIES);
 });
 
+// Ending a series is the form's "Until" on an evening of it: the new last day is written into THAT
+// series. A series that was open stays open when the edit says nothing about "until".
+test("an edit carrying a last day ends the series on it, and only when it says so", () => {
+  const ended = seriesWithEdit(SERIES, { until: "2026-10-06" });
+  assert.equal(ended.until, "2026-10-06");
+  assert.equal(ended.id, SERIES.id);
+  assert.equal(seriesWithEdit({ ...SERIES, until: "2026-10-06" }, {}).until, "2026-10-06");
+  // An empty last day reopens the series.
+  assert.equal(seriesWithEdit({ ...SERIES, until: "2026-10-06" }, { until: "" }).until, "");
+  assert.deepEqual(
+    datesOf(seriesOccurrences(ended, { from: "2026-08-24", to: "2026-12-31" })).slice(-1),
+    ["2026-10-06"],
+  );
+});
+
+test("an edit carrying weekdays replaces them; an empty list keeps the old ones", () => {
+  assert.deepEqual(seriesWithEdit(SERIES, { weekdays: [3] }).weekdays, [3]);
+  assert.deepEqual(seriesWithEdit(SERIES, { weekdays: [] }).weekdays, [2, 4]);
+});
+
 // A stored evening answers to the key the board taps with, which is the DERIVED evening's id. The
 // record itself carries a fresh id, so asking by id alone said "not stored yet" on the second tap and
 // wrote the evening a second time — two identical cards on one day.

@@ -30,31 +30,18 @@ export function renderEditSessionView(targetElement) {
             <div>
               <label for="setup-session-name" data-i18n="label_session_name">Session Name</label>
               <input type="text" id="setup-session-name" class="form-control" list="setup-session-name-list" data-i18n-placeholder="session_name_placeholder" placeholder="Select or type session name...">
-              <datalist id="setup-session-name-list">
-                <option value="Morning Strength"></option>
-                <option value="Hypertrophy Upper"></option>
-                <option value="Full Body Conditioning"></option>
-                <option value="Cardio & Core"></option>
-                <option value="Athletic Performance"></option>
-                <option value="Mobility & Recovery"></option>
-                <option value="Lower Body Power"></option>
-                <option value="Personal Training 1-on-1"></option>
-              </datalist>
+              <datalist id="setup-session-name-list"></datalist>
               <p class="form-error" id="setup-session-name-error" hidden></p>
             </div>
             <div>
               <label for="setup-location" data-i18n="label_location">Location</label>
               <input type="text" id="setup-location" class="form-control" list="setup-location-list" data-i18n-placeholder="location_placeholder" placeholder="Select or type location...">
-              <datalist id="setup-location-list">
-                <option value="Trib gym base"></option>
-                <option value="playground outside"></option>
-                <option value="city park"></option>
-                <option value="Studio A"></option>
-                <option value="Main Gym Floor"></option>
-              </datalist>
+              <datalist id="setup-location-list"></datalist>
               <p class="form-error" id="setup-location-error" hidden></p>
             </div>
           </div>
+
+          <p id="setup-slot-locked-note" class="setup-occurrence-note text-sm mb-3" role="status" hidden></p>
 
           <div class="grid grid-3-col gap-2 mb-3">
             <div>

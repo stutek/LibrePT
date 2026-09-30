@@ -237,11 +237,15 @@ export function sessionsAfterRemoving(sessions, removedIds) {
 
 /** The series after a trainer edited one of its evenings and asked for it to apply to all of them.
  *
- * What travels is what the rule DESCRIBES — the title, the slot, the place, who is in it — and not
- * the date: a date belongs to one evening, and "we are moving to Wednesdays" is a change to
- * `weekdays`, which is a different sentence and a different control.
+ * What travels is what the rule DESCRIBES: the title, the slot, the place, who is in it, the
+ * weekdays it falls on, and the last day it runs (`until`). The date does not: a date belongs to
+ * one evening. `until` left out keeps the series as it was; an empty `until` makes it open again;
+ * an empty `weekdays` list keeps the old days, because a rule with no day produces nothing.
  */
-export function seriesWithEdit(series, { title, time, location, participants, routineId } = {}) {
+export function seriesWithEdit(
+  series,
+  { title, time, location, participants, routineId, weekdays, until } = {},
+) {
   if (!series) return series;
   return {
     ...series,
@@ -250,5 +254,7 @@ export function seriesWithEdit(series, { title, time, location, participants, ro
     location: location ?? series.location,
     participants: participants ? [...participants] : series.participants,
     routineId: routineId || series.routineId,
+    weekdays: weekdays?.length ? [...weekdays] : series.weekdays,
+    ...(until === undefined ? {} : { until }),
   };
 }

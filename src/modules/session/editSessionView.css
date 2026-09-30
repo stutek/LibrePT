@@ -268,3 +268,9 @@
   min-width: 0;
   width: 100%;
 }
+/* A session that has started or finished keeps its day and time: the arrows and marks that would
+   change them are hidden, the fields stay readable. */
+.is-slot-locked .stepped-field-steps,
+.is-slot-locked .stepped-field-marks {
+  display: none;
+}

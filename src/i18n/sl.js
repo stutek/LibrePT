@@ -808,6 +808,8 @@ export const sl = {
   plan_fit_over: "čez",
   plan_fit_tight: "na tesnem",
   label_apply_to_series: "Spremeni vse večere tega treninga",
+  session_slot_locked:
+    "Ta trening se je že začel ali končal, zato datuma in ure ne moreš spremeniti.",
   session_one_of_a_series:
     "To je en večer ponavljajočega se treninga. Kar spremeniš tukaj, velja samo za ta večer.",
   gym_note_in_this_plan: "v tem načrtu",

@@ -560,6 +560,7 @@ async function init() {
     rerenderSessions: renderSessions,
     openSessionInviteDialog,
     openNewClient,
+    getActiveSession: () => getActiveSession(),
   });
   setupActiveSession();
 

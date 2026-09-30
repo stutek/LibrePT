@@ -857,6 +857,8 @@ export const en = {
   plan_fit_over: "over",
   plan_fit_tight: "tight",
   label_apply_to_series: "Change every evening of this session",
+  session_slot_locked:
+    "This session has already started or finished, so its date and time cannot be changed.",
   session_one_of_a_series:
     "This is one evening of a repeating session. What you change here changes this evening only.",
   gym_note_in_this_plan: "in this plan",

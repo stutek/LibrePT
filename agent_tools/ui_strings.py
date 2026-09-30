@@ -51,7 +51,7 @@ SRC = REPO_ROOT / "src"
 # registry's own language names (intakeView.js), then the global History view's title and
 # description, removed with the view (historyView.js), then the screen-reader names of close
 # buttons and fields and the clipboard's "Completed" tag (2026-09-30).
-BASELINE = 99
+BASELINE = 98
 
 # Upstream files and the dictionaries themselves: the first are not ours to translate, the second
 # ARE the translations.

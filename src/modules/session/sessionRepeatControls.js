@@ -81,11 +81,27 @@ export function setupRepeatControls({ doc = document, lang = "en" } = {}) {
 /** Puts the controls back to "one-off", which is what a fresh form means. */
 export function resetRepeatControls(doc = document) {
   const toggle = doc.getElementById(REPEAT_ID);
-  if (toggle) toggle.checked = false;
+  if (toggle) {
+    toggle.checked = false;
+    toggle.disabled = false;
+  }
   const until = doc.getElementById(UNTIL_ID);
   if (until) until.value = "";
   setWeekdays(doc, []);
   doc.getElementById(DETAIL_ID)?.classList.add("hidden");
+}
+
+/** Shows an existing series' rule: "repeat" ticked (and locked, so it cannot say the opposite of
+ * what is stored), its weekdays and its last day. */
+export function fillRepeatControls(series, doc = document) {
+  const toggle = doc.getElementById(REPEAT_ID);
+  if (!toggle || !series) return;
+  toggle.checked = true;
+  toggle.disabled = true;
+  setWeekdays(doc, series.weekdays || []);
+  const until = doc.getElementById(UNTIL_ID);
+  if (until) until.value = series.until || "";
+  doc.getElementById(DETAIL_ID)?.classList.remove("hidden");
 }
 
 /** The series the form describes, or null when this is an ordinary one-off session.
