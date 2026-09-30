@@ -1230,6 +1230,14 @@ single-database layout), so **no app-level lock is needed for it**.
 - `navigator.locks` around the *migration pass* is worth ~3 lines so two tabs do not duplicate work —
   efficiency only, since idempotency already makes it safe.
 
+**Presoja 2026-09-30 (Claude): ostanek, ki ga ta razdelek rešuje, ne more več nastati.** Primerjava
+različic ob pisanju (CAS) je bila odgovor na dva zavihka, ki med branjem in pisanjem drug drugemu
+podtakneta spremembo. §80.40 (`4b17230`) je to rešil drugače: piše le en zavihek naenkrat
+([tabOwnership.js](src/data/tabOwnership.js)); zavihek, ki zagon opravi pozneje, prevzame pisanje,
+vsi drugi nehajo shranjevati in to povedo. Z enim piscem ni prepletanja, ki bi ga CAS lovil. Zato
+ga ne gradim; razdelek naj zapre Simon, ali pa ga ohrani za dan, ko bo pisalo več naprav hkrati
+(sinhronizacija), kjer en zavihek ni več edini pisec.
+
 ### 18.10 [x] [RESOLVED — one build] Deep links, and one build vs. many builds
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#1810-x-resolved-one-build-deep-links-and-one-build-vs-many-builds); what shipped is in [CHANGELOG.md](CHANGELOG.md).
@@ -4904,6 +4912,15 @@ an invitation, under both passes of §62. Blocks: §61, which needs the "P" snap
 **Stanje 2026-09-30:** prva alineja je narejena (`ea16316`): zahtevani zamrznjeni zapisi se izpeljejo
 iz `MIGRATION_STEPS`, in preizkus poimenuje različico brez zapisa. Preverjeno s skrito datoteko za
 shemo 3.
+
+**Stanje 2026-09-30, drugič: Simonovo naročilo z dne 2026-09-17 je izpolnjeno** — besedilo zgoraj
+opisuje stanje pred `a37e926` (»PREVIEW replaces P«). Izmerjeno danes z `migrateState` v Node pri
+aktivni shemi 5: »PREVIEW«, 4.5 in 5.5 so zavrnjeni kot predogled z razlogom in brez izvedenega
+koraka; 6 je zavrnjena kot »zapisano z novejšo različico«; 5 gre skozi brez koraka. Pravilo je v
+`refusalFor` ([schemaMigrations.js](src/data/schemaMigrations.js)) in `isPreviewVersion`
+([migrationSteps.js](src/data/migrationSteps.js)), preizkus v
+[schemaMigrations.test.mjs](tests/unit_js/data/schemaMigrations.test.mjs) (»PREVIEW data is refused by
+its version …«). Odprt ostaja le predlog o zamrznjeni bazi naprave za vsako različico, ki ni odločen.
 
 ## 62. [x] Feature code may write only what the live schema declares — shipped 2026-09-19
 
