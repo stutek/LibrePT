@@ -104,7 +104,7 @@ export const de = {
   btn_log_feedback: "Notiz hinzufügen",
   alert_no_sets:
     "Es wurden keine abgeschlossenen Sätze aufgezeichnet. Willst du das Training wirklich beenden und leer speichern?",
-  confirm_finish_early: "Dieses Training dauert noch etwa {min} Minuten. Trotzdem jetzt beenden?",
+  confirm_finish_early: "Dieses Training dauert noch etwa {time}. Trotzdem jetzt beenden?",
   confirm_cancel:
     "Dieses Training löschen? Der aufgezeichnete Fortschritt und die Rückmeldungen werden endgültig gelöscht.",
   confirm_delete_session:

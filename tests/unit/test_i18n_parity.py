@@ -24,6 +24,17 @@ def _keys(path):
     return set(re.findall(r"^\s*([a-zA-Z0-9_]+)\s*:", body.group(1), re.MULTILINE))
 
 
+# `key: "… {name} …"`, single or multi-line, up to the line that ends the value.
+ENTRY = re.compile(r'^\s*([a-zA-Z0-9_]+):\s*\n?\s*"((?:[^"\\]|\\.)*)"', re.MULTILINE)
+PLACEHOLDER = re.compile(r"\{([a-zA-Z0-9_]+)\}")
+
+
+def _placeholders(path):
+    """Which `{name}` each string key carries, per locale file."""
+    text = path.read_text(encoding="utf-8")
+    return {key: set(PLACEHOLDER.findall(value)) for key, value in ENTRY.findall(text)}
+
+
 def test_locales_present_and_registered(src_dir):
     files = _locale_files(src_dir)
     assert files, "no locale files found under src/i18n/"
@@ -46,6 +57,33 @@ def test_all_locales_have_the_same_keys(src_dir):
         name: sorted(all_keys - ks) for name, ks in keysets.items() if all_keys - ks
     }
     assert not missing, f"locales with missing translations: {missing}"
+
+
+def test_a_key_carries_the_same_placeholders_in_every_locale(src_dir):
+    """A placeholder is a contract with the ONE caller that fills it. When a key's `{name}` differs
+    between locales, the caller fills the name it knows and the other language shows the brace text
+    itself — a defect nothing else catches, because the dictionaries are still in key parity and both
+    strings read perfectly well on their own. It is also what a change like counting a remaining time
+    in hours instead of raw minutes touches: three dictionaries and one caller, and missing one
+    of them is silent."""
+    files = _locale_files(src_dir)
+    per_locale = {f.stem: _placeholders(f) for f in files}
+    reference = max(per_locale.items(), key=lambda item: len(item[1]))
+
+    disagreements = []
+    for name, entries in per_locale.items():
+        if name == reference[0]:
+            continue
+        for key, holders in entries.items():
+            expected = reference[1].get(key)
+            if expected is not None and expected != holders:
+                disagreements.append(
+                    f"{key}: {reference[0]} has {sorted(expected) or 'none'}, "
+                    f"{name} has {sorted(holders) or 'none'}"
+                )
+    assert not disagreements, "placeholders differ between locales:\n" + "\n".join(
+        sorted(disagreements)
+    )
 
 
 # An element carrying `data-i18n` has its whole content replaced at runtime: domMappings.js applies

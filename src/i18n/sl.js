@@ -104,7 +104,7 @@ export const sl = {
   btn_log_feedback: "Dodaj opombo",
   alert_no_sets: "Ni zabeleženih zaključenih serij. Res želiš zaključiti in shraniti prazno vadbo?",
   confirm_finish_early:
-    "Do konca tega treninga je še približno {min} minut. Ga želiš vseeno zaključiti zdaj?",
+    "Do konca tega treninga je še približno {time}. Ga želiš vseeno zaključiti zdaj?",
   confirm_cancel:
     "Izbriši ta trening? Zabeležen napredek in povratne informacije bodo trajno izgubljeni.",
   confirm_delete_session:

@@ -30,6 +30,7 @@ import { renderNotificationArea } from "../modules/common/notificationArea.js";
 import {
   clientDisplayName,
   formatClockFromEpoch,
+  formatDurationHourMin,
   getISODateString,
 } from "../modules/common/utils.js";
 import {
@@ -319,7 +320,13 @@ async function confirmEarlyFinish(activeSession, t) {
   if (!endDate || activeSession.sourceSession?.isPlanning) return true;
   const remainingMin = (new Date(endDate).getTime() - Date.now()) / 60000;
   if (remainingMin <= 10) return true;
-  const message = t("confirm_finish_early").replace("{min}", String(Math.round(remainingMin)));
+  // Said the way every other countdown in the app says it ("01h 32m"): the same question used to
+  // count in raw minutes, so a session two days off asked about "3812 minutes" — a number no trainer
+  // reads as a time.
+  const message = t("confirm_finish_early").replace(
+    "{time}",
+    formatDurationHourMin(remainingMin * 60),
+  );
   return askInApp({ t, message, confirmKey: "dialog_finish_now" });
 }
 
