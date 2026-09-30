@@ -71,6 +71,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Fixed
 
+- **An imported programme opens with its sets, reps and loads.** The editor showed "[object Object]"
+  for the sets and every exercise opened without a load.
+- **A load and reps changed in the plan editor reach the sets not yet done**, so the history no
+  longer records "10, 10, 10" with no load for a squat done at 12 kg.
+- **Swapping an exercise in a pending adjustment starts with nothing chosen.** It preselected the
+  first in the list — a barbell squat for a client with a painful knee.
 - **The privacy notice, the consent forms and the preview page open once the app works offline.**
   They showed "page not found".
 - **Show me draws every tap it makes.** On a card reached by walking Back, Show me replayed the

@@ -167,6 +167,34 @@ export function buildClientStateFromHistoryLog(log, exercises) {
   return clientState;
 }
 
+// An imported programme (programImport.js `readProgram` items) as a live plan. An imported item
+// carries its own throwaway id and a per-set list; the plan keys logs by the CATALOGUE id, so a
+// matched movement takes the catalogue's id and name (a second occurrence gets a fresh id and keeps
+// the movement in `exerciseId`, as routines do). A movement the catalogue does not know keeps its
+// own id and name. The rest of the conversion is the history-snapshot path, so an import and a
+// replayed session cannot build two different plans from the same sets.
+export function buildClientStateFromImportedItems(items, exercises, routineName = "") {
+  const seen = new Set();
+  const rows = (items || []).map((raw) => {
+    if (isRestRecord(raw) || raw.unreadable) return raw;
+    // A programme that names no load prescribes none: its sets carry 0, as the target does, not a
+    // missing value the history would later have to read as something.
+    const item = Array.isArray(raw.sets)
+      ? { ...raw, sets: raw.sets.map((set) => ({ ...set, weight: set.weight ?? 0 })) }
+      : raw;
+    const entry = exercises.find((e) => e.id === item.exerciseId);
+    if (!entry) return item;
+    const slot = planItemIdFor(entry, seen);
+    return { ...item, ...slot, name: entry.name };
+  });
+  const clientState = buildClientStateFromHistoryLog({ routineName, exercises: rows }, exercises);
+  for (const plan of clientState.exercises) {
+    const source = rows.find((row) => row.id === plan.id);
+    if (source?.exerciseId && source.exerciseId !== plan.id) plan.exerciseId = source.exerciseId;
+  }
+  return clientState;
+}
+
 // A plan item's id is also the key of its logged sets. A routine that lists one movement twice (a
 // warm-up and a main block) would give both occurrences one log, so the second occurrence onward
 // gets its own id and keeps the movement in `exerciseId`, the shape library circuits already use.

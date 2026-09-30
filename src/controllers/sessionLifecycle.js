@@ -16,6 +16,7 @@ import { isCachedSessionStale } from "../domain/sessionClock.js";
 import { buildSessionHistoryRecord } from "../domain/sessionHistoryRecord.js";
 import {
   buildClientStateFromHistoryLog,
+  buildClientStateFromImportedItems,
   buildClientStateFromRoutine,
 } from "../domain/sessionPlanFactory.js";
 import { sessionBelongsToSlot } from "../domain/sessionRecord.js";
@@ -138,9 +139,16 @@ export function startWorkoutSession(clientRoutines, sessionMeta = null, deps = {
     // rather than by writing over the session afterwards — an import that patched a session the
     // moment after it was created would be a second way to construct one.
     if (options.plan) {
-      session.clientRoutines[cr.clientId].exercises = options.plan;
-      session.clientRoutines[cr.clientId].logs = {};
-      session.clientRoutines[cr.clientId].routineName = sessionMeta?.titles?.[0] || "";
+      const imported = buildClientStateFromImportedItems(
+        options.plan,
+        libraryExercises(state),
+        sessionMeta?.titles?.[0] || "",
+      );
+      Object.assign(session.clientRoutines[cr.clientId], {
+        exercises: imported.exercises,
+        logs: imported.logs,
+        routineName: imported.routineName,
+      });
     }
   }
 

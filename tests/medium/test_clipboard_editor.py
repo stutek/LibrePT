@@ -450,3 +450,48 @@ def test_a_load_that_is_not_a_number_is_marked_on_the_field(page, local_server):
     assert page.locator(".editor-f-weight").first.evaluate(
         "el => el.matches(':invalid')"
     )
+
+
+def test_a_load_and_reps_typed_in_the_editor_reach_the_sets_not_yet_done(
+    page, local_server
+):
+    """The history copies the logged sets, not the targets. A load typed after the sets were built
+    left them at 0 kg, so the client's history read '10, 10, 10' with no weight. Sets already
+    completed are what was done and stay."""
+    _mount(
+        page,
+        local_server,
+        [
+            exercise_item(
+                "e1", "Goblet Squat", setsTargetCount=3, repsTarget=10, weightTarget=0
+            )
+        ],
+    )
+    page.evaluate(
+        """async () => {
+          const ctrl = await import(new URL('controllers/activeSessionController.js', document.baseURI).href);
+          const session = ctrl.getActiveSession();
+          session.clientRoutines[session.activeClientId].logs.e1 = [
+            {reps: 8, weight: 5, completed: true, note: ''},
+            {reps: 10, weight: 0, completed: false, note: ''},
+            {reps: 10, weight: 0, completed: false, note: ''},
+          ];
+        }"""
+    )
+    if not page.locator(".editor-f-weight").first.is_visible():
+        page.locator(".editor-row-toggle").first.click()
+    for selector, typed in ((".editor-f-weight", "12"), (".editor-f-reps", "9")):
+        field = page.locator(selector).first
+        field.click()
+        field.press("Control+a")
+        field.press_sequentially(typed)
+        field.press("Tab")
+    logs = page.evaluate(
+        """async () => {
+          const ctrl = await import(new URL('controllers/activeSessionController.js', document.baseURI).href);
+          const session = ctrl.getActiveSession();
+          return session.clientRoutines[session.activeClientId].logs.e1
+            .map((l) => [l.reps, l.weight, l.completed]);
+        }"""
+    )
+    assert logs == [[8, 5, True], [9, 12, False], [9, 12, False]]

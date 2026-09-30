@@ -198,6 +198,7 @@ export function renderApplyAdjustmentDialog() {
           <label><span data-i18n="adjust_replacement">Replacement Exercise</span> <span class="swap-hint text-muted" data-i18n="adjust_replacement_hint">— same muscle group keeps volume tracking intact</span></label>
           <input type="hidden" id="adjust-exercise-swap">
           <div id="adjust-swap-picker" class="exercise-picker"></div>
+          <p id="adjust-swap-needed" class="text-muted" data-i18n="adjust_swap_choose">Tap a replacement exercise to continue.</p>
         </div>
       </div>
 
@@ -295,7 +296,17 @@ export function openAdjustmentWizardComponent(updateId, ctx) {
 
   // Action select toggles which panel is shown.
   const actionTypeSelect = document.getElementById("adjust-action-type");
+  // Nothing is chosen for the trainer: a swap needs a tapped replacement before Apply works.
+  const swapSelect = document.getElementById("adjust-exercise-swap");
+  const applyButton = newForm.querySelector("button[type=submit]");
+  const needed = document.getElementById("adjust-swap-needed");
+  const syncApply = () => {
+    const missing = actionTypeSelect.value === "swap" && !swapSelect.value;
+    applyButton.disabled = missing;
+    needed.classList.toggle("hidden", !missing);
+  };
   actionTypeSelect.addEventListener("change", () => {
+    syncApply();
     const action = actionTypeSelect.value;
     if (action === "modify") {
       document.getElementById("adjust-panel-modify").classList.remove("hidden");
@@ -313,19 +324,19 @@ export function openAdjustmentWizardComponent(updateId, ctx) {
 
   // Swap picker — pre-filtered to the same muscle group so the replacement inherits the correct
   // volume bucket. The chosen id lands in the hidden #adjust-exercise-swap.
-  const swapSelect = document.getElementById("adjust-exercise-swap");
   swapSelect.value = "";
   mountExercisePicker(document.getElementById("adjust-swap-picker"), {
     state,
     excludeId: exerciseId,
     defaultCategory: exercise ? exercise.category : "All",
-    autoSelectFirst: true,
     keepSelection: true,
     ...pickerLabels(t),
     onSelect: (ex) => {
       swapSelect.value = ex ? ex.id : "";
+      syncApply();
     },
   });
+  syncApply();
 
   newForm.addEventListener("submit", (e) => {
     e.preventDefault();

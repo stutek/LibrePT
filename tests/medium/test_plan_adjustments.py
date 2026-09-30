@@ -281,6 +281,8 @@ def test_swap_puts_the_replacement_in_the_same_slot(page, local_server):
     """A regression or progression replaces the movement and keeps the prescription around it."""
     _open_wizard(page, local_server, "swap")
     before = page.evaluate(ROUTINE_ROWS)
+    # Nothing is chosen for the trainer: the replacement is tapped.
+    page.locator("#adjust-swap-picker .picker-item").first.click()
     _submit(page)
 
     changed = _changed_rows(before, page.evaluate(ROUTINE_ROWS))

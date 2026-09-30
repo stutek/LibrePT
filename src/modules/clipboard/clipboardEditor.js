@@ -492,11 +492,21 @@ export function renderClipboardEditor(container, deps) {
   bindField(".editor-f-weight", (ex, v) => {
     ex.weightTarget = parseLoad(v);
   });
+  // The history stores the logged sets, not the targets. A target changed after the sets were built
+  // must reach every set not yet done; a completed set is what was done and stays as it was.
+  const setOnPendingLogs = (ex, field, value) => {
+    for (const log of activeClientState.logs[ex.id] || []) {
+      if (!log.completed) log[field] = value;
+    }
+  };
 
   // ---------- fields collapse/expand: the chevron next to the name toggles that one row's
+    if (v !== "") setOnPendingLogs(ex, "reps", ex.repsTarget);
   // sets/reps/load/circuit fields only, leaving every other row's state untouched. ----------
   const wireRowExpandToggle = () => {
     for (const btn of listEl.querySelectorAll(".editor-row-toggle")) {
+    // A half-typed load ("2,5,5") stays on the field, marked invalid; it is not written into a set.
+    if (typeof ex.weightTarget === "number") setOnPendingLogs(ex, "weight", ex.weightTarget);
       btn.addEventListener("click", (e) => {
         e.stopPropagation();
         const ex = items[rowKeyOf(btn.closest(".editor-row"))];

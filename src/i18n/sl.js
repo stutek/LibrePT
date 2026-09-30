@@ -322,6 +322,7 @@ export const sl = {
   adjust_replacement: "Nadomestna vaja",
   adjust_replacement_hint: "— ista mišična skupina ohrani sledenje obsegu",
   adjust_apply: "Uveljavi in razreši",
+  adjust_swap_choose: "Tapni nadomestno vajo, da nadaljuješ.",
   // The encrypted-file reader a CLIENT opens (modules/common/encryptedFileReader.js).
   // The Routine Template dialog and its rows (routineFormsController.js, plansView.js).
   routine_name_placeholder: "npr. Zgornji del telesa A",

@@ -307,6 +307,7 @@ export const en = {
   adjust_replacement: "Replacement Exercise",
   adjust_replacement_hint: "— same muscle group keeps volume tracking intact",
   adjust_apply: "Apply & Resolve",
+  adjust_swap_choose: "Tap a replacement exercise to continue.",
   // The encrypted-file reader a CLIENT opens (modules/common/encryptedFileReader.js).
   // The Routine Template dialog and its rows (routineFormsController.js, plansView.js).
   routine_name_placeholder: "e.g. Upper Body A",

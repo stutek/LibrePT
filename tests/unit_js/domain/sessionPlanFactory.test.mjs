@@ -16,6 +16,7 @@ import { test } from "node:test";
 import {
   blankExercise,
   buildClientStateFromHistoryLog,
+  buildClientStateFromImportedItems,
   buildClientStateFromLibraryCircuit,
   buildClientStateFromRoutine,
   clampFocusIndex,
@@ -298,4 +299,59 @@ test("a blank exercise has one empty log row per target set, in the circuit it j
     ["c1", "Core", 2],
   );
   assert.deepEqual(blankExercise({ id: "x2" }).planItem.circuitId, null);
+});
+
+test("an imported programme becomes plan items with targets and logs, not raw import rows", () => {
+  const set = (reps, weight) => ({ reps, weight, completed: false });
+  const items = [
+    {
+      id: "tmp-1",
+      type: "exercise",
+      name: "  bench press ",
+      exerciseId: "ex-bench",
+      custom: false,
+      sets: [set(5, 60), set(5, 60), set(5, 60), set(5, 60)],
+    },
+    { id: "tmp-2", type: "rest", rest: 120 },
+    {
+      id: "tmp-3",
+      type: "exercise",
+      name: "Push-Up",
+      custom: true,
+      sets: [set(12, 0), set(12, 0)],
+    },
+    {
+      id: "tmp-4",
+      type: "exercise",
+      name: "Bench Press",
+      exerciseId: "ex-bench",
+      custom: false,
+      sets: [set(8, 40)],
+    },
+  ];
+  const state = buildClientStateFromImportedItems(items, CATALOG, "Upper");
+  const [bench, rest, pushUp, benchAgain] = state.exercises;
+  assert.equal(state.routineName, "Upper");
+  assert.equal(bench.id, "ex-bench");
+  assert.equal(bench.name, "Bench Press");
+  assert.equal(bench.setsTargetCount, 4);
+  assert.equal(bench.repsTarget, 5);
+  assert.equal(bench.weightTarget, 60);
+  assert.deepEqual(
+    state.logs["ex-bench"].map((log) => [log.reps, log.weight]),
+    [
+      [5, 60],
+      [5, 60],
+      [5, 60],
+      [5, 60],
+    ],
+  );
+  assert.equal(rest.type, "rest");
+  assert.equal(pushUp.name, "Push-Up");
+  assert.equal(pushUp.id, "tmp-3");
+  assert.equal(pushUp.setsTargetCount, 2);
+  assert.equal(state.logs["tmp-3"].length, 2);
+  assert.equal(benchAgain.exerciseId, "ex-bench");
+  assert.notEqual(benchAgain.id, "ex-bench");
+  assert.equal(state.logs[benchAgain.id][0].weight, 40);
 });

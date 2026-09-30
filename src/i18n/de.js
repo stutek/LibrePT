@@ -325,6 +325,7 @@ export const de = {
   adjust_replacement_hint:
     "— dieselbe Muskelgruppe, damit das Trainingsvolumen weiter gezählt wird",
   adjust_apply: "Übernehmen und erledigen",
+  adjust_swap_choose: "Tippe auf eine Ersatzübung, um fortzufahren.",
   // The encrypted-file reader a CLIENT opens (modules/common/encryptedFileReader.js).
   // The Routine Template dialog and its rows (routineFormsController.js, plansView.js).
   routine_name_placeholder: "z. B. Oberkörper A",

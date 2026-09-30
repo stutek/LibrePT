@@ -110,7 +110,6 @@ export function sourceBadge(exercise, ownWord) {
  * @param {Object}   opts.state            - App state (reads the library through `libraryExercises`).
  * @param {string}  [opts.excludeId]       - Exercise id to omit (e.g. the one being swapped).
  * @param {string}  [opts.defaultCategory] - Muscle-group chip to pre-select (default "All").
- * @param {boolean} [opts.autoSelectFirst] - Pre-select the first match and fire onSelect (swap mode).
  * @param {boolean} [opts.keepSelection]   - Keep a persistent highlight on the chosen item (swap mode).
  * @param {string}  [opts.initialQuery]    - Seed the search box (e.g. what the PT already typed).
  * @param {boolean} [opts.autoFocusSearch] - Put the caret in the search box on mount.
@@ -137,7 +136,6 @@ export function mountExercisePicker(
     state,
     excludeId = null,
     defaultCategory = "All",
-    autoSelectFirst = false,
     keepSelection = false,
     initialQuery = "",
     autoFocusSearch = false,
@@ -334,19 +332,5 @@ export function mountExercisePicker(
       searchEl.focus();
       searchEl.select();
     }, 0);
-  }
-
-  if (autoSelectFirst) {
-    const first = getMatches()[0];
-    if (first) {
-      selectedId = first.id;
-      if (keepSelection) {
-        const el = listEl.querySelector(`.picker-item[data-id="${first.id}"]`);
-        el?.classList.add("selected");
-      }
-      onSelect?.(first);
-    } else {
-      onSelect?.(null);
-    }
   }
 }
