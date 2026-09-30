@@ -268,17 +268,29 @@ RECORD_SCROLL = """() => {
   const t0 = performance.now();
   window.__scrollLog = [];
   const deck = document.getElementById('active-exercise-scroll-deck');
-  const log = (kind) => {
+  const scroller = () => {
     let el = deck.parentElement;
     while (el && !/(auto|scroll)/.test(getComputedStyle(el).overflowY)) el = el.parentElement;
-    el = el || document.scrollingElement;
+    return el || document.scrollingElement;
+  };
+  const describe = (node) =>
+    node ? `${node.tagName.toLowerCase()}${node.id ? '#' + node.id : ''}.${[...node.classList].join('.')}` : 'none';
+  const log = (kind, extra = {}) => {
+    const el = scroller();
     window.__scrollLog.push({
       kind, ms: Math.round(performance.now() - t0), top: Math.round(el.scrollTop),
       room: deck.style.getPropertyValue('--deck-scroll-room'),
       canScroll: el.scrollHeight - el.clientHeight,
+      ...extra,
     });
   };
-  window.addEventListener('wheel', () => log('wheel'), { passive: true });
+  // Where the wheel landed, and whether the scroller can receive it: a failure that shows a wheel
+  // and no scroll has to say which of the two it was; one failure on 2026-09-30 could not.
+  window.addEventListener('wheel', (event) => log('wheel', {
+    target: describe(event.target),
+    insideScroller: scroller().contains(event.target),
+    defaultPrevented: event.defaultPrevented,
+  }), { passive: true });
   document.addEventListener('scroll', () => log('scroll'), { capture: true, passive: true });
   log('start');
 }"""
