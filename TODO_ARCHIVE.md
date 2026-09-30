@@ -20,6 +20,39 @@ Read [CHANGELOG.md](CHANGELOG.md) for what shipped and when. This file is why.
 
 ---
 
+### 92.1 [x] The L: sideways looks, up opens — shipped 2026-09-30
+
+`planPeek.js` after the axis locks to x (8px, `LOCK_PX`) already captures the pointer, so vertical
+movement from that moment on is free to carry meaning and cannot be confused with the deck's own
+scroll. A release with no upward stroke always springs back.
+
+- Opening asks for both: a horizontal pull of at least a quarter of the width, and an upward stroke
+  of at least 64px measured from the DEEPEST point of the horizontal pull, not from where the
+  press began.
+- The horizontal offset is pinned at its deepest value while the finger travels up, so the plan
+  does not slide back during the second stroke.
+- `is-release-ready` is renamed `is-open-ready`: a class named for releasing, on a gesture that no
+  longer opens on release, is a lie in the code. It now turns on as soon as an openable neighbour is
+  uncovered at all, not at a distance threshold.
+- Wording: `plan_peek_release_open` / `plan_peek_release_create` are replaced by
+  `plan_peek_up_open` / `plan_peek_up_create` in sl, en and de — the old keys are deleted, since a
+  step that names a control names what the control says.
+- Tests: `tests/medium/test_plan_peek.py` (the threshold, the two open cases, the spring-back, the
+  started-session refusal) and `tests/e2e/test_plan_peek_open.py`.
+
+**Found by the gate, not by the plan:** splitting `pointermove` was not optional. The added
+bookkeeping took it to a cyclomatic complexity of 21 against a limit of 15, so the rise, the axis
+lock and the opening each became their own named function. The gate caught it in Stage 1, 11
+seconds in.
+
+**Chosen while writing, not ruled:** opening happens on the upward stroke itself, in `pointermove`,
+not on the `pointerup` that follows. A completed L that still waited for the finger to lift would be
+cancellable by sliding back down, and nothing on the screen would say so. It also makes every
+release mean one thing — the look is over — including a `pointercancel`, which used to need its own
+guard against opening.
+
+---
+
 ### 17.4 [x] Save a past session as a routine template (library fills itself from history) — shipped 2026-09-30
 
 With §17.1 preserving the full program, "Save as routine" on a history record extracts a reusable

@@ -7773,25 +7773,10 @@ therefore moves the active exercise to the first of the session.
 (`modules/clipboard/exerciseDeckOfCards.js`) only marks the cards of the open session when that
 session is a later day. Only the past block leaves.
 
-### 92.1 [ ] The L: sideways looks, up opens
+### 92.1 [x] The L: sideways looks, up opens — shipped 2026-09-30
 
-`planPeek.js` after the axis locks to x (8px, `LOCK_PX`) already captures the pointer, so vertical
-movement from that moment on is free to carry meaning and cannot be confused with the deck's own
-scroll. A release with no upward stroke always springs back.
-
-- Opening asks for both: a horizontal pull of at least a quarter of the width, and an upward stroke
-  of at least 64px measured from the DEEPEST point of the horizontal pull, not from where the
-  press began.
-- The horizontal offset is pinned at its deepest value while the finger travels up, so the plan
-  does not slide back during the second stroke.
-- `is-release-ready` is renamed `is-open-ready`: a class named for releasing, on a gesture that no
-  longer opens on release, is a lie in the code. It now turns on as soon as an openable neighbour is
-  uncovered at all, not at a distance threshold.
-- Wording: `plan_peek_release_open` / `plan_peek_release_create` are replaced by
-  `plan_peek_up_open` / `plan_peek_up_create` in sl, en and de — the old keys are deleted, since a
-  step that names a control names what the control says.
-- Tests: `tests/medium/test_plan_peek.py` (the threshold, the two open cases, the spring-back, the
-  started-session refusal) and `tests/e2e/test_plan_peek_open.py`.
+Reasoning in [TODO_ARCHIVE.md](TODO_ARCHIVE.md). Commit `97e3226`; `build check` green 12:31 to
+12:40.
 
 ### 92.2 [ ] The deck holds one session, and the peek is aligned to the exercise in focus
 
