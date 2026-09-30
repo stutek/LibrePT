@@ -141,11 +141,18 @@ def _do_step(page):
     """One step, the way a viewer spends one: ask to be shown it where there is something to show,
     and tap Next only if the card has not already followed the app (2026-08-26)."""
     progress_before = _progress_text(page)
-    if page.locator(SHOW_ME).is_visible():
-        page.locator(SHOW_ME).click()
-    if not _card_moved_on(page, progress_before):
+    shown = _show_me_if_offered(page)
+    if not _card_moved_on(page, progress_before, shown):
         expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
         page.locator(NEXT).click()
+
+
+def _show_me_if_offered(page):
+    """Taps Show me where the step offers it, and says whether it did."""
+    if not page.locator(SHOW_ME).is_visible():
+        return False
+    page.locator(SHOW_ME).click()
+    return True
 
 
 def _progress_text(page):
@@ -159,13 +166,22 @@ def _progress_text(page):
     return " ".join(page.locator(PROGRESS).evaluate("el => el.textContent").split())
 
 
-def _card_moved_on(page, progress_before, timeout=8_000):
+def _card_moved_on(page, progress_before, shown, timeout=8_000):
     """Whether the card followed the app off this step by itself (2026-08-26), or still wants Next.
+
+    Only a step that was just SHOWN can carry the card on, so only then is it worth waiting. A card
+    with no Show me has nothing done on it, and waiting the whole `timeout` there before tapping Next
+    cost 8s on every such card: the seven walks of the whole story took 83-164s each (2026-09-30).
+    If a card ever did move on by itself, the walk would tap Next on the step after it, and the
+    count of steps walked would stop matching the story's length.
 
     Compared against the progress line's OWN words, not against "step N of" — that pattern is
     English, so in every other language it never matched, the helper answered "yes, it moved on" to
     every step, and a walk in Slovenian silently stopped tapping Next (found 2026-08-31 writing the
     language-crossing test below)."""
+    if not shown:
+        # Not `timeout=0`: to Playwright that means wait for ever.
+        return _progress_text(page) != progress_before
     try:
         expect(page.locator(PROGRESS)).not_to_have_text(
             progress_before, timeout=timeout
@@ -202,13 +218,12 @@ def _walk_the_whole_story(page, limit=60, on_step=None):
         if on_step:
             on_step(page, step_now)
 
-        if page.locator(SHOW_ME).is_visible():
-            page.locator(SHOW_ME).click()
+        shown = _show_me_if_offered(page)
 
         # A step done in front of the viewer carries the card on by itself; one that arrived already
         # satisfied waits for Next. Both are the guide working, so the walk asks which happened
         # rather than tapping Next regardless — which would skip the step after it.
-        if not _card_moved_on(page, progress_before):
+        if not _card_moved_on(page, progress_before, shown):
             try:
                 expect(page.locator(NEXT)).to_be_enabled(timeout=15_000)
             except AssertionError:
