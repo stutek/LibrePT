@@ -3810,6 +3810,12 @@ and shows how to send it by hand. Saving the trainer's contact is the first step
   changed the refusal path applies to it too; presenting the contact card as step one, and what a
   link that carried no trainer name shows in its place.
 
+**Stanje 2026-09-30:** dva ostanka iz zgornjih odločitev sta narejena. *Shrani datoteko za deljenje*
+obrazca ne pozabi več, enako kot samodejno shranjevanje; stran je razdeljena v »1. korak: Shrani ta
+kontakt« in »2. korak: Izpolni obrazec«, stran brez kartice kontakta pa številk ne kaže. **Odprto:**
+preizkus na telefonu S23, preizkus kod QR na dveh telefonih, in kaj pokaže povezava brez imena
+trenerja namesto kartice — vse tri čakajo na Simona.
+
 ### 45.5 [ ] Import covers a programme, but not the trainer's own exercise LIBRARY
 
 **Reported:** trainers want to bring in their own exercises and their own blocks from text files and
