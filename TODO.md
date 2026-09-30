@@ -6638,6 +6638,38 @@ to je druga napaka kot §80.80.
 **Predlog:** »Pretežko« in »Prelahko« naj zapišeta samo signal, nobene serije — opaženo na različici
 `8b2ce80`.
 
+### 80.96 [ ] P2 — Prva kartica vodenega ogleda veleva pritisniti »Naprej«, tega gumba pa ni
+
+**Scenarij in koraki:** ☰ → »Nastavitve« → »Vstopi v peskovnik«. Odpri predal na dnu in tapni poglavje
+»LibrePT te pozdravlja«.
+
+**Opaženo:** kartica pravi »KORAK 1 OD 1« in v besedilu: »Z gumbom Pokaži mi ti vodnik pokaže dvoje …
+Z gumbom Naprej začneš.« Na kartici sta samo dva gumba, »Pokaži mi« (153 × 46 pik) in »Končaj«
+(136 × 46 pik), ter ikona za pospravljanje kartice, ki meri 17 × 19 pik. Gumba »Naprej« ni nikjer na
+zaslonu, ne omogočenega ne onemogočenega. »Končaj« je veliki zeleni gumb in ogled zapre.
+
+**Težava in vpliv:** trener bere navodilo in pritisne edini veliki gumb, ki se ponuja, torej »Končaj«,
+in ogled se konča, preden se je začel. Ogled je edina razlaga aplikacije, ki jo ima.
+
+**Predlog:** besedilo naj imenuje gumb, ki na kartici res je, ali pa naj bo gumb »Naprej« — opaženo na
+različici `8b2ce80`.
+
+### 80.97 [ ] P3 — Peskovnik napoti trenerja na seznam poglavij, ki je 325 pik pod robom zaslona
+
+**Scenarij in koraki:** ☰ → »Nastavitve« → »Vstopi v peskovnik«. Preberi besedilo, ki se izpiše, in
+poskusi narediti, kar pravi.
+
+**Opaženo:** besedilo pravi: »Za vodeni ogled aplikacije po korakih pritisni poglavje v spodnjem
+seznamu: ogled se začne pri poglavju, ki ga pritisneš.« Ta seznam je v predalu na dnu, ki je zaprt:
+vrstica »LibrePT te pozdravlja« je pri 1169. piki navpično, zaslon pa je visok 844. Predal odpre le
+ročica, ki meri 40 × 5 pik (§80.78).
+
+**Težava in vpliv:** trener stori, kar mu piše, in ne najde ničesar. Seznama, na katerega je napoten,
+ne vidi, ker je pod robom zaslona.
+
+**Predlog:** ob vstopu v peskovnik naj bo predal odprt, ali pa naj besedilo pove, da ga je treba prej
+odpreti, in imenuje ročico — opaženo na različici `8b2ce80`.
+
 **Presoja 2026-09-30 (Claude): čaka na Simona — nasprotuje zapisani odločitvi.** `logQuickSignal` v
 [sessionQuickSignals.js](src/controllers/sessionQuickSignals.js) namerno označi vse serije vaje kot
 opravljene, ko trener tapne signal: »signal na vaji pomeni, da je bila opravljena« (manj dotikov,
