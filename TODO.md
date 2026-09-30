@@ -7167,6 +7167,24 @@ ko telefon izgubi, izgubi vse stranke. Iz brskalnika orodja tega ni mogoče loč
 Androidu in v Safariju na iPhonu izvoziti kopijo in pogledati, ali je v »Prenosi« datoteka. Če je,
 se zapis zapre kot omejitev orodja in ostane le protislovje sporočil (P3).
 
+### 80.137 [ ] P2 — Stranka z angleškim »Jezik obrazca« dobi slovensko vabilo in slovensko stran za odgovor
+
+**Scenarij in koraki:** stranka Emily Stone, e-pošta vpisana, »Uredi profil« → privolitev →
+»Jezik obrazca: English« → »Shrani«. Nato trening »Moč« za jutri z Emily, »Shrani«, v oknu »Pošlji
+vabila v koledar« pogledati povezavo »Pošlji vabilo«.
+
+**Opaženo:** »Pošlji obrazec za privolitev« pripravi angleško sporočilo (»Hi Emily Stone, To prepare
+our workout schedules …«). »Pošlji vabilo« pa slovensko: zadeva »Trening: Moč«, besedilo
+»Pozdravljen/a Emily Stone, Tvoj trening: Moč … Sporoči mi, ali lahko prideš:« in povezava z
+`?lang=sl`. Zaprta §80.50 (`86aefd7`) je v povezavo dodala jezik, v katerem je vabilo napisano, to je
+trenerjev. Trenerka dneva 08 (stranka govori le angleško): »Emily dobi vabilo v slovenščini.«
+
+**Težava in vpliv:** stranka, ki slovensko ne bere, vabila ne razume, stran za odgovor pa je tudi
+slovenska. Trener mora vsako vabilo prevesti na roke ali ga ne pošlje.
+
+**Predlog:** vabilo in povezava naj uporabita jezik, ki ga ima stranka zapisan (»Jezik obrazca«),
+kot ga že obrazec za privolitev. Opaženo na `main` `e8e90d8`, sl, 390 × 844.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
