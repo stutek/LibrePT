@@ -6605,6 +6605,24 @@ okno govori o eni stranki. Pri močnejši stranki to pomeni teden treninga s pre
 njej«) in naj ponudi izbiro med spremembo rutine in spremembo načrta te stranke — opaženo na
 različici `8b2ce80`.
 
+### 80.93 [ ] P2 — »Kopiraj ta načrt na …« ne kopira na drug dan, ampak na drugo stranko istega treninga
+
+**Scenarij in koraki:** odpri podlogo treninga z eno stranko (»Ponedeljkova moc«, 2026-10-05, Jane
+Doe). Tapni ⋮ »Možnosti treninga«. Meni ponudi »Uredi načrt«, »Vsi na ta načrt«, »Kopiraj ta načrt na
+…« in »Izbriši trening«. Tapni »Kopiraj ta načrt na …«.
+
+**Opaženo:** aplikacija odgovori »V tem treningu ni še nikogar drugega.« Ukaz torej kopira načrt na
+druge stranke istega termina, ne na drug dan. Tri pike v napisu obljubljajo izbiro cilja, ta pa je
+lahko samo oseba na istem treningu.
+
+**Težava in vpliv:** trener, ki je za stranko sestavil načrt in ga hoče v tem tednu ponoviti še v
+četrtek, po tem napisu poseže prav sem in dobi stavek o nikomer drugem. Načrt lahko ponovi le tako, da
+pri novem terminu znova izbere rutino, s čimer izgubi vse, kar je v načrtu popravil za to stranko.
+
+**Predlog:** napis naj povedati, kam kopira (»Kopiraj ta načrt drugi stranki na tem treningu«), in če
+kopiranja na drug dan ni, naj tega ukaza ni videti pri treningu z eno stranko — opaženo na različici
+`8b2ce80`.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
