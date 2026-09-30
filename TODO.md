@@ -4287,35 +4287,9 @@ signala pa nič. Pri odgovoru, ki ne pride, bi čakal, dokler telefon ne obupa �
 **Predlog:** ko je stran na telefonu, naj se odpre iz njega in omrežje vpraša v ozadju — opaženo na
 različici `main` `6230070` (zamrznjena kopija), 390 × 844, sl.
 
-### 80.154 [ ] P2 — Občasno se aplikacija ne naloži: ostane na angleškem zaslonu za nalaganje
+### 80.154 [x] P2 — Občasno se aplikacija ne naloži: ostane na angleškem zaslonu za nalaganje — zavrnjeno 2026-10-01
 
-**Popravek 2026-10-01 01:20 (Claude):** prva različica je bila P1 s petimi zastoji na kopiji `main`.
-Ti so skoraj vsi lastnost moje kopije: bila je nežigosana (`version.js` = `dev`), in ko sem ji dal
-pravi SHA, je izginilo tudi 15 zastojev od 15. Na objavljeni aplikaciji je en zastoj.
-
-**Scenarij in koraki:** objavljena aplikacija, prvi zagon trenerke »Tara Zorko« (podatki, tema,
-»Začni s prazno aplikacijo«), nato isti naslov `/?lang=sl` naložiti znova, več kot štiridesetkrat.
-
-**Opaženo:** enkrat (00:44) je stran ostala na zaslonu »LibrePT / A lightweight, free app for your
-clipboard, sessions and training programmes.« v angleščini, `<html lang="en">`, naslov `/LibrePT/`
-se ni preusmeril na ploščo. Po 50 sekundah enako; konzola brez napak. Naslednja nalaganja so stekla.
-
-| Kje                                        | Nalaganj | Zastojev             |
-| :----------------------------------------- | :------- | :------------------- |
-| objavljena `#8b2ce80`                      | ~40      | 1                    |
-| kopija `main` `6230070`, žigosana          | 18       | 0                    |
-| kopija `main` `6230070`, nežigosana `dev`  | ~25      | 5; `/intake` po prvem zagonu trenerja vsakič (3 od 3) |
-
-Na nežigosani kopiji je en zastoj obstal globlje: stran ni odgovorila niti na `1+1` prek CDP, brez
-izvornega okna in brez porabe procesorja. Na žigosani kopiji in na objavljeni se `/intake` po prvem
-zagonu trenerja odpre (3 od 3).
-
-**Težava in vpliv:** trener, ki mu se to zgodi, vidi angleški zaslon, ki ne pove ničesar in se ne
-premakne, in ne ve, ali je podatke izgubil. Na razvojnem strežniku (nežigosan) pa `/intake` obstane
-vsakič, ko je trener aplikacijo že odprl — kdor povabilo preizkuša lokalno, obtiči.
-
-**Predlog:** zagon naj se vedno konča — s ploščo ali s sporočilom v jeziku trenerja, kaj ni uspelo in kaj
-naj stori — opaženo na različicah `#8b2ce80` (objavljena) in `main` `6230070`, 390 × 844, sl.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80154-x-p2--občasno-se-aplikacija-ne-naloži-ostane-na-angleškem-zaslonu-za-nalaganje--zavrnjeno-2026-10-01).
 
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
