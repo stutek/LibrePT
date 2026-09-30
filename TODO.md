@@ -7844,11 +7844,23 @@ Reasoning in [TODO_ARCHIVE.md](TODO_ARCHIVE.md). Commit `97e3226`; `build check`
 
 ### 92.2 [ ] The deck holds one session, and the peek is aligned to the exercise in focus
 
-- Out of `exerciseDeckOfCards.js`: `buildPastExerciseItems`, the `PastDeckCard` branch,
-  `pastExpanded` and `expandedPastId`, with `pastDeckCard.js` deleted and the review panel in
-  `activeSessionOverlayView.js` with it. `exerciseDeckOfCards.css` and `themes/spreadsheet.css`
-  lose their `.past-session` rules, and the nine tests that select
-  `.exercise-deck-card:not(.past-session)` drop a qualifier that can no longer match.
+- Out of `exerciseDeckOfCards.js`: `buildPastExerciseItems`, the `PastDeckCard` branch and the
+  `pastExpanded` plumbing it feeds to the live cards (`exerciseCard.js`, `circuitCard.js`), whose
+  "an open past log defocuses the live card" rule can no longer be reached.
+  `exerciseDeckOfCards.css` and `themes/spreadsheet.css` lose their `.past-session` rules, and the
+  nine tests that select `.exercise-deck-card:not(.past-session)` drop a qualifier that can no
+  longer match.
+- **`pastDeckCard.js` STAYS, with `expandedPastId`** — corrected 2026-09-30, before any code. An
+  earlier draft of this subsection said the module would be deleted. That was wider than Simon's
+  instruction, which is about what the live deck holds, and it would have destroyed the component
+  §45.8 is built on: its ruling of 2026-09-11 is that the client's history view stops drawing its
+  own records and mounts these cards instead. The pair is self-contained, so it is left whole and
+  simply not mounted in the live deck. Nothing in the build fails on a module with no importer.
+- The two comments in `activeSessionBoard.js` (lines 459-461) that send the reader to
+  `showPastExerciseInFocus` are corrected: that function no longer exists, and
+  `clipboard-logger-container` is now only the empty-state placeholder.
+- `src/sw/cacheManifest.js` and the `CHANGELOG.md` link to `pastDeckCard.js` are untouched, since
+  the file stays.
 - Alignment: `planSheet.js` marks each exercise row with its normalised name,
   `planPeekController.js` finds the row matching the card in focus and offsets the sheet by one
   custom property (`--peek-align`), the same carve-out `--plan-pull` already uses. No match, no
