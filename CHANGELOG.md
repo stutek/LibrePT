@@ -83,6 +83,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Fixed
 
+- **"Invite client" lets the trainer choose the language the client reads.** A new client has no
+  language on record, so the message, the intake link, the privacy notice and the QR code all
+  followed the app's language; the dialog now offers English, Slovenščina and Deutsch.
+- **A typed-in exercise can be timed.** "Measured in" on its row makes an 8-minute warm-up read 8:00
+  and count 8 minutes in the plan's length; before, it counted one.
+- **An exercise added from the catalogue brings no rest the trainer did not add.** A circuit of two
+  such exercises ended in two 60-second rests.
+- **The reps field in the plan-change dialog opens the number keyboard** when it holds a number.
 - **The session form no longer decides for the trainer.** A client added to a session gets the empty
   plan instead of the library's first routine; the name and place suggestions are the trainer's own
   instead of English presets; a started or finished session keeps its date and times, and the form
