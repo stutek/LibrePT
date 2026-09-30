@@ -7236,6 +7236,41 @@ in »Level« sta angleška.
 **Predlog:** enota v jeziku aplikacije, vidna tudi ob vpisani številki, in možnost kilogramov pri
 vajah na napravi. Opaženo na `main` `e8e90d8`, sl, 390 × 844; najprej opazil trener dneva 07.
 
+### 80.133 [ ] P2 — Ocena obrazca »Uveljavi spremembo programa«: ne pove vaje ne stare vrednosti, Esc zavrže
+
+Način 3. Naloga (podagent, pred ogledom obrazca): stranki je bila vaja pretežka, po treningu ji
+popravi program. Pot: »Treningi, ki čakajo na pregled« → vrstica stranke → »Razreši«. `main`
+`e8e90d8`, sl, 390 × 844 in 320 × 680 (brez premikanja, gumbi na zaslonu, nobena tarča pod 44 pik).
+Naloga podagenta: `.private/exploratory-test/forms/2026-09-30-06-task.md`. Stranka Ana Zupan, rutina
+»Test pon«, dva signala »Pretežko« (Dumbbell Goblet Squat pri 0 kg, Lat Pulldown pri »Lvl 60«).
+
+**Odveč.** Nič: okno ne sprašuje ničesar, kar bi naloga imela za odveč.
+
+**Manjka.**
+- **Katera vaja** (P2). Naloga: »Vaja, ki je bila pretežka — VEDNO«. Okno pove »Stranka«,
+  »Povratna informacija«, »Podrobnosti«, vaje ne. Pri dveh signalih iste stranke sta okni enaki do
+  številk; seznam za oknom vajo pove (»Vaja: Dumbbell Goblet Squat«).
+- **Stara vrednost** (P3). Naloga: »Nova teža 10 kg (prej 12)«. Polja so predizpolnjena (dobro), »prej«
+  pa ni napisano nikjer; po prvem popravku trener ne ve več, iz česa je izšel.
+- **Za koga** (čaka na Simona, §80.92): naloga zahteva »samo ta stranka / vsi s tem programom«;
+  okno spremeni skupno rutino (preverjeno: »Lat Pulldown 3×8 · Lvl 55.5« v knjižnici).
+- **Od katere seje** (čaka na Simona): naloga »od naslednje seje (četrtek)«; polja ni.
+
+**Ne deluje.**
+- **Esc zavrže vpisano** (P2). Ponovitve spremenjene z 18 na 12, Esc, ponovno »Razreši«: spet 18.
+  Pravilo 2026-09-17: zavrže le »Prekliči«, vsak drug izhod ohrani.
+- **Enota ne ustreza vaji** (P2). Pri Lat Pulldown, ki ga katalog vodi v stopnjah (»Lvl 60«, §80.132),
+  okno predlaga 57.5 pod oznako »Ciljna teža (kg)«.
+- Vejica deluje: »55,5« je shranjeno kot 55.5. »Uveljavi in razreši« zapiše spremembo v rutino.
+
+**Napačen tip ali vrstni red.**
+- **Ponovitve so besedilno polje brez številske tipkovnice**, serije so številsko polje, teža ima
+  decimalno tipkovnico (P3). Na telefonu se pri ponovitvah odpre cela tipkovnica.
+- Vrstni red sledi nalogi (kaj se spremeni, nato teža, ponovitve, serije).
+
+Trenerjeva preverba po koncu: »Odprem njeno današnjo sejo, ki je že bila: stara vrednost je ostala.«
+Tega ni mogel preveriti, ker trening brez zapisane vaje ne pride v zgodovino (§80.6).
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
