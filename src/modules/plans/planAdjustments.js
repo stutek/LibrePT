@@ -4,7 +4,7 @@
 import { libraryExercises } from "../../data/exerciseLibrary.js";
 import { performedTarget, suggestedTarget } from "../../domain/adjustmentSuggestion.js";
 import { feedbackTagText, readFeedbackTag } from "../../domain/feedbackTags.js";
-import { DECIMAL_PATTERN, parseDecimal } from "../../domain/repsAndLoad.js";
+import { DECIMAL_PATTERN, loadUnitForEquipment, parseDecimal } from "../../domain/repsAndLoad.js";
 import { renderMarkupOnce } from "../common/dom.js";
 import { mountExercisePicker, pickerLabels } from "../exercises/exercisePicker.js";
 
@@ -158,6 +158,9 @@ export function renderApplyAdjustmentDialog() {
           <strong class="adjust-summary-label" data-i18n="adjust_client">Client:</strong> <span id="adjust-client-name" class="font-semibold text-emerald"></span>
         </div>
         <div class="adjust-summary-row">
+          <strong class="adjust-summary-label" data-i18n="adjust_exercise">Exercise:</strong> <span id="adjust-exercise-name" class="font-semibold"></span>
+        </div>
+        <div class="adjust-summary-row">
           <strong class="adjust-summary-label" data-i18n="adjust_feedback">Feedback:</strong> <span id="adjust-feedback-tag" class="font-semibold text-primary"></span>
         </div>
         <div class="adjust-summary-row-last">
@@ -178,7 +181,7 @@ export function renderApplyAdjustmentDialog() {
       <div id="adjust-panel-modify" class="adjust-action-panel">
         <div class="adjust-modify-grid">
           <div class="form-group">
-            <label for="adjust-weight" data-i18n="adjust_target_weight">Target Weight (kg)</label>
+            <label for="adjust-weight" id="adjust-weight-label" data-i18n="adjust_target_weight">Target Weight (kg)</label>
             <input type="text" inputmode="decimal" pattern="${DECIMAL_PATTERN}" id="adjust-weight" class="form-control">
           </div>
           <div class="form-group">
@@ -211,6 +214,14 @@ export function renderApplyAdjustmentDialog() {
 `,
   );
 }
+
+// The "Target ..." caption of the weight field, by the exercise's load unit.
+const TARGET_LABEL_KEY = {
+  kg: "adjust_target_weight",
+  level: "adjust_target_level",
+  band: "adjust_target_band",
+  bw: "adjust_target_bw",
+};
 
 // Find target exercise & routine database links.
 function resolveAdjustmentTargets(state, update) {
@@ -276,6 +287,12 @@ export function openAdjustmentWizardComponent(updateId, ctx) {
     : update.tag;
 
   const { exercise, exerciseId, routine, exMapping } = resolveAdjustmentTargets(state, update);
+
+  document.getElementById("adjust-exercise-name").textContent = update.exerciseName;
+  // The target is in the unit the exercise is programmed in: a level machine is not asked for kg.
+  const weightLabel = document.getElementById("adjust-weight-label");
+  weightLabel.removeAttribute("data-i18n");
+  weightLabel.textContent = t(TARGET_LABEL_KEY[loadUnitForEquipment(exercise?.equipment)]);
 
   document.getElementById("adjust-routine-id").value = routine ? routine.id : "";
   document.getElementById("adjust-exercise-id").value = exerciseId;

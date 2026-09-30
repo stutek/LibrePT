@@ -315,6 +315,10 @@ export const de = {
   instructions_placeholder: "Hinweise zur Technik...",
   // The Apply Program Adjustment dialog (modules/plans/planAdjustments.js).
   adjust_title: "Programmänderung übernehmen",
+  adjust_exercise: "Übung:",
+  adjust_target_level: "Zielstufe",
+  adjust_target_band: "Zielband",
+  adjust_target_bw: "Zusatzgewicht (kg)",
   adjust_client: "Kunde:",
   adjust_feedback: "Rückmeldung:",
   adjust_details: "Details:",

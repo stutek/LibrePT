@@ -298,6 +298,10 @@ export const en = {
   instructions_placeholder: "Form cues...",
   // The Apply Program Adjustment dialog (modules/plans/planAdjustments.js).
   adjust_title: "Apply Program Adjustment",
+  adjust_exercise: "Exercise:",
+  adjust_target_level: "Target Level",
+  adjust_target_band: "Target Band",
+  adjust_target_bw: "Target Added Weight (kg)",
   adjust_client: "Client:",
   adjust_feedback: "Feedback:",
   adjust_details: "Details:",

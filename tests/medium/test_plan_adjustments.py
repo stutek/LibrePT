@@ -292,3 +292,30 @@ def test_swap_puts_the_replacement_in_the_same_slot(page, local_server):
     assert {k: v for k, v in new.items() if k != "id"} == {
         k: v for k, v in old.items() if k != "id"
     }
+
+
+def test_the_dialog_names_the_exercise_it_changes(page, local_server):
+    """Two signals from one client gave two dialogs that differed only in their numbers: the dialog
+    named the client and the feedback but not the exercise whose target it edits."""
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#view-adjustments.active")
+    _cards(page).first.locator(".btn-resolve-alert").click()
+
+    assert (
+        page.locator("#adjust-exercise-name").inner_text().strip()
+        == "Barbell Bench Press"
+    )
+    assert "Target Weight (kg)" in page.locator("label[for=adjust-weight]").inner_text()
+
+
+def test_a_level_machine_is_not_asked_for_kilograms(page, local_server):
+    """Lat Pulldown is programmed in stack levels; the dialog proposed 57.5 under "(kg)"."""
+    machine = NO_ROUTINE_STUB.replace("Floor Squat", "Lat Pulldown")
+    load_with_stub(page, local_server, machine)
+    page.wait_for_selector("#view-adjustments.active")
+    _cards(page).first.locator(".btn-resolve-alert").click()
+
+    assert page.locator("#adjust-exercise-name").inner_text().strip() == "Lat Pulldown"
+    label = page.locator("label[for=adjust-weight]").inner_text()
+    assert "kg" not in label
+    assert "Level" in label

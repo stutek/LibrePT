@@ -76,6 +76,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Fixed
 
+- **The plan-change dialog names the exercise it changes**, and its target field is labelled in the
+  exercise's own unit (level, band, added weight or kg) instead of always "(kg)".
 - **A load says its unit in the app's language, beside the number.** A machine load read "Lvl 60" and
   the field named its unit only in English, and only while empty; it now reads "Stopnja 60" in
   Slovenian and the unit stays visible when a number is typed.

@@ -313,6 +313,10 @@ export const sl = {
   instructions_placeholder: "Namigi za izvedbo ...",
   // The Apply Program Adjustment dialog (modules/plans/planAdjustments.js).
   adjust_title: "Uveljavi spremembo programa",
+  adjust_exercise: "Vaja:",
+  adjust_target_level: "Ciljna stopnja",
+  adjust_target_band: "Ciljna elastika",
+  adjust_target_bw: "Ciljna dodatna teža (kg)",
   adjust_client: "Stranka:",
   adjust_feedback: "Povratna informacija:",
   adjust_details: "Podrobnosti:",
