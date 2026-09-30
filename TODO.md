@@ -7246,6 +7246,28 @@ gumb, ki ga ni, ali obljubi, česar zaslon ne pokaže, trener ne ve, ali je zgre
 **Predlog:** korak 7 z napisom gumba; korak 12 naj pove, kje je opomba res vidna; koraka 2 in 5 naj
 sklop imenujeta. Opaženo na `main` `e2daf5e`, sl, 390 × 844.
 
+### 80.141 [ ] P3 — Poglavje »Načrt za torek« obljublja oceno minut, ki je ni, in shrani prazen sklop
+
+**Scenarij in koraki:** prvi zagon, poglavje »Načrt za torek« (8 korakov), vsak korak opravljen sam.
+
+**Opaženo:**
+- **Korak 3:** »Ob naslovu piše na primer 45 / 60 min: 45 minut vaj v 60-minutnem terminu.« Podloga
+  združi »Skupinska moč in kondicija« in »Vrnitev po poškodbi« (»Danes · 17:00 - 19:00«); ocene
+  minut ob naslovu ni (posnetek zaslona). Pri treningu z eno stranko je (»49 / 60 min«, §80.134).
+- **Koraka 4 in 5:** »+ Sklop … doda prazen sklop, v katerega dodaš vaje«, takoj zatem »Pritisni ✓ …
+  Načrt se shrani«. Vaj ne doda nihče; po ✓ praznega sklopa na podlogi ni. Trener se nauči dodati
+  nekaj, kar izgine.
+- **Korak 7:** »Jane, John in Sarah delajo isti sklop, zato imajo en načrt.« Sarah je na drugem
+  treningu, »Vrnitev po poškodbi«, z načrtom »Trup in gibljivost po porodu«; po »Vsi na ta načrt« ima
+  načrt skupine (zavihek »Skupaj JD · JS · SJ«).
+
+**Težava in vpliv:** trener, ki se iz ogleda uči, išče oceno, ki je ni, in se nauči, da stranko po
+porodu pridruži skupinskemu metaboličnemu krogu z enim dotikom.
+
+**Predlog:** korak 3 naj pokaže oceno tudi pri združeni podlogi ali naj je ne omenja; v koraku 4 naj
+trener v sklop doda vajo; korak 7 naj velja za stranke, ki res delajo isto, ali naj pove, da Sarah
+zamenja načrt. Opaženo na `main` `e2daf5e`, sl, 390 × 844.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
