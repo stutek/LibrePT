@@ -6868,6 +6868,23 @@ misli, da se trening ni zaključil, ali pa počaka, da se stanje »popravi«, č
 **Predlog:** po zaključku naj se kartica v seznamu takoj prepiše na »Zaključeno« — opaženo na
 različici `8b2ce80`.
 
+### 80.108 [ ] P3 — Na 320 × 680 je od gumba »Shrani in nadaljuj« na uvodnem zaslonu vidne štiri pike
+
+**Scenarij in koraki:** zaslon širine 320 in višine 680 (najmanjši, ki ga aplikacija podpira), prvi
+zagon: »Se strinjam« → izberi temo → »Nadaljuj«. Odpre se obrazec s trenerjevimi podatki.
+
+**Opaženo:** štiri polja so na zaslonu (zadnje, »E-pošta«, sega do 666. pike), gumb »Shrani in
+nadaljuj« pa se začne pri 676. piki in je visok 48, torej je vidna le njegova zgornja robna črta.
+Stran se ne premika (`scrollHeight` telesa je enak višini zaslona), premika se notranji del
+`.app-splash`; ko se ta premakne za 69 pik, je gumb cel na zaslonu. Torej je dosegljiv, a ob odprtju
+zaslon izgleda končan.
+
+**Težava in vpliv:** to je prvi zaslon, ki ga vidi vsak nov trener, in edini gumb na njem je videti,
+kot da ga ni. Na manjšem telefonu trener najprej ne ve, kako naprej.
+
+**Predlog:** gumb naj bo ob odprtju cel na zaslonu tudi pri 320 × 680, ali pa naj bo pritrjen na dno —
+opaženo na različici `8b2ce80`.
+
 **Presoja 2026-09-30 (Claude): čaka na Simona — nasprotuje zapisani odločitvi.** `logQuickSignal` v
 [sessionQuickSignals.js](src/controllers/sessionQuickSignals.js) namerno označi vse serije vaje kot
 opravljene, ko trener tapne signal: »signal na vaji pomeni, da je bila opravljena« (manj dotikov,
