@@ -8334,6 +8334,33 @@ session from the board and the same session by its `/session/:id/client/:id` add
 and compare what the past layer holds. Written down as a question because the last thing recorded
 here as a defect was not one.
 
+**Narrowed on 2026-09-30 by measurement, then STOPPED without an answer.** Six probes through the
+demo's own `expectHeld`, each ruling something out, in this order:
+
+1. **Not a negative screen coordinate.** A forward path kept entirely inside the viewport does
+   nothing either, so the backward drag ending at x ≈ 395 and the forward one at x ≈ −5 is not the
+   difference.
+2. **The neighbour is there.** While the finger is down, `#plan-peek-under-future` carries
+   `has-plan` — the app has a next session to open and has drawn it.
+3. **The gesture never arms.** `is-open-ready` is never set on that layer.
+4. **The plan never moves.** `pulled-left` is never set on the blanket.
+5. **The gesture never even starts.** `is-held` is never set, so the axis lock in `pointermove` is
+   not reached.
+6. **It is wired, and the press lands.** The blanket still carries `data-plan-peek-wired`, so the
+   element was never replaced; pressing the blanket's own centre instead of a card's changes
+   nothing, so `EDGE_PX` is not refusing the press; and a temporary probe inside `pointerdown`
+   showed `isDisabled()` false.
+
+So: `pointerdown` is reached and does not bail, yet no `pointermove` ever locks the axis — for the
+forward direction only, on that screen only. That is where the next attempt starts, and the obvious
+next measurement is whether the `pointermove` events arrive at all (the listener is on `window`),
+with an attribute cleared at the start of each gesture so a stale one cannot answer for it — the
+mistake that ended this round.
+
+**Stopped deliberately, not abandoned.** What is broken is one step of a demonstration; what it
+would cost to finish is more than the step is worth today, and the app it demonstrates is not
+affected. Picked up again when the demo is next worked on.
+
 **Which is why the walkthrough ships the look and the switch back, but not the switch forward** —
 Simon asked for all three. Next step, in `demoTourPlayer.js` and not in `planPeek.js`: find which of
 those differences bites, by sending the same path through Playwright's real mouse in a test and then
