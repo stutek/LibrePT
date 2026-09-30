@@ -7604,11 +7604,22 @@ Last green CI run (36063598211): 20 min. Stage 3 alone is 12 min: e2e 675s, demo
 4. **[ ] Low priority: the Stage 4 CI job spends ~48s on setup for ~15s of tests.** Merging it into
    another job would save that, but Stage 4 is its own stage by Simon's ruling (2026-09-19), so
    this changes only if that ruling does.
-5. **[ ] Low priority: the story walk still waits where nothing will happen.** A step whose Show me
-   finds the step already done waits the whole 8s before Next, and every walk waits 6s at its end
-   to be sure the guide is gone. The seven walks still take 37–99s each (~0.8s per step). Next
-   step: count how many steps take the 8s path, from one walk with a timer around
-   `_card_moved_on`.
+5. **[~] The story walk still waits where nothing will happen — in progress 2026-09-30 (Simon:
+   "implement the best solution").** After a Show me that did not carry the card on (the last step
+   of a leg, or a failed demonstration; `carryCardOn` in `walkthroughOverlay.js`), the walk waits
+   the whole 8s before Next, and every walk waits 6s at its end to be sure the guide is gone. The
+   seven walks still take 37–99s each. The fix: wait for the guide's own signal — the progress line
+   changed, or Show me is enabled again (it is disabled until the guide renders after the
+   demonstration) — and skip the end wait on the story's last step. And split
+   `test_every_offered_chapter_can_be_walked_from_a_cold_start` (99s, the longest demo test) into
+   one test per chapter, so three workers share it. Blocked on: librept-02 holds the tree and has
+   `tests/e2e/test_demo_story.py` open.
+7. **[ ] Gap: no test walks the story at full motion.** Every story walk runs with reduced motion,
+   where `demoPace` makes every pause zero; `test_demo_pacing.py` times one step at full motion. A
+   defect that only shows while the hand travels (the app re-rendering under it) is found by
+   nobody. One full-motion walk costs ~2.5 min of worker time (~3s × 48 steps), which is why it is
+   not in the gate. Decide whether it runs, and where (the gate, or a scheduled workflow like
+   `google-canary.yml`).
 6. **[ ] Low priority: the demo task is still the longest in local Stage 3** (331s against e2e
    292s in the gate after item 2), so any change to e2e does not shorten the stage until item 5
    does.
