@@ -5315,3 +5315,20 @@ Not worth fixing twice, so it waits here.
 
 Until then the walkthrough places the gesture before anything is logged. That is a workaround, and this
 is why.
+
+## 96. [ ] Predstaviti Simonu najdbe in meritve raziskovalnega testiranja 2026-09-30
+
+**Naročil Simon 2026-09-30 zvečer:** ko bo čas, mu predstaviti, kaj je raziskovalno testiranje tistega
+dne našlo in izmerilo. Predstavitev naj pove, kaj je že popravljeno in kaj še čaka nanj.
+
+Gradivo:
+- Prvo odprtje (štirje trenerji brez predznanja, tudi v nemščini): poročilo z navdušenjem, iskanjem,
+  zmedo in frustracijami v `.private/exploratory-test/first-open/2026-09-30-porocilo.md`, dnevniki v
+  isti mapi. Dnevnik trenerja 04 še ni obdelan.
+- Napake §80.110–§80.149 (del je že popravljen in zaprt).
+- Vrzeli §88.12–§88.16 (množično prestavljanje, selitev iz preglednice, nov telefon, premor serije,
+  nesreča med vadbo); dnevi trenerja 07–10 v `.private/exploratory-test/days/`.
+- Meritve: dotiki, črke in ocena časa za devet opravil v §94.
+- Odločitve, ki čakajo nanj: točke z oznako »čaka na Simona« v §80, §88 in §94; preverba šifrirane
+  kopije na telefonu (§80.136); predlog pravila o commitih z `git commit --only` (iz pogovora
+  2026-09-30).
