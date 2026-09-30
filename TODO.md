@@ -7363,6 +7363,20 @@ v ženskem spolu.
 **Predlog:** stavek brez spola, na primer »komu jo daš, izbereš ti«. Opaženo na `main` `e2daf5e`, sl,
 390 × 844.
 
+### 80.146 [ ] P3 — Po »Začni s prazno aplikacijo« se izbira ob vsakem nalaganju vrne, dokler trener nič ne vpiše
+
+**Scenarij in koraki:** svež brskalnik, pogoji, tema, osebni podatki, »Začni s prazno aplikacijo«.
+Brez vpisa česar koli stran ponovno naložiti (v istem zavihku).
+
+**Opaženo:** celozaslonska izbira (844 pik) je spet tu: »Razišči z vzorčnimi podatki«, »Vodeni ogled:
+izberi poglavje« s šestimi poglavji, »Začni s prazno aplikacijo«. Dokler je odprta, prestreže vse
+dotike pod njo. Ko je v aplikaciji ena stranka, se ne vrne več.
+
+**Težava in vpliv:** trener, ki je izbral prazno aplikacijo in jo zaprl, preden je kaj vpisal, mora
+izbirati znova in ne ve, ali se je prva izbira sploh prijela.
+
+**Predlog:** izbira naj velja, ko je enkrat narejena. Opaženo na `main` `e2daf5e`, sl, 390 × 844.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
