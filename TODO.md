@@ -7103,6 +7103,23 @@ sredi slovenske strani in gumba ne more poklicati s slovensko besedo, ki jo vidi
 **Predlog:** imena iz slovarja, kot ostala; test, ki na `?lang=sl` ne najde angleškega pomožnega
 imena. Opaženo na `main` `12d0e66`, 390 × 844.
 
+### 80.126 [ ] P3 — Pred izbiro jezika stran nima `<html lang>`, besedilo za oknom pa je angleško
+
+**Scenarij in koraki:** prvi obisk brez `?lang=`, kot ga trener dobi od kolega:
+`/LibrePT/`. Brskalnik ima `navigator.language` `en-US`.
+
+**Opaženo:** okno »Choose your language · Izberi jezik · Wähle deine Sprache« z gumbi »English«,
+»Slovenščina«, »Deutsch«. Za njim je glava angleška (»PREVIEW«, »Sessions«) in stavek »A lightweight,
+free app for your clipboard, sessions and training programmes.« `<html lang>` ni nastavljen.
+Gumbi jezikov imajo pravilen svoj `lang` (`en`, `sl`, `de`). Po dotiku »Slovenščina« je `lang`
+strani `sl` in besedilo slovensko.
+
+**Težava in vpliv:** bralnik zaslona angleško besedilo za oknom prebere z glasom, ki ga izbere
+sam, ker stran ne pove, v katerem jeziku je.
+
+**Predlog:** stran naj ima `lang` jezika, v katerem je besedilo za oknom (`en`). Opaženo na `main`
+`12d0e66`, 390 × 844.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
