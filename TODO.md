@@ -6555,6 +6555,13 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8087-x-p2--napa
 what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ### 80.88 [~] P1 — V oknu, ki briše podatke, sta »Prekliči« in »Odstrani« visoka 21 pik in 4 pike narazen
+**Dokaz za odprto vprašanje, prvo odprtje 2026-09-30, `main` `12d0e66`:** oba trenerja brez
+predznanja sta okno odprla in besedilo prebrala, pa sta vseeno ostala v skrbeh. Prvi: »"!" ne pove,
+kaj je narobe … Za trenerja, ki ne razume Google Drive, je to alarm brez razlage«; skupaj z rumeno
+oznako »PREDOGLED«: »pomeni, da ne smem zaupati podatkom«. Drugi, brez računa Google: »Stavek
+"Vprašaj v glavi" ne razumem. "Izvozi JSON" — beseda JSON mi ne pove nič.« Nobeden ni izvedel, kam
+gredo podatki, če se telefon pokvari.
+
 
 **Scenarij in koraki:** svež zagon z vzorčnimi podatki. Odpri predal z obvestili na dnu in tapni
 »Počisti podatke in zapusti predstavitveni način«. Odpre se okno »Počisti vzorčne podatke«, ki našteje
