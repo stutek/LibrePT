@@ -149,7 +149,7 @@ that used `inject`, `stop` and `start` again before believing anything the app s
 **A page stuck on the English loading screen cannot be settled from here.** On 2026-10-01 pages
 stalled on »LibrePT / A lightweight, free app …« in runs, with this tool's `goto` and with a plain
 `goto(wait_until="commit")`, and one series of measurements after another pointed a different way;
-the finding (§80.154) was rewritten four times in an hour. The driver re-attaches over CDP on every
+the finding was rewritten four times in an hour. The driver re-attaches over CDP on every
 command, so it cannot rule itself out. Write such a stall once, with the counts, as a check for Simon
 to run on a phone, and move on.
 
