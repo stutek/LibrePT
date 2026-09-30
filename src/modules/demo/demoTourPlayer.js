@@ -40,6 +40,11 @@ import { demoPace, prefersReducedMotion } from "./demoPace.js";
 // the pause could not go to zero without racing any handler that re-renders on a later frame.
 const OUTCOME_POLL_MS = 25;
 
+// How long a control's box may keep moving after the scroll before the hand is placed on it anyway.
+// A smooth scroll inside the deck can outlast the settle pause (the replay of a step runs with
+// shortened pauses), and a hand placed on the box mid-scroll taps empty glass beside the control.
+const BOX_SETTLE_POLLS = 40;
+
 /** Is this element sitting BEHIND a modal the app has open?
  *
  * A `<dialog>` opened with showModal() makes the rest of the page inert: the controls under it are
@@ -78,6 +83,45 @@ function centreOf(el) {
 }
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** Waits until the control's box has stopped moving, so the hand lands on where the control IS.
+ * Two readings in a row that agree mean it has; the budget keeps a control that never stops (an
+ * animation of its own) from holding the step up. */
+async function waitForBoxToSettle(target, wait) {
+  let previous = target.getBoundingClientRect();
+  for (let poll = 0; poll < BOX_SETTLE_POLLS; poll += 1) {
+    await wait(OUTCOME_POLL_MS);
+    const box = target.getBoundingClientRect();
+    // A control not drawn yet has a zero box at 0,0, and two such readings agree: that is not a
+    // control standing still, it is one that has not arrived (a card still being built under a
+    // replayed step). The hand went to the corner and the tap to the control that then appeared.
+    const drawn = box.width > 0 && box.height > 0;
+    if (drawn && box.top === previous.top && box.left === previous.left) return;
+    previous = box;
+  }
+}
+
+/** Whether the hand is over the control now — the last check before the tap. */
+function handIsOver(hand, target) {
+  const x = Number.parseFloat(hand.style.getPropertyValue("--hand-x"));
+  const y = Number.parseFloat(hand.style.getPropertyValue("--hand-y"));
+  const box = target.getBoundingClientRect();
+  return x >= box.left && x <= box.right && y >= box.top && y <= box.bottom;
+}
+
+/** Sends the hand to the control and presses it there, the demonstration of one tap. */
+async function pointAndPress(hand, target, wait, travelMs, tapLeadMs) {
+  const { x, y } = centreOf(target);
+  moveDemoHand(hand, x, y);
+  await wait(travelMs);
+  pulseDemoHand(hand);
+  // The mark is spent BEFORE the app is told anything, because the click below is what replaces
+  // the screen (reported 2026-08-27: the rings arriving on the view the tap had just opened, which
+  // reads as a tap on the screen that arrived rather than on the one that left). The wait is a
+  // whole ring long (demoPace.js), so every ring is out and the first one finished by the time the
+  // control is touched.
+  await wait(tapLeadMs);
+}
 
 /** Is this element actually on screen? Every view lives in the DOM at once — the router activates
  * one and leaves the rest in place — so a hidden view's copy has a zero-sized box while the one a
@@ -246,17 +290,15 @@ export async function performStep(
   // used to be.
   await wait(pace.scrollSettleMs);
 
+  const travelMs = step.travelMs ?? pace.travelMs;
   if (hand) {
-    const { x, y } = centreOf(target);
-    moveDemoHand(hand, x, y);
-    await wait(step.travelMs ?? pace.travelMs);
-    pulseDemoHand(hand);
-    // The mark is spent BEFORE the app is told anything, because the click below is what replaces
-    // the screen (reported 2026-08-27: the rings arriving on the view the tap had just opened, which
-    // reads as a tap on the screen that arrived rather than on the one that left). The wait is a
-    // whole ring long (demoPace.js), so every ring is out and the first one finished by the time the
-    // control is touched.
-    await wait(pace.tapLeadMs);
+    await waitForBoxToSettle(target, wait);
+    await pointAndPress(hand, target, wait, travelMs, pace.tapLeadMs);
+    // The control can still move while the hand travels (a slow phone finishing a layout). The tap
+    // is never sent to a place the hand is not: it goes back and presses again first.
+    if (isOnScreen(target) && !handIsOver(hand, target)) {
+      await pointAndPress(hand, target, wait, travelMs, pace.tapLeadMs);
+    }
   }
 
   // IDEMPOTENT, and that is the contract rather than an optimisation (decided 2026-08-18: "show me
@@ -272,7 +314,11 @@ export async function performStep(
   // re-opened standing — the ☰ menu over the register the step had already opened (reported
   // 2026-08-25 at story step 3). The toggle case never reaches this: a toggle's outcome lives on the
   // same screen as its control, so a ground worth rebuilding has taken the outcome with it.
-  if (replay || !stepOutcomeNow(step, doc).ok) interactWith(target, step);
+  //
+  // The control is checked AGAIN here: the hand's travel takes time, and the app can take the
+  // control off the screen meanwhile (a dialog a replayed step just closed). A tap on it then goes
+  // to a box nobody can see, with the hand pointing at empty glass.
+  if ((replay || !stepOutcomeNow(step, doc).ok) && isOnScreen(target)) interactWith(target, step);
   // Wait for the app, then — and only at full motion — for the viewer.
   const outcome = await waitForOutcome(step, doc, wait, pace.outcomeBudgetMs);
   await wait(step.settleMs ?? pace.stepPauseMs);

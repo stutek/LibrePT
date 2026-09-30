@@ -66,6 +66,11 @@ const PANEL_MIN_HEIGHT_PX = 220;
 // the demonstration's own pauses (demoTourPlayer.js): those exist so a viewer can follow a finger,
 // while this is the guide putting back a state the trainer never saw leave.
 const RESTORE_SETTLE_MS = 150;
+// The longest any single pause of a REPLAYED tap may last. A replayed tap is still drawn: the hand
+// travels to the control and pulses before the tap, or a step that fills two fields is performed
+// behind the viewer's back (reported 2026-08-31). Long enough for the hand's glide (0.42s in
+// demoTour.css) and one ring to be seen, far shorter than the demonstration's own pauses.
+const REPLAY_BEAT_MS = 260;
 // How long a rebuilt app is given to actually show the step's control before the trainer is told
 // anything. A view renders a frame or two after the tap that opened it, and a guide that says "wrong
 // screen" and then works is worse than one that waits a step.
@@ -86,6 +91,7 @@ const TAPPABLE =
 const GROUND_REPLAY_BEATS = 3;
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const replayWait = (ms) => sleep(Math.min(ms, REPLAY_BEAT_MS));
 
 function iconButton(doc, { id, className, icon, label }) {
   const button = doc.createElement("button");
@@ -487,23 +493,23 @@ export function startGuidedWalkthrough({
     if (scrolledClearOf === here) return;
     scrolledClearOf = here;
     // Away from the panel, not into the middle: `center` is exactly where it already is.
+    const instant = prefersReducedMotion(doc);
     target.scrollIntoView({
       block: el.overlay.classList.contains("is-top") ? "end" : "start",
       behavior: instant ? "auto" : "smooth",
     });
-  }
-
-    const instant = prefersReducedMotion(doc);
-  /** The last resort: the panel gives up height until the control is clear of it.
-   *
-   * Some pages cannot scroll. The client's intake form on a 667px phone is one — measured
-   * `scrollHeight === clientHeight`, so asking the control to move does nothing at all, and the name
     // Measured again as soon as the control has moved, not at the next poll: the trim taken before
     // the scroll was for where the control used to be, and until it is re-measured the card scrolls
     // inside a panel that no longer needs to be short.
     const remeasure = () => moveTargetOutFromUnderPanel(target);
     if (instant) remeasure();
     else doc.addEventListener("scrollend", remeasure, { once: true, capture: true });
+  }
+
+  /** The last resort: the panel gives up height until the control is clear of it.
+   *
+   * Some pages cannot scroll. The client's intake form on a 667px phone is one — measured
+   * `scrollHeight === clientHeight`, so asking the control to move does nothing at all, and the name
    * field sits in the middle band where a panel docked at either end still reaches it.
    * Something has to give, and it is the prose: the card scrolls inside the panel, so the words are
    * all still there, one thumb-flick further.
@@ -539,18 +545,18 @@ export function startGuidedWalkthrough({
     return room >= PANEL_MIN_HEIGHT_PX;
   }
 
-  /** Gives the panel back whatever height was surrendered for a control that is no longer being
-   * pointed at. */
-  function releasePanelTrim() {
-    el.panel.classList.remove("is-trimmed");
-    el.panel.style.removeProperty("--walkthrough-panel-max-height");
-  }
   function coversTarget(target) {
     const panelBox = el.panel.getBoundingClientRect();
     const box = target.getBoundingClientRect();
     return !(box.bottom <= panelBox.top || box.top >= panelBox.bottom);
   }
 
+  /** Gives the panel back whatever height was surrendered for a control that is no longer being
+   * pointed at. */
+  function releasePanelTrim() {
+    el.panel.classList.remove("is-trimmed");
+    el.panel.style.removeProperty("--walkthrough-panel-max-height");
+  }
 
   /** Whether the app is already on a step's route. Compared on the path the script writes — the
    * scripts name routes as the app's own paths, and the base path is the same for both. */
@@ -900,7 +906,7 @@ export function startGuidedWalkthrough({
       if (groundOnly ? groundIntact(step) : stepIsReady(step)) break;
       if (stepOutcomeNow(earlier, doc).ok) continue;
       performed = true;
-      await performStep(earlier, { doc, wait: (ms) => sleep(Math.min(ms, RESTORE_SETTLE_MS)) });
+      await performStep(earlier, { doc, hand, wait: replayWait });
     }
     return performed;
   }
@@ -1019,7 +1025,8 @@ export function startGuidedWalkthrough({
         if (rebuilt && stepOutcomeNow(step, doc).ok) {
           await performStep(step, {
             doc,
-            wait: (ms) => sleep(Math.min(ms, RESTORE_SETTLE_MS)),
+            hand,
+            wait: replayWait,
             replay: true,
           });
         }

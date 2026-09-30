@@ -65,6 +65,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Fixed
 
+- **Show me draws every tap it makes.** On a card reached by walking Back, Show me replayed the
+  earlier steps without the hand, so fields were filled and dialogs closed with nothing drawn; the
+  hand also pointed at controls that were still scrolling into place. Every tap the demonstration
+  performs is now drawn first, and a test walks the whole story, forward and back, to hold it.
 - **A time costs the same in the plan's estimate however it is written.** Four intervals of "2:30"
   were costed at nothing and four of "150" at ten minutes, so the fit meter said 2 or 12 minutes for
   the same plan. Times are now read by the rule the card writes them with, holds included.

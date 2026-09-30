@@ -802,3 +802,126 @@ def test_every_offered_chapter_can_be_walked_from_a_cold_start(
         captions[-1] if captions else "nothing walked"
     )
     expect(page.locator(PANEL)).to_be_hidden()
+
+
+# Every tap the DEMO PLAYER performs, and what the hand was doing when it did. Installed before the
+# app loads and recorded from the player's own calls (found by the file name in the stack), so an
+# app-internal click() is not counted as a demonstration. A tap is: `click()`, and the `input` or
+# `change` event a fill, pick or attach fires (an `input` followed by `change` on the same field in
+# the same tick is one fill).
+#
+# A tap is DRAWN when, at that instant, the hand is on screen over the control and it has pulsed
+# since the previous tap. The log rides in sessionStorage because the story crosses to the client's
+# phone by navigating, which discards the page's own variables.
+TAP_RECORDER = """
+(() => {
+  const KEY = "__player_taps";
+  let pulses = 0;
+  let lastFill = null;
+  const watch = () => {
+    new MutationObserver((records) => {
+      for (const r of records)
+        for (const n of r.addedNodes)
+          if (n.classList?.contains("demo-tour-waves")) pulses += 1;
+    }).observe(document.body, { childList: true });
+  };
+  const started = () => document.body ? watch() : addEventListener("DOMContentLoaded", watch);
+  started();
+  const note = (kind, el) => {
+    if (!new Error().stack.includes("demoTourPlayer")) return;
+    const box = el.getBoundingClientRect();
+    const hand = document.getElementById("demo-tour-hand");
+    const x = parseFloat(hand?.style.getPropertyValue("--hand-x"));
+    const y = parseFloat(hand?.style.getPropertyValue("--hand-y"));
+    const over = x >= box.left - 2 && x <= box.right + 2 && y >= box.top - 2 && y <= box.bottom + 2;
+    const log = JSON.parse(sessionStorage.getItem(KEY) || "[]");
+    log.push({
+      step: new URLSearchParams(location.search).get("step"),
+      kind,
+      target: el.id || el.className || el.tagName,
+      handVisible: Boolean(hand?.classList.contains("is-visible")),
+      handOver: over,
+      where: `hand ${x},${y} box ${Math.round(box.left)},${Math.round(box.top)} ${Math.round(box.width)}x${Math.round(box.height)}`,
+      pulsed: pulses > 0,
+    });
+    pulses = 0;
+    sessionStorage.setItem(KEY, JSON.stringify(log));
+  };
+  const click = HTMLElement.prototype.click;
+  HTMLElement.prototype.click = function () { note("click", this); return click.call(this); };
+  const dispatch = EventTarget.prototype.dispatchEvent;
+  EventTarget.prototype.dispatchEvent = function (event) {
+    if (event.type === "input") { note("fill", this); lastFill = this; queueMicrotask(() => { lastFill = null; }); }
+    else if (event.type === "change" && lastFill !== this) note("pick", this);
+    return dispatch.call(this, event);
+  };
+})();
+"""
+
+
+def _drain_taps(page):
+    return page.evaluate(
+        """() => { const log = JSON.parse(sessionStorage.getItem("__player_taps") || "[]");
+                  sessionStorage.removeItem("__player_taps"); return log; }"""
+    )
+
+
+def _undrawn(taps):
+    return [
+        f"{tap['step']}: {tap['kind']} on {tap['target']!r} "
+        f"(hand visible={tap['handVisible']}, over the control={tap['handOver']}, "
+        f"pulsed={tap['pulsed']}; {tap['where']})"
+        for tap in taps
+        if not (tap["handVisible"] and tap["handOver"] and tap["pulsed"])
+    ]
+
+
+def test_every_tap_show_me_performs_is_drawn_by_the_hand_first(page, local_server):
+    """Reported 2026-08-31: "show me fills both number and mail, never animates the x click", and on
+    another card "show me shows no click animation". The hand is what makes a demonstration a
+    demonstration, so a tap the player performs without the hand having travelled to the control and
+    pulsed there is the guide doing something behind the viewer's back.
+
+    Walked forward through the whole story, and then BACKWARD one step at a time with Show me on
+    each card, because Back is what makes the guide rebuild the ground under a step by replaying the
+    steps before it."""
+    page.add_init_script(TAP_RECORDER)
+    _open_story(page, local_server)
+
+    taps = []
+
+    def collect(page, _step):
+        taps.extend(_drain_taps(page))
+
+    _walk_the_whole_story(page, on_step=collect)
+    taps.extend(_drain_taps(page))
+    assert taps, "the recorder saw no tap: it is not watching the player"
+    forward = _undrawn(taps)
+
+    backward = []
+    for chapter in page.evaluate(CHAPTER_INDEX):
+        _open_story(
+            page, local_server, f"?init=demo_data_load&demo=story&chapter={chapter}"
+        )
+        _, last = _step_numbers(page)
+        while _step_numbers(page)[0] < last:
+            _do_step(page)
+        _drain_taps(page)
+        while _step_numbers(page)[0] > 1:
+            if not page.locator(BACK).is_visible():
+                break
+            page.locator(BACK).click()
+            # The rebuild runs as the card arrives, and Show me after it.
+            page.wait_for_timeout(800)
+            here = _step_numbers(page)[0]
+            _show_me_if_offered(page)
+            page.wait_for_timeout(800)
+            # Show me on a card walked back to can carry the guide on; the walk goes back to it.
+            if _step_numbers(page)[0] > here and page.locator(BACK).is_visible():
+                page.locator(BACK).click()
+                page.wait_for_timeout(800)
+            backward += [f"{chapter}/{line}" for line in _undrawn(_drain_taps(page))]
+    backward = sorted(set(backward))
+    assert not forward + backward, "taps without the hand:\n" + "\n".join(
+        forward + backward
+    )
