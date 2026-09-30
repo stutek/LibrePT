@@ -20,6 +20,37 @@ Read [CHANGELOG.md](CHANGELOG.md) for what shipped and when. This file is why.
 
 ---
 
+### 17.4 [x] Save a past session as a routine template (library fills itself from history) — shipped 2026-09-30
+
+With §17.1 preserving the full program, "Save as routine" on a history record extracts a reusable
+template — **demoting the Routines view from an authoring surface to a library that fills itself from
+real sessions**, removing the blank-page chore that blocks ramp-up.
+
+- Extraction **strips person/day-specific magnitudes** (`weight`, watts, time, distance, calories),
+  keeping the prescription structure: exercise, set count, reps/targets, rest, circuit grouping.
+- Pairs with the inline clipboard editor (§8.3) and §5.1's Tab 3.
+- **Watch item for §18.5**: a *hard* provenance reference back to the source history record would
+  create the first cycle in the reference graph (`history → routine → history`), which the topological
+  migration order forbids. Keep provenance soft/denormalised.
+
+### 80.94 [x] P2 — V kartoteki stranke je signal s treninga še vedno angleški: »Too Hard - Reduce Load« — popravljeno 2026-09-30
+
+**Scenarij in koraki:** na podlogi pri vaji tapni »Pretežko«, nato »Dodaj opombo«, izberi »Pretežko –
+zmanjšaj težo«, vpiši opombo (»SIM pretežko pri 4. seriji«), obkljukaj shranjevanje v kartoteko in
+tapni »Zapiši opozorilo«. Nato odpri »Imenik strank« → stranko → razdelek OPOMBE.
+
+**Opaženo:** vrstica se glasi »2026-09-30 — Barbell Back Squat: Too Hard - Reduce Load - SIM pretežko
+pri 4. seriji«. Na zaslonu »Čakajoče na pregled« je isti signal slovenski: »Pretežko – zmanjšaj
+težo«. Angleška oblika je torej ostala samo v kartoteki.
+
+**Težava in vpliv:** kartoteka je tisto, kar trener prebere pred naslednjim treningom s to stranko.
+Vrstica, ki jo je zapisala aplikacija sama, je tam v tujem jeziku, pomešana s slovensko opombo, ki jo
+je napisal trener.
+
+**Predlog:** v kartoteko naj se zapiše isto besedilo kot na zaslonu za pregled — opaženo na različici
+`8b2ce80`. Isti napis je bil na zaslonu za pregled popravljen z §80.26 (2026-09-27), v kartoteki pa
+ne.
+
 ### 7.2 [x] Feedback button must show its own state — toggled, and "notes exist" — note mark drawn and tested 2026-09-30
 
 **Raised 2026-07-26 (Simon).** The three signal buttons on a deck card

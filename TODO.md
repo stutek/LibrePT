@@ -1058,17 +1058,10 @@ copy-to-a-new-session from a template, never an edit of the past. The only permi
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#173-x-erasure-anonymization-only-never-delete-shipped-2026-08-11); what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-### 17.4 [ ] Save a past session as a routine template (library fills itself from history)
-With §17.1 preserving the full program, "Save as routine" on a history record extracts a reusable
-template — **demoting the Routines view from an authoring surface to a library that fills itself from
-real sessions**, removing the blank-page chore that blocks ramp-up.
+### 17.4 [x] Save a past session as a routine template (library fills itself from history) — shipped 2026-09-30
 
-- Extraction **strips person/day-specific magnitudes** (`weight`, watts, time, distance, calories),
-  keeping the prescription structure: exercise, set count, reps/targets, rest, circuit grouping.
-- Pairs with the inline clipboard editor (§8.3) and §5.1's Tab 3.
-- **Watch item for §18.5**: a *hard* provenance reference back to the source history record would
-  create the first cycle in the reference graph (`history → routine → history`), which the topological
-  migration order forbids. Keep provenance soft/denormalised.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#174-x-save-a-past-session-as-a-routine-template-library-fills-itself-from-history--shipped-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ### 17.5 [~] Explicit item ordering — `position` on every session item
 **Shipped** in [sessionItemOrder.js](src/data/sessionItemOrder.js); rationale (why dense not gapped,
@@ -6526,6 +6519,10 @@ delo nanje vezano), ostanejo označeni za vedno, zato opozorilo prej ni moglo ni
 slovarjih); ali stranka iz vzorca, ki ostane, dobi oznako »vzorec«, in ali oznaka PREDOGLED ostane v
 glavi, je Simonova odločitev.
 
+**Stanje 2026-09-30, drugič:** razlogi in imena zbirk so zdaj v jeziku trenerja (`03aeba4`). Odprto
+ostane le, kar je zgoraj zapisano kot Simonova odločitev: oznaka »vzorec« na stranki, ki ostane, in
+oznaka PREDOGLED v glavi.
+
 ### 80.91 [ ] P1 — Sprememba teže v načrtu prihodnjega treninga po osvežitvi izgine brez besede
 
 **Scenarij in koraki:** odpri podlogo prihodnjega treninga (»Ponedeljkova moc«, 2026-10-05, 09:00 -
@@ -6598,23 +6595,10 @@ kopiranja na drug dan ni, naj tega ukaza ni videti pri treningu z eno stranko �
 §88.5 (»Kopiraj trening na datum«). »Kopiraj ta načrt na …« je namenoma kopija k drugemu udeležencu
 istega treninga. Napis gumba bi lahko to povedal jasneje; to sodi k §88.5.
 
-### 80.94 [ ] P2 — V kartoteki stranke je signal s treninga še vedno angleški: »Too Hard - Reduce Load«
+### 80.94 [x] P2 — V kartoteki stranke je signal s treninga še vedno angleški: »Too Hard - Reduce Load« — popravljeno 2026-09-30
 
-**Scenarij in koraki:** na podlogi pri vaji tapni »Pretežko«, nato »Dodaj opombo«, izberi »Pretežko –
-zmanjšaj težo«, vpiši opombo (»SIM pretežko pri 4. seriji«), obkljukaj shranjevanje v kartoteko in
-tapni »Zapiši opozorilo«. Nato odpri »Imenik strank« → stranko → razdelek OPOMBE.
-
-**Opaženo:** vrstica se glasi »2026-09-30 — Barbell Back Squat: Too Hard - Reduce Load - SIM pretežko
-pri 4. seriji«. Na zaslonu »Čakajoče na pregled« je isti signal slovenski: »Pretežko – zmanjšaj
-težo«. Angleška oblika je torej ostala samo v kartoteki.
-
-**Težava in vpliv:** kartoteka je tisto, kar trener prebere pred naslednjim treningom s to stranko.
-Vrstica, ki jo je zapisala aplikacija sama, je tam v tujem jeziku, pomešana s slovensko opombo, ki jo
-je napisal trener.
-
-**Predlog:** v kartoteko naj se zapiše isto besedilo kot na zaslonu za pregled — opaženo na različici
-`8b2ce80`. Isti napis je bil na zaslonu za pregled popravljen z §80.26 (2026-09-27), v kartoteki pa
-ne.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8094-x-p2--v-kartoteki-stranke-je-signal-s-treninga-še-vedno-angleški-too-hard---reduce-load--popravljeno-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ### 80.95 [ ] P1 — Dotik »Pretežko« zapiše vajo kot opravljeno z vsemi načrtovanimi serijami
 
