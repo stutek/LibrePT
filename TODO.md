@@ -6860,6 +6860,26 @@ posledico ne sme ugibati, na kaj se nanaša.
 
 **Predlog:** »Ni se zgodil« ali »Trening ni bil«. Opaženo na `main` `12d0e66`, sl, 390 × 844.
 
+### 80.113 [ ] P1 — Uvoz programa izgubi serije, ponovitve in težo, tudi pri primeru, ki ga pokaže aplikacija
+
+**Scenarij in koraki:** ☰ → »Vaje in rutine« → »Rutine« → »Uvozi program«. »Pokaži obliko«
+(v polje vpiše primer aplikacije). »Za koga«: SIM Vera Kos. »Odpri v urejevalniku«.
+
+**Opaženo:** okno reče »Prebranih 4 postavk, 2 jih ni v tvojem katalogu.« Primer predpiše
+Barbell Bench Press 4 × 5 × 60 kg, Bent-Over Row 4 × 8 × 45 kg in Push-Up 3 × 12. V
+urejevalniku ima Barbell Bench Press prazno polje za serije, 10 ponovitev in 0 kg. Vaji z
+značko »PO MERI« kažeta »S[object Object],[object Object],[object Object],[object Object] × R—«
+in »S[object Object],[object Object],[object Object] × R—«. Konzola nima napak.
+
+**Težava in vpliv:** trener uvozi program, ki ga je pisal drugje, in dobi vaje brez številk
+ali s privzetimi (10 ponovitev, 0 kg). Opozorila ni. Če ne primerja vsake vrstice z izvirnikom,
+stranka dela po napačnem programu. Programski izpis »[object Object]« mu pove, da je nekaj
+pokvarjeno, ne pa kaj.
+
+**Predlog:** urejevalnik naj pokaže serije, ponovitve in težo iz uvoza. Postavko, ki je ni bilo
+mogoče prebrati, naj imenuje. Opaženo na `main` `12d0e66`, sl, 390 × 844; najprej opazil
+trener-podagent.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
