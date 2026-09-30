@@ -6780,6 +6780,44 @@ Ob tem opažena manjša neskladnost na istem zaslonu: pri podpisu z datumom 2026
 »Privolitev dana (2026-06-15 · v2026-08-09)«, torej pripiše različico obrazca iz avgusta podpisu iz
 junija.
 
+### 80.103 [ ] P1 — Odprtje in zapiranje enega večera serije ustvari drugo, enako kartico istega večera
+
+**Scenarij in koraki:** »Ustvari trening«: ime »Jutranja vaja«, datum 2026-10-05, 07:15 - 08:15,
+stranka Sarah Jenkins, obkljukaj »PONOVI VSAK TEDEN«, v »DO (NEOBVEZNO)« vpiši 2026-10-19, »Shrani«,
+nato »Končano« v oknu za vabila. Seznam pokaže tri ponedeljke: 5., 12. in 19. oktober. Zdaj na kartici
+12. oktobra tapni svinčnik, v obrazcu tapni »Zavrzi spremembe«, isto kartico odpri še enkrat s
+svinčnikom in tapni »Odpri v beležki«.
+
+**Opaženo:** kartic je zdaj štiri. Pri 12. oktobru sta dve enaki: obe »07:15 - 08:15 Jutranja vaja
+1/1 mest zasedenih«, obe visoki 102 pike. Ostaneta tudi po osvežitvi strani. Naslov podloge, ki se je
+odprla, nosi drug id treninga kot tisti, ki sem ga urejal.
+
+**Težava in vpliv:** trener pogleda v termin serije in ga zapre, ne da bi kaj spremenil, pa ima v
+urniku dva treninga isto uro. Stranka je na obeh, mesto je zasedeno dvakrat, in vsakega je treba
+izbrisati posebej. Če na napačnem zabeleži vadbo, je zapis na terminu, ki ga ne bo pogledal.
+
+**Predlog:** odprtje večera serije, brez shranjene spremembe, naj ne ustvari novega treninga —
+opaženo na različici `8b2ce80`.
+
+### 80.104 [ ] P2 — Izbrisana serija pusti za sabo programe brez datuma, ki jih ni mogoče razločiti
+
+**Scenarij in koraki:** ustvari tedensko serijo s stranko (šest večerov), nato izbriši vse njene
+večere enega za drugim (kartica → svinčnik → »Odpri v beležki« → ⋮ »Možnosti treninga« → »Izbriši
+trening«). Nato poglej predal z obvestili.
+
+**Opaženo:** urnik je prazen, predal pa pravi: »Nenačrtovani programi — 7 programov je pripravljenih,
+a še niso dodeljeni treningu«, in pod tem sedemkrat isto vrstico »Jutranja serija · Sarah Jenkins«.
+Vrstice nimajo datuma in se med sabo ne razlikujejo v ničemer. Ostanejo tudi po osvežitvi strani. (Da
+se dajo odstraniti, nisem našel; poti nisem izčrpal, zato tega ne trdim.)
+
+**Težava in vpliv:** trener, ki odpove tečaj, ima potem v predalu sedem enakih opravil, ki jih ne more
+ne razločiti ne zapreti. Predal je mesto, kjer bere, kaj ga čaka, zato ga sedem praznih vrstic zmoti
+pri vsakem pogledu.
+
+**Predlog:** ko se izbriše večer serije, naj njegov program ne ostane med nenačrtovanimi, ali pa naj
+vrstica nosi datum večera, iz katerega je prišla, in pot, po kateri se odstrani — opaženo na različici
+`8b2ce80`.
+
 **Presoja 2026-09-30 (Claude): čaka na Simona — nasprotuje zapisani odločitvi.** `logQuickSignal` v
 [sessionQuickSignals.js](src/controllers/sessionQuickSignals.js) namerno označi vse serije vaje kot
 opravljene, ko trener tapne signal: »signal na vaji pomeni, da je bila opravljena« (manj dotikov,
