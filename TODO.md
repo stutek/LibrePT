@@ -6728,6 +6728,29 @@ izvoz ne vsebuje vsega, kar okno obljubi.
 jeziku dokumenta; obljubljena sprememba načrta naj bo v datoteki ali pa naj je okno ne šteje —
 opaženo na različici `8b2ce80`.
 
+### 80.101 [ ] P2 — Izbrisana stranka ima še vedno cel zaslon stranke in ponuja izvoz svojih podatkov
+
+**Scenarij in koraki:** »Imenik strank« → stranka z zgodovino → »Izbriši stranko (GDPR)« → v polje
+vpiši »IZBRIŠI« → »Izbriši dokončno«. Nato to stranko odpri znova iz imenika.
+
+**Opaženo:** zaslon pravi »Client #BYDL7Y« in »Izbrisano 2026-09-30 na zahtevo stranke. Spodnji zapisi
+treningov so anonimni.« Pod tem so isti gumbi kot pri živi stranki: »Uredi profil«, »Načrtuj
+program«, »Anonimna kopija za AI«, »Izvozi podatke (GDPR)« in »Izbriši stranko (GDPR)«. Dotik na
+»Izvozi podatke (GDPR)« odpre okno »Izvozi podatke te stranke — Client #BYDL7Y … Opravljeni treningi:
+3, termini: 6, spremembe plana: 1«. Izbrisana oseba ostane tudi v imeniku strank in v obvestilu
+»Treningi, ki čakajo na pregled«: »Client #BYDL7Y — Skupinska moč in kondicija (1)«. Oznaka »Client
+#BYDL7Y« je angleška, aplikacija pa je slovenska.
+
+**Težava in vpliv:** trener po izbrisu na zahtevo stranke še vedno vidi vrstico v imeniku in nalogo v
+pregledu, ki ju ne more zapreti, ker za njima ni več osebe. Aplikacija mu ponudi, da izvozi podatke
+osebe, ki je bila izbrisana — komu naj jih izroči, ni jasno, privolitve pa ni več. »Načrtuj program«
+za izbrisano osebo je v isti vrsti.
+
+**Predlog:** po izbrisu naj zaslon ponudi samo pogled na anonimne zapise; »Uredi profil«, »Načrtuj
+program«, »Anonimna kopija za AI« in »Izvozi podatke (GDPR)« naj izginejo, oznaka pa naj bo slovenska
+(»Stranka #BYDL7Y«). Vrstica v imeniku in naloga v pregledu naj bosta označeni kot izbrisani ali
+odstranjeni — opaženo na različici `8b2ce80`.
+
 **Presoja 2026-09-30 (Claude): čaka na Simona — nasprotuje zapisani odločitvi.** `logQuickSignal` v
 [sessionQuickSignals.js](src/controllers/sessionQuickSignals.js) namerno označi vse serije vaje kot
 opravljene, ko trener tapne signal: »signal na vaji pomeni, da je bila opravljena« (manj dotikov,
