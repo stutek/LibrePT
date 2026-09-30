@@ -6709,6 +6709,11 @@ kopiranja na drug dan ni, naj tega ukaza ni videti pri treningu z eno stranko �
 §88.5 (»Kopiraj trening na datum«). »Kopiraj ta načrt na …« je namenoma kopija k drugemu udeležencu
 istega treninga. Napis gumba bi lahko to povedal jasneje; to sodi k §88.5.
 
+**Prvo odprtje 2026-09-30, `main` `12d0e66`:** kopija k drugemu udeležencu uspe, vendar brez besede.
+Trening »Par« za SIM Tim Test in SIM Eva Test: »Kopiraj ta načrt na …« → »SIM Eva Test«. Okno se
+zapre, zavihek ostane pri Timu, obvestila ni. Trenerka brez predznanja je preverila ročno na drugem
+zavihku: »Potrditev bi bila dobrodošla.«
+
 ### 80.94 [x] P2 — V kartoteki stranke je signal s treninga še vedno angleški: »Too Hard - Reduce Load« — popravljeno 2026-09-30
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8094-x-p2--v-kartoteki-stranke-je-signal-s-treninga-še-vedno-angleški-too-hard---reduce-load--popravljeno-2026-09-30);
@@ -7050,6 +7055,21 @@ ne vidim, kdaj je kaj.«
 Izbira na slepo, nato preveri na seznamu.
 
 **Predlog:** označiti današnji dan in dneve s treningi. Opaženo na `main` `12d0e66`, sl, 390 × 844.
+
+### 80.123 [ ] P2 — Podloga treninga čez dva ali več dni v glavi ne pove dneva, samo »Prihodnje«
+
+**Scenarij in koraki:** ustvariti trening »Par« s čipom »sob. 3.« (seznam ga pokaže pod »sobota
+2026-10-03«) in ga odpreti. Za primerjavo odpreti trening za jutri.
+
+**Opaženo:** glava sobotnega treninga: »Prihodnje · 13:30 - 14:30 · Studio«. Glava jutrišnjega:
+»Jutri · 13:30 - 14:30 · Studio«, današnjega »Danes · …«. Datuma ali dneva v tednu pri treningu čez
+dva dni ni nikjer na podlogi.
+
+**Težava in vpliv:** trener pripravlja načrt za soboto in na zaslonu, kjer ga ureja, ne vidi, da je
+to sobota. Pri tedenski seriji so vsi večeri »Prihodnje«, zato ne ve, katerega ureja.
+
+**Predlog:** namesto »Prihodnje« dan in datum, na primer »sob. 2026-10-03«. Opaženo na `main`
+`12d0e66`, sl, 390 × 844.
 
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
