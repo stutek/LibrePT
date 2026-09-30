@@ -146,6 +146,11 @@ that shape whenever a finding would otherwise be "I noticed a few of these".
 »Brez povezave« on a machine that was online, which reads exactly like a defect. After a scenario
 that used `inject`, `stop` and `start` again before believing anything the app shows.
 
+**A copy of `main` must carry a SHA.** `git archive` gives `src/version.js` with `commit: "dev"`,
+and an unstamped build behaves unlike anything a trainer runs: on 2026-10-01 it stalled `/intake`
+every time after the trainer's first launch and put »Brez povezave« in the header while online. Write
+the SHA into the copy's `BUILD_INFO` before testing on it; the dev server on 8081 is unstamped too.
+
 **`goto` is not a stopwatch.** It waits until the network goes quiet, up to 60 seconds, so a load
 timed around it measures the driver. On 2026-10-01 that turned a 2.1-second boot on a slow line into
 a 96.9-second P1 that had to be withdrawn. Time a load from `page.goto(url, wait_until="commit")` to
