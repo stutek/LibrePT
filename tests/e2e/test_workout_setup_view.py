@@ -87,6 +87,26 @@ def test_a_group_session_started_from_a_routine_survives_a_reload(page, local_se
     assert urlparse(page.url).path.rstrip("/").endswith("/routines")
 
 
+def test_a_running_session_keeps_its_day_and_says_why(page, local_server):
+    """A trainer opened the running session's form and picked Friday, thinking it moved the next
+    appointment: the running session went to Friday without a question. While it runs, its date
+    and times cannot be edited, and the form says why."""
+    page.goto(local_server)
+    page.locator('.session-card[data-session-id="s01f2e3d"]').click()
+    page.wait_for_selector("#active-session-overlay:not(.hidden)")
+    page.click("#btn-start-session")
+    page.click("#dialog-session-start-time[open] .modal-close-btn")
+
+    page.goto(f"{local_server}session/setup/s01f2e3d")
+    page.wait_for_selector("#setup-session-date")
+
+    for field in ("setup-session-date", "setup-start-time", "setup-end-time"):
+        assert page.get_attribute(f"#{field}", "readonly") is not None, field
+    expect(page.locator("#setup-slot-locked-note")).to_have_text(
+        "This session has already started or finished, so its date and time cannot be changed."
+    )
+
+
 def test_workout_setup_view_route_loads(page, local_server):
     """Directly visiting /session/new loads the workout setup view."""
     page.goto(f"{local_server}session/new")
