@@ -8498,3 +8498,52 @@ stranko 3 dotike, okoli 11 črk in eno okno (≈ 11 s); skupina desetih je okoli
 Že dobro: dotik na uro označi vsebino in »1800«, »9.30«, »17.45« se preberejo pravilno; konec ure se
 premakne sam; »Ponovi vsak teden« sam izbere dan; predlog pri »Pretežko« je izračunan iz načrta (12 →
 9.5 kg); iskanje strank ponudi »Dodaj »ime« kot novo stranko« in ime prenese v obrazec.
+
+## 95. [ ] A session in progress is a record like any other
+
+**Ruled by Simon 2026-09-30**, from one question: why would only finished sessions be written? The
+app does not in fact do that, and its two halves contradict each other.
+
+**What is true today.** A planning draft IS written as an ordinary record, one per participant, into
+`state.history`, from the moment it is edited — `syncPlanningSnapshotToHistory` in
+`controllers/activeSessionCache.js` rebuilds it from the live session on every save and remembers
+each participant's draft id, so several unfinished plans coexist and survive anything. A session in
+progress is written nowhere of the kind. It lives in ONE storage key, `librept_active_session`
+(`data/sessionCache.js`), which is a constant: opening another session overwrites it, and what the
+trainer had logged into the first one is gone. Same problem, two answers, and only one of them
+loses data.
+
+**Worse, a draft is written TWICE on every save** — into that cache blob and into history — and the
+function above exists to keep the copy in step. That is the single-source-of-truth value paying
+rent: one of the two shapes has to win at recovery, and `recoverActiveSession` decides it is the
+cache.
+
+**Simon's two requirements, which the change is measured against:** one source of truth, and several
+unfinished sessions or plans stored at the same time. The draft path already meets both; a live
+session must meet them the same way.
+
+**The shape.** A session is one record with a STATE — planned, in progress, finished — not a record
+plus a private slot. Complete stops being the moment of first writing and becomes a change of state.
+
+**One status, never a second flag, and this is the part that decides whether the change is safe.**
+`isPlanning` appears 77 times in `src/`. Every reader that must not count a draft as performed work
+filters on it: the client's history, the "last time" numbers, the neighbours the peek offers, the
+routine built from a session. Give a live session its own boolean and every one of those filters
+silently counts it as performed. One field with three values forces each of those sites to be looked
+at once and decided, which is the only version of this that can be finished.
+
+**What stops existing** — not fixed, but with nothing left to protect: the live-session cache, its
+staleness rule, the recovery path at boot, the `canOpen` guard that refuses to leave a started
+session, and §92.6. A reload reads the record; opening a neighbour leaves the other record alone.
+
+**What it costs.** A data-schema version and its migration. Those 77 sites, read once. The Drive
+sync will carry a session in progress and push it repeatedly, which has to be looked at before it is
+switched on. And one product question that is not technical: with several sessions in progress at
+once, the dashboard badge, the clipboard bar and the timers must each say WHICH session they mean.
+
+### 95.1 [ ] §92.6 is this section's subordinate case, not its own task
+
+Leaving a session by the peek throws away what was logged in it. The guard refuses only a STARTED
+session, while the risk is a session that has anything in it — on the gym floor the plan is marked
+up long before anyone taps Start. Widening the guard treats the symptom; giving the session its own
+record removes the case. Not worth fixing twice, so it waits here.
