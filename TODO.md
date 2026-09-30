@@ -7092,6 +7092,24 @@ podatkom«). Edina stran, ki pove, kaj predogled pomeni za njune podatke, jima o
 pritisne v takem brskalniku, ne s `curl`. Opaženo na `main` `12d0e66` (lokalni strežnik) in na
 objavljeni `8b2ce80`, 390 × 844.
 
+### 80.125 [ ] P3 — Na slovenski strani so pomožna imena gumbov za bralnik zaslona angleška
+
+**Scenarij in koraki:** `?lang=sl`, seznam »Treningi« in podloga treninga. Zbrati `aria-label` in
+`title` vseh elementov v dokumentu, tudi v zaprtih oknih.
+
+**Opaženo:** slovar aplikacije je preveden (od 1080 besedil jih je le pet enakih angleškim, vsa
+upravičeno), angleška pa so ta imena, ki ne pridejo iz njega: »Loading LibrePT«, »Notification Center
+and Active Session«, »Toggle notifications drawer«, »Toggle Notifications«, »Close modal«, »Close add
+exercise modal«, »Close catalog«, »Close conflict review«, »Close build info«; v oknu »Uredi rutino«
+ima polje za težo ime »Load«. Drugi gumbi za zapiranje so »Zapri« (14-krat). Trener brez predznanja je
+to opazil v orodju: »ime "Close" (angleško) na slovenski strani, drugod "Zapri"«.
+
+**Težava in vpliv:** trener, ki uporablja bralnik zaslona ali glasovno upravljanje, sliši angleščino
+sredi slovenske strani in gumba ne more poklicati s slovensko besedo, ki jo vidi pri drugih oknih.
+
+**Predlog:** imena iz slovarja, kot ostala; test, ki na `?lang=sl` ne najde angleškega pomožnega
+imena. Opaženo na `main` `12d0e66`, 390 × 844.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
