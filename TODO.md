@@ -8705,6 +8705,42 @@ where a collection's shape is declared, and from the storage keys in `src/`.
 `SCHEMA_PREVIEW`, `schemaMigrations.js` and schema 5 for real, on a change that touches the two
 collections carrying the durability stakes, rather than on a probe record written by tests.
 
+### 95.4 [ ] What the entity list turned up: one program shape, one grouping key, no history
+
+Simon's four questions of 2026-09-30, answered from the code.
+
+**Does `routines` deserve to be an entity?** Yes, but not in its present shape. What justifies it: a
+template carries no date and no participants, is reused by many trenings, and deleting it must not
+touch what was already run. What does NOT justify it: a routine and a plan are the same idea — a
+list of prescribed exercise instances — stored in two different shapes. In `data/routines.js` an
+entry reads `sets: 3, reps: 5, weight: 62.5`: numbers, the prescription. In a `history` record the
+same field reads `sets: [ … ]`: an array of what was performed. **The same field name holds a
+different type depending on which collection it is in**, which is the normalisation to do — one
+program structure, used by a routine and by a trening's plan alike, with performance recorded ON the
+instance instead of by redefining the field under it.
+
+**Is a `circuit` a mapping of exercise ids plus a name?** Nearly. Schema 5 declares
+`{id, name, series, exercises, source}` — `series` being the number of rounds — and its `exercises`
+carry the prescription too, not ids alone. Schema 5 has already begun extracting it, because
+`routines` denormalises the same circuit onto every member row: `circuitId`, `circuitTitle` and
+`circuitSeries` repeat on each exercise of the group.
+
+**And there are TWO grouping keys for one grouping.** `circuitId` is what the app actually groups by
+(129 uses, `controllers/sessionCircuits.js`). `comboGroupId` is written into every seed routine and
+preserved on import by `ROUTINE_GROUPING` in `domain/libraryImport.js` — and grouped by nothing.
+Dead weight carried forward on every routine.
+
+**Is `history` needed at all, or a state on the exercise instances?** Not needed as a collection, and
+the instinct matches this section. `history` holds two different things in one shape: a plan not yet
+performed (`isPlanning`) and a trening that happened. Under §95 both are a trening with a state, and
+the per-client program is its plan. What remains genuinely needed is state on the INSTANCE, which
+half-exists already — `completed` on a session item, with "skipped" derived from it.
+
+**The caution that belongs with that answer.** `history` is what the client's page, the "last time"
+numbers on the clipboard, the statistics, the routine-from-session feature and the Drive backup all
+read. Removing it is the largest single migration in the app — which is exactly why Simon wants the
+refactor to exercise `SCHEMA_PREVIEW` and `schemaMigrations.js` rather than a probe record.
+
 ### 95.1 [ ] §92.6 is this section's subordinate case, not its own task
 
 Leaving a session by the peek throws away what was logged in it. The guard refuses only a STARTED
