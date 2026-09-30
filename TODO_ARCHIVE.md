@@ -33,6 +33,131 @@ real sessions**, removing the blank-page chore that blocks ramp-up.
   create the first cycle in the reference graph (`history → routine → history`), which the topological
   migration order forbids. Keep provenance soft/denormalised.
 
+### 80.96 [x] P2 — Prva kartica vodenega ogleda veleva pritisniti »Naprej«, tega gumba pa ni — popravljeno 2026-09-30
+
+**Scenarij in koraki:** ☰ → »Nastavitve« → »Vstopi v peskovnik«. Odpri predal na dnu in tapni poglavje
+»LibrePT te pozdravlja«.
+
+**Opaženo:** kartica pravi »KORAK 1 OD 1« in v besedilu: »Z gumbom Pokaži mi ti vodnik pokaže dvoje …
+Z gumbom Naprej začneš.« Na kartici sta samo dva gumba, »Pokaži mi« (153 × 46 pik) in »Končaj«
+(136 × 46 pik), ter ikona za pospravljanje kartice, ki meri 17 × 19 pik. Gumba »Naprej« ni nikjer na
+zaslonu, ne omogočenega ne onemogočenega. »Končaj« je veliki zeleni gumb in ogled zapre.
+
+**Težava in vpliv:** trener bere navodilo in pritisne edini veliki gumb, ki se ponuja, torej »Končaj«,
+in ogled se konča, preden se je začel. Ogled je edina razlaga aplikacije, ki jo ima.
+
+**Predlog:** besedilo naj imenuje gumb, ki na kartici res je, ali pa naj bo gumb »Naprej« — opaženo na
+različici `8b2ce80`.
+
+**Popravljeno 2026-09-30.** Kartica zdaj imenuje gumba, ki na njej res sta: »Pokaži mi« pokaže
+oboje, »Končaj« pa kartico zapre, in besedilo pove, da naslednje poglavje trener izbere v seznamu
+spodaj. Besedilo je popravljeno v vseh treh jezikih.
+
+### 80.97 [x] P3 — Peskovnik napoti trenerja na seznam poglavij, ki je 325 pik pod robom zaslona — popravljeno 2026-09-30
+
+**Scenarij in koraki:** ☰ → »Nastavitve« → »Vstopi v peskovnik«. Preberi besedilo, ki se izpiše, in
+poskusi narediti, kar pravi.
+
+**Opaženo:** besedilo pravi: »Za vodeni ogled aplikacije po korakih pritisni poglavje v spodnjem
+seznamu: ogled se začne pri poglavju, ki ga pritisneš.« Ta seznam je v predalu na dnu, ki je zaprt:
+vrstica »LibrePT te pozdravlja« je pri 1169. piki navpično, zaslon pa je visok 844. Predal odpre le
+ročica, ki meri 40 × 5 pik (§80.78).
+
+**Težava in vpliv:** trener stori, kar mu piše, in ne najde ničesar. Seznama, na katerega je napoten,
+ne vidi, ker je pod robom zaslona.
+
+**Predlog:** ob vstopu v peskovnik naj bo predal odprt, ali pa naj besedilo pove, da ga je treba prej
+odpreti, in imenuje ročico — opaženo na različici `8b2ce80`.
+
+**Popravljeno 2026-09-30.** Ob vstopu v peskovnik se predal odpre, tako da je seznam poglavij, na
+katerega besedilo napoti, na zaslonu (`switchToWorkspace` v `src/app.js`).
+
+### 80.98 [x] P2 — Korak ogleda imenuje polje »Ime stranke«, obrazec pa ima »Ime in priimek« — popravljeno 2026-09-30
+
+**Scenarij in koraki:** v peskovniku zaženi poglavje »Sprejem treh novih strank« in pojdi do koraka 8
+od 10 (☰ → »Imenik strank« → »Povabi stranko« → vpiši telefon → vpiši e-naslov → zapri z ✕ → »Dodaj
+stranko«).
+
+**Opaženo:** kartica pravi: »V polje Ime stranke vpiši Nik Zupan.« V obrazcu tega polja ni. Polja se
+imenujejo »Ime in priimek *«, »Vzdevek (samo če si dve stranki delita ime)«, »E-pošta«, »Telefonska
+številka«, »Cilji treninga«, »Poškodbe in omejitve« in »Opombe«.
+
+**Težava in vpliv:** trener, ki prvič vidi aplikacijo, išče polje z imenom, ki ga je pravkar prebral,
+in ga ne najde. Pravilo aplikacije je, da korak imenuje kontrolo z napisom, ki ga ta kontrola kaže v
+tem jeziku.
+
+**Predlog:** korak naj reče »Ime in priimek«, ali pa naj se polje preimenuje in napis popravi v vseh
+jezikih — opaženo na različici `8b2ce80`.
+
+**Popravljeno 2026-09-30.** Korak zdaj imenuje polje z napisom, ki ga to polje kaže: »Ime in
+priimek«, enako kot korak za vpis stranke same. Popravljeno v vseh treh jezikih.
+
+### 80.106 [x] P3 — Vprašanje pred zaključkom treninga šteje čas v minutah: »še približno 3812 minut« — popravljeno 2026-09-30
+
+**Scenarij in koraki:** ustvari trening za čez dva dni (»Vecerna vadba«, 2026-10-02, 18:00 - 19:00),
+odpri podlogo, tapni »Začni trening« in »Ohrani urnik«, nato »Zaključi vadbo«.
+
+**Opaženo:** okno pravi »Do konca tega treninga je še približno 3812 minut. Ga želiš vseeno zaključiti
+zdaj?« To je 63 ur in 32 minut. Aplikacija drugod isti čas piše po urah in minutah, na primer »Se
+začne čez 62h 32m« na kartici in »začeto 62h 32m prezgodaj« v oknu tri dotike prej.
+
+**Težava in vpliv:** številke 3812 trener ne prebere. Vprašanje je varovalka pred prezgodnjim
+zaključkom, in prav v njej mu podatek ne pove nič.
+
+**Predlog:** čas naj bo zapisan kot drugod, v urah in minutah — opaženo na različici `8b2ce80`.
+
+**Popravljeno 2026-09-30.** Vprašanje zdaj pove preostanek tako, kot ga povejo vsi drugi
+števci v aplikaciji (»01h 32m«), prek `formatDurationHourMin`. Ob tem je dodana preverba, ki velja za
+ves slovar: `{nadomestek}` mora biti pri istem ključu enak v vseh jezikih, sicer se v enem jeziku
+izpiše besedilo v zavitih oklepajih (`tests/unit/test_i18n_parity.py`).
+
+### 80.107 [x] P3 — Kartica zaključenega treninga takoj po zaključku še vedno piše »Aktiven trening« — popravljeno 2026-09-30
+
+**Scenarij in koraki:** kot pri §80.106; po »Zaključi vadbo« potrdi »Zaključi zdaj« in nato še
+»Zaključi zdaj« v oknu »Ni zabeleženih zaključenih serij. Res želiš zaključiti in shraniti prazno
+vadbo?«. Takoj zatem poglej kartico tega treninga v seznamu.
+
+**Opaženo:** kartica pravi »18:00 - 19:00 Vecerna vadba 1/1 mest zasedenih Program ni določen Aktiven
+trening«. Po osvežitvi strani piše pravilno: »Zaključeno 00:00«. Seznam se torej po zaključku ne
+osveži sam.
+
+**Težava in vpliv:** trener zaključi vadbo, seznam pa mu pravi, da še teče. Lahko tapne kartico in
+misli, da se trening ni zaključil, ali pa počaka, da se stanje »popravi«, česar brez osvežitve ne bo.
+
+**Predlog:** po zaključku naj se kartica v seznamu takoj prepiše na »Zaključeno« — opaženo na
+različici `8b2ce80`.
+
+**Popravljeno 2026-09-30.** Po zaključku se seznam takoj preriše, iz istega razloga, kot se
+preriše ob zagonu treninga: stanje na kartici se vpiše ob izrisu seznama in ni izračunano v živo.
+
+### 80.108 [x] P3 — Na 320 × 680 je od gumba »Shrani in nadaljuj« na uvodnem zaslonu vidne štiri pike — popravljeno 2026-09-30
+
+**Scenarij in koraki:** zaslon širine 320 in višine 680 (najmanjši, ki ga aplikacija podpira), prvi
+zagon: »Se strinjam« → izberi temo → »Nadaljuj«. Odpre se obrazec s trenerjevimi podatki.
+
+**Opaženo:** štiri polja so na zaslonu (zadnje, »E-pošta«, sega do 666. pike), gumb »Shrani in
+nadaljuj« pa se začne pri 676. piki in je visok 48, torej je vidna le njegova zgornja robna črta.
+Stran se ne premika (`scrollHeight` telesa je enak višini zaslona), premika se notranji del
+`.app-splash`; ko se ta premakne za 69 pik, je gumb cel na zaslonu. Torej je dosegljiv, a ob odprtju
+zaslon izgleda končan.
+
+**Težava in vpliv:** to je prvi zaslon, ki ga vidi vsak nov trener, in edini gumb na njem je videti,
+kot da ga ni. Na manjšem telefonu trener najprej ne ve, kako naprej.
+
+**Predlog:** gumb naj bo ob odprtju cel na zaslonu tudi pri 320 × 680, ali pa naj bo pritrjen na dno —
+opaženo na različici `8b2ce80`.
+
+**Presoja 2026-09-30 (Claude): čaka na Simona — nasprotuje zapisani odločitvi.** `logQuickSignal` v
+[sessionQuickSignals.js](src/controllers/sessionQuickSignals.js) namerno označi vse serije vaje kot
+opravljene, ko trener tapne signal: »signal na vaji pomeni, da je bila opravljena« (manj dotikov,
+§48). Ugotovitev pravi, da tak zapis trdi delo, ki ga ni bilo. Obe branji sta mogoči; katero velja,
+je Simonova odločitev. Opaženo ob tem: ponovni tap, ki signal umakne, pusti serije označene kot
+opravljene, zato zapis po umiku ni tak kot pred tapom.
+
+**Popravljeno 2026-09-30.** Na nizkem zaslonu (do 720 pik) se višina vzame znaku in ritmu, ne
+besedilu, tako da je gumb ob odprtju cel na zaslonu; preizkušeno pri 320 × 680
+(`tests/e2e/test_first_run_terms.py`).
+
 ### 80.95 [x] P1 — Dotik »Pretežko« zapiše vajo kot opravljeno z vsemi načrtovanimi serijami — popravljeno 2026-09-30
 
 **Scenarij in koraki:** odpri podlogo treninga (»Ponedeljkova moc«, stranka Jane Doe, rutina »Zgornji

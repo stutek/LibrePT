@@ -6383,6 +6383,14 @@ oznako na sredini; spodaj je vrstica z gumbi. Tarča 44 pik zato zahteva eno od 
 vrstico, višjo za okoli 20 pik na vsakem zaslonu z ročico (plošča, načrti, nastavitev treninga,
 podloga), ali tarčo, ki prekrije sredino glave. Oboje je odločitev o prostoru na zaslonu, kot §80.25.
 
+**Popravljeno 2026-09-30 za predal, ne za podlogo.** Vrstica predala je ves čas nosila `cursor:
+pointer`, odzivala pa se je le ročica; zdaj predal odpre tudi dotik na prazni del te vrstice, ki je
+visoka 56 do 64 pik. To je pomembno prav med tekočim treningom, ko je povzetek skrit in je bila ročica
+edina tarča. Dotik šteje le, če je pristal na vrstici sami, zato vrstica tekočega treninga in gumbi v
+njej obdržijo svoje dotike (`src/modules/common/notificationArea.js`, preizkušeno v
+`tests/medium/test_notification_footer.py`). Pri podlogi ostane vprašanje odprto, kot je opisano
+zgoraj.
+
 ### 80.79 [x] P2 — Kartica treninga brez udeležencev se na dotik ne odzove, noter vodi le svinčnik — popravljeno 2026-09-30
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8079-x-p2--kartica-treninga-brez-udeležencev-se-na-dotik-ne-odzove-noter-vodi-le-svinčnik--popravljeno-2026-09-30);
@@ -6618,54 +6626,20 @@ what shipped is in [CHANGELOG.md](CHANGELOG.md).
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8095-x-p1--dotik-pretežko-zapiše-vajo-kot-opravljeno-z-vsemi-načrtovanimi-serijami--popravljeno-2026-09-30);
 what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-### 80.96 [ ] P2 — Prva kartica vodenega ogleda veleva pritisniti »Naprej«, tega gumba pa ni
+### 80.96 [x] P2 — Prva kartica vodenega ogleda veleva pritisniti »Naprej«, tega gumba pa ni — popravljeno 2026-09-30
 
-**Scenarij in koraki:** ☰ → »Nastavitve« → »Vstopi v peskovnik«. Odpri predal na dnu in tapni poglavje
-»LibrePT te pozdravlja«.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8096-x-p2--prva-kartica-vodenega-ogleda-veleva-pritisniti-naprej-tega-gumba-pa-ni--popravljeno-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-**Opaženo:** kartica pravi »KORAK 1 OD 1« in v besedilu: »Z gumbom Pokaži mi ti vodnik pokaže dvoje …
-Z gumbom Naprej začneš.« Na kartici sta samo dva gumba, »Pokaži mi« (153 × 46 pik) in »Končaj«
-(136 × 46 pik), ter ikona za pospravljanje kartice, ki meri 17 × 19 pik. Gumba »Naprej« ni nikjer na
-zaslonu, ne omogočenega ne onemogočenega. »Končaj« je veliki zeleni gumb in ogled zapre.
+### 80.97 [x] P3 — Peskovnik napoti trenerja na seznam poglavij, ki je 325 pik pod robom zaslona — popravljeno 2026-09-30
 
-**Težava in vpliv:** trener bere navodilo in pritisne edini veliki gumb, ki se ponuja, torej »Končaj«,
-in ogled se konča, preden se je začel. Ogled je edina razlaga aplikacije, ki jo ima.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8097-x-p3--peskovnik-napoti-trenerja-na-seznam-poglavij-ki-je-325-pik-pod-robom-zaslona--popravljeno-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-**Predlog:** besedilo naj imenuje gumb, ki na kartici res je, ali pa naj bo gumb »Naprej« — opaženo na
-različici `8b2ce80`.
+### 80.98 [x] P2 — Korak ogleda imenuje polje »Ime stranke«, obrazec pa ima »Ime in priimek« — popravljeno 2026-09-30
 
-### 80.97 [ ] P3 — Peskovnik napoti trenerja na seznam poglavij, ki je 325 pik pod robom zaslona
-
-**Scenarij in koraki:** ☰ → »Nastavitve« → »Vstopi v peskovnik«. Preberi besedilo, ki se izpiše, in
-poskusi narediti, kar pravi.
-
-**Opaženo:** besedilo pravi: »Za vodeni ogled aplikacije po korakih pritisni poglavje v spodnjem
-seznamu: ogled se začne pri poglavju, ki ga pritisneš.« Ta seznam je v predalu na dnu, ki je zaprt:
-vrstica »LibrePT te pozdravlja« je pri 1169. piki navpično, zaslon pa je visok 844. Predal odpre le
-ročica, ki meri 40 × 5 pik (§80.78).
-
-**Težava in vpliv:** trener stori, kar mu piše, in ne najde ničesar. Seznama, na katerega je napoten,
-ne vidi, ker je pod robom zaslona.
-
-**Predlog:** ob vstopu v peskovnik naj bo predal odprt, ali pa naj besedilo pove, da ga je treba prej
-odpreti, in imenuje ročico — opaženo na različici `8b2ce80`.
-
-### 80.98 [ ] P2 — Korak ogleda imenuje polje »Ime stranke«, obrazec pa ima »Ime in priimek«
-
-**Scenarij in koraki:** v peskovniku zaženi poglavje »Sprejem treh novih strank« in pojdi do koraka 8
-od 10 (☰ → »Imenik strank« → »Povabi stranko« → vpiši telefon → vpiši e-naslov → zapri z ✕ → »Dodaj
-stranko«).
-
-**Opaženo:** kartica pravi: »V polje Ime stranke vpiši Nik Zupan.« V obrazcu tega polja ni. Polja se
-imenujejo »Ime in priimek *«, »Vzdevek (samo če si dve stranki delita ime)«, »E-pošta«, »Telefonska
-številka«, »Cilji treninga«, »Poškodbe in omejitve« in »Opombe«.
-
-**Težava in vpliv:** trener, ki prvič vidi aplikacijo, išče polje z imenom, ki ga je pravkar prebral,
-in ga ne najde. Pravilo aplikacije je, da korak imenuje kontrolo z napisom, ki ga ta kontrola kaže v
-tem jeziku.
-
-**Predlog:** korak naj reče »Ime in priimek«, ali pa naj se polje preimenuje in napis popravi v vseh
-jezikih — opaženo na različici `8b2ce80`.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8098-x-p2--korak-ogleda-imenuje-polje-ime-stranke-obrazec-pa-ima-ime-in-priimek--popravljeno-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ### 80.99 [ ] P2 — Kartica »Ta zaslon ni del demota« pokrije oba gumba zaslona, na katerem stoji
 
@@ -6821,59 +6795,20 @@ neimenovano stranko **brez besede**. Tri poti, brez zavrnitve shranjevanja:
 Začetnice, ki ostanejo »NS« po preimenovanju, so navadna napaka in ne čakajo na nič; popravljene bodo
 posebej.
 
-### 80.106 [ ] P3 — Vprašanje pred zaključkom treninga šteje čas v minutah: »še približno 3812 minut«
+### 80.106 [x] P3 — Vprašanje pred zaključkom treninga šteje čas v minutah: »še približno 3812 minut« — popravljeno 2026-09-30
 
-**Scenarij in koraki:** ustvari trening za čez dva dni (»Vecerna vadba«, 2026-10-02, 18:00 - 19:00),
-odpri podlogo, tapni »Začni trening« in »Ohrani urnik«, nato »Zaključi vadbo«.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80106-x-p3--vprašanje-pred-zaključkom-treninga-šteje-čas-v-minutah-še-približno-3812-minut--popravljeno-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-**Opaženo:** okno pravi »Do konca tega treninga je še približno 3812 minut. Ga želiš vseeno zaključiti
-zdaj?« To je 63 ur in 32 minut. Aplikacija drugod isti čas piše po urah in minutah, na primer »Se
-začne čez 62h 32m« na kartici in »začeto 62h 32m prezgodaj« v oknu tri dotike prej.
+### 80.107 [x] P3 — Kartica zaključenega treninga takoj po zaključku še vedno piše »Aktiven trening« — popravljeno 2026-09-30
 
-**Težava in vpliv:** številke 3812 trener ne prebere. Vprašanje je varovalka pred prezgodnjim
-zaključkom, in prav v njej mu podatek ne pove nič.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80107-x-p3--kartica-zaključenega-treninga-takoj-po-zaključku-še-vedno-piše-aktiven-trening--popravljeno-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-**Predlog:** čas naj bo zapisan kot drugod, v urah in minutah — opaženo na različici `8b2ce80`.
+### 80.108 [x] P3 — Na 320 × 680 je od gumba »Shrani in nadaljuj« na uvodnem zaslonu vidne štiri pike — popravljeno 2026-09-30
 
-### 80.107 [ ] P3 — Kartica zaključenega treninga takoj po zaključku še vedno piše »Aktiven trening«
-
-**Scenarij in koraki:** kot pri §80.106; po »Zaključi vadbo« potrdi »Zaključi zdaj« in nato še
-»Zaključi zdaj« v oknu »Ni zabeleženih zaključenih serij. Res želiš zaključiti in shraniti prazno
-vadbo?«. Takoj zatem poglej kartico tega treninga v seznamu.
-
-**Opaženo:** kartica pravi »18:00 - 19:00 Vecerna vadba 1/1 mest zasedenih Program ni določen Aktiven
-trening«. Po osvežitvi strani piše pravilno: »Zaključeno 00:00«. Seznam se torej po zaključku ne
-osveži sam.
-
-**Težava in vpliv:** trener zaključi vadbo, seznam pa mu pravi, da še teče. Lahko tapne kartico in
-misli, da se trening ni zaključil, ali pa počaka, da se stanje »popravi«, česar brez osvežitve ne bo.
-
-**Predlog:** po zaključku naj se kartica v seznamu takoj prepiše na »Zaključeno« — opaženo na
-različici `8b2ce80`.
-
-### 80.108 [ ] P3 — Na 320 × 680 je od gumba »Shrani in nadaljuj« na uvodnem zaslonu vidne štiri pike
-
-**Scenarij in koraki:** zaslon širine 320 in višine 680 (najmanjši, ki ga aplikacija podpira), prvi
-zagon: »Se strinjam« → izberi temo → »Nadaljuj«. Odpre se obrazec s trenerjevimi podatki.
-
-**Opaženo:** štiri polja so na zaslonu (zadnje, »E-pošta«, sega do 666. pike), gumb »Shrani in
-nadaljuj« pa se začne pri 676. piki in je visok 48, torej je vidna le njegova zgornja robna črta.
-Stran se ne premika (`scrollHeight` telesa je enak višini zaslona), premika se notranji del
-`.app-splash`; ko se ta premakne za 69 pik, je gumb cel na zaslonu. Torej je dosegljiv, a ob odprtju
-zaslon izgleda končan.
-
-**Težava in vpliv:** to je prvi zaslon, ki ga vidi vsak nov trener, in edini gumb na njem je videti,
-kot da ga ni. Na manjšem telefonu trener najprej ne ve, kako naprej.
-
-**Predlog:** gumb naj bo ob odprtju cel na zaslonu tudi pri 320 × 680, ali pa naj bo pritrjen na dno —
-opaženo na različici `8b2ce80`.
-
-**Presoja 2026-09-30 (Claude): čaka na Simona — nasprotuje zapisani odločitvi.** `logQuickSignal` v
-[sessionQuickSignals.js](src/controllers/sessionQuickSignals.js) namerno označi vse serije vaje kot
-opravljene, ko trener tapne signal: »signal na vaji pomeni, da je bila opravljena« (manj dotikov,
-§48). Ugotovitev pravi, da tak zapis trdi delo, ki ga ni bilo. Obe branji sta mogoči; katero velja,
-je Simonova odločitev. Opaženo ob tem: ponovni tap, ki signal umakne, pusti serije označene kot
-opravljene, zato zapis po umiku ni tak kot pred tapom.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80108-x-p3--na-320-×-680-je-od-gumba-shrani-in-nadaljuj-na-uvodnem-zaslonu-vidne-štiri-pike--popravljeno-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 

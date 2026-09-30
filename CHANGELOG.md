@@ -59,6 +59,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 - **Opening one evening of a repeating session no longer duplicates it.** Opening an evening,
   closing it without a change and opening it again left two identical cards on the same day, both
   with the client on them, and they survived a reload.
+- **The guided tour names the buttons and the field it really shows.** Its opening card told the
+  trainer to press *Next*, which is not on it — *Done*, the big green button, ends the tour — and a
+  later step asked for a *Client Name* box the form calls *Full Name*.
+- **Entering the sandbox opens the drawer its own notice points at.** The notice says to tap a
+  chapter in the list below; that list sat 325px under the screen behind a 5px handle.
+- **The question before an early finish says the time in hours and minutes.** It counted raw
+  minutes, so a session two days off asked about "3812 minutes".
+- **A finished session's card stops saying "Active session".** The list is repainted when a session
+  is finished, as it already is when one is started; until then the card only corrected itself on
+  the next unrelated repaint or a reload.
+- **The welcome form's button fits the smallest supported phone.** On 320x680 the save button on the
+  trainer's details step ended 42px below the bottom edge with only its top line showing, and the
+  page itself does not scroll.
+- **The notification bar itself opens the drawer.** It has always looked tappable; only the 23px
+  pill inside it answered, which is the whole target while a session is running.
 - **Editing a routine keeps its circuits.** The routine form has no field for an exercise's circuit
   and wrote every exercise back from its fields alone, so one keystroke in a routine's name turned
   its circuits into a flat list.
