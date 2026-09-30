@@ -7585,17 +7585,30 @@ set the order, not the design.
 Last green CI run (36063598211): 20 min. Stage 3 alone is 12 min: e2e 675s, demo 472s. Local
 `build check`: 9–10½ min, Stage 3 is 387–454s and the demo suite is the slowest task in it.
 
-1. **[ ] CI runs e2e and demo on ONE browser worker each.** `demo_worker_count` and
-   `e2e_worker_count` in `build/__init__.py` split one budget (half the cores) between the two
-   tasks, because locally they share one machine and one dev server. In CI each has its own
-   4-core runner, so the budget is 2 and the split gives 1 + 1: each runner uses half of what it
-   has. Derived from the code, not read from a CI log. Fix: split only when both tasks run in one
-   process (`build check`); a CI job takes the whole budget. Expected: Stage 3 from ~12 to ~6 min.
-2. **[ ] Locally the demo task finishes 80–150s after e2e.** `DEMO_WORKER_SHARE = 3/8` was
-   measured on 2026-09-01 (demo 181s, e2e 162s); on 2026-09-29 it was demo 387–454s, e2e
-   217–303s. The demo task used 210–290 CPU-seconds over 387–454s of wall time on 3 workers, so
-   it mostly waits. Next step: one run with `--durations=20` to find what it waits for, then set
-   the share again.
-3. **[ ] Every browser job installs Chromium with `--with-deps` again** (34–75s per job, four jobs
-   on the critical path). Caching `~/.cache/ms-playwright` saves the download, not the system
-   packages. Worth measuring after 1.
+1. **[~] CI runs e2e and demo on ONE browser worker each — fixed in `64936fa`, not yet measured in
+   CI.** `demo_worker_count` and `e2e_worker_count` in `build/__init__.py` split one budget (half
+   the cores) between the two tasks, because locally they share one machine and one dev server. In
+   CI each has its own 4-core runner, so the budget is 2 and the split gave 1 + 1. The regression
+   suite (Stage 4) took e2e's share too. Now a task called with no argument takes the whole budget,
+   and only Stage 3 of `build check` splits it. Expected: CI Stage 3 from ~12 to ~6 min. Next step:
+   read the Stage 3 job times of the first CI run after the push, then close this item.
+2. **[x] Locally the demo task finished 80–150s after e2e — fixed in `e2f0d21`.** Not the worker
+   share: four demo workers of eight were tried and gave demo 400s, e2e 323s (the finding is in the
+   comment at `DEMO_WORKER_SHARE`). `--durations` showed seven walks of the whole story in
+   `tests/e2e/test_demo_story.py` taking 736s together, because the walk waited 8s on every card
+   that has no Show me. Now 391s. In the gate the demo task took 331s (before: 370–400s).
+3. **[ ] Low priority: every browser job installs Chromium with `--with-deps` again** (34–75s per
+   job, four jobs in a row on the critical path). Caching `~/.cache/ms-playwright` saves the
+   download, not the system packages, so the gain is unknown and likely under a minute. Measure one
+   job with the cache before deciding.
+4. **[ ] Low priority: the Stage 4 CI job spends ~48s on setup for ~15s of tests.** Merging it into
+   another job would save that, but Stage 4 is its own stage by Simon's ruling (2026-09-19), so
+   this changes only if that ruling does.
+5. **[ ] Low priority: the story walk still waits where nothing will happen.** A step whose Show me
+   finds the step already done waits the whole 8s before Next, and every walk waits 6s at its end
+   to be sure the guide is gone. The seven walks still take 37–99s each (~0.8s per step). Next
+   step: count how many steps take the 8s path, from one walk with a timer around
+   `_card_moved_on`.
+6. **[ ] Low priority: the demo task is still the longest in local Stage 3** (331s against e2e
+   292s in the gate after item 2), so any change to e2e does not shorten the stage until item 5
+   does.
