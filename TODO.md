@@ -1440,7 +1440,9 @@ one job they all hate, and expand from there.
 - [ ] **Share only the demo deep-link, never the bare URL.** `?init=demo_data_load&lang=…&theme=…` is
       an unfair advantage no competitor can match — comment to working clipboard in three seconds, no
       email gate. It also papers over the missing onboarding below.
-- [ ] **One headline README feature is still not shippable.** Google Calendar is unbuilt (§1.5).
+- [ ] **One headline README feature is still not shippable.** Google Calendar is no longer claimed:
+      README says LibrePT does not connect to it and that calendar sync belongs to PRO (§68.3); its
+      last trace, a `google-calendar-sync` tag in the README's frontmatter, was removed 2026-09-30.
       Drive sync is now live (§3.3, client id installed 2026-08-12) but reaches only the ≤100
       explicitly-listed test users until the OAuth app is published, so the pitch can promise it only
       with that caveat — or wait for Production-unverified, which drops the list and keeps the cap.

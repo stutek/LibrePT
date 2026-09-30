@@ -7,7 +7,6 @@ tags:
   - architecture
   - personal-training
   - gym-floor-pwa
-  - google-calendar-sync
 ---
 
 # LibrePT - Personal Trainer Session Clipboard & Scheduling System
