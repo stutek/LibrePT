@@ -238,3 +238,87 @@ def test_toggle_never_removes_a_note_or_an_old_voice_flag(page, local_server):
     assert result["activeAfter"] is True
     assert result["countAfter"] == 2
     assert result["feedbackSurvived"] is True
+
+
+def _mount_with_logs(page, local_server, name):
+    """A live exercise whose three sets are planned and none of them logged yet."""
+    load_with_stub(
+        page,
+        local_server,
+        clipboard_stub(
+            active_session_fixture(
+                clientRoutines={
+                    CLIENT_ID: {
+                        "routineId": "r1",
+                        "routineName": "Upper Body",
+                        "clientName": "Jane Doe",
+                        "activeExerciseIndex": 0,
+                        "deckAllCollapsed": False,
+                        "exercises": [exercise_item("ex1", name)],
+                        "logs": {
+                            "ex1": [
+                                {"reps": 5, "weight": 60, "completed": False},
+                                {"reps": 5, "weight": 60, "completed": False},
+                                {"reps": 5, "weight": 60, "completed": False},
+                            ]
+                        },
+                    }
+                },
+            ),
+            extra_imports=EXPOSE_CONTROLS,
+            extra_body="""
+window.__signals = { getActiveSession, hasQuickSignal, logQuickSignal, state };
+""",
+        ),
+    )
+    page.wait_for_selector("#active-session-overlay:not(.hidden)")
+
+
+_SETS_AFTER_SIGNAL = """(args) => {
+    const { getActiveSession, hasQuickSignal, logQuickSignal } = window.__signals;
+    const { clientId, name, tag } = args;
+    const logs = () => getActiveSession().clientRoutines[clientId].logs.ex1;
+    const completed = () => logs().filter((l) => l.completed).length;
+
+    const completedBefore = completed();
+    logQuickSignal(tag);
+    return {
+        completedBefore,
+        completedAfter: completed(),
+        total: logs().length,
+        signalLogged: hasQuickSignal(clientId, name, tag),
+    };
+}"""
+
+
+def test_too_hard_records_no_sets(page, local_server):
+    # Too Hard is commonly tapped BECAUSE the client could not finish the set, so it must not tick the
+    # sets off. It used to: three finished sets at the planned weight were written for work that never
+    # happened, and the client's history and the clipboard's "Last time" row then quoted them back as
+    # performed.
+    _mount_with_logs(page, local_server, "Unlogged Exercise")
+
+    result = page.evaluate(
+        _SETS_AFTER_SIGNAL,
+        {"clientId": CLIENT_ID, "name": "Unlogged Exercise", "tag": HARD},
+    )
+    assert result["completedBefore"] == 0
+    # The signal is recorded, and not one of the three planned sets is claimed as performed.
+    assert result["signalLogged"] is True
+    assert result["total"] == 3
+    assert result["completedAfter"] == 0
+
+
+def test_too_easy_still_records_the_sets(page, local_server):
+    # The other half of the same promise. A plain exercise has no tick of its own, so the signal that
+    # says the reps happened is what writes them down; dropping that with the Too Hard fix would have
+    # lost real work instead of inventing it.
+    _mount_with_logs(page, local_server, "Easy Exercise")
+
+    result = page.evaluate(
+        _SETS_AFTER_SIGNAL,
+        {"clientId": CLIENT_ID, "name": "Easy Exercise", "tag": EASY},
+    )
+    assert result["completedBefore"] == 0
+    assert result["signalLogged"] is True
+    assert result["completedAfter"] == 3

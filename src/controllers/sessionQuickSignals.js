@@ -7,6 +7,7 @@
 // The (clientId, exerciseName, tag) signatures are kept because exerciseDeckOfCards.js and feedbackModal.js
 // are wired against them.
 
+import { tagImpliesPerformed } from "../domain/feedbackTags.js";
 import {
   buildQuickSignalEntries,
   hasExerciseNote as hasPlainExerciseNote,
@@ -79,10 +80,14 @@ export function logQuickSignal(tag, exId) {
     if (!activeSession.feedback) activeSession.feedback = [];
     activeSession.feedback.push(sessionFeedback);
 
-    // Signalling on an exercise implies it was performed — the trainer is reacting to the work,
-    // not planning it, so the sets stop asking to be ticked off individually.
-    for (const log of clientState.logs[currentExercise.id] || []) {
-      log.completed = true;
+    // Signalling on an exercise can stand in for ticking its sets off, because a plain exercise has
+    // no tick of its own — but only for the signals that SAY the work was done. Which those are is
+    // the tags' own rule (domain/feedbackTags.js): Too Hard wrote three finished sets at the planned
+    // weight for a set the client had just failed.
+    if (tagImpliesPerformed(tag)) {
+      for (const log of clientState.logs[currentExercise.id] || []) {
+        log.completed = true;
+      }
     }
   }
 

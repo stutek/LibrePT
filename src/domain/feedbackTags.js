@@ -28,6 +28,20 @@ export const FEEDBACK_TAGS = [
   { id: "progression", tag: "Completed reps easily", key: "feedback_tag_progression" },
 ];
 
+// Which signals SAY the work was done. A plain exercise has no tick of its own — its sets are counted
+// off by the trainer reacting to them — so this set is what stands between "recorded as performed" and
+// "not recorded at all". Too Easy and Completed reps easily both say in their own words that the reps
+// happened. Too Hard, pain and a form break say the opposite as often as not: on the gym floor Too Hard
+// is commonly tapped BECAUSE the client could not finish the set, and inferring completion from it
+// wrote three finished sets at the planned weight for work that never happened. A bare note
+// says nothing either way.
+const TAGS_IMPLYING_PERFORMED = new Set(["Too Easy - Increase Load", "Completed reps easily"]);
+
+/** Whether this signal is itself a statement that the sets were performed. */
+export function tagImpliesPerformed(tag) {
+  return TAGS_IMPLYING_PERFORMED.has(String(tag || ""));
+}
+
 const NOTE_SEPARATOR = " - ";
 
 /** The known tag a stored tag starts with (or null), and the trainer's note after it. */
