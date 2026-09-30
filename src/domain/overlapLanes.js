@@ -73,7 +73,8 @@ function placeCluster(cluster) {
 /** Assigns each interval a lane and the number of lanes it shares width with.
  *
  * Input: `[{ start, end, ... }]` — `start`/`end` as RFC3339 strings, Dates or epoch ms.
- * Output: `[{ item, lane, laneCount }]`, sorted by start then end, with the caller's original
+ * Output: `[{ item, lane, laneCount, cluster }]` (`cluster` numbers the overlapping runs, so a
+ * renderer can wrap each run in one block), sorted by start then end, with the caller's original
  * object under `item` so records are handed back untouched.
  *
  * The sort is total and deterministic: two intervals with identical bounds keep their input order,
@@ -90,11 +91,11 @@ export function assignLanes(intervals) {
     .sort((a, b) => a.startMs - b.startMs || a.endMs - b.endMs || a.inputIndex - b.inputIndex);
 
   const placed = [];
-  for (const cluster of toClusters(sorted)) {
+  toClusters(sorted).forEach((cluster, clusterIndex) => {
     const laneCount = placeCluster(cluster);
     for (const entry of cluster) {
-      placed.push({ item: entry.item, lane: entry.lane, laneCount });
+      placed.push({ item: entry.item, lane: entry.lane, laneCount, cluster: clusterIndex });
     }
-  }
+  });
   return placed;
 }

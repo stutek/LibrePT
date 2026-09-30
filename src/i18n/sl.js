@@ -934,6 +934,7 @@ export const sl = {
   yesterday: "Včeraj",
   upcoming: "Prihodnje",
   starts_in: "Se začne čez",
+  session_overlaps_with: "Se prekriva z {times}",
   overdue: "Zamuja",
   elapsed: "Trajanje",
   edit_elapsed_time: "Uredi trajanje",

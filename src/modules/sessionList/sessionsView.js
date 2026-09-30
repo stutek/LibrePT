@@ -3,6 +3,7 @@
 // sections of the continuous timeline. It owns the markup of its `<section id="view-clients">` shell.
 
 import { libraryExercises } from "../../data/exerciseLibrary.js";
+import { assignLanes } from "../../domain/overlapLanes.js";
 import { filterSessions, hasAnyFilter } from "../../domain/sessionFilters.js";
 import { buildClientStateFromRoutine } from "../../domain/sessionPlanFactory.js";
 import { sessionCalendarDate } from "../../domain/sessionRecord.js";
@@ -11,6 +12,7 @@ import {
   sessionsWithSeries,
   storedOccurrenceFor,
 } from "../../domain/sessionSeries.js";
+import { parseTimeRange } from "../../domain/timeRange.js";
 import { renderMarkupOnce } from "../common/dom.js";
 import { buildSessionMeta, escapeHTML, getOverlappingSessions } from "../common/utils.js";
 import { updateSessionBarTimer } from "../session/sessionBar.js";
@@ -216,6 +218,55 @@ export function launchClipboardDirectly(
   );
 }
 
+// Three overlapping sessions in three columns leave each card about 85 px of text at 390 px, less
+// than the time badge alone, so from this many lanes up the cluster stacks full width instead and
+// each card names the times it overlaps.
+const MAX_SIDE_BY_SIDE_LANES = 2;
+
+/** Draws one day's cards. A session that overlaps nothing is a plain full-width card, as before.
+ * Sessions that overlap form a block: side by side in their lanes, each pushed down by how many
+ * minutes after the block's first start it begins (the CSS turns minutes into pixels and caps
+ * them), so the later start visibly starts lower. */
+function renderDayCards(list, daySessions, cardDeps, t) {
+  const intervals = daySessions.map((session) => {
+    const range = parseTimeRange(session.time);
+    const start = range ? range.start : 0;
+    return { session, start, end: range ? range.end : start };
+  });
+  const placed = assignLanes(intervals);
+  for (const clusterIndex of new Set(placed.map((p) => p.cluster))) {
+    const members = placed.filter((p) => p.cluster === clusterIndex);
+    if (members.length === 1) {
+      renderSessionCard(members[0].item.session, list, cardDeps);
+      continue;
+    }
+    const block = document.createElement("div");
+    block.className = "sessions-overlap-block";
+    const laneCount = members[0].laneCount;
+    const sideBySide = laneCount <= MAX_SIDE_BY_SIDE_LANES;
+    block.classList.add(sideBySide ? "side-by-side" : "stacked");
+    block.style.setProperty("--lane-count", String(laneCount));
+    const firstStart = Math.min(...members.map((m) => m.item.start));
+    for (const member of members) {
+      const card = renderSessionCard(member.item.session, block, cardDeps);
+      card.style.setProperty("--lane", String(member.lane));
+      card.style.setProperty("--start-offset", String(member.item.start - firstStart));
+      if (!sideBySide) addOverlapNote(card, member, members, t);
+    }
+    list.appendChild(block);
+  }
+}
+
+function addOverlapNote(card, member, members, t) {
+  const others = members
+    .filter((m) => m !== member && m.item.start < member.item.end && member.item.start < m.item.end)
+    .map((m) => m.item.session.time);
+  const note = document.createElement("div");
+  note.className = "session-overlap-note";
+  note.textContent = t("session_overlaps_with").replace("{times}", others.join(", "));
+  card.querySelector(".session-card-info")?.appendChild(note);
+}
+
 function compareByStartDate(a, b) {
   return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
 }
@@ -318,6 +369,11 @@ export function renderSessions({
     // One continuous, strictly time-ordered pass — grouped under a sticky per-day header rather
     // than split into four fixed yesterday/today/tomorrow/upcoming containers.
     const sorted = [...sessions].sort(compareByStartDate);
+    const byDay = new Map();
+    for (const session of sorted) {
+      const dayKey = sessionCalendarDate(session);
+      byDay.set(dayKey, [...(byDay.get(dayKey) || []), session]);
+    }
     let currentKey = null;
     let currentList = null;
     const groupMeta = []; // [{ key, group, footer }], in order — filled in with next-day info below
@@ -362,8 +418,8 @@ export function renderSessions({
 
         container.appendChild(group);
         groupMeta.push({ key, group, footer });
+        renderDayCards(currentList, byDay.get(key), cardDeps, t);
       }
-      renderSessionCard(session, currentList, cardDeps);
     }
 
     // Second pass: each footer shows its SUCCESSOR's day, now that every group's key is known. The

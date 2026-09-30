@@ -412,4 +412,5 @@ export function renderSessionCard(b, colContainer, deps) {
     const valueEl = card.querySelector(".session-status-value");
     if (valueEl) wireElapsedEdit(valueEl, b, deps);
   }
+  return card;
 }

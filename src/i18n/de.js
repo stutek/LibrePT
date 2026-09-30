@@ -991,6 +991,7 @@ export const de = {
   yesterday: "Gestern",
   upcoming: "Demnächst",
   starts_in: "Beginnt in",
+  session_overlaps_with: "Überschneidet sich mit {times}",
   overdue: "Überfällig",
   elapsed: "Vergangen",
   edit_elapsed_time: "Vergangene Zeit bearbeiten",

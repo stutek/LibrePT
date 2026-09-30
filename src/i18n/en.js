@@ -1002,6 +1002,7 @@ export const en = {
   yesterday: "Yesterday",
   upcoming: "Upcoming",
   starts_in: "Starts in",
+  session_overlaps_with: "Overlaps {times}",
   overdue: "Overdue",
   elapsed: "Elapsed",
   edit_elapsed_time: "Edit elapsed time",

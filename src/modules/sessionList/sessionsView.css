@@ -342,6 +342,47 @@
   opacity: 0.25;
   cursor: default;
 }
+/* --- OVERLAPPING SESSIONS ---
+   sessionsView.js wraps a run of sessions that overlap in time in one block. Two lanes sit side by
+   side, each card in its lane's column and pushed down by the minutes between the block's first
+   start and its own (1px a minute, at most 64px, so a block never grows by more than that). Three
+   or more lanes would leave each card under 90px of text at 390px, so the block stacks them full
+   width and every card carries a .session-overlap-note naming the times it overlaps. */
+.sessions-overlap-block {
+  display: grid;
+  gap: 0 8px;
+}
+.sessions-overlap-block.side-by-side {
+  grid-template-columns: repeat(var(--lane-count), minmax(0, 1fr));
+  align-items: start;
+}
+.sessions-overlap-block.side-by-side > .session-card {
+  grid-row: 1;
+  grid-column: calc(var(--lane) + 1);
+  margin-top: min(calc(var(--start-offset) * 1px), 64px);
+  min-width: 0;
+}
+.sessions-overlap-block.stacked {
+  grid-template-columns: minmax(0, 1fr);
+}
+.session-overlap-note {
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--warning);
+  overflow-wrap: anywhere;
+}
+@media (max-width: 600px) {
+  /* Narrow columns: let the time and title wrap and give the status bar room, never an ellipsis. */
+  .sessions-overlap-block.side-by-side > .session-card {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  .sessions-overlap-block.side-by-side .session-live-bar {
+    margin-left: -8px;
+    margin-right: -8px;
+    flex-wrap: wrap;
+  }
+}
 /* --- SESSIONS TIMELINE (continuous, time-ordered) --- */
 .sessions-timeline {
   display: flex;

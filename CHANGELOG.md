@@ -34,6 +34,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Changed
 
+- **Sessions that overlap sit side by side on the board.** Two sessions that partly overlap
+  (10:00-11:00 and 10:30-11:30) read as if one came after the other; they now share a row, each in
+  its own column, the later one starting lower. Three or more overlapping sessions stay full width,
+  each saying which times it overlaps, because three columns are too narrow on a phone to read.
 - **The guide gives back the room it took once the control has moved.** It shortened itself to
   clear a control, the board then scrolled the control away, and the guide stayed short with its
   card scrolling inside half an empty screen.
