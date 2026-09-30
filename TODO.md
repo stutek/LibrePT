@@ -8113,30 +8113,35 @@ session is a later day. Only the past block leaves.
 Reasoning in [TODO_ARCHIVE.md](TODO_ARCHIVE.md). Commit `97e3226`; `build check` green 12:31 to
 12:40.
 
-### 92.2 [ ] The deck holds one session, and the peek is aligned to the exercise in focus
+### 92.2 [x] The deck holds one session, and the peek is aligned to the exercise in focus — shipped 2026-09-30
 
-- Out of `exerciseDeckOfCards.js`: `buildPastExerciseItems`, the `PastDeckCard` branch and the
-  `pastExpanded` plumbing it feeds to the live cards (`exerciseCard.js`, `circuitCard.js`), whose
-  "an open past log defocuses the live card" rule can no longer be reached.
-  `exerciseDeckOfCards.css` and `themes/spreadsheet.css` lose their `.past-session` rules, and the
-  nine tests that select `.exercise-deck-card:not(.past-session)` drop a qualifier that can no
-  longer match.
-- **`pastDeckCard.js` STAYS, with `expandedPastId`** — corrected 2026-09-30, before any code. An
-  earlier draft of this subsection said the module would be deleted. That was wider than Simon's
-  instruction, which is about what the live deck holds, and it would have destroyed the component
-  §45.8 is built on: its ruling of 2026-09-11 is that the client's history view stops drawing its
-  own records and mounts these cards instead. The pair is self-contained, so it is left whole and
-  simply not mounted in the live deck. Nothing in the build fails on a module with no importer.
-- The two comments in `activeSessionBoard.js` (lines 459-461) that send the reader to
-  `showPastExerciseInFocus` are corrected: that function no longer exists, and
-  `clipboard-logger-container` is now only the empty-state placeholder.
-- `src/sw/cacheManifest.js` and the `CHANGELOG.md` link to `pastDeckCard.js` are untouched, since
-  the file stays.
-- Alignment: `planSheet.js` marks each exercise row with its normalised name,
-  `planPeekController.js` finds the row matching the card in focus and offsets the sheet by one
-  custom property (`--peek-align`), the same carve-out `--plan-pull` already uses. No match, no
-  offset.
-- `docs/SRC_MODULES.md` loses `pastDeckCard.js` in the same change.
+Reasoning in [TODO_ARCHIVE.md](TODO_ARCHIVE.md). Commit `53a3fed`; `build check` green 16:13 to
+16:22.
+
+### 92.4 [ ] A bound group's last sessions are now shown nowhere — Simon's call
+
+**Found by the gate on 2026-09-30, while §92.2 was being written**, and not foreseen when it was
+planned. `tests/medium/test_participant_binding.py` asserted two promises in one test, and §92.2
+takes one of them away.
+
+Clients bound to ONE plan share one tab. Before, the deck listed every member's last session, each
+under that client's name — a rule that came from a real defect: the clipboard showed only the tapped
+client's, unnamed, so a trainer could read one person's history while coaching another. The injury
+half of that rule still holds and is still tested. The last-session half is gone: the deck no longer
+carries past sessions at all, and the sideways peek shows the previous session of the ACTIVE client
+only, because that is what `clientSessionNeighbours.js` answers — one client's own history.
+
+So for a bound group of three, the trainer can now reach one member's previous session and not the
+other two's. Nothing on the screen says the other two exist.
+
+**The question, which is Simon's and not an implementation detail:** when several clients share one
+plan, should the peek show each member's previous session — one sheet per member, or the tapped
+client's with the others named — or is one client's history the right answer and the group case
+simply does not need it? The answer decides whether `clientSessionNeighbours.js` stays a
+one-client function.
+
+Until it is answered the gap stands, recorded here rather than in a test that cannot run. The test's
+docstring says the same thing at the place a reader will meet it.
 
 ### 92.3 [ ] The demo shows a press, a hold and a drag at once
 

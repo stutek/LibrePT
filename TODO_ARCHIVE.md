@@ -57,6 +57,51 @@ vaj ali napačno presodi, koliko časa ostane.
 in »150« pri več serijah, skupaj s počitki. Opaženo na objavljeni `8b2ce80`, sl,
 390 × 844, Chrome CDP; brez prestreženih napak in brez pregledovanja kode.
 
+### 92.2 [x] The deck holds one session, and the peek is aligned to the exercise in focus — shipped 2026-09-30
+
+- Out of `exerciseDeckOfCards.js`: `buildPastExerciseItems`, the `PastDeckCard` branch and the
+  `pastExpanded` plumbing it feeds to the live cards (`exerciseCard.js`, `circuitCard.js`), whose
+  "an open past log defocuses the live card" rule can no longer be reached.
+  `exerciseDeckOfCards.css` and `themes/spreadsheet.css` lose their `.past-session` rules, and the
+  nine tests that select `.exercise-deck-card:not(.past-session)` drop a qualifier that can no
+  longer match.
+- **`pastDeckCard.js` STAYS, with `expandedPastId`** — corrected 2026-09-30, before any code. An
+  earlier draft of this subsection said the module would be deleted. That was wider than Simon's
+  instruction, which is about what the live deck holds, and it would have destroyed the component
+  §45.8 is built on: its ruling of 2026-09-11 is that the client's history view stops drawing its
+  own records and mounts these cards instead. The pair is self-contained, so it is left whole and
+  simply not mounted in the live deck. Nothing in the build fails on a module with no importer.
+- The two comments in `activeSessionBoard.js` (lines 459-461) that send the reader to
+  `showPastExerciseInFocus` are corrected: that function no longer exists, and
+  `clipboard-logger-container` is now only the empty-state placeholder.
+- `src/sw/cacheManifest.js` and the `CHANGELOG.md` link to `pastDeckCard.js` are untouched, since
+  the file stays.
+- Alignment: `planSheet.js` marks each exercise row with its normalised name,
+  `planPeekController.js` finds the row matching the card in focus and offsets the sheet by one
+  custom property (`--peek-align`), the same carve-out `--plan-pull` already uses. No match, no
+  offset.
+- `docs/SRC_MODULES.md` loses `pastDeckCard.js` in the same change.
+
+**What the gate found that the plan did not.** Two promises this change takes away, both stated
+rather than quietly dropped. The rendered "Last time" badge — the word from the dictionary beside an
+ISO date — had two browser tests through the card, and the card is mounted nowhere now; the data
+rules behind it moved to `tests/unit_js/modules/clipboard/pastDeckCard.test.mjs`, and the rendering
+is uncovered until the card is mounted again. A bound group's per-member last sessions are shown
+nowhere at all, which is §92.4, open for Simon.
+
+**Chosen while writing, not planned:** the alignment is measured when the peek BEGINS
+(`onPeekBegin`, a new injected seam on `initPlanPeek`), not when the sheets are drawn. Measured at
+render time it was 12px out, because the deck scrolls its own active card into view a tenth of a
+second after it paints. The seam is worth more than the fix: anything else measured about the
+under-layers now has one honest moment to be measured in.
+
+**`buildPastExerciseItems` moved from `exerciseDeckOfCards.js` into `pastDeckCard.js`.** Deleting it
+along with the deck's use of it would have kept the card while throwing away what it is built from,
+and with it the rule that a skipped movement is named as skipped rather than listed as sets the
+client lifted — a rule that came from a real defect.
+
+---
+
 ### 92.1 [x] The L: sideways looks, up opens — shipped 2026-09-30
 
 `planPeek.js` after the axis locks to x (8px, `LOCK_PX`) already captures the pointer, so vertical
