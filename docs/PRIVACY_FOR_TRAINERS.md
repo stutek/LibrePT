@@ -28,10 +28,15 @@ signature — so the signed sheet in your own files is the only proof, and it is
 Consent is only valid if the client was informed *first* (Art. 7(2), Art. 13). Two documents, in
 this order:
 
-1. **Send the [Client Privacy Notice](templates/en/Client_Privacy_Notice.md)** — fill in your name,
-   contact details, and retention period once, and reuse it for every client.
+1. **Send the [Client Privacy Notice](templates/en/Client_Privacy_Notice.md)** — the same page for
+   every trainer, with nothing to fill in. It names you as "the trainer who gave you this notice".
 2. **Send or print the [Client Consent Form](templates/en/Client_Consent_Form.md)** — the letter and the
-   signature block.
+   signature block. The letter is signed with your name, phone and email from **Settings → My
+   details**, and that signature is what tells the client who the controller is. When you print the
+   letter, print the notice with it: a client holding paper cannot follow a link.
+
+Both promise the client a retention period: while they train with you, and at most two years after
+their last session. The app deletes nothing by itself, so keeping that promise is yours.
 
 From **Add/Edit Client → Data Protection (GDPR)**, the app does both deliveries for you:
 
@@ -49,8 +54,8 @@ failing silently.
 who reads another language and both buttons switch — letter, SMS, and the privacy-notice link, which
 points at that language's copy ([templates INDEX](templates/INDEX.md) lists them). The choice is
 saved with the consent, so a re-send later goes out in the language they actually read the first
-time. Non-English editions are maintainer translations of the English source and are not legally
-reviewed.
+time. The Slovenian edition is the maintainer's translation of the English source; the German one
+is a machine translation no German speaker has read yet. None is legally reviewed.
 
 ## 2. Recording the consent
 
@@ -59,8 +64,8 @@ today, if the client signed at the desk last week. The date is the field a super
 asks about; the app's own write timestamp is not it, which is exactly why the field is editable.
 
 The **consent form version** shown beside the date is stamped onto the record. See
-[Client_Consent_Form.md](templates/en/Client_Consent_Form.md) for when the version moves and who has to
-re-sign when it does.
+[the templates INDEX](templates/INDEX.md#versioning) for when the version moves and who has to
+consent again when it does.
 
 ## 3. Archiving — the part only you can do
 
@@ -137,8 +142,10 @@ date you got round to it.
 
 - **Pasting identifiable client data into an AI assistant.** Names plus health notes in a chat
   prompt is a transfer of Art. 9 data to a processor you have no agreement with. Use the app's
-  **AI Safe Copy (Anonymized)** action on the client's profile instead — it strips identifying
-  fields before copying ([PRIVACY.md §3.2](../PRIVACY.md)).
+  **AI Safe Copy** action on the client's profile instead. The copy carries the client's number,
+  session dates and sets, and no name, contact details, goals or notes. That makes it
+  *pseudonymised* (Art. 4(5)), not anonymous: your device can still link the number to the client,
+  and the notice tells the client so ([PRIVACY.md §3.2](../PRIVACY.md)).
 - **Treating the app as the backup.** The database in your browser is the only copy unless you have
   configured Drive sync or taken an export. Losing it loses your clients' data too, which is a
   security failing under Art. 32, not just an inconvenience.
@@ -147,6 +154,6 @@ date you got round to it.
 
 - [PRIVACY.md](../PRIVACY.md) — what the LibrePT app itself does and does not do with data
 - [Client Privacy Notice](templates/en/Client_Privacy_Notice.md) — the notice you hand to the client
-- [Client Consent Form](templates/en/Client_Consent_Form.md) — the letter, the signature block, and versioning
+- [Client Consent Form](templates/en/Client_Consent_Form.md) — the letter and the signature block
 - [templates INDEX](templates/INDEX.md) — both documents in every language the app can send them in
 - [DATA_MODEL.md](DATA_MODEL.md) — where consent is stored and what is kept

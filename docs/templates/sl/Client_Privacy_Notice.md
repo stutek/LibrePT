@@ -1,10 +1,10 @@
 ---
 type: template
-title: Obvestilo posamezniku o obdelavi osebnih podatkov (člen 13 GDPR)
-description: Obvestilo o obdelavi osebnih podatkov v razumljivem jeziku, ki ga osebni trener izroči stranki — kaj se beleži, zakaj, na kateri pravni podlagi, kje je shranjeno, kako dolgo se hrani in kako uveljaviti pravice posameznika.
+title: Obvestilo o obdelavi osebnih podatkov za stranke (člen 13 GDPR)
+description: Obvestilo, ki ga osebni trener izroči stranki, preden jo prosi za privolitev — kdo je upravljavec, kaj se beleži in zakaj, kdo podatke prejme, kako dolgo se hranijo in kakšne pravice ima posameznik.
 status: active
-consent_form_version: "2026-08-09"
-terminology_audit: "2026-08-10"
+consent_form_version: "2026-09-30"
+terminology_audit: "2026-09-30"
 tags:
   - gdpr
   - privacy
@@ -14,97 +14,109 @@ tags:
   - okf
 ---
 
-# Obvestilo posamezniku o obdelavi osebnih podatkov
+# Obvestilo o obdelavi osebnih podatkov
 
-**Namenjeno stranki. Izroči ga trener, ne LibrePT.**
-
-To je dokument, na katerega se sklicujeta e-pošta in SMS s privolitvijo, ki ju pošlje aplikacija.
-Privolitev je veljavna le, če je bil posameznik pred tem *obveščen* (člen 7(2) in člen 13 GDPR) — to
-obvestilo je ta informacija, [obrazec privolitve](Client_Consent_Form.md) pa dokazilo, da je bila
-privolitev dana.
-
-> **Trener: pred pošiljanjem izpolni polja v oglatih oklepajih.** Ta so edino, kar se razlikuje med
-> trenerji; vse ostalo opisuje, kako podatke hrani LibrePT, in je že točno.
-
-> ⚠ **Izrazje je usklajeno, pravni pregled pa ni opravljen.** Izrazje je 2026-08-10 preverjeno po
-> uradnem slovenskem besedilu Uredbe (EU) 2016/679 in ZVOP-2 (preslikava izrazov je v
-> [kazalu slovenskih predlog](INDEX.md)). Vsebinsko je dokument enak angleški izdaji
-> ([Client_Privacy_Notice.md](../en/Client_Privacy_Notice.md)).
-
----
+To obvestilo ti izroči osebni trener, preden te prosi za privolitev. Pove, kaj o tebi beleži, zakaj,
+kdo podatke prejme, kako dolgo jih hrani in kakšne pravice imaš (Splošna uredba o varstvu podatkov,
+Uredba (EU) 2016/679 — GDPR, člen 13, in Zakon o varstvu osebnih podatkov, ZVOP-2).
+[Pismo s prošnjo za privolitev](Client_Consent_Form.md) ga povzema.
 
 ## Kdo je odgovoren za tvoje podatke
 
-**[Ime trenerja / podjetja]**, kontakt **[e-pošta]**, **[telefon]**, je *upravljavec* osebnih
-podatkov (člen 4(7) GDPR) za spodaj opisane zapise treningov. To pomeni, da o namenih in sredstvih
-obdelave odloča trener — ne avtorji aplikacije LibrePT — in da se s svojimi zahtevami obrneš nanj.
+Za tvoje podatke odgovarja trener, ki ti je izročil to obvestilo: je *upravljavec* (člen 4(7)).
+Njegovo ime in kontakt sta v pismu ali sporočilu, ki te je pripeljalo sem. Vsa vprašanja in zahteve
+naslovi nanj.
 
-LibrePT je brezplačna odprtokodna aplikacija, ki jo trener poganja na svoji napravi. Njeni avtorji ne
-upravljajo nobenega strežnika, ne prejmejo kopije tvojih podatkov in do njih ne morejo dostopati,
-jih pridobiti ali izbrisati.
+Trener zapise vodi v LibrePT, brezplačni odprtokodni aplikaciji, ki teče na njegovi napravi. Avtorji
+aplikacije LibrePT nimajo strežnika in ne prejmejo kopije tvojih podatkov. Ne morejo jih videti,
+spremeniti ali izbrisati.
 
-## Kaj se beleži
+## Kaj se o tebi beleži
 
-- **Identiteta in kontakt**: tvoje ime ter e-poštni naslov ali telefonska številka, če ju posreduješ.
-- **Podatki o treningu**: cilji, datumi treningov, vaje, serije, ponovitve, bremena in potek vadbe.
-- **Podatki o zdravstvenem stanju**: poškodbe, bolečine, omejitve gibljivosti in podobne opombe,
-  potrebne za varno vadbo. Po členu 9 GDPR gre za *posebne vrste osebnih podatkov* — prav zato se
-  izrecna privolitev vpraša in ne domneva.
+- **Identiteta in kontakt**: tvoje ime ter e-poštni naslov ali telefonska številka, ki ju posreduješ.
+- **Trening**: tvoji cilji, datumi treningov, vaje, serije, ponovitve, bremena in potek vsakega
+  treninga.
+- **Zdravje**: poškodbe, bolečine, omejitve gibljivosti, telesna masa in podobne opombe, ki jih
+  trener potrebuje za varno vadbo. Podatki o zdravju so po GDPR *posebne vrste osebnih podatkov*
+  (člen 9), zato trener za njih prosi za tvojo izrecno privolitev.
 
-O tvoji napravi ali brskanju se ne beleži nič samodejno — aplikacija nima analitike, sledilnih
-piškotkov ali oglaševanja.
+O tvoji napravi in brskanju se samodejno ne beleži nič. Aplikacija nima analitike, sledilnih
+piškotkov in oglaševanja.
 
-## Zakaj in na kakšni pravni podlagi
+## Zakaj in na kateri pravni podlagi
 
 Za načrtovanje treningov, prilagajanje programa skozi čas in varno vadbo. Pravna podlaga je tvoja
-**izrecna privolitev** (člen 6(1)(a) in člen 9(2)(a) GDPR), dana na obrazcu privolitve. Kadar koli jo
-lahko prekličeš — glej spodaj.
+**izrecna privolitev** (člen 6(1)(a) in člen 9(2)(a)), ki jo daš z odgovorom na pismo ali s podpisom
+obrazca.
 
-## Kje so podatki shranjeni in kdo jih še vidi
+## Ali moraš podatke dati
 
-- **Predvsem na trenerjevi napravi**, v lokalnem shrambnem prostoru brskalnika. Strežnika LibrePT ni.
-- **Po želji varnostna kopija v trenerjevem Google Drive**, v zasebnem območju, ki je namenjeno le
-  tej aplikaciji — v običajnem seznamu datotek ni vidno in drugim aplikacijam ni dostopno. Google v
-  okviru trenerjevega računa nastopa kot *obdelovalec* (člen 4(8) GDPR); podatki so med prenosom in v
-  mirovanju šifrirani, vendar ne tako, da jih Google sam ne bi mogel prebrati.
-- **Tvojih podatkov nihče ne prodaja, ne deli z oglaševalci in ne posreduje tretjim osebam.**
-- Če trener pri načrtovanju uporablja orodja umetne inteligence, so zapisi prej **anonimizirani** —
-  imena in kontaktni podatki so odstranjeni — z vgrajenim orodjem za anonimizirano kopijo.
+Ne. Podatkov ti ne nalaga niti zakon niti pogodba in privolitve ti ni treba dati. Brez privolitve
+trener o tebi v aplikaciji ne sme voditi zapisov. Brez podatkov o zdravju ti vadbe ne more
+prilagoditi.
+
+## Kje so podatki shranjeni in kdo jih prejme
+
+- **Na trenerjevi napravi**, v shrambi brskalnika. Strežnika LibrePT ni.
+- **Varnostna kopija v trenerjevem Google Drive**, če trener vklopi varnostno kopiranje. Shranjena je
+  v območju, ki ga lahko uporablja le ta aplikacija. Preden kopija zapusti napravo, jo aplikacija
+  šifrira z geslom, ki ga pozna le trener, zato Google datoteko hrani, prebrati pa je ne more. Google
+  Drive v EU zagotavlja Google Ireland Limited. Google lahko podatke hrani tudi v Združenih državah
+  Amerike; ta prenos v tretjo državo temelji na sklepu Evropske komisije o ustreznosti za prenose v
+  ZDA (Izvedbeni sklep (EU) 2023/1795).
+- **Orodje umetne inteligence**, če si trener z njim pomaga pri načrtovanju. Prejme le kopijo, ki jo
+  naredi aplikacija: številko, datume treningov, vaje in serije. Kopija ne vsebuje imena, kontaktnih
+  podatkov, ciljev, opomb in podatkov o zdravju. Številko lahko s tabo poveže le trenerjeva naprava,
+  zato je kopija po GDPR *psevdonimizirana* (člen 4(5)), ne anonimna. Orodje izbere trener in je
+  lahko zunaj EU.
+- **Sporočila**, ki ti jih pošlje trener — e-pošta, SMS, vabila v koledar — gredo prek trenerjevih
+  storitev za e-pošto in telefon, kot vsako sporočilo.
+- **Tvojih podatkov nihče ne prodaja in ne deli z oglaševalci.** Nihče drug jih ne prejme.
 
 ## Kako dolgo se hranijo
 
-Dokler si stranka, in še **[obdobje hrambe, npr. 2 leti]** po zadnjem treningu, da je zgodovina
-vadbe na voljo, če se vrneš. Nato se izbrišejo. Podpisan obrazec privolitve trener hrani, dokler
-hrani tvoje zapise, kot dokazilo, da je bila privolitev dana (člen 7(1) GDPR).
+Dokler treniraš pri trenerju in največ dve leti po zadnjem treningu, da je zgodovina na voljo, če se
+vrneš. Prej, če tako želiš. Podpisan obrazec privolitve ali tvoj odgovor na pismo se hrani kot
+dokazilo o privolitvi, tudi po izbrisu (člen 7(1), člen 17(3)(e)).
 
 ## Tvoje pravice
 
 Kot posameznik, na katerega se nanašajo osebni podatki, lahko kadar koli in brezplačno od trenerja
 zahtevaš:
 
-- **Dostop** do podatkov o tebi (člen 15) in **prenosljivost** — kopijo v strojno berljivi obliki
-  (člen 20). Aplikacija na zahtevo izvozi celotno zgodovino.
+- **Dostop** do podatkov o tebi in njihovo **kopijo** v strojno berljivi obliki (člen 15, člen 20).
+  Aplikacija izvozi celotno zgodovino.
 - **Popravek** netočnih podatkov (člen 16).
-- **Izbris** zapisov — »pravica do pozabe« (člen 17). Izbris profila jih odstrani s trenerjeve
-  naprave in iz naslednje varnostne kopije v oblaku.
-- **Omejitev obdelave** (člen 18), če točnost podatkov ali zakonitost obdelave izpodbijaš.
-- **Preklic privolitve** (člen 7(3)). Preklic je enako preprost kot privolitev: sporoči trenerju, v
-  kakršni koli obliki. Ustavi nadaljnjo obdelavo, ne vpliva pa na zakonitost obdelave pred preklicem.
-- **Pritožbo pri nadzornem organu**, če meniš, da so bili tvoji podatki obdelani nepravilno. V
-  Sloveniji je to Informacijski pooblaščenec Republike Slovenije
-  ([ip-rs.si](https://www.ip-rs.si/)); vsaka država EU ima svoj organ, seznam vodi
-  [EDPB](https://edpb.europa.eu/edpb_en).
+- **Izbris** (člen 17). Aplikacija nato s trenerjeve naprave in iz naslednje varnostne kopije
+  odstrani tvoje ime, kontakt, cilje, opombe, poškodbe in telesno maso. Zapisi treningov ostanejo,
+  povezani s številko, ki ne vodi več do tebe.
+- **Omejitev obdelave** (člen 18), na primer dokler izpodbijaš točnost podatkov.
+- **Preklic privolitve** (člen 7(3)), v kakršni koli obliki in brez navedbe razloga. Preklic je enako
+  preprost kot privolitev. Ustavi nadaljnjo obdelavo in ne vpliva na zakonitost obdelave pred
+  preklicem.
 
-Zahteve naslovi na trenerja na zgoraj navedene kontakte.
+Trener odgovori v enem mesecu (člen 12(3)). O tebi se ne sprejemajo avtomatizirane odločitve in se
+ne oblikujejo profili (člen 22).
+
+Če meniš, da tvoji podatki niso obdelani pravilno, se lahko **pritožiš** pri nadzornem organu,
+predvsem v državi, kjer živiš ali delaš (člen 77):
+
+- Slovenija: Informacijski pooblaščenec, Dunajska 22, 1000 Ljubljana, gp.ip@ip-rs.si,
+  [www.ip-rs.si](https://www.ip-rs.si/)
+- Nemčija: nadzorni organ zvezne dežele, v kateri živiš; seznam vodi
+  [Datenschutzkonferenz](https://www.datenschutzkonferenz-online.de/datenschutzaufsichtsbehoerden.html)
+- Avstrija: Datenschutzbehörde, [dsb.gv.at](https://dsb.gv.at/)
+- Vse druge države EU in EGP: seznam nadzornih organov, ki ga vodi
+  [Evropski odbor za varstvo podatkov](https://edpb.europa.eu/about-edpb/about-edpb/members_en)
 
 ---
 
-*Različica obvestila: 2026-08-09. Če je ta izvod starejši od različice na tvojem obrazcu privolitve,
-trenerja prosi za aktualnega.*
+*Različica obvestila: 2026-09-30. Če je različica na tvojem pismu novejša, trenerja prosi za
+aktualno obvestilo.*
 
 ## Povezano
 
-- [Obrazec privolitve stranke](Client_Consent_Form.md) — pismo in podpisni del, ki spremljata to obvestilo
+- [Pismo s prošnjo za privolitev](Client_Consent_Form.md) — pismo in podpisni del, ki spremljata to obvestilo
 - [English edition](../en/Client_Privacy_Notice.md) — izvirnik
-- [Kazalo predlog](../INDEX.md) — vsi jeziki teh dokumentov
-- [PRIVACY.md](../../../PRIVACY.md) — kaj z podatki počne sama aplikacija LibrePT
+- [Deutsche Ausgabe](../de/Client_Privacy_Notice.md) — isto obvestilo v nemščini
+- [PRIVACY.md](../../../PRIVACY.md) — kaj s podatki počne sama aplikacija LibrePT

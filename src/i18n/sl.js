@@ -519,7 +519,7 @@ export const sl = {
   intake_health_hint:
     "Samo če želiš. Gre v datoteko, ki jo pošlješ trenerju, in nikamor drugam — ne v SMS in ne v nobeno povezavo.",
   intake_consent:
-    "Strinjam se, da moj trener hrani te podatke in jih uporablja za načrtovanje in beleženje mojega treninga. Ostanejo na trenerjevi napravi, lahko pa se hranijo tudi kot varnostna kopija v njegovi osebni shrambi v oblaku — nobena druga storitev jih ne prejme. Privolitev lahko kadarkoli prekličem, tako da to povem trenerju.",
+    "Izrecno privolim, da moj trener te podatke, vključno s podatki o mojem zdravju, hrani in uporablja za načrtovanje in beleženje mojih treningov. Shranjeni so na trenerjevi napravi. Šifrirana varnostna kopija, ki je ponudnik shrambe ne more prebrati, je lahko tudi v trenerjevi shrambi v oblaku. Orodje umetne inteligence lahko prejme kopijo brez mojega imena, kontaktnih podatkov in opomb. Nihče drug jih ne prejme. Privolitev lahko kadar koli prekličem, tako da to povem trenerju.",
   intake_sender_for: "To izpolnjuješ za: {who}.",
   intake_sender_save: "Shrani ta kontakt",
   intake_step_contact: "1. korak: Shrani ta kontakt",

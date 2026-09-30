@@ -81,6 +81,25 @@ test("each letter names the client, the version, and its own language's notice",
   assert.notEqual(clientPrivacyNoticeUrl("en"), clientPrivacyNoticeUrl("sl"));
 });
 
+test("the trainer signs the letter, because the signature is what names the controller", () => {
+  // Art. 13(1)(a): the client must learn who the controller is, and the published notice cannot say
+  // it — one page serves every trainer. The letter's signature and the SMS's greeting carry it.
+  const trainer = { name: "Sam Novak", phone: "+386 40 111 222", email: "sam@example.com" };
+  for (const lang of LANGS) {
+    const body = consentEmailBody("Jane Doe", lang, trainer);
+    assert.ok(
+      body.endsWith("Sam Novak\n+386 40 111 222\nsam@example.com"),
+      `${lang}: the letter is not signed with the trainer's details`,
+    );
+    assert.ok(consentShareText("Jane Doe", lang, trainer).includes("Sam Novak"), `${lang}: SMS`);
+
+    // An install with no details still sends a letter that ends in a greeting, never an empty line.
+    const unsigned = consentEmailBody("Jane Doe", lang, {});
+    assert.ok(!unsigned.endsWith("\n"), `${lang}: an unsigned letter ends in a blank line`);
+    assert.ok(!consentShareText("Jane Doe", lang).includes("undefined"), `${lang}: SMS`);
+  }
+});
+
 test("the notice link a client receives is absolute and points at the deployed site", () => {
   // The property that matters is where this URL is READ: in an email, an SMS, and printed on a
   // signed paper form — by someone who has never opened the app, on a device that never loaded it.
@@ -100,7 +119,8 @@ test("the SMS variant is a link, not the whole letter", () => {
   for (const lang of LANGS) {
     // A messaging app truncates a multi-screen wall of text differently on every platform, so what
     // the client reads has to be the linked document rather than the message body.
-    const share = consentShareText("Jane Doe", lang);
+    // Measured with a trainer's name in it, as the app sends it: the name adds a sentence.
+    const share = consentShareText("Jana Novak", lang, { name: "Samanta Kovačič" });
 
     assert.ok(share.includes(clientPrivacyNoticeUrl(lang)));
     assert.ok(share.length < 400, `${lang}: share text should stay short, got ${share.length}`);
@@ -193,9 +213,16 @@ test("every shipped letter is verbatim its printable template", () => {
       de: "[Name des Kunden]",
     }[lang];
     assert.ok(clientNamePlaceholder, `${lang}: add the template's client-name placeholder here`);
+    const trainerPlaceholder = {
+      en: { name: "[Trainer name]", phone: "[Phone]", email: "[Email]" },
+      sl: { name: "[Ime trenerja]", phone: "[Telefon]", email: "[E-pošta]" },
+      de: { name: "[Name des Trainers]", phone: "[Telefon]", email: "[E-Mail]" },
+    }[lang];
+    assert.ok(trainerPlaceholder, `${lang}: add the template's signature placeholders here`);
     const expected = `${subjectLabel}: ${consentEmailSubject(lang)}\n\n${consentEmailBody(
       clientNamePlaceholder,
       lang,
+      trainerPlaceholder,
     )}\n`;
     assert.equal(
       fenced[1],

@@ -12,6 +12,8 @@
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
 import datetime
+import re
+from pathlib import Path
 
 import pytest
 from playwright.sync_api import expect
@@ -20,6 +22,13 @@ from tests.conftest import frozen_now, frozen_today
 from tests.medium._harness import load_with_stub, view_stub
 
 pytestmark = pytest.mark.clean_start
+
+# The version the app stamps today, read from its one declaration: a copy here would fail on every
+# legitimate bump of the letter rather than on a record stamped with the wrong version.
+CURRENT_FORM_VERSION = re.search(
+    r'CONSENT_FORM_VERSION = "([0-9-]+)"',
+    (Path(__file__).parents[2] / "src/modules/common/consentForm.js").read_text(encoding="utf-8"),
+).group(1)
 
 STUB = view_stub(
     imports="""
@@ -104,7 +113,7 @@ def test_date_field_appears_only_once_consent_is_ticked(page, local_server):
     expect(page.locator("#client-consent-date-group")).to_be_visible()
     # Defaults to today, but stays editable: the paper is often signed before anyone opens the app.
     expect(page.locator("#client-consent-date")).to_have_value(_today())
-    expect(page.locator("#client-consent-version")).to_contain_text("2026-08-09")
+    expect(page.locator("#client-consent-version")).to_contain_text(CURRENT_FORM_VERSION)
 
 
 def test_existing_consent_shows_its_signed_date_and_the_version_signed_under(
@@ -169,7 +178,7 @@ def test_saving_records_the_signed_date_and_the_current_form_version(
     consent = page.evaluate("() => window.__consentOf('c-new')")
     assert consent["cloudSync"] is True
     assert consent["consentDate"] == "2026-07-04"
-    assert consent["formVersion"] == "2026-08-09"
+    assert consent["formVersion"] == CURRENT_FORM_VERSION
     # The write timestamp is recorded alongside, and is NOT the consent date. Asserted as a recent
     # INSTANT rather than as today's date: it is a UTC moment, so its date part legitimately differs
     # from the local calendar day for anyone not on UTC — comparing the two failed nightly between

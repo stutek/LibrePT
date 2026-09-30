@@ -9,11 +9,19 @@
 # is a stub. It is also the only place the real file input and real IndexedDB persistence are exercised.
 
 import json
+import re
+from pathlib import Path
 
 import pytest
 from playwright.sync_api import expect
 
 from tests.conftest import wait_for_stored_record
+
+# The wording version the intake page stamps, read from its one declaration rather than copied.
+CURRENT_FORM_VERSION = re.search(
+    r'CONSENT_FORM_VERSION = "([0-9-]+)"',
+    (Path(__file__).parents[2] / "src/modules/common/consentForm.js").read_text(encoding="utf-8"),
+).group(1)
 
 
 def _client_file(tmp_path, page, local_server):
@@ -61,7 +69,7 @@ def test_a_stranger_becomes_a_client_without_the_trainer_typing_anything(
     # The health detail the client chose to offer is the part the trainer must read before session one.
     expect(review).to_contain_text("left knee, careful with deep flexion")
     # Consent as evidence: the date they ticked and the wording version they were shown.
-    expect(review).to_contain_text("2026-08-09")
+    expect(review).to_contain_text(CURRENT_FORM_VERSION)
 
     page.click("#signup-review-save")
     expect(page.locator("#dialog-signup-review")).to_be_hidden()

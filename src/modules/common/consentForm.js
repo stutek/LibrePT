@@ -33,7 +33,7 @@ export { resolveConsentLang };
 // consented to the same thing, and a bump asks every one of them to sign again. One version spans
 // every locale — the translations say the same thing, so they cannot be separately versioned
 // without the version ceasing to mean "which promises were made".
-export const CONSENT_FORM_VERSION = "2026-08-09";
+export const CONSENT_FORM_VERSION = "2026-09-30";
 
 // The docs are read on the CLIENT's device, by someone who has no LibrePT install and should not
 // need one to read what they are agreeing to — so a GitHub URL, not an in-app route. One folder per
@@ -70,37 +70,49 @@ export function consentEmailSubject(lang) {
   return consentLetterFor(resolveConsentLang(lang)).subject;
 }
 
-export function consentEmailBody(clientName, lang) {
+// The trainer signs the letter: name, phone and email, one per line, as far as they are known. The
+// signature is what names the controller (Art. 13(1)(a)) in the one text a client is sure to read.
+// `trainer` is data/trainerIdentity.js's shape, passed in so this module stays free of storage.
+function signatureOf(trainer) {
+  return [trainer?.name, trainer?.phone, trainer?.email]
+    .map((part) => (part || "").trim())
+    .filter(Boolean)
+    .join("\n");
+}
+
+export function consentEmailBody(clientName, lang, trainer) {
   const resolved = resolveConsentLang(lang);
   return consentLetterFor(resolved).body({
     clientName,
     noticeUrl: clientPrivacyNoticeUrl(resolved),
     version: CONSENT_FORM_VERSION,
+    signature: signatureOf(trainer),
   });
 }
 
 // The SMS/share variant is deliberately NOT the letter: a multi-screen wall of text in a messaging
 // app gets dismissed unread, and every messaging client truncates differently. It is one sentence
 // plus the link to the same notice, so what the client actually reads is the canonical document.
-export function consentShareText(clientName, lang) {
+export function consentShareText(clientName, lang, trainer) {
   const resolved = resolveConsentLang(lang);
   return consentLetterFor(resolved).share({
     clientName,
     noticeUrl: clientPrivacyNoticeUrl(resolved),
+    trainerName: (trainer?.name || "").trim(),
   });
 }
 
-export function consentEmailHref(client, lang) {
+export function consentEmailHref(client, lang, trainer) {
   if (!client?.email) return "";
   const subject = encodeURIComponent(consentEmailSubject(lang));
-  const body = encodeURIComponent(consentEmailBody(client.name || "", lang));
+  const body = encodeURIComponent(consentEmailBody(client.name || "", lang, trainer));
   return `mailto:${encodeURIComponent(client.email)}?subject=${subject}&body=${body}`;
 }
 
-export function consentSmsHref(client, lang) {
+export function consentSmsHref(client, lang, trainer) {
   if (!client?.phone) return "";
   // `?&body=` rather than `?body=`: iOS only honours the body parameter after a leading `&`, while
   // Android accepts either — this one form opens a prefilled compose on both.
-  const body = encodeURIComponent(consentShareText(client.name || "", lang));
+  const body = encodeURIComponent(consentShareText(client.name || "", lang, trainer));
   return `sms:${client.phone.replace(/\s/g, "")}?&body=${body}`;
 }

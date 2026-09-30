@@ -25,6 +25,7 @@ import {
   isConsentWithdrawn,
   withdrawConsent,
 } from "../../data/clientConsent.js";
+import { readTrainerIdentity } from "../../data/trainerIdentity.js";
 import { CONSENT_LANG_LABELS } from "../../i18n/consent/index.js";
 import {
   CONSENT_FORM_VERSION,
@@ -289,11 +290,12 @@ function applyDeliveryLinks(client) {
     phone: typed("client-phone", client?.phone),
   };
   const lang = selectedConsentLang();
-  applyDeliveryLink($id("btn-consent-email"), consentEmailHref(live, lang), {
+  const trainer = readTrainerIdentity();
+  applyDeliveryLink($id("btn-consent-email"), consentEmailHref(live, lang, trainer), {
     ready: translate("consent_send_email", "Email form"),
     missing: translate("consent_no_email", "No email on file"),
   });
-  applyDeliveryLink($id("btn-consent-sms"), consentSmsHref(live, lang), {
+  applyDeliveryLink($id("btn-consent-sms"), consentSmsHref(live, lang, trainer), {
     ready: translate("consent_send_sms", "Send link by SMS"),
     missing: translate("consent_no_phone", "No phone on file"),
   });

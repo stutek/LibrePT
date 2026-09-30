@@ -1,9 +1,9 @@
 ---
 type: template
-title: Informative Client Consent Letter & Intake Template
-description: Standardized GDPR-compliant client consent form template for personal trainers handling health data (Special Category Data under Article 9).
+title: Consent to process your personal data
+description: The consent letter a personal trainer sends a client by email or hands over printed, with the signature block — explicit consent to health data under GDPR Article 9(2)(a).
 status: active
-consent_form_version: "2026-08-09"
+consent_form_version: "2026-09-30"
 tags:
   - gdpr
   - consent
@@ -12,91 +12,71 @@ tags:
   - okf
 ---
 
-# Informative Client Consent Letter Template
+# Consent to process your personal data
 
-The letter below is the wording LibrePT itself sends. The app's **Email form** button (Add/Edit
-Client → *Data Protection (GDPR)*) opens your mail client prefilled with exactly this text, and its
-**Send link by SMS** button sends a one-line message pointing at the
-[Client Privacy Notice](Client_Privacy_Notice.md). Print it, email it, or adapt it — but if you
-adapt it, see *Versioning* below.
-
-The runtime copy lives in [src/i18n/consent/en.js](../../../src/i18n/consent/en.js) — one file per
-language, delivered by [consentForm.js](../../../src/modules/common/consentForm.js) — and the two are
-pinned to each other by
-[tests/unit_js/modules/common/consentForm.test.mjs](../../../tests/unit_js/modules/common/consentForm.test.mjs),
-so this document cannot silently drift out of step with what the app actually sends.
+Your personal trainer sends you this letter by email, or gives it to you printed together with the
+[privacy notice](Client_Privacy_Notice.md). To consent, reply to the email as the letter says, or
+sign the printed form.
 
 ## The letter
 
 ```markdown
-Subject: Personal Training — Data Privacy & Cloud Storage Consent
+Subject: Personal training — consent to process your personal data
 
 Hi [Client Name],
 
-To prepare our workout schedules, track your strength progression, and ensure safe training, I use LibrePT to log our session results, exercise weights, and any relevant mobility or injury notes.
+I use LibrePT, an app on my own device, to plan your training, follow your progress and train you safely. Before I keep records about you, I need your consent. This message says what I keep, who receives it and what your rights are. I, the trainer who signs this message, am responsible for your data: under the GDPR (Regulation (EU) 2016/679) I am the controller.
 
-In accordance with data protection regulations (GDPR), I want to make sure you are fully informed about how your coaching data is managed:
+What I record:
+1. Your name, and the email address or phone number you give me.
+2. Your training: goals, session dates, exercises, sets, repetitions, loads, and how each session went.
+3. Information about your health: injuries, pain, limits on movement and body weight, where I need it to train you safely. The GDPR treats health data as a special category, so I need your explicit consent for it (Art. 9(2)(a)).
 
-1. Storage & Security: Your workout logs and training notes are stored on my own device and, optionally, backed up to my personal cloud storage strictly for coaching continuity and preparation.
-2. No Third-Party Tracking or Selling: Your data is never sold, shared with advertisers, or transferred to third parties.
-3. Artificial Intelligence Safety: If I utilize AI tools to assist in periodizing or analyzing workout volume, your records are strictly anonymized (all names and identifying personal information are stripped) prior to analysis.
-4. Your Rights: You have the right at any time to request a complete export of your workout history, request corrections, or ask for your personal records to be permanently deleted. You may also withdraw this consent at any time and in any form — withdrawal stops any further processing and does not affect the lawfulness of processing carried out before it.
+Where it is kept and who receives it:
+1. The records are kept on my own device. The makers of LibrePT receive nothing.
+2. If I turn on backup, a copy is kept in my own cloud storage. My device encrypts it with my password before it leaves, so the storage provider cannot read it. The provider may keep it outside the EU; the privacy notice names the provider and the safeguard.
+3. If I use an AI assistant to help plan your training, it receives only a copy without your name, contact details, goals or notes: a number, session dates and the sets you did. Only my device can link that number to you.
+4. I never sell your data and never share it with advertisers. Nobody else receives it.
+
+How long I keep it: while we train together, and at most two years after your last session, so your history is there if you come back. Earlier if you ask.
+
+Your rights: at any time and free of charge, you can ask me for a copy of your data, a correction, its deletion, or a restriction of its processing. I answer within one month. If you think I handled your data wrongly, you can complain to the data protection authority where you live (in Slovenia: the Information Commissioner, www.ip-rs.si). No decision about you is made by a machine alone.
+
+You do not have to consent. Without your consent I cannot keep records about you in the app, and without information about your health I cannot adapt your training to it.
 
 The full privacy notice is here: {{PUBLIC_SITE_URL}}/privacy-notice-en.html
 
-Please reply "I CONSENT" to this email (or sign the printed form) to confirm that you understand and agree to these privacy practices for our personal training sessions.
+To consent, reply "I CONSENT" to this email, or sign the printed form. With that you confirm that you have read this message and that you explicitly consent to me processing your personal data, including the information about your health, for your training.
 
-To withdraw later, reply "WITHDRAW" to this message. Withdrawing is exactly as easy as giving consent — the same reply, no form and no account — and you do not have to give a reason.
+You can withdraw your consent at any time, without giving a reason: reply "WITHDRAW" to this message, or tell me in any other way. Withdrawing is as easy as consenting. It stops further processing and does not make the processing before it unlawful.
 
-Consent form version: 2026-08-09
+Consent form version: 2026-09-30
 
 Best regards,
-Your Personal Trainer
+[Trainer name]
+[Phone]
+[Email]
 ```
 
-## Printed form — signature block
-
-Append this to the printed version. **You keep the signed sheet.** LibrePT never stores a photo,
-scan, or signature — only the fact of consent, the date on this sheet, and the form version above.
+## Printed form — signatures
 
 ```markdown
-Client Signature: ___________________________   Date: _______________
+I have read this letter and the privacy notice, and I explicitly consent to the processing of my
+personal data, including the information about my health, as described above.
 
-Trainer Signature: __________________________   Date: _______________
+Client name: ________________________________
+
+Client signature: ___________________________   Date: _______________
+
+Trainer signature: __________________________   Date: _______________
 ```
 
-## Versioning
-
-Consent is consent to *a specific wording*, so LibrePT stamps the version a client signed under onto
-their record (`gdprConsent.formVersion`, see [DATA_MODEL §1](../../DATA_MODEL.md)) alongside the signed
-date. That stamp is what lets you answer "who is still covered?" after the letter changes.
-
-- **Bump the version** when the *substance* changes — a new purpose, a new recipient or processor, a
-  change to retention or to the rights on offer. Clients on an older version should re-sign.
-- **Do not bump it** for typos, formatting, or translation of unchanged meaning: those clients
-  consented to the same thing, and a bump would send every one of them a form to re-sign for nothing.
-  The 2026-08-10 terminology audit is the worked example — the Slovenian edition changed
-  substantially (consent became *privolitev* throughout, per the
-  [terminology map](../sl/INDEX.md)) and both editions gained an explicit Art. 7(3) sentence on
-  withdrawal, yet **`2026-08-09` stayed**: the purposes, the recipients, the retention and the rights
-  on offer are all unchanged, and stating a right the client already held more plainly does not make
-  the earlier consent cover less than it did.
-- **The version is a full ISO date (`YYYY-MM-DD`) — the day the current wording was adopted, not the
-  day the file was last touched.** A month alone cannot separate two substantive revisions that land
-  in the same month, and separating them is the only thing the stamp is for. It is deliberately not
-  the app's commit SHA or data schema — those are the *code* and *data shape* axes and change
-  constantly, while this letter does not.
-- **One version spans every language.** The translations state the same promises, so versioning them
-  separately would make the stamp stop meaning "which promises were made". Bumping therefore means
-  editing, in one change: `CONSENT_FORM_VERSION` in
-  [consentForm.js](../../../src/modules/common/consentForm.js), the letter body in **every**
-  `src/i18n/consent/<lang>.js`, and the matching `docs/templates/<lang>/Client_Consent_Form.md` —
-  the unit test fails until they agree.
+The trainer keeps the signed sheet as proof of your consent. The app records only that you
+consented, the date and the version of this form — never a photo, a scan or a signature.
 
 ## Related
 
-- [Client Privacy Notice](Client_Privacy_Notice.md) — the plain-language notice this letter links to
-- [Slovenian edition](../sl/Client_Consent_Form.md) — the same letter, as the app sends it in Slovenian
-- [templates INDEX](../INDEX.md) — every language this form exists in
-- [Trainer Privacy Guide](../../PRIVACY_FOR_TRAINERS.md) — your obligations as data controller
-- [PRIVACY.md](../../../PRIVACY.md) — what LibrePT itself does and does not do with data
+- [Privacy notice](Client_Privacy_Notice.md) — the full information this letter summarises
+- [Slovenska izdaja](../sl/Client_Consent_Form.md) — the same letter in Slovenian
+- [Deutsche Ausgabe](../de/Client_Consent_Form.md) — the same letter in German
+- [templates INDEX](../INDEX.md) — how the letter is versioned and kept in step with the app

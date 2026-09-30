@@ -519,7 +519,9 @@ export const en = {
     "Only if you want to. It goes in the file you send your trainer, and nowhere else — not into a text message, and not into any link.",
   // Informed consent rests on full disclosure or it is void (ruled 2026-08-23). The one line a
   // client actually reads has to say what the linked notice says: the trainer's own device, an
-  // optional backup in their own private cloud storage, nobody else, and the right to withdraw. The
+  // optional encrypted backup in their own cloud storage, the AI copy without a name, nobody else,
+  // and the right to withdraw. It says "explicitly" and names the health information, because health
+  // data needs explicit consent (Art. 9(2)(a)) and a tick that only says "I agree" is not that. The
   // links stay for the detail; they are not where the substance is allowed to hide.
   //
   // The VENDOR is not named here. It used to say "Google Drive", while the
@@ -529,7 +531,7 @@ export const en = {
   // full, in both languages, and that is where a processor's identity belongs. It is also a promise
   // the app cannot keep for a deployment that syncs somewhere else.
   intake_consent:
-    "I agree to my trainer keeping these details and using them to plan and log my training. They stay on my trainer's own device, and may also be kept as a backup copy in my trainer's own private cloud storage — no other service receives them. I can withdraw this at any time by telling my trainer.",
+    "I explicitly consent to my trainer keeping these details, including the information about my health, and using them to plan and log my training. They are kept on my trainer's own device. An encrypted backup copy, which the storage provider cannot read, may also be kept in my trainer's own cloud storage. An AI assistant may receive a copy without my name, contact details and notes. Nobody else receives them. I can withdraw this consent at any time by telling my trainer.",
   intake_sender_for: "You are filling this in for {who}.",
   intake_sender_save: "Save this contact",
   intake_step_contact: "Step 1: Save your trainer's contact",

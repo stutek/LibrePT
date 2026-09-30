@@ -34,36 +34,43 @@ Ein Text, den eine Aufsichtsbehörde liest, muss die Begriffe der Verordnung ver
 Alltagssprache. Die folgende Zuordnung gilt für beide Dokumente und für
 [src/i18n/consent/de.js](../../../src/i18n/consent/de.js).
 
-| Englisch (Original) | Deutsch (amtlich) | Quelle |
-| :--- | :--- | :--- |
-| consent | **Einwilligung** *(nie „Zustimmung“)* | Art. 4 Nr. 11 |
-| explicit consent | ausdrückliche Einwilligung | Art. 9 Abs. 2 lit. a |
-| withdraw consent | Einwilligung widerrufen / Widerruf | Art. 7 Abs. 3 |
-| data controller | Verantwortlicher | Art. 4 Nr. 7 |
-| processor | Auftragsverarbeiter | Art. 4 Nr. 8 |
-| data subject | betroffene Person | Art. 4 Nr. 1 |
-| processing | Verarbeitung | Art. 4 Nr. 2 |
-| special categories of personal data | besondere Kategorien personenbezogener Daten | Art. 9 |
-| lawful basis | Rechtsgrundlage *(Rechtmäßigkeit der Verarbeitung)* | Art. 6 |
-| right of access | Auskunftsrecht der betroffenen Person | Art. 15 |
-| rectification | Berichtigung | Art. 16 |
-| erasure / right to be forgotten | Löschung / „Recht auf Vergessenwerden“ | Art. 17 |
-| restriction of processing | Einschränkung der Verarbeitung | Art. 18 |
-| data portability | Datenübertragbarkeit | Art. 20 |
-| right to lodge a complaint | Recht auf Beschwerde bei einer Aufsichtsbehörde | Art. 77 |
-| European Data Protection Board | Europäischer Datenschutzausschuss (EDSA) | Art. 68 |
-| retention period | Speicherdauer | Art. 13 Abs. 2 lit. a |
+| Englisch (Original)                            | Deutsch (amtlich)                                                                             | Quelle                         |
+| :--------------------------------------------- | :-------------------------------------------------------------------------------------------- | :----------------------------- |
+| consent                                        | **Einwilligung** *(nie „Zustimmung“)*                                                         | Art. 4 Nr. 11                  |
+| explicit consent                               | ausdrückliche Einwilligung                                                                    | Art. 9 Abs. 2 lit. a           |
+| withdraw consent                               | Einwilligung widerrufen / Widerruf                                                            | Art. 7 Abs. 3                  |
+| data controller                                | Verantwortlicher                                                                              | Art. 4 Nr. 7                   |
+| processor                                      | Auftragsverarbeiter                                                                           | Art. 4 Nr. 8                   |
+| recipient                                      | Empfänger                                                                                     | Art. 4 Nr. 9                   |
+| data subject                                   | betroffene Person                                                                             | Art. 4 Nr. 1                   |
+| processing                                     | Verarbeitung                                                                                  | Art. 4 Nr. 2                   |
+| pseudonymisation                               | Pseudonymisierung                                                                             | Art. 4 Nr. 5                   |
+| special categories of personal data            | besondere Kategorien personenbezogener Daten                                                  | Art. 9                         |
+| lawful basis                                   | Rechtsgrundlage *(Rechtmäßigkeit der Verarbeitung)*                                           | Art. 6                         |
+| transfer to a third country                    | Übermittlung an ein Drittland                                                                 | Art. 13 Abs. 1 lit. f          |
+| adequacy decision                              | Angemessenheitsbeschluss (der Kommission)                                                     | Art. 13 Abs. 1 lit. f, Art. 45 |
+| statutory or contractual requirement           | gesetzlich oder vertraglich vorgeschrieben                                                    | Art. 13 Abs. 2 lit. e          |
+| automated decision-making, including profiling | automatisierte Entscheidungsfindung einschließlich Profiling                                  | Art. 13 Abs. 2 lit. f, Art. 22 |
+| right of access                                | Auskunftsrecht der betroffenen Person                                                         | Art. 15                        |
+| rectification                                  | Berichtigung                                                                                  | Art. 16                        |
+| erasure / right to be forgotten                | Löschung / „Recht auf Vergessenwerden“                                                        | Art. 17                        |
+| restriction of processing                      | Einschränkung der Verarbeitung                                                                | Art. 18                        |
+| data portability                               | Datenübertragbarkeit                                                                          | Art. 20                        |
+| right to lodge a complaint                     | Recht auf Beschwerde bei einer Aufsichtsbehörde                                               | Art. 77                        |
+| European Data Protection Board                 | Europäischer Datenschutzausschuss *(in der Verordnung: „Ausschuss“)*                          | Art. 68                        |
+| retention period                               | Speicherdauer *(Verordnung: „Dauer, für die die personenbezogenen Daten gespeichert werden“)* | Art. 13 Abs. 2 lit. a          |
 
 **Zitierweise**: `Art. 9 Abs. 2 lit. a DSGVO`, wie in der deutschen Rechtspraxis üblich.
 
-**Was geprüft wurde und was nicht (2026-09-26).** Die Begriffe der Tabelle bis Art. 77 und der Name
-des Ausschusses (Art. 68) wurden gegen den deutschen Wortlaut der Verordnung geprüft, gelesen auf
-[dsgvo-gesetz.de](https://dsgvo-gesetz.de/), das den amtlichen Text je Artikel wiedergibt; EUR-Lex war
-von hier aus nicht abrufbar. „Speicherdauer“ ist nicht gegen den Wortlaut geprüft (Art. 13 Abs. 2
-lit. a spricht von der „Dauer, für die die personenbezogenen Daten gespeichert werden“). **Nicht
-erfolgt:** eine Prüfung durch eine deutschsprachige Person und eine rechtliche Prüfung. Offen ist
-auch, ob die Hinweise für Kunden in Deutschland und Österreich die dortige Aufsichtsbehörde nennen
-sollen; das englische Original nennt nur die slowenische und die Liste des Ausschusses.
+**Was geprüft wurde und was nicht (2026-09-30).** Die Begriffe der Tabelle wurden gegen den
+deutschen Wortlaut der Verordnung geprüft, gelesen auf [dsgvo-gesetz.de](https://dsgvo-gesetz.de/),
+das den amtlichen Text je Artikel wiedergibt; EUR-Lex war von hier aus nicht abrufbar. „Speicherdauer“
+ist der Begriff der Datenschutzkonferenz (DSK), nicht der Verordnung. Die Hinweise wurden mit dem
+DSK-Kurzpapier Nr. 10 (Informationspflichten) und Nr. 20 (Einwilligung) abgeglichen; sie nennen jetzt
+auch die Aufsichtsbehörden in Deutschland und Österreich, weil sich eine Person dort beschwert, wo
+sie wohnt oder arbeitet (Art. 77). **Abweichung:** Alle gelesenen deutschen Muster und Formulare
+sagen „Sie“, die Vorlagen sagen „du“, wie die ganze deutsche Oberfläche. **Nicht erfolgt:** eine
+Prüfung durch eine deutschsprachige Person und eine rechtliche Prüfung.
 
 ## Verwandt
 

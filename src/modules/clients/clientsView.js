@@ -7,6 +7,7 @@ import {
   isConsentWithdrawn,
 } from "../../data/clientConsent.js";
 import { isErased } from "../../data/clientErasure.js";
+import { readTrainerIdentity } from "../../data/trainerIdentity.js";
 import { aiClientSummary } from "../../domain/aiClientSummary.js";
 import { tellInApp } from "../common/appQuestion.js";
 import { consentEmailHref } from "../common/consentForm.js";
@@ -346,7 +347,7 @@ function renderConsentDelivery(client, lang, t) {
   const mailtoBtn = document.getElementById("btn-send-consent-email");
   if (!mailtoBtn) return;
 
-  const href = consentEmailHref(client, lang);
+  const href = consentEmailHref(client, lang, readTrainerIdentity());
   mailtoBtn.href = href || "#";
   mailtoBtn.classList.toggle("disabled", !href);
   // The label carries the reason, not only the tooltip — a phone cannot hover.

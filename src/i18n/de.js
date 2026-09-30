@@ -540,7 +540,7 @@ export const de = {
   // Informed consent (see en.js): the line a client ticks says what the linked notice says, and it
   // names no storage vendor.
   intake_consent:
-    "Ich willige ein, dass mein Trainer diese Angaben speichert und nutzt, um mein Training zu planen und aufzuzeichnen. Sie bleiben auf dem eigenen Gerät meines Trainers und können zusätzlich als Sicherungskopie im eigenen privaten Cloud-Speicher meines Trainers liegen — kein anderer Dienst erhält sie. Ich kann diese Einwilligung jederzeit widerrufen, indem ich es meinem Trainer sage.",
+    "Ich willige ausdrücklich ein, dass mein Trainer diese Angaben einschließlich der Angaben zu meiner Gesundheit speichert und nutzt, um mein Training zu planen und aufzuzeichnen. Die Angaben werden auf dem eigenen Gerät meines Trainers gespeichert. Eine verschlüsselte Sicherungskopie, die der Speicheranbieter nicht lesen kann, kann zusätzlich im eigenen Cloud-Speicher meines Trainers gespeichert werden. Ein KI-Assistent kann eine Kopie ohne meinen Namen, meine Kontaktdaten und Notizen erhalten. Sonst erhält niemand die Angaben. Ich kann diese Einwilligung jederzeit widerrufen, indem ich es meinem Trainer mitteile.",
   intake_sender_for: "Du füllst das für {who} aus.",
   intake_sender_save: "Diesen Kontakt speichern",
   intake_step_contact: "Schritt 1: Speichere diesen Kontakt",
