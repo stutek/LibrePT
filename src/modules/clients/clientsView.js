@@ -149,7 +149,7 @@ export function renderClientDetailViewShell() {
           </div>
         </div>
 
-        <div class="quick-workout-action">
+        <div id="client-detail-actions" class="quick-workout-action">
           <button id="btn-plan-client-program" class="btn primary-btn">
             <i class="fa-solid fa-calendar-plus"></i> <span data-i18n="btn_plan_program">Plan Program</span>
           </button>
@@ -271,6 +271,17 @@ export function showClientDetails({
         (client.erasure.erasedAt || "").substring(0, 10),
       );
     }
+  }
+
+  // What an erased record can still DO: be read. Every action on this page assumes a person — edit
+  // their details, plan their programme, hand them their data, erase them again — and the page went
+  // on offering all five afterwards, including an export that opened on three logged workouts for
+  // somebody the app had just stopped being able to name. The anonymised history below stays: that
+  // is what an erasure keeps on purpose.
+  const erased = isErased(client);
+  for (const id of ["btn-edit-client", "client-detail-actions"]) {
+    const el = document.getElementById(id);
+    if (el) el.hidden = erased;
   }
 
   const planBtn = document.getElementById("btn-plan-client-program");

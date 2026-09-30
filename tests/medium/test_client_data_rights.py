@@ -157,6 +157,31 @@ def test_the_erased_record_says_so_on_the_profile(page, local_server):
     expect(page.locator("#profile-erased")).to_contain_text("at the client's request")
 
 
+def test_an_erased_record_offers_nothing_but_reading(page, local_server):
+    """Every action on this page assumes a person: edit their details, plan their programme, hand
+    them their data, erase them again. The page went on offering all five after the erasure — the
+    export even opened on the logged workouts of somebody the app had just stopped being able to
+    name. The anonymised history stays, because that is what an erasure keeps on purpose."""
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#view-client-detail.active")
+    page.locator("#btn-client-erase").click()
+    page.locator("#client-erase-confirm").fill("ERASE")
+    page.locator("#btn-erase-confirm").click()
+
+    _open_detail(page, "c-jane-a")
+    expect(page.locator("#profile-erased")).to_be_visible()
+    expect(page.locator("#btn-edit-client")).to_be_hidden()
+    expect(page.locator("#client-detail-actions")).to_be_hidden()
+    for action in (
+        "#btn-plan-client-program",
+        "#btn-ai-safe-copy",
+        "#btn-client-export",
+        "#btn-client-erase",
+    ):
+        expect(page.locator(action)).to_be_hidden()
+    expect(page.locator("#client-history-list")).to_be_visible()
+
+
 def _with_trainer_details(page):
     """The document names the trainer as the data controller, so the export needs their details."""
     page.add_init_script(

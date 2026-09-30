@@ -91,6 +91,12 @@
   gap: 8px;
   flex-wrap: wrap;
 }
+/* Required, not redundant: `display: flex` above outranks the UA stylesheet's `[hidden]` rule, so
+   without this the hidden attribute silently does nothing — and what it hides here is every action
+   on an erased client's page. */
+.quick-workout-action[hidden] {
+  display: none;
+}
 .quick-workout-action > .btn {
   flex: 1;
   min-width: 150px;
