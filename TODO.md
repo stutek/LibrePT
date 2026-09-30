@@ -5324,10 +5324,40 @@ Gradivo:
   kopije na telefonu (§80.136); predlog pravila o commitih z `git commit --only` (iz pogovora
   2026-09-30).
 
-## 97. [~] Besedila privolitve in obvestila po GDPR — pregled in popravek v vseh jezikih
+## 97. [ ] Besedila privolitve in obvestila po GDPR — pregled in popravek v vseh jezikih
 
 **Naročil Simon 2026-09-30:** temeljito preveriti vsebino privolitve, jo primerjati z objavljenimi in
-uradnimi vzorci ter popraviti v vseh podprtih jezikih (en, sl, de). V delu: Claude Opus.
+uradnimi vzorci ter popraviti v vseh podprtih jezikih (en, sl, de).
+
+**Popravljeno 2026-09-30 (commit e5bd1f3), različica obrazca 2026-09-30.** Vse spodaj naštete
+najdbe iz kode so odpravljene v pismu, kljukici na obrazcu za vpis in obvestilu, v vseh treh jezikih.
+Primerjano z: vzorcem IP RS po členu 13 (ip-rs.si/obrazci), mnenji IP RS o privolitvi in fitnesu,
+EDPB Guidelines 05/2020, WP260 rev.01, DSK Kurzpapier 10 in 20, obrazcem TLfDI, vzorcem LfD
+Niedersachsen za fitnes studie, obrazci F45 Ljubljana, Uni Paderborn, Uni Hannover in dvema
+angleškima obrazcema za trenerje.
+
+**Čaka na Simona:**
+- **97.1 Obdobje hrambe.** Besedila zdaj obljubljajo »največ dve leti po zadnjem treningu«. Izbral
+  agent, ker je bil to primer v stari predlogi in ker člen 13(2)(a) zahteva obdobje ali merila.
+  Drugačna številka pomeni novo različico obrazca.
+- **97.2 Pravna podlaga.** Vse sloni na privolitvi. EDPB (05/2020, točka 26) pravi, da se privolitev
+  in pogodba ne smeta mešati; za ime, kontakt in dnevnik treningov bi bila podlaga lahko pogodba
+  (člen 6(1)(b)), privolitev pa le za zdravje. Sprememba vpliva na to, kaj naredi preklic.
+- **97.3 »ti« in »du«.** Vzorec IP RS in vsi prebrani nemški vzorci nagovarjajo z »vi« oziroma »Sie«.
+  Besedila ostajajo pri »ti« in »du« kot ves vmesnik.
+- **97.4 AI kopija kot ločen namen.** EDPB (točka 42) želi ločeno privolitev za ločen namen. Zdaj je
+  AI kopija razkrita kot prejemnik, brez ločene kljukice.
+- **97.5 Google ni obdelovalec po členu 28** pri brezplačnem računu (pogodbo DPA ima le Workspace in
+  Cloud). Besedila Googla ne imenujejo več obdelovalca; kopija je šifrirana. Ali to trenerju zadošča,
+  je pravno vprašanje.
+- **97.6 Pravni pregled** ni opravljen v nobenem jeziku; nemščine ni prebral nihče, ki govori nemško.
+
+**Vrzel v aplikaciji, ni zgrajeno:** aplikacija ne pokaže, katere stranke so privolile po starejši
+različici. Po tej spremembi so to vse obstoječe stranke, trener pa tega ne izve nikjer.
+
+**Opaženo med delom:** razvojni strežnik na :8081 teče na starejši različici
+`deploy/local_http_server.py`, zato ga brskalniški testi zunaj `build check` odklonijo. Ponovni zagon
+je Simonova odločitev.
 
 Najdeno v kodi, pred primerjavo z vzorci:
 - Obvestilo pravi, da Google kopijo lahko prebere. Kopija na Drive je šifrirana z geslom trenerja
