@@ -6907,6 +6907,49 @@ trajanje, na primer »trajal 1 min«. Opaženo na `main` `12d0e66`, sl, 390 × 8
 first name, last name, phone and email mandatory. The ☰ menu keeps five entries: *Training
 sessions* (the home page), *Client directory*, *Exercises and routines*, *Data management* and
 *Settings*. *Leave the sandbox* is a top-level row only while the sandbox is open. This replaces
+### 80.115 [ ] P2 — Na slovenski podlogi vaja po »Prelahko« dobi oznako »Completed«
+
+**Scenarij in koraki:** vzorčni podatki, trening za Jane Doe s tremi vajami iz kataloga. Na odprti
+vaji Wall Sit pritisniti »Prelahko«, nato tapniti oznako »Prihodnje« na naslednji vaji.
+
+**Opaženo:** kartica Wall Sit ima zdaj oznako »Completed«. Ostale oznake na isti podlogi so
+slovenske: »Prihodnje«, »Zadnjič: 2026-07-20«, »Krog 1 / 3«. Trener brez predznanja: »prejšnja
+dobi oznako Completed (angleško v slovenskem zaslonu)«.
+
+**Težava in vpliv:** edina oznaka, ki pove, da je vaja zapisana kot opravljena, je v jeziku, ki
+ga trener morda ne bere.
+
+**Predlog:** slovenska oznaka, na primer »Opravljeno«. Opaženo na `main` `12d0e66`, sl, 390 × 844.
+
+### 80.116 [ ] P2 — Okno »Trening se je začel izven urnika« skrije »Končni čas« desno od roba
+
+**Scenarij in koraki:** vzorčni trening »Hitri HIIT za trup« (14:00–15:00) ob 13:01 odpreti in
+pritisniti »Začni trening«.
+
+**Opaženo:** okno je široko 351 pik. »Začetni čas« z gumbi 13:30, 14:00, 14:30, 15:00 zapolni
+širino. »Končni čas« se začne pri 315 pikah in sega do 577, zato se vidi le »Končn« in začetek
+dveh gumbov (posnetek zaslona). Pod poljema je tanek drsnik; nič ne pove, da je treba
+podrsati v stran.
+
+**Težava in vpliv:** trener, ki premakne trening na dejanski čas, lahko popravi le začetek. Konca
+ne vidi in ne ve, da obstaja, zato z »Prilagodi čas« shrani konec, ki ga ni preveril.
+
+**Predlog:** polji naj stojita drugo pod drugim, kot v obrazcu »Nastavitev treninga«. Opaženo na
+`main` `12d0e66`, sl, 390 × 844; najprej opazil trener-podagent.
+
+### 80.117 [ ] P3 — Trening čez teden dni »se začne čez 870h 01m«
+
+**Scenarij in koraki:** vzorčni podatki, seznam »Treningi«, trening »Moč ob torkih in četrtkih«
+2026-11-05.
+
+**Opaženo:** kartica: »Se začne čez 870h 01m«. Enako »197h 01m« za trening čez osem dni.
+
+**Težava in vpliv:** trener ur ne preračuna v dneve. Trener brez predznanja: »Ure za en teden
+naprej ne preračunam; dneva bi razumel.« Datum nad kartico to že pove, zato je številka le šum.
+
+**Predlog:** nad 24 ur pisati dneve (»čez 36 dni«) ali števca ne kazati. Opaženo na `main`
+`12d0e66`, sl, 390 × 844.
+
 §11.3's plan to fold the menu from 21 rows to 14.
 
 **Ruled the same day (Simon):**
