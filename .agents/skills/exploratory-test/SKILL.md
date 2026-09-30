@@ -146,11 +146,12 @@ that shape whenever a finding would otherwise be "I noticed a few of these".
 »Brez povezave« on a machine that was online, which reads exactly like a defect. After a scenario
 that used `inject`, `stop` and `start` again before believing anything the app shows.
 
-**A page stuck on the English loading screen after `goto` is the driver until shown otherwise.** On
-2026-10-01, with a fresh browser and the trainer's first launch, `/intake` stalled on »LibrePT / A
-lightweight, free app …« 3 times in 6 when loaded with this tool's `goto`, and 0 in 6 with a plain
-`page.goto(url, wait_until="commit")` from a process that stays connected; the session reported it as
-P1 and withdrew it (§80.154). Before reporting a load that never finishes, repeat it that plain way.
+**A page stuck on the English loading screen cannot be settled from here.** On 2026-10-01 pages
+stalled on »LibrePT / A lightweight, free app …« in runs, with this tool's `goto` and with a plain
+`goto(wait_until="commit")`, and one series of measurements after another pointed a different way;
+the finding (§80.154) was rewritten four times in an hour. The driver re-attaches over CDP on every
+command, so it cannot rule itself out. Write such a stall once, with the counts, as a check for Simon
+to run on a phone, and move on.
 
 **`goto` is not a stopwatch.** It waits until the network goes quiet, up to 60 seconds, so a load
 timed around it measures the driver. On 2026-10-01 that turned a 2.1-second boot on a slow line into
