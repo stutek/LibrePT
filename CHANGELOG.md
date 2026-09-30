@@ -42,6 +42,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Fixed
 
+- **The mark for "a note is written here" shows on the card.** The dot on the feedback button of an
+  exercise or a circuit member with a written note was built on 2026-08-15 but never drawn: the deck
+  did not hand the note lookup to its cards. A new test mounts the deck and looks for the dot.
 - **Clients on one plan show every injury and every last session, each with a name.** With
   "Everyone on this plan", the shared tab showed one client's injury and one client's "Last time"
   rows, neither named, and nothing of the others.

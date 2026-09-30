@@ -10,7 +10,7 @@
 // deckContainer: the #active-exercise-scroll-deck element
 // deps: {
 //   activeSession, activeClientState, activeClientId, state,
-//   t, escapeHTML, buildCircuitUnits, getExerciseSignalColor, hasQuickSignal,
+//   t, escapeHTML, buildCircuitUnits, getExerciseSignalColor, hasExerciseNote, hasQuickSignal,
 //   logQuickSignal, openFeedbackModal, completeCircuitRound, focusExerciseByIndex,
 //   activateExerciseByScroll(index)   // the trainer scrolled another card to the focus line
 //   saveActiveSessionToCache, saveToLocalStorage,
@@ -225,6 +225,7 @@ export function renderExerciseDeck(deckContainer, deps) {
     escapeHTML,
     buildCircuitUnits,
     getExerciseSignalColor,
+    hasExerciseNote,
     hasQuickSignal,
     logQuickSignal,
     openFeedbackModal,
@@ -333,6 +334,7 @@ export function renderExerciseDeck(deckContainer, deps) {
         t,
         escapeHTML,
         getExerciseSignalColor,
+        hasExerciseNote,
         hasQuickSignal,
         logQuickSignal,
         openFeedbackModal,
@@ -354,6 +356,7 @@ export function renderExerciseDeck(deckContainer, deps) {
         t,
         escapeHTML,
         getExerciseSignalColor,
+        hasExerciseNote,
         hasQuickSignal,
         logQuickSignal,
         openFeedbackModal,
