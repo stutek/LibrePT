@@ -29,6 +29,9 @@
 import { dependenciesOf, dependencyIndex } from "./recordDependencies.js";
 import { isSeedRecord, seededCollections } from "./seedProvenance.js";
 
+// The reason a seeded record is kept. A dictionary key, not a sentence: the view words it (t()).
+const DEPENDED_ON = "demo_cleanup_reason_depended_on";
+
 // Seeded, but worth keeping: the movement catalog a trainer builds real programmes from.
 export const DEFAULT_COLLECTIONS_TO_KEEP = ["exercises"];
 
@@ -42,7 +45,7 @@ function recordsIn(state, collection) {
  *
  * Returns `{ removals, retained, counts }`:
  *   - `removals`  — `{ collection: [id, ...] }`, safe to delete
- *   - `retained`  — `[{ collection, id, reason }]`, seeded but kept, each with a stated why
+ *   - `retained`  — `[{ collection, id, reason }]`, seeded but kept, each with a dictionary key as its why
  *   - `counts`    — `{ collection: { removing, retaining, keeping } }` for a confirmation screen
  *
  * `keepCollections` are swept for reporting but never removed from. `keepIds` is the confirmation
@@ -94,7 +97,7 @@ export function planDemoRemoval(state, options = {}) {
         retainedReasons.set(`${collection}:${id}`, {
           collection,
           id,
-          reason: "a record you created still depends on it",
+          reason: DEPENDED_ON,
         });
         rescuedAny = true;
       }

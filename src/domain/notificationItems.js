@@ -48,7 +48,10 @@ export function buildEscapedTestDataItem(state, t, { sandbox = false, testRun = 
       "{count} record(s) written by a test run are stored with your own work, in {collections}. They are not yours and can be removed."
     )
       .replace("{count}", String(count))
-      .replace("{collections}", collections.join(", ")),
+      .replace(
+        "{collections}",
+        collections.map((name) => t(`test_data_collection_${name}`) || name).join(", "),
+      ),
     actions: [{ labelKey: "notif_test_data_escaped_btn", resetDemo: true, primary: true }],
   };
 }

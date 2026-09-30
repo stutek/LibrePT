@@ -107,7 +107,7 @@ function renderRetained(plan, state) {
       const name = record ? displayName(record) : entry.id;
       return `<li>
         <span class="demo-cleanup-retained-name">${deps.escapeHTML(name)}</span>
-        <span class="demo-cleanup-retained-why">${deps.escapeHTML(entry.reason)}</span>
+        <span class="demo-cleanup-retained-why">${deps.escapeHTML(deps.t(entry.reason) || entry.reason)}</span>
       </li>`;
     })
     .join("");

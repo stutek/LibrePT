@@ -13,6 +13,8 @@
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { planDemoRemoval } from "../../../src/data/demoDataRemoval.js";
+import { COLLECTIONS } from "../../../src/data/recordProjections.js";
 import {
   buildCrashReportItem,
   buildEscapedTestDataItem,
@@ -21,6 +23,7 @@ import {
   buildUnscheduledPlansItem,
   resolveNotificationItems,
 } from "../../../src/domain/notificationItems.js";
+import { TRANSLATIONS } from "../../../src/i18n/index.js";
 
 // A translator that marks what it touched, so a test can tell a resolved key from a literal. The
 // `_desc` keys, counted ones included (`_desc_one` … `_desc_other`), keep the {count} placeholder,
@@ -562,4 +565,42 @@ test("no chapters are offered where the walkthrough itself cannot be", () => {
 
   assert.ok(!card.actions.some((action) => action.startWalkthrough));
   assert.deepEqual(card.chapters, []);
+});
+
+test("the test-records message on a Slovenian screen names every collection in Slovenian", () => {
+  const sl = TRANSLATIONS.sl;
+  const slT = (key) => sl[key] ?? "";
+  const row = (id) => ({ id, name: id, testData: "test" });
+  // Every collection that can hold a test row, so a collection without a dictionary word fails.
+  const state = Object.fromEntries(COLLECTIONS.map((collection) => [collection, [row("x")]]));
+  const item = buildEscapedTestDataItem(state, slT, {});
+  const shown = item.description;
+  for (const collection of COLLECTIONS.filter((c) => c !== "exercises")) {
+    assert.ok(
+      sl[`test_data_collection_${collection}`],
+      `${collection} has a Slovenian word for the message`,
+    );
+    assert.ok(
+      !new RegExp(`\\b${collection}\\b`).test(shown),
+      `"${collection}" is shown as its code name in: ${shown}`,
+    );
+  }
+  assert.match(shown, /stranke/, "uses the app's own word for clients");
+});
+
+test("a reason a record is kept is a dictionary code, worded in all three languages", () => {
+  const seedExercise = { id: "e1", name: "Squat", testData: "test" };
+  const state = {
+    exercises: [seedExercise],
+    routines: [{ id: "r1", name: "Mine", exercises: [{ id: "e1" }] }],
+  };
+  const { retained } = planDemoRemoval(state, { keepCollections: [] });
+  assert.ok(retained.length > 0);
+  for (const { reason } of retained) {
+    assert.match(reason, /^demo_cleanup_reason_/, "the data layer returns a code, not a sentence");
+    for (const lang of ["en", "sl", "de"]) {
+      assert.ok(TRANSLATIONS[lang][reason], `${lang} words ${reason}`);
+    }
+    assert.doesNotMatch(TRANSLATIONS.sl[reason], /record|created|depends/i);
+  }
 });

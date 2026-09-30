@@ -42,6 +42,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Fixed
 
+- **The message about test records left after removing the sample data is in the trainer's
+  language.** It named the kept collections by their code names ("exercises", "routines") and gave
+  the reason a record is kept in English.
 - **A note kept on a client's record is written in the trainer's language.** The line read
   "Too Hard - Reduce Load" on a Slovenian screen, the tag's stored English identifier; it now reads
   as the Pending Review screen says it.
