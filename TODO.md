@@ -5520,3 +5520,14 @@ Najdeno v kodi, pred primerjavo z vzorci:
 - Manjka iz člena 13: omejitev obdelave (en, de), ali je dajanje podatkov obvezno in posledice,
   avtomatizirano odločanje, prenos v tretje države.
 - Jeziki se razhajajo: le sl pismo pove, da je ponudnik shrambe obdelovalec.
+
+**Izpust v e5bd1f3, najden 2026-10-01 pri raziskovalnem testiranju (§80.155):** popravek je zajel pismo,
+kljukico in obvestilo, ne pa napisov v vmesniku trenerja, ki trdijo drugače:
+- Profil stranke: »Privolitev GDPR za sinhronizacijo v oblak« (`profile_consent_label`), značka »Brez
+  privolitve (samo lokalno)« (`consent_badge_none`) in kljukica »Stranka je podpisala privolitev (hramba
+  podatkov in sinhronizacija v oblak)« (`consent_signed_label`). Pravijo, da je privolitev le za oblak in
+  da brez nje trener podatke sme hraniti na napravi. Pismo pravi: »Brez privolitve o tebi v aplikaciji ne
+  smem voditi zapisov.« **Čaka na Simona**, ker je to vprašanje 97.2: ali aplikacija brez privolitve
+  podatke hrani (in bi moralo pismo reči drugače) ali ne.
+- Gumb »Anonimna kopija za AI« (`profile_ai_safe_copy`; en »AI Safe Copy«) trdi anonimnost, ki je ni.
+  Popravek naslova gumba zahteva iskanje vseh besedil, ki ga imenujejo, v vseh jezikih.
