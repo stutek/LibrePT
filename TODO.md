@@ -7168,6 +7168,23 @@ ali je aplikacija pomešala njegove podatke s tujimi.
 vpisal; ali pa naj bodo vzorčni predlogi v jeziku aplikacije in za trenerjevimi. Opaženo na `main`
 `12d0e66`, 390 × 844.
 
+### 80.129 [ ] P3 — Ob začetku treninga ni odprta prva vaja: ali nobena ali zadnja dodana
+
+**Scenarij in koraki:** (a) trening z rutino »Moč A« (tri vaje), ki ga trener ne ureja: odpreti s
+seznama, »Začni trening«. (b) trening brez rutine: v »Uredi načrt« dodati tri vaje, »Končano z
+urejanjem načrta«, »Začni trening«; nato isti trening odpreti znova s seznama.
+
+**Opaženo:** (a) vse tri vaje pišejo »Prihodnje«, nobena ni odprta, gumbov »Prelahko«, »Pretežko«
+in »Opombe« ni. (b) odprta je zadnja dodana vaja (»5/6 Barbell Row«), prvi dve pišeta »Prihodnje«;
+enako po ponovnem odprtju s seznama. Trenerka brez predznanja: »Pričakoval sem, da bo odprta prva
+vaja … sem mislil, da sta ti dve že opravljeni.«
+
+**Težava in vpliv:** vsak trening se začne z dotikom, ki ga trener mora najti; v primeru (b) trener
+začne pri napačni vaji ali misli, da sta prvi dve že za njim.
+
+**Predlog:** ob »Začni trening« naj bo odprta prva vaja, ki še ni opravljena. Opaženo na `main`
+`12d0e66`, sl, 390 × 844.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
