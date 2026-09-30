@@ -423,3 +423,33 @@
   border-color: var(--card-border);
   background: var(--card-bg);
 }
+
+/* A short phone has no room for the full mark above a four-field form. On 320x680 — the smallest
+   screen the app supports — the details step's save button used to end 42px below the bottom edge
+   with only its top border line showing, and the page itself does not scroll (the splash does), so
+   the screen looked finished without its only button. Height comes back from the decoration and the
+   rhythm; every word stays. */
+@media (max-height: 720px) {
+  .app-splash {
+    gap: 10px;
+    padding: 16px 20px;
+  }
+
+  .app-splash-mark {
+    width: min(28vw, 104px);
+  }
+
+  .app-splash-name {
+    font-size: clamp(22px, 6vw, 28px);
+  }
+
+  .app-splash-language,
+  .app-splash-step {
+    gap: 8px;
+    margin-top: 0;
+  }
+
+  .app-splash-details {
+    gap: 8px;
+  }
+}
