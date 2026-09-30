@@ -136,3 +136,17 @@ def test_routine_row_numbers_show_whole_and_carry_a_visible_label(page, local_se
         "el => el.getBoundingClientRect().right"
     )
     assert remove <= right + 1 and right <= 390
+
+
+def test_add_exercise_button_never_hides_the_open_picker(page, local_server):
+    # The picker is already open when the dialog opens. "Add exercise" used to close it on the
+    # first tap, so the button that says "add" hid the list to add from.
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#view-routines.active")
+    page.click("#btn-add-routine")
+    page.wait_for_selector("#routine-ex-picker:not(.hidden)")
+
+    page.click("#btn-routine-add-ex")
+    page.wait_for_timeout(150)
+    assert page.locator("#routine-ex-picker").is_visible()
+    assert page.locator("#routine-ex-picker .picker-item").count() > 0

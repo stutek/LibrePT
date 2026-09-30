@@ -76,6 +76,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Fixed
 
+- **"Add exercise" in the routine form no longer hides the exercise picker** that is already open;
+  a tap on an open picker puts the cursor in its search box.
 - **The rounds counter says "Krogi" in Slovenian**, not the German "Runde".
 - **A date typed the Slovenian way is read as that date.** "6.10.2026" was saved as 6102-02-06.
   Day, month and year written with dots, slashes or dashes are now read as such, and a day that does

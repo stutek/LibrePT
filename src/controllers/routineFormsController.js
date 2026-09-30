@@ -153,8 +153,6 @@ export function setupRoutineForms({
   const closeBtn = dialog.querySelector(".modal-close-btn");
   const pickerEl = $id("routine-ex-picker");
 
-  const hideRoutinePicker = () => pickerEl?.classList.add("hidden");
-
   // Mount a fresh filtered picker; each tap drops a configured row into the template.
   // Stays open for rapid multi-add.
   const openRoutinePicker = () => {
@@ -191,8 +189,10 @@ export function setupRoutineForms({
   const btnRoutineAddEx = $id("btn-routine-add-ex");
   if (btnRoutineAddEx) {
     btnRoutineAddEx.addEventListener("click", () => {
+      // An open picker stays open: "add" never hides the list it adds from. A second tap puts the
+      // cursor in the search box instead.
       if (pickerEl?.classList.contains("hidden")) openRoutinePicker();
-      else hideRoutinePicker();
+      else pickerEl?.querySelector(".picker-search")?.focus();
     });
   }
 
