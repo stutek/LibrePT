@@ -2859,6 +2859,12 @@ answer before drawing anything: an approximation of somebody's share sheet is th
 
 Both are the player, not the script: the hand is what makes a demonstration a demonstration.
 
+- **[ ] A demonstration that fails part-way leaves what it opened open (found 2026-09-30).**
+  `demonstrateBeats` stops at the first beat that does not come true, so a later beat that tidies up
+  never runs: on the welcome card, the ☰ menu stays open. A trainer does not reach this on the
+  welcome card (see §91.5 for how the tests did), but any failed demonstration does the same. One
+  way: run a sequence's closing beat even after a failure.
+
 ### 39.10 [x] CHANGE — the intake-link button is named for the intent
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#3910-x-change-the-intake-link-button-is-named-for-the-intent); what shipped is in [CHANGELOG.md](CHANGELOG.md).
@@ -7846,25 +7852,30 @@ Last green CI run (36063598211): 20 min. Stage 3 alone is 12 min: e2e 675s, demo
 4. **[ ] Low priority: the Stage 4 CI job spends ~48s on setup for ~15s of tests.** Merging it into
    another job would save that, but Stage 4 is its own stage by Simon's ruling (2026-09-19), so
    this changes only if that ruling does.
-5. **[~] The story walk still waits where nothing will happen — in progress 2026-09-30 (Simon:
-   "implement the best solution").** After a Show me that did not carry the card on (the last step
-   of a leg, or a failed demonstration; `carryCardOn` in `walkthroughOverlay.js`), the walk waits
-   the whole 8s before Next, and every walk waits 6s at its end to be sure the guide is gone. The
-   seven walks still take 37–99s each. The fix: wait for the guide's own signal — the progress line
-   changed, or Show me is enabled again (it is disabled until the guide renders after the
-   demonstration) — and skip the end wait on the story's last step. And split
-   `test_every_offered_chapter_can_be_walked_from_a_cold_start` (99s, the longest demo test) into
-   one test per chapter, so three workers share it. Blocked on: librept-02 holds the tree and has
-   `tests/e2e/test_demo_story.py` open.
+5. **[~] The story walk still waits where nothing will happen — two of three parts shipped
+   2026-09-30 (Simon: "implement the best solution").** Shipped: the walk ends at once on step n of
+   n instead of waiting 6s for a panel that is not coming back, and
+   `test_every_offered_chapter_can_be_walked_from_a_cold_start` is one test per chapter (six of
+   9–11s instead of one of 99s), in `e164826`. `tests/e2e/test_demo_story.py` alone went from 228s
+   to 136s on three workers; in the gate the demo task took 248s (331s before). **Still open:** after a Show me that does not carry the card on (the last step of a
+   leg), the walk waits the whole 8s. Waiting instead until Show me is enabled again (the guide's own
+   signal; `showing` in `walkthroughOverlay.js`) failed 5 tests of 27, all on the welcome card: the
+   demonstration reported *"This step didn't complete"* and left the ☰ menu open, then hid its own
+   message 0.2s later, before the 8s wait ended. Cause (measured by librept-02, checked against
+   `demoDataUrl` in `splashScreen.js`): the tests open the story with `?init=demo_data_load`, which
+   seeds the WORKING workspace, while every link the app offers opens it with `workspace=sandbox`.
+   Outside the sandbox the menu row *Leave the sandbox* does not exist, so the beat pointing at it
+   never comes true. Next step: `_open_story` opens the story the way the app does, then the signal
+   wait goes in. The comment at `_card_moved_on` still names the welcome card as the thing the 8s
+   hides; it goes with that change.
 7. **[ ] Gap: no test walks the story at full motion.** Every story walk runs with reduced motion,
    where `demoPace` makes every pause zero; `test_demo_pacing.py` times one step at full motion. A
    defect that only shows while the hand travels (the app re-rendering under it) is found by
    nobody. One full-motion walk costs ~2.5 min of worker time (~3s × 48 steps), which is why it is
    not in the gate. Decide whether it runs, and where (the gate, or a scheduled workflow like
    `google-canary.yml`).
-6. **[ ] Low priority: the demo task is still the longest in local Stage 3** (331s against e2e
-   292s in the gate after item 2), so any change to e2e does not shorten the stage until item 5
-   does.
+6. **[x] The demo task was the longest in local Stage 3 — no longer, 2026-09-30.** After item 5's
+   two parts, the gate had demo 248s and e2e 313s, so e2e now sets the stage's length.
 
 ## 92. [ ] The peek gesture becomes an L, the deck holds one session, and the demo shows a drag
 
