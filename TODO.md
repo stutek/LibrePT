@@ -46,13 +46,11 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#11-x-pt-side-cl
 
 ### 1.2 [x] Simultaneous sessions merged into one clipboard: multi-line titles + per-participant tags — dots shipped 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#12-x-simultaneous-sessions-merged-into-one-clipboard-multi-line-titles--per-participant-tags--dots-shipped-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#12-x-simultaneous-sessions-merged-into-one-clipboard-multi-line-titles--per-participant-tags--dots-shipped-2026-09-30).
 
 ### 1.3 [x] Session list must model partial overlaps — shipped 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#13-x-session-list-must-model-partial-overlaps--shipped-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#13-x-session-list-must-model-partial-overlaps--shipped-2026-09-30).
 
 ### 1.4 [ ] Calendar preferences — holidays and non-working days
 
@@ -277,8 +275,7 @@ review at the desk ([uc2](use_cases/uc2_async_plan_adjustments.md)).
 
 ### 7.2 [x] Feedback button must show its own state — toggled, and "notes exist" — note mark drawn and tested 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#72-x-feedback-button-must-show-its-own-state--toggled-and-notes-exist--note-mark-drawn-and-tested-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#72-x-feedback-button-must-show-its-own-state--toggled-and-notes-exist--note-mark-drawn-and-tested-2026-09-30).
 
 ### 7.3 [~] [Brainstorm] Session-level "Pending Review" flag, unscheduled sessions, and a shared scrollable-deck component
 
@@ -380,8 +377,7 @@ simplifies the deck/tabs/title-bar wiring and unifies router handling.
 
 ### 11.3 [x] The ☰ menu is where everything without a home ended up — superseded by §81.2, closed 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#113-x-the--menu-is-where-everything-without-a-home-ended-up--superseded-by-812-closed-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#113-x-the--menu-is-where-everything-without-a-home-ended-up--superseded-by-812-closed-2026-09-30).
 
 ## Audit schedule — every two weeks
 
@@ -418,8 +414,7 @@ git reflog expire --expire=now --all && git gc --prune=now
 
 ### 12.6 [x] Vendor Font Awesome locally — the last CDN dependency — done, closed 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#126-x-vendor-font-awesome-locally--the-last-cdn-dependency--done-closed-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#126-x-vendor-font-awesome-locally--the-last-cdn-dependency--done-closed-2026-09-30).
 
 ### 12.7 [x] [CLOSED — measured, do not reopen] ~89 separate module requests on first load
 
@@ -566,8 +561,7 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#173-x-erasure-a
 
 ### 17.4 [x] Save a past session as a routine template (library fills itself from history) — shipped 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#174-x-save-a-past-session-as-a-routine-template-library-fills-itself-from-history--shipped-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#174-x-save-a-past-session-as-a-routine-template-library-fills-itself-from-history--shipped-2026-09-30).
 
 ### 17.5 [~] Explicit item ordering — `position` on every session item
 
@@ -657,8 +651,7 @@ Android, and private-browsing quotas. The recovery for all three is the backup f
 
 ### 18.7 [x] [Decided] Backups: 1× not N×, readers forever, writers never — every part shipped, closed 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#187-x-decided-backups-1-not-n-readers-forever-writers-never--every-part-shipped-closed-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#187-x-decided-backups-1-not-n-readers-forever-writers-never--every-part-shipped-closed-2026-09-30).
 
 ### 18.8 [ ] [Open] Encryption, device theft, and storage durability
 
@@ -707,8 +700,7 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#1810-x-resolved
 
 ### 18.11 [x] Legal gaps this design creates — every gap answered, closed 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#1811-x-legal-gaps-this-design-creates--every-gap-answered-closed-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#1811-x-legal-gaps-this-design-creates--every-gap-answered-closed-2026-09-30).
 
 ### 18.12 [ ] [Decided] Reuse the preview badge for unsupported-version warning
 Generalise `#preview-badge` into a **build-status ribbon with severity tiers**: `PREVIEW` (amber,
@@ -1429,8 +1421,7 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#393-x-bug-the-c
 
 ### 39.4 [x] CHANGE — the invite dialog's two buttons — fixed 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#394-x-change--the-invite-dialogs-two-buttons--fixed-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#394-x-change--the-invite-dialogs-two-buttons--fixed-2026-09-30).
 
 ### 39.5 [~] BUG — the register takes the same person twice
 
@@ -2013,13 +2004,11 @@ what shipped is in [CHANGELOG.md](CHANGELOG.md). The promotional page it left op
 
 ### 45.2 [x] The trainer can enter their own name, phone and email — shipped 2026-09-11
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#452-x-the-trainer-can-enter-their-own-name-phone-and-email--shipped-2026-09-11);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#452-x-the-trainer-can-enter-their-own-name-phone-and-email--shipped-2026-09-11).
 
 ### 45.3 [x] The signup form asks for first and last name — fixed 2026-09-11
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#453-x-the-signup-form-asks-for-first-and-last-name--fixed-2026-09-11);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#453-x-the-signup-form-asks-for-first-and-last-name--fixed-2026-09-11).
 
 ### 45.4 [ ] The share of a filled-in signup FAILED, and fell back to saving the file
 
@@ -2085,8 +2074,7 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#456-x-the-sessi
 
 ### 45.7 [x] Finish "seja" → "trening", and settle on ONE form of address — finished 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#457-x-finish-seja--trening-and-settle-on-one-form-of-address--finished-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#457-x-finish-seja--trening-and-settle-on-one-form-of-address--finished-2026-09-30).
 
 ### 45.8 [ ] The clipboard and the client's history are two views of one thing
 
@@ -2417,8 +2405,7 @@ failures is not measured; the module holds the re-check condition.
 
 ## 54. [x] The past cards on the clipboard write their date as "20. jul." — fixed 2026-09-20
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#54-x-the-past-cards-on-the-clipboard-write-their-date-as-20-jul--fixed-2026-09-20);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#54-x-the-past-cards-on-the-clipboard-write-their-date-as-20-jul--fixed-2026-09-20).
 
 ## 68. [ ] The paid tiers: what stays out of this app, and the tag that invites the upgrade
 
@@ -2574,18 +2561,15 @@ on every screen the way a session's name is.
 
 ## 66. [x] A session may not be named after a client — shipped 2026-09-18
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#66-x-a-session-may-not-be-named-after-a-client--shipped-2026-09-18);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#66-x-a-session-may-not-be-named-after-a-client--shipped-2026-09-18).
 
 ## 65. [x] The erasure sweep does not reach repeating sessions — closed 2026-09-24
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#65-x-the-erasure-sweep-does-not-reach-repeating-sessions--closed-2026-09-24);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#65-x-the-erasure-sweep-does-not-reach-repeating-sessions--closed-2026-09-24).
 
 ## 64. [x] The gate fails on a different test each run, and each one passes on its own — fixed 2026-09-19
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#64-x-the-gate-fails-on-a-different-test-each-run-and-each-one-passes-on-its-own--fixed-2026-09-19);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#64-x-the-gate-fails-on-a-different-test-each-run-and-each-one-passes-on-its-own--fixed-2026-09-19).
 
 ## 63. [ ] Migrations are tested from the oldest version, but not for ever and not on a device
 
@@ -2618,8 +2602,7 @@ invitation, under both passes of §62.
 
 ## 62. [x] Feature code may write only what the live schema declares — shipped 2026-09-19
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#62-x-feature-code-may-write-only-what-the-live-schema-declares--shipped-2026-09-19);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#62-x-feature-code-may-write-only-what-the-live-schema-declares--shipped-2026-09-19).
 
 ## 61. [x] Every install reads the preview schema P — the live schema must not be P — archived 2026-09-30
 
@@ -2627,13 +2610,11 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#61-x-every-inst
 
 ## 60. [x] A numbered schema changed shape without a new number — ruled and enforced 2026-09-21
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#60-x-a-numbered-schema-changed-shape-without-a-new-number--ruled-and-enforced-2026-09-21);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#60-x-a-numbered-schema-changed-shape-without-a-new-number--ruled-and-enforced-2026-09-21).
 
 ## 59. [x] Erasing a client keeps their alias — fixed 2026-09-18
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#59-x-erasing-a-client-keeps-their-alias--fixed-2026-09-18);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#59-x-erasing-a-client-keeps-their-alias--fixed-2026-09-18).
 
 ## 58. [x] A record is written whole, so a field cannot be staged at all — merged 2026-09-30
 
@@ -2641,8 +2622,7 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#58-x-a-record-i
 
 ## 57. [x] The demo story tests count steps — fixed 2026-09-24
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#57-x-the-demo-story-tests-count-steps--fixed-2026-09-24);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#57-x-the-demo-story-tests-count-steps--fixed-2026-09-24).
 
 ## 56. [ ] A commit is not tied to the tree its gate proved
 
@@ -2660,13 +2640,11 @@ that read the rules. Proposed (Claude), not ruled.
 ## 55. [x] Found while shipping §52.2 — both fixed 2026-09-20
 
 Closed — §55.1 (a reopened record is named, and offers no Start) and §55.2 (Blossom's future colour)
-are in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#551-x-a-history-record-opened-from-the-clipboard-reads-untitled-session-and-offers-start--fixed-2026-09-20);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+are in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#551-x-a-history-record-opened-from-the-clipboard-reads-untitled-session-and-offers-start--fixed-2026-09-20).
 
 ## 69. [x] One board test fails for a whole hour every night — fixed 2026-09-21
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#69-x-one-board-test-fails-for-a-whole-hour-every-night--fixed-2026-09-21);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#69-x-one-board-test-fails-for-a-whole-hour-every-night--fixed-2026-09-21).
 
 ## 70. [x] Reading a narrower schema narrows the whole database on the next save — closed 2026-09-23
 
@@ -2765,8 +2743,7 @@ offer any official European language.
 
 ### 73.1 [x] A table of contents on both surfaces — shipped 2026-09-21
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#731-x-a-table-of-contents-on-both-surfaces--shipped-2026-09-21);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#731-x-a-table-of-contents-on-both-surfaces--shipped-2026-09-21).
 
 ### 73.2 [x] Only a chapter that actually runs from cold is offered — measured 2026-09-21
 
@@ -2784,13 +2761,11 @@ trainer sees on first entering the sandbox, and that the arrive chapter then del
 
 ### 73.4 [x] The language choice is built from the shipped dictionaries — shipped 2026-09-21
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#734-x-the-language-choice-is-built-from-the-shipped-dictionaries--shipped-2026-09-21);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#734-x-the-language-choice-is-built-from-the-shipped-dictionaries--shipped-2026-09-21).
 
 ### 73.6 [x] The index is open, and the "show me around" button is gone — shipped 2026-09-21
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#736-x-the-index-is-open-and-the-show-me-around-button-is-gone--shipped-2026-09-21);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#736-x-the-index-is-open-and-the-show-me-around-button-is-gone--shipped-2026-09-21).
 
 ### 73.8 [x] The chapters carry Simon's own names — shipped 2026-09-21
 
@@ -2832,8 +2807,7 @@ decision needed is **which languages** and **who translates them**, before any f
 
 ## 74. [x] The sessions board's header and its calendar — all four done, closed 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#74-x-the-sessions-boards-header-and-its-calendar--all-four-done-closed-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#74-x-the-sessions-boards-header-and-its-calendar--all-four-done-closed-2026-09-30).
 
 ## 75. [ ] The displayed date format should be the trainer's choice
 
@@ -2937,8 +2911,7 @@ popravka in regresijskega testa. Šest od sedmih je popravljenih; odprta je §77
 
 ### 77.1 [x] P1 — Uvoženi ID vaje lahko prepiše stranko — popravljeno 2026-09-24
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#771-x-p1--uvoženi-id-vaje-lahko-prepiše-stranko--popravljeno-2026-09-24);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#771-x-p1--uvoženi-id-vaje-lahko-prepiše-stranko--popravljeno-2026-09-24).
 
 ### 77.2 [ ] P1 — Vrnitev iz dejanske stare izdaje izgubi njene spremembe
 
@@ -2963,28 +2936,23 @@ kodo. Blokira zagotovilo varnega povratka oziroma dela stare predpomnjene izdaje
 
 ### 77.3 [x] P2 — Uvoz sklopa tiho zavrže nenumerične cilje vaj — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#773-x-p2--uvoz-sklopa-tiho-zavrže-nenumerične-cilje-vaj--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#773-x-p2--uvoz-sklopa-tiho-zavrže-nenumerične-cilje-vaj--popravljeno-2026-09-30).
 
 ### 77.4 [x] P2 — Vir iz imena datoteke izgine ob potrditvi uvoza — popravljeno 2026-09-25
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#774-x-p2--vir-iz-imena-datoteke-izgine-ob-potrditvi-uvoza--popravljeno-2026-09-25);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#774-x-p2--vir-iz-imena-datoteke-izgine-ob-potrditvi-uvoza--popravljeno-2026-09-25).
 
 ### 77.5 [x] P2 — Ponovni uvoz istega kataloga podvoji sklope — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#775-x-p2--ponovni-uvoz-istega-kataloga-podvoji-sklope--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#775-x-p2--ponovni-uvoz-istega-kataloga-podvoji-sklope--popravljeno-2026-09-30).
 
 ### 77.6 [x] P3 — Ime uvoznega vira se lahko zamenja z internim filtrom — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#776-x-p3--ime-uvoznega-vira-se-lahko-zamenja-z-internim-filtrom--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#776-x-p3--ime-uvoznega-vira-se-lahko-zamenja-z-internim-filtrom--popravljeno-2026-09-30).
 
 ### 77.7 [x] P2 — Danes ne prikaže današnjih vadb ob aktivnem datumskem filtru — popravljeno 2026-09-24
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#777-x-p2--danes-ne-prikaže-današnjih-vadb-ob-aktivnem-datumskem-filtru--popravljeno-2026-09-24);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#777-x-p2--danes-ne-prikaže-današnjih-vadb-ob-aktivnem-datumskem-filtru--popravljeno-2026-09-24).
 
 ## 79. [~] German (de) — the second market, Germany and Austria
 
@@ -3016,13 +2984,11 @@ the notice's substance in one language only, so it is a decision, not a translat
 
 ### 79.3 [x] The evening theme card names an option the menu does not have — popravljeno 2026-09-26
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#793-x-the-evening-theme-card-names-an-option-the-menu-does-not-have--popravljeno-2026-09-26);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#793-x-the-evening-theme-card-names-an-option-the-menu-does-not-have--popravljeno-2026-09-26).
 
 ### 79.4 [x] The client documents declare `lang="en"` whatever their language — popravljeno 2026-09-26
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#794-x-the-client-documents-declare-langen-whatever-their-language--popravljeno-2026-09-26);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#794-x-the-client-documents-declare-langen-whatever-their-language--popravljeno-2026-09-26).
 
 ## 80. [ ] Preizkus prve uporabe v vlogi osebnega trenerja
 
@@ -3126,8 +3092,7 @@ Preizkus: dodelitev brez ponovnega sestavljanja vaj. Na `main` še ni preverjeno
 
 ### 80.10 [x] P1 — Po zaključku aktivnega treninga se testni zavihek ne odziva — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8010-x-p1--po-zaključku-aktivnega-treninga-se-testni-zavihek-ne-odziva--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8010-x-p1--po-zaključku-aktivnega-treninga-se-testni-zavihek-ne-odziva--popravljeno-2026-09-30).
 
 ### 80.11 [x] P2 — Števec sinhronizacije v glavi je brez besed in samo v angleščini — merged 2026-09-30
 
@@ -3536,23 +3501,19 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8073-x-p1--sinh
 
 ### 80.74 [x] P2 — Vaja, ki je v rutini dvakrat, si deli zapis serij — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8074-x-p2--vaja-ki-je-v-rutini-dvakrat-si-deli-zapis-serij--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8074-x-p2--vaja-ki-je-v-rutini-dvakrat-si-deli-zapis-serij--popravljeno-2026-09-30).
 
 ### 80.75 [x] P3 — Vzorčni peskovnik obljublja trening, ki že poteka, a ga ni — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8075-x-p3--vzorčni-peskovnik-obljublja-trening-ki-že-poteka-a-ga-ni--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8075-x-p3--vzorčni-peskovnik-obljublja-trening-ki-že-poteka-a-ga-ni--popravljeno-2026-09-30).
 
 ### 80.76 [x] P1 — Tap na kartico treninga, ki že teče, ga zamenja z novim, nezačetim — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8076-x-p1--tap-na-kartico-treninga-ki-že-teče-ga-zamenja-z-novim-nezačetim--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8076-x-p1--tap-na-kartico-treninga-ki-že-teče-ga-zamenja-z-novim-nezačetim--popravljeno-2026-09-30).
 
 ### 80.77 [x] P2 — Po polnoči obrazec »Nastavitev treninga« privzame včerajšnji datum — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8077-x-p2--po-polnoči-obrazec-nastavitev-treninga-privzame-včerajšnji-datum--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8077-x-p2--po-polnoči-obrazec-nastavitev-treninga-privzame-včerajšnji-datum--popravljeno-2026-09-30).
 
 ### 80.78 [~] P2 — Ročica, ki zapre podlogo treninga, je visoka 21 pik, tik pod njo pa je drug gumb
 
@@ -3574,13 +3535,11 @@ naj bo prazen pas.
 
 ### 80.79 [x] P2 — Kartica treninga brez udeležencev se na dotik ne odzove, noter vodi le svinčnik — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8079-x-p2--kartica-treninga-brez-udeležencev-se-na-dotik-ne-odzove-noter-vodi-le-svinčnik--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8079-x-p2--kartica-treninga-brez-udeležencev-se-na-dotik-ne-odzove-noter-vodi-le-svinčnik--popravljeno-2026-09-30).
 
 ### 80.80 [x] P1 — Vrstica »Zadnjič« na podlogi pokaže tudi serije, ki jih stranka ni naredila — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8080-x-p1--vrstica-zadnjič-na-podlogi-pokaže-tudi-serije-ki-jih-stranka-ni-naredila--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8080-x-p1--vrstica-zadnjič-na-podlogi-pokaže-tudi-serije-ki-jih-stranka-ni-naredila--popravljeno-2026-09-30).
 
 ### 80.81 [~] P1 — Ko trener na prost termin doda eno stranko, termin izgubi mesta in zamenja rutino
 
@@ -3597,23 +3556,19 @@ nikjer ne more popraviti. Novo polje in njegov vrstni red sta Simonova odločite
 
 ### 80.82 [x] P2 — Odprt in zaprt urejevalnik načrta pobriše oznako »Zaključeno« z opravljenega sklopa — popravljeno 2026-09-30 z 5ea4ada
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8082-x-p2--odprt-in-zaprt-urejevalnik-načrta-pobriše-oznako-zaključeno-z-opravljenega-sklopa--popravljeno-2026-09-30-z-5ea4ada);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8082-x-p2--odprt-in-zaprt-urejevalnik-načrta-pobriše-oznako-zaključeno-z-opravljenega-sklopa--popravljeno-2026-09-30-z-5ea4ada).
 
 ### 80.83 [x] P1 — Treninga, ki se konča po polnoči, ni mogoče niti vpisati niti urediti — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8083-x-p1--treninga-ki-se-konča-po-polnoči-ni-mogoče-niti-vpisati-niti-urediti--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8083-x-p1--treninga-ki-se-konča-po-polnoči-ni-mogoče-niti-vpisati-niti-urediti--popravljeno-2026-09-30).
 
 ### 80.84 [x] P1 — Nedokončan nov trening se prilepi na urejanje drugega treninga in ga pri shranjevanju povozi — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8084-x-p1--nedokončan-nov-trening-se-prilepi-na-urejanje-drugega-treninga-in-ga-pri-shranjevanju-povozi--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8084-x-p1--nedokončan-nov-trening-se-prilepi-na-urejanje-drugega-treninga-in-ga-pri-shranjevanju-povozi--popravljeno-2026-09-30).
 
 ### 80.85 [x] P2 — V skupnem načrtu je opozorilo o poškodbi ene stranke prikazano brez imena — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8085-x-p2--v-skupnem-načrtu-je-opozorilo-o-poškodbi-ene-stranke-prikazano-brez-imena--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8085-x-p2--v-skupnem-načrtu-je-opozorilo-o-poškodbi-ene-stranke-prikazano-brez-imena--popravljeno-2026-09-30).
 
 ### 80.86 [~] P2 — Značka v glavi piše »7?« in nikjer na zaslonu ni povedano, kaj šteje
 
@@ -3639,8 +3594,7 @@ isti glavi je §80.149.
 
 ### 80.87 [x] P2 — Napačna datoteka pri uvozu odgovori angleško: »Error: Invalid backup file format.« — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8087-x-p2--napačna-datoteka-pri-uvozu-odgovori-angleško-error-invalid-backup-file-format--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8087-x-p2--napačna-datoteka-pri-uvozu-odgovori-angleško-error-invalid-backup-file-format--popravljeno-2026-09-30).
 
 ### 80.88 [~] P1 — V oknu, ki briše podatke, sta »Prekliči« in »Odstrani« visoka 21 pik in 4 pike narazen
 
@@ -3656,8 +3610,7 @@ pred izbrisom ponudi »Izvozi JSON«.
 
 ### 80.89 [x] P2 — Po čiščenju vzorčnih podatkov vrstica na dnu še vodi v izbrisani vzorčni trening — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8089-x-p2--po-čiščenju-vzorčnih-podatkov-vrstica-na-dnu-še-vodi-v-izbrisani-vzorčni-trening--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8089-x-p2--po-čiščenju-vzorčnih-podatkov-vrstica-na-dnu-še-vodi-v-izbrisani-vzorčni-trening--popravljeno-2026-09-30).
 
 ### 80.90 [~] P2 — Aplikacija po čiščenju še naprej terja odstranitev testnih zapisov, gumba za to pa ni več
 
@@ -3706,58 +3659,47 @@ ukaza ne bo; po kopiji naj aplikacija pove, komu je kopirala.
 
 ### 80.94 [x] P2 — V kartoteki stranke je signal s treninga še vedno angleški: »Too Hard - Reduce Load« — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8094-x-p2--v-kartoteki-stranke-je-signal-s-treninga-še-vedno-angleški-too-hard---reduce-load--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8094-x-p2--v-kartoteki-stranke-je-signal-s-treninga-še-vedno-angleški-too-hard---reduce-load--popravljeno-2026-09-30).
 
 ### 80.95 [x] P1 — Dotik »Pretežko« zapiše vajo kot opravljeno z vsemi načrtovanimi serijami — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8095-x-p1--dotik-pretežko-zapiše-vajo-kot-opravljeno-z-vsemi-načrtovanimi-serijami--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8095-x-p1--dotik-pretežko-zapiše-vajo-kot-opravljeno-z-vsemi-načrtovanimi-serijami--popravljeno-2026-09-30).
 
 ### 80.96 [x] P2 — Prva kartica vodenega ogleda veleva pritisniti »Naprej«, tega gumba pa ni — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8096-x-p2--prva-kartica-vodenega-ogleda-veleva-pritisniti-naprej-tega-gumba-pa-ni--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8096-x-p2--prva-kartica-vodenega-ogleda-veleva-pritisniti-naprej-tega-gumba-pa-ni--popravljeno-2026-09-30).
 
 ### 80.97 [x] P3 — Peskovnik napoti trenerja na seznam poglavij, ki je 325 pik pod robom zaslona — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8097-x-p3--peskovnik-napoti-trenerja-na-seznam-poglavij-ki-je-325-pik-pod-robom-zaslona--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8097-x-p3--peskovnik-napoti-trenerja-na-seznam-poglavij-ki-je-325-pik-pod-robom-zaslona--popravljeno-2026-09-30).
 
 ### 80.98 [x] P2 — Korak ogleda imenuje polje »Ime stranke«, obrazec pa ima »Ime in priimek« — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8098-x-p2--korak-ogleda-imenuje-polje-ime-stranke-obrazec-pa-ima-ime-in-priimek--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8098-x-p2--korak-ogleda-imenuje-polje-ime-stranke-obrazec-pa-ima-ime-in-priimek--popravljeno-2026-09-30).
 
 ### 80.99 [x] P2 — Kartica »Ta zaslon ni del demota« pokrije oba gumba zaslona, na katerem stoji — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8099-x-p2--kartica-ta-zaslon-ni-del-demota-pokrije-oba-gumba-zaslona-na-katerem-stoji--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8099-x-p2--kartica-ta-zaslon-ni-del-demota-pokrije-oba-gumba-zaslona-na-katerem-stoji--popravljeno-2026-09-30).
 
 ### 80.100 [x] P2 — Berljiv izvoz podatkov za stranko meša prihodnje termine z opravljenimi, je delno angleški, in pogreša obljubljeno spremembo načrta — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80100-x-p2--berljiv-izvoz-podatkov-za-stranko-meša-prihodnje-termine-z-opravljenimi-je-delno-angleški-in-pogreša-obljubljeno-spremembo-načrta--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80100-x-p2--berljiv-izvoz-podatkov-za-stranko-meša-prihodnje-termine-z-opravljenimi-je-delno-angleški-in-pogreša-obljubljeno-spremembo-načrta--popravljeno-2026-09-30).
 
 ### 80.101 [x] P2 — Izbrisana stranka ima še vedno cel zaslon stranke in ponuja izvoz svojih podatkov — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80101-x-p2--izbrisana-stranka-ima-še-vedno-cel-zaslon-stranke-in-ponuja-izvoz-svojih-podatkov--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80101-x-p2--izbrisana-stranka-ima-še-vedno-cel-zaslon-stranke-in-ponuja-izvoz-svojih-podatkov--popravljeno-2026-09-30).
 
 ### 80.102 [x] P2 — Preklic privolitve nima polja za datum in ne pove, kaj se z njim ustavi — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80102-x-p2--preklic-privolitve-nima-polja-za-datum-in-ne-pove-kaj-se-z-njim-ustavi--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80102-x-p2--preklic-privolitve-nima-polja-za-datum-in-ne-pove-kaj-se-z-njim-ustavi--popravljeno-2026-09-30).
 
 ### 80.103 [x] P1 — Odprtje in zapiranje enega večera serije ustvari drugo, enako kartico istega večera — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80103-x-p1--odprtje-in-zapiranje-enega-večera-serije-ustvari-drugo-enako-kartico-istega-večera--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80103-x-p1--odprtje-in-zapiranje-enega-večera-serije-ustvari-drugo-enako-kartico-istega-večera--popravljeno-2026-09-30).
 
 ### 80.104 [x] P2 — Izbrisana serija pusti za sabo programe brez datuma, ki jih ni mogoče razločiti — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80104-x-p2--izbrisana-serija-pusti-za-sabo-programe-brez-datuma-ki-jih-ni-mogoče-razločiti--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80104-x-p2--izbrisana-serija-pusti-za-sabo-programe-brez-datuma-ki-jih-ni-mogoče-razločiti--popravljeno-2026-09-30).
 
 ### 80.105 [ ] P1 — Stranka brez imena se shrani kot »Nova stranka«, čeprav je ime obvezno
 
@@ -3781,23 +3723,19 @@ stranka«); posebej nastavljen znak se ne povozi.
 
 ### 80.106 [x] P3 — Vprašanje pred zaključkom treninga šteje čas v minutah: »še približno 3812 minut« — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80106-x-p3--vprašanje-pred-zaključkom-treninga-šteje-čas-v-minutah-še-približno-3812-minut--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80106-x-p3--vprašanje-pred-zaključkom-treninga-šteje-čas-v-minutah-še-približno-3812-minut--popravljeno-2026-09-30).
 
 ### 80.107 [x] P3 — Kartica zaključenega treninga takoj po zaključku še vedno piše »Aktiven trening« — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80107-x-p3--kartica-zaključenega-treninga-takoj-po-zaključku-še-vedno-piše-aktiven-trening--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80107-x-p3--kartica-zaključenega-treninga-takoj-po-zaključku-še-vedno-piše-aktiven-trening--popravljeno-2026-09-30).
 
 ### 80.108 [x] P3 — Na 320 × 680 je od gumba »Shrani in nadaljuj« na uvodnem zaslonu vidne štiri pike — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80108-x-p3--na-320-×-680-je-od-gumba-shrani-in-nadaljuj-na-uvodnem-zaslonu-vidne-štiri-pike--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80108-x-p3--na-320-×-680-je-od-gumba-shrani-in-nadaljuj-na-uvodnem-zaslonu-vidne-štiri-pike--popravljeno-2026-09-30).
 
 ### 80.109 [x] P2 — Ocena trajanja istega intervala je odvisna od zapisa časa — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80109-x-p2--ocena-trajanja-istega-intervala-je-odvisna-od-zapisa-časa--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80109-x-p2--ocena-trajanja-istega-intervala-je-odvisna-od-zapisa-časa--popravljeno-2026-09-30).
 
 ### 80.110 [~] P2 — »Shrani kot rutino« pozabi težo, številke v poljih so odrezane, polja nimajo oznak
 
@@ -3814,18 +3752,15 @@ person/day-specific magnitudes (`weight` …)«). Če trener tega ne opazi, nasl
 
 ### 80.111 [x] P2 — Nova stranka: gumba pravita »E-pošta ni vpisana« in »Telefon ni vpisan«, čeprav sta vpisana — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80111-x-p2--nova-stranka-gumba-pravita-e-pošta-ni-vpisana-in-telefon-ni-vpisan-čeprav-sta-vpisana--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80111-x-p2--nova-stranka-gumba-pravita-e-pošta-ni-vpisana-in-telefon-ni-vpisan-čeprav-sta-vpisana--popravljeno-2026-09-30).
 
 ### 80.112 [x] P3 — Gumb »Ni se zgodila« v oknu, ki govori o »treningu« — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80112-x-p3--gumb-ni-se-zgodila-v-oknu-ki-govori-o-treningu--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80112-x-p3--gumb-ni-se-zgodila-v-oknu-ki-govori-o-treningu--popravljeno-2026-09-30).
 
 ### 80.113 [x] P1 — Uvoz programa izgubi serije, ponovitve in težo, tudi pri primeru, ki ga pokaže aplikacija — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80113-x-p1--uvoz-programa-izgubi-serije-ponovitve-in-težo-tudi-pri-primeru-ki-ga-pokaže-aplikacija--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80113-x-p1--uvoz-programa-izgubi-serije-ponovitve-in-težo-tudi-pri-primeru-ki-ga-pokaže-aplikacija--popravljeno-2026-09-30).
 
 ### 80.114 [~] P2 — Zaključen trening s tremi vajami piše »Program ni določen« in »Zaključeno 00:01«
 
@@ -3842,18 +3777,15 @@ bere kot uro zaključka. Predlog: »trajal 1 min«. Nezačet trening z ročno se
 
 ### 80.115 [x] P2 — Na slovenski podlogi vaja po »Prelahko« dobi oznako »Completed« — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80115-x-p2--na-slovenski-podlogi-vaja-po-prelahko-dobi-oznako-completed--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80115-x-p2--na-slovenski-podlogi-vaja-po-prelahko-dobi-oznako-completed--popravljeno-2026-09-30).
 
 ### 80.116 [x] P2 — Okno »Trening se je začel izven urnika« skrije »Končni čas« desno od roba — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80116-x-p2--okno-trening-se-je-začel-izven-urnika-skrije-končni-čas-desno-od-roba--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80116-x-p2--okno-trening-se-je-začel-izven-urnika-skrije-končni-čas-desno-od-roba--popravljeno-2026-09-30).
 
 ### 80.117 [x] P3 — Trening čez teden dni »se začne čez 870h 01m« — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80117-x-p3--trening-čez-teden-dni-se-začne-čez-870h-01m--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80117-x-p3--trening-čez-teden-dni-se-začne-čez-870h-01m--popravljeno-2026-09-30).
 
 ### 80.118 [ ] P2 — Zaslon treninga ima dve imeni, »beležka« in »podloga«, in nobeno ni razloženo
 
@@ -3877,53 +3809,43 @@ pa vidi drugo.
 
 ### 80.119 [x] P2 — Zgodovina stranke izpusti težo: »Dumbbell Goblet Squat: 10, 10, 10« pri 12 kg — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80119-x-p2--zgodovina-stranke-izpusti-težo-dumbbell-goblet-squat-10-10-10-pri-12-kg--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80119-x-p2--zgodovina-stranke-izpusti-težo-dumbbell-goblet-squat-10-10-10-pri-12-kg--popravljeno-2026-09-30).
 
 ### 80.120 [x] P2 — Pod poškodbo kolena stran stranke pravi »Brez zabeleženih zdravstvenih težav« — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80120-x-p2--pod-poškodbo-kolena-stran-stranke-pravi-brez-zabeleženih-zdravstvenih-težav--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80120-x-p2--pod-poškodbo-kolena-stran-stranke-pravi-brez-zabeleženih-zdravstvenih-težav--popravljeno-2026-09-30).
 
 ### 80.121 [x] P2 — »Zamenjaj vajo« stranki z bolečim kolenom vnaprej izbere Barbell Back Squat — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80121-x-p2--zamenjaj-vajo-stranki-z-bolečim-kolenom-vnaprej-izbere-barbell-back-squat--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80121-x-p2--zamenjaj-vajo-stranki-z-bolečim-kolenom-vnaprej-izbere-barbell-back-squat--popravljeno-2026-09-30).
 
 ### 80.122 [x] P3 — Koledar »Datumi« ne pokaže ne današnjega dne ne dni s treningi — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80122-x-p3--koledar-datumi-ne-pokaže-ne-današnjega-dne-ne-dni-s-treningi--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80122-x-p3--koledar-datumi-ne-pokaže-ne-današnjega-dne-ne-dni-s-treningi--popravljeno-2026-09-30).
 
 ### 80.123 [x] P2 — Podloga treninga čez dva ali več dni v glavi ne pove dneva, samo »Prihodnje« — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80123-x-p2--podloga-treninga-čez-dva-ali-več-dni-v-glavi-ne-pove-dneva-samo-prihodnje--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80123-x-p2--podloga-treninga-čez-dva-ali-več-dni-v-glavi-ne-pove-dneva-samo-prihodnje--popravljeno-2026-09-30).
 
 ### 80.124 [x] P2 — Oznaka »PREDOGLED« vodi na »Stran ni najdena«, ko je aplikacija že naložena — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80124-x-p2--oznaka-predogled-vodi-na-stran-ni-najdena-ko-je-aplikacija-že-naložena--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80124-x-p2--oznaka-predogled-vodi-na-stran-ni-najdena-ko-je-aplikacija-že-naložena--popravljeno-2026-09-30).
 
 ### 80.125 [x] P3 — Na slovenski strani so pomožna imena gumbov za bralnik zaslona angleška — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80125-x-p3--na-slovenski-strani-so-pomožna-imena-gumbov-za-bralnik-zaslona-angleška--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80125-x-p3--na-slovenski-strani-so-pomožna-imena-gumbov-za-bralnik-zaslona-angleška--popravljeno-2026-09-30).
 
 ### 80.126 [x] P3 — Pred izbiro jezika stran nima `<html lang>`, besedilo za oknom pa je angleško — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80126-x-p3--pred-izbiro-jezika-stran-nima-html-lang-besedilo-za-oknom-pa-je-angleško--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80126-x-p3--pred-izbiro-jezika-stran-nima-html-lang-besedilo-za-oknom-pa-je-angleško--popravljeno-2026-09-30).
 
 ### 80.127 [x] P1 — Datum, vpisan po slovensko »6.10.2026«, se tiho shrani kot 6102-02-06 — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80127-x-p1--datum-vpisan-po-slovensko-6102026-se-tiho-shrani-kot-6102-02-06--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80127-x-p1--datum-vpisan-po-slovensko-6102026-se-tiho-shrani-kot-6102-02-06--popravljeno-2026-09-30).
 
 ### 80.128 [x] P2 — Prazna slovenska aplikacija predlaga angleška imena treningov in krajev — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80128-x-p2--prazna-slovenska-aplikacija-predlaga-angleška-imena-treningov-in-krajev--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80128-x-p2--prazna-slovenska-aplikacija-predlaga-angleška-imena-treningov-in-krajev--popravljeno-2026-09-30).
 
 ### 80.129 [~] P3 — Ob začetku treninga ni odprta prva vaja: ali nobena ali zadnja dodana
 
@@ -3940,13 +3862,11 @@ Prihranek: en dotik na trening (§94, točka 8).
 
 ### 80.130 [x] P2 — Vsaka stranka, dodana na trening, samodejno dobi prvo rutino v knjižnici — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80130-x-p2--vsaka-stranka-dodana-na-trening-samodejno-dobi-prvo-rutino-v-knjižnici--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80130-x-p2--vsaka-stranka-dodana-na-trening-samodejno-dobi-prvo-rutino-v-knjižnici--popravljeno-2026-09-30).
 
 ### 80.131 [x] P2 — Takoj po zaključku treninga predal pravi »Vse je pregledano«, signal se pokaže šele po osvežitvi — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80131-x-p2--takoj-po-zaključku-treninga-predal-pravi-vse-je-pregledano-signal-se-pokaže-šele-po-osvežitvi--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80131-x-p2--takoj-po-zaključku-treninga-predal-pravi-vse-je-pregledano-signal-se-pokaže-šele-po-osvežitvi--popravljeno-2026-09-30).
 
 ### 80.132 [~] P2 — Teža pri Lat Pulldown se shrani kot »Lvl 60«; polje enoto pove le angleško in le, ko je prazno
 
@@ -4041,8 +3961,7 @@ Maja Novak brez rutine → podloga → ⋮ → »Uredi načrt«. `main` `e8e90d8
 
 ### 80.135 [x] P2 — Trening, ki teče, se brez vprašanja prestavi na drug dan; tam ostane »Zaključeno« — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80135-x-p2--trening-ki-teče-se-brez-vprašanja-prestavi-na-drug-dan-tam-ostane-zaključeno--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80135-x-p2--trening-ki-teče-se-brez-vprašanja-prestavi-na-drug-dan-tam-ostane-zaključeno--popravljeno-2026-09-30).
 
 ### 80.136 [ ] P1? — Šifrirana varnostna kopija v brskalniku orodja ne pride do datoteke; preveriti na telefonu
 
@@ -4065,18 +3984,15 @@ se zapis zapre kot omejitev orodja in ostane le protislovje sporočil (P3).
 
 ### 80.137 [x] P2 — Stranka z angleškim »Jezik obrazca« dobi slovensko vabilo in slovensko stran za odgovor — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80137-x-p2--stranka-z-angleškim-jezik-obrazca-dobi-slovensko-vabilo-in-slovensko-stran-za-odgovor--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80137-x-p2--stranka-z-angleškim-jezik-obrazca-dobi-slovensko-vabilo-in-slovensko-stran-za-odgovor--popravljeno-2026-09-30).
 
 ### 80.138 [x] P1 — Konec serije, vpisan pri današnjem večeru, podvoji današnji večer in serije ne konča — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80138-x-p1--konec-serije-vpisan-pri-današnjem-večeru-podvoji-današnji-večer-in-serije-ne-konča--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80138-x-p1--konec-serije-vpisan-pri-današnjem-večeru-podvoji-današnji-večer-in-serije-ne-konča--popravljeno-2026-09-30).
 
 ### 80.139 [x] P3 — V »Ustvari rutino« gumb »Dodaj vajo« skrije izbirnik vaj, ki je že odprt — popravljeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80139-x-p3--v-ustvari-rutino-gumb-dodaj-vajo-skrije-izbirnik-vaj-ki-je-že-odprt--popravljeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80139-x-p3--v-ustvari-rutino-gumb-dodaj-vajo-skrije-izbirnik-vaj-ki-je-že-odprt--popravljeno-2026-09-30).
 
 ### 80.140 [ ] P2 — Poglavje »Izvedba in prilagoditve treninga«: korak imenuje angleški gumb, opombe ob vaji ni
 
@@ -4612,8 +4528,7 @@ samo, česar ni nikjer drugje, in presoja, ali se avtomatizacija izplača.
 
 ### 88.1 [x] Iskanje v katalogu brez zadetka se konča, uvoz večjega kataloga pa obstaja — narejeno 2026-09-30
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#881-x-iskanje-v-katalogu-brez-zadetka-se-konča-uvoz-večjega-kataloga-pa-obstaja--narejeno-2026-09-30);
-what shipped is in [CHANGELOG.md](CHANGELOG.md).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#881-x-iskanje-v-katalogu-brez-zadetka-se-konča-uvoz-večjega-kataloga-pa-obstaja--narejeno-2026-09-30).
 
 ### 88.2 [ ] Šest novih strank za skupinski trening je šest celih obrazcev
 
