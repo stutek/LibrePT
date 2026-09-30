@@ -4277,7 +4277,9 @@ meriti čas, dokler ni vidna slovenska plošča »Treningi«.
 Med čakanjem je na zaslonu le »LibrePT / A lightweight, free app for your clipboard …« v angleščini,
 brez sporočila, da aplikacija čaka na omrežje. Napak v konzoli ni. Na zamrznjeni kopiji z običajnim
 strežnikom sta se dvakrat zgodila enaka zastoja, oba takrat, ko je glava pisala »Brez povezave«
-(»Strežnik HTTP ni dosegljiv. Zagon iz predpomnjene kode …«); naslednje nalaganje je steklo.
+(»Strežnik HTTP ni dosegljiv. Zagon iz predpomnjene kode …«); naslednje nalaganje je steklo. Tretjič
+(00:31) se stran v 134 sekundah ni naložila: strežnik na posamezno zahtevo ni odgovoril, aplikacija pa
+iz predpomnilnika ni zagnala. Odgovor, ki ne pride nikoli, je skrajni primer slabega signala.
 
 **Težava in vpliv:** v kleti brez signala aplikacija dela, v telovadnici s slabim signalom, kar je
 pogostejše, pa trener med dvema strankama čaka minuto in pol na angleški zaslon, ki ne pove ničesar.
