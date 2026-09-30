@@ -6838,6 +6838,36 @@ Na istem zaslonu opaženo še: stranka, ki je bila preimenovana iz »Nova strank
 ima v imeniku še vedno začetnici »NS«, torej začetnici starega imena. (Preimenovanje je opravil prejšnji
 zagon; sam sem videl izid v imeniku.)
 
+### 80.106 [ ] P3 — Vprašanje pred zaključkom treninga šteje čas v minutah: »še približno 3812 minut«
+
+**Scenarij in koraki:** ustvari trening za čez dva dni (»Vecerna vadba«, 2026-10-02, 18:00 - 19:00),
+odpri podlogo, tapni »Začni trening« in »Ohrani urnik«, nato »Zaključi vadbo«.
+
+**Opaženo:** okno pravi »Do konca tega treninga je še približno 3812 minut. Ga želiš vseeno zaključiti
+zdaj?« To je 63 ur in 32 minut. Aplikacija drugod isti čas piše po urah in minutah, na primer »Se
+začne čez 62h 32m« na kartici in »začeto 62h 32m prezgodaj« v oknu tri dotike prej.
+
+**Težava in vpliv:** številke 3812 trener ne prebere. Vprašanje je varovalka pred prezgodnjim
+zaključkom, in prav v njej mu podatek ne pove nič.
+
+**Predlog:** čas naj bo zapisan kot drugod, v urah in minutah — opaženo na različici `8b2ce80`.
+
+### 80.107 [ ] P3 — Kartica zaključenega treninga takoj po zaključku še vedno piše »Aktiven trening«
+
+**Scenarij in koraki:** kot pri §80.106; po »Zaključi vadbo« potrdi »Zaključi zdaj« in nato še
+»Zaključi zdaj« v oknu »Ni zabeleženih zaključenih serij. Res želiš zaključiti in shraniti prazno
+vadbo?«. Takoj zatem poglej kartico tega treninga v seznamu.
+
+**Opaženo:** kartica pravi »18:00 - 19:00 Vecerna vadba 1/1 mest zasedenih Program ni določen Aktiven
+trening«. Po osvežitvi strani piše pravilno: »Zaključeno 00:00«. Seznam se torej po zaključku ne
+osveži sam.
+
+**Težava in vpliv:** trener zaključi vadbo, seznam pa mu pravi, da še teče. Lahko tapne kartico in
+misli, da se trening ni zaključil, ali pa počaka, da se stanje »popravi«, česar brez osvežitve ne bo.
+
+**Predlog:** po zaključku naj se kartica v seznamu takoj prepiše na »Zaključeno« — opaženo na
+različici `8b2ce80`.
+
 **Presoja 2026-09-30 (Claude): čaka na Simona — nasprotuje zapisani odločitvi.** `logQuickSignal` v
 [sessionQuickSignals.js](src/controllers/sessionQuickSignals.js) namerno označi vse serije vaje kot
 opravljene, ko trener tapne signal: »signal na vaji pomeni, da je bila opravljena« (manj dotikov,
