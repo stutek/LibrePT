@@ -20,45 +20,6 @@ Read [CHANGELOG.md](CHANGELOG.md) for what shipped and when. This file is why.
 
 ---
 
-### 80.154 [x] P2 — Občasno se aplikacija ne naloži: ostane na angleškem zaslonu za nalaganje — zavrnjeno 2026-10-01
-
-**Popravek 2026-10-01 01:07 (Claude):** prva različica je bila P1 s petimi zastoji na kopiji `main`.
-Ti so skoraj vsi lastnost moje kopije: bila je nežigosana (`version.js` = `dev`), in ko sem ji dal
-pravi SHA, je izginilo tudi 15 zastojev od 15. Na objavljeni aplikaciji je en zastoj.
-
-**Scenarij in koraki:** objavljena aplikacija, prvi zagon trenerke »Tara Zorko« (podatki, tema,
-»Začni s prazno aplikacijo«), nato isti naslov `/?lang=sl` naložiti znova, več kot štiridesetkrat.
-
-**Opaženo:** enkrat je stran ostala na zaslonu »LibrePT / A lightweight, free app for your
-clipboard, sessions and training programmes.« v angleščini, `<html lang="en">`, naslov `/LibrePT/`
-se ni preusmeril na ploščo. Po 50 sekundah enako; konzola brez napak. Naslednja nalaganja so stekla.
-
-| Kje                                        | Nalaganj | Zastojev             |
-| :----------------------------------------- | :------- | :------------------- |
-| objavljena `#8b2ce80`                      | ~40      | 1                    |
-| kopija `main` `6230070`, žigosana          | 18       | 0                    |
-| kopija `main` `6230070`, nežigosana `dev`  | ~25      | 5; `/intake` po prvem zagonu trenerja vsakič (3 od 3) |
-
-Na nežigosani kopiji je en zastoj obstal globlje: stran ni odgovorila niti na `1+1` prek CDP, brez
-izvornega okna in brez porabe procesorja. Na žigosani kopiji in na objavljeni se `/intake` po prvem
-zagonu trenerja odpre (3 od 3).
-
-**Težava in vpliv:** trener, ki mu se to zgodi, vidi angleški zaslon, ki ne pove ničesar in se ne
-premakne, in ne ve, ali je podatke izgubil. Na razvojnem strežniku (nežigosan) pa `/intake` obstane
-vsakič, ko je trener aplikacijo že odprl — kdor povabilo preizkuša lokalno, obtiči.
-
-**Predlog:** zagon naj se vedno konča — s ploščo ali s sporočilom v jeziku trenerja, kaj ni uspelo in kaj
-naj stori — opaženo na različicah `#8b2ce80` (objavljena) in `main` `6230070`, 390 × 844, sl.
-
-**Zavrnjeno 2026-10-01 01:14 (Claude): zastoja ni mogoče pripisati aplikaciji.** Primerjava A/B na
-kopiji `main`, vsakič čist brskalnik, prvi zagon trenerke in tri nalaganja `/intake`: z navadno
-navigacijo (`goto(wait_until="commit")`, brez kavlja) 6 od 6 naloženih, z ukazom `goto` iz explore.py
-(`networkidle`, nato vbrizg kavlja za napake in odklop ukaznega procesa) 3 od 6 obstalih. Z navadno
-navigacijo v vsej seji ni bilo zastoja (0 od 24 na kopiji). Edini zastoj na objavljeni aplikaciji se je
-zgodil prvi po ukazih explore.py. Tudi zveza z žigom različice, ki jo je trdila prejšnja različica te
-točke, ni potrjena: po žigosanju je `/intake` z `goto` iz explore.py znova obstal. Kaj v gonilniku
-povzroči zastoj, ni ugotovljeno; lekcija je v veščini `exploratory-test`.
-
 ### 80.148 [x] P2 — Zamenjava vaje obdrži težo prejšnje: Wall Sit dobi »BW+80kg« — popravljeno 2026-09-30
 
 **Scenarij in koraki:** trening »Noge« za Barbaro Kos, v »Uredi načrt« Leg Press 3 × 10 × 80 kg. V

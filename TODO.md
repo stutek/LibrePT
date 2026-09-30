@@ -4287,9 +4287,27 @@ signala pa nič. Pri odgovoru, ki ne pride, bi čakal, dokler telefon ne obupa �
 **Predlog:** ko je stran na telefonu, naj se odpre iz njega in omrežje vpraša v ozadju — opaženo na
 različici `main` `6230070` (zamrznjena kopija), 390 × 844, sl.
 
-### 80.154 [x] P2 — Občasno se aplikacija ne naloži: ostane na angleškem zaslonu za nalaganje — zavrnjeno 2026-10-01
+### 80.154 [ ] P2 — Občasno se aplikacija ne naloži: ostane na angleškem zaslonu za nalaganje — preveriti na telefonu
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80154-x-p2--občasno-se-aplikacija-ne-naloži-ostane-na-angleškem-zaslonu-za-nalaganje--zavrnjeno-2026-10-01).
+**Stanje 2026-10-01 01:18 (Claude):** zastoj je resničen v brskalniku, ki ga poganja orodje, vzroka pa
+orodje ne more ločiti od sebe, ker se ob vsakem ukazu znova priklopi prek CDP. Ta točka je bila v eni
+uri zapisana kot P1, znižana, umaknjena in vrnjena; vsakič na podlagi ene serije meritev. Spodaj je
+samo tisto, kar drži čez vse serije.
+
+**Opaženo:** stran ostane na zaslonu »LibrePT / A lightweight, free app for your clipboard, sessions and
+training programmes.« v angleščini, `<html lang="en">`, brez napak v konzoli, tudi po 50 sekundah.
+Na objavljeni `#8b2ce80` enkrat v približno 40 nalaganjih. Na kopiji `main` `6230070` pogosto, v nizih:
+ko se zgodi, obstane več zaporednih nalaganj, nato spet steče. Najpogosteje stran `/intake` po prvem
+zagonu trenerja v istem brskalniku. Zgodi se z ukazom `goto` iz explore.py (3 od 6 v enem poskusu) in z
+navadno navigacijo (`goto(wait_until="commit")`, 4 zaporedna na `/intake`), a drugič navadna 6 od 6
+steče. Enkrat stran ni odgovorila niti na `1+1` prek CDP.
+
+**Težava in vpliv, če je aplikacija:** trener vidi angleški zaslon, ki se ne premakne; trener, ki
+povezavo povabila preizkusi na svojem telefonu, ne pride do obrazca.
+
+**Preverba za Simona, na telefonu, brez orodja:** odpri aplikacijo in jo uporabljaj kot trener, nato v
+istem brskalniku odpri povezavo iz »Povabi stranko« in stran nekajkrat osveži. Če obrazec vedno pride,
+je bil zastoj orodje in se ta točka zapre — opaženo na `#8b2ce80` in `main` `6230070`, 390 × 844, sl.
 
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
