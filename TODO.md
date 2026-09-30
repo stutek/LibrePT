@@ -7206,6 +7206,21 @@ urniku.
 izbris enega večera naj pusti drugi. Pri večeru serije naj bo »Ponovi vsak teden« prikazan kot
 obkljukan. Opaženo na `main` `e2daf5e`, sl, 390 × 844; najprej opazil trener dneva 09.
 
+### 80.139 [ ] P3 — V »Ustvari rutino« gumb »Dodaj vajo« skrije izbirnik vaj, ki je že odprt
+
+**Scenarij in koraki:** ☰ → »Vaje in rutine« → »Rutine« → »Ustvari rutino«. Pritisniti »Dodaj vajo«,
+nato še enkrat.
+
+**Opaženo:** ob odprtju okna je izbirnik vaj že odprt (»Išči vaje«, filtri, 48 vaj). Prvi dotik na
+»Dodaj vajo« ga zapre, drugi odpre. Trener dneva 09: »tapni "Dodaj vajo" (izbirnik se ne odpre),
+tapni še enkrat (odpre se)«.
+
+**Težava in vpliv:** gumb, ki pravi »dodaj«, prvič skrije seznam, iz katerega se dodaja. Trener
+misli, da gumb ne deluje.
+
+**Predlog:** ko je izbirnik odprt, naj gumb pravi, kaj naredi (na primer »Skrij seznam vaj«), ali naj
+izbirnik ostane odprt. Opaženo na `main` `e2daf5e`, sl, 390 × 844.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
