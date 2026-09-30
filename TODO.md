@@ -7220,6 +7220,22 @@ ne. Signal »Pretežko« ostane nerešen, naslednji trening ima enako težo.
 **Predlog:** predal naj se po zaključku osveži, kot se je seznam treningov v zaprti §80.107.
 Opaženo na `main` `12d0e66`, sl, 390 × 844.
 
+### 80.132 [ ] P2 — Teža pri Lat Pulldown se shrani kot »Lvl 60«; polje enoto pove le angleško in le, ko je prazno
+
+**Scenarij in koraki:** ☰ → »Vaje in rutine« → »Rutine« → »Ustvari rutino«, dodati Lat Pulldown,
+v polje za breme vpisati 60 (trener misli kilograme), »Shrani«.
+
+**Opaženo:** polje za breme ima namig »Level« (pri drugih vajah »kg« ali »+kg (BW)«); namig izgine,
+ko je v polju številka, nad polji pa ni oznake (§80.110). Rutina v seznamu: »Lat Pulldown 3×10 · Lvl
+60«. Trener dneva 07: »kartica pokaže "Lvl 60", ne 60 kg. Ni jasno, kaj pomeni in kako vnesti kg.«
+
+**Težava in vpliv:** večina naprav za poteg ima ploščice v kilogramih, katalog pa to vajo vodi v
+stopnjah. Trener ne ve, ali je vpisal 60 kg ali 60. stopnjo, in ne more vpisati kilogramov. »Lvl«
+in »Level« sta angleška.
+
+**Predlog:** enota v jeziku aplikacije, vidna tudi ob vpisani številki, in možnost kilogramov pri
+vajah na napravi. Opaženo na `main` `e8e90d8`, sl, 390 × 844; najprej opazil trener dneva 07.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
@@ -7438,6 +7454,9 @@ mesec (4–5 na dan), večina ena na ena in dve manjši skupini, brez recepcije,
 | Opomniki za neplačano                           | nič                       | nikjer                    | ~0,5 h/mesec, denar pa pride prej |
 | Pregled prihodka po mesecu, stranki in uri      | nič                       | nikjer                    | ~0,5 h/mesec ročnega seštevanja; brez tega trener ne ve, katera stranka se izplača |
 
+Dan 07 (2026-09-30): paket stranke (6 od 10) in plačilo z gotovino je trener zapisal v »Opombe«;
+ocena 0, 15 minut na dan zunaj aplikacije (trenerjeva ocena).
+
 ### 86.3 Termini
 
 | Opravilo                                     | Kaj aplikacija dela danes                                             | Kje je že prevzeto | Ocena vrednosti |
@@ -7463,6 +7482,10 @@ samo »Odstrani s tega treninga: <ime>« v obrazcu, brez vprašanja. S tem se sp
 odsotnosti ne ostane nič — trening drugih dveh pa mora normalno teči. Zapis prisotnosti po strankah je
 torej pogoj tudi za skupine, ne le za individualne termine.
 
+Dan 07 (2026-09-30): vikend tabor za 15 udeležencev v treh skupinah. Termin z več strankami je
+mogoč; najvišjega števila mest, čakalne vrste, skupin znotraj termina in predplačila ni. Vpis treh
+udeležencev je trajal 8 minut, trener ocenjuje 20 minut za vseh 15 na papirju.
+
 ### 86.4 Izvedba in stranka
 
 | Opravilo                                  | Kaj aplikacija dela danes                                   | Kje je že prevzeto | Ocena vrednosti |
@@ -7471,6 +7494,9 @@ torej pogoj tudi za skupine, ne le za individualne termine.
 | Zapis prisotnosti (prišla / ni prišla)    | nič — trening je zaključen ali ne                            | nikjer             | pogoj za vse zgoraj: obračun paketa, pozne odpovedi, opomnike |
 | Meritve in napredek skozi čas             | teža stranke je polje; zgodovine meritev ni                  | §78, odprto        | ~1,1 h/mesec poročil, večja pa je zadržana stranka |
 | Poročilo stranki o napredku               | nič                                                          | nikjer             | ista postavka kot meritve |
+
+Dan 07 (2026-09-30): obseg stegna, telesna teža in čas na 400 m nimajo mesta; ocena 0, 5 minut na dan
+zunaj aplikacije (trenerjeva ocena).
 | Domača naloga med vadbama                 | nič                                                          | nikjer             | majhna, dokler ni meritev |
 
 ### 86.5 Zadrževanje strank in vodenje posla
@@ -7727,6 +7753,37 @@ prisotnost in odpovedi v dveh (§86 in §88.3).
 **O postopku:** vsak dan je izpeljal tri do šest treningov v eni uri; dnevi, ki so poskusili zajeti
 vse, niso prišli do konca. Dve poročili »napak« sta bili omejitvi orodja za brskalnik, ne aplikacije
 (kliki po besedilu v zaprtih oknih, `fill` v prvi zadetek); oboje je v orodju popravljeno.
+
+### 88.12 [ ] Trener zboli: vsak termin se prestavi posebej, obvestilo dobijo le povabljeni
+
+Dan 07 (2026-09-30, `main` `e8e90d8`; samostojni trener v Kranju, 12 strank, ki jih vodi v Excelu):
+zjutraj bolan, šest terminov današnjega in jutrišnjega dne prestavi drugam. Za vsak termin »Uredi«,
+datum, čas, »Shrani«; opozorilo o prekrivanju in ponudba, da povabljenim pošlje nov čas, sta
+pohvaljena. **14 minut v aplikaciji proti 10 na papirju, in še 10 minut ročnih sporočil**, ker
+obvestilo dobijo le stranke, ki so vabilo že prejele (minute so trenerjeve ocene). Zapisa »odpadlo
+zaradi bolezni« ni, trening pa na plošči kaže »Zamuja«.
+**Vrednost:** nekajkrat na leto (predpostavka: 3–5 dni bolezni) po okoli 25 minut, torej ~2 h na
+leto; večja je zaupanje strank, ki za odpoved izvedo pravočasno. **Cena:** srednja: izbira več
+terminov, »prestavi za N dni« ali »odpovej ta dan«, eno besedilo za vse prizadete. Sporočilo brez
+strežnika je lahko pripravljeno besedilo za SMS ali e-pošto. **Presoja: čaka na Simona**, ker je del
+iste odločitve kot zapis odpovedi (§86.3, »Odpoved in pravilo o pozni odpovedi«): brez zapisa
+odpovedi je prestavljanje le premik ure.
+
+### 88.13 [ ] Selitev iz preglednice: stranke in programi se vpišejo na roke
+
+Dan 07: sedem strank iz Excela je vpisal ročno, vsako v 1–2 minutah (ime, telefon, e-pošta, cilj,
+poškodba); **14 minut v aplikaciji proti 10 v preglednici**. Programi: 10 minut, ker se ponovitve
+niso vedno prijele (glej spodaj) in ker katalog nima vaj, kot so potisk nog na napravi, kettlebell
+zamah in dvig medenice. Za 12 strank je selitev okoli 20 minut, enkrat. Uvoz programa obstaja, a
+zahteva obliko JSON in izgubi številke (§80.113).
+**Vrednost:** enkratna, a prav na dan, ko trener odloča, ali aplikacijo obdrži (kot §88.2). **Cena:**
+majhna za stranke (CSV s stolpci ime, telefon, e-pošta, cilj, poškodba); srednja za programe.
+**Presoja: čaka na Simona**: uvožena stranka nima privolitve, kar je isto vprašanje kot v §88.2.
+
+Ob dnevu 07 prijavljeno in ne zapisano kot napaka: v »Ustvari rutino« vpis ponovitev v pravkar dodano
+vajo ne ostane (8 postane 10). V brskalniku orodja se to zgodi le pri polju s seznamom predlogov
+(`list="reps-presets"`); brez njega vnos deluje. **Preveriti na pravem telefonu**, ker gre lahko za
+posebnost brskalnika brez zaslona.
 
 ## 89. [~] Pregled 2026-09-28: isti podatek na več mestih
 
