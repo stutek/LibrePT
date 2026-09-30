@@ -853,7 +853,7 @@ export const en = {
   // card and ✕ ends the run, and the ✕ is only on the bar the parked card leaves behind
   // (modules/demo/walkthrough.css hides it while the card is open) — so the order matters.
   story_step_welcome:
-    "Show me points out two things: the SANDBOX badge in the top bar, and the row Leave the sandbox at the top of the ☰ menu. Reset sandbox data is in the menu under Settings. Next starts the walkthrough. To try the app without the guide, put this card away with ▾ in its top right corner. A small bar stays on screen: its ✕ ends the walkthrough.",
+    "Show me points out two things: the SANDBOX badge in the top bar, and the row Leave the sandbox at the top of the ☰ menu. Reset sandbox data is in the menu under Settings. When you have looked, Done closes the card; the next chapter is yours to pick from the list below. To try the app without the guide, put this card away with ▾ in its top right corner. A small bar stays on screen: its ✕ ends the walkthrough.",
   story_persona_trainer: "Your phone",
   story_chapter_trainer_details: "Enter your own details",
   story_trainer_details_open_body:
@@ -888,7 +888,7 @@ export const en = {
   story_step_arrive_add_manually:
     "Nik is standing in front of you and tells you his details, so tap Add Client — the green button at the top of the list, next to the one you just used.",
   story_step_arrive_type_name:
-    "Type Nik Zupan in the Client Name box. A name is all a client needs; the rest can be added later, by you or by him.",
+    "Type Nik Zupan in the Full Name box. A name is all a client needs; the rest can be added later, by you or by him.",
   story_step_arrive_save_client:
     "Tap Save at the bottom of the form. Nik is in the Clients Directory.",
   story_review_sender: "Ana Novak",

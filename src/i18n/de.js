@@ -845,7 +845,7 @@ export const de = {
   story_welcome_body:
     "LibrePT ist eine App für Personal Trainer: Termine, Trainingspläne und ein Notizblock während des Trainings. In dieser Tour lädst du drei neue Kunden ein, bereitest das Training am Dienstag vor und passt es an, während es läuft. Alles geschieht in der Sandbox, einer getrennten Kopie mit erfundenen Kunden. Deine echten Kunden, Termine und Trainings ändert sie nicht.",
   story_step_welcome:
-    "Zeig es mir zeigt dir zwei Dinge: das Abzeichen SANDBOX in der oberen Leiste und die Zeile Sandbox verlassen oben im Menü ☰. Sandbox-Daten zurücksetzen findest du im Menü unter Einstellungen. Weiter startet die Tour. Um die App ohne Führung auszuprobieren, klapp diese Karte mit ▾ oben rechts weg. Eine kleine Leiste bleibt sichtbar: Ihr ✕ beendet die Tour.",
+    "Zeig es mir zeigt dir zwei Dinge: das Abzeichen SANDBOX in der oberen Leiste und die Zeile Sandbox verlassen oben im Menü ☰. Sandbox-Daten zurücksetzen findest du im Menü unter Einstellungen. Wenn du geschaut hast, schließt Fertig die Karte; das nächste Kapitel wählst du in der Liste unten. Um die App ohne Führung auszuprobieren, klapp diese Karte mit ▾ oben rechts weg. Eine kleine Leiste bleibt sichtbar: Ihr ✕ beendet die Tour.",
   story_persona_trainer: "Dein Telefon",
   story_chapter_trainer_details: "Deine Angaben eintragen",
   story_trainer_details_open_body:
@@ -880,7 +880,7 @@ export const de = {
   story_step_arrive_add_manually:
     "Nik steht vor dir und sagt dir seine Angaben, also tippe auf Neuer Kunde — die grüne Schaltfläche oben in der Liste, neben der, die du gerade benutzt hast.",
   story_step_arrive_type_name:
-    "Gib Nik Zupan in das Feld Name des Kunden ein. Mehr als einen Namen braucht ein Kunde nicht; den Rest kannst du oder er später ergänzen.",
+    "Gib Nik Zupan in das Feld Vor- und Nachname ein. Mehr als einen Namen braucht ein Kunde nicht; den Rest kannst du oder er später ergänzen.",
   story_step_arrive_save_client:
     "Tippe unten im Formular auf Speichern. Nik ist in der Kundenliste.",
   story_review_sender: "Ana Novak",

@@ -801,7 +801,7 @@ export const sl = {
   story_welcome_body:
     "LibrePT je aplikacija za osebne trenerje: termini, načrti treningov in beležka med vadbo. V tem ogledu povabiš tri nove stranke, pripraviš torkov trening in ga med vadbo prilagodiš. Vse se dogaja v peskovniku, ločeni kopiji z izmišljenimi strankami. Tvojih pravih strank, terminov in vadb ne spremeni.",
   story_step_welcome:
-    "Z gumbom Pokaži mi ti vodnik pokaže dvoje: značko PESKOVNIK v zgornji vrstici in vrstico Zapusti peskovnik na vrhu menija ☰. Ponastavi podatke peskovnika je v meniju pod Nastavitve. Z gumbom Naprej začneš. Kartico lahko kadar koli pospraviš z ikono ▾ v njenem zgornjem desnem kotu in aplikacijo preizkušaš brez vodenja; na vrstici, ki ostane, ogled končaš z ✕.",
+    "Z gumbom Pokaži mi ti vodnik pokaže dvoje: značko PESKOVNIK v zgornji vrstici in vrstico Zapusti peskovnik na vrhu menija ☰. Ponastavi podatke peskovnika je v meniju pod Nastavitve. Ko si pogledal, s Končaj zapreš kartico; naslednje poglavje izbereš v spodnjem seznamu. Kartico lahko kadar koli pospraviš z ikono ▾ v njenem zgornjem desnem kotu in aplikacijo preizkušaš brez vodenja; na vrstici, ki ostane, ogled končaš z ✕.",
   story_persona_trainer: "Tvoj telefon",
   story_chapter_trainer_details: "Vnesi svoje podatke",
   story_trainer_details_open_body:
@@ -836,7 +836,7 @@ export const sl = {
   story_step_arrive_add_manually:
     "Nik stoji pred tabo in ti pove svoje podatke, zato pritisni Dodaj stranko — zeleni gumb na vrhu seznama, ob gumbu, ki si ga pravkar uporabil.",
   story_step_arrive_type_name:
-    "V polje Ime stranke vpiši Nik Zupan. Za stranko je dovolj ime; drugo lahko dopišeš pozneje ti ali on.",
+    "V polje Ime in priimek vpiši Nik Zupan. Za stranko je dovolj ime; drugo lahko dopišeš pozneje ti ali on.",
   story_step_arrive_save_client: "Pritisni Shrani na dnu obrazca. Nik je v imeniku strank.",
   story_review_sender: "Ana Novak",
   story_step_review_attach:
