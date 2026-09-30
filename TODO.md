@@ -6052,6 +6052,15 @@ razveljavi, vsak drug izhod — Shrani, ✕, Esc, Nazaj, menjava pogleda — pa 
 razveljavita. Odločitev: ali ✕ in Esc preideta k »Prekliči«, ali obrazec ob njiju vpraša, ali ostane,
 kot je, in se samo pokaže, da je stranka nastala.
 
+**Nov scenarij na objavljeni `8b2ce80`:** Nastavitve → Moji podatki, trener TEST
+Tine Novak, shranjeni telefon »+386 00 000 000«. Telefon spremeniti v »+386 00 000 111«,
+zapreti z Esc in ponovno odpreti Moje podatke. V polju je spet prvotna številka.
+Ponovitev s »+386 00 000 222« in križcem »Zapri« da isti izid. »Prekliči« prav tako
+vrne shranjeno številko. Brez opozorila in brez prestreženih napak, sl, 390 × 844.
+Trener izgubi popravek ob prekinitvi, če računa na zgoraj zapisano vedenje drugih
+obrazcev. Predlog: tudi trenerjeve podatke vključiti v preverjanje enotnega pomena
+izhodov; po veljavnem pravilu naj samo »Prekliči« razveljavi. Kode nismo pregledovali.
+
 ### 80.42 [x] P2 — Izvoz podatkov, ki ga prebere stranka, je v celoti angleški — popravljeno 2026-09-27
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8042-x-p2--izvoz-podatkov-ki-ga-prebere-stranka-je-v-celoti-angleški--popravljeno-2026-09-27).
