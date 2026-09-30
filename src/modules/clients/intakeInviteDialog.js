@@ -22,9 +22,18 @@
 // trainer has accepted them, and a half-remembered phone number sitting in storage would be
 // a client record nobody consented to.
 //
-// Injected dependencies: `t`, `getLang()`, `getTrainer()` (who signs the invitation) and `onShare()`
-// (the share-sheet/clipboard route, so this module owns no `navigator`).
+// **The language is the client's, and the trainer chooses it.** A new client has no form language on
+// record yet (that is written by their own intake), so the dialog asks, each language named in its
+// own tongue, defaulting to the app's. The choice sets the message, the intake link's `lang`, the
+// privacy-notice link, the code and the share sheet together; the dialog's own words stay in the
+// app's language.
+//
+// Injected dependencies: `t`, `getLang()`, `getTrainer()` (who signs the invitation) and
+// `onShare({ lang, t })` (the share-sheet/clipboard route, so this module owns no `navigator`; it is
+// handed the client's language and a translator for it).
 
+import { CONSENT_LANG_LABELS } from "../../i18n/consent/index.js";
+import { dictionaryFor, isSupportedLang } from "../../i18n/index.js";
 import { closeModal, openModal, renderMarkupOnce } from "../common/dom.js";
 import { qrCodePath } from "../common/qrCode.js";
 import { intakeInviteHref, intakeInviteUrl } from "./intakeInvite.js";
@@ -47,6 +56,12 @@ export function renderIntakeInviteDialog() {
   </div>
   <div class="modal-form">
     <p id="intake-invite-lede" class="text-sm"></p>
+    <label class="form-label" for="intake-invite-lang" id="intake-invite-lang-label"></label>
+    <select id="intake-invite-lang" class="form-control">
+${Object.entries(CONSENT_LANG_LABELS)
+  .map(([code, label]) => `      <option value="${code}">${label}</option>`)
+  .join("\n")}
+    </select>
     <label class="form-label" for="intake-invite-contact" id="intake-invite-contact-label"></label>
     <input type="text" id="intake-invite-contact" class="form-control" autocomplete="off"
            inputmode="email" enterkeyhint="send" />
@@ -77,6 +92,21 @@ export function renderIntakeInviteDialog() {
   );
 }
 
+/** The language the client reads, as chosen in the dialog. */
+function clientLang() {
+  const chosen = document.getElementById("intake-invite-lang")?.value;
+  return isSupportedLang(chosen) ? chosen : deps.getLang();
+}
+
+/** A translator for that language: the trainer's own `t` where it is the app's language, so a missing
+ *  key falls back exactly as it does everywhere else. */
+function clientTranslator() {
+  const lang = clientLang();
+  if (lang === deps.getLang()) return deps.t;
+  const dictionary = dictionaryFor(lang);
+  return (key) => dictionary[key];
+}
+
 /** The send control, kept in step with what has been typed.
  *
  * Until there is a contact the control keeps its own name, greyed and out of reach (aria-disabled,
@@ -88,8 +118,8 @@ function syncSendControl() {
   const contact = document.getElementById("intake-invite-contact")?.value || "";
   const ready = intakeInviteHref({
     contact,
-    lang: deps.getLang(),
-    t,
+    lang: clientLang(),
+    t: clientTranslator(),
     trainer: deps.getTrainer?.(),
   });
   const anchor = document.getElementById("intake-invite-send");
@@ -125,6 +155,7 @@ export function openIntakeInviteDialog() {
   for (const [id, key] of [
     ["intake-invite-title", "intake_invite_title"],
     ["intake-invite-lede", "intake_invite_lede"],
+    ["intake-invite-lang-label", "intake_invite_lang_label"],
     ["intake-invite-contact-label", "intake_invite_contact_label"],
     ["intake-invite-share", "intake_invite_other_ways"],
   ]) {
@@ -136,6 +167,13 @@ export function openIntakeInviteDialog() {
   document
     .getElementById("intake-invite-qr-svg")
     .setAttribute("aria-label", t("intake_invite_qr_label"));
+  // Back to the app's language on every open: this is the next person, not the last one.
+  const langField = document.getElementById("intake-invite-lang");
+  langField.value = isSupportedLang(deps.getLang()) ? deps.getLang() : "en";
+  langField.onchange = () => {
+    syncSendControl();
+    showCode();
+  };
   showCode();
 
   const field = document.getElementById("intake-invite-contact");
@@ -165,7 +203,7 @@ export function openIntakeInviteDialog() {
  * app's language are all settings they can change between one invitation and the next.
  */
 function showCode() {
-  const url = intakeInviteUrl({ lang: deps.getLang(), trainer: deps.getTrainer?.() });
+  const url = intakeInviteUrl({ lang: clientLang(), trainer: deps.getTrainer?.() });
   const code = qrCodePath(url);
   if (!code) return;
   document.getElementById("intake-invite-qr-svg").setAttribute("viewBox", code.viewBox);
@@ -176,7 +214,7 @@ function showCode() {
  * and the link on screen when a browser refuses both — a trainer standing in front of somebody is
  * never left with nothing. */
 async function shareAnyWay() {
-  const outcome = await deps.onShare();
+  const outcome = await deps.onShare({ lang: clientLang(), t: clientTranslator() });
   const said = {
     shared: "intake_invite_sent",
     copied: "intake_invite_copied",
@@ -189,7 +227,7 @@ async function shareAnyWay() {
   }
   if (outcome === "unavailable") {
     const field = document.getElementById("intake-invite-link");
-    field.value = intakeInviteUrl({ lang: deps.getLang(), trainer: deps.getTrainer?.() });
+    field.value = intakeInviteUrl({ lang: clientLang(), trainer: deps.getTrainer?.() });
     field.classList.remove("hidden");
     field.select();
   }

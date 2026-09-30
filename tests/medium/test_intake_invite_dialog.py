@@ -8,6 +8,8 @@
 # still there.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
+from urllib.parse import unquote
+
 import pytest
 from playwright.sync_api import expect
 
@@ -35,10 +37,11 @@ window.__trainer = { name: 'Sam Trainer', phone: '+386 40 111 222' };
 
 initIntakeInviteDialog({
   t,
-  getLang: () => 'en',
+  getLang: () => globalThis.stubLanguage || 'en',
   getTrainer: () => window.__trainer,
-  onShare: () => { window.__shareCalls += 1; return Promise.resolve(window.__shareOutcome); },
+  onShare: ({ lang }) => { window.__lastShareLang = lang; window.__shareCalls += 1; return Promise.resolve(window.__shareOutcome); },
 });
+window.__t = t;
 window.__open = () => openIntakeInviteDialog();
 """,
 )
@@ -205,3 +208,51 @@ def test_the_code_is_redrawn_from_the_trainers_details_each_time(page, local_ser
     page.wait_for_selector("#dialog-intake-invite[open]")
 
     assert page.get_attribute("#intake-invite-qr-path", "d") != first
+
+
+def test_the_trainer_chooses_the_language_the_client_reads(page, local_server):
+    """A new client has no form language on record, so the dialog asks. In a Slovenian app the
+    trainer picks English: the message, the intake link and the privacy link are English, while the
+    dialog's own words stay Slovenian."""
+    page.add_init_script("globalThis.stubLanguage = 'sl'")
+    _open(page, local_server)
+    page.fill("#intake-invite-contact", "emily@example.com")
+
+    # Defaults to the app's language: the message is Slovenian until the trainer chooses.
+    select = page.locator("#intake-invite-lang")
+    assert select.input_value() == "sl"
+    assert "intake%3Flang%3Dsl" in page.get_attribute(SEND, "href")
+    assert [o.strip() for o in select.locator("option").all_inner_texts()] == [
+        "English",
+        "Slovenščina",
+        "Deutsch",
+    ]
+
+    select.select_option("en")
+
+    href = unquote(page.get_attribute(SEND, "href"))
+    assert "intake?lang=en" in href and "intake?lang=sl" not in href, href
+    assert "privacy-notice-en.html" in href, href
+    assert "fill in your own details" in href, href
+    assert "Your details for our training" in href, href
+    # The trainer's words did not move.
+    expect(page.locator("#intake-invite-title")).to_have_text(
+        page.evaluate("() => window.__t('intake_invite_title')")
+    )
+    expect(page.locator("#intake-invite-title")).not_to_have_text("Invite a client")
+    box = select.bounding_box()
+    assert box and box["height"] >= 44, box
+
+
+def test_the_chosen_language_also_reaches_the_code_and_the_share_sheet(
+    page, local_server
+):
+    page.add_init_script("globalThis.stubLanguage = 'sl'")
+    _open(page, local_server)
+    before = page.get_attribute("#intake-invite-qr-path", "d")
+
+    page.select_option("#intake-invite-lang", "de")
+
+    assert page.get_attribute("#intake-invite-qr-path", "d") != before
+    page.click("#intake-invite-share")
+    assert page.evaluate("() => window.__lastShareLang") == "de"

@@ -443,6 +443,13 @@
 /* The invitation as a code on the trainer's own screen. Black on white whatever the
    theme is: this is a picture for somebody else's camera, and a themed ground turns a symbol a
    phone reads in one pass into one it hunts for. The white padding is the quiet zone's paper. */
+/* The language choice is tapped like the contact field under it, at every width: the shared 44px
+   minimum for fields applies only on narrow screens, and a select is drawn two pixels shorter than
+   an input with the same padding. */
+#dialog-intake-invite select.form-control {
+  min-height: 44px;
+}
+
 .intake-invite-actions .btn[aria-disabled="true"] {
   pointer-events: none;
   opacity: 0.5;

@@ -218,11 +218,11 @@ export function setupClientForms({
       t,
       getLang: () => getState().lang,
       getTrainer: () => readTrainerIdentity(),
-      onShare: () =>
+      onShare: ({ lang, t: clientT }) =>
         sendIntakeInvite({
           platform: browserInvitePlatform(),
-          t,
-          lang: getState().lang,
+          t: clientT,
+          lang,
           trainer: readTrainerIdentity(),
         }),
     });
