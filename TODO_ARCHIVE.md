@@ -320,6 +320,62 @@ vaj ali napačno presodi, koliko časa ostane.
 in »150« pri več serijah, skupaj s počitki. Opaženo na objavljeni `8b2ce80`, sl,
 390 × 844, Chrome CDP; brez prestreženih napak in brez pregledovanja kode.
 
+### 93.1 [ ] Move the skill where every agent reads
+
+- `SKILL.md`, `explore.py`, `form-task-prompt.md` and `persona-day-prompt.md` move to
+  `.agents/skills/exploratory-test/`, tracked by git. Other projects of Simon's already use
+  `.agents/skills/` for this, so the location is the convention rather than a new idea. The depth is
+  the same, so the relative links inside `SKILL.md` still resolve.
+- `.claude/skills/exploratory-test/SKILL.md` becomes a pointer to the shared file, so Claude Code
+  still lists the skill. A pointer and not a copy: the description is the trigger, and two copies of
+  it would drift.
+- The one hard path inside `SKILL.md` (`S=.claude/skills/exploratory-test/explore.py`, line 68)
+  becomes the shared one.
+- `AGENT_RULES.md` names `.agents/skills/` as the home of skills every agent must read before doing
+  the work they cover — this is what makes the move worth anything to Codex.
+- `.gitignore` takes `.agents/skills/exploratory-test/.session/` and its `__pycache__`: the browser
+  profile is runtime state, wiped at every start.
+- `.agents/skills/INDEX.md`, because every knowledge directory has one.
+
+### 93.2 [ ] A live browser says who holds it, and until when
+
+`explore.py` writes `.private/AGENT_SYNC/exploratory-browser.md` — port, browser pid, watchdog pid,
+profile path and the clock time the idle timeout will close it — refreshed on the same call that
+touches the heartbeat, and deleted by `stop` and by the watchdog. Refreshed on every command rather
+than only at `start`, so a browser already running when this ships gets a note on its next command
+instead of needing a restart.
+
+Then a session arriving later can act instead of guessing: if the note is absent, or its watchdog pid
+is gone while the browser is alive, the browser has no keeper and may be closed. Today that judgement
+needed reading `/proc`, and the answer still had to go to Simon.
+
+**Shipped 2026-09-30. What the move turned up, none of it in the plan:**
+
+- **`.agents/` was in `.gitignore` too.** Moving the skill there as written would have left it
+  exactly as invisible to Codex and Gemini as `.claude/` had. The ignore is narrowed instead —
+  `.agents/*` ignored, `.agents/skills/` re-included, `.agents/skills/*/.session/` ignored again for
+  the browser profile — so what every agent must read is tracked and what one agent keeps for itself
+  is not. Without this line the whole move would have been theatre.
+- **The pointer is a symlink, not a copy.** `.claude/skills/exploratory-test/SKILL.md` is a symlink
+  to the shared file. A copy would have needed the description duplicated — and the description is
+  the trigger, so two of them drift into two different skills. Verified live: the skill listing
+  Claude Code offers shows the rewritten text, read through the symlink.
+- **Ruff saw `explore.py` for the first time** and failed it: `main` is a twenty-branch command
+  dispatcher, complexity 33 against a limit of 10. Suppressed with the rationale at the function and
+  a re-check condition — when a command needs more than a couple of calls, or two commands start
+  sharing state, the branches have stopped being independent and it becomes a table of handlers.
+- **`todo_refs` saw it too, and that one could not be suppressed.** SKILL.md named TODO sections
+  fourteen times, and the rule is that no file outside TODO.md points into it. The purpose behind
+  the rule is that a section closes and its reasoning moves — but this skill does not READ those
+  sections, it WRITES findings into them, and they are registers that never close. The rule was left
+  untouched all the same and the skill reworded: it names its destinations by what they are (the
+  first-use trial section, the trainer's-day section, the business-needs brainstorm) rather than by
+  number. Simon was offered the alternative — an exemption for `.agents/skills/` — and it remains
+  his to take; the rewording costs precision the whole project otherwise has, since findings are
+  referred to everywhere by their numbers.
+
+---
+
 ### 92.3 [x] The demo shows a press, a hold and a drag at once — shipped 2026-09-30
 
 `demoTourPlayer.js` can only tap, type, pick a file and point; `demoHand.js` can only move and
