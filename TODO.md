@@ -8659,6 +8659,52 @@ what a trainer sees, so they are Simon's:
    get one — the trening they belonged to was never written. Do old records become single-participant
    trenings, or does history keep two shapes with a migration boundary and a date?
 
+### 95.3 [ ] Every entity stored today, read out of the schema rather than recalled
+
+Asked by Simon 2026-09-30, before normalising anything. Read from `data/recordSchemas.js`, which is
+where a collection's shape is declared, and from the storage keys in `src/`.
+
+**Business records — the nine collections schema 4 declares, plus one schema 5 adds:**
+
+| Entity | Collection | What it is | Required fields |
+| --- | --- | --- | --- |
+| Stranka | `clients` | A person the trainer trains | `id`, `name`, `active` |
+| Vaja | `exercises` | The movement catalogue | `id`, `name` |
+| Rutina | `routines` | A reusable program template, no date, no people | `id`, `name`, `exercises` |
+| Sklop | `circuits` (schema 5) | A reusable circuit template | `id`, `name`, `exercises` |
+| Trening | `sessions` | One booked occasion: time, place, who | `id`, `participants` |
+| Ponavljajoči trening | `sessionSeries` | The RULE, not its evenings — occurrences are derived | `id`, `startDate`, `time`, `weekdays` |
+| Zapis vadbe AND načrt | `history` | Both, told apart by `isPlanning` | `id`, `clientId`, `exercises` |
+| Prilagoditev načrta | `planUpdates` | A feedback tag waiting to change the next plan | `id`, `clientId`, `resolved` |
+| Vabilo | `invites` | An RSVP is a fact about an invitation, by reference only | `id`, `sessionId`, `clientId`, `status` |
+
+`notifications` is declared too but is app chrome, not a business record — its own comment says so.
+`previewProbe` exists only to keep staging exercised by the real schemas; no screen writes one.
+
+**Stored outside every collection, and this is where the trouble is:**
+
+- **Trening v teku** — `librept_active_session`, one key, one session, overwritten by the next. The
+  subject of this whole section.
+- Settings and chrome, correctly not records: trainer identity, language, workspace, last route,
+  Drive sync settings, read notifications, terms accepted, expand preferences, the unsaved-state
+  journal, the workout-setup draft, running timers.
+
+**Two of the entities Simon named do not exist as data.**
+
+1. **Zaznamki.** There is no such record. What a trainer notes is scattered across three shapes: a
+   free-text `notes` field on the client, an untyped `feedback` array inside each history record,
+   and the `planUpdates` collection for the ones that should change the next plan. Three homes for
+   one idea, and only the third can be found, listed or resolved.
+2. **Skupinski program za več strank (M:N).** `sessions.participants` is the M:N between a trening
+   and its clients, and that one is real. But WHICH clients share ONE program — `bindings` — is
+   declared in no schema at all. It lives on the live session object only, is re-applied at recovery
+   by `boundClientRoutines`, and dies with the cache. The grouping Simon names as an entity is the
+   one piece of the clipboard that was never written down.
+
+**Which makes the refactor the test Simon wants** (his own point, 2026-09-30): it exercises
+`SCHEMA_PREVIEW`, `schemaMigrations.js` and schema 5 for real, on a change that touches the two
+collections carrying the durability stakes, rather than on a probe record written by tests.
+
 ### 95.1 [ ] §92.6 is this section's subordinate case, not its own task
 
 Leaving a session by the peek throws away what was logged in it. The guard refuses only a STARTED
