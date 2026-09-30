@@ -6623,6 +6623,24 @@ pri novem terminu znova izbere rutino, s čimer izgubi vse, kar je v načrtu pop
 kopiranja na drug dan ni, naj tega ukaza ni videti pri treningu z eno stranko — opaženo na različici
 `8b2ce80`.
 
+### 80.94 [ ] P2 — V kartoteki stranke je signal s treninga še vedno angleški: »Too Hard - Reduce Load«
+
+**Scenarij in koraki:** na podlogi pri vaji tapni »Pretežko«, nato »Dodaj opombo«, izberi »Pretežko –
+zmanjšaj težo«, vpiši opombo (»SIM pretežko pri 4. seriji«), obkljukaj shranjevanje v kartoteko in
+tapni »Zapiši opozorilo«. Nato odpri »Imenik strank« → stranko → razdelek OPOMBE.
+
+**Opaženo:** vrstica se glasi »2026-09-30 — Barbell Back Squat: Too Hard - Reduce Load - SIM pretežko
+pri 4. seriji«. Na zaslonu »Čakajoče na pregled« je isti signal slovenski: »Pretežko – zmanjšaj
+težo«. Angleška oblika je torej ostala samo v kartoteki.
+
+**Težava in vpliv:** kartoteka je tisto, kar trener prebere pred naslednjim treningom s to stranko.
+Vrstica, ki jo je zapisala aplikacija sama, je tam v tujem jeziku, pomešana s slovensko opombo, ki jo
+je napisal trener.
+
+**Predlog:** v kartoteko naj se zapiše isto besedilo kot na zaslonu za pregled — opaženo na različici
+`8b2ce80`. Isti napis je bil na zaslonu za pregled popravljen z §80.26 (2026-09-27), v kartoteki pa
+ne.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
