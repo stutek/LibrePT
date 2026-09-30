@@ -6751,6 +6751,35 @@ program«, »Anonimna kopija za AI« in »Izvozi podatke (GDPR)« naj izginejo, 
 (»Stranka #BYDL7Y«). Vrstica v imeniku in naloga v pregledu naj bosta označeni kot izbrisani ali
 odstranjeni — opaženo na različici `8b2ce80`.
 
+### 80.102 [ ] P2 — Preklic privolitve nima polja za datum in ne pove, kaj se z njim ustavi
+
+**Scenarij in koraki:** »Imenik strank« → stranka → »Uredi profil«. Obkljukaj »Stranka je podpisala
+privolitev (hramba podatkov in sinhronizacija v oblak)«, v polje »Datum podpisa« vpiši pretekli datum
+2026-06-15 in shrani. Nato znova odpri »Uredi profil«, kljukico odstrani in shrani.
+
+**Opaženo:** troje.
+1. Ko kljukico odstraniš, polje za datum izgine in drugega polja ni. Datum preklica aplikacija zapiše
+   sama, na dan dotika: zaslon pravi »Privolitev preklicana (2026-06-15 → 2026-09-30)«. Stranka, ki je
+   privolitev preklicala prejšnji teden, dobi današnji datum.
+2. Puščica med datumoma ni pojasnjena. Nikjer ne piše, da je prvi datum podpis in drugi preklic.
+3. Po shranitvi se na zaslonu stranke ne spremeni nič drugega: nobenega opozorila, kaj se je s
+   preklicem ustavilo. Razdelek se imenuje »PRIVOLITEV GDPR ZA SINHRONIZACIJO V OBLAK«, o
+   sinhronizaciji po preklicu pa ni besede. Edino navodilo je v majhnem pojasnilu »Kdo hrani obrazec?«:
+   »Če stranka privolitev prekliče, tukaj izbriši njene zapise in preklic zabeleži na svojem izvodu.«
+
+**Težava in vpliv:** preklic je datum, ki šteje — od njega naprej obdelava ni več dovoljena. Trener ga
+ne more vpisati, zato je zapis napačen pri vsaki stranki, ki ne prekliče ravno tisti dan, ko trener
+sedi pri telefonu. In ker aplikacija ne pove, kaj se je ustavilo, trener misli, da je s kljukico
+opravil vse.
+
+**Predlog:** ob odstranitvi kljukice naj se pokaže polje »Datum preklica« s privzetim današnjim
+datumom; zaslon naj obe datuma poimenuje z besedami; in naj z eno vrstico pove, kaj se s preklicem
+ustavi — opaženo na različici `8b2ce80`.
+
+Ob tem opažena manjša neskladnost na istem zaslonu: pri podpisu z datumom 2026-06-15 zaslon pravi
+»Privolitev dana (2026-06-15 · v2026-08-09)«, torej pripiše različico obrazca iz avgusta podpisu iz
+junija.
+
 **Presoja 2026-09-30 (Claude): čaka na Simona — nasprotuje zapisani odločitvi.** `logQuickSignal` v
 [sessionQuickSignals.js](src/controllers/sessionQuickSignals.js) namerno označi vse serije vaje kot
 opravljene, ko trener tapne signal: »signal na vaji pomeni, da je bila opravljena« (manj dotikov,
