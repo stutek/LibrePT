@@ -6613,7 +6613,7 @@ istega treninga. Napis gumba bi lahko to povedal jasneje; to sodi k §88.5.
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8094-x-p2--v-kartoteki-stranke-je-signal-s-treninga-še-vedno-angleški-too-hard---reduce-load--popravljeno-2026-09-30);
 what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-### 80.95 [ ] P1 — Dotik »Pretežko« zapiše vajo kot opravljeno z vsemi načrtovanimi serijami
+### 80.95 [x] P1 — Dotik »Pretežko« zapiše vajo kot opravljeno z vsemi načrtovanimi serijami
 
 **Scenarij in koraki:** odpri podlogo treninga (»Ponedeljkova moc«, stranka Jane Doe, rutina »Zgornji
 del A«), tapni »Začni trening« in »Ohrani urnik«. Odpri sklop »Sklop za moč prsi in hrbta«. Pri vaji
@@ -6790,7 +6790,7 @@ Ob tem opažena manjša neskladnost na istem zaslonu: pri podpisu z datumom 2026
 »Privolitev dana (2026-06-15 · v2026-08-09)«, torej pripiše različico obrazca iz avgusta podpisu iz
 junija.
 
-### 80.103 [ ] P1 — Odprtje in zapiranje enega večera serije ustvari drugo, enako kartico istega večera
+### 80.103 [x] P1 — Odprtje in zapiranje enega večera serije ustvari drugo, enako kartico istega večera
 
 **Scenarij in koraki:** »Ustvari trening«: ime »Jutranja vaja«, datum 2026-10-05, 07:15 - 08:15,
 stranka Sarah Jenkins, obkljukaj »PONOVI VSAK TEDEN«, v »DO (NEOBVEZNO)« vpiši 2026-10-19, »Shrani«,
@@ -6808,6 +6808,12 @@ izbrisati posebej. Če na napačnem zabeleži vadbo, je zapis na terminu, ki ga 
 
 **Predlog:** odprtje večera serije, brez shranjene spremembe, naj ne ustvari novega treninga —
 opaženo na različici `8b2ce80`.
+
+**Popravljeno 2026-09-30.** Ploščica večer tapne z id-jem, ki ga je narisala, pri izpeljanem večeru
+torej s ključem tega večera, zapis zanj pa dobi svoj id; vprašanje »ali je ta večer že zapisan« se je
+postavljalo samo po id-ju in je zato vedno odgovorilo z ne. Zdaj na to odgovarja domena po večeru, ki
+ga zapis zastopa (`storedOccurrenceFor` v `src/domain/sessionSeries.js`, preizkušeno v
+`tests/unit_js/domain/sessionSeries.test.mjs`).
 
 ### 80.104 [ ] P2 — Izbrisana serija pusti za sabo programe brez datuma, ki jih ni mogoče razločiti
 
