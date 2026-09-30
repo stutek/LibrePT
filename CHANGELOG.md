@@ -42,6 +42,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Fixed
 
+- **Editing a routine keeps its circuits.** The routine form has no field for an exercise's circuit
+  and wrote every exercise back from its fields alone, so one keystroke in a routine's name turned
+  its circuits into a flat list.
 - **The message about test records left after removing the sample data is in the trainer's
   language.** It named the kept collections by their code names ("exercises", "routines") and gave
   the reason a record is kept in English.

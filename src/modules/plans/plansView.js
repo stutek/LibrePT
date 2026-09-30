@@ -157,6 +157,13 @@ export function addRoutineExerciseRow({ preset = null, state, t }) {
   const tr = (key, fallback) => (t ? t(key) || fallback : fallback);
   const row = document.createElement("div");
   row.className = "routine-builder-row";
+  // What the row does not edit rides along on it: a routine item's circuit grouping (circuitId,
+  // circuitTitle, circuitSeries, comboGroupId) has no field here, and writing the item back from the
+  // fields alone dropped it, so renaming a routine undid its circuits.
+  if (preset) {
+    const { id: _id, sets: _sets, reps: _reps, weight: _weight, rest: _rest, ...kept } = preset;
+    row.dataset.kept = JSON.stringify(kept);
+  }
 
   const optionsHTML = libraryExercises(state)
     .slice()

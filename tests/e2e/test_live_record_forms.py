@@ -192,3 +192,16 @@ def test_the_first_client_ends_the_empty_app_welcome(page, local_server):
     page.locator("#form-client button[type=submit]").click()
 
     expect(page.locator("#btn-first-run-sandbox")).to_have_count(0)
+
+
+def test_renaming_a_routine_keeps_its_circuits(page, local_server):
+    # The form has no field for an item's circuit, and it wrote every item back from its fields
+    # alone: one keystroke in the name turned a routine of circuits into a flat list.
+    page.goto(local_server + "routines/r10d5e6f")
+    page.wait_for_selector("#dialog-routine[open]")
+    page.locator("#routine-name").fill("Renamed With Circuits")
+
+    routine = _record(page, "routines", "Renamed With Circuits")
+    assert routine is not None
+    circuits = {item.get("circuitId") for item in routine["exercises"]}
+    assert circuits == {"z01a2b3c", "z02a2b3c", "z03a2b3c"}, routine["exercises"]

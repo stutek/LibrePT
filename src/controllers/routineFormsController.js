@@ -191,3 +191,4 @@ export function setupRoutineForms({
   });
   openRoutineEditForm = (routine) => live.openExisting(routine);
 }
+          ...JSON.parse(row.dataset.kept || "{}"),
