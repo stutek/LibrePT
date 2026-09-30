@@ -214,7 +214,7 @@ export function addRoutineExerciseRow({ preset = null, state, t }) {
       value,
       cls: "form-control input-weight",
       escapeHTML,
-      ariaLabel: "Load",
+      ariaLabel: escapeHTML(t("routine_row_load_label")),
     });
   };
 

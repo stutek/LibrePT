@@ -68,7 +68,7 @@ export function renderBuildInfoDialog() {
 <dialog id="dialog-build-info" class="dialog-modal card glassmorphic">
     <div class="modal-header">
       <h3 id="build-info-title">This build</h3>
-      <button class="modal-close-btn" aria-label="Close build info"><i class="fa-solid fa-xmark"></i></button>
+      <button class="modal-close-btn" data-i18n-label="modal_close" aria-label="Close build info"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <!-- The preview warning in FULL, because the header badge cannot carry it: at 16px the
          "PREVIEW" wordmark is illegible, so the badge is an icon plus screen-reader text. Sighted

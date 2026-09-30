@@ -41,7 +41,7 @@ export function renderProgramImportDialog() {
 <dialog id="dialog-program-import" class="dialog-modal card glassmorphic">
   <div class="modal-header">
     <h3 id="program-import-title">Import a programme</h3>
-    <button class="modal-close-btn" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+    <button class="modal-close-btn" data-i18n-label="close" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
   </div>
   <div class="modal-form">
     <p id="program-import-lede" class="text-sm text-muted"></p>

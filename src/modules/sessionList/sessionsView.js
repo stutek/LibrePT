@@ -63,7 +63,7 @@ export function renderClientsViewShell() {
 
       <!-- One continuous, time-ordered scroll: sessions render grouped under sticky per-day
            headers instead of fixed yesterday/today/tomorrow/upcoming columns. -->
-      <div class="sessions-timeline mb-6" id="sessions-categories-grid" role="region" aria-label="Sessions"></div>
+      <div class="sessions-timeline mb-6" id="sessions-categories-grid" role="region" data-i18n-label="sessions_schedule" aria-label="Sessions"></div>
 
       <!-- Floating "Create Session" button: stays visible while scrolling the sessions list -->
       <button id="btn-create-session" class="btn primary-btn floating-action-btn">

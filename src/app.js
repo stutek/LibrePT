@@ -194,9 +194,13 @@ function t(key) {
   return dict[key] || key;
 }
 
-function applyTranslations(lang = resolveLang(getState().lang)) {
+function applyTranslations(chosen = getState().lang) {
   const state = getState();
-  state.lang = lang;
+  // The trainer's choice is stored as it is — null until they make one — and the page is labelled
+  // with the language it is actually written in. Both were one value, so before a choice the
+  // document declared `lang="null"`.
+  state.lang = chosen;
+  const lang = resolveLang(chosen);
   // index.html ships `lang="en"` and nothing moved it, so a trainer switched to Slovenian was
   // served Slovenian text inside a document still declaring English — which is what a screen
   // reader picks its pronunciation from, and what `:lang()`/hyphenation rules match on.

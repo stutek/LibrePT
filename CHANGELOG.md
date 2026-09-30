@@ -79,6 +79,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   first in the list — a barbell squat for a client with a painful knee.
 - **The privacy notice, the consent forms and the preview page open once the app works offline.**
   They showed "page not found".
+- **Controls are named in the page's language for a screen reader**, and before a language is
+  chosen the page declares English instead of "null".
 - **The Dates calendar marks today and the days that have sessions.**
 - **Show me draws every tap it makes.** On a card reached by walking Back, Show me replayed the
   earlier steps without the hand, so fields were filled and dialogs closed with nothing drawn; the

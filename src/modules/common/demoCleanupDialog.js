@@ -60,7 +60,7 @@ export function renderDemoCleanupDialog() {
 <dialog id="dialog-demo-cleanup" class="dialog-modal card glassmorphic">
     <div class="modal-header">
       <h3 id="demo-cleanup-title"></h3>
-      <button class="modal-close-btn" data-demo-cleanup-close aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+      <button class="modal-close-btn" data-demo-cleanup-close data-i18n-label="close" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div class="modal-body-scroll">
       <p class="dialog-desc" id="demo-cleanup-desc"></p>

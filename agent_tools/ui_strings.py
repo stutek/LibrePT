@@ -49,8 +49,9 @@ SRC = REPO_ROOT / "src"
 # signupReviewDialog.js), then every view's grabber label, then the header's close and version
 # labels (applicationHeader.js), then the intake page's language buttons, now built from the
 # registry's own language names (intakeView.js), then the global History view's title and
-# description, removed with the view (historyView.js).
-BASELINE = 116
+# description, removed with the view (historyView.js), then the screen-reader names of close
+# buttons and fields and the clipboard's "Completed" tag (2026-09-30).
+BASELINE = 99
 
 # Upstream files and the dictionaries themselves: the first are not ours to translate, the second
 # ARE the translations.

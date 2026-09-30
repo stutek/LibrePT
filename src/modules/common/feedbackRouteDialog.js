@@ -39,7 +39,7 @@ export function renderFeedbackRouteDialog() {
 <dialog id="dialog-feedback-route" class="dialog-modal card glassmorphic">
   <div class="modal-header">
     <h3 id="feedback-route-title">Tell us what you think</h3>
-    <button class="modal-close-btn" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+    <button class="modal-close-btn" data-i18n-label="close" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
   </div>
   <div class="modal-form">
     <p id="feedback-route-lede" class="text-sm"></p>

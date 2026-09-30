@@ -40,6 +40,17 @@ def test_the_language_is_asked_before_the_terms(browser, local_server):
         context.close()
 
 
+def test_the_page_declares_its_language_before_one_is_chosen(browser, local_server):
+    """Before the trainer picked a language the document declared `lang="null"`: the unchosen
+    language is null, and it was written into `<html lang>` as text. The page is English until a
+    choice is made, so it says so."""
+    context, page = _fresh_page(browser, local_server)
+    try:
+        assert page.evaluate("document.documentElement.getAttribute('lang')") == "en"
+    finally:
+        context.close()
+
+
 def test_terms_are_mandatory_on_first_run(browser, local_server):
     context, page = _fresh_page(browser, local_server)
     try:

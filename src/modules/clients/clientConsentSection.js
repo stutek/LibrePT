@@ -112,7 +112,7 @@ export function renderConsentInfoDialog() {
 <dialog id="dialog-consent-info" class="dialog-modal card glassmorphic">
     <div class="modal-header">
       <h3 id="consent-info-title">You keep the signed form</h3>
-      <button class="modal-close-btn" aria-label="Close modal"><i class="fa-solid fa-xmark"></i></button>
+      <button class="modal-close-btn" aria-label="Close modal" data-i18n-label="modal_close"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div class="modal-body consent-info-body">
       <p id="consent-info-body-text">LibrePT records only that consent was given and on which date — never a photo, scan, or signature. As the data controller you are responsible for archiving the signed form yourself, for as long as you hold this client's records, so you can prove the consent if you are ever asked to. If the client withdraws consent, untick the box above — that records the withdrawal and stops further processing while keeping proof that consent was once given. Withdrawal is not the same as erasure: delete their records only if they ask you to.</p>

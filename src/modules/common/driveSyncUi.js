@@ -402,7 +402,7 @@ function renderConflictsDialog() {
 <dialog id="dialog-drive-conflicts" class="dialog-modal card glassmorphic">
     <div class="modal-header">
       <h3 id="drive-conflicts-title">Review sync conflicts</h3>
-      <button class="modal-close-btn" aria-label="Close conflict review"><i class="fa-solid fa-xmark"></i></button>
+      <button class="modal-close-btn" data-i18n-label="modal_close" aria-label="Close conflict review"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div class="modal-body-scroll">
       <p id="drive-conflicts-desc" class="dialog-desc">These records changed on two devices since the last sync. Pick which version to keep — the other side is discarded once you choose.</p>

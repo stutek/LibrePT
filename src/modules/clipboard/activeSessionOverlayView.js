@@ -17,7 +17,7 @@ export function renderAddSessionExerciseDialog() {
 <dialog id="dialog-add-session-exercise" class="dialog-modal card glassmorphic">
     <div class="modal-header">
       <h3>Inject Exercise to Active Plan</h3>
-      <button class="modal-close-btn" aria-label="Close add exercise modal"><i class="fa-solid fa-xmark"></i></button>
+      <button class="modal-close-btn" data-i18n-label="modal_close" aria-label="Close add exercise modal"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <form id="form-add-session-exercise" method="dialog" class="modal-form">
       <div class="form-group">
@@ -69,7 +69,7 @@ export function renderCatalogPickerDialog() {
 <dialog id="dialog-catalog-picker" class="dialog-modal card glassmorphic wide-modal">
     <div class="modal-header">
       <h3 id="catalog-picker-title">Add from Exercise Catalog</h3>
-      <button class="modal-close-btn" aria-label="Close catalog"><i class="fa-solid fa-xmark"></i></button>
+      <button class="modal-close-btn" data-i18n-label="modal_close" aria-label="Close catalog"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div id="catalog-picker-mount" class="exercise-picker"></div>
   </dialog>

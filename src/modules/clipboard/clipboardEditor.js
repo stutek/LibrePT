@@ -153,11 +153,17 @@ function buildSetsFieldHTML(ex, tr, escapeHTML) {
 
 // A load field shows for load-bearing modalities (strength, isometric) — a weighted plank still
 // takes a load — but not for cardio, holds, or agility.
-function buildLoadFieldHTML(ex, modality, unit, escapeHTML) {
+function buildLoadFieldHTML(ex, modality, unit, escapeHTML, tr) {
   if (!usesLoad(modality)) return "";
   const value = ex.weightTarget ?? ex.weight ?? 0;
   return `<label class="editor-field"><span>${escapeHTML(loadFieldMeta(unit).label)}</span>${loadInputHTML(
-    { unit, value, cls: "editor-f-weight", escapeHTML, ariaLabel: "Load" },
+    {
+      unit,
+      value,
+      cls: "editor-f-weight",
+      escapeHTML,
+      ariaLabel: escapeHTML(tr("routine_row_load_label", "Load")),
+    },
   )}</label>`;
 }
 
@@ -301,7 +307,7 @@ export function renderClipboardEditor(container, deps) {
     const escapedName = escapeHTML(name);
     const escapedReps = escapeHTML(reps);
     const setsField = buildSetsFieldHTML(ex, tr, escapeHTML);
-    const loadField = buildLoadFieldHTML(ex, modality, unit, escapeHTML);
+    const loadField = buildLoadFieldHTML(ex, modality, unit, escapeHTML, tr);
     // A row just inserted/swapped/restored (isCalledOut) is already the accordion's sole expanded
     // row (editorExpandedId was forced to callout.id above) — the trainer either needs to type its
     // name right now (a blank insert, the scroll+focus logic below targets .editor-row-name) or just
@@ -486,12 +492,6 @@ export function renderClipboardEditor(container, deps) {
       });
     logs.length = n;
   });
-  bindField(".editor-f-reps", (ex, v) => {
-    ex.repsTarget = v === "" ? ex.repsTarget : parseReps(v);
-  });
-  bindField(".editor-f-weight", (ex, v) => {
-    ex.weightTarget = parseLoad(v);
-  });
   // The history stores the logged sets, not the targets. A target changed after the sets were built
   // must reach every set not yet done; a completed set is what was done and stays as it was.
   const setOnPendingLogs = (ex, field, value) => {
@@ -499,14 +499,20 @@ export function renderClipboardEditor(container, deps) {
       if (!log.completed) log[field] = value;
     }
   };
+  bindField(".editor-f-reps", (ex, v) => {
+    ex.repsTarget = v === "" ? ex.repsTarget : parseReps(v);
+    if (v !== "") setOnPendingLogs(ex, "reps", ex.repsTarget);
+  });
+  bindField(".editor-f-weight", (ex, v) => {
+    ex.weightTarget = parseLoad(v);
+    // A half-typed load ("2,5,5") stays on the field, marked invalid; it is not written into a set.
+    if (typeof ex.weightTarget === "number") setOnPendingLogs(ex, "weight", ex.weightTarget);
+  });
 
   // ---------- fields collapse/expand: the chevron next to the name toggles that one row's
-    if (v !== "") setOnPendingLogs(ex, "reps", ex.repsTarget);
   // sets/reps/load/circuit fields only, leaving every other row's state untouched. ----------
   const wireRowExpandToggle = () => {
     for (const btn of listEl.querySelectorAll(".editor-row-toggle")) {
-    // A half-typed load ("2,5,5") stays on the field, marked invalid; it is not written into a set.
-    if (typeof ex.weightTarget === "number") setOnPendingLogs(ex, "weight", ex.weightTarget);
       btn.addEventListener("click", (e) => {
         e.stopPropagation();
         const ex = items[rowKeyOf(btn.closest(".editor-row"))];

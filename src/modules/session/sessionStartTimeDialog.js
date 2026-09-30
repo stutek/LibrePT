@@ -61,7 +61,7 @@ function ensureStartTimeDialog(t) {
 <dialog id="${DIALOG_ID}" class="dialog-modal card glassmorphic">
     <div class="modal-header">
       <h3 id="session-start-time-title"></h3>
-      <button type="button" class="modal-close-btn" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+      <button type="button" class="modal-close-btn" aria-label="Close" data-i18n-label="close"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <form id="form-session-start-time" class="modal-form">
       <div class="modal-body-scroll">

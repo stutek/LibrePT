@@ -318,6 +318,7 @@ export const en = {
     "Primary target (reps, time, distance, or 'max' to failure — depends on the exercise's modality)",
   routine_row_rest: "Rest",
   routine_row_rest_label: "Rest duration in seconds",
+  routine_row_load_label: "Load",
   routine_row_remove: "Remove exercise from routine",
   history_save_as_routine: "Save as routine",
   routine_saved_from_session: "Saved from the session of {date}",
@@ -663,6 +664,10 @@ export const en = {
   // `walkthrough_title` rather than adding a second spelling of the same name.
   splash_tagline: "A lightweight, free app for your clipboard, sessions and training programmes.",
   splash_dismiss: "Dismiss and continue to the app",
+  splash_loading: "Loading LibrePT",
+  notification_area_label: "Notification Center and Active Session",
+  notification_drawer_toggle: "Toggle notifications drawer",
+  notification_toggle: "Toggle notifications",
   splash_load_demo: "Explore with demo data",
   splash_start_empty: "Start with an empty app",
   // The trainer's own details. The lede says what they are FOR, because nothing in the

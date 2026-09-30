@@ -336,6 +336,7 @@ export const de = {
     "Hauptziel (Wiederholungen, Zeit, Strecke oder „max“ bis zum Muskelversagen — je nach Art der Übung)",
   routine_row_rest: "Pause",
   routine_row_rest_label: "Pausendauer in Sekunden",
+  routine_row_load_label: "Last",
   routine_row_remove: "Übung aus der Routine entfernen",
   history_save_as_routine: "Als Routine speichern",
   routine_saved_from_session: "Gespeichert aus dem Training vom {date}",
@@ -666,6 +667,10 @@ export const de = {
   splash_tagline:
     "Eine schlanke, kostenlose App für dein Klemmbrett, deine Trainings und Trainingsprogramme.",
   splash_dismiss: "Schließen und zur App",
+  splash_loading: "LibrePT wird geladen",
+  notification_area_label: "Benachrichtigungen und laufendes Training",
+  notification_drawer_toggle: "Benachrichtigungsfach öffnen oder schließen",
+  notification_toggle: "Benachrichtigungen öffnen oder schließen",
   splash_load_demo: "Mit Demodaten ausprobieren",
   splash_start_empty: "Mit leerer App beginnen",
   // The trainer's own details.

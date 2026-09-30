@@ -442,6 +442,7 @@ export function renderHeaderShell() {
         <a id="preview-badge" class="preview-badge"
            href="./preview.html"
            target="_blank" rel="noopener noreferrer"
+           data-i18n-label="preview_badge_desc"
            aria-label="Preview build — pre-release, may lose data. Open the risks & data-loss notice.">
           <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
           <span id="preview-badge-label" class="preview-badge-label">PREVIEW</span>
@@ -459,7 +460,7 @@ export function renderHeaderShell() {
       <div class="header-actions">
         <!-- Normal view actions -->
         <div class="normal-header-actions">
-          <button id="backup-btn" class="icon-btn sync-backup-btn" aria-label="Sync & Backup Data">
+          <button id="backup-btn" class="icon-btn sync-backup-btn" data-i18n-label="backup_center" aria-label="Sync & Backup Data">
             <!-- Cloud + recycle: this one control now covers both syncing session data and
                  backup/restore (the separate home-page Sync button was merged in here). -->
             <!-- The overlay glyph is state-driven (renderSyncCloudIcon): spinning arrows while

@@ -50,7 +50,7 @@ export function renderDataWipeDialog() {
 <dialog id="dialog-data-wipe" class="dialog-modal card glassmorphic">
   <div class="modal-header">
     <h3 id="data-wipe-title">Erase this device's LibrePT data</h3>
-    <button class="modal-close-btn" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+    <button class="modal-close-btn" data-i18n-label="close" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
   </div>
   <div class="modal-form">
     <p id="data-wipe-lede" class="text-sm"></p>

@@ -43,7 +43,7 @@ export function renderIntakeInviteDialog() {
 <dialog id="dialog-intake-invite" class="dialog-modal card glassmorphic">
   <div class="modal-header">
     <h3 id="intake-invite-title"></h3>
-    <button class="modal-close-btn" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+    <button class="modal-close-btn" data-i18n-label="close" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
   </div>
   <div class="modal-form">
     <p id="intake-invite-lede" class="text-sm"></p>

@@ -394,7 +394,7 @@ export function renderNotificationAreaShell() {
     (root) => root.querySelector(".notification-handle-bar"),
     `
     <div class="notification-handle-bar view-titlebar" id="notification-handle-bar">
-      <button class="view-grabber notification-grabber" id="notification-grabber-btn" type="button" aria-label="Toggle notifications drawer"></button>
+      <button class="view-grabber notification-grabber" id="notification-grabber-btn" type="button" data-i18n-label="notification_drawer_toggle" aria-label="Toggle notifications drawer"></button>
       
       <!-- Collapsed status summary preview when no active session bar -->
       <div class="notification-summary-preview" id="notification-summary-preview">
@@ -405,7 +405,7 @@ export function renderNotificationAreaShell() {
           </div>
           <div class="notification-summary-badges">
             <span id="notification-summary-count" class="notification-count-pill">3 unread / 3 all</span>
-            <button class="icon-btn notification-toggle-btn" id="btn-toggle-notifications" aria-label="Toggle Notifications">
+            <button class="icon-btn notification-toggle-btn" id="btn-toggle-notifications" data-i18n-label="notification_toggle" aria-label="Toggle Notifications">
               <i class="fa-solid fa-chevron-up toggle-chevron"></i>
             </button>
           </div>
