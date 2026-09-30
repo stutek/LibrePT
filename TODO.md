@@ -8204,3 +8204,58 @@ instead of needing a restart.
 Then a session arriving later can act instead of guessing: if the note is absent, or its watchdog pid
 is gone while the browser is alive, the browser has no keeper and may be closed. Today that judgement
 needed reading `/proc`, and the answer still had to go to Simon.
+
+## 94. [ ] Manj korakov v trenerjevih opravilih — štetje 2026-09-30
+
+**Naročil Simon 2026-09-30:** preštej dotike in črke pri trenerjevih opravilih, oceni čas in poišči,
+kje se da korake skrajšati. Opravila so iz pričakovanj dveh trenerjev brez predznanja, ki sta pred
+prvim odprtjem zapisala, kaj hočeta opraviti v prvi uri. Štel sem po najkrajši poti, ki jo trener
+pozna po prvi uri, na `main` `12d0e66`, 390 × 844, sl, prazna aplikacija. Potek po korakih je v
+`.private/exploratory-test/first-open/2026-09-30-stetje-korakov.md` (ni v gitu).
+
+**Čas je ocena, ne meritev:** dotik 1,5 s, črka 0,4 s, vsako novo okno ali zaslon 2 s branja.
+
+| opravilo                                        | dotiki | črke | okna | ocena |
+| :---------------------------------------------- | -----: | ---: | ---: | ----: |
+| T0 prvi zagon do prazne aplikacije              |     10 |   40 |    5 |  41 s |
+| T1 nova stranka: ime, telefon, poškodba         |      7 |   51 |    3 |  37 s |
+| T2 trening jutri 18:00–19:00 za stranko         |      9 |   16 |    2 |  24 s |
+| T3 načrt: 3 vaje iz kataloga s težo             |     17 |   17 |    4 |  40 s |
+| T4 izvedba in zaključek                         |      5 |    0 |    2 |  12 s |
+| T5 isti načrt kot rutina (»Ustvari rutino«)     |     15 |   30 |    3 |  41 s |
+| T6 skupina treh novih strank                    |     15 |   42 |    5 |  49 s |
+| T7 »Pretežko« in razrešitev po treningu         |      6 |    0 |    3 |  15 s |
+| T8 tedenska serija z rutino                     |     12 |   24 |    3 |  34 s |
+
+**Kaj številke skrijejo.** T4 je kratek, ker ničesar ne zapiše: vaje, narejene po načrtu, ni s čim
+označiti (§80.6), ročno sestavljen načrt pa po zaključku izgine (§80.52). Zato T5 ni »shrani«, ampak
+ponoven vnos istih treh vaj: T3 in T5 skupaj stane 81 s za en program. T6 doda za vsako nadaljnjo
+stranko 3 dotike, okoli 11 črk in eno okno (≈ 11 s); skupina desetih je okoli dve minuti. T7 velja le,
+če trener stran osveži (§80.131).
+
+**Priložnosti, od največjega prihranka.** Vsaka spremeni izdelek, zato **čakajo na Simona**.
+
+1. **En dotik »opravljeno po načrtu« na kartici vaje**, ali ob zaključku »Vse je bilo po načrtu«.
+   Ne skrajša T4, ampak ga naredi uporabnega: brez tega trening ne pusti zgodovine (§80.6).
+2. **»Shrani kot rutino« v meniju ⋮ podloge**, iz načrta, ki je na zaslonu. T5 s 15 dotikov in 30
+   črk na okoli 3 dotike in ime (≈ 10 s namesto 41 s), in nobenega ponovnega vnosa tež.
+3. **Izbirnik kataloga ostane odprt za več vaj**, kot že v »Ustvari rutino«, in nova vaja se odpre
+   sama. T3 s 17 na 11 dotikov (≈ −9 s); iskanje se po izbiri izprazni.
+4. **Eno vprašanje ob zaključku namesto dveh** (»še 26h 49m« in »Ni zabeleženih zaključenih serij«):
+   −1 dotik, −1 okno pri vsakem treningu, zaključenem pred koncem ure.
+5. **Okno »Pošlji vabila v koledar« ne po vsakem »Shrani«** (§88.6): −1 dotik, −1 okno pri vsakem
+   treningu (≈ 3,5 s, 15 % T2).
+6. **Nova stranka samo z imenom, brez okna** (§88.2): pri skupini −1 dotik in −1 okno na osebo.
+7. **Fokus v prvem polju, ko se obrazec odpre** (»Dodaj novo stranko« ima fokus na ✕): −1 dotik,
+   tipkovnica se odpre sama.
+8. **Ob »Začni trening« odprta prva vaja** (§80.129): −1 dotik na trening.
+9. **Polja urejevalnika načrta ob dotiku označijo vsebino**, kot polje za uro: sprememba »10« v »8«
+   brez dveh izbrisov.
+10. **Datum:** sprejeti »6.10.2026« (§80.127) in pri »DO (NEOBVEZNO)« ponuditi konec glede na začetek
+    (»+4 tedne«, »+8 tednov«) namesto »danes«, »jutri«, »pet. 2.«, ki za konec serije ne pomagajo.
+11. **Prvi zagon:** tema bi lahko bila privzeta (Dan) in izbira v Nastavitvah: −2 dotika, −1 okno.
+    Obvezni podatki so Simonov sklep v §81, zato jih ta točka ne spreminja.
+
+Že dobro: dotik na uro označi vsebino in »1800«, »9.30«, »17.45« se preberejo pravilno; konec ure se
+premakne sam; »Ponovi vsak teden« sam izbere dan; predlog pri »Pretežko« je izračunan iz načrta (12 →
+9.5 kg); iskanje strank ponudi »Dodaj »ime« kot novo stranko« in ime prenese v obrazec.
