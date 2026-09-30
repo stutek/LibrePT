@@ -6837,6 +6837,16 @@ je Novak pozneje izbrisan, ta zapis ostane — natanko ostanek, ki naj bi ga §6
 pravo ime telovadnice. Danes ni nobene poti, da bi trener povedal »to je fitnes, ne stranka«;
 zavrnitev je absolutna. Aplikacija tega ne more vedeti sama — ve samo trener.
 
+**Dodaten scenarij prek vmesnika, objavljena `8b2ce80`:** v imeniku je TEST Luka
+Kovač z vzdevkom »jutranji · Studio A«. Trener ustvari »SIM Previdna vadba« samo za
+drugo stranko, TEST Maja Omejitev, za jutri 10:00–10:45. Lokaciji »Studio test« in
+»Studio« sta obe zavrnjeni: »Kraj ne sme vsebovati imena stranke, Studio pa je ime
+stranke.« Po zamenjavi lokacije s »Telovadnica B« ista oddaja uspe. Tako že del
+vzdevka osebe, ki pri vadbi ne sodeluje, prepreči uporabo običajnega naziva prostora.
+Predlog: pri presoji naključnega ujemanja zajeti tudi vzdevke in generične besede
+za kraj, ne le priimke; morebitna sprememba pravila ostaja predmet zgornje odločitve.
+Sl, 390 × 844, brez novih prestreženih napak; brez pregleda kode.
+
 **Pokritost:** [clientNameWords.test.mjs](tests/unit_js/domain/clientNameWords.test.mjs) preizkuša
 samo čisto funkcijo. Vrstni red »besedilo prej, stranka pozneje« ni pokrit z nobenim testom.
 
