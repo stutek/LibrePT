@@ -6711,8 +6711,10 @@ neimenovano stranko **brez besede**. Tri poti, brez zavrnitve shranjevanja:
 2. polje že ob odprtju kaže podomestek kot vrednost, tako da trener vidi, kaj bo shranjeno;
 3. pravilo se zoži: podomestek velja za vse razen imena, ime pa zadrži zapiranje z besedilom pri
    polju, kot ga ima uvodni obrazec (»Izpolni to polje.«).
-Začetnice, ki ostanejo »NS« po preimenovanju, so navadna napaka in ne čakajo na nič; popravljene bodo
-posebej.
+Začetnice, ki ostanejo »NS« po preimenovanju, so navadna napaka in ne čakajo na nič. **Popravljeno
+2026-09-30:** začetnice zdaj sledijo imenu tudi pri preimenovanju, ne le pri dodajanju; posebej
+nastavljen znak stranke se ne povozi (`src/controllers/clientFormsController.js`, preizkušeno v
+`tests/medium/test_clients_directory.py`). Odprto ostaja samo Simonovo vprašanje zgoraj.
 
 ### 80.106 [x] P3 — Vprašanje pred zaključkom treninga šteje čas v minutah: »še približno 3812 minut« — popravljeno 2026-09-30
 
