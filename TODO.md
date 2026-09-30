@@ -6961,45 +6961,22 @@ what shipped is in [CHANGELOG.md](CHANGELOG.md).
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80126-x-p3--pred-izbiro-jezika-stran-nima-html-lang-besedilo-za-oknom-pa-je-angleško--popravljeno-2026-09-30);
 what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-### 80.127 [ ] P1 — Datum, vpisan po slovensko »6.10.2026«, se tiho shrani kot 6102-02-06
+### 80.127 [x] P1 — Datum, vpisan po slovensko »6.10.2026«, se tiho shrani kot 6102-02-06 — popravljeno 2026-09-30
 
-**Scenarij in koraki:** »Ustvari trening«, tapniti polje »DATUM« in vpisati »6.10.2026«, kot se datum
-piše v Sloveniji. Zapustiti polje, dodati stranko Maja Kranjc, »Shrani«.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80127-x-p1--datum-vpisan-po-slovensko-6102026-se-tiho-shrani-kot-6102-02-06--popravljeno-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-**Opaženo:** polje pokaže »6102-02-06«. Opozorila ni, polje ni označeno kot napačno. Po »Shrani« se
-odpre okno z vabili, nato seznam na naslovu `/sessions/6102-02-06`: trening je shranjen v leto 6102.
-Za primerjavo: »20261006« da pravilno 2026-10-06. Polje ima številsko tipkovnico
-(`inputmode=numeric`); na mnogih telefonih ta nima vezaja, pika pa je na njej.
+### 80.128 [x] P2 — Prazna slovenska aplikacija predlaga angleška imena treningov in krajev — popravljeno 2026-09-30
 
-**Težava in vpliv:** trener vpiše termin za naslednji torek po navadi, ki jo ima, in trening izgine
-s seznama tega tedna. Stranka pride, trener pa termina nima. Vabilo v koledar bi stranki poslalo
-datum 6102.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80128-x-p2--prazna-slovenska-aplikacija-predlaga-angleška-imena-treningov-in-krajev--popravljeno-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-**Predlog:** polje naj sprejme »6.10.2026« in »6. 10.« kot 2026-10-06, ali pa vnos zavrne in pove,
-kako se piše. Nikoli naj ne shrani drugega datuma brez besede (isto načelo kot zaprta §80.59).
-Opaženo na `main` `12d0e66`, sl, 390 × 844.
+### 80.129 [~] P3 — Ob začetku treninga ni odprta prva vaja: ali nobena ali zadnja dodana
 
-### 80.128 [ ] P2 — Prazna slovenska aplikacija predlaga angleška imena treningov in krajev
-
-**Scenarij in koraki:** svež brskalnik, `?lang=sl`, »Začni s prazno aplikacijo« (vzorčni podatki
-nikoli naloženi). Trener vpiše treninga »Moč« in »Moč A« in kraj »Studio«. Nato »Ustvari trening« in
-dotik polja »Izberi ali vpiši ime treninga ...«.
-
-**Opaženo:** seznam predlogov imena: »Morning Strength«, »Hypertrophy Upper«, »Full Body
-Conditioning«, »Cardio & Core«, »Athletic Performance«, »Mobility & Recovery«, »Lower Body Power«,
-»Personal Training 1-on-1«, šele nato »Moč« in »Moč A«. Predlogi kraja: »Trib gym base«,
-»playground outside«, »city park«, »Studio A«, »Main Gym Floor«, »Client Home Studio«, nato
-»Studio«. Zaprta §46.4 je prevedla vzorčne podatke; tu vzorca ni, besede so vseeno tam.
-
-**Težava in vpliv:** trener v slovenski aplikaciji dobi osem angleških imen pred svojim. Svoj
-»Moč« najde na devetem mestu. Kraja »Trib gym base« in »city park« nista njegova in ga zmedeta,
-ali je aplikacija pomešala njegove podatke s tujimi.
-
-**Predlog:** v prazni aplikaciji naj predlogi vsebujejo le imena in kraje, ki jih je trener že
-vpisal; ali pa naj bodo vzorčni predlogi v jeziku aplikacije in za trenerjevimi. Opaženo na `main`
-`12d0e66`, 390 × 844.
-
-### 80.129 [ ] P3 — Ob začetku treninga ni odprta prva vaja: ali nobena ali zadnja dodana
+**Stanje 2026-09-30 (librept-02):** (b) je popravljen: »Začni trening« za aktivno vajo izbere prvo,
+ki še ni opravljena (`ba6c546`). **Odprto, čaka na Simona:** (a). Da se nov trening odpre z vsemi
+vajami zaprtimi, je zapisana odločitev v `sessionPlanFactory.js`; ali ob »Začni trening« odpreti
+prvo vajo, je sprememba te odločitve.
 
 **Scenarij in koraki:** (a) trening z rutino »Moč A« (tri vaje), ki ga trener ne ureja: odpreti s
 seznama, »Začni trening«. (b) trening brez rutine: v »Uredi načrt« dodati tri vaje, »Končano z
@@ -7016,42 +6993,20 @@ začne pri napačni vaji ali misli, da sta prvi dve že za njim.
 **Predlog:** ob »Začni trening« naj bo odprta prva vaja, ki še ni opravljena. Opaženo na `main`
 `12d0e66`, sl, 390 × 844.
 
-### 80.130 [ ] P2 — Vsaka stranka, dodana na trening, samodejno dobi prvo rutino v knjižnici
+### 80.130 [x] P2 — Vsaka stranka, dodana na trening, samodejno dobi prvo rutino v knjižnici — popravljeno 2026-09-30
 
-**Scenarij in koraki:** v knjižnici je ena rutina, »Moč A« (Dumbbell Goblet Squat 12 kg, Dumbbell
-Bench Press 30 kg, Barbell Row 25 kg). »Ustvari trening«, dodati obstoječo stranko Ana Zupan in novo
-stranko »Nova Oseba« prek »Dodaj »Nova Oseba« kot novo stranko«. Rutine ne izbrati.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80130-x-p2--vsaka-stranka-dodana-na-trening-samodejno-dobi-prvo-rutino-v-knjižnici--popravljeno-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-**Opaženo:** izbirnik rutine pri obeh kaže »Moč A«, ne »Izberi rutino« ali »Prazen načrt, brez
-rutine«. Skupina treh novih strank (»Skupina«, jutri) je shranjena s »Moč A« na kartici, čeprav je
-trener ni izbral. Pred prvo rutino je izbirnik kazal »Prazen načrt, brez rutine«.
+### 80.131 [x] P2 — Takoj po zaključku treninga predal pravi »Vse je pregledano«, signal se pokaže šele po osvežitvi — popravljeno 2026-09-30
 
-**Težava in vpliv:** nova stranka, o kateri trener še ne ve ničesar, dobi program z utežmi, ki ga je
-sestavil za nekoga drugega. Če tega ne opazi v vrstici pod imenom, je program na podlogi. Popravek
-`0caf9b5` je ista stvar odpravil pri odpiranju (»a programme nobody chose«); obrazec jo zdaj naredi
-pri vpisu.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80131-x-p2--takoj-po-zaključku-treninga-predal-pravi-vse-je-pregledano-signal-se-pokaže-šele-po-osvežitvi--popravljeno-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-**Predlog:** izbirnik naj ostane »Prazen načrt, brez rutine«, dokler trener ne izbere; ali naj
-predlaga rutino, ki jo je ta stranka imela zadnjič. Opaženo na `main` `12d0e66`, sl, 390 × 844.
+### 80.132 [~] P2 — Teža pri Lat Pulldown se shrani kot »Lvl 60«; polje enoto pove le angleško in le, ko je prazno
 
-### 80.131 [ ] P2 — Takoj po zaključku treninga predal pravi »Vse je pregledano«, signal se pokaže šele po osvežitvi
-
-**Scenarij in koraki:** trening »Moč« (rutina »Moč A«) za Maja Kranjc. »Začni trening«, tapniti prvo
-vajo, »Pretežko«, »Zaključi vadbo« → »Zaključi zdaj« → »Zaključi zdaj«. Pogledati predal z
-obvestili. Nato osvežiti stran.
-
-**Opaženo:** po zaključku predal: »Obvestila in pregled stanja«, »Vse je pregledano — trenutno tukaj
-ni ničesar.« Po osvežitvi: »Treningi, ki čakajo na pregled«, »1 stranka ima nerešene povratne
-signale iz treninga.«, »Maja Kranjc — Moč (1)«. Enako že prej s hitrim »Prelahko« pri SIM Nina
-Koleno (treninga »Rehabilitacija«). Signal, dan z »Opombe« → »Zapiši opozorilo«, pa se pokaže takoj.
-
-**Težava in vpliv:** trener po treningu pogleda, ali mora kaj popraviti v programu, in prebere, da
-ne. Signal »Pretežko« ostane nerešen, naslednji trening ima enako težo.
-
-**Predlog:** predal naj se po zaključku osveži, kot se je seznam treningov v zaprti §80.107.
-Opaženo na `main` `12d0e66`, sl, 390 × 844.
-
-### 80.132 [ ] P2 — Teža pri Lat Pulldown se shrani kot »Lvl 60«; polje enoto pove le angleško in le, ko je prazno
+**Stanje 2026-09-30 (librept-02):** enota je v jeziku aplikacije (»Stopnja 60«) in stoji ob polju tudi
+z vpisano številko (`151b92d`). **Odprto, čaka na Simona:** ali naj vaja na napravi dovoli kilograme.
 
 **Scenarij in koraki:** ☰ → »Vaje in rutine« → »Rutine« → »Ustvari rutino«, dodati Lat Pulldown,
 v polje za breme vpisati 60 (trener misli kilograme), »Shrani«.
@@ -7067,7 +7022,13 @@ in »Level« sta angleška.
 **Predlog:** enota v jeziku aplikacije, vidna tudi ob vpisani številki, in možnost kilogramov pri
 vajah na napravi. Opaženo na `main` `e8e90d8`, sl, 390 × 844; najprej opazil trener dneva 07.
 
-### 80.133 [ ] P2 — Ocena obrazca »Uveljavi spremembo programa«: ne pove vaje ne stare vrednosti, Esc zavrže
+### 80.133 [~] P2 — Ocena obrazca »Uveljavi spremembo programa«: ne pove vaje ne stare vrednosti, Esc zavrže
+
+**Stanje 2026-09-30 (librept-02):** okno pove vajo (»Vaja: …«), oznaka polja sledi enoti vaje
+(stopnja, elastika, dodatna teža ali kg) (`22df0f8`). **Odprto, čaka na Simona:** kaj naredita Esc
+in ✕. Okno ne piše sproti kot obrazec, zato pravilo »zavrže le Prekliči« zanj ne velja samo po sebi;
+enako vprašanje je pri »Moji podatki«. Odprto ostaja tudi: »prej«, za koga, od katere seje,
+številska tipkovnica pri ponovitvah (P3, ne čaka na nikogar).
 
 Način 3. Naloga (podagent, pred ogledom obrazca): stranki je bila vaja pretežka, po treningu ji
 popravi program. Pot: »Treningi, ki čakajo na pregled« → vrstica stranke → »Razreši«. `main`
@@ -7102,7 +7063,11 @@ Naloga podagenta: `.private/exploratory-test/forms/2026-09-30-06-task.md`. Stran
 Trenerjeva preverba po koncu: »Odprem njeno današnjo sejo, ki je že bila: stara vrednost je ostala.«
 Tega ni mogel preveriti, ker trening brez zapisane vaje ne pride v zgodovino (§80.6).
 
-### 80.134 [ ] P1 — Ocena obrazca »Uredi načrt«: načrt za jutri po osvežitvi izgine, ogrevanje ne more biti časovno
+### 80.134 [~] P1 — Ocena obrazca »Uredi načrt«: načrt za jutri po osvežitvi izgine, ogrevanje ne more biti časovno
+
+**Stanje 2026-09-30 (librept-02):** urejevalnik pravi »Krogi«, kot podloga (`b95c673`). Vse ostalo
+je odprto: izginuli načrt čaka na §80.52, opomba pri vaji na Simona; časovna vaja po meri, prazna
+vrstica v novem sklopu in dva nenaročena počitka ne čakajo na nikogar.
 
 Način 3. Naloga (podagent, pred ogledom obrazca): zvečer načrt jutrišnjega enournega treninga za
 stranko z bolečo levo ramo: ogrevanje 8 min, štiri vaje s serijami, ponovitvami in težo, dve od
@@ -7134,23 +7099,10 @@ Maja Novak brez rutine → podloga → ⋮ → »Uredi načrt«. `main` `e8e90d8
 - Dobro: fokus je v imenu nove vaje, ocena trajanja opozori »49 / 60 min · na tesnem«, plank je
   časovna vaja s poljem »DRŽA«, vrstni red na podlogi je enak vrstnemu redu v urejevalniku.
 
-### 80.135 [ ] P2 — Trening, ki teče, se brez vprašanja prestavi na drug dan; tam ostane »Zaključeno«
+### 80.135 [x] P2 — Trening, ki teče, se brez vprašanja prestavi na drug dan; tam ostane »Zaključeno« — popravljeno 2026-09-30
 
-**Scenarij in koraki:** trening »Jutranja« danes (2026-09-30) za Emily Stone, rutina »Tri vaje«.
-»Začni trening«. Na seznamu svinčnik »Uredi« na kartici, čip »pet. 2.«, »Shrani«. Nato trening
-zaključiti in odpreti seznam za 2026-10-02 ter stran stranke.
-
-**Opaženo:** shranjevanje ne vpraša ničesar. Na petku 2026-10-02 stoji »Aktiven trening 01h 06m«,
-spodnja vrstica šteje naprej (»1:06:51«), na sredi treninga ni več. Po zaključku ima petek »Zaključeno
-00:01«, zgodovina stranke pa »2026-09-30«. Trenerka dneva 08 je trening prestavila, ker je mislila, da
-prestavlja termin, ki se še ni zgodil: »Aplikacija ni vprašala, ali premik velja za začet trening.«
-
-**Težava in vpliv:** petkov termin je zaseden s treningom, ki je bil v sredo; urnik za petek laže, v
-sredo pa ni zapisa, da je trening bil. Če je trener hotel prestaviti naslednji termin, ta ostane
-nedotaknjen.
-
-**Predlog:** pri treningu, ki teče ali je končan, naj »Uredi« datum ne ponudi ali naj vpraša, ali gre
-za drug termin. Opaženo na `main` `e8e90d8`, sl, 390 × 844; najprej opazila trenerka dneva 08.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80135-x-p2--trening-ki-teče-se-brez-vprašanja-prestavi-na-drug-dan-tam-ostane-zaključeno--popravljeno-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ### 80.136 [ ] P1? — Šifrirana varnostna kopija v brskalniku orodja ne pride do datoteke; preveriti na telefonu
 
@@ -7171,7 +7123,11 @@ ko telefon izgubi, izgubi vse stranke. Iz brskalnika orodja tega ni mogoče loč
 Androidu in v Safariju na iPhonu izvoziti kopijo in pogledati, ali je v »Prenosi« datoteka. Če je,
 se zapis zapre kot omejitev orodja in ostane le protislovje sporočil (P3).
 
-### 80.137 [ ] P2 — Stranka z angleškim »Jezik obrazca« dobi slovensko vabilo in slovensko stran za odgovor
+### 80.137 [~] P2 — Stranka z angleškim »Jezik obrazca« dobi slovensko vabilo in slovensko stran za odgovor
+
+**Stanje 2026-09-30 (librept-02):** vabilo na trening je v jeziku obrazca stranke: e-pošta, SMS in
+stran za odgovor (`dcc2cae`). **Odprto:** »Povabi stranko« (spodaj, dodano 19:11). Nova stranka
+jezika obrazca še nima, zato ga okno ne more prebrati; potrebuje izbiro jezika v oknu.
 
 **Scenarij in koraki:** stranka Emily Stone, e-pošta vpisana, »Uredi profil« → privolitev →
 »Jezik obrazca: English« → »Shrani«. Nato trening »Moč« za jutri z Emily, »Shrani«, v oknu »Pošlji
@@ -7195,41 +7151,15 @@ povezavo `intake?lang=sl` in slovensko obvestilo o zasebnosti (`privacy-notice-s
 prijavo sama ponudi »English«, »Slovenščina«, »Deutsch«, a do nje stranka pride prek slovenskega
 sporočila.
 
-### 80.138 [ ] P1 — Konec serije, vpisan pri današnjem večeru, podvoji današnji večer in serije ne konča
+### 80.138 [x] P1 — Konec serije, vpisan pri današnjem večeru, podvoji današnji večer in serije ne konča — popravljeno 2026-09-30
 
-**Scenarij in koraki:** tedenska serija »Hipertrofija« ob sredah ob 07:00 od danes (2026-09-30) za
-Petro Zupan. Večer 7. 10. odpreti s svinčnikom »Uredi« in »Shrani« (nič spremenjeno). Nato današnji
-večer »Uredi«: obkljukati »Spremeni vse večere tega treninga«, nato »Ponovi vsak teden« (pri večeru
-serije je prikazan neobkljukan), v »DO (NEOBVEZNO)« vpisati 20261006, »Shrani«.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80138-x-p1--konec-serije-vpisan-pri-današnjem-večeru-podvoji-današnji-večer-in-serije-ne-konča--popravljeno-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-**Opaženo:** na seznamu je današnji večer dvakrat, obe kartici »07:00 - 08:00 Hipertrofija … Zamuja«
-(eden je shranjen zapis, drugi večer serije `…@2026-09-30`). Serija teče dalje: 7., 14., 21. 10. in
-naprej. Po »Izbriši trening« pri eni od kartic (okno: »Izbriše se samo ta večer, ostali ostanejo«)
-izgineta obe; današnjega treninga ni več. Trener dneva 09 je hotel ustaviti serijo za dva tedna
-stranke na dopustu.
+### 80.139 [x] P3 — V »Ustvari rutino« gumb »Dodaj vajo« skrije izbirnik vaj, ki je že odprt — popravljeno 2026-09-30
 
-**Težava in vpliv:** trener misli, da je serijo končal, termini pa se še naprej pojavljajo; na
-današnji dan ima dva enaka termina, in ko enega izbriše, izgubi oba. Stranka na dopustu ostane v
-urniku.
-
-**Predlog:** »Do« pri »Spremeni vse večere« naj serijo konča na tem dnevu in ne ustvari novega večera;
-izbris enega večera naj pusti drugi. Pri večeru serije naj bo »Ponovi vsak teden« prikazan kot
-obkljukan. Opaženo na `main` `e2daf5e`, sl, 390 × 844; najprej opazil trener dneva 09.
-
-### 80.139 [ ] P3 — V »Ustvari rutino« gumb »Dodaj vajo« skrije izbirnik vaj, ki je že odprt
-
-**Scenarij in koraki:** ☰ → »Vaje in rutine« → »Rutine« → »Ustvari rutino«. Pritisniti »Dodaj vajo«,
-nato še enkrat.
-
-**Opaženo:** ob odprtju okna je izbirnik vaj že odprt (»Išči vaje«, filtri, 48 vaj). Prvi dotik na
-»Dodaj vajo« ga zapre, drugi odpre. Trener dneva 09: »tapni "Dodaj vajo" (izbirnik se ne odpre),
-tapni še enkrat (odpre se)«.
-
-**Težava in vpliv:** gumb, ki pravi »dodaj«, prvič skrije seznam, iz katerega se dodaja. Trener
-misli, da gumb ne deluje.
-
-**Predlog:** ko je izbirnik odprt, naj gumb pravi, kaj naredi (na primer »Skrij seznam vaj«), ali naj
-izbirnik ostane odprt. Opaženo na `main` `e2daf5e`, sl, 390 × 844.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80139-x-p3--v-ustvari-rutino-gumb-dodaj-vajo-skrije-izbirnik-vaj-ki-je-že-odprt--popravljeno-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ### 80.140 [ ] P2 — Poglavje »Izvedba in prilagoditve treninga«: korak imenuje angleški gumb, opombe ob vaji ni
 
