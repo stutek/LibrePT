@@ -251,3 +251,72 @@ def test_a_movement_added_from_the_catalog_brings_no_rest_the_trainer_did_not_as
         page.wait_for_selector("#dialog-catalog-picker[open]", state="detached")
 
     assert page.locator(".editor-rest-row").count() == rests_before
+
+
+def _swap_first_row_to(page, local_server, current, target, weight=80):
+    """Swap the only row from `current` to the catalog movement `target` through the picker."""
+    load_with_stub(
+        page,
+        local_server,
+        clipboard_stub(
+            active_session_fixture(
+                exercises=[
+                    exercise_item(
+                        "exA",
+                        current,
+                        loadUnit="kg",
+                        modality="strength",
+                        metric="reps",
+                        sets=[
+                            {"reps": 10, "weight": weight, "completed": False},
+                            {"reps": 10, "weight": weight, "completed": False},
+                        ],
+                    )
+                ]
+            )
+        ),
+    )
+    page.wait_for_selector("#active-session-overlay:not(.hidden)")
+    open_plan_editor(page)
+    page.wait_for_selector(".clipboard-editor")
+    page.locator(".editor-row .editor-row-catalog").first.click()
+    page.wait_for_selector("#dialog-catalog-picker[open]")
+    page.click(
+        "#catalog-picker-mount .picker-chips[data-axis=muscle] .chip[data-value=All]"
+    )
+    search = page.locator("#catalog-picker-mount .picker-search")
+    search.fill(target)
+    page.wait_for_function(
+        """(name) => document.querySelector('#catalog-picker-mount .picker-item-name')
+                       ?.innerText.trim() === name""",
+        arg=target,
+    )
+    search.press("Enter")
+    page.wait_for_selector("#dialog-catalog-picker[open]", state="detached")
+    return page.evaluate(
+        """async () => {
+             const ctrl = await import(new URL('controllers/activeSessionController.js', document.baseURI).href);
+             const session = ctrl.getActiveSession();
+             const item = session.clientRoutines[session.activeClientId].exercises[0];
+             return { name: item.name, loadUnit: item.loadUnit,
+                      sets: item.sets.map((s) => [s.reps, s.weight]) };
+           }"""
+    )
+
+
+def test_swapping_a_machine_for_a_hold_does_not_carry_the_machines_load(
+    page, local_server
+):
+    """Leg Press at 80 kg swapped for Wall Sit: the 80 kg belonged to the machine. Carried over it
+    becomes 'BW+80kg' held for ten seconds, which a trainer between two clients does not notice."""
+    after = _swap_first_row_to(page, local_server, "Leg Press", "Wall Sit")
+    assert after["name"] == "Wall Sit"
+    assert after["loadUnit"] == "bw"
+    assert after["sets"] == [[10, 0], [10, 0]]
+
+
+def test_swapping_for_the_same_kind_of_movement_keeps_the_load(page, local_server):
+    """Leg Press for Leg Extension is a machine for a machine: the trainer's 80 kg is still a fair start."""
+    after = _swap_first_row_to(page, local_server, "Leg Press", "Leg Extension")
+    assert after["name"] == "Leg Extension"
+    assert after["sets"] == [[10, 80], [10, 80]]

@@ -84,6 +84,22 @@ function injectExerciseIntoActivePlan(baseEx, { sets, reps, weight, rest }) {
   renderBoardUnlessDialogIsOpen();
 }
 
+// The starting numbers of a movement added from the catalog (see the picker's onSelect below).
+const DEFAULT_REPS = 10;
+const DEFAULT_WEIGHT = 0;
+
+// Puts the row's not-yet-done targets back to the defaults. A set the trainer already completed is a
+// record of what was done and stays as it is.
+function resetTargets(item, clientState) {
+  if ("repsTarget" in item) item.repsTarget = DEFAULT_REPS;
+  if ("weightTarget" in item) item.weightTarget = DEFAULT_WEIGHT;
+  for (const set of [...(item.sets || []), ...(clientState.logs?.[item.id] || [])]) {
+    if (set.completed) continue;
+    set.reps = DEFAULT_REPS;
+    set.weight = DEFAULT_WEIGHT;
+  }
+}
+
 // Retarget an existing plan row at a different movement, keeping the slot: the id, the sets and the
 // logs already written against them survive, so a swap changes WHAT is done, never what was done.
 function swapPlanItemMovement(slotId, baseEx) {
@@ -92,14 +108,25 @@ function swapPlanItemMovement(slotId, baseEx) {
   const clientState = activeSession.clientRoutines[activeSession.activeClientId];
   const item = clientState?.exercises?.find((e) => e.id === slotId);
   if (!item) return;
+  const loadUnit = loadUnitForEquipment(baseEx.equipment);
+  const modality = modalityOf(baseEx);
+  const metric = primaryMetricOf(baseEx);
+  // A load and a rep count mean something only for the kind of movement they were set for: 80 kg on
+  // a machine, carried to a wall sit, becomes "BW+80kg" held for ten seconds. When the unit, the
+  // modality or the metric changes, the numbers go back to what "Add from catalog" starts with.
+  const kindChanged =
+    (item.loadUnit || "kg") !== loadUnit ||
+    modalityOf(item) !== modality ||
+    primaryMetricOf(item) !== metric;
   item.exerciseId = baseEx.id;
   item.name = baseEx.name;
   item.category = baseEx.category;
   item.pattern = baseEx.pattern || "";
   item.instructions = baseEx.instructions || "";
-  item.loadUnit = loadUnitForEquipment(baseEx.equipment);
-  item.modality = modalityOf(baseEx);
-  item.metric = primaryMetricOf(baseEx);
+  item.loadUnit = loadUnit;
+  item.modality = modality;
+  item.metric = metric;
+  if (kindChanged) resetTargets(item, clientState);
   markEditorRow(slotId, { kind: "swap", focus: false });
   saveActiveSessionToCache();
   const { saveToLocalStorage } = getAppDeps();
