@@ -20,6 +20,269 @@ Read [CHANGELOG.md](CHANGELOG.md) for what shipped and when. This file is why.
 
 ---
 
+### 80.10 [x] P1 — Po zaključku aktivnega treninga se testni zavihek ne odziva — popravljeno 2026-09-30
+
+**Scenarij:** prek »Ustvari trening« ustvariti »Individualna vadba« za Ano, dodati
+počep 3 × 10 × 8 kg, začeti trening, sprejeti ponujeni premik na dejanski čas,
+v »Opombe« izrecno izbrati »Too Hard - Reduce Load« in vnesti besedilo izvedbe.
+Ponovno odpreti in preklicati opombo ter pritisniti »Zaključi vadbo«.
+
+**Opaženo:** zahteva za klik in nato branje strani ne odgovorita v 30 sekundah.
+Chrome ohrani zavihek; CDP potrdi, da ni odprtega JavaScript potrditvenega okna.
+Po zaprtju samo testnega zavihka in odprtju aplikacije v istem profilu je trening še
+aktiven, opomba je ohranjena. Ponovljen zaključek z dejanskimi dogodki miške prek CDP
+znova obstane; prejšnje branje kartice uspe, klik zaključka pa ne odgovori.
+
+**Vpliv:** preizkus zaključka in pregleda opravljenih serij je blokiran. Vzrok še ni
+lokaliziran: to je ponovljiv zastoj testnega zavihka ob zaključku, ne dokaz določene
+napake v kodi. Preizkušeno v Chrome CDP na objavljeni različici `0625bd6`.
+
+**Predlog in preverjanje:** ponoviti zaključek v običajnem uporabniškem kliku ter
+ugotoviti vzrok neodzivnosti. Zaključek mora potrditi shranitev in po ponovnem odprtju
+pokazati zaključeno vadbo; preklic pa mora ohraniti odziven aktiven trening.
+
+**Stanje 2026-09-27:** verjetni vzrok je odstranjen. Zaključek pred iztekom in zaključek brez serij sta
+odprla dve okni brskalnika (`confirm`) zaporedoma, in dokler stojita, stran ne dela ničesar (§80.19).
+Od `f49f7e4` sprašuje okno aplikacije, ki strani ne ustavi. **Odprto:** ponoviti scenarij v brskalniku
+na objavljeni gradnji; zaprto šele, ko se zaključek odzove in shrani.
+
+**Zaprto 2026-09-30 (Claude):** vzrok (dve okni brskalnika zaporedoma) je odstranjen v `f49f7e4`, v
+`src/` ni več nobenega `confirm()`. Zaključek začetega treninga z oknom aplikacije pokriva
+`test_session_start_time_adjust.py` (»Finishing asks twice in the app's own dialog«), ki teče v vsaki
+gradnji.
+
+### 80.111 [x] P2 — Nova stranka: gumba pravita »E-pošta ni vpisana« in »Telefon ni vpisan«, čeprav sta vpisana — popravljeno 2026-09-30
+
+**Scenarij in koraki:** »Ustvari trening« → v polje »Poišči stranko po imenu...« vpisati
+»SIM Vera Kos« → »Dodaj »SIM Vera Kos« kot novo stranko«. Vpisati e-pošto in telefon, nato
+označiti »Stranka je podpisala privolitev (hramba podatkov in sinhronizacija v oblak)«.
+Tipkati v polje »E-pošta« in ga zapustiti.
+
+**Opaženo:** pod privolitvijo sta sivi, onemogočeni gumbi z napisom »E-pošta ni vpisana« in
+»Telefon ni vpisan«. Napisa se ne spremenita, ko sta polji izpolnjeni, ne ob tipkanju in ne
+ob izhodu iz polja.
+
+**Težava in vpliv:** trener prebere, da e-pošte ni vpisal, čeprav jo je. Ne ve, ali je polje
+sprejelo naslov in ali bo obrazec za privolitev lahko poslal.
+
+**Predlog:** gumba naj se odzoveta na vpisani naslov in številko. Če obrazca pred shranjevanjem
+stranke ni mogoče poslati, naj to piše: na primer »Obrazec pošlješ, ko stranko shraniš«.
+Opaženo na `main` `12d0e66`, sl, 390 × 844.
+
+### 80.112 [x] P3 — Gumb »Ni se zgodila« v oknu, ki govori o »treningu« — popravljeno 2026-09-30
+
+**Scenarij in koraki:** trening za danes ob 18:00 začeti ob 12:30 z »Začni trening«.
+
+**Opaženo:** okno »Trening se je začel izven urnika« ponudi »Ni se zgodila«, »Ohrani urnik« in
+»Prilagodi čas«. »Trening« je moškega spola, gumb je ženskega. Trener-podagent je zapisal:
+»ne vem, kaj se ni zgodilo: vadba?«
+
+**Težava in vpliv:** trener se ustavi pri gumbu, ki odstrani termin. Pri gumbu z nepovratno
+posledico ne sme ugibati, na kaj se nanaša.
+
+**Predlog:** »Ni se zgodil« ali »Trening ni bil«. Opaženo na `main` `12d0e66`, sl, 390 × 844.
+
+### 80.113 [x] P1 — Uvoz programa izgubi serije, ponovitve in težo, tudi pri primeru, ki ga pokaže aplikacija — popravljeno 2026-09-30
+
+**Scenarij in koraki:** ☰ → »Vaje in rutine« → »Rutine« → »Uvozi program«. »Pokaži obliko«
+(v polje vpiše primer aplikacije). »Za koga«: SIM Vera Kos. »Odpri v urejevalniku«.
+
+**Opaženo:** okno reče »Prebranih 4 postavk, 2 jih ni v tvojem katalogu.« Primer predpiše
+Barbell Bench Press 4 × 5 × 60 kg, Bent-Over Row 4 × 8 × 45 kg in Push-Up 3 × 12. V
+urejevalniku ima Barbell Bench Press prazno polje za serije, 10 ponovitev in 0 kg. Vaji z
+značko »PO MERI« kažeta »S[object Object],[object Object],[object Object],[object Object] × R—«
+in »S[object Object],[object Object],[object Object] × R—«. Konzola nima napak.
+
+**Težava in vpliv:** trener uvozi program, ki ga je pisal drugje, in dobi vaje brez številk
+ali s privzetimi (10 ponovitev, 0 kg). Opozorila ni. Če ne primerja vsake vrstice z izvirnikom,
+stranka dela po napačnem programu. Programski izpis »[object Object]« mu pove, da je nekaj
+pokvarjeno, ne pa kaj.
+
+**Predlog:** urejevalnik naj pokaže serije, ponovitve in težo iz uvoza. Postavko, ki je ni bilo
+mogoče prebrati, naj imenuje. Opaženo na `main` `12d0e66`, sl, 390 × 844; najprej opazil
+trener-podagent.
+
+### 80.115 [x] P2 — Na slovenski podlogi vaja po »Prelahko« dobi oznako »Completed« — popravljeno 2026-09-30
+
+**Scenarij in koraki:** vzorčni podatki, trening za Jane Doe s tremi vajami iz kataloga. Na odprti
+vaji Wall Sit pritisniti »Prelahko«, nato tapniti oznako »Prihodnje« na naslednji vaji.
+
+**Opaženo:** kartica Wall Sit ima zdaj oznako »Completed«. Ostale oznake na isti podlogi so
+slovenske: »Prihodnje«, »Zadnjič: 2026-07-20«, »Krog 1 / 3«. Trener brez predznanja: »prejšnja
+dobi oznako Completed (angleško v slovenskem zaslonu)«.
+
+**Težava in vpliv:** edina oznaka, ki pove, da je vaja zapisana kot opravljena, je v jeziku, ki
+ga trener morda ne bere.
+
+**Predlog:** slovenska oznaka, na primer »Opravljeno«. Opaženo na `main` `12d0e66`, sl, 390 × 844.
+
+### 80.116 [x] P2 — Okno »Trening se je začel izven urnika« skrije »Končni čas« desno od roba — popravljeno 2026-09-30
+
+**Scenarij in koraki:** vzorčni trening »Hitri HIIT za trup« (14:00–15:00) ob 13:01 odpreti in
+pritisniti »Začni trening«.
+
+**Opaženo:** okno je široko 351 pik. »Začetni čas« z gumbi 13:30, 14:00, 14:30, 15:00 zapolni
+širino. »Končni čas« se začne pri 315 pikah in sega do 577, zato se vidi le »Končn« in začetek
+dveh gumbov (posnetek zaslona). Pod poljema je tanek drsnik; nič ne pove, da je treba
+podrsati v stran.
+
+**Težava in vpliv:** trener, ki premakne trening na dejanski čas, lahko popravi le začetek. Konca
+ne vidi in ne ve, da obstaja, zato z »Prilagodi čas« shrani konec, ki ga ni preveril.
+
+**Predlog:** polji naj stojita drugo pod drugim, kot v obrazcu »Nastavitev treninga«. Opaženo na
+`main` `12d0e66`, sl, 390 × 844; najprej opazil trener-podagent.
+
+Na 320 × 680 je okno široko 288 pik, oznaka »Končni čas« se začne pri 311. piki in polje za konec
+pri 311. do 523. piki: z zaslona se vidi 9 pik oznake, polja nič.
+
+### 80.117 [x] P3 — Trening čez teden dni »se začne čez 870h 01m« — popravljeno 2026-09-30
+
+**Scenarij in koraki:** vzorčni podatki, seznam »Treningi«, trening »Moč ob torkih in četrtkih«
+2026-11-05.
+
+**Opaženo:** kartica: »Se začne čez 870h 01m«. Enako »197h 01m« za trening čez osem dni.
+
+**Težava in vpliv:** trener ur ne preračuna v dneve. Trener brez predznanja: »Ure za en teden
+naprej ne preračunam; dneva bi razumel.« Datum nad kartico to že pove, zato je številka le šum.
+
+**Predlog:** nad 24 ur pisati dneve (»čez 36 dni«) ali števca ne kazati. Opaženo na `main`
+`12d0e66`, sl, 390 × 844.
+
+### 80.119 [x] P2 — Zgodovina stranke izpusti težo: »Dumbbell Goblet Squat: 10, 10, 10« pri 12 kg — popravljeno 2026-09-30
+
+**Scenarij in koraki:** prazna aplikacija, stranka SIM Nina Koleno, trening »Rehabilitacija« z vajo
+Dumbbell Goblet Squat 3 × 10 × 12 kg (podloga kaže »S3 × R10 × 12 kg«). Začeti, pritisniti
+»Prelahko«, zaključiti. ☰ → »Imenik strank« → SIM Nina Koleno.
+
+**Opaženo:** »ZGODOVINA ZABELEŽENIH VADB«: »Dumbbell Goblet Squat: 10, 10, 10«. Teže ni. Tudi vrstica
+»Zadnjič« na naslednjem treningu te stranke piše le »10, 10, 10«. Pri vzorčni stranki Jane Doe pa
+»Zadnjič« piše »18 kg x 10, 18 kg x 10, 18 kg x 9«. Trenerka brez
+predznanja: »Teže (12 kg) ni v zgodovini. … napredek po teži ne vidim.«
+
+**Težava in vpliv:** napredek pri vaji z utežjo je teža. Iz zgodovine trener ne vidi, s koliko je
+stranka delala, in pri naslednjem programu ugiba ali išče drugje.
+
+**Predlog:** zgodovina naj pokaže težo ob vsaki seriji, kot vrstica »Zadnjič«. Opaženo na `main`
+`12d0e66`, sl, 390 × 844; najprej opazil trener-podagent.
+
+### 80.120 [x] P2 — Pod poškodbo kolena stran stranke pravi »Brez zabeleženih zdravstvenih težav« — popravljeno 2026-09-30
+
+**Scenarij in koraki:** nova stranka SIM Nina Koleno, v »Poškodbe in omejitve« vpisano »Bolečine v
+desnem kolenu, brez globokih počepov«, polje »Opombe« prazno. Odpreti stran stranke.
+
+**Opaženo:** »POŠKODBE IN OMEJITVE: Bolečine v desnem kolenu, brez globokih počepov«, takoj pod tem
+»OPOMBE: Brez zabeleženih zdravstvenih težav ali posebnosti.«
+
+**Težava in vpliv:** besedilo za prazno polje »Opombe« trdi, da stranka nima zdravstvenih težav, dve
+vrstici pod njeno poškodbo. Trener, ki stran hitro preleti, lahko prebere zadnje.
+
+**Predlog:** za prazne opombe napisati, da opomb ni, na primer »Ni opomb.« Opaženo na `main`
+`12d0e66`, sl, 390 × 844.
+
+### 80.121 [x] P2 — »Zamenjaj vajo« stranki z bolečim kolenom vnaprej izbere Barbell Back Squat — popravljeno 2026-09-30
+
+**Scenarij in koraki:** stranka SIM Nina Koleno s »Poškodbe in omejitve: Bolečine v desnem kolenu,
+brez globokih počepov«. Na treningu pri Dumbbell Goblet Squat »Opombe« → »Prelahko – povečaj
+težo« → »Zapiši opozorilo«. Zaključiti. »Treningi, ki čakajo na pregled« → vnos stranke →
+»Razreši« → »Zamenjaj vajo (lažja ali težja različica)«.
+
+**Opaženo:** seznam »Vaje: 9« za noge je po abecedi, izbrana je prva: Barbell Back Squat. Okno ne
+omeni poškodbe. Nad seznamom piše »Nadomestna vaja — ista mišična skupina ohrani sledenje obsegu«.
+Trenerka brez predznanja je pri signalu »Bolečina ali nelagodje v sklepu« dobila isto izbiro:
+»pri stranki s poškodbo kolena in zabeleženo bolečino. Trener to lahko spregleda.«
+
+**Težava in vpliv:** en dotik na »Uveljavi in razreši« stranki, ki ne sme delati globokih počepov,
+vpiše počep s palico v program. Izbira ni trenerjeva, naredila jo je abeceda.
+
+**Predlog:** nobena vaja naj ne bo izbrana vnaprej, dokler je trener ne izbere; ob poškodbi naj
+okno pokaže njeno besedilo. Opaženo na `main` `12d0e66`, sl, 390 × 844.
+
+### 80.122 [x] P3 — Koledar »Datumi« ne pokaže ne današnjega dne ne dni s treningi — popravljeno 2026-09-30
+
+**Scenarij in koraki:** prazna aplikacija s treningoma 2026-10-01 in 2026-10-02. Na seznamu
+»Treningi« pritisniti »Datumi«.
+
+**Opaženo:** koledar septembra 2026. Dan 30 (danes) ima isto obliko kot dan 15: brez ozadja, brez
+krepke pisave, brez oznake za bralnik zaslona. Enako 1. in 2. oktober, ko sta vpisana treninga.
+Trenerka brez predznanja: »Koledar ne označi današnjega dne in ne pokaže dni s treningi, zato z njim
+ne vidim, kdaj je kaj.«
+
+**Težava in vpliv:** trener, ki izbira obdobje, ne vidi, kje je danes in kateri dnevi so zasedeni.
+Izbira na slepo, nato preveri na seznamu.
+
+**Predlog:** označiti današnji dan in dneve s treningi. Opaženo na `main` `12d0e66`, sl, 390 × 844.
+
+### 80.123 [x] P2 — Podloga treninga čez dva ali več dni v glavi ne pove dneva, samo »Prihodnje« — popravljeno 2026-09-30
+
+**Scenarij in koraki:** ustvariti trening »Par« s čipom »sob. 3.« (seznam ga pokaže pod »sobota
+2026-10-03«) in ga odpreti. Za primerjavo odpreti trening za jutri.
+
+**Opaženo:** glava sobotnega treninga: »Prihodnje · 13:30 - 14:30 · Studio«. Glava jutrišnjega:
+»Jutri · 13:30 - 14:30 · Studio«, današnjega »Danes · …«. Datuma ali dneva v tednu pri treningu čez
+dva dni ni nikjer na podlogi.
+
+**Težava in vpliv:** trener pripravlja načrt za soboto in na zaslonu, kjer ga ureja, ne vidi, da je
+to sobota. Pri tedenski seriji so vsi večeri »Prihodnje«, zato ne ve, katerega ureja.
+
+**Predlog:** namesto »Prihodnje« dan in datum, na primer »sob. 2026-10-03«. Opaženo na `main`
+`12d0e66`, sl, 390 × 844.
+
+### 80.124 [x] P2 — Oznaka »PREDOGLED« vodi na »Stran ni najdena«, ko je aplikacija že naložena — popravljeno 2026-09-30
+
+**Scenarij in koraki:** trener nekaj časa dela v aplikaciji (ne v peskovniku), nato pritisne rumeno
+oznako »PREDOGLED« v glavi. Njeno pomožno ime: »Predogledna različica — še ni izdana in lahko izgubi
+podatke. Odpri obvestilo o tveganjih in izgubi podatkov.«
+
+**Opaženo:** na `main` `12d0e66` se odpre `/LibrePT/preview.html` z besedilom »Stran ni najdena. Ta
+povezava ne vodi do treninga, stranke ali pogleda v LibrePT.« Na objavljeni `8b2ce80` isti naslov v
+istem brskalniku odpre aplikacijo z izbiro jezika. Strežnik pa stran vrne: `curl` na oba naslova da
+200 in naslov »LibrePT Preview Build — Risks & Data-Loss Notice«. Stran z obvestilom torej obstaja,
+brskalnik, ki je aplikacijo že naložil, pa je ne pokaže. To je verjetno isto, kar je Simon prijavil
+2026-09-10 (»klik na peskovnik značko vodi na neobstoječo stran«, §42.12), ko se s `curl` ni
+ponovilo.
+
+**Težava in vpliv:** oba trenerja brez predznanja je oznaka skrbela (»pomeni, da ne smem zaupati
+podatkom«). Edina stran, ki pove, kaj predogled pomeni za njune podatke, jima odgovori, da ne obstaja.
+
+**Predlog:** oznaka naj odpre obvestilo tudi v brskalniku, ki ima aplikacijo naloženo; test naj jo
+pritisne v takem brskalniku, ne s `curl`. Opaženo na `main` `12d0e66` (lokalni strežnik) in na
+objavljeni `8b2ce80`, 390 × 844.
+
+### 80.125 [x] P3 — Na slovenski strani so pomožna imena gumbov za bralnik zaslona angleška — popravljeno 2026-09-30
+
+**Scenarij in koraki:** `?lang=sl`, seznam »Treningi« in podloga treninga. Zbrati `aria-label` in
+`title` vseh elementov v dokumentu, tudi v zaprtih oknih.
+
+**Opaženo:** slovar aplikacije je preveden (od 1080 besedil jih je le pet enakih angleškim, vsa
+upravičeno), angleška pa so ta imena, ki ne pridejo iz njega: »Loading LibrePT«, »Notification Center
+and Active Session«, »Toggle notifications drawer«, »Toggle Notifications«, »Close modal«, »Close add
+exercise modal«, »Close catalog«, »Close conflict review«, »Close build info«; v oknu »Uredi rutino«
+ima polje za težo ime »Load«. Drugi gumbi za zapiranje so »Zapri« (14-krat). Trener brez predznanja je
+to opazil v orodju: »ime "Close" (angleško) na slovenski strani, drugod "Zapri"«.
+
+**Težava in vpliv:** trener, ki uporablja bralnik zaslona ali glasovno upravljanje, sliši angleščino
+sredi slovenske strani in gumba ne more poklicati s slovensko besedo, ki jo vidi pri drugih oknih.
+
+**Predlog:** imena iz slovarja, kot ostala; test, ki na `?lang=sl` ne najde angleškega pomožnega
+imena. Opaženo na `main` `12d0e66`, 390 × 844.
+
+### 80.126 [x] P3 — Pred izbiro jezika stran nima `<html lang>`, besedilo za oknom pa je angleško — popravljeno 2026-09-30
+
+**Scenarij in koraki:** prvi obisk brez `?lang=`, kot ga trener dobi od kolega:
+`/LibrePT/`. Brskalnik ima `navigator.language` `en-US`.
+
+**Opaženo:** okno »Choose your language · Izberi jezik · Wähle deine Sprache« z gumbi »English«,
+»Slovenščina«, »Deutsch«. Za njim je glava angleška (»PREVIEW«, »Sessions«) in stavek »A lightweight,
+free app for your clipboard, sessions and training programmes.« `<html lang>` ni nastavljen.
+Gumbi jezikov imajo pravilen svoj `lang` (`en`, `sl`, `de`). Po dotiku »Slovenščina« je `lang`
+strani `sl` in besedilo slovensko.
+
+**Težava in vpliv:** bralnik zaslona angleško besedilo za oknom prebere z glasom, ki ga izbere
+sam, ker stran ne pove, v katerem jeziku je.
+
+**Predlog:** stran naj ima `lang` jezika, v katerem je besedilo za oknom (`en`). Opaženo na `main`
+`12d0e66`, 390 × 844.
+
 ### 1.3 [x] Session list must model partial overlaps — shipped 2026-09-30
 
 **Narrowed 2026-09-27: the room half left this app.** Other trainers' room occupancy was read from
