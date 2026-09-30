@@ -958,3 +958,33 @@ def test_walking_back_every_tap_show_me_makes_is_drawn(page, local_server, chapt
             _guide_idle(page)
         undrawn += _undrawn(_drain_taps(page))
     assert not undrawn, "taps without the hand:\n" + "\n".join(sorted(set(undrawn)))
+
+
+def test_typing_into_the_form_a_step_shows_does_not_stop_the_tour(page, local_server):
+    """Reported 2026-09-30: the chapter "Enter your details" asks for the details to be typed, and
+    the first tap into a field stopped the tour with "the last thing you did was not this step".
+    A field in the dialog the step points into is part of that step's screen, not a stray tap."""
+    _open_story(page, local_server, step="trainer-details-close")
+    form = page.locator("#dialog-trainer-details")
+    expect(form).to_be_visible(timeout=15_000)
+
+    form.locator("input[type=tel]").click()
+    form.locator("input[type=tel]").fill("041 222 333")
+    page.wait_for_timeout(1500)
+
+    expect(page.locator("#walkthrough-return")).to_be_hidden()
+    assert _step_id(page) == "trainer-details-close"
+
+
+def test_the_circuit_the_programme_chapter_adds_survives_the_done_button(
+    page, local_server
+):
+    """Reported 2026-09-30: the chapter taught "+ Circuit adds an empty circuit", then "press ✓ and
+    the plan is saved", and the empty circuit was gone. The editor drops an exercise with no name
+    when it closes, so a circuit with nothing typed into it leaves no trace. The chapter now types
+    an exercise into the new circuit before it presses ✓."""
+    _open_story(page, local_server, chapter="programme")
+    _walk_to(page, "programme-menu-again")
+
+    deck = page.locator("#active-exercise-scroll-deck")
+    expect(deck).to_contain_text("Bird Dog")

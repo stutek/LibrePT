@@ -684,6 +684,20 @@ const PROGRAMME_CHAPTER = {
       expect: { selector: ".editor-circuit .editor-circuit-title[value='']", visible: true },
     },
     {
+      // A circuit with nothing in it leaves no trace: the editor drops an exercise whose name is
+      // blank when it closes, so the ✓ in the next step used to save a plan without the circuit this
+      // chapter had just taught the trainer to add. The name is typed, as a trainer would.
+      id: "programme-add-exercise",
+      persona: TRAINER,
+      target: ".editor-circuit:has(.editor-circuit-title[value='']) .editor-row-name",
+      enter: "Bird Dog",
+      caption: "story_step_programme_add_exercise",
+      expect: {
+        selector: ".editor-circuit:has(.editor-circuit-title[value='']) .editor-row-name",
+        hasValue: "Bird Dog",
+      },
+    },
+    {
       // Out of the editor first: the participant tabs are hidden while a plan is being edited (the
       // trainer is looking at one person's programme, not at the room), so the binding this chapter
       // is about could not be seen from in there.

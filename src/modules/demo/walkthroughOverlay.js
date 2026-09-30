@@ -1290,6 +1290,10 @@ export function startGuidedWalkthrough({
     if (!step) return;
     const target = resolveTarget(doc, step);
     if (target && (target.contains(tapped) || tapped.contains(target))) return;
+    // A field in the dialog the step's control sits in is that step's own screen: the chapter that
+    // asks for the trainer's details invites typing them, and the first tap into a field stopped it.
+    const dialog = target?.closest("dialog");
+    if (dialog?.contains(tapped) && tapped.closest("input, select, textarea, label")) return;
     strayTap = true;
   }
   doc.addEventListener("click", noticeStrayTap, { capture: true });
