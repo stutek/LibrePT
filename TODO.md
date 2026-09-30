@@ -6731,6 +6731,28 @@ what shipped is in [CHANGELOG.md](CHANGELOG.md).
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80108-x-p3--na-320-×-680-je-od-gumba-shrani-in-nadaljuj-na-uvodnem-zaslonu-vidne-štiri-pike--popravljeno-2026-09-30);
 what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
+### 80.109 [ ] P2 — Ocena trajanja istega intervala je odvisna od zapisa časa
+
+**Scenarij in koraki:** v »SIM Previdna vadba« za TEST Maja Omejitev (jutri
+10:00–10:45, Telovadnica B) odpreti »Uredi načrt«. Obstoječemu Dumbbell Bicep Curl
+3×10×6 kg in počitku 60 s dodati Treadmill Run iz kataloga. Nastaviti 4 serije in
+v polje »ČAS« vpisati »2:30«. Končati urejanje, nato ga ponovno odpreti. Za primerjavo
+v isti vaji zamenjati samo čas s »150«, končati urejanje in ga ponovno odpreti.
+
+**Opaženo:** pri obeh vnosih kartica vaje kaže »S4 × 2:30«. Pri vnosu »2:30« ocena
+načrta kaže »2 / 45 min«, pri enakovrednem vnosu »150« pa »12 / 45 min«. V načrtu
+sta tudi dva počitka po 60 s. Že štirje tekaški intervali sami trajajo deset minut,
+zato dvominutna ocena celotnega načrta ne more držati. Obrazec »2:30« sprejme brez
+opozorila in ga ob ponovnem odprtju ohrani.
+
+**Težava in vpliv:** trener dobi deset minut razlike pri oceni zasedenosti termina,
+čeprav obe kartici predpisujeta isto vadbo. Na tej osnovi lahko v termin doda preveč
+vaj ali napačno presodi, koliko časa ostane.
+
+**Predlog:** sprejeti zapisi časa naj dajo isto oceno trajanja; primerjati »2:30«
+in »150« pri več serijah, skupaj s počitki. Opaženo na objavljeni `8b2ce80`, sl,
+390 × 844, Chrome CDP; brez prestreženih napak in brez pregledovanja kode.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
