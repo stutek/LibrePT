@@ -5787,6 +5787,12 @@ ure in lokacije ponuditi shranitev v urnik ali vidno omogočiti manjkajočo dode
 Preverjanje: pot iz profila se konča s kartico na izbranem dnevu ali z jasnim obvestilom,
 da termin ni rezerviran. Opaženo na objavljeni različici `0625bd6`, razvoj ni pregledan.
 
+**Dopolnitev 2026-09-30, `main` `12d0e66`, 390 × 844, sl:** še vedno tako, tudi z izbranim dnem.
+V »Načrtuj prihodnji program« za SIM Vera Kos izbrati čip »pet. 2.« (polje pokaže 2026-10-02)
+in 13:00, nato »Odpri v beležki«. Glava beležke: »Nenačrtovano · SIM Vera Kos« in gumb »Danes«.
+Na seznamu treningov ni ničesar za 2026-10-02. Trener brez predznanja: »Izbrani datum 2. 10. je
+izgubljen; čas ni moj. V seznamu terminov tega termina ni.«
+
 ### 80.6 [ ] P1 — Zgodovina zaključenih vadb kaže načrt in vse vaje kot preskočene
 
 **Scenarij:** v programu iz profila pripraviti tri vaje, v beležki shraniti opombo o
@@ -6879,6 +6885,21 @@ pokvarjeno, ne pa kaj.
 **Predlog:** urejevalnik naj pokaže serije, ponovitve in težo iz uvoza. Postavko, ki je ni bilo
 mogoče prebrati, naj imenuje. Opaženo na `main` `12d0e66`, sl, 390 × 844; najprej opazil
 trener-podagent.
+
+### 80.114 [ ] P2 — Zaključen trening s tremi vajami piše »Program ni določen« in »Zaključeno 00:01«
+
+**Scenarij in koraki:** trening »Skupina torek« za SIM Vera Kos brez rutine. V »Uredi načrt«
+dodati tri vaje iz kataloga, začeti in zaključiti trening. Vrniti se na seznam treningov.
+
+**Opaženo:** kartica: »1/1 mest zasedenih«, »Program ni določen«, »Zaključeno«, »00:01«. Trening
+je imel tri vaje in stran stranke jih pokaže. Trener brez predznanja je pri skupini treh strank
+zapisal: »oznaka ne pove, za koga« in »prikaz zgleda kot ura, ne kot trajanje«.
+
+**Težava in vpliv:** oznaka trdi, da programa ni, čeprav je bil. Trener pomisli, da se načrt
+ni shranil. »00:01« prebere kot uro zaključka (ob eni minuti čez polnoč), ne kot eno minuto.
+
+**Predlog:** »Program ni določen« naj velja le za trening brez vaj. Trajanje naj se napiše kot
+trajanje, na primer »trajal 1 min«. Opaženo na `main` `12d0e66`, sl, 390 × 844.
 
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
