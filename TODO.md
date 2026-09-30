@@ -6818,6 +6818,26 @@ pri vsakem pogledu.
 vrstica nosi datum večera, iz katerega je prišla, in pot, po kateri se odstrani — opaženo na različici
 `8b2ce80`.
 
+### 80.105 [ ] P1 — Stranka brez imena se shrani kot »Nova stranka«, čeprav je ime obvezno
+
+**Scenarij in koraki:** »Imenik strank« → »Dodaj stranko«. Polja »Ime in priimek *« se ne dotakni, v
+»Cilji treninga« vpiši »SIM cilj: hujsanje« in tapni »Shrani«.
+
+**Opaženo:** okno se zapre brez sporočila. V imeniku je nova stranka z imenom »Nova stranka« in
+vpisanim ciljem. Sporočila o neizpolnjenem polju ni nobenega, ne pri polju ne v oknu, čeprav ima polje
+zvezdico in atribut `required`.
+
+**Težava in vpliv:** ime je edini podatek, po katerem trener stranko najde. Ko na hodniku vpiše cilj
+in shrani, misli, da je stranko vpisal, v imeniku pa ima vrstico »Nova stranka«. Pri dveh takih ne ve,
+katera je katera, in cilj je pripisan nikomur.
+
+**Predlog:** »Shrani« naj brez imena zavrne, s sporočilom pri polju, kot to počne uvodni obrazec s
+trenerjevimi podatki (»Izpolni to polje.«) — opaženo na različici `8b2ce80`.
+
+Na istem zaslonu opaženo še: stranka, ki je bila preimenovana iz »Nova stranka« v »SIM Ana Testna«,
+ima v imeniku še vedno začetnici »NS«, torej začetnici starega imena. (Preimenovanje je opravil prejšnji
+zagon; sam sem videl izid v imeniku.)
+
 **Presoja 2026-09-30 (Claude): čaka na Simona — nasprotuje zapisani odločitvi.** `logQuickSignal` v
 [sessionQuickSignals.js](src/controllers/sessionQuickSignals.js) namerno označi vse serije vaje kot
 opravljene, ko trener tapne signal: »signal na vaji pomeni, da je bila opravljena« (manj dotikov,
