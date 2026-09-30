@@ -14,10 +14,12 @@
 
 import pathlib
 import re
+from urllib.parse import urlencode
 
 import pytest
 
 from tests.conftest import HARNESS_LOCAL_STORAGE_KEYS
+from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 from playwright.sync_api import expect
 
 PANEL = "#walkthrough-overlay"
@@ -69,8 +71,31 @@ def _offered_chapter_ids():
     ]
 
 
-def _open_story(page, local_server, query="?init=demo_data_load&demo=story"):
-    page.goto(f"{local_server}{query}")
+# Every test here opens the story itself, the way the app does, so the suite's own seed must stay out:
+# `seed_demo_data` in tests/conftest.py adds `init=demo_data_load` to every navigation of a test NOT
+# marked `clean_start`, which seeds the trainer's WORKING data instead of the sandbox.
+pytestmark = pytest.mark.clean_start
+
+
+def _open_story(page, local_server, path="", **params):
+    """Opens the story the way every link the app offers does (`guidedDemoUrl` in
+    `modules/splash/splashScreen.js`): in the sandbox, with the splash skipped. `params` adds to the
+    query or replaces a part of it — `lang`, `chapter`, `step`.
+
+    Until 2026-09-30 it opened `?init=demo_data_load`, which seeds the WORKING workspace. The story
+    then ran outside the sandbox, where the ☰ menu has no *Leave the sandbox* row, so Show me on the
+    welcome card failed, left the menu open and hid its own message 0.2s later — a trainer never
+    sees that, and every test here did."""
+    query = urlencode(
+        {
+            "workspace": "sandbox",
+            "splash": "off",
+            "demo": "story",
+            "lang": "en",
+            **params,
+        }
+    )
+    page.goto(f"{local_server}{path}?{query}")
     page.locator(PANEL).wait_for(state="visible", timeout=30_000)
 
 
@@ -189,35 +214,41 @@ def _progress_text(page):
     return " ".join(page.locator(PROGRESS).evaluate("el => el.textContent").split())
 
 
-def _card_moved_on(page, progress_before, shown, timeout=8_000):
+# True once the guide has finished with a Show me: the card has moved on, or Show me is enabled again.
+# The guide disables Show me in the same tick as the tap and enables it only when it draws the step
+# again (`showing` in walkthroughOverlay.js). A demonstration that carries the card on draws the NEXT
+# step, so the two cannot be seen apart: when Show me is back, the progress line is already final.
+GUIDE_DONE_SHOWING = """(before) => {
+  const progress = document.querySelector('#walkthrough-overlay .walkthrough-progress');
+  const now = (progress?.textContent || '').split(/\\s+/).filter(Boolean).join(' ');
+  return now !== before || !document.getElementById('walkthrough-show')?.disabled;
+}"""
+
+
+def _card_moved_on(page, progress_before, shown, timeout=15_000):
     """Whether the card followed the app off this step by itself (2026-08-26), or still wants Next.
 
-    Only a step that was just SHOWN can carry the card on, so only then is it worth waiting. A card
-    with no Show me has nothing done on it, and waiting the whole `timeout` there before tapping Next
-    cost 8s on every such card: the seven walks of the whole story took 83-164s each (2026-09-30).
-    If a card ever did move on by itself, the walk would tap Next on the step after it, and the
-    count of steps walked would stop matching the story's length.
-
-    After a Show me the walk still waits the whole 8s where the card does not move (the last step of
-    a leg). Waiting instead until Show me is enabled again — the guide's own sign that the
-    demonstration is over — was tried on 2026-09-30, and it showed that this wait also HIDES a
-    defect: Show me on the welcome card opens the ☰ menu and fails to close it, the guide says the
-    step did not complete, and 0.2s later hides that message itself. Read 8s later, it is gone.
+    Only a step that was just SHOWN can carry the card on, and the walk waits for the guide to say it
+    is done with it rather than for a clock. It used to wait up to 8s for the card to move: the whole
+    8s on every card with no Show me and on the last step of every leg, and long enough for a guide
+    to report a failed step and hide the message again before the walk looked. If a card ever moved
+    on by itself later than this, the walk would tap Next on the step after it, and the count of
+    steps walked would stop matching the story's length.
 
     Compared against the progress line's OWN words, not against "step N of" — that pattern is
     English, so in every other language it never matched, the helper answered "yes, it moved on" to
     every step, and a walk in Slovenian silently stopped tapping Next (found 2026-08-31 writing the
     language-crossing test below)."""
-    if not shown:
-        # Not `timeout=0`: to Playwright that means wait for ever.
-        return _progress_text(page) != progress_before
-    try:
-        expect(page.locator(PROGRESS)).not_to_have_text(
-            progress_before, timeout=timeout
-        )
-        return True
-    except AssertionError:
-        return False
+    if shown:
+        try:
+            page.wait_for_function(
+                GUIDE_DONE_SHOWING, arg=progress_before, timeout=timeout
+            )
+        except PlaywrightTimeoutError:
+            # A demonstration still running after `timeout` is a stuck guide. The caller's wait for
+            # Next reports it with the step, the guide's message and the screen.
+            pass
+    return _progress_text(page) != progress_before
 
 
 def _walk_the_whole_story(page, limit=60, on_step=None):
@@ -301,7 +332,7 @@ def test_the_whole_story_can_be_walked_in_slovenian(page, local_server):
     English name ("Group Strength", "Tuesday & Thursday"), but the demo data is written in the
     language chosen when it loads, and in Slovenian those cards say "Skupinska moč in kondicija"
     and "Moč ob torkih in četrtkih". The only Slovenian walk stopped at Ana's phone, before them."""
-    _open_story(page, local_server, "?init=demo_data_load&lang=sl&demo=story")
+    _open_story(page, local_server, lang="sl")
 
     _, story_length = _step_numbers(page)
     captions = _walk_the_whole_story(page)
@@ -330,7 +361,7 @@ def test_every_card_fits_a_phone_without_scrolling(page, local_server, lang):
     is checked on every step of the story, in every language, rather than on the opening card.
     German runs longest of the three."""
     page.set_viewport_size({"width": 390, "height": 844})
-    _open_story(page, local_server, f"?init=demo_data_load&lang={lang}&demo=story")
+    _open_story(page, local_server, lang=lang)
     measured = {}
 
     def measure(step_page, step):
@@ -368,7 +399,7 @@ def test_the_story_leaves_the_note_on_the_person_it_was_about(page, local_server
     Walked as its own chapter, which is also what the claim is about — the story now runs on past
     this into the evening, and asserting it from the end would be asserting where the LAST chapter
     happens to leave the app."""
-    _open_story(page, local_server, "?init=demo_data_load&demo=story&chapter=gym")
+    _open_story(page, local_server, chapter="gym")
 
     _walk_the_whole_story(page)
 
@@ -409,7 +440,7 @@ def test_a_reload_comes_back_on_the_step_it_left(page, local_server):
     card. A demo is watched in interruptions — a phone that locks, a tab restored, a link forwarded
     to a colleague half way through — and starting again from the top is what a viewer will not sit
     through twice. The step names itself in the address, so the address is enough to come back to."""
-    _open_story(page, local_server, "?init=demo_data_load&demo=story&step=arrive-menu")
+    _open_story(page, local_server, step="arrive-menu")
     _walk_to(page, "arrive-invite")
     progress_before = _progress_text(page)
     caption_before = page.locator(CAPTION).inner_text()
@@ -477,7 +508,7 @@ def test_asking_to_be_shown_again_rebuilds_what_the_first_time_used_up(
 
     Walked BACK into rather than repeated in place, because since 2026-08-26 a step done in front of
     the viewer carries the card on — so "asking again" is what you do after returning to it."""
-    _open_story(page, local_server, "?init=demo_data_load&demo=story&step=arrive-menu")
+    _open_story(page, local_server, step="arrive-menu")
     _walk_to(page, "arrive-invite")
     _back_to(page, "arrive-clients", settle_ms=0)
     on_the_step = _progress_text(page)
@@ -506,7 +537,7 @@ def test_walking_back_out_of_a_dialog_and_forward_again_reopens_it(page, local_s
     where none of it was happening. Nothing detected it: none of those steps declares a
     precondition, and a control inside a closed dialog is not something a selector complains about.
     Being READY now includes the step's own control being reachable."""
-    _open_story(page, local_server, "?init=demo_data_load&demo=story&step=arrive-menu")
+    _open_story(page, local_server, step="arrive-menu")
 
     # Forward to the step that types an email address into the invite dialog.
     _walk_to(page, "arrive-contact-email")
@@ -535,9 +566,7 @@ def test_walking_back_puts_the_screen_the_card_describes_back(page, local_server
     the invite dialog — which empties its contact field — and stopped there, because the step's own
     control was now reachable and nothing looked wrong. The card then read "type it over the number"
     over an empty box. Every step the story has already shown is part of the next one's ground."""
-    _open_story(
-        page, local_server, "clients?init=demo_data_load&demo=story&step=arrive-invite"
-    )
+    _open_story(page, local_server, "clients", step="arrive-invite")
     _walk_to(page, "arrive-add-manually")
     _back_to(page, "arrive-contact", settle_ms=1500)
 
@@ -566,7 +595,8 @@ def test_the_trainer_reads_what_ana_sent_and_she_lands_in_the_register(
     _open_story(
         page,
         local_server,
-        "clients?init=demo_data_load&demo=story&step=review-message",
+        "clients",
+        step="review-message",
     )
 
     for _ in range(2):
@@ -602,9 +632,7 @@ def test_one_chapter_can_be_walked_on_its_own(page, local_server):
     first_step, story_length = _step_numbers(page)
     assert first_step == 1, "the story opened from the top starts at its first step"
 
-    _open_story(
-        page, local_server, f"?init=demo_data_load&demo=story&chapter={chapters[0]}"
-    )
+    _open_story(page, local_server, chapter=chapters[0])
 
     expect(page.locator(PANEL)).to_be_visible()
     chapter_step, chapter_total = _step_numbers(page)
@@ -719,7 +747,7 @@ def test_the_guide_does_not_call_the_screen_wrong_while_scrolling_to_it(
     # on a desktop viewport the evening's session is already in view and there is nothing to scroll.
     page.set_viewport_size({"width": 390, "height": 844})
     page.add_init_script(WATCH_COMPLAINTS)
-    _open_story(page, local_server, "?init=demo_data_load&demo=story&step=evening-move")
+    _open_story(page, local_server, step="evening-move")
 
     control = page.locator(
         ".session-card", has_text="Tuesday & Thursday"
@@ -743,7 +771,7 @@ def test_crossing_to_the_client_phone_carries_the_language(page, local_server):
     language from — so the only way it can know is the address the handover sends it to. That
     address named the theme and forgot the language, and a Slovenian viewer watched Ana fill in an
     English form and send back a consent recorded in a language she never chose."""
-    _open_story(page, local_server, "?init=demo_data_load&lang=sl&demo=story")
+    _open_story(page, local_server, lang="sl")
 
     while "Anin obrazec" not in page.locator(NEXT).inner_text():
         _do_step(page)
@@ -791,9 +819,7 @@ def test_every_offered_chapter_can_be_walked_from_a_cold_start(
     seen none of the others, a broken one is named by its test, and the workers share the chapters
     rather than one of them walking all six in a row (99s, 2026-09-30).
     """
-    _open_story(
-        page, local_server, f"?init=demo_data_load&demo=story&chapter={chapter}"
-    )
+    _open_story(page, local_server, chapter=chapter)
     _, chapter_length = _step_numbers(page)
 
     captions = _walk_the_whole_story(page)
@@ -900,9 +926,7 @@ def test_every_tap_show_me_performs_is_drawn_by_the_hand_first(page, local_serve
 
     backward = []
     for chapter in page.evaluate(CHAPTER_INDEX):
-        _open_story(
-            page, local_server, f"?init=demo_data_load&demo=story&chapter={chapter}"
-        )
+        _open_story(page, local_server, chapter=chapter)
         _, last = _step_numbers(page)
         while _step_numbers(page)[0] < last:
             _do_step(page)
