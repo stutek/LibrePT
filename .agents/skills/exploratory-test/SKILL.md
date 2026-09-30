@@ -146,6 +146,15 @@ that shape whenever a finding would otherwise be "I noticed a few of these".
 »Brez povezave« on a machine that was online, which reads exactly like a defect. After a scenario
 that used `inject`, `stop` and `start` again before believing anything the app shows.
 
+**`goto` is not a stopwatch.** It waits until the network goes quiet, up to 60 seconds, so a load
+timed around it measures the driver. On 2026-10-01 that turned a 2.1-second boot on a slow line into
+a 96.9-second P1 that had to be withdrawn. Time a load from `page.goto(url, wait_until="commit")` to
+a `wait_for_function` on what the trainer sees, and write the predicate as a function (`() => …`):
+the app's CSP refuses a string.
+
+**A tab opened through `json/new` is not the same browser.** The browser runs `--incognito`, so that
+tab gets its own, empty storage and looks exactly like an app that lost every record.
+
 **`errors` after every scenario.** A console error with nothing visible on screen is still a finding.
 
 ## Mode 2 — a trainer's whole day
