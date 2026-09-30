@@ -6670,6 +6670,43 @@ ne vidi, ker je pod robom zaslona.
 **Predlog:** ob vstopu v peskovnik naj bo predal odprt, ali pa naj besedilo pove, da ga je treba prej
 odpreti, in imenuje ročico — opaženo na različici `8b2ce80`.
 
+### 80.98 [ ] P2 — Korak ogleda imenuje polje »Ime stranke«, obrazec pa ima »Ime in priimek«
+
+**Scenarij in koraki:** v peskovniku zaženi poglavje »Sprejem treh novih strank« in pojdi do koraka 8
+od 10 (☰ → »Imenik strank« → »Povabi stranko« → vpiši telefon → vpiši e-naslov → zapri z ✕ → »Dodaj
+stranko«).
+
+**Opaženo:** kartica pravi: »V polje Ime stranke vpiši Nik Zupan.« V obrazcu tega polja ni. Polja se
+imenujejo »Ime in priimek *«, »Vzdevek (samo če si dve stranki delita ime)«, »E-pošta«, »Telefonska
+številka«, »Cilji treninga«, »Poškodbe in omejitve« in »Opombe«.
+
+**Težava in vpliv:** trener, ki prvič vidi aplikacijo, išče polje z imenom, ki ga je pravkar prebral,
+in ga ne najde. Pravilo aplikacije je, da korak imenuje kontrolo z napisom, ki ga ta kontrola kaže v
+tem jeziku.
+
+**Predlog:** korak naj reče »Ime in priimek«, ali pa naj se polje preimenuje in napis popravi v vseh
+jezikih — opaženo na različici `8b2ce80`.
+
+### 80.99 [ ] P2 — Kartica »Ta zaslon ni del demota« pokrije oba gumba zaslona, na katerem stoji
+
+**Scenarij in koraki:** v poglavju »Sprejem treh novih strank« pridi do koraka 9 od 10, kjer kartica
+pravi »Pritisni Shrani na dnu obrazca«. Namesto tega tapni »Prekliči«.
+
+**Opaženo:** kartica se preseli na vrh zaslona (od 69. do 277. pike navpično) in pravi »Ta zaslon ni
+del demota. Demo se odvija drugje v aplikaciji. Pritisni Nazaj v demo ali Ustavi demo.« Zaslon je pri
+tem »Imenik strank«, torej prav tisti, na katerem se poglavje dogaja. Gumba »Povabi stranko« (pri 75.
+piki, visok 62) in »Dodaj stranko« (pri 76. piki, visok 60) sta v celoti pod kartico: `elementFromPoint`
+na sredini obeh vrne kartico, ne gumba. Izhod obstaja — »Nazaj v demo« pri meni deluje in obrazec
+ponovno odpre, tako da se ogled nadaljuje.
+
+**Težava in vpliv:** trener, ki je prekinil korak, dobi dvoje hkrati: trditev, da je na napačnem
+zaslonu, čeprav je na pravem, in kartico, ki mu zakrije edina dva gumba tega zaslona. Če se hoče
+lotiti svojega dela, ne more, ker se gumba ne odzoveta na dotik.
+
+**Predlog:** kartica naj ne pokriva kontrol zaslona (naj se postavi pod nje ali ob rob), in stavka o
+napačnem zaslonu naj ne izpiše, kadar je trener na zaslonu, kjer korak teče — opaženo na različici
+`8b2ce80`.
+
 **Presoja 2026-09-30 (Claude): čaka na Simona — nasprotuje zapisani odločitvi.** `logQuickSignal` v
 [sessionQuickSignals.js](src/controllers/sessionQuickSignals.js) namerno označi vse serije vaje kot
 opravljene, ko trener tapne signal: »signal na vaji pomeni, da je bila opravljena« (manj dotikov,
