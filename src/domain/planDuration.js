@@ -29,6 +29,7 @@
 //
 // Injected dependencies: none — pure functions over plain objects.
 
+import { isTimeBasedMetric, toSeconds } from "./exerciseModality.js";
 import { isFailureReps } from "./repsAndLoad.js";
 import { parseTimeRange } from "./timeRange.js";
 
@@ -51,8 +52,8 @@ export const SLOT_WARNING_RATIO = 0.75;
 
 const isRest = (item) => item?.type === "rest";
 // Time-based work states its own duration in the same slot reps live in (domain/repsAndLoad.js), so
-// a 40-second plank is 40 seconds rather than a set.
-const isTimed = (item) => item?.metric === "time";
+// a 40-second plank is 40 seconds rather than a set. Held work ("hold") is timed too.
+const isTimed = (item) => isTimeBasedMetric(item?.metric);
 // "12 per arm" is TWELVE in the description a trainer wrote and TWENTY-FOUR in the room. Ruled
 // 2026-09-01: "keep the description '12 reps per arm', but when estimating duration for a card or a
 // cycle it should return calculated time back" — so the authored text is never rewritten; the cost
@@ -89,7 +90,10 @@ const countedSet = (reps) => SET_OVERHEAD_SECONDS + reps * SECONDS_PER_REP;
  */
 const COST_MODELS = [
   { matches: isRest, seconds: (item) => Number(item.rest) || 0 },
-  { matches: isTimed, seconds: (item) => setsOf(item) * (Number(item.repsTarget) || 0) },
+  // Read by the same rule the card writes the time with (exerciseModality.js's toSeconds): "2:30",
+  // "150", "150s" and "2.5 min" are one duration. Number() read "2:30" as nothing, so the same
+  // interval set cost ten minutes or none depending on how it was typed.
+  { matches: isTimed, seconds: (item) => setsOf(item) * toSeconds(item.repsTarget) },
   {
     // A set taken to failure has no rep count to cost, and 45 seconds is not what it takes: the set
     // itself runs long and the recovery it forces runs longer. Ruled 2026-09-01 as "3 or 5 min" —

@@ -41,6 +41,20 @@ test("held and timed work is counted in its own seconds, not in sets", () => {
   assert.equal(planNetSeconds(items), 80);
 });
 
+test("a time costs the same however it is written", () => {
+  // "2:30" costed nothing and "150" two and a half minutes, so one interval set gave a plan of
+  // 2 minutes or 12 depending on how the trainer typed it. The card writes both as 2:30.
+  const cost = (repsTarget, metric = "time") =>
+    planNetSeconds([exercise({ metric, repsTarget, setsTargetCount: 4 })]);
+
+  assert.equal(cost("2:30"), 600);
+  assert.equal(cost("150"), 600);
+  assert.equal(cost(150), 600);
+  assert.equal(cost("150s"), 600);
+  assert.equal(cost("2.5 min"), 600);
+  assert.equal(cost("0:40", "hold"), 160, "a hold is timed work too");
+});
+
 test("a circuit costs its rounds", () => {
   const items = [
     exercise({ circuitId: "c1", circuitSeries: 3, setsTargetCount: 1 }),
