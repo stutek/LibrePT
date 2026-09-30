@@ -7203,6 +7203,23 @@ pri vpisu.
 **Predlog:** izbirnik naj ostane »Prazen načrt, brez rutine«, dokler trener ne izbere; ali naj
 predlaga rutino, ki jo je ta stranka imela zadnjič. Opaženo na `main` `12d0e66`, sl, 390 × 844.
 
+### 80.131 [ ] P2 — Takoj po zaključku treninga predal pravi »Vse je pregledano«, signal se pokaže šele po osvežitvi
+
+**Scenarij in koraki:** trening »Moč« (rutina »Moč A«) za Maja Kranjc. »Začni trening«, tapniti prvo
+vajo, »Pretežko«, »Zaključi vadbo« → »Zaključi zdaj« → »Zaključi zdaj«. Pogledati predal z
+obvestili. Nato osvežiti stran.
+
+**Opaženo:** po zaključku predal: »Obvestila in pregled stanja«, »Vse je pregledano — trenutno tukaj
+ni ničesar.« Po osvežitvi: »Treningi, ki čakajo na pregled«, »1 stranka ima nerešene povratne
+signale iz treninga.«, »Maja Kranjc — Moč (1)«. Enako že prej s hitrim »Prelahko« pri SIM Nina
+Koleno (treninga »Rehabilitacija«). Signal, dan z »Opombe« → »Zapiši opozorilo«, pa se pokaže takoj.
+
+**Težava in vpliv:** trener po treningu pogleda, ali mora kaj popraviti v programu, in prebere, da
+ne. Signal »Pretežko« ostane nerešen, naslednji trening ima enako težo.
+
+**Predlog:** predal naj se po zaključku osveži, kot se je seznam treningov v zaprti §80.107.
+Opaženo na `main` `12d0e66`, sl, 390 × 844.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
