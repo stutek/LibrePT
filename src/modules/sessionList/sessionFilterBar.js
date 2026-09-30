@@ -38,6 +38,7 @@ import {
   nextDateSelection,
   participantsOf,
 } from "../../domain/sessionFilters.js";
+import { sessionCalendarDate } from "../../domain/sessionRecord.js";
 import { escapeHTML } from "../common/utils.js";
 
 const BAR_ID = "sessions-filter-bar";
@@ -55,6 +56,9 @@ let armedEnd = null;
 let calendarOpen = false;
 // The month the grid is showing. Not a filter either: it is where the trainer has scrolled to.
 let visibleMonth = null;
+// The days (ISO) on which the board holds at least one session, from the list the board passed in.
+// That list covers the board's own window, so a day beyond it is not marked.
+let daysWithSessions = new Set();
 
 export function initSessionFilterBar(injected) {
   deps = injected;
@@ -146,6 +150,9 @@ function dateChipLabel() {
  *  today — and the ends are drawn strongest, which is the documented convention and what
  *  makes "tap an end" a thing a person can aim at. */
 function dayCellHTML(iso, inMonth, label) {
+  const { t } = deps;
+  const isToday = iso === isoOf(new Date());
+  const hasSessions = daysWithSessions.has(iso);
   const isEnd = iso === filters.from || iso === filters.to;
   const inside = hasDateFilter(filters) && iso > filters.from && iso < filters.to;
   const classes = [
@@ -153,10 +160,18 @@ function dayCellHTML(iso, inMonth, label) {
     inMonth ? "" : "filter-day-outside",
     isEnd ? "filter-day-end" : "",
     inside ? "filter-day-inside" : "",
+    isToday ? "filter-day-today" : "",
+    hasSessions ? "filter-day-has-sessions" : "",
   ]
     .filter(Boolean)
     .join(" ");
-  return `<button type="button" class="${classes}" data-day="${iso}" aria-pressed="${isEnd}">${escapeHTML(label)}</button>`;
+  // A marked day is also named in words, since a colour alone says nothing to a screen reader.
+  const spoken = [
+    isToday ? t("filter_day_today") : "",
+    hasSessions ? t("filter_day_has_sessions") : "",
+  ].filter(Boolean);
+  const name = spoken.length ? ` aria-label="${escapeHTML([iso, ...spoken].join(", "))}"` : "";
+  return `<button type="button" class="${classes}" data-day="${iso}"${name} aria-pressed="${isEnd}">${escapeHTML(label)}</button>`;
 }
 
 function calendarHTML() {
@@ -224,6 +239,7 @@ export function renderSessionFilterBar(sessions = []) {
   const bar = document.getElementById(BAR_ID);
   if (!bar || !deps) return;
   const { t } = deps;
+  daysWithSessions = new Set(sessions.map(sessionCalendarDate).filter(Boolean));
 
   const clientRows = participantsOf(sessions, deps.clients()).map((client) => ({
     value: client.id,

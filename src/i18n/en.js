@@ -470,6 +470,8 @@ export const en = {
   filter_year: "Year",
   filter_prev_month: "Previous month",
   filter_next_month: "Next month",
+  filter_day_today: "today",
+  filter_day_has_sessions: "has sessions",
   no_sessions_for_filters:
     "No sessions match these filters. Tap ✕ to the right of the filters to see the whole board.",
   no_sessions_scheduled: "No sessions scheduled.",

@@ -79,6 +79,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   first in the list — a barbell squat for a client with a painful knee.
 - **The privacy notice, the consent forms and the preview page open once the app works offline.**
   They showed "page not found".
+- **The Dates calendar marks today and the days that have sessions.**
 - **Show me draws every tap it makes.** On a card reached by walking Back, Show me replayed the
   earlier steps without the hand, so fields were filled and dialogs closed with nothing drawn; the
   hand also pointed at controls that were still scrolling into place. Every tap the demonstration

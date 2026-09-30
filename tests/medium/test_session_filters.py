@@ -169,3 +169,26 @@ def test_every_control_in_the_filter_row_is_a_thumb_wide(page, local_server):
     )
     small = [s for s in sizes if s[1] < 44 or s[2] < 44]
     assert sizes and not small, f"controls smaller than a thumb: {small}"
+
+
+def test_the_calendar_marks_today_and_the_days_with_sessions_in_words_too(
+    page, local_server
+):
+    """The grid must show where today is and which days are booked; a colour alone is not enough,
+    so a marked day also carries a spoken name."""
+    load_with_stub(page, local_server, SESSIONS_STUB)
+    page.wait_for_selector("#sessions-filter-bar")
+    _open_calendar(page)
+
+    today = page.locator("#sessions-filter-calendar .filter-day-today")
+    assert today.count() == 1
+    assert "today" in today.get_attribute("aria-label").lower()
+
+    booked = page.locator("#sessions-filter-calendar .filter-day-has-sessions")
+    assert booked.count() >= 1, "the demo board has sessions, so some days are marked"
+    assert "has sessions" in booked.first.get_attribute("aria-label").lower()
+
+    plain = page.locator(
+        "#sessions-filter-calendar .filter-day:not(.filter-day-today):not(.filter-day-has-sessions)"
+    )
+    assert plain.first.get_attribute("aria-label") is None

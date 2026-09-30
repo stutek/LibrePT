@@ -217,6 +217,29 @@
   color: var(--primary);
 }
 
+/* Today has a ring; a day with a session has a dot under its number. Neither uses a fill, which
+   belongs to the range, so both still show inside a chosen range and on its ends. */
+.filter-day-today {
+  box-shadow: inset 0 0 0 2px var(--primary);
+  font-weight: 700;
+}
+
+.filter-day-has-sessions {
+  position: relative;
+}
+
+.filter-day-has-sessions::after {
+  content: "";
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  margin-left: -2.5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
 .filter-day-end {
   background: var(--primary);
   color: var(--on-primary);

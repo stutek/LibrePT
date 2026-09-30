@@ -491,6 +491,8 @@ export const de = {
   filter_year: "Jahr",
   filter_prev_month: "Vorheriger Monat",
   filter_next_month: "Nächster Monat",
+  filter_day_today: "heute",
+  filter_day_has_sessions: "hat Trainings",
   no_sessions_for_filters:
     "Kein Training passt zu diesen Filtern. Tippe rechts neben den Filtern auf ✕, um die ganze Übersicht zu sehen.",
   no_sessions_scheduled: "Keine Trainings geplant.",

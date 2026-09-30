@@ -478,6 +478,8 @@ export const sl = {
   filter_year: "Leto",
   filter_prev_month: "Prejšnji mesec",
   filter_next_month: "Naslednji mesec",
+  filter_day_today: "danes",
+  filter_day_has_sessions: "ima treninge",
   no_sessions_for_filters:
     "Tem filtrom ne ustreza noben trening. Pritisni ✕ desno od filtrov, da vidiš vso ploščo.",
   no_sessions_scheduled: "Ni načrtovanih treningov.",
