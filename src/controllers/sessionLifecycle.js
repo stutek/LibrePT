@@ -432,6 +432,9 @@ export async function finishWorkoutSession() {
 
   cancelWorkoutSession();
 
+  // The finished session just produced its signals (state.planUpdates); the drawer lists them.
+  renderNotificationArea();
+
   renderClientsList({ state, t });
   renderRoutinesList({ state, t });
 
@@ -447,9 +450,6 @@ export async function finishWorkoutSession() {
 
 export function recoverActiveSession() {
   const parsed = readActiveSessionCache();
-  // The finished session just produced its signals (state.planUpdates); the drawer lists them.
-  renderNotificationArea();
-
   if (!parsed) return;
 
   try {
