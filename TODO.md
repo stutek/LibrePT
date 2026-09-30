@@ -7185,6 +7185,24 @@ začne pri napačni vaji ali misli, da sta prvi dve že za njim.
 **Predlog:** ob »Začni trening« naj bo odprta prva vaja, ki še ni opravljena. Opaženo na `main`
 `12d0e66`, sl, 390 × 844.
 
+### 80.130 [ ] P2 — Vsaka stranka, dodana na trening, samodejno dobi prvo rutino v knjižnici
+
+**Scenarij in koraki:** v knjižnici je ena rutina, »Moč A« (Dumbbell Goblet Squat 12 kg, Dumbbell
+Bench Press 30 kg, Barbell Row 25 kg). »Ustvari trening«, dodati obstoječo stranko Ana Zupan in novo
+stranko »Nova Oseba« prek »Dodaj »Nova Oseba« kot novo stranko«. Rutine ne izbrati.
+
+**Opaženo:** izbirnik rutine pri obeh kaže »Moč A«, ne »Izberi rutino« ali »Prazen načrt, brez
+rutine«. Skupina treh novih strank (»Skupina«, jutri) je shranjena s »Moč A« na kartici, čeprav je
+trener ni izbral. Pred prvo rutino je izbirnik kazal »Prazen načrt, brez rutine«.
+
+**Težava in vpliv:** nova stranka, o kateri trener še ne ve ničesar, dobi program z utežmi, ki ga je
+sestavil za nekoga drugega. Če tega ne opazi v vrstici pod imenom, je program na podlogi. Popravek
+`0caf9b5` je ista stvar odpravil pri odpiranju (»a programme nobody chose«); obrazec jo zdaj naredi
+pri vpisu.
+
+**Predlog:** izbirnik naj ostane »Prazen načrt, brez rutine«, dokler trener ne izbere; ali naj
+predlaga rutino, ki jo je ta stranka imela zadnjič. Opaženo na `main` `12d0e66`, sl, 390 × 844.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
