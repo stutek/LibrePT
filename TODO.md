@@ -7189,6 +7189,12 @@ slovenska. Trener mora vsako vabilo prevesti na roke ali ga ne pošlje.
 **Predlog:** vabilo in povezava naj uporabita jezik, ki ga ima stranka zapisan (»Jezik obrazca«),
 kot ga že obrazec za privolitev. Opaženo na `main` `e8e90d8`, sl, 390 × 844.
 
+Enako pri »Povabi stranko« (`main` `e2daf5e`): okno nima izbire jezika stranke; za
+`emily@primer.invalid` pripravi slovensko sporočilo (»Tvoji podatki za najin trening … Vzame minuto«),
+povezavo `intake?lang=sl` in slovensko obvestilo o zasebnosti (`privacy-notice-sl.html`). Stran za
+prijavo sama ponudi »English«, »Slovenščina«, »Deutsch«, a do nje stranka pride prek slovenskega
+sporočila.
+
 ### 80.138 [ ] P1 — Konec serije, vpisan pri današnjem večeru, podvoji današnji večer in serije ne konča
 
 **Scenarij in koraki:** tedenska serija »Hipertrofija« ob sredah ob 07:00 od danes (2026-09-30) za
@@ -7341,6 +7347,21 @@ Nemški trener išče gumb, ki ga ni.
 
 **Predlog:** kratice in enota iz slovarja (na primer »3 × 10 × 12 kg«, kot jo že kaže rutina: »3×10 ·
 12 kg«); nemški namig z napisom gumba. Opaženo na `main` `e2daf5e`, sl in de, 390 × 844.
+
+### 80.145 [ ] P3 — Stran za prijavo nagovori vsako stranko v ženskem spolu: »izbereš sama«
+
+**Scenarij in koraki:** »Povabi stranko« → povezava `intake?lang=sl` → prvi zaslon strani za prijavo.
+
+**Opaženo:** »Ta stran sama ničesar ne pošlje: iz tvojih odgovorov nastane datoteka na tem telefonu,
+komu jo daš, pa izbereš **sama**.« Stavek nagovarja bralca, to je stranko, ne glede na spol. Drugod
+aplikacija za nagovor ne ve spola in piše »Pozdravljen/a«. Druge ženske oblike v slovarju se ujemajo
+s samostalnikom (»stranka … poslala«, »oseba, ki ti je dala«) in so pravilne.
+
+**Težava in vpliv:** moška stranka na prvem zaslonu, ki ga od trenerja sploh vidi, prebere nagovor
+v ženskem spolu.
+
+**Predlog:** stavek brez spola, na primer »komu jo daš, izbereš ti«. Opaženo na `main` `e2daf5e`, sl,
+390 × 844.
 
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
