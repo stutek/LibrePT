@@ -192,8 +192,13 @@ export function setupClientForms({
       client.injury = $id("client-injury").value.trim();
       client.hasInjury = client.injury !== "";
       client.notes = $id("client-notes").value.trim();
-      // Initials follow the name only while the client is being added, as they always did.
-      if (!before) client.avatar = getInitials(client.name);
+      // Initials follow the name, on a rename as well as while the client is being added. They used
+      // to be stamped once: a client saved as the placeholder and renamed straight afterwards kept
+      // the placeholder's letters in the directory and on the clipboard, so the round badge beside
+      // "SIM Ana Testna" read NS. Only initials are recomputed — an avatar the trainer set to
+      // something else is not one of these.
+      const derived = !client.avatar || client.avatar === getInitials(before?.name || "");
+      if (!before || derived) client.avatar = getInitials(client.name);
       client.gdprConsent = readConsentFromSection(before?.gdprConsent ?? null);
     },
     isBlank: () =>

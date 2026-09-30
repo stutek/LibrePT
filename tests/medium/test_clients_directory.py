@@ -153,6 +153,52 @@ def test_an_injury_the_trainer_writes_down_raises_the_warning(page, local_server
     assert saved["notes"] == "prefers mornings"
 
 
+def test_the_initials_follow_a_rename(page, local_server):
+    """They were stamped once, while the client was being added. A client saved before their name was
+    typed carries the placeholder's letters, and renaming them left those letters on the round badge in
+    the directory and on the clipboard — NS beside "SIM Ana Testna"."""
+    seeded = "const state = { clients: structuredClone(DEFAULT_CLIENTS), lang: 'en' };"
+    assert seeded in STUB
+    load_with_stub(
+        page, local_server, STUB.replace(seeded, seeded + "\nwindow.__state = state;")
+    )
+    page.wait_for_selector("#view-client-directory.active")
+    page.locator("#btn-add-client").click()
+    page.wait_for_selector("#dialog-client[open]")
+    page.fill("#client-goals", "lose weight")
+    page.locator("#form-client button[type=submit]").click()
+    page.wait_for_selector("#dialog-client", state="hidden")
+
+    added = page.evaluate(
+        "() => window.__state.clients.find((c) => c.goals === 'lose weight')"
+    )
+    placeholder_initials = added["avatar"]
+
+    # The Edit button asks the view which client is on screen, and there is no router here to put one
+    # there — so the test does both halves of what opening the page would: names the client, and shows
+    # the detail section the button lives in.
+    page.evaluate(
+        """(id) => import('./modules/clients/clientsView.js').then((m) => {
+            m.setActiveDetailClientId(id);
+            document.getElementById('view-client-detail').classList.add('active');
+        })""",
+        added["id"],
+    )
+    page.locator("#btn-edit-client").click()
+    page.wait_for_selector("#dialog-client[open]")
+    page.fill("#client-name", "Ana Testna")
+    page.locator("#form-client button[type=submit]").click()
+    page.wait_for_selector("#dialog-client", state="hidden")
+
+    renamed = page.evaluate(
+        "() => window.__state.clients.find((c) => c.name === 'Ana Testna')"
+    )
+    assert renamed["avatar"] == "AT", (
+        f"the badge still carries the old name's letters: {renamed['avatar']} "
+        f"(was {placeholder_initials})"
+    )
+
+
 @pytest.mark.parametrize("width,height", [(390, 844), (320, 680)])
 def test_save_is_on_the_screen_when_the_client_form_opens(
     page, local_server, width, height
