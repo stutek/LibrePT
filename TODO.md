@@ -7071,6 +7071,27 @@ to sobota. Pri tedenski seriji so vsi večeri »Prihodnje«, zato ne ve, katereg
 **Predlog:** namesto »Prihodnje« dan in datum, na primer »sob. 2026-10-03«. Opaženo na `main`
 `12d0e66`, sl, 390 × 844.
 
+### 80.124 [ ] P2 — Oznaka »PREDOGLED« vodi na »Stran ni najdena«, ko je aplikacija že naložena
+
+**Scenarij in koraki:** trener nekaj časa dela v aplikaciji (ne v peskovniku), nato pritisne rumeno
+oznako »PREDOGLED« v glavi. Njeno pomožno ime: »Predogledna različica — še ni izdana in lahko izgubi
+podatke. Odpri obvestilo o tveganjih in izgubi podatkov.«
+
+**Opaženo:** na `main` `12d0e66` se odpre `/LibrePT/preview.html` z besedilom »Stran ni najdena. Ta
+povezava ne vodi do treninga, stranke ali pogleda v LibrePT.« Na objavljeni `8b2ce80` isti naslov v
+istem brskalniku odpre aplikacijo z izbiro jezika. Strežnik pa stran vrne: `curl` na oba naslova da
+200 in naslov »LibrePT Preview Build — Risks & Data-Loss Notice«. Stran z obvestilom torej obstaja,
+brskalnik, ki je aplikacijo že naložil, pa je ne pokaže. To je verjetno isto, kar je Simon prijavil
+2026-09-10 (»klik na peskovnik značko vodi na neobstoječo stran«, §42.12), ko se s `curl` ni
+ponovilo.
+
+**Težava in vpliv:** oba trenerja brez predznanja je oznaka skrbela (»pomeni, da ne smem zaupati
+podatkom«). Edina stran, ki pove, kaj predogled pomeni za njune podatke, jima odgovori, da ne obstaja.
+
+**Predlog:** oznaka naj odpre obvestilo tudi v brskalniku, ki ima aplikacijo naloženo; test naj jo
+pritisne v takem brskalniku, ne s `curl`. Opaženo na `main` `12d0e66` (lokalni strežnik) in na
+objavljeni `8b2ce80`, 390 × 844.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
