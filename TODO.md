@@ -6216,6 +6216,16 @@ po osvežitvi. Trener izgubi pripravljeni sklop brez opozorila. Predlog: preveri
 obstoj celotnega sklopa in števila krogov po osvežitvi ter po vseh poteh ponovnega
 odpiranja. Sl, 390 × 844; brez novih prestreženih napak. Kode nismo pregledovali.
 
+**Dokaz 2026-09-30, `main` `12d0e66`, prazna aplikacija: zaključek izbriše ročno sestavljen načrt.**
+Trening »Moč« za jutri, brez rutine, stranka Maja Kranjc. V »Uredi načrt« tri vaje iz kataloga s
+12, 30 in 25 kg. »Začni trening« → »Ohrani urnik«. Po osvežitvi med tekom podloga še kaže vse tri.
+Brez zapisane vaje (§80.6: ni je s čim zapisati) »Zaključi vadbo« → »Zaključi zdaj« → »Zaključi
+zdaj« v oknu »Ni zabeleženih zaključenih serij. Res želiš zaključiti in shraniti prazno vadbo?«.
+Nato: podloga »Vaj še ni.«, stran stranke »Ni še zabeleženih vadb.«, zato ni niti »Shrani kot
+rutino«. V IndexedDB (`schema4`, `schema5`, `schemaPREVIEW`) ni nobene od treh vaj; trening in stranka
+sta. Trener, ki prvič sestavi načrt in ga s stranko opravi po načrtu, nima po zaključku ničesar:
+ne načrta, ne zgodovine, ne rutine za naslednji teden.
+
 **Stanje 2026-09-29 — predlagani popravek ne zadošča, čaka na odločitev o zasnovi.** Preizkušeno na
 `main`: tap na kartico, ki bi vrnil na že odprto podlogo namesto nove gradnje, ohrani spremembe
 načrta, pokvari pa demo zgodbo (korak »Pritisni Johnovo ime«). Vzrok: odprta podloga ima udeležence
