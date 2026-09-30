@@ -240,7 +240,12 @@ function prefillAdjustmentFields(exMapping, update, state) {
     tagId: readFeedbackTag(update.tag).known?.id,
   });
   document.getElementById("adjust-weight").value = target.weight;
-  document.getElementById("adjust-reps").value = target.reps;
+  const repsField = document.getElementById("adjust-reps");
+  repsField.value = target.reps;
+  // Reps may be "max", "20s" or "8-12", which a number keyboard cannot type. Only a plain number
+  // gets one; any other value keeps the full keyboard.
+  if (/^\d+$/.test(String(target.reps))) repsField.setAttribute("inputmode", "numeric");
+  else repsField.removeAttribute("inputmode");
   document.getElementById("adjust-sets").value = target.sets;
 }
 

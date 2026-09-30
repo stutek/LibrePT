@@ -319,3 +319,14 @@ def test_a_level_machine_is_not_asked_for_kilograms(page, local_server):
     label = page.locator("label[for=adjust-weight]").inner_text()
     assert "kg" not in label
     assert "Level" in label
+
+
+def test_the_reps_field_opens_a_number_keyboard_for_a_plain_number(page, local_server):
+    """Reps was a bare text field, so a phone opened the full keyboard while sets and weight got
+    a number keyboard. A phone reads `inputmode` to choose the keyboard."""
+    load_with_stub(page, local_server, NO_ROUTINE_STUB)
+    page.wait_for_selector("#view-adjustments.active")
+    _cards(page).first.locator(".btn-resolve-alert").click()
+
+    assert page.locator("#adjust-reps").input_value() == "10"
+    assert page.locator("#adjust-reps").get_attribute("inputmode") == "numeric"
