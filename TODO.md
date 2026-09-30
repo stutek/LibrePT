@@ -4259,7 +4259,7 @@ imenuje gumb po tem, kar se vidi (»Pritisni ✓ zgoraj desno …«) — opažen
 
 ### 80.153 [ ] P3 — Pri slabem signalu aplikacija počaka na odgovor strani, čeprav je vse na telefonu
 
-**Popravek 2026-10-01 01:05 (Claude):** prva različica te točke je bila P1 s številkama 96,9 s in več kot
+**Popravek 2026-10-01 00:59 (Claude):** prva različica te točke je bila P1 s številkama 96,9 s in več kot
 150 s. Napačni sta: čas sem meril od začetka ukaza `goto` v explore.py, ta pa čaka, da omrežje utihne,
 kar pri zadržanih odgovorih traja do 60 sekund. Spodnje številke so izmerjene znova, s štoparico od
 začetka navigacije do slovenske plošče ali uvodne izbire.

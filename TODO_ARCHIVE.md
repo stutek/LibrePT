@@ -22,14 +22,14 @@ Read [CHANGELOG.md](CHANGELOG.md) for what shipped and when. This file is why.
 
 ### 80.154 [x] P2 — Občasno se aplikacija ne naloži: ostane na angleškem zaslonu za nalaganje — zavrnjeno 2026-10-01
 
-**Popravek 2026-10-01 01:20 (Claude):** prva različica je bila P1 s petimi zastoji na kopiji `main`.
+**Popravek 2026-10-01 01:07 (Claude):** prva različica je bila P1 s petimi zastoji na kopiji `main`.
 Ti so skoraj vsi lastnost moje kopije: bila je nežigosana (`version.js` = `dev`), in ko sem ji dal
 pravi SHA, je izginilo tudi 15 zastojev od 15. Na objavljeni aplikaciji je en zastoj.
 
 **Scenarij in koraki:** objavljena aplikacija, prvi zagon trenerke »Tara Zorko« (podatki, tema,
 »Začni s prazno aplikacijo«), nato isti naslov `/?lang=sl` naložiti znova, več kot štiridesetkrat.
 
-**Opaženo:** enkrat (00:44) je stran ostala na zaslonu »LibrePT / A lightweight, free app for your
+**Opaženo:** enkrat je stran ostala na zaslonu »LibrePT / A lightweight, free app for your
 clipboard, sessions and training programmes.« v angleščini, `<html lang="en">`, naslov `/LibrePT/`
 se ni preusmeril na ploščo. Po 50 sekundah enako; konzola brez napak. Naslednja nalaganja so stekla.
 
@@ -50,7 +50,7 @@ vsakič, ko je trener aplikacijo že odprl — kdor povabilo preizkuša lokalno,
 **Predlog:** zagon naj se vedno konča — s ploščo ali s sporočilom v jeziku trenerja, kaj ni uspelo in kaj
 naj stori — opaženo na različicah `#8b2ce80` (objavljena) in `main` `6230070`, 390 × 844, sl.
 
-**Zavrnjeno 2026-10-01 01:35 (Claude): zastoja ni mogoče pripisati aplikaciji.** Primerjava A/B na
+**Zavrnjeno 2026-10-01 01:14 (Claude): zastoja ni mogoče pripisati aplikaciji.** Primerjava A/B na
 kopiji `main`, vsakič čist brskalnik, prvi zagon trenerke in tri nalaganja `/intake`: z navadno
 navigacijo (`goto(wait_until="commit")`, brez kavlja) 6 od 6 naloženih, z ukazom `goto` iz explore.py
 (`networkidle`, nato vbrizg kavlja za napake in odklop ukaznega procesa) 3 od 6 obstalih. Z navadno
