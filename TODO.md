@@ -4828,6 +4828,22 @@ overwrite a client, because every record of one schema shares a single key space
 fixed on 2026-09-24, and it is the warning this section starts from: the identifier half is less
 settled than it looks, so read what that fix changed before designing on top of it.
 
+**Prebrano 2026-09-30 (Claude), za živo shemo 5 in PREVIEW.**
+
+- **Identifikator: večinoma da.** Vsaka zbirka ima nespremenljiv `id`. Vse, kar ustvari aplikacija,
+  dobi `newRecordId()` ([recordId.js](src/data/recordId.js)): UUIDv7 s 122 naključnimi biti iz
+  `crypto.getRandomValues`, zato se dve napravi praktično ne moreta ujeti. Izjeme: (1) vzorčni in
+  preizkusni zapisi imajo stalne id-je, enake na vsaki napravi — tako je narejeno namenoma; (2) uvoz
+  knjižnice ohrani id vaje ali sklopa iz datoteke, če je na TEJ napravi prost (§77.1 je zaprl trk med
+  zbirkami na eni napravi, ne med napravami), zato se lahko ujame z zapisom na drugi napravi; (3)
+  starejše gradnje so delale 8-znakovne id-je iz `Math.random` (okoli 41 bitov), ki ostanejo veljavni.
+- **Kdaj in na kateri napravi spremenjeno: ne, pri nobeni zbirki.** Ni polja `updatedAt` ne naprave;
+  edino žig ob zapisu je `schemaVersion` celotne shrambe. Sinhronizacija z Drive je namenoma zgrajena
+  brez njih (trismerno spajanje po id-ju, ki spor pokaže, ne izbere zmagovalca).
+- **Kaj to pomeni:** druga polovica zahteva novo polje v vsaki zbirki, torej novo številko sheme
+  (oštevilčene oblike so zamrznjene). To je odločitev za Simona, ne branje; točka (2) zgoraj je
+  vredna enakega premisleka, če bo več naprav pisalo iste zapise.
+
 ## 67. [ ] Free text elsewhere is not checked for a client's name
 
 Left open by §66 (2026-09-18): the refusal covers a session's name and location only. A routine's
