@@ -5332,3 +5332,21 @@ Gradivo:
 - Odločitve, ki čakajo nanj: točke z oznako »čaka na Simona« v §80, §88 in §94; preverba šifrirane
   kopije na telefonu (§80.136); predlog pravila o commitih z `git commit --only` (iz pogovora
   2026-09-30).
+
+## 97. [~] Besedila privolitve in obvestila po GDPR — pregled in popravek v vseh jezikih
+
+**Naročil Simon 2026-09-30:** temeljito preveriti vsebino privolitve, jo primerjati z objavljenimi in
+uradnimi vzorci ter popraviti v vseh podprtih jezikih (en, sl, de). V delu: Claude Opus.
+
+Najdeno v kodi, pred primerjavo z vzorci:
+- Obvestilo pravi, da Google kopijo lahko prebere. Kopija na Drive je šifrirana z geslom trenerja
+  ([driveSyncService.js](src/data/driveSyncService.js)), zato je ne more.
+- Povezava v e-pošti in SMS vodi na javno stran z neizpolnjenimi polji (ime trenerja, obdobje
+  hrambe) in z navodili trenerju in razvijalcem. Stranka tako ne izve, kdo je upravljavec.
+- AI kopija ni anonimna: nosi številko stranke in datume (psevdonimizacija). Izpusti pa tudi cilje in
+  opombe, česar besedilo ne pove ([aiClientSummary.js](src/domain/aiClientSummary.js)).
+- Izbris ohrani zgodovino treningov brez imena; obvestilo pravi, da se izbriše vse.
+- Besedilo privolitve ne imenuje izrecno zdravstvenih podatkov (člen 9(2)(a)).
+- Manjka iz člena 13: omejitev obdelave (en, de), ali je dajanje podatkov obvezno in posledice,
+  avtomatizirano odločanje, prenos v tretje države.
+- Jeziki se razhajajo: le sl pismo pove, da je ponudnik shrambe obdelovalec.
