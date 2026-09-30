@@ -83,6 +83,10 @@ export function renderIntakeViewShell() {
            message, the name here and the person they just spoke to all agreeing. Without it the
            page asked a stranger for health details while identifying nobody, which is the shape of
            a phishing attempt (asked 2026-08-23). -->
+      <!-- The two steps, as text (asked 2026-09-15): saving the trainer's contact comes first, the form
+           second. Both are hidden together when there is no contact card to save, because a lone
+           "step 2" sends the client looking for a step 1. -->
+      <h2 id="intake-step-contact" class="intake-step hidden"></h2>
       <div id="intake-sender" class="intake-sender" hidden>
         <p id="intake-sender-for" class="intake-sender-for"></p>
         <!-- The contact itself, tappable (asked 2026-09-11). The client usually does NOT have the
@@ -101,6 +105,7 @@ export function renderIntakeViewShell() {
         <p id="intake-sender-check" class="intake-hint"></p>
       </div>
 
+      <h2 id="intake-step-form" class="intake-step hidden"></h2>
       <form id="intake-form" class="intake-form" novalidate>
         <div class="form-group">
           <label id="intake-name-label" for="intake-name"></label>
@@ -191,6 +196,8 @@ const TEXT_BY_ELEMENT = {
   "intake-save": "intake_save",
   "intake-privacy-note": "intake_privacy_note",
   "intake-sender-check": "intake_sender_check",
+  "intake-step-contact": "intake_step_contact",
+  "intake-step-form": "intake_step_form",
 };
 
 function setStatus(t, key, tone, { detail = "", file = "" } = {}) {
@@ -287,6 +294,15 @@ function showSender(sender, t) {
   save.classList.toggle("hidden", !buildTrainerVcard(sender));
 }
 
+/** Whether the page is presented as two steps. Only when the contact card is offered: without it
+ *  step 1 does not exist, and what such a page shows instead is undecided. */
+function showSteps(sender) {
+  const numbered = Boolean(sender && buildTrainerVcard(sender));
+  for (const id of ["intake-step-contact", "intake-step-form"]) {
+    $id(id)?.classList.toggle("hidden", !numbered);
+  }
+}
+
 /** The saved file, pre-addressed to the trainer the link named.
  *
  * **A `mailto:` cannot carry the file**, which is the whole shape of this: the composer opens with
@@ -343,6 +359,7 @@ export function setupIntakeForm(deps) {
       senderBox.hidden = !sender;
       if (sender) showSender(sender, t);
     }
+    showSteps(sender);
     const notice = $id("intake-notice-link");
     if (notice) notice.href = noticeUrlFor(current);
     const form = $id("intake-form-link");
@@ -416,7 +433,8 @@ export function setupIntakeForm(deps) {
     const file = currentFile();
     if (!file) return;
     saveSignupFile(file, platform);
-    draft.forget();
+    // The draft STAYS, as after the automatic save (ruled 2026-09-17): the file is in Downloads but
+    // has not reached the trainer, and a reload must not make the client type everything again.
     setStatus(t, "intake_saved", "done");
     savedFileName = file.name;
     offerToEmailTheTrainer(t, savedFileName);

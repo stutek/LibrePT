@@ -34,6 +34,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Changed
 
+- **The client's signup page is two numbered steps: save the trainer's contact, then fill in the
+  form**, as ruled on 2026-09-15; a page with no contact card to save shows no numbers. *Save the
+  file to share* now keeps what the client typed, as the automatic save after a failed share
+  already did, so a reload does not make them type it again.
 - **A clipboard holding two sessions pairs each client with their session.** Each session's title
   line carries a coloured dot, and the same dot sits on the tab of every client booked in it; a
   screen reader reads the session's name on the tab. A clipboard with one session shows no dots.

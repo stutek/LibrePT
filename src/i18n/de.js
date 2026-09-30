@@ -529,6 +529,8 @@ export const de = {
     "Ich willige ein, dass mein Trainer diese Angaben speichert und nutzt, um mein Training zu planen und aufzuzeichnen. Sie bleiben auf dem eigenen Gerät meines Trainers und können zusätzlich als Sicherungskopie im eigenen privaten Cloud-Speicher meines Trainers liegen — kein anderer Dienst erhält sie. Ich kann diese Einwilligung jederzeit widerrufen, indem ich es meinem Trainer sage.",
   intake_sender_for: "Du füllst das für {who} aus.",
   intake_sender_save: "Diesen Kontakt speichern",
+  intake_step_contact: "Schritt 1: Speichere diesen Kontakt",
+  intake_step_form: "Schritt 2: Fülle das Formular aus",
   intake_sender_check:
     "Wenn das nicht die Person ist, die dir diesen Link gegeben hat, füll ihn nicht aus. Diese Seite sendet selbst nichts: Aus deinen Antworten wird eine Datei auf diesem Telefon, und du entscheidest, mit wem du sie teilst.",
   intake_notice_link: "Was mit deinen Daten passiert",

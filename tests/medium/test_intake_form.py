@@ -101,7 +101,6 @@ def test_the_form_leaves_nothing_on_the_client_phone(page, local_server):
     _deliver(page, "#intake-save")
 
     assert _app_written_local_storage(page) == []
-    assert page.evaluate("() => Object.keys(sessionStorage)") == []
     assert (
         page.evaluate("async () => (await indexedDB.databases()).map((d) => d.name)")
         == []
@@ -315,6 +314,53 @@ def test_a_refused_share_keeps_what_the_client_typed(page, local_server):
     assert page.evaluate("() => Object.keys(sessionStorage)") != []
     page.reload()
     expect(page.locator("#intake-name")).to_have_value("Jana Novak")
+
+
+def test_the_save_button_keeps_what_the_client_typed(page, local_server):
+    """Ruled 2026-09-17 for the automatic save, and the same reason applies to the button: the file
+    is in Downloads but not yet in the trainer's hands, and a reload must not make the client type
+    the introduction again."""
+    _mount(page, local_server, can_share=False)
+    _fill(page)
+    page.check("#intake-consent")
+
+    _deliver(page, "#intake-save")
+
+    assert page.evaluate("() => Object.keys(sessionStorage)") != []
+    page.reload()
+    expect(page.locator("#intake-name")).to_have_value("Jana Novak")
+
+
+SENDER_HASH = (
+    "window.__intakeHash = '#from=' + "
+    "encodeURIComponent('Sam Trainer|+386 40 111 222|sam@example.com');"
+)
+
+
+def test_the_page_is_two_numbered_steps_when_the_contact_can_be_saved(
+    page, local_server
+):
+    """Asked 2026-09-15: saving the contact is the first step, before the form. The headings are
+    real text, so the order is on the page and not only implied by where the button stands."""
+    page.add_init_script(SENDER_HASH)
+    _mount(page, local_server)
+
+    expect(page.locator("#intake-step-contact")).to_have_text(
+        "Step 1: Save your trainer's contact"
+    )
+    expect(page.locator("#intake-step-form")).to_have_text("Step 2: Fill in the form")
+    page.click('[data-intake-lang="sl"]')
+    expect(page.locator("#intake-step-contact")).to_contain_text("1. korak")
+
+
+def test_a_page_with_no_contact_card_shows_no_step_numbers(page, local_server):
+    """A lone "step 2" would send the client looking for a step 1 that is not there."""
+    page.add_init_script(
+        "window.__intakeHash = '#from=' + encodeURIComponent('|+386 40 111 222');"
+    )
+    _mount(page, local_server)
+    expect(page.locator("#intake-step-contact")).to_be_hidden()
+    expect(page.locator("#intake-step-form")).to_be_hidden()
 
 
 def test_the_trainer_contact_is_one_tap_rather_than_something_to_copy(
