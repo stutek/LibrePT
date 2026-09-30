@@ -7036,8 +7036,7 @@ vpiše počep s palico v program. Izbira ni trenerjeva, naredila jo je abeceda.
 **Predlog:** nobena vaja naj ne bo izbrana vnaprej, dokler je trener ne izbere; ob poškodbi naj
 okno pokaže njeno besedilo. Opaženo na `main` `12d0e66`, sl, 390 × 844.
 
-**Težava in vpliv:** besedilo za prazno polje »Opombe« trdi, da stranka nima zdravstvenih težav, dve
-vrstici pod njeno poškodbo. Trener, ki stran hitro preleti, lahko prebere zadnje.
+### 80.122 [ ] P3 — Koledar »Datumi« ne pokaže ne današnjega dne ne dni s treningi
 
 **Predlog:** za prazne opombe napisati, da opomb ni, na primer »Ni opomb.« Opaženo na `main`
 `12d0e66`, sl, 390 × 844.
