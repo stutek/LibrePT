@@ -6,6 +6,12 @@
 
 STORE = "(await import(new URL('data/stateStore.js', document.baseURI).href))"
 
+# The element's height on screen, unrounded, once every animation of the view it is in has finished.
+SETTLED_HEIGHT = """async (el) => {
+  await Promise.all(el.closest('.app-view').getAnimations().map((a) => a.finished));
+  return el.getBoundingClientRect().height;
+}"""
+
 
 def _base(page):
     return page.evaluate("() => new URL(document.baseURI).pathname").rstrip("/")
@@ -32,7 +38,10 @@ def test_save_as_routine_adds_a_zero_weight_routine_and_opens_the_editor(
         "#client-history-list .history-card", has_text="Assault Bike"
     ).first
     button = card.get_by_role("button", name="Save as routine")
-    assert button.bounding_box()["height"] >= 44
+    # Read once the view has settled: it arrives with a 0.32s scale from 0.985 (`viewSwitch` in
+    # index.css), and `_nav` waits 0.3s, so the box read 43.9998px in two runs of three
+    # (2026-09-30). Not `offsetHeight`, which rounds: a 43.6px button would read 44 and pass.
+    assert button.evaluate(SETTLED_HEIGHT) >= 44
     button.click()
     page.wait_for_timeout(600)
 
