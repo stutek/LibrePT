@@ -415,6 +415,11 @@ export async function finishWorkoutSession() {
   // Back to the sessions list, where the finished session's card is. It used to open the history of
   // every client, which is gone: history is shown only on a client's page.
   if (navigateToPath) navigateToPath("/");
+  // Then repaint the list, for the same reason starting a session does it: a card's status line is
+  // stamped when the list renders, not derived live, and the route is already "/" when a trainer
+  // finishes from there — so the card went on saying "Active session" until something unrelated
+  // repainted it or the page was reloaded.
+  getAppDeps().renderSessions?.();
 }
 
 export function recoverActiveSession() {
