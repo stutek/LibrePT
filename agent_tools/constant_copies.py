@@ -56,7 +56,16 @@ REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
 # disk and every link into the GitHub repo. A constant whose value collides with unrelated text is
 # not trackable this way, and a check that cries wolf is one nobody runs.
 DECLARATIONS = (
-    ("DEV_SERVER_PORT", "deploy/local_http_server.py", r"^DEV_SERVER_PORT\s*=\s*(\d+)"),
+    (
+        "DEV_SERVER_PORT",
+        "deploy/local_http_server.py",
+        r"^DEV_SERVER_PORT\s*=.*\bor (\d+)\)",
+    ),
+    (
+        "SNAPSHOT_SERVER_PORT",
+        "deploy/local_http_server.py",
+        r"^SNAPSHOT_SERVER_PORT\s*=\s*(\d+)",
+    ),
     (
         "PUBLIC_SITE_URL",
         "src/data/publicUrls.js",

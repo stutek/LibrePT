@@ -38,7 +38,13 @@ from urllib.parse import urlsplit
 # 2026-08-18 it appeared in six places, which is the same shape of problem as the thirteen Python
 # pins: nothing wrong until one of them moves. Prose names it too (TODO §28.1): a comment quoting the
 # number is a copy that goes stale silently, and `python -m agent_tools.constant_copies` finds those.
-DEV_SERVER_PORT = 8081
+#
+# A gate run in a snapshot (build/snapshot.py) serves its own copy of src/ on SNAPSHOT_SERVER_PORT and
+# sets PORT_ENV for every process of that run, so its pytest workers and its ZAP scan reach that copy
+# rather than the shared tree another session is editing. Unset, the shared port applies.
+PORT_ENV = "LIBREPT_DEV_SERVER_PORT"
+DEV_SERVER_PORT = int(os.environ.get(PORT_ENV) or 8081)
+SNAPSHOT_SERVER_PORT = 8095
 
 # Where the app is mounted, so a link the tests build matches what the server actually serves.
 DEV_SERVER_BASE_PATH = "/LibrePT/"

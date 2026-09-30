@@ -1,5 +1,7 @@
 """`python -m build` — run the full build: environment check, tests, then bundle src/ -> dist/.
 `python -m build check` — run lint analysis and tests together without bundling dist/.
+`python -m build check -- <paths>` — the same gate on HEAD plus those paths only, in a snapshot, and
+`python -m build commit -F <msg> -- <paths>` — commit them if they are what it proved (build/snapshot.py).
 """
 
 import atexit
@@ -8,7 +10,7 @@ import sys
 import time
 from datetime import datetime
 
-from . import gate_lock
+from . import gate_lock, snapshot
 from .quiet_machine import foreign_cores, wait_for_room
 from . import (
     PIPELINE_STAGES,
@@ -216,7 +218,24 @@ def _print_summary(
     return host
 
 
+def snapshot_command(argv):
+    """`check -- <paths>` and `commit -F <msg> -- <paths>` go to build/snapshot.py; None otherwise."""
+    if "--" not in argv:
+        return None
+    split = argv.index("--")
+    head, paths = argv[:split], argv[split + 1 :]
+    if head == ["check"]:
+        return lambda: snapshot.run_check(paths)
+    if len(head) == 3 and head[0] == "commit" and head[1] == "-F":
+        return lambda: snapshot.run_commit(head[2], paths)
+    return None
+
+
 if __name__ == "__main__":
+    command = snapshot_command(sys.argv[1:])
+    if command is not None:
+        refuse_a_pipe()
+        sys.exit(command())
     start = time.monotonic()
     arg = sys.argv[1] if len(sys.argv) > 1 else ""
     label = f"build {arg}".strip()

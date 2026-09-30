@@ -107,13 +107,16 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
   progress, and every file you take exclusively, TODO.md never among them. A file another note claims is not yours — take
   other work or ask. **Delete the note in the same turn as the commit**; a stale note locks files
   nobody holds.
-- **The working tree takes ONE writer at a time; research and planning run in parallel.** Claim
-  the tree in the note, write, verify, commit, release, and say so. A run proves a whole TREE, so
-  another session's write anywhere under `src/` or `tests/` voids it — per-file turn-taking is not
-  enough. `build check` holds `.build-reports/gate.lock` with its pid and refuses a second run, and
-  it fails a run during which `src/` or `tests/` changed. Either answer means wait, never commit
-  without a green run. Whether a gate is running is the lock's answer, not the process table's:
-  `pgrep -f "python -m build"` also matches the command that asks.
+- **Sessions write in parallel, each on the files its note claims, and prove their own paths.**
+  `.venv/bin/python -m build check -- <your paths>` runs the gate on HEAD plus exactly those files,
+  in a copy of the tree with its own dev server, so another session's half-written file neither
+  fails the run nor has to stop for it. `.venv/bin/python -m build commit -F <message file> -- <the
+  same paths>` then commits exactly them from a private index — the shared one and what others staged
+  in it are left alone — and refuses a path that changed after the run or a HEAD since moved by code.
+  A file two sessions must both change is taken in turns, through the note. `build check` holds
+  `.build-reports/gate.lock` with its pid and refuses a second run: that answer means wait, never
+  commit without a green run. Whether a gate is running is the lock's answer, not the process
+  table's: `pgrep -f "python -m build"` also matches the command that asks.
 - **A check whose result nothing acts on is not a check.** Putting the probe and the action in one
   shell line prints the warning and does the thing anyway. Guard it, or read the answer in one call
   and act in the next.
@@ -125,17 +128,13 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
   session that is alive and listening; the note reaches one that starts later, or one that died
   mid-edit. So on finding foreign changes, read the notes first and message second, and never let a
   message be the only record of who holds what.
-- **A gate that failed on someone else's half-written file is not your failure.** Read the digest;
-  if the failing file is another session's, re-read `git status --short` and the notes every five
-  minutes and judge whether the tree has settled. Say what you are waiting for. This is the one
-  allowed re-run; a failure in a file you hold is yours.
 - Commit messages: `type(scope): imperative summary` (lowercase, ≤72 chars), blank line, body
   wrapped at 72 saying **why**, blank line, and last a line `Co-Authored-By: <model> <email>`
   naming the model actually running. **Write the message to a file and commit with
   `git commit -F <file>`.** `git commit -m "…\n\n…"` stores the two characters `\` and `n`, not a
   line break: git then finds no body and no co-author (Codex, 2026-09-15). After the commit,
   `git log -1 --format='%(trailers:key=Co-Authored-By)'` must print that line.
-- **Run `.venv/bin/python -m build check` in full before every code commit**, unpiped, and report
+- **Run the gate in full before every code commit**, unpiped, and report
   the result. **Say the clock time it will finish BEFORE launching it, in the reply, for every run —
   a re-run too** — `.build-reports/last-run.json` holds the last duration, so that is a time such as
   "done at 08:49", never "312 seconds" or "a few minutes", and a time written only in the note has

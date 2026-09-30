@@ -34,6 +34,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Changed
 
+- **The gate can run on a copy of the tree, so sessions no longer stop for each other.**
+  `build check -- <paths>` proves HEAD plus exactly those files in a snapshot with its own dev
+  server, and `build commit -F <message> -- <paths>` commits exactly them, refusing a file changed
+  since the run or a HEAD since moved by code. Before, a gate proved the whole shared tree: every
+  other session had to stop writing for its nine minutes, and one session's unfinished work had to
+  be moved out with `git stash` for another to commit, which collided with that session's staged
+  files when it was put back.
 - **Sessions that overlap sit side by side on the board.** Two sessions that partly overlap
   (10:00-11:00 and 10:30-11:30) read as if one came after the other; they now share a row, each in
   its own column, the later one starting lower. Three or more overlapping sessions stay full width,

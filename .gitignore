@@ -24,8 +24,9 @@ Thumbs.db
 __pycache__/
 *.pyc
 
-# Python Environments
-.venv/
+# Python Environments. `.venv` without a slash: in a gate snapshot (build/snapshot.py) it is a
+# symlink to the shared one, and a pattern ending in "/" matches only a directory.
+.venv
 env/
 
 # Build Outputs

@@ -259,8 +259,9 @@ the same SHA is not evaluated again.
 
 ## Never run the same scenario twice
 
-The ledger is [`.private/exploratory-test/scenarios.md`](../../../.private/exploratory-test/scenarios.md)
-(gitignored). Scenarios have one table, days (mode 2) another, "Dnevi trenerja", with one row per day:
+The ledger is `.private/exploratory-test/scenarios.md` (gitignored, so named rather than linked: a
+link into it is dead in every clone and in CI). Scenarios have one table, days (mode 2) another,
+"Dnevi trenerja", with one row per day:
 | datum | št. | kdo je trener | dan v enem stavku | oznake | izid (the numbers it produced) |.
 **Read it before inventing anything**, and add a row the moment a scenario ends —
 clean runs included, because a clean run is what stops the next session repeating it. One row:
