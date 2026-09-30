@@ -7221,6 +7221,31 @@ misli, da gumb ne deluje.
 **Predlog:** ko je izbirnik odprt, naj gumb pravi, kaj naredi (na primer »Skrij seznam vaj«), ali naj
 izbirnik ostane odprt. Opaženo na `main` `e2daf5e`, sl, 390 × 844.
 
+### 80.140 [ ] P2 — Poglavje »Izvedba in prilagoditve treninga«: korak imenuje angleški gumb, opombe ob vaji ni
+
+**Scenarij in koraki:** prvi zagon, pogoji, tema, osebni podatki, poglavje »Izvedba in prilagoditve
+treninga« (15 korakov). Vsak korak opraviti sam, kot ga korak opiše; »Pokaži mi« le, kjer korak ni
+enoznačen.
+
+**Opaženo:**
+- **Korak 7** (P2): »Pritisni 🔥 Joint Pain / Discomfort — bolečina v sklepu.« Gumb v oknu »Zabeleži
+  povratne informacije« se glasi »🔥 Bolečina ali nelagodje v sklepu«. Pravilo izdelka: korak imenuje
+  gumb z napisom, ki ga gumb kaže v tem jeziku. Odprta Simonova odločitev o angleških imenih v vodenem
+  ogledu (»all three personas named the English note-type button …«) izhaja iz časa, ko je bil gumb še
+  angleški; zdaj je slovenski, angleški je le še korak (ključ `story_step_capture_tag`).
+- **Korak 12** (P2): »Pritisni Uredi načrt. Odpre se Johnov načrt; opomba je v njem, ob vaji.« V
+  urejevalniku opombe »levo koleno, tretja runda« ob vaji ni (vrstica nima polja za opombo, §80.134);
+  besedilo je le v pogledu prejšnjega načrta nad robom zaslona.
+- **Koraka 2 in 5** (P3): »Pritisni Janin sklop.« in »Pritisni njegov sklop, da se odpre.« Jane ima
+  tri sklope, John pet; mišljen je prvi (»Dinamično ogrevanje«), kar pokaže šele »Pokaži mi«.
+- Drži: po koraku 14 ima John Lat Pulldown, Jane pa še Face Pulls (»Vaja se zamenja samo pri Johnu«).
+
+**Težava in vpliv:** vodeni ogled je za trenerja brez predznanja edini učitelj. Kjer korak imenuje
+gumb, ki ga ni, ali obljubi, česar zaslon ne pokaže, trener ne ve, ali je zgrešil on ali aplikacija.
+
+**Predlog:** korak 7 z napisom gumba; korak 12 naj pove, kje je opomba res vidna; koraka 2 in 5 naj
+sklop imenujeta. Opaženo na `main` `e2daf5e`, sl, 390 × 844.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
