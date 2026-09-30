@@ -7098,6 +7098,38 @@ Naloga podagenta: `.private/exploratory-test/forms/2026-09-30-06-task.md`. Stran
 Trenerjeva preverba po koncu: »Odprem njeno današnjo sejo, ki je že bila: stara vrednost je ostala.«
 Tega ni mogel preveriti, ker trening brez zapisane vaje ne pride v zgodovino (§80.6).
 
+### 80.134 [ ] P1 — Ocena obrazca »Uredi načrt«: načrt za jutri po osvežitvi izgine, ogrevanje ne more biti časovno
+
+Način 3. Naloga (podagent, pred ogledom obrazca): zvečer načrt jutrišnjega enournega treninga za
+stranko z bolečo levo ramo: ogrevanje 8 min, štiri vaje s serijami, ponovitvami in težo, dve od
+njih v paru za 3 kroge, počitki, plank 3 × 40 s. Naloga podagenta:
+`.private/exploratory-test/forms/2026-09-30-07-task.md`. Pot: trening »Moč« jutri 17:00, stranka
+Maja Novak brez rutine → podloga → ⋮ → »Uredi načrt«. `main` `e8e90d8`, sl, 390 × 844.
+
+**Odveč.** Nič. Trening, stranka in ura so že znani; urejevalnik jih ne sprašuje znova.
+
+**Manjka.**
+- **Opomba pri vaji** (čaka na Simona). Naloga: »Potisk ima opombo o rami, vidno, ko ga odprem.«
+  Vrstica ima le ime, serije, ponovitve, težo in sklop; opombo je mogoče napisati le v ime vaje.
+- **Časovna vaja po meri** (P2). Ogrevanje »Vaja« brez kataloga ima le ponovitve: »8:00« je na
+  podlogi »S1 × R8:00«, »480« pa »S1 × R480«; ocena trajanja ogrevanje šteje kot 1 minuto
+  (»1 / 60 min«). Katalogove časovne vaje (Plank: »DRŽA«, »S3 × 0:40 × BW«) to znajo.
+
+**Ne deluje.**
+- **Načrt po osvežitvi izgine** (P1, §80.52). Šest vaj, sklop in počitki, »Končano z urejanjem
+  načrta«; podloga pokaže ves načrt. Osvežitev in dotik iste kartice: »Ni vstavljenih vaj.« Naloga je
+  prav to: »Ko aplikacijo zaprem in odprem brez omrežja, je vse še tam.«
+- **Sklop ob dodajanju ustvari prazno vajo** (P3). Po »Sklop« je v njem vrstica brez imena; ostane,
+  dokler je trener ne odstrani z »Odstrani«.
+- Počitki: za sklopom sta na podlogi dva »Počitek 60s«, ki ju trener ni dodal; naloga zahteva 0 s
+  med vajama v paru in 90 s po paru.
+
+**Napačen tip ali vrstni red.**
+- **Dve imeni za krog** (P3): urejevalnik »Runde« (pri polju za število krogov), podloga »KROG 1 / 3«.
+- Nova kataloška vaja se ne odpre sama; odpre jo le »Razširi« (§94, točka 3).
+- Dobro: fokus je v imenu nove vaje, ocena trajanja opozori »49 / 60 min · na tesnem«, plank je
+  časovna vaja s poljem »DRŽA«, vrstni red na podlogi je enak vrstnemu redu v urejevalniku.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
