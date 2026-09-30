@@ -20,6 +20,1681 @@ Read [CHANGELOG.md](CHANGELOG.md) for what shipped and when. This file is why.
 
 ---
 
+## [x] Resume point — state as at 2026-09-26 12:06 — merged 2026-09-30
+
+**Merged 2026-09-30 into: 83. [ ] §66 gleda samo naprej: stranka, ki pride za besedilom**
+
+Read this and `.private/AGENT_SYNC/` before touching anything.
+
+Written when Simon stopped every agent at 2026-09-26 12:06, and committed at 2026-09-27 03:01, when
+he told them to carry on. The machine slept between the two, so **everything below describes the tree
+as it was fifteen hours earlier** — re-read `git log` and `git status --short` rather than trusting
+the commit list here. What is ruled, refuted and measured does not go stale; what is in the tree
+does.
+
+**The tree.** `librept-39` parked its unfinished §81.2 with `git stash push -u`, named
+"claude-opus §81.2 WIP", so `main` is clean; §81.2 says what is missing. Shipped today: §79 German,
+§79.3, §79.4, §81.1 (`f847eb4`), §82.1 (`964539d`), and the ISO date in `3461d92`.
+
+**Two stale claim notes are still in `.private/AGENT_SYNC/`.** `gpt-6-trainer-review.md` belongs to a
+Codex session that ran out of tokens and is not coming back. `claude-opus-card-copy.md` (2026-09-23)
+waits on a note that no longer exists. Both lock nothing and nobody owns them. Simon decides whether
+they go.
+
+**§80, the trainer's first-use review, is ruled and needs no re-checking.** Codex tested the
+published build `0625bd6`, fourteen commits behind, so every finding was re-verified in the code on
+`main`. §80.1 is refuted — it is §66 working as ruled. §80.2's terms modal is fixed in §81.1. §80.4
+was three defects: its date is closed, its language-change seam is in §81.1, its two unkeyed menu
+rows in §81.2. **§80.3 is the one finding nobody has taken**: the exercise catalogue's 48 English
+names carry no search synonyms, so "počep" matches nothing, and localised names are refused by
+§46.4. It needs Simon's Slovenian and German search terms, which an agent must not invent by
+translating. Codex's own scenario §80.1 is also unfinished: running a session, logging sets, fixing a
+wrong entry and closing it were never tested, and the requested five hours were not spent.
+
+**§83 waits on Simon's ruling** — §66's client-name check looks only forward, which breaks editing
+old sessions and leaves the GDPR hole §66 exists to close.
+
+**Two TODO entries Simon asked for on 2026-09-26 were never written.** They take the next free
+numbers; §84 is taken by the legacy-session boot crash. Their content, measured rather than guessed,
+so it is not lost:
+
+1. **Better detection of a client's name in a field.** Run against the real `clientNamesIn` with
+   clients "Ana Novak" and "Jože Kovačič", **nine of thirteen phrases pass through**: *Anin trening*,
+   *trening za Novaka*, *pri Novaku*, *Vadba z Ano*, *Ano peljem ven*, *Anini zgibi*, *Kovačičev
+   program*, *pri Jožetu*, *Novakova garaža*. Only *Ana 1:1*, *NOVAK doma* and *Telovadnica Novak*
+   are blocked — and the last of those is a real gym name, so the rule is wrong in both directions.
+   It matches the nominative only, which is the form a Slovenian trainer is least likely to type in a
+   title. "Whole words only" was ruled on 2026-09-18 against an English-shaped assumption; the first
+   market is inflected. Only two fields are checked at all, `setup-session-name` and
+   `setup-location`, while [clientErasure.js](src/data/clientErasure.js) itself names three prose
+   surfaces erasure cannot reach — session titles, draft titles and feedback notes — and the feedback
+   note (`feedback_note_placeholder`) is unchecked.
+2. **Offer the trainer a way out of the conflict: change the name, or change the field values.**
+   Simon's words, 2026-09-26. Today the refusal is a dead end: retyping the field is the only exit,
+   there is no way to change the client's name or alias from there, and no way to say the word is a
+   coincidence.
+
+**These two are ordered, and the order is the point.** A stricter matcher is safe only once the
+conflict has an exit; while the refusal is a dead end, every improvement to detection costs more than
+it buys.
+
+## [x] Where to start (ranked 2026-08-22) — superseded 2026-09-30
+
+**Superseded 2026-09-30 in the TODO clean-up: Every ranked item is closed or has its own section: §29 shipped (af17b0b, use_cases/uc9_program_import.md); §8.8 '[x] ... shipped 2026-08-22'; §8.7 and §23.1/§23.6 are their own open sections; §23.5's feedback route and §12.6 ('[x] ... closed 2026-09-30') shipped; §18.11 '[x] ... closed 2026-09-30'. Waiting-on-ruling items live in §1.6 (replay question) and §19.2. The GitHub-issues question was answered and the route shipped (§23.5). Nothing true here that another section does not say.**
+
+The governing fact is [docs/PREVIEW.md](docs/PREVIEW.md): the app tells its own users it can wipe
+their data. Nothing trainer-facing can be promoted until that is false, so the ranking is **data
+safety → showability → everything else**.
+
+**Every ranked item from 08-17 has shipped**: §26/§1.7's self-onboarding (rank 1, 08-17), §18.7's
+import consent (3, 08-18), and §8.7/§8.8's neighbourhood (4) is now the only gym-floor work left.
+What replaced them, on 08-21/08-22, was the long demo and everything it needed — which is why this
+re-rank looks different: §35's story named four product gaps, and building the story built them
+(§8.1's shared plan, §35.3a's recurrence model, §35.3b's fit meter, §35.3c/d's gym notes).
+
+Re-read this table against `src/` before trusting it, and close items in the commit that ships them.
+
+| Rank | Item | Why now |
+| :--- | :--- | :--- |
+| 1 | §29 program import | The shape is decided and every prerequisite exists — the parser and its frozen corpus are the whole of it |
+| 2 | §8.7 / §8.8 gym-floor remainders | §8.7 is a question rather than work (does completing a round stop its timer); §8.8's copy-program icon is cheap, and its open questions are answerable now that §8.1 exists |
+| 3 | §23.6 / §23.1 — what "winning" means, then a channel | Nothing technical is left in front of a launch: the feedback route and the icon subsetting both shipped 2026-08-22 |
+
+**Asked 2026-08-22 (Simon), answered rather than decided**: should the email go and everything run
+through GitHub issues, praise included? Recommendation is no, on two grounds — the tracker is
+**public**, and a screenshot of this app shows real people, which makes "post it publicly" bad advice
+in an app built around client confidentiality; and praise is precisely the feedback that does not
+survive the friction of opening an account. If one channel is wanted anyway, the honest version is
+email only, with the maintainer filing issues from it. The public-tracker warning shipped regardless,
+since it holds as long as the GitHub route exists at all.
+
+**Both 08-22 ranks shipped the day they were written**: §23.5's feedback route (an address that needs
+no account, plus the bug half pointed at an issue with a screenshot) and §12.6's subsetting.
+
+**Waiting on a ruling, not on work** — §1.6's confirm link (a replayable capability token aimed at the
+trainer's own store) and SMS as the response channel; §19.2's URL-privacy invariant, which unblocks
+§19.3. Each is a question in its own section, deliberately not folded into the ranking above.
+
+**Cheap wins, unranked** — each small enough to ride along with adjacent work. What is LEFT of the
+list: §12.5's reflog expiry (one maintainer command) and §12.6's glyph subsetting (prerequisite
+already built, and §7.2 wants the regular weight it would restore). Done since it was written:
+§19.3's exercise-library filter reset and §25.6's overflow harness (2026-08-21), §18.11's retention
+paragraph and §21's 60s → 30s navigation timeout (2026-08-22).
+
+Deprioritised on purpose: §24.5/§24.7 remainders and §24.8's rename (optional by their own text),
+§11/§5.1/§4.1 (large UI churn with no users yet to aim it), §17.2/§17.4 and §18.8–§18.12 (decided on
+paper, correctly parked), §12.7 (measured, closed — do not reopen).
+
+### Open work at a glance
+
+One row per theme, so the shape of the backlog is readable without scrolling it. "Blocked on" names
+the thing that must happen first, not merely what it touches.
+
+| Theme | Open | Lead item | Blocked on |
+| :--- | :--- | :--- | :--- |
+| **Launch prerequisites** | §16.6, §23.5 | §16.6: one origin or two (custom domain) before trainers hold data | Simon's ruling on §16.6; §23.5's two open items (demo deep-link, Calendar in README) do not block a push |
+| **Data safety remainder** | §18.8, §18.9, §18.12 | Storage durability warning, and the desktop file handle | Nothing; the backup encryption shipped 2026-09-28 |
+| **Scheduling** | §1.2, §1.3, §1.4, §1.5 | Room occupancy via `freebusy.query` | §1.5's OAuth/verification path |
+| **Gym-floor UX** | §8.7, §8.8 | Copy-program icon on the clipboard | Nothing; §8.7 is a question, not work |
+| **History & templates** | §17.1, §17.2, §17.4, §17.5 | Modality into the history snapshot | Decided on paper, parked deliberately |
+| **UI redesign** | §4.1, §5.1, §5.2, §11.1, §11.2 | Tabbed client view | Deliberately waiting for real users to aim it |
+| **Go-to-market** | §23.1–§23.6 | Decide what "winning" means | §23.1 gates every channel choice |
+| **Refactor remainders** | §24.4d, §24.5, §24.7, §24.8 | One movement → plan item mapping | Optional by their own text |
+| **Tests & docs** | §6.2, §12.3, §12.5, §12.6 | Vendor Font Awesome locally | Nothing; all small |
+| **The long demo** | Nothing blocking | — | The trainer opening Ana's file shipped 2026-08-25: the demo engine attaches a real file to the real input, so no hook was added to the shipped app |
+| **Routing decisions** | §19.2, §19.3 | The URL-privacy invariant | One decision, then both unblock |
+| **Data-subject rights** | §27.4 | One-tap withdrawal in the consent letter | Nothing; the other four shipped 2026-08-11 |
+| **Reported 2026-08-18** | §28.2 | Which contributor-facing docs get BUILT, so their addresses are injected rather than written out | Everything else in §28 shipped the same day |
+| **Client self-service** | §26.7 phase 2 | The vendored QR encoder and the wall poster | Deferred on purpose until the messaging handover has been tried in a gym; the link route shipped 08-22 |
+| **Welcome screen & menu** | §81.1–§81.6 | The mandatory welcome screen (§81.1) | Nothing for §81.1–§81.4; §81.5 and §81.6 on Simon's answer |
+| **Program import** | §29 | Nothing — shape decided 2026-08-18, and the editor-as-review answers the fragility question | The parser and its frozen corpus; the intake flow, media-type rule and catalog crosswalk already exist |
+| **Live clipboard taps — PRIORITY** | §48.2 | Tracking and notes after the session | §48.2's measuring exception waits on §45.11; §48.1 shipped 2026-09-13 |
+| **Trainer feedback 2026-09-11** | §45.4–§45.13 | §45.4's failed share of a filled-in signup | Nothing for the three defects; §45.4 is ruled (2026-09-15) and waits to be built, §45.8 on looking at both screens together |
+
+---
+
+#### 1.5.1 [x] Live-Google testing with a bounded stored credential — 2026-08-16 — archived 2026-09-30
+
+**Archived 2026-09-30 in the TODO clean-up: Heading says [x] Done 2026-08-16 and the body is still here. The runbook it describes is in docs/GOOGLE_CLOUD_SETUP.md and tests/INDEX.md (both mention GOOGLE_LIVE_CREDENTIALS / credential_expiry); its one 'Not built' item (calendarFreeBusy.js) died with Calendar: `ls tests/live/` = _credentials.mjs, driveAppData.live.test.mjs, tokenScopes.live.test.mjs.**
+
+**Built 2026-08-10**: [tests/live/](tests/live/), `.github/workflows/google-canary.yml`,
+`build.run_live_google_tests`. The canary workflow is complete; it needs only its one-time consumer
+credential before it can run live.
+
+**Settled 2026-08-12, after two attempts at storing no secret at all — worth recording in full,
+because both attempts were reasonable and both were wrong.** The goal was never "test Google", it
+was **"test Google from a public repository without a credential to leak."** Workload Identity
+Federation answered that exactly: GitHub's OIDC assertion exchanged for a short-lived token at run
+time, nothing stored on either side. A vaulted consumer refresh token (Secret Manager, unlocked by
+that same federation) was built alongside it, then removed as buying no coverage — the argument
+being that the only thing a consumer identity exercises that a service account cannot is the consent
+flow, which no CI can drive anyway since Google fingerprints and blocks automated browsers on
+`accounts.google.com`.
+
+**That last step is false, and the canary said so on its first dispatch:** `findSyncFile` (a list)
+answered, `createSyncFile` (the multipart upload) returned **403**. Google removed service-account
+Drive storage quota, and neither remedy they publish reaches this case — an `appDataFolder` cannot
+live in a shared drive, and domain-wide delegation needs Workspace, not a consumer Gmail. Seeding
+the folder by hand does not work either: `appDataFolder` is written only by the owning account
+specifying `parents: ["appDataFolder"]`, so a manual upload is the identical refused request, and a
+file shared into the account lands in "Shared with me" where `spaces=appDataFolder` will never see
+it.
+
+**A service account can therefore read the Drive API and can never write to it** — and because the
+folder stays permanently empty, everything downstream of a file existing goes with it: download,
+update, and the `modifiedTime` assertion `driveSyncService`'s conflict detection depends on. What
+was left was one call on its empty-result path. Multipart upload, the one hand-rolled wire format in
+`driveAppData.js` and the likeliest thing to break, would have been unwatched.
+
+**So the design is now a plain stored credential, and the cost is stated rather than engineered
+around**: a real account's refresh token in the `GOOGLE_LIVE_CREDENTIALS` Actions secret, written
+into `.private/google-live.json` at run time so CI and a laptop run one code path. WIF, Secret
+Manager and `agent_tools/wif_audit.py` are all deleted — a federation with no consumer is a standing
+capability nobody would notice was still granted. Bounding what the credential can do is what
+replaces bounding whether it exists: the grant is `drive.appdata` (one hidden folder, one probe
+file) plus `calendar.freebusy` (busy intervals, never an event body), and there is no
+`pull_request_target` trigger.
+
+**Two consequences worth carrying forward.** The 7-day refresh-token expiry is a *Testing*-mode
+property, not a verification one: the consent screen is now **In production** (unverified is fine,
+the 100-user cap stays), so the credential remains valid until revoked, changed, or unused for six
+months. A missing or expired credential makes the canary fail before checkout rather than report a
+green run that watched nothing. The static "canary requests the app's scopes" check could not
+survive the move — the grant lives on a consent screen now, not in the workflow YAML — so it became
+[tests/live/tokenScopes.live.test.mjs](tests/live/tokenScopes.live.test.mjs), which asks `tokeninfo`
+what the token was actually granted. Strictly better: it also catches an OVER-broad grant (a `drive`
+scope left from debugging) that would keep every Drive test green while production's narrow
+`drive.appdata` was broken.
+
+- **Testing a PR branch by hand** uses the workflow's `access_token` dispatch input, which
+  short-circuits `_credentials.mjs`. Deliberately an ACCESS token, not the refresh token: a
+  dispatch input is echoed on the run's own page, so on a public repository treat it as published
+  the moment it is submitted. An hour-long token that is revoked afterwards bounds that; a refresh
+  token pasted there would be a standing grant on a real account.
+- **Not a deploy gate, deliberately.** It sits outside `deploy.yml` rather than joining the chain, so
+  Google's uptime can never block a release. `pipeline_gates.py`'s one-terminal-job rule holds
+  trivially in a single-job workflow. What it cannot cover — the consent UI — is unautomatable
+  anyway: Google fingerprints and blocks driven browsers on `accounts.google.com`.
+- **[x] Done 2026-08-16.** The credential is minted on the dedicated throwaway account, stored as the
+  `GOOGLE_LIVE_CREDENTIALS` secret, and the first live canary run passed — so Drive `appDataFolder`,
+  the multipart upload, `freeBusy.query`, the granted scopes and the rotation deadline are all
+  verified against the real Google, not against a stub. The rotation date is in the maintainer's
+  calendar, which is the one part of this no code in the repo can guarantee (see the rotation bullet
+  above: a guard inside the repo can only fire when someone touches the repo).
+
+  How it was done: run `python -m agent_tools.google_credential`, which consents in a
+  browser, exchanges the returned code and verifies the granted scopes in one step, then store its
+  JSON as the `GOOGLE_LIVE_CREDENTIALS` GitHub Actions secret. It uses the supported Desktop loopback
+  callback; Google's retired copy/paste OOB callback cannot work for an app that is In production.
+  Run it as the **dedicated throwaway** created 2026-08-16 (`canary@` in the runbook). Google's
+  per-phone-number signup limit blocked an earlier attempt, which is why this section briefly said to
+  use the admin account instead; retrying worked. The throwaway is the better identity for the one
+  place a long-lived refresh token is stored — the admin account owns both GCP projects, and while
+  the grant could never administer them (an OAuth token carries only its scopes), an account holding
+  nothing is a smaller thing to lose. Being an ordinary consumer account, it has the Drive storage
+  quota a service account lacks, which is the whole reason a human account is needed here.
+  The tool exists because the flow was three hand-run steps around a **single-use** authorization
+  code, so any stumble after the code was written to disk meant starting the consent over.
+- **The six-month expiry is a rotation deadline, not a diary entry — and this is the subtle part.**
+  Google revokes a refresh token that has gone **six months unused**, and that clock is reset by
+  every use, so the daily canary keeps the credential alive indefinitely and no renewal ever falls
+  due while things work. The clock only starts advancing once the canary **stops**, and every way it
+  stops is quiet: GitHub disables scheduled workflows after 60 days of repository inactivity, a
+  workflow edit can break the `cron`, a repository can be archived. By the time anyone notices there
+  is nothing to notice — the credential is simply dead, and the fix is the full consent flow again.
+  So there is nothing observable to alert on, and a calendar reminder would be exactly the
+  silently-expiring, nobody's-job artefact no gate may carry for
+  suppressions. Instead `python -m agent_tools.google_credential` stamps a `minted` date and
+  `python -m agent_tools.credential_expiry` runs **inside the canary**, failing it from **150 days**
+  — a month inside Google's 180 — so a live canary turns red with runway, and a canary that stopped
+  comes back red the moment it next runs. It is deliberately a hard failure rather than a warning
+  (a gate that warns and returns success is a build failure); a month of
+  daily red is the action item.
+  It cannot live in `build check` Stage 1, because a contributor's clone holds no credential and a
+  check that skips on a missing file gates nothing — so Stage 1 asserts the *workflow still runs it*
+  instead, via [tests/unit/test_google_canary_workflow.py](tests/unit/test_google_canary_workflow.py).
+- **Not built**: a live test importing a real `calendarFreeBusy.js`, because §1.3's occupancy module
+  does not exist yet. `calendarFreeBusy.live.test.mjs` probes the endpoint directly meanwhile, which
+  is what proves the minted token actually carries the calendar scope.
+
+### 1.7 [x] Client self-onboarding and GDPR consent from a QR on a leaflet — archived 2026-09-30
+
+**Archived 2026-09-30 in the TODO clean-up: Done, and its two open questions are answered elsewhere. Shipped: intake route src/modules/intake/intakeView.js with its own boot (src/appBoot.js:419 bootIntake); review dialog src/modules/clients/signupReviewDialog.js; file type src/manifest.json:40,49 ('.json.librept-signup'); goals/injuries optional (src/data/clientSignup.js:8-9,48); UC8. 'Landing page: static or route' = §26.1 (route); 'what the PT sees on arrival' = §26.5 review dialog. The static leaflet QR was replaced by the code the trainer's phone draws (§26.4, src/modules/common/qrCode.js). Heading mark becomes [x]. §29.4 cites §1.7's media-type ruling; it moves to the archive with it.**
+
+**Wanted 2026-08-17 (Simon).** A code on a gym wall or a printed leaflet that a prospective client
+scans to introduce themselves and give consent, so a PT acquires a client without typing anything.
+Rides the same seam §1.6 built: an event, encoded into a link, carried by email or SMS.
+
+- **The QR is static and generic** — one code per trainer, not per client, so it carries only the
+  trainer's return channel (~100 bytes, prints crisply at leaflet size). It therefore does **not**
+  force the in-app QR-generation question: a code needed once, for printing, can be produced by any
+  tool outside the app. An in-app generator is a separate convenience, and the only thing that would
+  make a vendored QR library necessary.
+- **The consent it produces must be the same record a PT-captured consent is** —
+  `{cloudSync, consentDate, formVersion, formLang}` per [clientConsent.js](src/data/clientConsent.js).
+  Art. 7(1) requires being able to DEMONSTRATE consent, so the wording version and the language it
+  was given under have to travel with it; a self-served consent that loses those is not evidence of
+  anything. The notice and form pages already exist in both languages
+  ([privacy-notice-en.html](src/privacy-notice-en.html), and the `sl` pair).
+- **Decided 2026-08-17 (Simon) — the client offers goals and injuries if they choose to.** So the form
+  does collect Art. 9 health data, and the exposure story is the transport: those fields ride **only
+  inside the shared file**, never in a URL, so they never sit in a carrier's logs or two phones'
+  message histories. They are optional at every level, and a blank field is absent from the record
+  rather than stored as an empty string — "chose not to say" and "not asked yet" are different things
+  for a trainer reading the review. Pinned in [clientSignup.js](src/data/clientSignup.js).
+- **Decided 2026-08-17 (Simon: "use shares")** — the submission travels as a FILE, not a payload in a
+  link. This retires §26.2's fragment codec for phase 1: there is no URL payload to compress, so
+  nothing needs `CompressionStream` and the §19.2 URL-privacy question does not arise here at all.
+  Built: [signupFile.js](src/data/signupFile.js) (the artifact, both declarations) and
+  [signupDelivery.js](src/modules/intake/signupDelivery.js) (share sheet, with the permanent download
+  fallback — `canShare({files})` is false on every desktop and on iOS below 15).
+- **The original recommendation, kept for the reasoning**: the submission travels as a FILE attached to an email,
+  not as a payload in a link — `navigator.share({ files })` puts it in the client's mail app in one
+  tap, and `mailto:` cannot attach anything, so a link-based version would have a stranger hand-
+  attaching a download. Three things follow. Nothing sensitive crosses a carrier or sits in a URL, so
+  the Art. 9 question above may simply stop applying. The file is a RETAINABLE artifact — notice
+  version, language, timestamp, what was ticked — which is far better Art. 7(1) evidence than a query
+  parameter. And there is no size budget, so a signature or photo becomes possible later. The
+  trainer-side fallback already exists in [encryptedFileReader.js](src/modules/common/encryptedFileReader.js)
+  ("pick the file someone sent you, opened on this device, no copy kept"), so this is buildable with
+  no manifest work; `file_handlers`/`share_target` registration later upgrades it from *find the
+  file* to *tap the attachment*. iOS Safari supports neither, so the fallback is permanent, not
+  temporary.
+- **Decided 2026-08-17 (Simon) — one media type per handling surface, not one generic type with a
+  `kind` field inside.** `application/vnd.librept.signup+json` (RFC 6838 vendor tree, RFC 6839 `+json`
+  suffix) plus a distinctive extension, because the mechanisms key off different things: an Android
+  share intent routes on the MIME type, an OS file association routes on the extension, and email
+  frequently relabels the type to `application/octet-stream` so only the extension survives that hop.
+  Declaring both is not redundancy. **Marked for reconsideration** if the number of file kinds grows
+  enough that per-kind declarations become the larger cost.
+- **Amended 2026-08-30 (Simon) — the distinctive part goes LAST: `.json.librept-signup`.** It was
+  `.librept-signup.json`, chosen when the trailing `.json` was what kept the file openable where no
+  association existed. Registering the app as a file handler (§38.22) made that the wrong way round:
+  **an operating system associates on the last suffix**, so a distinctive part in the middle
+  registers nothing, and claiming `.json` instead would hand LibrePT every JSON file on the phone.
+  *"daj na konec, json pred tem je namig uporabniku"* — the `.json` stays, now as a hint to the person
+  looking at the file rather than as the association.
+- **Open**: whether the landing page is a generated static page (the `privacy.html` pattern — own
+  CSP, offline-cached) or a route inside the app; and what the PT sees on arrival, since accepting a
+  stranger's submission into the client register should be a deliberate act rather than a silent
+  write.
+- **Started anyway, because it depends on none of the above (2026-08-17)**: the submission RECORD is
+  built and tested ([clientSignup.js](src/data/clientSignup.js), §26.7 phase 0). Identity, contact and
+  the consent stamp are the same under every option on the table; the file-vs-link question and the
+  health-data question both decide *transport and form*, not the record. The record ships with health
+  fields excluded, which is the option that stays reversible whichever way the ruling goes.
+
+---
+
+### 5.2 [x] Client add/modify — fold editing into the detail view, keep creation a minimal modal — merged 2026-09-30
+
+**Merged 2026-09-30 into: 5.1 [ ] Tabbed client view**
+
+**Decided (2026-07-22): no standalone add/modify client view.** Unlike a session (setup vs. live
+clipboard are genuinely different modes), a client has no "live" mode, so a separate edit view would
+just duplicate the detail screen. **Create** = a lightweight modal with the minimum to bring the
+client into existence, dropping straight into the detail view. **Edit** = inline inside §5.1's tabbed
+view. Effectively a sub-decision of 5.1 and should ship with it.
+
+---
+
+### 9.2 [x] Demo-data loader — PARTIAL — superseded 2026-09-30
+
+**Superseded 2026-09-30 in the TODO clean-up: Replaced by the sandbox workspace (f562c37 'one control moves between the trainer's work and the sandbox'): sample data is seeded into its own database by ensureSandboxSeeded (src/data/stateStore.js:688), offered in-app via `?workspace=sandbox` (src/modules/splash/splashScreen.js:129-135, which says the offer no longer seeds the trainer's database). The 'never clobber real records' and 'callable from in-app' goals are met by construction.**
+
+`?init=demo_data_load` (parsed in [shareLink.js](src/modules/common/shareLink.js)) seeds the full
+fixture, but **only when the app is genuinely empty**, so it never clobbers real records. **Still
+open**: narrow it to a focused subset (a few clients, one or two routines, today's sessions, the
+in-progress session) and expose it as a callable `loadDemoData()` invoked by the in-app activation in
+§9.5, not only by URL.
+
+### 11.1 [x] Replace the footer nav with a message / status area — superseded 2026-09-30
+
+**Superseded 2026-09-30 in the TODO clean-up: The footer nav is gone: src/index.html:207 'Omnipresent Notification Area (replaces old footer & bottom-nav)'. Navigation found its home in the ☰ menu of five entries (§81.2 '[x] ... done 2026-09-27').**
+
+Evolve the session-bar contents into a general message area: current/upcoming session, spot
+reservations, cancellations, and the "run the demo" invite. Navigation (Clients / Routines /
+Exercises / History) needs a new home — proposal: a compact tab row in the omnipresent header. The
+feed is priority-ordered: live session → next upcoming → notifications, each tappable to its session.
+
+### 12.3 [x] Test completeness — superseded 2026-09-30
+
+**Superseded 2026-09-30 in the TODO clean-up: Its one open item is false: the walkthrough shipped (§9.5 [x]) and is tested (tests/e2e/test_walkthrough.py; tests/medium/test_walkthrough_modal.py, _panel.py, _show_me.py, _target.py). 'Every extracted component has an exercised path' is now a gate: agent_tools/unit_coverage.py (2d7ef08) holds src/domain and src/data at 90%; the browser-tier question lives in §6.2.**
+
+Themes, the Sync & Backup modal and counters, the header menu, the first-run agreement, the
+plan-adjustments deck and wizard, the Client Directory grid and search are all covered. **Still
+open**: the demo walkthrough (§9.5) is unbuilt, so it has no tests. Confirm every extracted component
+has at least one exercised path.
+
+### 18.15 [x] A hard reload can outrun a queued write — archived 2026-09-30
+
+**Archived 2026-09-30 in the TODO clean-up: Fixed: 76d9af1 'fix(data): keep a save the page closed before it landed'. src/controllers/appLifecycleController.js:162-169 listens to `pagehide` and `visibilitychange` and keeps the state in localStorage while a write is unfinished (src/data/unsavedStateJournal.js); §6.2's body records the same fix. Heading mark becomes [x].**
+
+Found 2026-08-18 while landing §18.7's import consent: `tests/e2e/test_signup_round_trip.py` failed under
+a parallel run and passed alone, because it accepted a client and then navigated with a FULL page load —
+which re-reads IndexedDB before the enqueued write ([writeQueue.js](src/data/writeQueue.js)) has flushed.
+
+The test now waits for the stored row, which is the assertion it wanted anyway ("it survived", not "the
+list re-rendered"). **The app-side question is left open deliberately**: the real window is milliseconds
+and only on a hard reload or a tab close immediately after a write, so it has never been observed by a
+trainer — but there is no flush-on-`pagehide` and nothing that would tell anyone if it bit. Worth deciding
+whether the queue should drain on `visibilitychange`, or whether the risk is acceptable and should simply
+be written down.
+
+---
+
+## 20b. [x] Backlog sweep — 2026-08-06 — superseded 2026-09-30
+
+**Superseded 2026-09-30 in the TODO clean-up: A method note from one past sweep. Its lesson ('close the entry in the commit that ships it') is now a rule and a gate: AGENT_RULES.md 'A section leaves TODO.md the day it closes' and agent_tools/todo_hygiene.py (fails a closed section that keeps its body). The two false positives it records are about §9.5 and §18.9 text that has since changed.**
+
+Method note, kept so the next sweep starts from evidence: check a signal's **context, not its count**
+(a `grep -c` over multiple files emits `file:count`, which mis-scored several items on the first
+pass). Two recorded false positives: `expectedVersion` in
+[schemaMigrations.js](src/data/schemaMigrations.js) is *schema* validation, not §18.9's
+compare-and-swap; and the `walkthrough` hits are i18n strings for a notification button, not §9.5's
+engine.
+
+**The lesson this sweep exists to prevent recurred anyway**: on 2026-08-08 two more items (§6.3 and
+§7.3) were found shipped but unticked. **Tick the entry in the commit that closes it.**
+
+### [x] 26.1 One app, one route — not a second PWA — archived 2026-09-30
+
+**Archived 2026-09-30 in the TODO clean-up: Decided and built: `/intake` inside the same build, with its own boot (src/appBoot.js:419 bootIntake, called from src/app.js:373); pinned by tests/medium/test_intake_form.py and tests/e2e/test_intake.py per §26.7's body. Heading gets [x].**
+
+**Decided**: `#/intake` inside the same build. A second PWA means a second service worker, CSP,
+deploy target and test tier for what is ~200 lines of form; the client simply never installs the one
+that exists. The constraint this buys is worth stating: intake must render on a **stock, cold
+browser** — no IndexedDB write, no demo seed, no service-worker dependency, no boot of the trainer's
+app state. It is the only route in the app that is stateless by design, and a medium test should
+pin that rather than trusting it.
+
+### [x] 26.4 The trainer's own QR has to be drawn, not printed — archived 2026-09-30
+
+**Archived 2026-09-30 in the TODO clean-up: Built 2026-09-11 (its own body: '[x] Built'): the invite dialog draws the code on open (src/modules/clients/intakeInviteDialog.js; src/modules/common/qrCode.js; src/vendor/qrcode.js). Nothing open. Note: intakeInviteDialog.js has uncommitted edits by another session (§80.137, invitation language), unrelated. Heading gets [x].**
+
+It was to encode a **static** URL — a pre-rendered SVG in `assets/`, printable, stickable on the gym
+wall, one file per language variant, and no runtime encoder on the trainer's side in either phase.
+
+**[x] Built 2026-09-11 as a code the trainer's phone DRAWS. Revised first, and the reason is
+§26.3's own signature.** A static file is the same for
+every install, so it cannot carry `#from=` — the name, number and address that let the client check
+who sent them and save the contact. A wall QR therefore identifies nobody, which is the state the
+page was deliberately moved out of on 2026-08-23. Wanted instead (asked 2026-09-11): the trainer's
+phone **draws the QR on screen and shows it to the client**, as the alternative to typing a number or
+an address into the invite dialog at all. That needs the vendored encoder of §26.3 step 3 on the
+TRAINER's side, which Phase 2 was already going to pay for on the client's side; the printed leaflet
+stays possible as the version that names nobody.
+
+**What shipped.** The invite dialog draws the invitation as a code on the trainer's own screen,
+under the two send buttons ([intakeInviteDialog.js](src/modules/clients/intakeInviteDialog.js)). It
+carries the same `#from=` every other route carries, so the client sees who it is from and can save
+the contact. The
+encoder is vendored ([vendor/qrcode.js](src/vendor/qrcode.js), MIT, checksummed against upstream),
+and the app builds only the geometry ([qrCode.js](src/modules/common/qrCode.js)) — a library that
+returns markup would be markup built from a string, which this app does not do. Black on white
+whatever the theme, because it is a picture for somebody else's camera. **Drawn the moment the dialog
+opens** (asked 2026-09-11): it sat behind a *Show a code* button for one afternoon, guarding against a
+code left up from the last invitation — a guard that protected nothing, since the code carries the
+trainer and names no client, so it is the same code for everybody. Redrawn on each open, because the
+name, number, address and language it carries are all settings.
+
+### [x] 26.7 Phasing — merged 2026-09-30
+
+**Merged 2026-09-30 into: 26.3 Return path — share first, mail/SMS second, QR third**
+
+- [~] **Phase 0 — what a submission IS, 2026-08-17.** [clientSignup.js](src/data/clientSignup.js):
+      identity + contact + the consent stamp, built and parsed in one place, with the register match
+      that stops a second Jane Doe being minted. Deliberately **transport-free** — it is the half of
+      this section that both live designs share, so it could ship while §1.7's two open questions
+      (below) are still open. Health fields are **excluded for now**, since shipping them and
+      retracting them is not reversible while adding them later is.
+- [~] **Phase 1 — both rulings landed 2026-08-17; the client's half is built.** Shared file (§1.7)
+      rather than a link, so §26.2's codec is retired unbuilt; goals and injuries collected at the
+      client's discretion. Done: the record, the file artifact, share/save delivery, and the `/intake`
+      page itself — [intakeView.js](src/modules/intake/intakeView.js) behind its own boot step
+      (`appBoot.bootIntake`), which is what makes §26.1's stateless promise structural rather than
+      disciplinary. **Left: the trainer-side import-review dialog with dedupe** (§26.5). Still **no new
+      dependency and no CSP change** — `connect-src` untouched, it is all local.
+
+      **A separate boot, not a flag through the normal one.** Every step of the trainer's boot writes
+      something or asks something — state load, seed, service worker, terms modal, splash hold, and
+      `initTheme`, which persists the resolved theme. Threading "unless this is a client" through all
+      of them would work until the day one was missed, and the failure would be a stranger's phone
+      holding a LibrePT database or a terms modal in front of the form. Pinned at both tiers:
+      [test_intake_form.py](tests/medium/test_intake_form.py) mounts the boot step and asserts nothing
+      is written; [test_intake.py](tests/e2e/test_intake.py) navigates for real and asserts the boot
+      DECISION, which the medium tier cannot see.
+
+      **Found by writing the test first**: the send button set `hidden` and stayed on screen, because
+      every `.btn` in this app sets `display: flex`, which beats the UA stylesheet's `[hidden]` rule —
+      so a desktop visitor would have been offered a file share their browser cannot do. It uses the
+      `.hidden` class now.
+
+- [x] **Phase 1 COMPLETE — 2026-08-17.** The review dialog (§26.5) closed the loop, and
+      [UC8](use_cases/uc8_client_self_onboarding.md) documents the whole flow with spec↔test
+      traceability. End to end, proven in one e2e test: a stranger fills in `/intake`, shares the file,
+      and the trainer accepts them into the register without typing anything.
+- [~] **Phase 2 — the trainer's half built 2026-09-11.** The vendored encoder and the code on the
+      TRAINER's screen shipped (§26.4); the static leaflet asset is dropped rather than deferred,
+      since a printed file names nobody. **Left: the code on the CLIENT's screen** — the return path
+      for a phone with no messaging app and no signal, which is §26.3 step 3 and lands on the same
+      review dialog. Worth deferring until the messaging handoff has actually been tried in a gym.
+- [x] **Tests — done 2026-08-17.** `tests/unit_js/` for the record, the file artifact and delivery
+      (the "codec round-trip" became file round-trip, since the transport is a file);
+      `tests/medium/` for the intake form mounted cold and for the review dialog; `tests/e2e/` for the
+      full intake → file → review → saved-client loop, plus the boot decision. UC8 and its
+      [INDEX](use_cases/INDEX.md) row shipped with it.
+
+## 27. [x] Data-subject rights the app documents but cannot perform — archived 2026-09-30
+
+**Archived 2026-09-30 in the TODO clean-up: Every subsection is closed: 27.1, 27.2, 27.3, 27.4 (2026-08-14), 27.5, 27.7 are '[x]' headings; its intro still says 'Only §27.4 is still open', which is false. Heading gets [x].**
+
+[PRIVACY_FOR_TRAINERS.md §5](docs/PRIVACY_FOR_TRAINERS.md) tabulates four data-subject rights against
+"what to do in LibrePT". Two of the four had no code behind them when this section was filed at 20:10
+on 2026-08-11 — no way to delete a client, no way to export one client's data. The document was not
+wrong about the law; it was wrong about the app, which is worse, because it is written for trainers
+who will rely on it while answering a request under a one-month deadline.
+
+**All of that shipped 44 minutes later, in the same evening** (see [CHANGELOG](CHANGELOG.md)) — and
+then sat here marked open until 2026-08-13, still ranked second in *Where to start*, because nobody
+came back to the file. Two sessions began by reading it and nearly rebuilt an export that already
+existed. **Only §27.4 is still open.** The lesson is the one this repo already states for suppression
+comments: a note about work is only as good as the pass that re-reads it, so a section that ships
+gets closed *in the shipping change*, not later.
+
+§26 is the reason this section exists: it was written first, and reading the trainer doc against
+`src/` while sizing its consent step is what surfaced these gaps. It was then pruned *because* of
+them, and restored on 08-13 once this section closed — the sequencing objection it carried is
+discharged by §27.1 and §27.2 having shipped.
+
+### 27.1 [x] Erasure (Art. 17) — shipped 2026-08-11
+
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#271-x-erasure-art-17-shipped-2026-08-11); what shipped is in [CHANGELOG.md](CHANGELOG.md).
+
+### 27.2 [x] Access & portability (Art. 15, 20) — shipped 2026-08-11
+
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#272-x-access-portability-art-15-20-shipped-2026-08-11); what shipped is in [CHANGELOG.md](CHANGELOG.md).
+
+### 27.3 [x] Erasure does not reach the copies — closed 2026-08-11 by the register
+
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#273-x-erasure-does-not-reach-the-copies-closed-2026-08-11-by-the-register); what shipped is in [CHANGELOG.md](CHANGELOG.md).
+
+### 27.4 [x] Withdrawal as easy as consent (Art. 7(3)) — 2026-08-14
+
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#274-x-withdrawal-as-easy-as-consent-art-73-2026-08-14); what shipped is in [CHANGELOG.md](CHANGELOG.md).
+
+### 27.7 [x] Record a withdrawal instead of erasing the consent — 2026-08-14
+
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#277-x-record-a-withdrawal-instead-of-erasing-the-consent-2026-08-14); what shipped is in [CHANGELOG.md](CHANGELOG.md).
+
+### 27.5 [x] The doc describes what a trainer can actually do — 2026-08-11
+
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#275-x-the-doc-describes-what-a-trainer-can-actually-do-2026-08-11); what shipped is in [CHANGELOG.md](CHANGELOG.md).
+
+### 27.6 What this architecture already gets for free
+**Identity verification** (Art. 12(6)) is trivial here — the trainer knows the client by face, with
+no account, no recovery flow and no impersonation vector, where a SaaS has to build for it. And with
+data never leaving the device (the trainer's own Drive aside), there is no processor relationship to
+paper.
+
+The asymmetry is the point, and the 08-11 build proved the prediction: **this architecture makes
+verification easy and erasure hard**, the exact inverse of a hosted product. Erasure took a
+derived-pseudonym scheme, a same-name safeguard, a register applied at import and an itemised
+receipt of what it cannot reach — where a hosted product would have written one `DELETE`. Weight
+future compliance work the same way.
+
+---
+
+### [x] 29.1 Decided 2026-08-18 (Simon) — archived 2026-09-30
+
+**Archived 2026-09-30 in the TODO clean-up: All its decisions are built (§29.5: 'The surface, and everything §29.1 decided about it'; af17b0b). The CUSTOM tag renders in the editor (src/modules/clipboard/clipboardEditor.js:283-285). Heading gets [x].**
+
+- **A movement the catalog does not have is ALLOWED**, not refused and not silently normalised. It
+  carries **a small tag marking it as having no official taxonomy backing** — so a trainer can see at
+  a glance which movements in a plan are standard and which came in with it.
+  - Recommended glyph `fa-pencil` ("hand-written"), with the word **CUSTOM** beside it, since
+    Meaning may never live only in an icon — this app is used on a phone, where a tooltip is unreachable. `fa-asterisk`,
+    `fa-puzzle-piece`, `fa-user-pen`, `fa-wand-magic-sparkles` and `fa-tag` all ship too, if the
+    reading should be "with a caveat" rather than "yours". Not a decision — the maintainer asked
+    whether a glyph exists, and the answer is that several do.
+  - This does NOT retire §13's taxonomy work: the tag is what keeps a custom movement visibly
+    distinct instead of quietly becoming the fortieth spelling of "Bench Press".
+- **The import surface carries four inputs, every one of them optional**:
+  - a **client picker** — the client's permanent id, displayed as their name;
+  - a **session picker**;
+  - a **text area to paste into**;
+  - a **read from file** button.
+- **The result is the session EDIT view, prepopulated** — the same editor used during a session, not
+  a bespoke review screen. That is the decision that makes the rest cheap (see §29.2).
+- **A downloadable TEMPLATE of the format**, so a trainer has a working example to follow rather than
+  a schema to interpret. Generated from `programImport.js` and parsed by a test: an example that
+  stopped being readable would be the app handing out a demonstration of how to fail.
+- **Every parsing failure is shown BEFORE the editor opens** — all of them, not the first. A trainer
+  who lands in an editor and only then notices three blank rows has been handed a puzzle; one told
+  "3 of 12 lines could not be read, here they are" can fix the paste, or go in knowing exactly what
+  to repair. Each failure carries its position and its raw text, so the report points at a line.
+
+### [x] 29.2 Why the editor-as-review makes ingestion robust — archived 2026-09-30
+
+**Archived 2026-09-30 in the TODO clean-up: Reasoning realised in code: src/domain/programImport.js, the frozen corpus tests/fixtures/programs/ (4 files, 43bb127) and tests/unit_js/domain/frozenProgramCorpus.test.mjs. Heading gets [x].**
+
+The maintainer's open question: *"How do we make the data ingestion not fragile, that I don't know"*.
+The answer starts with the decision already made — **the import lands in an editor, not in the
+database** — which turns "parse correctly" into "parse usefully": a wrong guess is a field the
+trainer retypes, not a corrupted record. On top of that, in order of what it buys:
+
+1. **Ship the prompt; do not guess the format.** Most variance is at the source. A copyable prompt
+   specifying the exact shape, including a `"format": "librept.program/1"` marker, means a paste
+   either announces itself or is rejected with a useful message rather than half-understood. The
+   marker is also how "not our JSON" is told apart from "our JSON, one field wrong". No API key, no
+   integration, no egress — it works with whichever assistant the trainer already has.
+2. **Liberal at the edges, strict at the centre.** Strip markdown fences, accept an object or a bare
+   array, accept a NAMED alias per field (`reps`/`repetitions`, `weight`/`load`/`kg`,
+   `sets`/`series`), coerce `"3x10"` and `"3 × 10"`. Every alias is an explicit table entry with a
+   test — never a generic fuzzy matcher, which fails unpredictably and cannot be reasoned about
+   (verbosity over a clever mechanism).
+3. **Per-item parsing, never all-or-nothing.** Item 7 being unreadable must not lose items 1–6; an
+   unparsed line survives into the editor carrying its raw text, so the trainer fixes one row rather
+   than starting over. This is the whole difference between fragile and merely annoying.
+4. **A frozen corpus — the real answer.** Exactly the pattern
+   [frozenBackupCorpus.test.mjs](tests/unit_js/data/frozenBackupCorpus.test.mjs) already uses for
+   backups: a fixture folder of REAL pasted outputs (Claude's, ChatGPT's, a spreadsheet paste, one
+   with prose wrapped around the JSON) that must keep parsing. Every paste that fails in real use
+   joins the corpus and never regresses. Nothing else keeps a parser honest over time.
+5. **No second write path.** The editor's own save is the write, the same one a hand-built session
+   uses, so there is no import-specific persistence to keep correct.
+
+### [x] 29.3 Built so far (2026-08-18) — archived 2026-09-30
+
+**Archived 2026-09-30 in the TODO clean-up: Status snapshot of 2026-08-18, overtaken by §29.5 (shipped 2026-08-23, af17b0b). Heading gets [x].**
+
+The pure core, test-first, with nothing wired to a screen yet:
+
+- [programImport.js](src/domain/programImport.js) — the parser, its refusals, `programTemplate()`,
+  and the all-failures report.
+- [catalogMatch.js](src/domain/catalogMatch.js) — catalog id or the CUSTOM mark.
+- [tests/fixtures/programs/](tests/fixtures/programs/) + [the corpus test](tests/unit_js/domain/frozenProgramCorpus.test.mjs)
+  — four real pasted shapes that must keep parsing, and the rule that every paste which fails in real
+  use joins them.
+
+### [x] 29.4 What is already in the repository, and should be copied rather than invented — archived 2026-09-30
+
+**Archived 2026-09-30 in the TODO clean-up: Its one open line ('A use case is still owed') is done: use_cases/uc9_program_import.md. The reuse list was used (programImport.js, catalogMatch.js). Heading gets [x].**
+
+- **[§26](TODO.md)'s intake** is the same shape — a document another party produced, reviewed before
+  anything is written ([signupFile.js](src/data/signupFile.js) →
+  [signupReviewDialog.js](src/modules/clients/signupReviewDialog.js)). The file half of §29.1's input
+  list is that flow with a routine instead of a person.
+- **[§1.7](TODO.md)'s media-type ruling**: one media type per handling surface, so a program is
+  `application/vnd.librept.program+json` and the intake file stays its own.
+- **[exerciseStandard.js](src/domain/exerciseStandard.js)** already maps a movement name onto the
+  catalog by canonical name (the wger crosswalk, UC6 §6) — that is the matching half solved, and it
+  is also what decides whether a movement earns the CUSTOM tag.
+- **A use case is still owed**: this is a workflow, so it needs a file under
+  [use_cases/](use_cases/INDEX.md) like every other one.
+
+---
+
+## 33. [x] Code and tests still cite `TODO.md` 495 times — superseded 2026-09-30
+
+**Superseded 2026-09-30 in the TODO clean-up: Replaced by §82 'Links run one way, out of TODO.md' (ruled 2026-09-26: no file may point at a TODO section) and its gate agent_tools/todo_refs.py (96afe34 'feat(tools): a pointer into TODO fails the build', 500cb2b). The 'what replaces them' question is answered by AGENT_RULES ('what a file needs to explain itself is written in that file').**
+
+**Decided 2026-08-19 (Simon):** *"the code and tests are allowed to reference only use cases"* —
+code and tests work from behaviour and requirements, not from process documents. The operating-rules
+half is done and now gated: no file outside the loaders and document maps mentions them.
+The `TODO §N.M` half is 495 sites, and unlike those citations these carry real navigational value:
+a `§` pointer is often the only route from a module to the reasoning that produced it.
+
+**Open question before sweeping**: what replaces them. Three candidates, in preference order —
+a link to the [use case](use_cases/INDEX.md) that specifies the behaviour (best, but not every
+module has one); the reason restated in the comment itself (always possible, costs length); or
+nothing (cheapest, loses the trail). Doing this as one 495-site mechanical strip would rewrite
+half the repository's comments blind, so the plan is to convert them **as files are touched**,
+starting with the modules whose §-refs point at sections that have already shipped.
+
+---
+
+## 34. [x] Browser-suite cost: what an audit of test durations found — archived 2026-09-30
+
+**Archived 2026-09-30 in the TODO clean-up: Its action is done: 795c356 'perf(demo): honour reduced motion, and gate the demo as its own task' and 337d42d 'docs(todo): record the demo-suite outcome and the parallelism answer'. The rest is measurement for the record. Pipeline speed now lives in §91 ('The pipeline is slower than it needs to be — measured 2026-09-30'). Heading gets [x].**
+
+**Measured 2026-08-19** on a quiet 16-core box, `--durations=0` over both browser tiers. The headline
+is that nothing is broken: the duration distribution is smooth (51 tests near 3s, 48 near 2s, 31 near
+4s), so there is **no cluster of near-identical times** — the signature of a swallowed timeout, which
+is what the 2026-08-07 investigation found. This is real work, and both tiers run near their parallel
+floor: e2e at 81% efficiency (755s of call time, 94s floor at 8 workers, 116s actual), medium at 63%
+(238s call, 30s floor, 48s actual).
+
+So the only lever left is **total call time**, and it is concentrated in deliberate waiting:
+
+| Where | Cost | What it is |
+| :--- | :--- | :--- |
+| `test_walkthrough.py` | 117s / 20 tests | the demo's own pacing:each step is 520ms scroll + 650ms hand travel + 160ms tap + 1350ms settle ≈ 2.7s, and a test that walks the script pays ~11s |
+| `test_demo_tour.py` | 41s / 4 tests | same constants, whole script per test |
+| `test_splash_screen.py` | 63s / 19 tests | the splash's deliberate minimum hold |
+| `test_layout_overflow.py` | 45s / 4 tests | genuine geometry sweeps across four viewports and two languages |
+
+**158s of 755s (21%) is the app deliberately waiting so a human viewer can follow a finger.** Those
+constants exist for a viewer (raised 2026-08-18: "on web browser the button and clicks are about 50%
+too fast"); the tests pay them 24 times per gate run to assert step logic that has nothing to do with
+pacing.
+
+**Done 2026-08-19** — the second option, plus the reason the first was wrong. The demo now runs at
+`demoPace` zero under `prefers-reduced-motion`, which is a real user mode rather than a test switch,
+and the suites moved into their own Stage 3 task beside the e2e one. `test_demo_tour.py` 41s -> 6s,
+`test_walkthrough.py` 117s -> 22s, whole gate 3m13s -> 2m46s.
+
+**Is more parallelism worth it for the demo task? No — measured after the change:**
+
+| Configuration | Wall |
+| :--- | :--- |
+| Combined, one scheduler, 8 workers (208 tests) | 111s |
+| Split as shipped: e2e at 7 ∥ demo at 1 | **104s** (e2e 104s, demo 76s) |
+| Demo alone, 2 workers | 25s |
+| Demo alone, 4 workers | 17s |
+
+The stage costs `max(e2e, demo)` and e2e is the long pole, so the demo task already has ~28s of
+slack; more workers there can only come out of e2e's seven and push the long pole further out. Note
+also that its 76s inside the stage is CONTENTION, not cost — standalone it is a quarter of that — so
+nobody should read that number as the demo suite being slow. And the split is 7s FASTER than one
+scheduler over everything: two schedulers avoid the tail where one worker holds the last slow file
+while the others idle.
+
+The remaining lever for Stage 3 is e2e's own call time (437s of CPU over 182 tests), not
+parallelism. Raising the total worker count above half the cores has been measured and rejected
+twice — compositor starvation and the dev server's listen backlog, both surfacing as `Page.goto`
+timeouts unrelated to any change.
+
+**The three candidates as they were assessed, for the record:**
+
+1. **A URL knob for the pace** (`?demo=walkthrough&pace=fast`). Cheapest to write, and wrong: it adds
+   product surface whose only consumer is the test suite.
+2. **Move the step-logic tests down a tier.** Most of `test_walkthrough.py` asserts panel behaviour —
+   which control is offered, what Back rebuilds, what the caption says — and needs no router, no
+   persistence and no real boot. Mounted in `tests/medium/` via a stub, each can inject its own
+   `wait`, because `performStep` already takes one. Two e2e tests stay behind to prove the real thing
+   end to end, and one asserts the PACING itself, which is currently asserted nowhere.
+3. **Leave it.** 15s of wall time per run against a day's work is not obviously worth the churn.
+
+---
+
+### [x] 35.1 Shape before content — archived 2026-09-30
+
+**Archived 2026-09-30 in the TODO clean-up: Built: one persona at a time with a labelled handover (storyTour.js 'story_persona_client', the one-persona-at-a-time ruling comment near the ARRIVE_CHAPTER); paper track as text on a textured card (PaperNarratorCard in src/modules/demo/demoNarratorCard.js); client screens are the real /intake page. Rules now live in those files' comments.**
+
+- **Chapters, each independently playable and each ending somewhere useful.** ~23 events is 4–6
+  minutes at the current pace, and nobody watches an unbroken five-minute demo of software they do
+  not yet use. `?demo=story` plays the lot; `?demo=story&chapter=floor` plays one. A chapter is a
+  tour in the existing sense, so the engine ([demoTourPlayer.js](src/modules/demo/demoTourPlayer.js),
+  [domain/demoTour.js](src/domain/demoTour.js)) is unchanged and a chapter is DATA.
+- **Every step still carries an expectation**, including the narrated ones — the rule `validateTour`
+  enforces, and the reason a script was chosen over a recording. A paper-action card is not exempt:
+  its expectation is that the card is on screen and dismissible. What is NOT allowed is a step that
+  claims something about the app while asserting nothing about it.
+- **The paper track is TEXT on a paper-textured card, never a picture of a form.** The card SAYS what
+  happens on paper — the client signs the printed consent, the trainer dates and files it, the form
+  version is recorded — over a paper texture that marks it as narration. Do not draw a form that
+  looks like a screenshot: everything else in the demo is the live app, so a drawn surface among them
+  reads as a real screen, and the first viewer who tries to find it in the app has been misled.
+- **ONE persona on screen at a time, with a transition between them** (decided 2026-08-19, Simon:
+  *"we don't really need split screen, transition is enough"*). Desktop gets the same treatment as
+  mobile — no side-by-side pane, no second layout to keep working at every width, and the handover
+  itself becomes the thing the viewer reads. Each persona's screen is labelled with whose phone it
+  is, because the app looks the same on both sides of the handover.
+- **The client's screens are the real ones.** Intake, consent and RSVP already exist as pages
+  ([signupDelivery.js](src/modules/intake/signupDelivery.js), `consent-form-*.html`,
+  [rsvpView.js](src/modules/rsvp/rsvpView.js)), so the client chapter drives those rather than a
+  mock-up of them. A hand-built "client phone" would be a recording with extra steps, stale the day
+  those pages change.
+
+### [x] 35.2 The events — archived 2026-09-30
+
+**Archived 2026-09-30 in the TODO clean-up: The event list is implemented as the chapters of src/modules/demo/storyTour.js ('All five chapters play — 2026-08-22', §35.4); later changes to the script are recorded in §38.21, §39 and §73.**
+
+**Chapter A — three friends arrive.**
+
+1. The trainer's board, with the message feed and no pending work — the before state the story moves
+   away from.
+2. The trainer books the pair of weekly slots: muscle gain, 2× a week, fixed day and time, 60-minute
+   slot, three participants. **Needs the recurrence model (35.3a).**
+3. The trainer shares one self-onboarding link per friend, each carrying the calendar invite for the
+   series.
+4. **The demo hands over to the client** — a labelled transition from the trainer's app to a friend's
+   phone, on every screen size.
+5. On the phone: the introduction form — name, contact, goal, and injuries *offered, never demanded*
+   (§1.7's ruling, [clientSignup.js](src/data/clientSignup.js)).
+6. Consent, with the notice version and the language it was given under stamped into the record —
+   Art. 7(1) is about being able to DEMONSTRATE it later.
+7. The paper card, narrated: the same consent on a printed form, signed and dated, filed by the
+   trainer, its form version recorded (§3.5). Same record, different pen.
+8. The submission travels as a FILE; the trainer reviews it and decides
+   ([signupReviewDialog.js](src/modules/clients/signupReviewDialog.js)) — the feature's trust
+   boundary, and the step where the story says a stranger cannot write into the register.
+9. The other two are compressed into one step, not replayed. A demo that shows the same form three
+   times teaches that the app is slow.
+10. Back on the phone: the invite is answered ([rsvpView.js](src/modules/rsvp/rsvpView.js)) and the
+    trainer's board fills in.
+
+**Chapter B — the first programme.**
+
+11. The trainer builds the session as circuits, with rests as real items (§8.6), to **45 minutes net
+    inside the 60-minute slot** — the net-vs-slot number is the whole point of this chapter and
+    should be visible while it is being built. **Needs the net-time meter (35.3b).**
+12. The same circuit is bound to all three participants at once. **Needs §8.1.**
+
+**Chapter C — on the floor.**
+
+13. The session opens: one clipboard, three participant tabs, the circuit running.
+14. Mid-circuit a client mentions a recent minor injury; the trainer records it **without leaving the
+    session and without stopping the clock**, TAGGED to that one participant. **Needs an in-session
+    injury capture (35.3c).**
+15. The trainer swaps that one movement **for that one participant**; the other two are untouched and
+    the demo shows they are untouched.
+16. On the deadlift the trainer sees bad posture and leaves a coaching note against that client's
+    exercise — one-handed, mid-set. It is a note about a MOVEMENT, so it must resurface the next time
+    that movement is programmed for that client, not only in a session log. **Needs 35.3d.**
+
+    **What events 14 and 16 are in the story FOR** (refined 2026-08-19, Simon): not the capture
+    itself, which is two taps and unremarkable to watch, but the **review pane** they feed and the
+    **per-client tagging** that gets them there. The demo's claim is that a note taken one-handed
+    mid-circuit lands against the right person and comes back at the right moment — so the capture
+    steps are short, and the pane in event 20 is where the camera stays.
+17. Circuits progress; Too Easy is signalled once, so the story keeps §23.4's wedge inside it.
+18. The last circuit completes; the session is marked complete, net time against slot time shown.
+
+**Chapter D — the evening after.**
+
+19. The trainer switches to the dark theme, and the rest of the story runs in it — the only "look at
+    our settings" step that earns its place, because it is what an evening at home actually looks
+    like.
+20. Planning the next session: the injury swap and the deadlift note are **already there**, waiting
+    against the right client. This is the payoff for events 14–16 and the reason they are in the
+    story at all.
+21. A pre-agreed one-off move of the NEXT occurrence two hours later — **the series does not change**
+    — which lands 30 minutes across a 1-to-1 cardio session. The occupancy grid shows the two side by
+    side ([overlapLanes.js](src/domain/overlapLanes.js)); the overlap is accepted deliberately, on
+    screen, rather than warned away. **Needs 35.3a and §1.3.**
+22. The updated invite goes out to the three; the replies land on the board.
+23. Thank you, and the two ways onward already decided in §30.2 — play around, or clear the demo
+    data.
+
+### [x] 39.11 Answered 2026-08-31 — not work — archived 2026-09-30
+
+**Archived 2026-09-30 in the TODO clean-up: Heading says 'Answered 2026-08-31 — not work'. The answers (navigator.share hands over to the phone's share sheet, with clipboard and on-screen fallbacks in src/modules/clients/intakeInviteDialog.js; the demo phone number is invented and nothing is sent) are answers, not open work.**
+
+**"Other ways to send it — are those Chrome's built-in options, or do we have influence over that?"**
+The button is ours, and so is its wording and the payload; what it opens is not. It calls
+`navigator.share()`, which hands over to the phone's own share sheet — we choose the title, text and
+link, and nothing about which apps appear or how the sheet looks. Where the browser has no
+`navigator.share`, we write the link to the clipboard, and where that fails too we put the link on
+screen in a read-only field ([intakeInviteDialog.js](src/modules/clients/intakeInviteDialog.js),
+§26.3).
+
+**"Where did you get the demo phone number? Can it be some operator SMS echo service?"**
+`+386 41 234 567` is invented in the story script — a well-formed Slovenian mobile number with an
+obviously fake tail. It reaches nothing, and nothing is sent: the step composes the message and the
+story never taps send. I know of no Slovenian operator echo service and will not claim one exists.
+If the point is a number that is provably nobody's, the clean answer is a range a regulator has
+reserved for fiction — the UK and the US both publish one, and whether AKOS does is a question for
+their numbering plan, not something to guess at.
+
+### [x] 41.0 REDIRECTED 2026-09-11 — planning gets the columns, the clipboard does not — archived 2026-09-30
+
+**Archived 2026-09-30 in the TODO clean-up: Ruling executed in c200149 (2026-09-11); the ruling itself is restated in the compressed §41 body and in the header comment of src/modules/clipboard/planColumns.js ('Planning only, and that is the whole point').**
+
+**Ruled (Simon):** *"večstolpični pogled raje uporabiva za načrtovanje treningov"*, and then
+*"štartaj implementacijo seje priprave načrtov"*. This overrides §41.1's "the clipboard goes first".
+Everything below stands as written; what changed is WHICH screen gets columns, and it changed for
+reasons §41.4 had already written down against itself.
+
+- **The width exists where the trainer sits.** §41.4's first objection is that the gym floor is the
+  judge and a wide layout serves a desk. Planning IS the desk activity. The objection does not apply
+  to it; it applied to the clipboard.
+- **§41.4's safety argument disappears.** The clipboard is where data is WRITTEN live — sets, quick
+  signals, timers — and one participant per screen with thumb-sized targets is what keeps a mis-tap
+  from logging a set against the wrong person. Planning writes a plan. A wrong drop is visible and
+  undone before anybody trains.
+- **Comparison is the actual need in planning.** Building a group session for three people is where
+  "the same for everyone, except Ana's knee" is decided, and that decision wants the three
+  programmes side by side. During execution the trainer looks at ONE person, because they are
+  standing in front of them.
+- **Dragging between columns is what makes it worth building, and §41.4 named it as the likeliest
+  bug.** In planning it is the feature; in execution it is a gesture with two meanings.
+- **The schedule risk drops with it.** §41.2's hard part is that recovery after a reload reads the
+  address bar. In a live session being wrong there loses a session; in planning it costs some
+  retyping. **So the first slice does not touch the route grammar at all.**
+
+**What the code already gives us, read 2026-09-11 before any of it was written:**
+
+- `currentPlanMode()` ([activeSessionStore.js](src/controllers/activeSessionStore.js)) already
+  returns `live` / `future` / `planning`, so "planning" needs no new concept — it has one.
+- The editor is already a function of ONE participant:
+  [activeSessionBoard.js](src/modules/clipboard/activeSessionBoard.js) calls
+  `renderClipboardEditor(deckContainer, { activeClientState, clientName, … })`, and the plans live
+  per client in `clientRoutines[clientId]`. Columns mean calling it N times into N containers, not
+  taking it apart.
+
+**Two obstacles, both small and both found by reading rather than by running into them:**
+
+- [clipboardEditor.js](src/modules/clipboard/clipboardEditor.js) writes one fixed
+  `id="clipboard-editor-ex-names"` — the exercise-name datalist. N editors would mean N identical
+  ids. One shared list above the columns.
+- [editModeState.js](src/modules/clipboard/editModeState.js) holds ONE `editorRowId` for the whole
+  module, meaning "which row is open". With columns that becomes an answer per column. The same
+  shape of question as §41.2's routes, but it stays inside the module and never reaches session
+  recovery.
+
+**Still ruled, and unchanged:** the clipboard stays one participant at a time until somebody shows
+that it is missing on the floor.
+
+### [x] 41.1 Two layouts, not one — superseded 2026-09-30
+
+**Superseded 2026-09-30 in the TODO clean-up: §41.0 (2026-09-11) overrode 'the clipboard goes first'; the count rule '1/2/3/4/5/.. odvisno od prostora' is implemented as planColumnCount in src/modules/clipboard/planColumns.js.**
+
+**Ruled 2026-09-10 (Simon), and §41.0 has since redirected which screen this applies to first.** They share the rule for dividing the width and nothing else:
+
+| | The clipboard (live session) | The home screen |
+| :--- | :--- | :--- |
+| What a column holds | one participant's programme | one view taken from the menu |
+| How many | *"1/2/3/4/5/.. odvisno od prostora in števila udeležencev"* | as many as the same rule allows |
+| Are the columns alike? | yes — the same view, once per participant | no — different views side by side |
+| Per-column state | **each programme is independently in EDIT or EXECUTE mode** | each view is itself |
+
+*"clipboard pokaže 1/2/3/4/5/.. programov hkrati odvisno od prostora in števila udeležencev, vsak
+program je individualno lahko v edit ali execute načinu (popravi deep linke)"* — so the count is not
+a fixed three: it is what the width allows, bounded by how many participants the session has.
+
+**The clipboard goes first.** Its columns are alike and the rule for filling them is already ruled;
+the home screen still has to choose what goes in them (§41.3).
+
+### [x] 41.2 The deep links are the hard part, and they are ruled to change — superseded 2026-09-30
+
+**Superseded 2026-09-30 in the TODO clean-up: §41.5's ruling (2026-09-10: the layout is remembered, not addressed) and §41.0 ('the first slice does not touch the route grammar at all') replace the ?with= route proposal.**
+
+A route today names ONE session and ONE client, and three shapes carry the mode:
+
+```
+/session/:sessionId/client/:clientId                         execute
+/session/:sessionId/client/:clientId/edit                    edit
+/session/:sessionId/client/:clientId/edit/exercise/:slotId   edit, one row open
+```
+
+With several columns, each in its own mode, the address has to name a SET. Proposed — **the focused
+column keeps the path, the rest ride in the query**:
+
+```
+/session/:sessionId/client/:clientId?with=c7:edit:slot3,c9
+```
+
+Why this shape rather than a new path grammar: **every link ever shared keeps working and keeps
+meaning.** A link with no `with=` is exactly today's link — that client, alone or focused — so the
+demo scripts, the walkthrough's steps and every message a trainer has already sent stay correct, and
+the multi-column state is additive.
+
+What this touches, and why it is the schedule risk rather than the layout:
+
+- **Recovery after a reload reads the address bar** to know whether the trainer was in the editor and
+  which row was open ([sessionLifecycle.js](src/controllers/sessionLifecycle.js)). Per-column mode
+  makes that a set of answers, in the one path where being wrong loses a session.
+- [sessionFocusUrl.js](src/controllers/sessionFocusUrl.js) syncs the focused card INTO the URL on
+  every render. With several columns, "the focused card" needs a definition before that sync can be
+  written.
+- The demo story and the guided walkthrough assert on routes (§35, §38). They are the regression net
+  for exactly this screen.
+
+### [x] 41.4 Red team — the strongest case against the whole idea — superseded 2026-09-30
+
+**Superseded 2026-09-30 in the TODO clean-up: §41.0 answers the red team by moving columns to planning; the surviving ideas (participant strip, widen the home screen) are carried into the compressed §41 body.**
+
+Written against it on purpose. Nothing here is a refusal; it is what has to be answered before this
+is worth building.
+
+1. **The judge is the gym floor, and this is a desk feature.** Value 13 says a decision that only
+   makes sense at a desk is wrong. A wide layout serves a trainer sitting down. Before any of it:
+   how many of the trainers in the go-to-market plan own a tablet they would carry to a session?
+   If the answer is "the maintainer's own", the audience is one.
+2. **The clipboard is where data is WRITTEN, and its narrowness is a safety property.** Sets, quick
+   signals, timers. One participant per screen with thumb-sized targets is what keeps a mis-tap from
+   logging a set against the wrong person. Five columns makes those targets smaller and puts another
+   client's row a thumb-width away — against the standing rule that touch targets get real padding.
+3. **Two modes on screen at once is the likeliest source of a data-loss bug in the whole idea.** Edit
+   mode is drag-to-reorder; execute is tap-to-log. Side by side, a drag that starts in one column and
+   ends over another is a gesture with two meanings and no obvious right answer.
+4. **The route space multiplies, in the one place that must not break.** §41.2 lists what reads a
+   route; recovery after a reload is among them. The layout is a stylesheet problem; the addressing
+   is not, and that is where the time will actually go.
+5. **The test matrix multiplies with it.** The medium tier's stubs assume one column and the e2e
+   suite asserts on "the in-focus card"; both land in the slowest stage of the gate.
+6. **The home screen risks becoming a dashboard — a thing that is READ rather than used.** And since
+   the phone still shows one column, every feature after this is designed twice.
+7. **Sequencing.** [docs/PREVIEW.md](docs/PREVIEW.md) still tells trainers this build can lose their
+   data, and the ranking at the top of this file puts data safety and showability above everything.
+   A wide-screen layout moves neither.
+
+**Answered 2026-09-10 (Simon), and it moves the ground under most of the above:**
+
+> *"res je večina trenerjev ima telefon"* · *"več vrstični clipboard je feature predvsem za večerno
+> urejanje načrtov za računalnikom, ne live delo"* · *"again smiselno samo za evening planiranje sej"*
+
+**The multi-column clipboard is an EVENING PLANNING feature, at a computer — not a gym-floor one.**
+That is a different product decision from the one argued against above, and it settles three of the
+seven objections rather than answering them:
+
+- **(1) audience** — conceded and reframed. Most trainers have a phone, and the phone keeps its one
+  column. The wide layout serves the evening, on a machine that is already sitting on a desk, which
+  is the one context where a desk-shaped answer is the right one.
+- **(2) thumb-sized targets** — falls for the evening. Nobody is logging a set into five columns at
+  arm's length; the evening has a mouse and a keyboard. **It does NOT fall for the live case below.**
+- **(3) two gesture modes at once** — falls as a hazard in the evening, and comes back as an
+  OPPORTUNITY (§41.6): with several plans open in edit at once, dragging an exercise from one
+  client's plan into another's becomes possible, and no single-column layout can offer that at all.
+
+**Corrected the same day, by the maintainer's own Tuesday:**
+
+> *"primer uporabe clipboarda (1 ali 3 stolpce) je moj torkov trening: tri stranke vsak svoj program
+> hkrati"*
+
+**So the live case is real, and it is the maintainer's own weekly session:** three clients training
+side by side on three different programmes. One column on a phone, three on a tablet — the count
+follows the device, which is what "odvisno od prostora" already said. Objections (2) and (3) stand
+for that case and are settled only for the evening one, so the layout has to serve both without
+carrying the evening's gestures onto the floor.
+
+**The rule that lets it: the per-column MODE is the safety boundary, and it was already ruled.**
+
+| A column in EXECUTE | A column in EDIT |
+| :--- | :--- |
+| the gym floor: logging sets, signals, timers | planning: reordering, adding, removing |
+| thumb-sized targets, no drag gestures at all | drag is the point |
+| **never accepts a drop from another column** | may exchange exercises with another EDIT column |
+
+Cross-column drag (§41.6's opportunity) is therefore allowed **only between two columns that are both
+in edit**, and an executing column is inert to it. That is one rule, it needs no mode switch of its
+own, and it means the Tuesday session on a tablet — three columns, all executing — has exactly the
+gesture surface the single-column clipboard has today.
+
+**What survives, unchanged:** (4) the routes, (5) the test matrix, (6) the two-experience problem —
+sharper now, because the phone and the desk stop being the same layout by design rather than by
+accident — and (7) sequencing.
+
+**The question the evening framing raised — whether this belongs in the plan editor rather than the
+live clipboard — is answered by the Tuesday case: the clipboard.** It is the screen a session is run
+on, and running three programmes at once is the case. The evening then uses the same screen with its
+columns in edit mode, which is what the per-column mode is for.
+
+**Two cheaper things that take most of the value, worth measuring before the full build:**
+
+- **A participant rail.** On a wide screen, a fixed strip of participant names down the side of the
+  single clipboard column: switching becomes one tap instead of a swipe, targets stay thumb-sized,
+  and **no route changes at all**. It answers the complaint the request came from — switching one at
+  a time — at a small fraction of the cost, and it is not thrown away by a later multi-column build.
+- **Two columns before five.** Pair training is the common case above one; two columns can be built
+  with the focused-column route shape and no gesture ambiguity worth the name. Five is a different
+  product decision, and it can be taken after two are in front of real trainers.
+
+For the home screen, the equivalent cheap answer is **widen rather than split**: one column at a
+comfortable measure, with the deck showing more days at once. It uses the space without inventing a
+second layout to maintain.
+
+### [x] 42.5 One head row, however open the card is — archived 2026-09-30
+
+**Archived 2026-09-30 in the TODO clean-up: 7cf8d71 (2026-09-10) feat(clipboard): two expand settings that hold, and one head row per card**
+
+**Reported 2026-09-10 (Simon):** *"kartice imajo zanimiv past tag v naslovni vrstici, expanded card
+pa da past tag nad ime kartice, popravi, da ostane enak izgled expanded in collapsed"*.
+
+The collapsed row put the tag at the end of the title row; the expanded card put it on a line of its
+own above the name. One card read as two designs depending on how open it was — and on the past card,
+where the tag says which session the history came from, the tag moved furthest.
+
+Every card shape now draws the SAME head row in every state: number or icon, name, tag, and whatever
+control belongs at the end. The focused card's name grows so it is still readable at arm's length
+mid-set, but the row, the order and the tag's place do not move — that is what makes three states one
+design.
+
+It also takes the first of §42.3's savings: folding the top row into the name line is ~32px off every
+expanded card, which is what "expand all" spends its screen on.
+
+### [x] 42.6 A collapsed circuit names its movements — archived 2026-09-30
+
+**Archived 2026-09-30 in the TODO clean-up: 1e1a296 (2026-09-10) feat(clipboard): a collapsed circuit names its movements; CHANGELOG.md:1208**
+
+**Asked 2026-09-10 (Simon):** *"a lahko skrčene kartice za circuit prikažejo tudi imena vaj, težo in
+ponovitve (brez gumbov)?"* — shipped the same day, see [CHANGELOG](CHANGELOG.md).
+
+"Tri-Set Metabolic Circuit" with a round badge said only that three unnamed things were coming, while
+every other collapsed card already said what the trainer was looking at. It lists each movement with
+its reps and load now, in the same rows the open card draws, minus the actions — the rule every card
+that is not in focus follows (§42.1).
+
+**Found by looking at the real app rather than the stub:** a rest INSIDE a circuit is a member like
+any other and has no name or reps, so asking it for them printed a line reading `undefined` under
+every circuit in the deck. The medium-tier fixture had no rest inside its circuit; the seeded demo
+data did.
+
+### 45.6 [x] The session list needs filters: a date range, a client, a location — archived 2026-09-30
+
+**Archived 2026-09-30 in the TODO clean-up: 6c4708a (2026-09-11) feat(sessions): filter the board by dates, client and location — src/modules/sessionList/sessionFilterBar.js (chips, not a modal; own calendar), src/domain/sessionFilters.js (nextDateSelection); empty board says why: src/modules/sessionList/sessionsView.js:361-363. Later calendar work closed as §74.**
+
+**Reported:** on the home screen, the calendar should act as a from–to filter; a filter by client is
+wanted; Simon added a filter by location.
+
+**None of the three exists today.**
+
+**Not a modal (agreed, Simon 2026-09-11).** A modal costs two taps and hides what is switched on, so
+a trainer sees a short list without seeing why it is short — and this screen is read one-handed, with
+a client waiting. The shape instead: **a row of chips under the header that shows what is active**,
+each removable with one tap. A modal becomes worth revisiting only if the chips stop fitting on a
+phone-width row.
+
+**Researched 2026-09-11, and it is a bigger change than "add three filters".** There is no calendar on
+the board today. The control that looks like one is *Jump to date*
+([sessionTimeline.js](src/modules/sessionList/sessionTimeline.js)): it opens the phone's native date
+picker and **scrolls** the timeline to that day. The board itself is one continuous, time-ordered
+list with sticky day headers, over a fixed window of days around today
+([sessionsView.js](src/modules/sessionList/sessionsView.js)'s `visibleSessions`).
+
+**The request changes the model, not just the control: from "take me to" to "show only".** Three
+things are built on the first model and have to be answered before any of this is written:
+
+- **Day swipes and the sticky headers.** A day is a POSITION in the list. Under a from–to filter,
+  what does swiping past the end of the range do — nothing, or widen the range?
+- **The Today button**, which today both jumps to today and shows which day is in view. What is it
+  when today is outside the chosen range?
+- **The `sessions.day` route.** The focused date is written into the URL, so a deep link names a day.
+  A filtered board has a range as well as a position, and the link has to say which it carries — this
+  is [§19](TODO.md)'s territory, not the board's alone.
+
+**The chips live in the sticky title bar** (asked 2026-09-11, after seeing them). They shipped as a
+row below it, which meant scrolling the board took the filters off the screen while the thing they
+filter stayed on it — a filter nobody can see is the modal's defect arriving by another road. One
+sticky header now carries two rows, the title with the day controls and the filters under them, and
+the calendar opens inside it. The day headings' own sticky offset follows on its own: the timeline
+measures that header with a ResizeObserver, so a second row costs no number kept in step by hand.
+
+**Chips, not a modal, is still the answer for the client and location filters** — they are plain
+"show only these" choices and a modal hides what is on. The date range is the one that is not simply
+another chip, because the board's whole navigation is already made of dates.
+
+#### The date range's click model — proposed 2026-09-11 (Simon), NOT decided
+
+Proposed as booking.com's: first click selects a day; a second click on the same day clears it; a
+second click on another day makes a range; then the third click moves the first date, the fourth
+moves the second, and odd/even clicks continue that pattern. Separately proposed: a click on an
+already-selected date removes it and the range collapses back to one day.
+
+**Booking.com does not do the odd/even part.** Its rule is keyed to MEANING — first click is the
+arrival, second the departure, third starts over — not to a count of clicks.
+
+**And the count is the defect.** Under the parity rule, what the next tap does depends on how many
+taps came before, a number that is nowhere on screen. Two identical taps on the same day give
+different results, and a trainer who mis-taps cannot see why. Every rule here has to be readable from
+what is VISIBLE.
+
+**The collapse-to-one-day proposal is good and should be kept**, with one clarification: it can only
+apply to the two ENDS. A day in the middle of a range looks selected too, and removing it would split
+the range into two pieces, which a single from–to filter cannot express.
+
+**Counter-proposal — five rules, every one read off the screen:**
+
+1. nothing selected, tap A → filter is the day A;
+2. one day A, tap A again → filter cleared;
+3. one day A, tap another day B → the range between them, in either direction (a tap BEFORE A gives
+   B–A, never an inverted range);
+4. a range, tap one of its two ends → that end goes, the other stays as a single day;
+5. a range, tap any other day → the NEARER end moves there: inside the range it narrows, outside it
+   widens. An exact tie has to be settled by a fixed rule — the start, arbitrarily, and what matters
+   is only that it never changes.
+
+Rule 5 does the work parity was meant to do, without anything to remember: the edge nearest the
+finger is the one that moves. Rule 4 guarantees a way back from a range to a single day, so no state
+is a dead end.
+
+**The conservative alternative to rule 5** is booking's own: a tap anywhere else starts over with one
+day. Easier to explain, but every narrowing then costs two taps instead of one.
+
+##### Checked against documented practice, 2026-09-11 — and BOTH of the above are inventions
+
+Asked to test the design against the portals that built people's expectations. Every reference below
+was opened and read, not taken from a search summary.
+
+- **The third tap starts over.** eBay's design system states it plainly: the first tap sets the start,
+  the second the end, *"a third tap resets the date range and sets the new starting date"*
+  ([playbook.ebay.com](https://playbook.ebay.com/design-system/components/date-picker)). Syncfusion's
+  widely used component documents the same rule with more detail: a click when both ends are set is a
+  new start, **and a click on a date earlier than the current start is also a new start, never an
+  inverted range** ([help.syncfusion.com](https://help.syncfusion.com/js/daterangepicker/behavior-settings)).
+  Airbnb's `react-dates` behaves the same way for a selection that would be invalid — the clicked day
+  becomes the start ([github.com/airbnb/react-dates#1978](https://github.com/airbnb/react-dates/issues/1978)).
+- **Nothing uses alternation, and nothing uses "the nearer end".** Neither the parity model nor the
+  five-rule counter-proposal appears in any design system or component library found. Both are
+  patterns a trainer has met nowhere else.
+- **Booking.com — the portal this started from — edits an existing range by naming the END FIRST**:
+  *"by clicking the appropriate box for check-in/out the dates can be adjusted"*
+  ([blog.mobiscroll.com](https://blog.mobiscroll.com/how-to-build-amazing-booking-apps-calendar-tips-and-considerations/)).
+  So the visible marker both of us arrived at is real practice — with the difference that the USER
+  arms it, rather than the app alternating it.
+- **Ends styled apart from the days between them is the standard**, not a nicety: endpoints get a
+  *"distinct style"* with rounded caps, the interior a *"continuous highlight colour lighter than the
+  selection circles"* ([uxpatterns.dev](https://uxpatterns.dev/patterns/forms/date-range)). The same
+  page recommends the header text change from "Select a start date" to "Now select an end date" —
+  the marker, in words.
+- **Do not move the calendar between the two taps.** NN/g: a shifted month *"may go unnoticed and
+  cause users to slip by clicking where the intended date used to be"*
+  ([nngroup.com](https://www.nngroup.com/articles/date-input/)).
+
+**So the model to build, unless overruled:**
+
+1. first tap = start, second = end; a tap before the start becomes the start, never an inverted range;
+2. a third tap on any day starts over from that day — the one behaviour a trainer already knows;
+3. a tap on the same single day clears the filter;
+4. to move ONE end without starting over, tap the `od` or `do` chip to arm it, then tap a day. Armed
+   is visible, and chosen rather than inferred;
+   - **The chips are OUTSIDE the calendar grid** — in the filter row above it, beside the client and
+     location chips — so arming can never collide with rule 2 or 3. Misread once as "tap the endpoint
+     inside the grid to arm it", which is genuinely unworkable: a tap on a day already means
+     something there, and the only way left to tell the two apart would be a drag, which is the wrong
+     gesture on a phone. Booking.com places its check-in/check-out boxes outside the calendar for the
+     same reason.
+   - The same tap on a day therefore has two outcomes depending on whether a chip is armed. That is
+     only allowed because armed is VISIBLE — the whole objection to the parity model was a mode
+     nobody could see, and a mode this design cannot see either would be the same defect rebuilt;
+5. ends drawn stronger than the days between them, and the calendar does not shift while choosing.
+
+**What this costs, and it is the largest part of §45.6.** None of it is possible with the phone's own
+date picker: every date control in this app is a native `<input type="date">`, which returns one date
+and can neither show a range nor take two taps. This means a calendar of our own — a month grid,
+swiping between months, thumb-sized targets, marked ends and marked days between them, in five themes
+and two languages. A new component, not a setting on an existing one.
+
+Also unresolved and cheap to get wrong: what the list shows when a filter matches nothing. An empty
+board that does not say "because of a filter" is the same defect in a different costume.
+
+### 45.14 [x] Found while running the gate: `_switch` waits for the wrong thing — archived 2026-09-30
+
+**Archived 2026-09-30 in the TODO clean-up: The section's own body says '[x] Fixed the same day'; tests/e2e/test_sandbox.py:28-48 — _switch waits for body.in-sandbox, not activeWorkspace().**
+
+**Two sandbox tests failed on 2026-09-11**, in a Stage 3 that took 308s where earlier runs that day
+took 183–196s — the same suite, a busier machine.
+`test_a_sandbox_older_than_twelve_hours_offers_a_fresh_one` was clicking the ☰ menu while
+`#dialog-sandbox-stale` sat over it, and `test_coming_back_returns_to_the_view_you_left` read the URL
+before it had been rewritten. Both pass when the file is run on its own. **This is not flakiness to
+be re-run away; it is one located defect in a test helper.**
+
+**The cause.** `_switch` ([test_sandbox.py](tests/e2e/test_sandbox.py)) waits for
+`activeWorkspace() === expected`, then sleeps 200ms. That flag flips in the MIDDLE of
+`switchToWorkspace` ([app.js](src/app.js)): `switchWorkspace()` sets it, and only afterwards come
+`renderEverything()`, `rebindTimers()`, `returnToLastView()` — which is what rewrites the URL — and
+finally `offerFreshSandboxIfStale()`, which is what opens that dialog. So the helper returns while
+the switch is still running, and 200ms is the whole of what stands between it and the rest. On a
+quiet box that is enough; under eight browser workers it is not.
+
+**[x] Fixed the same day, in the test and with no timeout.** The helper now waits for
+`body.in-sandbox` to match the workspace it asked for. That class is set by `renderWorkspaceChrome()`
+inside `renderEverything()`, which runs AFTER the switch's awaits — and `renderEverything()` through
+`returnToLastView()` is one synchronous block, so observing the class means the database is loaded
+and the address bar has moved. The app needed no new signal; it was already saying this, and the test
+was asking the wrong question.
+
+**One place also had to stop lying to the page.** The staleness test aged the sandbox and then called
+`switchWorkspace('working')` from inside `page.evaluate` — which moves the stored workspace without
+repainting, leaving `body.in-sandbox` saying "sandbox" for a workspace the app had left. Any wait on
+that class would then be satisfied by a stale fact. It now leaves and re-enters through the menu, the
+way a trainer does.
+
+**The lesson, which is why this is written down rather than just fixed:** a wait on a flag that is set
+mid-operation is a sleep wearing a better name. `setActiveWorkspace()` is called before
+`loadSavedState()` and before a first sandbox is seeded, so the flag was true for the whole expensive
+part of the switch.
+
+## 46. [x] Reported 2026-09-12 — the setup form, read off a screenshot — archived 2026-09-30
+
+**Archived 2026-09-30 in the TODO clean-up: All seven subsections (46.1–46.7) are [x] and already archived; the parent keeps only an intro.**
+
+Simon sent one screenshot of the session setup form in Slovenian and asked what was wrong with it.
+Six things were, and the picker under them turned out to be the bigger problem.
+
+### 46.1 [x] The warning list called the whole day taken — fixed 2026-09-12
+
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#461-x-the-warning-list-called-the-whole-day-taken-fixed-2026-09-12); what shipped is in [CHANGELOG.md](CHANGELOG.md).
+
+### 46.2 [x] Choosing two clients out of a hundred — redesigned 2026-09-12
+
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#462-x-choosing-two-clients-out-of-a-hundred-redesigned-2026-09-12); what shipped is in [CHANGELOG.md](CHANGELOG.md).
+
+### 46.3 [x] Four smaller things in the same screenshot — fixed 2026-09-12
+
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#463-x-four-smaller-things-in-the-same-screenshot-fixed-2026-09-12); what shipped is in [CHANGELOG.md](CHANGELOG.md).
+
+### 46.4 [x] The demo data speaks the trainer's language — shipped 2026-09-12
+
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#464-x-the-demo-data-speaks-the-trainers-language--shipped-2026-09-12); what shipped is in [CHANGELOG.md](CHANGELOG.md).
+
+### 46.5 [x] The seed stamp says what it is — renamed 2026-09-12
+
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#465-x-the-seed-stamp-says-what-it-is--renamed-2026-09-12); what shipped is in [CHANGELOG.md](CHANGELOG.md).
+
+### 46.6 [x] [Decided] The demo-removal code stays, as a safety valve — ruled 2026-09-12
+
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#466-x-decided-the-demo-removal-code-stays-as-a-safety-valve-ruled-2026-09-12); what shipped is in [CHANGELOG.md](CHANGELOG.md).
+
+### 46.7 [x] The stamp says WHICH kind, and the app notices when test data escapes — shipped 2026-09-12
+
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#467-x-the-stamp-says-which-kind-and-the-app-notices-when-test-data-escapes-shipped-2026-09-12); what shipped is in [CHANGELOG.md](CHANGELOG.md).
+
+## 61. [x] Every install reads the preview schema P — the live schema must not be P — archived 2026-09-30
+
+**Archived 2026-09-30 in the TODO clean-up: The problem is gone: src/data/recordSchemas.js:340 DEFAULT_READ_SCHEMA = 5, src/data/migrationSteps.js:35 CURRENT_SCHEMA_VERSION = 5; PREVIEW replaced P in a37e926 (2026-09-18); the 'still open' second browser pass that reads PREVIEW exists since 635ef74 (build/__init__.py:1768 _read_schema_flags, .github/workflows/deploy.yml:244-248). The other 'still open' item, discarding preview data at the end of a test run, has no commit of its own — each test runs in a new browser context, so nothing survives it (not separately verified).**
+
+**Ruled 2026-09-17 (Simon): the live schema must not be P; that would be data loss for trainers in
+production.** Checked the same day (Claude), from the code:
+
+- `DEFAULT_READ_SCHEMA` is `"P"` ([recordSchemas.js](src/data/recordSchemas.js), since 93e2b1d,
+  2026-08-10) and `CURRENT_SCHEMA_VERSION` is `"P"` ([migrationSteps.js](src/data/migrationSteps.js)).
+  An install reads P unless its trainer chose another schema ([readSchema.js](src/data/readSchema.js)),
+  and its data is stamped P.
+- On the first boot of every new build, `rebuildPreviewSchemaIfBuildChanged` copies every `schema4`
+  record over the P store. Its comments say P is discarded; `backfillSchema` only puts and never
+  clears, so what exists only in P stays.
+- **What exists only in P** (measured in Node against `SCHEMA_4` and `SCHEMA_P`): the sessions'
+  fields `startDate`, `seriesId`, `occurrenceDate` and `cancelled`, and two whole collections,
+  `invites` and `sessionSeries` — invitations and the rules of repeating sessions. All are used by
+  live features.
+- **The four fields are safe today only by accident**: the star write copies every field into
+  `schema4`, undeclared ones included (§58), so the copy over P brings them back. **The two
+  collections are in the P store alone**: the star write writes a collection only where its schema
+  declares it, and no backup carries them.
+
+**Ruled 2026-09-17 (Simon): schema 4 is the live schema; P is discarded at every migration.** Also
+ruled: swallow the inconsistency — nothing held in 4 may be lost or thrown away.
+
+**What that settles, and what it does not (Claude):**
+
+- **The four fields: settled.** They are already in `schema4` and in every recent backup; declaring
+  them in `SCHEMA_4` makes the schema say what the data holds, as `alias` did (§60).
+- **The two collections: not settled.** Pointing reads at 4 today would show no invitations and no
+  repeating sessions — the rules sit only in the P store, which is then discarded. They must be
+  declared in `SCHEMA_4` AND copied from the P store into `schema4` once, before reads move.
+- **The stamp: not a problem on a phone — corrected the same day.** An IndexedDB install stores no
+  schema version: once its data is imported, boot runs no migration and sets the version in memory
+  (`loadSavedState` in [stateStore.js](src/data/stateStore.js)). Only the `localStorage` fallback and
+  a backup's `runtimeSchema` carry "P". The earlier claim that installs are stamped "P" and would be
+  refused was wrong.
+
+**Ruled 2026-09-17 (Simon), from schema 5 on: the P database is thrown away whenever a test run
+ends and whenever the app starts, and the app switches to the active database.** P is only ever a
+temporary demo or test. Open with it (Claude): a demo that must survive a reload then cannot live in
+P — the sandbox workspace (§40) is already a separate database for sample data, so whether a demo
+needs P at all is the question; and nothing in the app offers a trainer the choice to read P today
+(only a test sets `librept_read_schema`), which keeps that true only while nobody adds such a choice.
+
+**Ruled 2026-09-17 (Simon), the order:**
+
+1. Schema 4 takes the four session fields and the two collections, `invites` and `sessionSeries` —
+   the inconsistency is accepted.
+2. **A migration step P → 4** brings the records that exist only in the P store into `schema4`.
+   On a phone this cannot be a step of `migrateState`, which does not run on an IndexedDB boot; it is
+   a one-time store copy at boot, marked done in the meta store, like the backfill.
+3. Then the preview schema is renamed **PREVIEW**.
+4. **PREVIEW is never a step in the migration chain.** It is newer than 4 but a dead branch:
+   4 → PREVIEW → 5 must not exist; the chain runs 4 → 5.
+
+Tested from a frozen device database of a P-era install holding a repeating session, a cancelled
+evening and an invitation (§63), made from today's code before any of this changes.
+
+**Steps 1 and 2 done 2026-09-17** — schema 4 declares the fields and both collections, and
+[previewTransfer.js](src/data/previewTransfer.js) moves what only the P store holds, once, at boot.
+**Also ruled with them (Simon): P is not an alias of PREVIEW** — P is the legacy preview store data
+is moved out of; PREVIEW is the future CI and preview schema; the two mean different things.
+**Schema 4 made active 2026-09-17:** `DEFAULT_READ_SCHEMA` and `CURRENT_SCHEMA_VERSION` are 4; a stored
+"P" ranks as 4. Replaced by the PREVIEW schema below on 2026-09-18.
+
+**Ruled 2026-09-17 (Simon): PREVIEW uses the same solution as a released schema** — a store in the
+main database, provisioned and written like schema 4 and 5 and 6 will be. Done 2026-09-18:
+
+- **The database version stopped being a schema number** ([indexedDb.js](src/data/indexedDb.js)). It
+  was the highest numbered live schema, which could not provision a store for a schema named PREVIEW
+  and would have LOWERED the version the day a preview was retired; IndexedDB then refuses to open the
+  database at all. The database now opens at whatever version it holds and is reopened one version
+  higher only when a store is missing.
+- **`SCHEMA_PREVIEW` replaces `SCHEMA_P`** in the live schemas, with one collection only it declares,
+  `previewProbe`, so staging is exercised by the real schemas: a record of it reaches the PREVIEW store
+  alone, a backup leaves it out, and a restore names it as lost. No screen writes one.
+- **Preview data is refused by what it is**, before any rank comparison (`isPreviewVersion`), which is
+  the test §63 asked for.
+- The P store is no longer written. It stays on disk, and [previewTransfer.js](src/data/previewTransfer.js)
+  still reads it once on an install that has one.
+
+**Done 2026-09-18: the PREVIEW store is emptied when the build changes**, and refilled from schema 4
+only where it is read — at activation (`setReadSchema`) or for an install already on it. Emptying at
+every start was written first, on the earlier ruling, and Simon changed it the same day: a preview
+session spans reloads, and CI's second pass reads the store on every navigation, so an empty store at
+each start left it reading nothing. Filling it for an install that never asks would cost a projection
+pass on every boot — 22ms for the demo set, about 400ms at 3,000 records.
+
+**Still open:** the second browser-test pass that reads PREVIEW (§62), and discarding preview data at
+the end of a test run.
+
+## 58. [x] A record is written whole, so a field cannot be staged at all — merged 2026-09-30
+
+**Merged 2026-09-30 into: 71. [ ] Nothing detects when the code stops supporting a live schema with the right data**
+
+**[x] First step shipped 2026-09-23 (§45.5 needed it):** a store no longer receives a field only a
+newer live schema declares — schema 4's store never holds `exercises.source` — and a field the schema
+being read cannot see is carried over from the row a store already holds, so a save made while
+reading an older schema (the toggle §76 builds) cannot wipe it (`narrowToSchema`, `fieldsHiddenFrom`
+in [recordSchemas.js](src/data/recordSchemas.js)). A field no live schema declares is still written
+whole. **Still open:** renames and retypes — §71's per-schema projector.
+
+**By design a backup is made at schema 4, the newest numbered one, never at P** (Simon,
+2026-09-17), so a field that exists only in P is not in it. The preview database is used only for
+testing and demonstrations, never live for a client. [backupFile.js](src/data/backupFile.js) leaves out only the
+COLLECTIONS schema 4 does not declare; each record is copied whole through `projectCollection`,
+which keeps every field.
+
+**Measured 2026-09-17 (Claude)** with `buildBackupPayload` in Node: a session holding `seriesId`,
+`occurrenceDate` and `cancelled` — fields schema 4 does not declare — came out in a file stamped
+`schemaVersion: 4` with all three. The star write does the same to the `schema4` store, so
+`rebuildPreviewSchemaIfBuildChanged` in [readSchema.js](src/data/readSchema.js) does not lose them
+either, although its comment says it does.
+
+**Re-measured 2026-09-21 (Claude): those three instances are gone, and the mechanism is not.** §61
+declared all three fields in schema 4 on 09-17, and `SCHEMA_PREVIEW` today is `SCHEMA_4` plus one
+collection (`previewProbe`) and a stricter `required` on `startDate` — it adds no field at all. So
+the defect has zero instances and no test holds it at zero. The way it reached zero is exactly what
+§60 was about: the fix for "a preview field leaks into the schema 4 file" was to widen schema 4.
+
+The mechanism: `projectSession` is `{ ...session, collection }` — the whole domain object. Staging
+is enforced per **collection** only (`schemaAcceptsCollection`); nothing anywhere compares a
+record's fields against the shape it is being written at. `undeclaredFields` exists in
+[recordSchemas.js](src/data/recordSchemas.js) and no live code calls it.
+
+**What §60's ruling (2026-09-21) changes here.** Numbered shapes are frozen, so a new field can no
+longer be absorbed into schema 4 — it is staged in `SCHEMA_PREVIEW` until it mints a number. That
+makes field-level staging necessary rather than hypothetical, and the earlier warning above ("do not
+fix this before §61 is settled") has expired with §61.
+
+**The obstacle, found 2026-09-21 and not yet solved.** §62's guard
+([conftest.py](tests/conftest.py), `UNDECLARED_STORED_FIELDS`) reads each store and fails the test
+when a row carries a field that store's schema does not declare. A field staged in PREVIEW alone is
+therefore written into the `schema4` store by the fan-out and **fails that guard immediately** — so
+today field staging is not merely leaky, it is impossible.
+
+Trimming a record to its target schema's declared fields fixes both, but it also blinds §62's
+guard: after trimming, the store can never hold an undeclared field, so the check can never fire,
+and a feature writing ahead of **every** schema would be silently dropped instead of reported.
+
+**Proposed (Claude), not ruled** — three parts, and the middle one is the price:
+
+1. `projectCollection` takes the target schema and trims the record to the fields it declares.
+2. **Trim on write only, never on read.** `fieldIssues` and `groupRecordsByCollection` accept
+   unknown fields and collections on purpose, so an older build survives a newer file; trimming
+   there would destroy that.
+3. §62's guard moves from the store to the write path: a field declared by **no** live schema is
+   still an error and must still fail the build.
+
+Blocks: nothing now — §50.3's record badges are unblocked by §60 and go into `SCHEMA_PREVIEW`. What
+this blocks is the first field that actually stages there reaching a trainer's backup correctly.
+
+### 58.1 [ ] Removing a field is not expressible, and trimming alone does not make it so
+
+Asked 2026-09-21 (Simon): how does the star write handle schema 5 removing a field while schema 4,
+still live, has to go on writing it? Read from the code the same day (Claude):
+
+**It cannot be expressed today.** `starWrite` in [stateStore.js](src/data/stateStore.js) projects
+once, OUTSIDE the loop over schemas — `const projected = projectCollection(collection, record)`,
+then the same object is `put` into every target store. A schema decides only **whether** a record
+reaches a store, by collection; never **what shape** it arrives in.
+
+**The model forbids the case rather than answering it.** `docs/DATA_MODEL.md`'s star-write
+invariants say schema changes are expand-first, so no projection is ever lossy, and
+[starWriteInvariants.test.mjs](tests/unit_js/data/starWriteInvariants.test.mjs) asserts that no
+field is dropped between live schemas. So a field is removable only once every schema declaring it
+has been RETIRED — which is exactly the deliberate decision §60 introduced. §60's retirement clause
+is therefore the mechanism for removal, and nothing else is.
+
+**Trimming (above) does not by itself allow removal while both are live.** The star projects from
+the live domain object, so a field the app has stopped maintaining cannot be invented for schema 4's
+store. "Schema 5 removes the field" means *schema 5 stops storing it*, not *the app stops producing
+it*: while schema 4 is live and declares it, the app must keep producing a field none of its own
+code uses. That cost is why expand-first exists, and it should be stated before anyone plans a
+removal.
+
+**One direction is unguarded.** §62's store guard uses `undeclaredFields`, which finds EXTRA fields,
+not missing required ones — so an app that stopped producing a field schema 4 requires would not be
+caught there. It is caught one level up, by `every live writer shape validates against every live
+schema` in the same test file, which checks the write path's literals against every live schema.
+Worth knowing which check actually holds this, because the obvious one does not.
+
+**Proposed with it (Simon), not ruled: write the preview schema as `PREVIEW` instead of `P`**, so the
+stored value says what it is. Found against it (Claude): `P` is stored, not only named — in every
+preview database's `schemaVersion`, in the `schemaP` store name, and in a backup's `runtimeSchema` —
+and the demonstration installs hold it. The migration runner treats an
+unrecognised version as below the floor and replays the chain from 1, which re-asks the language
+question (step 3 → 4), so "PREVIEW" must be taught to rank exactly as "P". P also stops existing the
+day schema 5 is minted.
+
+### [x] 76.1 Three identities, kept apart — archived 2026-09-30
+
+**Archived 2026-09-30 in the TODO clean-up: Built: app version id and schema per entry in src/data/appVersions.js; commit SHA unchanged (BUILD_INFO.commit). The three identities are restated in one line of the compressed §76 body.**
+
+- **App version** — what the trainer chooses. A name and a date, for example *2026-10*, with one
+  sentence on what it changes. New to this design.
+- **Schema** — the shape of the stored data. Each app version names the schema its behaviour
+  writes; several versions may name the same one. **Every install READS the newest numbered schema,
+  whatever version runs** (§76.4).
+- **Commit SHA** — which code is running, for support. Unchanged.
+
+### [x] 76.2 One registry of app versions — archived 2026-09-30
+
+**Archived 2026-09-30 in the TODO clean-up: Built 2026-09-23: src/data/appVersions.js; tests/unit_js/data/appVersions.test.mjs:48 (one default), :55 (live schemas vs versions), :70 (every behaviour asked for is declared), :86 (no behaviour on in every version).**
+
+One file under `src/data/` lists every supported app version: its id, the schema it reads, its
+status, the text key of its one-sentence description, and the behaviours it turns on. The status is
+one of:
+
+- `default` — what a new install runs. Exactly one version has it.
+- `supported` — offered to the trainer, older or newer than the default. A newer one shows the
+  `BETA` tier of §18.12's ribbon, which that section already reserves for "an in-app behaviour
+  opt-in".
+- `preview` — CI and demonstrations only, never offered (§61's ruling). It reads PREVIEW.
+
+**`LIVE_SCHEMAS` is checked against the registry, not derived from it** (built 2026-09-23, Claude):
+`appVersions.test.mjs` fails the build when a numbered live schema is named by no version, or a
+version names a schema that is not live. Deriving it would have made recordSchemas.js import the
+registry for one line; the check gives the same guarantee without that dependency.
+
+**Feature code asks for a behaviour by name, never for a version number.** It asks, for example,
+whether circuits are offered when a plan is built, and never whether the version is at least
+2026-10. A comparison of versions spreads through every file that branches. A named behaviour lives
+in one registry entry, and a check fails the build when a behaviour named in the code is declared by
+no version, or is turned on in every supported version (its branch is then dead and must be removed).
+
+### [x] 76.3 What the trainer sees, and what happens when they switch — archived 2026-09-30
+
+**Archived 2026-09-30 in the TODO clean-up: Built: src/modules/common/appVersionDialog.js:7,47-66 (list of versions, refused while a session runs, reload). Its one unbuilt point, the sentence naming what the chosen version cannot show, is carried by §76.6.**
+
+- In the ☰ menu ([applicationHeader.js](src/modules/common/applicationHeader.js)), beside *My
+  details*: **App version**, which opens a list of the supported versions with the running one
+  marked and each one's sentence.
+- **Before the switch, one sentence says what the chosen version cannot show, and how many records
+  that is** — for example, that it has no circuits, that the trainer has three, and that they are
+  kept but not shown while that version runs. This is the production check §71.2 already earned.
+  The sentence is shown only when the number is not zero.
+- **The switch is refused while a session is running**, with the reason on the screen. This follows
+  §18.12's rule that nothing blocks a trainer who has a client in front of them.
+- The switch stores the chosen version and **reloads the page**, so every screen is built again
+  under the new behaviour. It does not change which store is read. The build is already in the
+  service worker's cache, so the reload also works offline.
+- The choice belongs to the device, like the theme, and is kept in `localStorage`.
+
+### [x] 76.5 What each supported version costs — merged 2026-09-30
+
+**Merged 2026-09-30 into: 76.6 The first use: schema 5 for §45.5**
+
+- **One browser-test pass per supported version**, the way §62 adds one for PREVIEW. The last full
+  gate run took 341 seconds (`.build-reports/last-run.json`). How much of that the browser tests take
+  was not measured, so the cost of a second pass is not stated here.
+- **Every behaviour branch stays in the code** until the last version that needs it is retired.
+- **One more star-write store** for each new schema, as `docs/DATA_MODEL.md` already counts it.
+
+**Proposed: at most two numbered versions are supported at once**, plus PREVIEW — the default and
+one other. Two versions give the trainer both a way back and a way forward, while each further
+version adds a browser-test pass and one more branch in every feature that differs.
+
+### 80.1 [x] Prva stranka in prvi individualni trening — v teku — superseded 2026-09-30
+
+**Superseded 2026-09-30 in the TODO clean-up: The rejected 'TEST' observation is §66 working as designed (verdict in the body). Its real residue — a surname that is also a gym name — is carried by §83 point 'pravilo ne pozna naključja'. The untested half of the scenario (run, log, finish) was tried 2026-09-30 on main 12d0e66: §80.6 'Odgovor 2026-09-30' and §80.52 'Dokaz 2026-09-30'.**
+
+**Scenarij:** trener prvič odpre aplikacijo in brez navodil poskuša dodati izmišljeno
+stranko »TEST Ana Novak«, njen cilj »redno trenirati dvakrat tedensko« ter pripraviti
+45-minutni trening s tremi vajami. Nato želi trening začeti, zapisati dejanske serije,
+ponovitve in obremenitve, popraviti napačen vnos ter trening zaključiti. Imena gumbov
+in poti se določijo šele iz vidnega vmesnika. Uporabiti ločene testne podatke.
+
+**Preverjeno doslej:** shranjen trener »TEST Trener« z naslovom
+`trener@example.invalid`; prek menija in imenika dodana »TEST Ana Novak« z naslovom
+`ana@example.invalid`, ciljem in opombo. Brez označene privolitve profil jasno pove
+»Brez privolitve (samo lokalno)«. »Načrtuj program« ohrani izbrano stranko.
+Termin »Uvodna vadba«, kraj »Telovadnica Center«, 10:00–10:45; iz kataloga dodan
+»Dumbbell Goblet Squat« 3 × 10 × 8 kg, »Single-Arm Dumbbell Row« 3 × 10 × 6 kg
+in »Plank« 3 × 30s. Pri vsaki vaji so shranjene opombe s simuliranimi dejanskimi
+serijami; pri počepu tudi »Pretežko«. Po ponovnem odprtju je program še nenačrtovan.
+Naslednji korak je ustvariti termin prek »Ustvari trening« in preveriti izvedbo v njem.
+
+**Opažanje za nadaljnji preizkus:** ime »TEST Ana — prvi trening« in kraj
+»TEST Telovadnica« sta zavrnjena zaradi besede »TEST« v imenu stranke. Po popravku
+na zgornji nevtralni imeni shranjevanje uspe. Preveriti še običajno ime kraja, ki se
+naključno ujema z imenom stranke; umetni testni prefiks sam ne dokazuje te napake.
+
+**Verdikt 2026-09-26 (Claude): opažanje zavrnjeno — to ni napaka, ampak §66, ki deluje, kot je
+bilo odločeno.** §66 (odločeno 2026-09-18) prepoveduje ime stranke v imenu ali kraju treninga,
+ker se besedila po izbrisu stranke ne da več očistiti: takrat ime ni več znano (§65). Zavrnjeno
+je ob shranjevanju in ne pobrisano pozneje, prav zato.
+[clientNameWords.js](src/domain/clientNameWords.js) razbije ime vsake stranke na besede in
+blokira vsako, dolgo `SHORTEST_BLOCKED_WORD` = 3 znake ali več. Stranka »TEST Ana Novak« torej
+prepove besedo »TEST« v imenu termina in v kraju. Sporočilo napake besedo krepko citira nazaj,
+da trener vidi, kateri del svojega naslova je sporen, in obroba pokaže, katero polje.
+
+**Ostanek, ki je resničen in ni sprememba:** pravi priimek je lahko tudi ime telovadnice.
+Stranka »Ana Novak« naredi besedo »Novak« neuporabno v kraju, torej trener ne more vpisati
+»Telovadnica Novak«. To je cena, ki jo §66 zavestno plača, in sprememba tega je Simonova
+odločitev, ne popravek. Zapisano tu, ker ga je Codexov preizkus pokazal, čeprav z umetnim
+imenom.
+
+**Scenarij sam ostaja nedokončan:** izvedba treninga, vpis serij in ponovitev, popravek
+napačnega vnosa in zaključek niso bili preizkušeni.
+
+### 80.11 [x] P2 — Števec sinhronizacije v glavi je brez besed in samo v angleščini — merged 2026-09-30
+
+**Merged 2026-09-30 into: 80.86 [~] P2 — Značka v glavi piše »7?« in nikjer na zaslonu ni povedano, kaj šteje**
+
+**Scenarij in koraki:** trener prvič odpre objavljeno aplikacijo v slovenščini, ne poveže
+nobene shrambe v oblaku in pogleda glavo zaslona.
+
+**Opaženo:** desno od imena in oznake različice stojita puščica gor z »0« in puščica dol z
+»?«. Nikjer ni besede, ki bi povedala, kaj šteje. Edina razlaga je bralniku zaslona
+namenjen `aria-label`, ki se glasi »0 local changes to push, cloud status unknown« — v
+angleščini, čeprav stran pravi `lang="sl"`.
+
+**Težava in vpliv:** trener vidi vprašaj v glavi in ne ve, ali kaj ni v redu z njegovimi
+podatki. Pomen je samo v nevidnem besedilu, kar projektno pravilo prepoveduje, in to
+besedilo je v tujem jeziku. Znak »?« brez razlage vzbuja skrb pri uporabniku, ki oblaka
+sploh ni priklopil.
+
+**Natančneje, izmerjeno v brskalniku:** gumb sam (`#backup-btn`) ima slovenski opis
+»Središče za sinhronizacijo in varnostne kopije — Sinhronizacija v oblak ni povezana«, znotraj
+njega pa je števec (`span.sync-badge`) z angleškim opisom »4 local changes to push, cloud
+status unknown«. Slovenščina in angleščina sta torej v istem gumbu, ena v drugi. Število
+narašča ob delu — po prvem shranjenem treningu je bilo 4 — in trener nikjer ne izve, kaj šteje.
+Nad devet se številka umakne klicaju: v glavi piše »↑!«, kar je videti kot opozorilo na napako,
+pomeni pa samo, da je sprememb veliko.
+
+**Predlog in preverjanje:** ko oblak ni nastavljen, števca ne kazati; ko je, mu dati vidno
+besedo ali ga odpreti v okno s stanjem. `aria-label` sestaviti prek `t(...)` s ključi v
+`en`, `sl` in `de`. Preverjeno na objavljeni različici `0625bd6`; koda na `main` je ista —
+[applicationHeader.js](src/modules/common/applicationHeader.js), funkcija, ki sestavi
+`sync-badge`, vpisuje oba angleška stavka dobesedno.
+
+**Delno popravljeno 2026-09-27, commit `22b79bf`:** opis za bralnik zaslona je v izbranem jeziku,
+s pravilnimi števili. **Odprto, čaka na Simona:** ali števca brez povezanega oblaka skriti. To bi
+spremenilo odločitev z dne 2026-08-18, da števca ostaneta vidna in siva.
+
+### 80.91 [x] P1 — Sprememba teže v načrtu prihodnjega treninga po osvežitvi izgine brez besede — merged 2026-09-30
+
+**Merged 2026-09-30 into: 80.52 [ ] P1 — Spremembe načrta nezačetega treninga izginejo, ko trening odpreš znova s kartice**
+
+**Scenarij in koraki:** odpri podlogo prihodnjega treninga (»Ponedeljkova moc«, 2026-10-05, 09:00 -
+10:00, stranka Jane Doe, rutina »Zgornji del A«). Tapni ⋮ »Možnosti treninga« → »Uredi načrt«. Pri
+vaji Barbell Bench Press popravi težo z 62.5 na 90 in tapni »Končano z urejanjem načrta«. Nato osveži
+stran in trening odpri znova s kartice.
+
+**Opaženo:** takoj po zaprtju urejevalnika podloga pravi »Barbell Bench Press · 5 · 90 kg«. Po
+osvežitvi pravi »5 · 62.5 kg«. Nobenega opozorila ni bilo, ne pri zapiranju urejevalnika ne po
+osvežitvi. V shrambi ni nikjer zapisa s to težo — ne med `sessions`, ne med `planUpdates`.
+
+**Težava in vpliv:** trener za mizo pripravi obremenitve za naslednji teden. Ko naslednjič odpre
+telefon, so nazaj stare številke, in tega ne izve: podloga po urejanju kaže novo težo, torej ni
+razloga za dvom. Delo, ki ga je opravil, je izgubljeno tiho.
+
+**Predlog:** »Končano z urejanjem načrta« naj spremembo zapiše, in dokler ni zapisana, naj podloga ne
+kaže nove številke — opaženo na različici `8b2ce80`.
+
+**Presoja 2026-09-30 (Claude):** isti vzrok kot §80.52. Načrt treninga, ki se še ni začel, živi samo
+v predpomnilniku odprte podloge (`librept_active_session`), ne pri treningu; ob novi gradnji podloge
+ali osvežitvi se vrne načrt iz rutine. Popravek, ki drži, shrani načrt pri treningu samem — to je
+sprememba sheme, o kateri odloča Simon (§80.52). Do takrat ostane odprto.
+
+### 92.6 [x] Leaving a session by the peek throws away what was logged in it — merged 2026-09-30
+
+**Merged 2026-09-30 into: 95.1 [ ] §92.6 is this section's subordinate case, not its own task**
+
+**Found 2026-09-30, the same way.** The walkthrough logged Too Easy on the first participant, then
+pulled aside to the previous session and came back with Today. The signal was gone — the control
+no longer showed it set, so a trainer would tap it again and a second tap CLEARS it.
+
+The guard that exists (`canOpen` in `controllers/planPeekController.js`) refuses to leave a session
+that has been STARTED, to protect a running session's logs. A session that has not been started but
+already carries feedback is not protected at all, although the trainer typed into it just as much.
+On the gym floor the plan is open and being marked up long before anyone taps Start.
+
+Two ways out, and the choice is Simon's: widen the guard to any session carrying logs or feedback,
+or keep what was logged when the clipboard is replaced. The second is the better product and the
+larger change.
+
+For now the walkthrough works around it by placing the gesture BEFORE anything is logged, which is
+also the better story — you check what they did last time, then you work — but it is a workaround
+and this is why.
+
+## 93. [x] The exploratory-test skill is Claude's alone, and the agent that needed it could not see it — archived 2026-09-30
+
+**Archived 2026-09-30 in the TODO clean-up: Both subsections shipped: b29777e ('move the exploratory-test skill where every agent reads it'), 02d0422 ('§93 shipped; what the move turned up is in the archive'). .agents/skills/exploratory-test/ exists and is tracked; .claude/skills/exploratory-test/SKILL.md is a symlink to it; explore.py:66 writes .private/AGENT_SYNC/exploratory-browser.md. TODO_ARCHIVE.md already holds 93.1/93.2 reasoning; the parent's body (the 3.5-hour browser story) moves with them.**
+
+Ruled by Simon 2026-09-30: **the skill must be shared by every agent.** It lives in
+`.claude/skills/exploratory-test/`, and `.claude/` is in `.gitignore` — so Codex and Gemini cannot
+see it, cannot run it, and cannot read what it already knows.
+
+**What that cost, today, measured.** A headless Chromium ran from 09:16 to 12:47, holding about 95 %
+of one core for three and a half hours, and blocked every `build check` on this machine until
+`ed041fd` changed how the gate measures load. It was not this skill's browser: port 9223, profile
+`/tmp/librept-trainer-cdp-profile`, launched by a Codex session started 2026-09-29 23:45 (its own
+rollout log names both). Its parent was `systemd --user`, so nothing owned it and nothing would ever
+have stopped it. The skill it could not see already solves exactly this: `explore.py` touches a
+heartbeat on every command and a detached watchdog closes the browser after 15 minutes without one,
+with a comment recording the same failure happening once before.
+
+**Two separate defects, then.** The skill is in the wrong place, and a browser held by a living
+session is recorded nowhere, so nobody arriving later can tell a browser that still has a keeper
+from one that does not.
+
+### 93.1 [x] Move the skill where every agent reads — done 2026-09-30
+
+Reasoning in [TODO_ARCHIVE.md](TODO_ARCHIVE.md).
+
+### 93.2 [x] A live browser says who holds it, and until when — done 2026-09-30
+
+Reasoning in [TODO_ARCHIVE.md](TODO_ARCHIVE.md).
+
 ### 80.137 [x] P2 — Stranka z angleškim »Jezik obrazca« dobi slovensko vabilo in slovensko stran za odgovor — popravljeno 2026-09-30
 
 **Stanje 2026-09-30 (librept-02):** vabilo na trening je v jeziku obrazca stranke: e-pošta, SMS in
