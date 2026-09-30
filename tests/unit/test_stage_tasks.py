@@ -83,3 +83,46 @@ def test_the_demo_share_holds_where_it_was_measured():
     on (2026-09-01: three of eight landed the two tasks within 20s of each other) so a change to the
     formula that quietly moves the measured split has to say so here."""
     assert _split_at(8) == (3, 5)
+
+
+def _workers_each_task_asks_for(monkeypatch, budget, call):
+    """{log name: the `-n` each pytest run was given}, for `call` run at `budget`, with no browser
+    started: `run_logged` records the command instead of running it."""
+    asked = {}
+
+    def record(cmd, log_name, *args, **kwargs):
+        asked[log_name] = cmd[cmd.index("-n") + 1]
+        return build.testreport.RunResult(0, "", log_name)
+
+    monkeypatch.setattr(build, "_playwright_worker_count", lambda: budget)
+    monkeypatch.setattr(build, "run_logged", record)
+    monkeypatch.setattr(build, "_read_schema_flags", lambda: [])
+    monkeypatch.setattr(build, "released_schema", lambda: 4)
+    call()
+    return asked
+
+
+def test_a_ci_job_running_one_task_takes_the_whole_budget(monkeypatch):
+    """deploy.yml runs e2e, demo and regression each on a runner of its own, calling the task with no
+    argument. Given the split share there, each four-core runner ran one browser where it had room
+    for two: e2e took 675s and demo 472s."""
+
+    def every_task_alone():
+        build.run_e2e_tests()
+        build.run_demo_tests()
+        build.run_regression_tests()
+
+    asked = _workers_each_task_asks_for(monkeypatch, 2, every_task_alone)
+
+    assert asked == {"e2e-parallel": "2", "demo-tests": "2", "regression": "2"}
+
+
+def test_stage_3_splits_the_budget_between_its_two_tasks(monkeypatch):
+    """Locally the two tasks run at once against one dev server, so there they share one budget."""
+    asked = _workers_each_task_asks_for(monkeypatch, 8, build.run_stage_3_e2e)
+
+    assert asked == {
+        "e2e-parallel": str(build.e2e_worker_count()),
+        "demo-tests": str(build.demo_worker_count()),
+    }
+    assert int(asked["e2e-parallel"]) + int(asked["demo-tests"]) == 8

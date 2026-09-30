@@ -1477,6 +1477,10 @@ DEMO_TEST_FILES = (
 # landed the two Stage 3 tasks within 20s of each other (demo 181s, e2e 162s). Kept as a ratio so the
 # measurement survives a machine with a different core count — the number it produces there is the
 # same decision, not a new one.
+#
+# Four of eight was tried on 2026-09-30 and gave nothing: at three, eight gate runs had the demo task
+# at 370-400s and e2e at 208-250s; at four, demo took 400s and e2e 323s. A fourth worker does not
+# shorten the demo task, so what sets its time is its longest tests, not its share.
 DEMO_WORKER_SHARE = 3 / 8
 
 
@@ -1515,11 +1519,18 @@ def e2e_worker_count():
     return max(1, _playwright_worker_count() - demo_worker_count())
 
 
-def run_demo_tests():
+# The split above holds only where the two tasks share a machine, which is `build check`'s Stage 3.
+# A CI job runs ONE of them on a runner of its own, so `.github/workflows/deploy.yml` calls each task
+# with no argument and the task takes the whole budget. Until 2026-09-30 both tasks took their split share
+# everywhere: CI's four-core runners have a budget of two, the split gave one and one, and each
+# runner used half of what it had (e2e 675s, demo 472s).
+def run_demo_tests(workers=None):
     """Runs the demo and guided-walkthrough suites (Stage 3, beside the e2e task).
 
+    `workers` is the task's share when it shares the machine; alone, it takes the whole budget.
     Same rules as the e2e task: no automatic re-run, no artifact capture, digest on failure.
     """
+    workers = workers or _playwright_worker_count()
     print("\n  Running Demo & Walkthrough Tests (parallel)...")
     run = run_logged(
         [
@@ -1527,7 +1538,7 @@ def run_demo_tests():
             "-m",
             "pytest",
             "-n",
-            str(demo_worker_count()),
+            str(workers),
             *DEMO_TEST_FILES,
             "-q",
             "--tb=long",
@@ -1590,8 +1601,11 @@ def run_medium_tests():
     sys.exit(returncode)
 
 
-def run_e2e_tests():
+def run_e2e_tests(workers=None):
     """Runs Playwright browser E2E tests in parallel (every test under tests/e2e/).
+
+    `workers` is the task's share when it shares the machine with the demo task; alone, it takes
+    the whole budget — see the comment above run_demo_tests.
 
     A failure fails the build outright — no automatic re-run. A prior version of this gate re-ran
     failing node ids serially and forgave them if that re-run passed, on the theory that pytest-xdist
@@ -1619,7 +1633,7 @@ def run_e2e_tests():
     """
     print("\n  Running E2E Browser Tests (parallel)...")
     venv_python = venv_python_path()
-    worker_count = e2e_worker_count()
+    worker_count = workers or _playwright_worker_count()
     run = run_logged(
         [
             venv_python,
@@ -1765,7 +1779,8 @@ def run_regression_tests():
             "-m",
             "pytest",
             "-n",
-            str(e2e_worker_count()),
+            # The whole budget: this stage runs alone, locally and in CI.
+            str(_playwright_worker_count()),
             "-q",
             "--tb=long",
             f"--read-schema={released_schema()}",
@@ -2268,8 +2283,8 @@ def run_stage_3_e2e():
     machine_busy_at_start = read_machine_busy_seconds()
     failures = _run_tasks_concurrently(
         {
-            "E2E Browser Tests": run_e2e_tests,
-            "Demo & Walkthrough Tests": run_demo_tests,
+            "E2E Browser Tests": lambda: run_e2e_tests(e2e_worker_count()),
+            "Demo & Walkthrough Tests": lambda: run_demo_tests(demo_worker_count()),
         }
     )
     stage_elapsed = time.monotonic() - stage_start
