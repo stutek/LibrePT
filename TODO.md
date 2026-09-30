@@ -7768,6 +7768,10 @@ dodajanje samo z imenom, ostali podatki pozneje. Paziti na privolitev po GDPR, k
 Prvo odprtje 2026-09-30: trener skupine 60+ (deset ljudi) je po treh vpisanih strankah ocenil »vsaj 4
 dotiki na osebo« in dodal, da med vadbo nima gumba »vsi opravili vajo«.
 
+Dan 10 (2026-09-30): enkratna delavnica za 20 članov tekaškega kluba. Trening zahteva vsaj eno
+stranko (»Izbrati moraš vsaj eno stranko.«); trener je vpisal eno izmišljeno »stranko« z imenom kluba.
+Števila udeležencev in postaj ni; ocena 0.
+
 ### 88.3 [ ] Nadomestni trener dobi načrt po WhatsAppu
 
 Dan 01: ko jo nadomesti kolegica, ji načrt pošlje kot sporočilo. **Vrednost:** redka (dopust,
@@ -7938,6 +7942,19 @@ sprememba urnika telovadnice nekajkrat na leto; brez tega trener serijo ali bri�
 termine, ki jih vabila pošljejo naprej. **Cena:** srednja: »izpusti večere od–do« in »spremeni od tega
 dne naprej« pri seriji. **Presoja: izplača se**, ko je §80.138 popravljena, ker gre za isti zapis serije;
 obseg (kaj se zgodi z vabili, ki so že poslana) čaka na Simona.
+
+### 88.16 [ ] Nesreča med vadbo nima zapisa, ki bi ostal
+
+Dan 10 (2026-09-30, `main` `d12646c`; zunanji trener v velikem fitnesu v Kranju, 5 strank): stranki
+med vadbo zdrsne in si poškoduje zapestje. Trener je zapisal, kaj se je zgodilo in kaj je naredil, v
+»Opombe« ob vaji z »Bolečina ali nelagodje v sklepu«. Ker je vajo nato odstranil iz načrta, opombe ni
+v zgodovini treninga; polje »Poškodbe in omejitve« je ostalo »Ni navedeno«; opomnika »pokliči jutri«
+ni. Na seznamu »Čakajoče na pregled« je signal bolečine med enajstimi »Prelahko« brez razlike in brez
+besedila opombe. **5 minut v aplikaciji proti 3 na papirju, ocena 1** (trenerjeva ocena).
+**Vrednost:** redko (predpostavka: nekajkrat na leto), a pomembno za trenerjevo odgovornost in za
+naslednji trening stranke; zdaj zapis izgine z vajo. **Cena:** majhna: signal bolečine naj se zapiše
+pri stranki, ne le pri vaji, in naj bo na seznamu za pregled viden kot drugačen. **Presoja: izplača
+se** za ta del; ločen obrazec za poročilo o nesreči čaka na Simona.
 
 ## 89. [~] Pregled 2026-09-28: isti podatek na več mestih
 
