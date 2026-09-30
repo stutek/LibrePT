@@ -141,6 +141,11 @@ can import, so a single `eval` can compare every `[data-i18n]` element on screen
 Slovenian dictionary and name the ones that differ — 847 keys, one mismatch, no reading. Reach for
 that shape whenever a finding would otherwise be "I noticed a few of these".
 
+**`inject` stays for the life of the tab.** It runs before the page's scripts on EVERY later
+`goto` and reload, not once. A clock shifted by two days on 2026-10-01 left the header saying
+»Brez povezave« on a machine that was online, which reads exactly like a defect. After a scenario
+that used `inject`, `stop` and `start` again before believing anything the app shows.
+
 **`errors` after every scenario.** A console error with nothing visible on screen is still a finding.
 
 ## Mode 2 — a trainer's whole day
