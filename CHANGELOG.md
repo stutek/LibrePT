@@ -61,6 +61,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 - **A time costs the same in the plan's estimate however it is written.** Four intervals of "2:30"
   were costed at nothing and four of "150" at ten minutes, so the fit meter said 2 or 12 minutes for
   the same plan. Times are now read by the rule the card writes them with, holds included.
+- **A time or a distance typed where the reps go is shown as typed.** A movement with its own name
+  has no measure to choose, so a trainer writing intervals types "40s" or "400m" there; the card
+  read "S4 × R40s". It now reads "S4 × 40s".
 - **Too Hard records the load, not three finished sets.** Signalling that an exercise was too heavy
   ticked off every planned set for it, so a set the client had just failed was written down as
   performed at the planned weight, and the client's history and the clipboard's *Last time* row

@@ -129,6 +129,17 @@ export function formatMetricValue(rawValue, metric) {
 // this wording: exerciseCard.js's collapsed card and the read-only plan sheet
 // both build the same phrase for the same item and must never drift apart. Returns a plain string —
 // callers escape it for their own markup context (exerciseCard.js innerHTML; planSheet.js textContent).
+// A time or a distance typed where the reps go: "40s", "2:30", "400m", "2 km", "5 min". A movement
+// with its own name has no measure to choose, so a trainer writing intervals types them there; an
+// "R" in front made "R40s", which reads as nothing. Such a value is written as typed.
+const CARRIES_ITS_OWN_UNIT = /^(\d+(?:[.,]\d+)?\s*(?:s|sec|min|m|km)|\d+:\d{2})$/i;
+
+function primaryTarget(repsTarget, metric) {
+  if (metric !== "reps") return formatMetricValue(repsTarget, metric);
+  const typed = String(repsTarget ?? "").trim();
+  return CARRIES_ITS_OWN_UNIT.test(typed) ? typed : `R${formatReps(repsTarget)}`;
+}
+
 export function compactTargetString({
   setsTarget,
   repsTarget,
@@ -141,8 +152,7 @@ export function compactTargetString({
     usesLoad(modality) && hasLoad(weightTarget, loadUnit)
       ? ` × ${formatLoad(weightTarget, loadUnit)}`
       : "";
-  const primaryPart =
-    metric === "reps" ? `R${formatReps(repsTarget)}` : formatMetricValue(repsTarget, metric);
+  const primaryPart = primaryTarget(repsTarget, metric);
   return `S${setsTarget} × ${primaryPart}${compactLoad}`;
 }
 

@@ -106,6 +106,21 @@ test("compactTargetString: the one wording the live card and the plan sheet shar
   );
 });
 
+test("a time or a distance typed into the reps box is not written as reps", () => {
+  // A movement with its own name has no measure to choose, so a trainer writing intervals types
+  // "40s" or "400m" where the reps go. The card said "S4 × R40s", which a client reads as nothing.
+  const target = (repsTarget) =>
+    m.compactTargetString({ setsTarget: 4, repsTarget, metric: "reps", modality: "strength" });
+
+  assert.equal(target("40s"), "S4 × 40s");
+  assert.equal(target("2:30"), "S4 × 2:30");
+  assert.equal(target("400m"), "S4 × 400m");
+  assert.equal(target("2 km"), "S4 × 2 km");
+  assert.equal(target("5 min"), "S4 × 5 min");
+  assert.equal(target("8-12"), "S4 × R8-12", "a rep range is still reps");
+  assert.equal(target("max"), "S4 × RMax");
+});
+
 test("only a duration can be timed on the clipboard", () => {
   assert.equal(m.isTimeBasedMetric("time"), true);
   assert.equal(m.isTimeBasedMetric("hold"), true);
