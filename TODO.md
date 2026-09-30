@@ -7356,6 +7356,19 @@ postavljena za napravo.
 teža in cilj ponastavita na privzeto vrednost nove vaje ali naj vrstica na številke opozori. Opaženo na
 `main` `d12646c`, sl, 390 × 844; najprej opazil trener dneva 10.
 
+### 80.149 [ ] P3 — Brez povezave glava slovenske aplikacije napiše »Offline«
+
+**Scenarij in koraki:** aplikacija je naložena, strežnik se ustavi (klet brez signala), stran se ponovno
+naloži.
+
+**Opaženo:** aplikacija se naloži iz predpomnilnika; v glavi je viden napis »Offline«
+(`span.sync-offline`). V slovenskem slovarju tega napisa ni. Delo brez povezave sicer deluje: trening
+»Klet« za jutri je nastal in je po ponovnem nalaganju še tam.
+
+**Težava in vpliv:** edini znak, da telefon nima povezave, je v jeziku, ki ga trener morda ne bere.
+
+**Predlog:** napis iz slovarja, na primer »Brez povezave«. Opaženo na `main` `d12646c`, sl, 390 × 844.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
