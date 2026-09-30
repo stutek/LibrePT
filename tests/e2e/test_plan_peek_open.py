@@ -81,6 +81,34 @@ def test_an_upward_stroke_opens_the_previous_plan_and_today_leads_back(
     assert not today.is_visible()
 
 
+def test_the_mirrored_stroke_walks_forward_again_through_both_kinds_of_session(
+    page, local_server
+):
+    """Walking back through a client's sessions must not be one-way. Back from today opens a
+    finished record; forward from there opens the series' stored evening, a scheduled row; forward
+    from that opens the next scheduled session. Each forward step lands on the plan the layer under
+    the deck named."""
+    _open(page, local_server, "Group Strength & Conditioning")
+    _pull_then_up(page, LEFT_START, 200)
+    seen = [_where(page)]
+
+    for _ in range(2):
+        next_exercise = _text(page, "#plan-peek-under-future .plan-sheet-name")
+        _pull_then_up(page, RIGHT_START, -200)
+        session_id, client_id = _where(page)
+        assert session_id not in [s for s, _ in seen], (
+            f"the forward stroke did not open another session: {seen}"
+        )
+        assert client_id == seen[0][1], "the next plan opened for another client"
+        deck_names = page.locator(
+            "#active-exercise-scroll-deck .exercise-deck-card"
+        ).evaluate_all("els => els.map((el) => el.textContent)")
+        assert any(next_exercise in name for name in deck_names), (
+            f"the deck does not show the next plan's {next_exercise!r}"
+        )
+        seen.append((session_id, client_id))
+
+
 def test_with_no_next_plan_the_gesture_opens_the_clients_planning_form(
     page, local_server
 ):
