@@ -9,10 +9,11 @@ import time
 from datetime import datetime
 
 from . import gate_lock
-from .quiet_machine import wait_for_quiet_machine
+from .quiet_machine import foreign_cores, wait_for_room
 from . import (
     PIPELINE_STAGES,
     _load_average,
+    _playwright_worker_count,
     check_environment,
     format_elapsed,
     print_pressure_delta,
@@ -22,6 +23,7 @@ from . import (
     run_lint,
     run_tests,
     run_build,
+    share_the_machine,
 )
 
 
@@ -231,16 +233,25 @@ if __name__ == "__main__":
     # Before the environment check, not after: the header is what tells anyone watching that the run
     # started and when, and `check_environment` can itself spend a minute installing requirements.
     print_run_header(label)
-    # Only on a machine that is not already busy (build/quiet_machine.py). Here and
-    # nowhere later: between stages the load average is this pipeline's own exhaust, so it is only
+    # Beside what else is running, on the cores it leaves free (build/quiet_machine.py). Measured here
+    # and nowhere later: between stages the load average is this pipeline's own exhaust, so it is only
     # before the first stage that the reading says anything about anyone else.
-    if not wait_for_quiet_machine(
+    cores = os.cpu_count() or 1
+    started, load = wait_for_room(
         read_load=lambda: (_load_average() or (None,))[0],
-        cores=os.cpu_count() or 1,
+        cores=cores,
         sleep=time.sleep,
         announce=print,
-    ):
+    )
+    if not started:
         sys.exit(1)
+    taken = foreign_cores(load, cores)
+    if taken:
+        share_the_machine(taken)
+        print(
+            f"  ⇄ Sharing the machine: {taken} of {cores} cores are in use by other work, so the "
+            f"browser tests run {_playwright_worker_count()} workers instead of {cores // 2}."
+        )
     pressure_at_start = read_host_pressure()
     check_environment()
 

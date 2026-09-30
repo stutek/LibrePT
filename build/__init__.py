@@ -21,7 +21,7 @@ from collections import namedtuple
 from datetime import datetime
 
 from build.frontend_audit import audit_html_sinks, compare_csp
-from build.quiet_machine import QUIET_LOAD_PER_CORE
+from build.quiet_machine import QUIET_LOAD_PER_CORE, SHARED_LOAD_PER_CORE
 from build.testreport import REPORT_DIR, failed_test_ids, print_digest, run_logged
 
 from deploy.local_http_server import DEV_SERVER_BASE_PATH, DEV_SERVER_PORT
@@ -55,10 +55,9 @@ RUN_PHRASES = {
 RUN_HISTORY_PATH = os.path.join(REPORT_DIR, "last-run.json")
 
 # A 1-minute load average per core, above which the box is doing more than it has cores for and the
-# documented stage budgets stop applying. The lower band comes from quiet_machine.py, which is what
-# actually decides whether a run may start — the header must not call a load quiet that the gate is
-# about to refuse (both words were printed about the same 2.52 on 2026-09-19).
-LOAD_BUSY_PER_CORE = 0.7
+# documented stage budgets stop applying. The lower bands come from quiet_machine.py, which is what
+# actually decides whether a run may start and on how many cores — the header must not call a load
+# quiet that the gate is about to refuse (both words were printed about the same 2.52 on 2026-09-19).
 LOAD_OVERSUBSCRIBED_PER_CORE = 1.0
 
 
@@ -320,10 +319,12 @@ def _load_verdict(load, cores):
     per_core = load[0] / max(1, cores)
     if per_core >= LOAD_OVERSUBSCRIBED_PER_CORE:
         return f"{per_core:.2f}/core, OVERSUBSCRIBED — expect stages past their budgets"
-    if per_core >= LOAD_BUSY_PER_CORE:
-        return f"{per_core:.2f}/core, busy"
-    if per_core > QUIET_LOAD_PER_CORE:
+    if per_core > SHARED_LOAD_PER_CORE:
         return f"{per_core:.2f}/core, too busy to start — the gate will wait"
+    if per_core > QUIET_LOAD_PER_CORE:
+        return (
+            f"{per_core:.2f}/core, shared — the browser tests take only the free cores"
+        )
     return f"{per_core:.2f}/core, quiet"
 
 
@@ -1421,14 +1422,18 @@ def _playwright_worker_count():
     `os.cpu_count()` can return None (containers with no /proc affinity info); fall back to a
     serial run rather than crashing the gate over an unknowable core count.
 
-    DELIBERATELY NOT load-aware. Scaling this down by `os.getloadavg()` was tried on 2026-08-04 and
-    reverted the same day: the stages run back-to-back, so Stage 3 samples the 1-minute load average
-    seconds after Stage 2's own workers stopped — it reads the pipeline's OWN exhaust (measured: 4.2
-    on a 16-core box, with nothing else running) and throttles itself for load that is already gone.
-    The e2e stage went 171-191s at the static count to 359s at the throttled one, and still failed
-    the same way, so the throttle cost three minutes and fixed nothing. If ambient load is genuinely
-    the problem, the answer is to not run the gate while hammering the machine — not to let the gate
-    misread its own footprint as a reason to go slower.
+    NOT load-aware between stages. Scaling this down by `os.getloadavg()` at each stage was tried on
+    2026-08-04 and reverted the same day: the stages run back-to-back, so Stage 3 samples the 1-minute
+    load average seconds after Stage 2's own workers stopped — it reads the pipeline's OWN exhaust
+    (measured: 4.2 on a 16-core box, with nothing else running) and throttles itself for load that is
+    already gone. The e2e stage went 171-191s at the static count to 359s at the throttled one, and
+    still failed the same way, so the throttle cost three minutes and fixed nothing.
+
+    What it does read is `_FOREIGN_CORES`: the load measured ONCE, before the first stage, when no
+    worker of this run exists (build/quiet_machine.py). Ruled 2026-09-30 that the machine runs an
+    exploring browser and the pipeline at once, so the budget is half the FREE cores — the same one
+    Chromium per two cores, counted on what the other work leaves. Only `build check` sets it; a CI
+    job runs one task on a runner of its own and keeps the whole budget.
 
     RAISING IT IS NOT WORTH IT EITHER — measured 2026-08-08 on the 16-core box, quiet (1-min load
     0.55), so this is not another starved-run artifact. Half-cores is not leaving throughput on the
@@ -1450,7 +1455,19 @@ def _playwright_worker_count():
     that briefly put that figure at 2.84s).
     """
     cpu_count = os.cpu_count() or 2
-    return max(1, cpu_count // 2)
+    free = max(1, cpu_count - _FOREIGN_CORES)
+    return max(1, min(cpu_count // 2, free // 2))
+
+
+# Cores another program was using when `build check` started, set once by `share_the_machine`
+# before the first stage. Zero everywhere else, which is every CI job and every task run on its own.
+_FOREIGN_CORES = 0
+
+
+def share_the_machine(cores_in_use):
+    """Take `cores_in_use` off the browser budget for the rest of this run."""
+    global _FOREIGN_CORES
+    _FOREIGN_CORES = max(0, int(cores_in_use))
 
 
 # The demo suite, split out of the e2e task and run beside it (Stage 3).
