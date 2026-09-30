@@ -83,6 +83,22 @@ def test_a_kept_note_lands_on_the_person_and_not_only_on_the_session(
     assert before.strip() in notes
 
 
+def test_a_kept_note_is_written_in_the_trainers_language(page, local_server):
+    # The client's notes read "Too Hard - Reduce Load" on a Slovenian screen: the stored tag is an
+    # English identifier, and it went into the notes as it was stored. The notes are what the
+    # trainer reads before the next session, so they get the words the review screen shows. The
+    # suite runs in English, where those words ("Joint pain or discomfort") still differ from the
+    # identifier ("Joint Pain / Discomfort").
+    _open_session_with_one_exercise(page, local_server)
+
+    _submit_note(page, "left knee clicks", keep=True)
+
+    last_line = _client_notes(page).splitlines()[-1]
+    assert last_line.endswith(
+        "Barbell Row: Joint pain or discomfort - left knee clicks"
+    ), last_line
+
+
 def test_the_default_leaves_the_record_alone(page, local_server):
     """Most signals are about today's load. A record that collects everything is one nobody reads,
     so keeping is a decision the trainer makes per note."""

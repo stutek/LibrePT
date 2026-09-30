@@ -17,7 +17,7 @@
 // }
 
 import { localDateString } from "../../data/calendarDay.js";
-import { FEEDBACK_TAGS } from "../../domain/feedbackTags.js";
+import { FEEDBACK_TAGS, feedbackTagText } from "../../domain/feedbackTags.js";
 import { notesWithGymNote } from "../../domain/gymNotes.js";
 import { $id, closeModal, openModal, renderMarkupOnce } from "./dom.js";
 import { clientDisplayName } from "./utils.js";
@@ -175,10 +175,13 @@ export function setupFeedbackForms() {
       // is being shaped. Deliberately NOT setting `hasInjury`: which tags mean "injury" would be a
       // guess made from a string, and the trainer's own record is where that call belongs.
       if (client && $id("feedback-keep-on-record").checked) {
+        // In the trainer's language, as the Pending Review screen says it. The notes are text the
+        // trainer reads before the next session, and the stored tag is an English identifier.
+        const said = feedbackTagText(tagVal, deps.t) + (customNote ? ` - ${customNote}` : "");
         client.notes = notesWithGymNote(client.notes, {
           on: localDateString(),
           exerciseName: exName,
-          tag: newFeedback.tag,
+          tag: said,
         });
       }
 

@@ -42,6 +42,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Fixed
 
+- **A note kept on a client's record is written in the trainer's language.** The line read
+  "Too Hard - Reduce Load" on a Slovenian screen, the tag's stored English identifier; it now reads
+  as the Pending Review screen says it.
 - **The Sync & Backup dialog says what the number on its button counts.** The button showed "7?"
   and nothing on screen said what it was; the dialog now states in words how many changes on this
   device are not yet in Google Drive, and that the cloud side is unknown while Drive is not
