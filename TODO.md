@@ -7130,6 +7130,24 @@ Maja Novak brez rutine → podloga → ⋮ → »Uredi načrt«. `main` `e8e90d8
 - Dobro: fokus je v imenu nove vaje, ocena trajanja opozori »49 / 60 min · na tesnem«, plank je
   časovna vaja s poljem »DRŽA«, vrstni red na podlogi je enak vrstnemu redu v urejevalniku.
 
+### 80.135 [ ] P2 — Trening, ki teče, se brez vprašanja prestavi na drug dan; tam ostane »Zaključeno«
+
+**Scenarij in koraki:** trening »Jutranja« danes (2026-09-30) za Emily Stone, rutina »Tri vaje«.
+»Začni trening«. Na seznamu svinčnik »Uredi« na kartici, čip »pet. 2.«, »Shrani«. Nato trening
+zaključiti in odpreti seznam za 2026-10-02 ter stran stranke.
+
+**Opaženo:** shranjevanje ne vpraša ničesar. Na petku 2026-10-02 stoji »Aktiven trening 01h 06m«,
+spodnja vrstica šteje naprej (»1:06:51«), na sredi treninga ni več. Po zaključku ima petek »Zaključeno
+00:01«, zgodovina stranke pa »2026-09-30«. Trenerka dneva 08 je trening prestavila, ker je mislila, da
+prestavlja termin, ki se še ni zgodil: »Aplikacija ni vprašala, ali premik velja za začet trening.«
+
+**Težava in vpliv:** petkov termin je zaseden s treningom, ki je bil v sredo; urnik za petek laže, v
+sredo pa ni zapisa, da je trening bil. Če je trener hotel prestaviti naslednji termin, ta ostane
+nedotaknjen.
+
+**Predlog:** pri treningu, ki teče ali je končan, naj »Uredi« datum ne ponudi ali naj vpraša, ali gre
+za drug termin. Opaženo na `main` `e8e90d8`, sl, 390 × 844; najprej opazila trenerka dneva 08.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Asked 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's
