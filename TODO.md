@@ -7804,3 +7804,51 @@ place a trainer can learn it.
   keeps the file's rule that the expectation is a behavioural claim.
 - To check before writing: the tour's session must not be started, or `canOpen` refuses to leave it
   and the switch steps cannot pass.
+
+## 93. [ ] The exploratory-test skill is Claude's alone, and the agent that needed it could not see it
+
+Ruled by Simon 2026-09-30: **the skill must be shared by every agent.** It lives in
+`.claude/skills/exploratory-test/`, and `.claude/` is in `.gitignore` — so Codex and Gemini cannot
+see it, cannot run it, and cannot read what it already knows.
+
+**What that cost, today, measured.** A headless Chromium ran from 09:16 to 12:47, holding about 95 %
+of one core for three and a half hours, and blocked every `build check` on this machine until
+`ed041fd` changed how the gate measures load. It was not this skill's browser: port 9223, profile
+`/tmp/librept-trainer-cdp-profile`, launched by a Codex session started 2026-09-29 23:45 (its own
+rollout log names both). Its parent was `systemd --user`, so nothing owned it and nothing would ever
+have stopped it. The skill it could not see already solves exactly this: `explore.py` touches a
+heartbeat on every command and a detached watchdog closes the browser after 15 minutes without one,
+with a comment recording the same failure happening once before.
+
+**Two separate defects, then.** The skill is in the wrong place, and a browser held by a living
+session is recorded nowhere, so nobody arriving later can tell a browser that still has a keeper
+from one that does not.
+
+### 93.1 [ ] Move the skill where every agent reads
+
+- `SKILL.md`, `explore.py`, `form-task-prompt.md` and `persona-day-prompt.md` move to
+  `.agents/skills/exploratory-test/`, tracked by git. Other projects of Simon's already use
+  `.agents/skills/` for this, so the location is the convention rather than a new idea. The depth is
+  the same, so the relative links inside `SKILL.md` still resolve.
+- `.claude/skills/exploratory-test/SKILL.md` becomes a pointer to the shared file, so Claude Code
+  still lists the skill. A pointer and not a copy: the description is the trigger, and two copies of
+  it would drift.
+- The one hard path inside `SKILL.md` (`S=.claude/skills/exploratory-test/explore.py`, line 68)
+  becomes the shared one.
+- `AGENT_RULES.md` names `.agents/skills/` as the home of skills every agent must read before doing
+  the work they cover — this is what makes the move worth anything to Codex.
+- `.gitignore` takes `.agents/skills/exploratory-test/.session/` and its `__pycache__`: the browser
+  profile is runtime state, wiped at every start.
+- `.agents/skills/INDEX.md`, because every knowledge directory has one.
+
+### 93.2 [ ] A live browser says who holds it, and until when
+
+`explore.py` writes `.private/AGENT_SYNC/exploratory-browser.md` — port, browser pid, watchdog pid,
+profile path and the clock time the idle timeout will close it — refreshed on the same call that
+touches the heartbeat, and deleted by `stop` and by the watchdog. Refreshed on every command rather
+than only at `start`, so a browser already running when this ships gets a note on its next command
+instead of needing a restart.
+
+Then a session arriving later can act instead of guessing: if the note is absent, or its watchdog pid
+is gone while the browser is alive, the browser has no keeper and may be closed. Today that judgement
+needed reading `/proc`, and the answer still had to go to Simon.
