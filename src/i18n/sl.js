@@ -674,9 +674,9 @@ export const sl = {
   walkthrough_exit: "Končaj demo",
   walkthrough_collapse: "Pospravi kartico demota",
   walkthrough_expand: "Nazaj na kartico demota",
-  walkthrough_off_track_title: "Ta zaslon ni del demota",
+  walkthrough_off_track_title: "Ogled čaka",
   walkthrough_off_track:
-    "Demo se odvija drugje v aplikaciji. Pritisni Nazaj v demo ali Ustavi demo.",
+    "Zadnje dejanje ni bilo korak ogleda. Z »Nazaj v demo« nadaljuješ tam, kjer si bil, s »Končaj demo« ga končaš.",
   walkthrough_return: "Nazaj v demo",
   walkthrough_leave: "Ustavi demo",
   walkthrough_finished: "To je celoten krog — en trening, ena podloga, štirje dotiki.",

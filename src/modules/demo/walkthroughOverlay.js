@@ -230,8 +230,8 @@ export function startGuidedWalkthrough({
 } = {}) {
   const el = buildOverlay(doc, t);
   const hand = mountDemoHand(doc);
-  // The guide always has a card surface, whether or not a story is being told through it: the "you
-  // have wandered off" message is a card like every other, and a guide that showed it as a
+  // The guide always has a card surface, whether or not a story is being told through it: the "the
+  // tour is waiting" message is a card like every other, and a guide that showed it as a
   // bare line of text would change what the demo LOOKS like at the one moment the viewer is already
   // unsure where they are. The long story mounts its own and hands it in, because it also narrates
   // through it; anything else gets one from here and it is torn down with the guide.
@@ -407,7 +407,16 @@ export function startGuidedWalkthrough({
     const nothingToAvoid = Boolean(target) && el.panel.contains(target);
     el.overlay.classList.toggle("is-centred", nothingToAvoid);
     if (nothingToAvoid) el.overlay.classList.remove("is-top");
-    if (!target) return;
+    // Off the path, and with no control to avoid, the card docks low — the same rule the ring follows
+    // (positionSpotlight): nobody is being pointed anywhere, so there is nothing to get out of the way
+    // of, and the bottom is the end that does not sit over the screen's own controls. `is-top` used to
+    // be left standing from the step before: a step whose control sits low docks the card at the top,
+    // and it stayed there while the guide waited — measured at the client directory, over both
+    // buttons that screen offers, so a trainer could not carry on with their own work.
+    if (!target || offTrack) {
+      el.overlay.classList.remove("is-top");
+      return;
+    }
     // A control that lives ON the panel — the story card's Continue, the handover link — cannot be
     // got out of the way of: moving the panel takes the target with it, so the answer flips every
     // time it is asked. It did, four times a second, and the card visibly bounced between the top
@@ -1169,8 +1178,8 @@ export function startGuidedWalkthrough({
       offTrackTicks = 0;
       strayTap = false;
       interrupted = false;
-      // The step's own card comes back with the step: the guide's "you have wandered off" card was
-      // standing in its place, and the app is now where the step happens again.
+      // The step's own card comes back with the step: the guide's waiting card was standing in its
+      // place, and the app is now where the step happens again.
       cards.showStep(currentWalkthroughStep(tour, state));
     }
     render();
@@ -1234,7 +1243,7 @@ export function startGuidedWalkthrough({
    * Until then the guide only noticed the trainer leaving when the step's control vanished from the
    * screen. The ☰ menu drops down while that control is still there, so the ring stayed lit over a
    * menu nobody had been asked to open. Now a tap on any control that is not the step's own, and not
-   * on the guide's panel, swaps the card for "you have wandered off" with its way back.
+   * on the guide's panel, swaps the card for the guide's waiting one, with its way back.
    *
    * Judged on the next poll rather than here: a tap beside the resolved control can still complete
    * the step, and that is a step done, not a trainer lost. Only a person's tap counts — the guide's
@@ -1274,8 +1283,6 @@ export function startGuidedWalkthrough({
       : stepOutcomeNow(step, doc).ok;
     if (!el.problem.hidden && cleared) el.problem.hidden = true;
     const target = resolveTarget(doc, step);
-    positionSpotlight(target);
-    keepPanelClearOf(target);
     watchTarget(target);
 
     const done = stepOutcomeNow(step, doc).ok;
@@ -1287,6 +1294,12 @@ export function startGuidedWalkthrough({
     offTrackTicks = wandered ? offTrackTicks + 1 : 0;
     judgeStrayTap(done);
     noticeWandering(step);
+    // Placed AFTER the judgement, not before it: both the ring and the card read `offTrack`, and
+    // computed first they described the tick before. The card spent a whole poll docked wherever the
+    // step had put it — at the top, over the screen's own controls — while already saying the guide
+    // was waiting.
+    positionSpotlight(target);
+    keepPanelClearOf(target);
     if (!done) return;
 
     state = completeWalkthroughStep(state, step.id);

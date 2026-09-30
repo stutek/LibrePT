@@ -709,9 +709,9 @@ export const de = {
   walkthrough_collapse: "Demokarte wegklappen",
   walkthrough_expand: "Zurück zur Demokarte",
   // Shown when the trainer has taken the app somewhere the current step cannot happen.
-  walkthrough_off_track_title: "Du bist woanders in der App",
+  walkthrough_off_track_title: "Die Tour wartet",
   walkthrough_off_track:
-    "Du hast die Stelle der Demo in der App verlassen. Kehr zurück oder hör hier auf.",
+    "Das Letzte, was du getan hast, war nicht dieser Schritt. Zurück zur Demo macht dort weiter, wo du warst; Demo beenden hört auf.",
   walkthrough_return: "Zurück zur Demo",
   walkthrough_leave: "Demo beenden",
   walkthrough_finished: "Das ist der ganze Ablauf — ein Training, ein Klemmbrett, vier Tipps.",

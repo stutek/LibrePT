@@ -201,7 +201,13 @@ export class PaperNarratorCard extends DemoNarratorCard {
   static kind = "paper";
 }
 
-/** The guide saying the trainer has wandered off the demo's place in the app.
+/** The guide saying it is waiting, because the step cannot happen as things stand.
+ *
+ * TWO causes, one card: the trainer has gone to another screen, or they did something here that the
+ * step did not ask for. Its words say neither — they say the tour is waiting and what the two buttons
+ * on it do. They used to say the screen was not part of the demo, which is false for the second cause
+ * and was met exactly there: cancelling a form left the trainer on the step's own screen, being told
+ * they were somewhere else.
  *
  * Its words are the GUIDE's, not the script's — the step's own instruction names a control that is
  * not on screen, so repeating it would be a lie. It is a card like every other because it is the

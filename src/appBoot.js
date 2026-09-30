@@ -383,8 +383,8 @@ export async function bootDemoStory({
   return startGuidedWalkthrough({
     tour: { id: DEMO_STORY.id, steps },
     t,
-    // The guide narrates through the surface the story already owns, so the card that says "you
-    // have wandered off" is the same card as every other one the viewer has been reading.
+    // The guide narrates through the surface the story already owns, so the card that says the tour
+    // is waiting is the same card as every other one the viewer has been reading.
     narrator,
     navigate: goHome && ((path) => goHome(path)),
     startAtStepId: shareStep,

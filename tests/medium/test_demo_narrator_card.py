@@ -238,7 +238,9 @@ def test_the_guide_speaks_through_the_same_card_as_the_story(page, local_server)
     card = page.locator("#demo-narrator-card")
     expect(card).to_be_visible()
     expect(card).to_have_class(re.compile(r"demo-narrator-card--off-track"))
-    expect(card).to_contain_text("wandered off")
+    # Its words say the guide is waiting, and NOT that the screen is the wrong one: the card is shown
+    # for an interrupted step too, and then the trainer is exactly where the step belongs.
+    expect(card).to_contain_text("The tour is waiting")
     (
         expect(card).not_to_contain_text("Running the session"),
         "the story's words are not the guide's",

@@ -711,8 +711,9 @@ export const en = {
   walkthrough_expand: "Back to the demo card",
   // Shown when the trainer has taken the app somewhere the current step cannot happen. It says what
   // is true — they went exploring — rather than blaming them, and gives the two ways on.
-  walkthrough_off_track_title: "You have wandered off",
-  walkthrough_off_track: "You have left the demo's place in the app. Bring it back, or stop here.",
+  walkthrough_off_track_title: "The tour is waiting",
+  walkthrough_off_track:
+    "The last thing you did was not this step. Back to the demo carries on where you were; End the demo stops it.",
   walkthrough_return: "Back to the demo",
   walkthrough_leave: "Stop the demo",
   walkthrough_finished: "That's the whole loop — one session, one clipboard, four taps.",
