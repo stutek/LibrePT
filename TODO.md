@@ -6248,6 +6248,10 @@ rutine na zaslonu »Rutine« skrajša seznam vaj z »+2 more«, opisi vzorčnih 
 (»Strength-focused upper body session prioritizing compound presses and rows.«). Prvo je besedilo
 vmesnika in sodi v isti popravek; drugo je vzorčni podatek.
 
+Prvo odprtje v nemščini 2026-09-30 (`main` `e2daf5e`, `?lang=de`): isti filtri so angleški tudi tam, in
+na istem zaslonu stojita »Alle« (vir) in »All« (mišica, oprema); oznake na karticah mešajo »AUSDAUER«
+in »BEWEGLICHKEIT« s »CONDITIONING«, »AGILITY«, »HORIZONTAL PUSH«.
+
 ### 80.55 [x] P3 — Kartica treninga pravi samo »Nedoločen«, trener pa to bere kot stanje — popravljeno 2026-09-29
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8055-x-p3--kartica-treninga-pravi-samo-nedoločen-trener-pa-to-bere-kot-stanje--popravljeno-2026-09-29).
@@ -7315,6 +7319,28 @@ da tisto ni bil korak. Okno potem imenuje gumb z napisom, ki ga ne najde.
 
 **Predlog:** vpis v polja obrazca v tem koraku naj ogleda ne ustavi; besedilo okna naj imenuje
 »Ustavi demo«; korak 1 brez »temni«. Opaženo na `main` `e2daf5e`, sl, 390 × 844.
+
+### 80.144 [ ] P3 — »S3 × R10« je angleška kratica v vseh jezikih; nemški namig imenuje gumb »Fertig«, ki ga ni
+
+**Scenarij in koraki:** trening z vajami na podlogi in v urejevalniku, v slovenščini in nemščini.
+
+**Opaženo:**
+- Vrstica vaje se glasi »S3 × R10 × 12 kg« (in »S3 × 0:10 × BW«) v slovenščini, nemščini in
+  angleščini: kratici sta iz angleških »Sets« in »Reps« in nista v slovarju, »BW« prav tako. Vsi trije
+  trenerji brez predznanja so se ustavili: »Razumem šele po ugibanju (S = serije, R = ponovitve?)«;
+  »Oblika "3×10" mi ni povedala …«; nemška trenerka: »S in R ne pomenita nič v nemščini (Sätze,
+  Wiederholungen).«
+- Nemški urejevalnik: namig »Tippe auf Fertig, drücke Esc oder tippe daneben, um zu beenden.«, gumb
+  pa »Bearbeitung des Plans beenden«; »Fertig« ni nikjer. (Slovenski »Pritisni Končano …« ob gumbu
+  »Končano z urejanjem načrta« in angleški »Tap Done …« ob »Done editing plan« se ujemata.)
+- Gumb menija ima v vseh jezikih pomožno ime »Menu / Meni«, zapisano v kodi glave, ne v slovarju
+  (dopolnitev k §80.125).
+
+**Težava in vpliv:** trener prebere program z ugibanjem; ne ve, ali je 10 ponovitev ali 10 serij.
+Nemški trener išče gumb, ki ga ni.
+
+**Predlog:** kratice in enota iz slovarja (na primer »3 × 10 × 12 kg«, kot jo že kaže rutina: »3×10 ·
+12 kg«); nemški namig z napisom gumba. Opaženo na `main` `e2daf5e`, sl in de, 390 × 844.
 
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
