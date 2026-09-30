@@ -8049,22 +8049,16 @@ Last green CI run (36063598211): 20 min. Stage 3 alone is 12 min: e2e 675s, demo
 4. **[ ] Low priority: the Stage 4 CI job spends ~48s on setup for ~15s of tests.** Merging it into
    another job would save that, but Stage 4 is its own stage by Simon's ruling (2026-09-19), so
    this changes only if that ruling does.
-5. **[~] The story walk still waits where nothing will happen — two of three parts shipped
-   2026-09-30 (Simon: "implement the best solution").** Shipped: the walk ends at once on step n of
-   n instead of waiting 6s for a panel that is not coming back, and
-   `test_every_offered_chapter_can_be_walked_from_a_cold_start` is one test per chapter (six of
-   9–11s instead of one of 99s), in `e164826`. `tests/e2e/test_demo_story.py` alone went from 228s
-   to 136s on three workers; in the gate the demo task took 248s (331s before). **Still open:** after a Show me that does not carry the card on (the last step of a
-   leg), the walk waits the whole 8s. Waiting instead until Show me is enabled again (the guide's own
-   signal; `showing` in `walkthroughOverlay.js`) failed 5 tests of 27, all on the welcome card: the
-   demonstration reported *"This step didn't complete"* and left the ☰ menu open, then hid its own
-   message 0.2s later, before the 8s wait ended. Cause (measured by librept-02, checked against
-   `demoDataUrl` in `splashScreen.js`): the tests open the story with `?init=demo_data_load`, which
-   seeds the WORKING workspace, while every link the app offers opens it with `workspace=sandbox`.
-   Outside the sandbox the menu row *Leave the sandbox* does not exist, so the beat pointing at it
-   never comes true. Next step: `_open_story` opens the story the way the app does, then the signal
-   wait goes in. The comment at `_card_moved_on` still names the welcome card as the thing the 8s
-   hides; it goes with that change.
+5. **[x] The story walk waited where nothing would happen — shipped 2026-09-30 (Simon: "implement
+   the best solution").** `e164826`: the walk ends at once on step n of n instead of waiting 6s,
+   and the chapter walk is one test per chapter (six of 9–11s instead of one of 99s). `fbddd8a`: the
+   tests open the story in the sandbox, as every link the app offers does — they used
+   `?init=demo_data_load`, which seeds the working data, and there Show me on the welcome card
+   failed and hid its own message before the old 8s wait ended — and the walk waits for the guide's
+   own signal after Show me instead of 8s. Walks of the whole story: 83–86s in the morning, 20–21s
+   now. The demo task in the gate: 370–400s in the morning, 287s now, of which the longest single
+   test is `test_every_tap_show_me_performs_is_drawn_by_the_hand_first` (150–185s, added the same
+   day; librept-02 plans to split it per chapter).
 7. **[ ] Gap: no test walks the story at full motion.** Every story walk runs with reduced motion,
    where `demoPace` makes every pause zero; `test_demo_pacing.py` times one step at full motion. A
    defect that only shows while the hand travels (the app re-rendering under it) is found by
