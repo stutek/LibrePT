@@ -717,45 +717,10 @@ Do we allow a 1-click resolve on pending plan-adjustment reminders? Tension: one
 low-interaction principle, but plan adjustments are exactly the decisions that deserve deliberate
 review at the desk ([uc2](use_cases/uc2_async_plan_adjustments.md)).
 
-### 7.2 [~] Feedback button must show its own state — toggled, and "notes exist"
-**Raised 2026-07-26 (Simon).** The three signal buttons on a deck card
-([exerciseCard.js](src/modules/clipboard/exerciseCard.js)) and the `.circuit-sig` trio look identical
-before and after use, so a PT who tapped *Too Hard* taps again and logs a second signal.
+### 7.2 [x] Feedback button must show its own state — toggled, and "notes exist" — note mark drawn and tested 2026-09-30
 
-Three things the control must express, and they are not the same signal:
-
-1. **Toggled on** — a filled/active **background**, not a colour tweak: it must read at arm's length
-   on a bright gym floor.
-2. **Icon changes with state** — outline for available, solid for set, so the meaning survives for a
-   colour-blind PT and in sunlit greyscale. Colour alone is not a state indicator.
-3. **Notes present** — a *separate* mark for "a written/voice note is attached here", independent of
-   any signal. A card can have either, both or neither.
-
-- **[x] Toggling off already cleared the stored feedback** — `removeQuickSignal` drops the ids from
-  BOTH `activeSession.feedback` and `state.planUpdates`, and only ever touches *plain* taps, so
-  something the trainer wrote is never deleted by a toggle aimed at a tag. Nothing to decide.
-- **[x] The notes lookup** is `hasExerciseNote` in [quickSignals.js](src/domain/quickSignals.js),
-  written as the exact inverse of `isPlainQuickSignal` rather than as its own condition, so "safe to
-  un-tap" and "has a note worth marking" cannot disagree about the same entry.
-- **[x] Standalone cards and circuit member rows agree** — same lookups, same glyph swap, same mark.
-
-**[x] Shipped 2026-08-15**, with one item's requirement met differently than written:
-
-- **Point 1 (filled background) was already there** for Too Easy / Too Hard.
-- **Point 2 (icon changes with state) could NOT be done as specified.** "Outline for available,
-  solid for set" needs Font Awesome's *regular* weight, and that face was deliberately deleted from
-  [fontawesome.css](src/fonts/fontawesome.css) on 2026-08-06 to save 29KB — on the then-true grounds
-  that nothing used it. An `fa-regular` class today still matches the stylesheet and silently
-  renders **solid**, so the two states would look identical, and `icon_coverage.py` cannot catch it
-  because it checks glyph renderability, not weight availability. The intent — a state cue that
-  survives greyscale and colour-blindness — is met with a different SOLID glyph instead
-  (`fa-circle-check` when set), which costs no payload and does not reverse a measured decision.
-- **Point 3 (notes mark) is a corner dot, not a fill**, because unlike the toggles the feedback
-  button is not a toggle: tapping it opens the modal whether or not a note exists. Reusing the
-  pressed fill would collapse two independent states into one.
-
-**Still open**: the mark is rendered but only lightly covered — a medium-tier test mounting the deck
-with a noted exercise would pin it against the real markup rather than the lookup alone.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#72-x-feedback-button-must-show-its-own-state--toggled-and-notes-exist--note-mark-drawn-and-tested-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ### 7.3 [~] [Brainstorm] Session-level "Pending Review" flag, unscheduled sessions, and a shared scrollable-deck component
 **Raised 2026-07-27 (Simon).** A bundle of separable proposals; the label rename shipped, and (8) —
@@ -4935,6 +4900,10 @@ schema is — so it must also hold against a made-up active schema 5 — and the
 above; each booted in the browser tests, walked through a client, a routine, a repeating session and
 an invitation, under both passes of §62. Blocks: §61, which needs the "P" snapshot first.
 
+**Stanje 2026-09-30:** prva alineja je narejena (`ea16316`): zahtevani zamrznjeni zapisi se izpeljejo
+iz `MIGRATION_STEPS`, in preizkus poimenuje različico brez zapisa. Preverjeno s skrito datoteko za
+shemo 3.
+
 ## 62. [x] Feature code may write only what the live schema declares — shipped 2026-09-19
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#62-x-feature-code-may-write-only-what-the-live-schema-declares--shipped-2026-09-19);
@@ -6467,7 +6436,7 @@ what shipped is in [CHANGELOG.md](CHANGELOG.md).
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8085-x-p2--v-skupnem-načrtu-je-opozorilo-o-poškodbi-ene-stranke-prikazano-brez-imena--popravljeno-2026-09-30);
 what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-### 80.86 [ ] P2 — Značka v glavi piše »7?« in nikjer na zaslonu ni povedano, kaj šteje
+### 80.86 [~] P2 — Značka v glavi piše »7?« in nikjer na zaslonu ni povedano, kaj šteje
 
 **Scenarij in koraki:** delaj z aplikacijo (dodaj stranko, vpiši serijo, shrani opombo) in glej gumb
 z oblakom v glavi, levo od menija ☰. Nato ga tapni.
@@ -6485,26 +6454,18 @@ nepotrebnem skrbi; če pa res kaže neposlane spremembe, tega ne izve.
 **Predlog:** ob številki naj bo na zaslonu napisano, kaj šteje, in okno naj isto številko ponovi z
 besedami — opaženo na različici `8b2ce80`.
 
-### 80.87 [ ] P2 — Napačna datoteka pri uvozu odgovori angleško: »Error: Invalid backup file format.«
+**Stanje 2026-09-30:** okno »Središče za sinhronizacijo in varnostne kopije« zdaj z besedami pove, kaj
+šteje številka: koliko sprememb na tej napravi še ni v Google Drive, in da je stanje v oblaku neznano,
+dokler Drive ni povezan (`68b56da`). Številka šteje razliko do zadnje sinhronizacije z Drive, ne do
+zadnje izvožene datoteke, zato besedilo ne govori o varnostni kopiji. **Odprto, čaka na Simona:** ali
+značko brez povezanega oblaka skriti — isto vprašanje kot §80.11.
 
-**Scenarij in koraki:** tapni gumb z oblakom v glavi → »Središče za sinhronizacijo in varnostne
-kopije« → »Izberi JSON datoteko« in izberi datoteko, ki ni varnostna kopija. Preizkušeno z besedilno
-datoteko (nakupovalni seznam) in z datoteko JSON, ki ni kopija (`{"seznam":["kruh","mleko"]}`).
+### 80.87 [x] P2 — Napačna datoteka pri uvozu odgovori angleško: »Error: Invalid backup file format.« — popravljeno 2026-09-30
 
-**Opaženo:** v obeh primerih se v oknu izpiše »Error: Invalid backup file format.« Vse ostalo v tem
-oknu je slovensko. Sporočilo ne pove, katero datoteko aplikacija pričakuje, ne kako jo trener dobi,
-in ne, da se na napravi ni nič spremenilo. Pri pravi kopiji z napačnim geslom je isti korak slovenski
-in pomirjujoč: »Napačno geslo ali spremenjena datoteka. Na tej napravi se ni nič spremenilo.«
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8087-x-p2--napačna-datoteka-pri-uvozu-odgovori-angleško-error-invalid-backup-file-format--popravljeno-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-**Težava in vpliv:** trener, ki išče svojo kopijo med datotekami na telefonu, prvič skoraj zagotovo
-izbere napačno. Dobi angleško besedo »Error« in ne ve, ali je pokvaril svoje podatke, ne kaj naj
-izbere.
-
-**Predlog:** sporočilo naj bo slovensko, naj pove, da se ni nič spremenilo, in naj imenuje datoteko,
-ki jo aplikacija pričakuje (tisto, ki jo je sama naredila z »Izvozi JSON«) — opaženo na različici
-`8b2ce80`.
-
-### 80.88 [ ] P1 — V oknu, ki briše podatke, sta »Prekliči« in »Odstrani« visoka 21 pik in 4 pike narazen
+### 80.88 [~] P1 — V oknu, ki briše podatke, sta »Prekliči« in »Odstrani« visoka 21 pik in 4 pike narazen
 
 **Scenarij in koraki:** svež zagon z vzorčnimi podatki. Odpri predal z obvestili na dnu in tapni
 »Počisti podatke in zapusti predstavitveni način«. Odpre se okno »Počisti vzorčne podatke«, ki našteje
@@ -6522,25 +6483,17 @@ preklicati, izbriše. Izbrisano je nepovratno — vrne ga le varnostna kopija, n
 pove, da brisanja ni mogoče razveljaviti, in naj prej ponudi »Izvozi JSON« — opaženo na različici
 `8b2ce80`.
 
-### 80.89 [ ] P2 — Po čiščenju vzorčnih podatkov vrstica na dnu še vodi v izbrisani vzorčni trening
+**Stanje 2026-09-30:** gumba sta zdaj gumba aplikacije, visoka 44 pik, z razmikom, »Odstrani« desno
+(`367f4ef`). Vzrok: razreda `btn-secondary` in `btn-danger` nimata nobenega pravila v CSS. **Odprto:**
+okno še ne pove, da izbrisa ni mogoče razveljaviti, in ne ponudi izvoza pred izbrisom; oboje je novo
+besedilo v oknu in naj ga potrdi Simon.
 
-**Scenarij in koraki:** svež zagon z vzorčnimi podatki, predal na dnu → »Počisti podatke in zapusti
-predstavitveni način« → »Odstrani«. Nato poglej vrstico na dnu zaslona in jo tapni.
+### 80.89 [x] P2 — Po čiščenju vzorčnih podatkov vrstica na dnu še vodi v izbrisani vzorčni trening — popravljeno 2026-09-30
 
-**Opaženo:** vrstica pravi »Skupinska moč in kondicija · 2 stranki · 00:00 - 02:00 · Zamuja 00h 09m«,
-čeprav je čiščenje pravkar odstranilo vseh 20 vzorčnih terminov; v shrambi ni nobenega vzorčnega
-treninga več, ostal je samo tisti, ki sem ga ustvaril sam. Dotik na vrstico odpre podlogo tega
-izbrisanega treninga, v celoti delujočo: »Začni trening«, zavihek stranke Jane, opozorilo o poškodbi,
-sklop »Dinamično ogrevanje«, časomer premora, »Prelahko«, »Pretežko«, »Dodaj opombo«.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8089-x-p2--po-čiščenju-vzorčnih-podatkov-vrstica-na-dnu-še-vodi-v-izbrisani-vzorčni-trening--popravljeno-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
-**Težava in vpliv:** trener počisti vzorčne podatke, da začne z resničnim delom, na dnu pa mu ostane
-vrstica, ki ga vabi v trening, ki ga ni. Če ga začne in vpiše serije, dela v termin, ki je izbrisan;
-kaj se z zapisanim zgodi, ni videti nikjer.
-
-**Predlog:** čiščenje naj zapre tekočo podlogo in odstrani vrstico na dnu — opaženo na različici
-`8b2ce80`.
-
-### 80.90 [ ] P2 — Aplikacija po čiščenju še naprej terja odstranitev testnih zapisov, gumba za to pa ni več
+### 80.90 [~] P2 — Aplikacija po čiščenju še naprej terja odstranitev testnih zapisov, gumba za to pa ni več
 
 **Scenarij in koraki:** svež zagon z vzorčnimi podatki. Ustvari en svoj trening z vzorčno stranko
 (»Ponedeljkova moc«, 2026-10-05, 09:00 - 10:00, Jane Doe). Odpri predal na dnu → »Počisti podatke in
@@ -6566,6 +6519,13 @@ imeniku poleg resničnih strank, zato ne ve, ali je aplikacija pripravljena za r
 zapis), naj bo v slovenščini z imeni, ki jih trener pozna, in naj obdrži pot, po kateri ohranjeno
 odstrani, ko zapisa ne potrebuje več — opaženo na različici `8b2ce80`.
 
+**Stanje 2026-09-30:** opozorilo o testnih zapisih zdaj šteje le zapise, ki bi jih odstranitev
+izbrisala (`367f4ef`). Zapisi, ki jih odstranitev namerno obdrži (katalog vaj in kar je trenerjevo
+delo nanje vezano), ostanejo označeni za vedno, zato opozorilo prej ni moglo nikoli izginiti.
+**Odprto:** razlogi, zakaj je zapis obdržan, in imena zbirk so v sporočilu še angleški (novi ključi v
+slovarjih); ali stranka iz vzorca, ki ostane, dobi oznako »vzorec«, in ali oznaka PREDOGLED ostane v
+glavi, je Simonova odločitev.
+
 ### 80.91 [ ] P1 — Sprememba teže v načrtu prihodnjega treninga po osvežitvi izgine brez besede
 
 **Scenarij in koraki:** odpri podlogo prihodnjega treninga (»Ponedeljkova moc«, 2026-10-05, 09:00 -
@@ -6583,6 +6543,11 @@ razloga za dvom. Delo, ki ga je opravil, je izgubljeno tiho.
 
 **Predlog:** »Končano z urejanjem načrta« naj spremembo zapiše, in dokler ni zapisana, naj podloga ne
 kaže nove številke — opaženo na različici `8b2ce80`.
+
+**Presoja 2026-09-30 (Claude):** isti vzrok kot §80.52. Načrt treninga, ki se še ni začel, živi samo
+v predpomnilniku odprte podloge (`librept_active_session`), ne pri treningu; ob novi gradnji podloge
+ali osvežitvi se vrne načrt iz rutine. Popravek, ki drži, shrani načrt pri treningu samem — to je
+sprememba sheme, o kateri odloča Simon (§80.52). Do takrat ostane odprto.
 
 ### 80.92 [ ] P2 — »Uveljavi in razreši« spremeni skupno rutino, okno pa govori samo o eni stranki
 
@@ -6605,6 +6570,12 @@ okno govori o eni stranki. Pri močnejši stranki to pomeni teden treninga s pre
 njej«) in naj ponudi izbiro med spremembo rutine in spremembo načrta te stranke — opaženo na
 različici `8b2ce80`.
 
+**Presoja 2026-09-30 (Claude): čaka na Simona.** Prilagoditev iz povratne informacije danes
+spremeni rutino, ki jo lahko uporablja več strank. Ali naj prilagoditev velja samo za to stranko
+(njena kopija rutine ali prilagoditev pri stranki) ali za vse na rutini, je odločitev o modelu
+podatkov, ne popravek. Najmanj, kar velja v obeh primerih: okno naj pove, da se spremeni rutina, in
+koliko strank jo uporablja.
+
 ### 80.93 [ ] P2 — »Kopiraj ta načrt na …« ne kopira na drug dan, ampak na drugo stranko istega treninga
 
 **Scenarij in koraki:** odpri podlogo treninga z eno stranko (»Ponedeljkova moc«, 2026-10-05, Jane
@@ -6622,6 +6593,10 @@ pri novem terminu znova izbere rutino, s čimer izgubi vse, kar je v načrtu pop
 **Predlog:** napis naj povedati, kam kopira (»Kopiraj ta načrt drugi stranki na tem treningu«), in če
 kopiranja na drug dan ni, naj tega ukaza ni videti pri treningu z eno stranko — opaženo na različici
 `8b2ce80`.
+
+**Presoja 2026-09-30 (Claude):** to ni napaka, ampak manjkajoča funkcija, ki je že zapisana kot
+§88.5 (»Kopiraj trening na datum«). »Kopiraj ta načrt na …« je namenoma kopija k drugemu udeležencu
+istega treninga. Napis gumba bi lahko to povedal jasneje; to sodi k §88.5.
 
 ### 80.94 [ ] P2 — V kartoteki stranke je signal s treninga še vedno angleški: »Too Hard - Reduce Load«
 
@@ -6662,6 +6637,13 @@ to je druga napaka kot §80.80.
 
 **Predlog:** »Pretežko« in »Prelahko« naj zapišeta samo signal, nobene serije — opaženo na različici
 `8b2ce80`.
+
+**Presoja 2026-09-30 (Claude): čaka na Simona — nasprotuje zapisani odločitvi.** `logQuickSignal` v
+[sessionQuickSignals.js](src/controllers/sessionQuickSignals.js) namerno označi vse serije vaje kot
+opravljene, ko trener tapne signal: »signal na vaji pomeni, da je bila opravljena« (manj dotikov,
+§48). Ugotovitev pravi, da tak zapis trdi delo, ki ga ni bilo. Obe branji sta mogoči; katero velja,
+je Simonova odločitev. Opaženo ob tem: ponovni tap, ki signal umakne, pusti serije označene kot
+opravljene, zato zapis po umiku ni tak kot pred tapom.
 
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 

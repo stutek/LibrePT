@@ -20,6 +20,84 @@ Read [CHANGELOG.md](CHANGELOG.md) for what shipped and when. This file is why.
 
 ---
 
+### 7.2 [x] Feedback button must show its own state — toggled, and "notes exist" — note mark drawn and tested 2026-09-30
+
+**Raised 2026-07-26 (Simon).** The three signal buttons on a deck card
+([exerciseCard.js](src/modules/clipboard/exerciseCard.js)) and the `.circuit-sig` trio look identical
+before and after use, so a PT who tapped *Too Hard* taps again and logs a second signal.
+
+Three things the control must express, and they are not the same signal:
+
+1. **Toggled on** — a filled/active **background**, not a colour tweak: it must read at arm's length
+   on a bright gym floor.
+2. **Icon changes with state** — outline for available, solid for set, so the meaning survives for a
+   colour-blind PT and in sunlit greyscale. Colour alone is not a state indicator.
+3. **Notes present** — a *separate* mark for "a written/voice note is attached here", independent of
+   any signal. A card can have either, both or neither.
+
+- **[x] Toggling off already cleared the stored feedback** — `removeQuickSignal` drops the ids from
+  BOTH `activeSession.feedback` and `state.planUpdates`, and only ever touches *plain* taps, so
+  something the trainer wrote is never deleted by a toggle aimed at a tag. Nothing to decide.
+- **[x] The notes lookup** is `hasExerciseNote` in [quickSignals.js](src/domain/quickSignals.js),
+  written as the exact inverse of `isPlainQuickSignal` rather than as its own condition, so "safe to
+  un-tap" and "has a note worth marking" cannot disagree about the same entry.
+- **[x] Standalone cards and circuit member rows agree** — same lookups, same glyph swap, same mark.
+
+**[x] Shipped 2026-08-15**, with one item's requirement met differently than written:
+
+- **Point 1 (filled background) was already there** for Too Easy / Too Hard.
+- **Point 2 (icon changes with state) could NOT be done as specified.** "Outline for available,
+  solid for set" needs Font Awesome's *regular* weight, and that face was deliberately deleted from
+  [fontawesome.css](src/fonts/fontawesome.css) on 2026-08-06 to save 29KB — on the then-true grounds
+  that nothing used it. An `fa-regular` class today still matches the stylesheet and silently
+  renders **solid**, so the two states would look identical, and `icon_coverage.py` cannot catch it
+  because it checks glyph renderability, not weight availability. The intent — a state cue that
+  survives greyscale and colour-blindness — is met with a different SOLID glyph instead
+  (`fa-circle-check` when set), which costs no payload and does not reverse a measured decision.
+- **Point 3 (notes mark) is a corner dot, not a fill**, because unlike the toggles the feedback
+  button is not a toggle: tapping it opens the modal whether or not a note exists. Reusing the
+  pressed fill would collapse two independent states into one.
+
+**Still open**: the mark is rendered but only lightly covered — a medium-tier test mounting the deck
+with a noted exercise would pin it against the real markup rather than the lookup alone.
+
+### 80.87 [x] P2 — Napačna datoteka pri uvozu odgovori angleško: »Error: Invalid backup file format.« — popravljeno 2026-09-30
+
+**Scenarij in koraki:** tapni gumb z oblakom v glavi → »Središče za sinhronizacijo in varnostne
+kopije« → »Izberi JSON datoteko« in izberi datoteko, ki ni varnostna kopija. Preizkušeno z besedilno
+datoteko (nakupovalni seznam) in z datoteko JSON, ki ni kopija (`{"seznam":["kruh","mleko"]}`).
+
+**Opaženo:** v obeh primerih se v oknu izpiše »Error: Invalid backup file format.« Vse ostalo v tem
+oknu je slovensko. Sporočilo ne pove, katero datoteko aplikacija pričakuje, ne kako jo trener dobi,
+in ne, da se na napravi ni nič spremenilo. Pri pravi kopiji z napačnim geslom je isti korak slovenski
+in pomirjujoč: »Napačno geslo ali spremenjena datoteka. Na tej napravi se ni nič spremenilo.«
+
+**Težava in vpliv:** trener, ki išče svojo kopijo med datotekami na telefonu, prvič skoraj zagotovo
+izbere napačno. Dobi angleško besedo »Error« in ne ve, ali je pokvaril svoje podatke, ne kaj naj
+izbere.
+
+**Predlog:** sporočilo naj bo slovensko, naj pove, da se ni nič spremenilo, in naj imenuje datoteko,
+ki jo aplikacija pričakuje (tisto, ki jo je sama naredila z »Izvozi JSON«) — opaženo na različici
+`8b2ce80`.
+
+### 80.89 [x] P2 — Po čiščenju vzorčnih podatkov vrstica na dnu še vodi v izbrisani vzorčni trening — popravljeno 2026-09-30
+
+**Scenarij in koraki:** svež zagon z vzorčnimi podatki, predal na dnu → »Počisti podatke in zapusti
+predstavitveni način« → »Odstrani«. Nato poglej vrstico na dnu zaslona in jo tapni.
+
+**Opaženo:** vrstica pravi »Skupinska moč in kondicija · 2 stranki · 00:00 - 02:00 · Zamuja 00h 09m«,
+čeprav je čiščenje pravkar odstranilo vseh 20 vzorčnih terminov; v shrambi ni nobenega vzorčnega
+treninga več, ostal je samo tisti, ki sem ga ustvaril sam. Dotik na vrstico odpre podlogo tega
+izbrisanega treninga, v celoti delujočo: »Začni trening«, zavihek stranke Jane, opozorilo o poškodbi,
+sklop »Dinamično ogrevanje«, časomer premora, »Prelahko«, »Pretežko«, »Dodaj opombo«.
+
+**Težava in vpliv:** trener počisti vzorčne podatke, da začne z resničnim delom, na dnu pa mu ostane
+vrstica, ki ga vabi v trening, ki ga ni. Če ga začne in vpiše serije, dela v termin, ki je izbrisan;
+kaj se z zapisanim zgodi, ni videti nikjer.
+
+**Predlog:** čiščenje naj zapre tekočo podlogo in odstrani vrstico na dnu — opaženo na različici
+`8b2ce80`.
+
 ### 80.82 [x] P2 — Odprt in zaprt urejevalnik načrta pobriše oznako »Zaključeno« z opravljenega sklopa — popravljeno 2026-09-30 z 5ea4ada
 
 **Scenarij in koraki:** vzorčni podatki, skupinski trening »Skupinska moč in kondicija« (stranke
