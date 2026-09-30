@@ -176,16 +176,18 @@ export function isDemoOnlyStore(state) {
  * navigation, so it never sees the alarm; a trainer's install never carries it, so a single test
  * row shows up the moment the app opens.
  */
-export function escapedTestRecords(state) {
-  const collections = COLLECTIONS.filter((collection) =>
-    (state?.[collection] || []).some((record) => seedOriginOf(record) === TEST_ORIGIN),
-  );
-  const count = collections.reduce(
-    (total, collection) =>
-      total +
-      (state[collection] || []).filter((record) => seedOriginOf(record) === TEST_ORIGIN).length,
-    0,
-  );
+export function escapedTestRecords(state, removals = null) {
+  // With `removals` (`{ collection: [id, ...] }`, from demoDataRemoval.js), only rows the removal
+  // would actually delete count. The catalog and any row the trainer's work depends on are kept and
+  // stay stamped `test` for good, so counting them would raise an alarm nothing can silence.
+  const escaped = (collection) =>
+    (state?.[collection] || []).filter(
+      (record) =>
+        seedOriginOf(record) === TEST_ORIGIN &&
+        (!removals || (removals[collection] || []).includes(record.id)),
+    );
+  const collections = COLLECTIONS.filter((collection) => escaped(collection).length > 0);
+  const count = collections.reduce((total, collection) => total + escaped(collection).length, 0);
   return { count, collections };
 }
 

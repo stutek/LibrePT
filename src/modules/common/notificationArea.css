@@ -599,3 +599,13 @@ body:has(#active-session-overlay:not(.hidden))
   border-color: var(--card-border);
   background: var(--bg-color);
 }
+
+/* Cancel and Remove in the clear-demo-data dialog: Remove deletes records, so each is a full
+   thumb-sized target with a wide gap, and a thumb cannot cover both. */
+#dialog-demo-cleanup .modal-actions {
+  gap: 20px;
+}
+#dialog-demo-cleanup .modal-actions .btn {
+  min-height: 44px;
+  min-width: 96px;
+}

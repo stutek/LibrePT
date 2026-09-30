@@ -83,6 +83,21 @@ export function sessionBelongsToSlot(session, sourceSession) {
   return Array.isArray(sourceSession.ids) && sourceSession.ids.includes(session.id);
 }
 
+/**
+ * Whether the live clipboard stands on records a removal just deleted: its booked slot is one of
+ * the removed sessions, or one of its participants is a removed client. `removals` is
+ * `{ collection: [id, ...] }`, the shape demoDataRemoval.js plans.
+ */
+export function clipboardDependsOnRemoved(activeSession, removals) {
+  if (!activeSession) return false;
+  const removedSessions = new Set(removals?.sessions || []);
+  const removedClients = new Set(removals?.clients || []);
+  const slot = activeSession.sourceSession;
+  const slotIds = [slot?.id, ...(Array.isArray(slot?.ids) ? slot.ids : [])];
+  if (slotIds.some((id) => id && removedSessions.has(id))) return true;
+  return (activeSession.participants || []).some((id) => removedClients.has(id));
+}
+
 export function buildSessionRecord({
   sessionId,
   sessionName,

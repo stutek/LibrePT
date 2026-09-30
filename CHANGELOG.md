@@ -49,6 +49,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 - **A wrong file chosen for a restore is refused in the trainer's language.** It answered "Error:
   Invalid backup file format." in English. Every refusal of the restore now says, in the app's
   language, what was wrong and what to choose instead.
+- **Removing the sample data is safe to tap and leaves nothing pointing at it.** The dialog's
+  *Cancel* and *Remove* were 21 pixels tall and 4 apart, with no button styling at all; they are
+  now full buttons, 44 pixels tall, apart, *Remove* on the right. After the removal the bar at the
+  bottom no longer leads into a deleted sample session, and the app no longer keeps asking to
+  remove test records that the removal keeps on purpose.
 - **The mark for "a note is written here" shows on the card.** The dot on the feedback button of an
   exercise or a circuit member with a written note was built on 2026-08-15 but never drawn: the deck
   did not hand the note lookup to its cards. A new test mounts the deck and looks for the dot.

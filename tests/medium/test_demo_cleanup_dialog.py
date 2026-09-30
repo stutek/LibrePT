@@ -137,7 +137,7 @@ def test_cancelling_removes_nothing(page, local_server):
     load_with_stub(page, local_server, STUB)
     page.wait_for_selector("#dialog-demo-cleanup[open]")
 
-    page.click("#dialog-demo-cleanup .btn-secondary")
+    page.click("#btn-demo-cleanup-cancel")
 
     assert page.evaluate("window.__removalCalls.length") == 0
     assert page.locator("#dialog-demo-cleanup[open]").count() == 0
@@ -158,3 +158,27 @@ def test_a_blocked_removal_says_so_and_keeps_the_dialog_open(page, local_server)
     status = page.locator("#demo-cleanup-status")
     assert "no longer exist" in status.inner_text()
     assert "error" in (status.get_attribute("class") or "")
+
+
+def test_cancel_and_remove_are_thumb_sized_and_apart(page, local_server):
+    """Cancel and Remove were bare 21px-tall buttons four pixels apart: one thumb covered both, and
+    Remove deletes data. A gym-floor thumb is about 44px."""
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#dialog-demo-cleanup[open]")
+
+    cancel = page.locator("#btn-demo-cleanup-cancel").bounding_box()
+    remove = page.locator("#btn-demo-cleanup-confirm").bounding_box()
+    assert cancel["height"] >= 44, f"Cancel is only {cancel['height']}px tall"
+    assert remove["height"] >= 44, f"Remove is only {remove['height']}px tall"
+    gap = remove["x"] - (cancel["x"] + cancel["width"])
+    assert gap >= 12, f"only {gap}px between Cancel and Remove"
+    assert cancel["x"] < remove["x"], "the destructive button stays on the right"
+
+    borders = page.evaluate(
+        """() => ['btn-demo-cleanup-cancel', 'btn-demo-cleanup-confirm'].map((id) => {
+            const style = getComputedStyle(document.getElementById(id));
+            return [Number.parseFloat(style.borderTopWidth), style.color];
+        })"""
+    )
+    assert borders[1][0] >= 1, "Remove keeps a visible edge"
+    assert borders[0][1] != borders[1][1], "Remove is coloured apart from Cancel"

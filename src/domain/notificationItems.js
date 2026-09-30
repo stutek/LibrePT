@@ -17,6 +17,7 @@
 // and reacting to a tap all belong to the module that owns the DOM.
 
 import { crashIssueUrl } from "../data/crashReport.js";
+import { planDemoRemoval } from "../data/demoDataRemoval.js";
 import { escapedTestRecords } from "../data/seedProvenance.js";
 import { resolveLang } from "../i18n/index.js";
 import { countedText } from "../i18n/plural.js";
@@ -35,7 +36,7 @@ import { walkthroughDataPresent } from "./walkthroughReadiness.js";
  */
 export function buildEscapedTestDataItem(state, t, { sandbox = false, testRun = false } = {}) {
   if (sandbox || testRun) return null;
-  const { count, collections } = escapedTestRecords(state);
+  const { count, collections } = escapedTestRecords(state, planDemoRemoval(state).removals);
   if (count === 0) return null;
   return {
     id: "synthetic-escaped-test-data",

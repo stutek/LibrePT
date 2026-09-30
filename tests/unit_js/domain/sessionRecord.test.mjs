@@ -15,6 +15,7 @@ import {
   buildPlanningSessionMeta,
   buildRealSessionMeta,
   buildSessionRecord,
+  clipboardDependsOnRemoved,
   computeSessionDayBucket,
   computeTimeLabel,
   newlyAssignedParticipantIds,
@@ -183,4 +184,18 @@ test("a slot claims every stored row it was merged from", () => {
   assert.equal(sessionBelongsToSlot({ id: "s1" }, { id: "s1" }), true);
   assert.equal(sessionBelongsToSlot({ id: "s1" }, { id: "plan-x", isPlanning: true }), false);
   assert.equal(sessionBelongsToSlot({ id: "s1" }, null), false);
+});
+
+test("a clipboard on a removed session or with a removed client is dropped, one of your own is not", () => {
+  const removals = { sessions: ["s1"], clients: ["c1"] };
+  const clipboard = (sourceSession, participants) => ({ sourceSession, participants });
+  assert.equal(clipboardDependsOnRemoved(clipboard({ id: "s1" }, ["mine"]), removals), true);
+  assert.equal(
+    clipboardDependsOnRemoved(clipboard({ id: "x", ids: ["s1", "x"] }, ["mine"]), removals),
+    true,
+  );
+  assert.equal(clipboardDependsOnRemoved(clipboard({ id: "own" }, ["c1", "mine"]), removals), true);
+  assert.equal(clipboardDependsOnRemoved(clipboard({ id: "own" }, ["mine"]), removals), false);
+  assert.equal(clipboardDependsOnRemoved(null, removals), false);
+  assert.equal(clipboardDependsOnRemoved(clipboard(null, ["mine"]), {}), false);
 });

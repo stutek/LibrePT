@@ -13,7 +13,7 @@
 // The counts matter for the same reason: "8 clients, 5 sessions, 5 history entries" is a sentence a
 // trainer can check against what they believe they have. "Clear demo data?" is not.
 //
-// deps: { getState, t, escapeHTML, removeDemoData, onRemoved }
+// deps: { getState, t, escapeHTML, removeDemoData, onRemoved(plan) }
 
 import { planDemoRemoval } from "../../data/demoDataRemoval.js";
 import { renderMarkupOnce } from "./dom.js";
@@ -68,9 +68,9 @@ export function renderDemoCleanupDialog() {
       <div id="demo-cleanup-retained"></div>
       <p class="status-msg" id="demo-cleanup-status"></p>
     </div>
-    <div class="modal-footer">
-      <button type="button" class="btn-secondary" data-demo-cleanup-close id="btn-demo-cleanup-cancel"></button>
-      <button type="button" class="btn-danger" id="btn-demo-cleanup-confirm"></button>
+    <div class="modal-actions">
+      <button type="button" class="btn secondary-btn" data-demo-cleanup-close id="btn-demo-cleanup-cancel"></button>
+      <button type="button" class="btn danger-btn" id="btn-demo-cleanup-confirm"></button>
     </div>
 </dialog>`,
   );
@@ -186,6 +186,6 @@ function wire(dialog) {
       return;
     }
     dialog.close();
-    deps.onRemoved?.();
+    deps.onRemoved?.(result.plan);
   });
 }

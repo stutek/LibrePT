@@ -123,3 +123,31 @@ def test_a_database_with_no_demo_data_has_nothing_to_remove(page, local_server):
         }"""
     )
     assert removable is False
+
+
+@pytest.mark.clean_start
+def test_clearing_the_demo_also_drops_the_live_clipboard_bar(page, local_server):
+    """The demo boots with a session already running on the clipboard bar. Clearing the demo removes
+    that session's record, so the bar must go too: it led into a session that no longer exists."""
+    page.goto(f"{local_server}?init=demo_data_load&lang=en")
+    page.wait_for_selector(".session-card")
+    page.wait_for_selector("#clipboard-bar:not(.hidden)")
+
+    page.evaluate(
+        """async () => {
+            const dialog = await import(
+                new URL('modules/common/demoCleanupDialog.js', document.baseURI).href
+            );
+            dialog.openDemoCleanupDialog();
+        }"""
+    )
+    page.click("#btn-demo-cleanup-confirm")
+
+    page.wait_for_selector("#clipboard-bar.hidden", state="attached")
+    cached = page.evaluate(
+        """async () => {
+            const cache = await import(new URL('data/sessionCache.js', document.baseURI).href);
+            return cache.readActiveSessionCache();
+        }"""
+    )
+    assert cached is None, "the cached live session is gone as well as the bar"

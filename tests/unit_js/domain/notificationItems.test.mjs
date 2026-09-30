@@ -438,6 +438,26 @@ test("test rows in the working database are reported, with what and where", () =
   assert.equal(item.actions[0].resetDemo, true, "its action is the removal the app already has");
 });
 
+test("test rows the removal keeps are not offered for removal, because nothing can remove them", () => {
+  // The movement catalog is kept by default and a record the trainer's own work needs is kept too.
+  // Both stay stamped `test` for good, so counting them made the alarm impossible to clear.
+  const catalogOnly = { exercises: [{ id: "e1", name: "Squat", testData: "test" }] };
+  assert.equal(
+    buildEscapedTestDataItem(catalogOnly, () => "", {}),
+    null,
+  );
+
+  // Mixed: only the rows the removal would delete are counted and named.
+  const mixed = {
+    exercises: [{ id: "e1", name: "Squat", testData: "test" }],
+    clients: [{ id: "c1", name: "Jane", testData: "test" }],
+  };
+  const item = buildEscapedTestDataItem(mixed, () => "", {});
+  assert.match(item.description, /^1 /, "one row is removable");
+  assert.match(item.description, /clients/);
+  assert.doesNotMatch(item.description, /exercises/);
+});
+
 test("a test run is not warned about its own data", () => {
   // The switch that seeded these rows is on this boot too, so this IS the test run. The alarm is
   // for the boot that finds them WITHOUT it.

@@ -84,6 +84,7 @@ import { claimThisTab, onTabDeactivated } from "./data/tabOwnership.js";
 import { SANDBOX, isSandbox } from "./data/workspace.js";
 import { DEMO_NOTICE_TYPE } from "./domain/notificationItems.js";
 import { repsPresetsDatalistHTML } from "./domain/repsAndLoad.js";
+import { clipboardDependsOnRemoved } from "./domain/sessionRecord.js";
 import { applyStaticDOMMappings } from "./i18n/domMappings.js";
 import {
   TRANSLATIONS,
@@ -666,7 +667,12 @@ async function init() {
     // A full re-render rather than a targeted patch: clearing the demo touches every collection, so
     // every view showing one is stale at once. It used to reload the page for that, which is a
     // heavy way to repaint and loses the trainer's place.
-    onRemoved: () => renderEverything(),
+    // The live clipboard is dropped first when it stands on a removed session or client: its bar
+    // otherwise still leads into a session that no longer exists.
+    onRemoved: (plan) => {
+      if (clipboardDependsOnRemoved(getActiveSession(), plan?.removals)) cancelWorkoutSession();
+      renderEverything();
+    },
     // The empty app's second offer (asked 2026-09-11): the sandbox, where trying things out cannot
     // touch the records the trainer is about to start keeping. It replaced an offer to seed sample
     // people straight into those records, which is what having two separate workspaces was
