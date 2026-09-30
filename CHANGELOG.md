@@ -34,6 +34,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Changed
 
+- **The consent letter, the intake tick and the privacy notice say what the app really does, in
+  English, Slovenian and German.** They were compared with the Slovenian Information
+  Commissioner's Art. 13 template, the EDPB consent guidelines and the German DSK papers. The
+  notice no longer says Google can read the backup (the app encrypts it first), has no blank
+  "[Trainer name]" or "[retention period]" fields, and holds nothing addressed to trainers. The
+  letter is signed with the trainer's name, phone and email, asks for explicit consent to health
+  data, and states the retention (at most two years after the last session), the rights and what
+  refusing costs. The AI copy is called pseudonymised, not anonymous. Form version 2026-09-30:
+  clients who consented under 2026-08-09 should consent again.
 - **The gate can run on a copy of the tree, so sessions no longer stop for each other.**
   `build check -- <paths>` proves HEAD plus exactly those files in a snapshot with its own dev
   server, and `build commit -F <message> -- <paths>` commits exactly them, refusing a file changed
