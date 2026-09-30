@@ -7652,6 +7652,9 @@ opombe« (ali »Dogovori«), prikazano v urejevalniku načrta tako kot poškodbe
 »Poškodbe in omejitve« in »Opombe«; urejevalnik načrta pokaže oboje, poškodbo prvo. Obstoječe
 zapiske strank ostanejo v »Opombah«, zato jih trener, ki želi opozorilo, prenese v novo polje sam.
 
+Dan 08 (2026-09-30): nova stranka mora pred vadbo prinesti zdravniško potrdilo. Trenerka ga je
+lahko zapisala le v »Opombe«, brez datuma veljavnosti in brez opomnika, ko poteče; ocena 1.
+
 ### 88.8 [ ] Prehransko svetovanje nima mesta
 
 Dan 05: trenerka nekaterim strankam svetuje tudi prehrano (teža, cilj kalorij, jedilnik za teden) in
@@ -7733,6 +7736,20 @@ Ob dnevu 07 prijavljeno in ne zapisano kot napaka: v »Ustvari rutino« vpis pon
 vajo ne ostane (8 postane 10). V brskalniku orodja se to zgodi le pri polju s seznamom predlogov
 (`list="reps-presets"`); brez njega vnos deluje. **Preveriti na pravem telefonu**, ker gre lahko za
 posebnost brskalnika brez zaslona.
+
+### 88.14 [ ] Nov telefon: obnovitev iz kopije je šele za uvodom, ki sprašuje, kar je v kopiji
+
+Dan 08 (2026-09-30, `main` `e8e90d8`; trenerka, ki ji je stari telefon razpadel): prvi zagon na
+novem telefonu ponudi pogoje, izbiro teme, štiri obvezne osebne podatke, nato »Razišči z vzorčnimi
+podatki«, vodeni ogled in »Začni s prazno aplikacijo«. Obnovitve iz kopije ni; ta je v ☰ →
+»Upravljanje podatkov« → »Uvozi varnostno kopijo«, do katerega trenerka pride šele po uvodu. Kopije
+sama ni mogla preskusiti (§80.136); napačno datoteko je aplikacija pravilno zavrnila: »Ta datoteka ni
+varnostna kopija LibrePT. Na tej napravi se ni nič spremenilo.«
+**Vrednost:** redka (predpostavka: enkrat na dve leti na trenerja), a prav takrat odloči, ali trener
+aplikaciji še zaupa; uvod pri tem stane okoli minute in vodi v napačno smer (»Začni s prazno
+aplikacijo«). **Cena:** majhna: na prvem zaslonu »Obnovi iz varnostne kopije« pred uvodom.
+**Presoja: čaka na Simona**, ker spremeni uvod, o katerem je odločil v §81 (podatki obvezni na vsaki
+poti); kopija te podatke že nosi.
 
 ## 89. [~] Pregled 2026-09-28: isti podatek na več mestih
 
