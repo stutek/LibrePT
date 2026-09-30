@@ -34,6 +34,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Changed
 
+- **The guide gives back the room it took once the control has moved.** It shortened itself to
+  clear a control, the board then scrolled the control away, and the guide stayed short with its
+  card scrolling inside half an empty screen.
 - **Looking at another session on the clipboard no longer risks opening it.** Pulling the plan
   aside now only uncovers the neighbouring session, at any distance, and opening it is a second
   stroke: pull aside, then slide up without lifting the finger. The uncovered plan says *Slide up to

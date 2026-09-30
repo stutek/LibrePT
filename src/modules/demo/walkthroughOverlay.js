@@ -463,8 +463,20 @@ export function startGuidedWalkthrough({
     // iPhone SE, story step 23, which is also why the walk stalled there).
     const here = currentWalkthroughStep(tour, state)?.id ?? null;
     if (box.bottom <= panelBox.top || box.top >= panelBox.bottom) {
-      // Clear of it: give back whatever height was surrendered for a different control.
-      if (trimmedFor !== here) releasePanelTrim();
+      // Clear of it: give back whatever height was surrendered for a different control. For this
+      // same control, give back what it no longer needs: a trim measured while the board was still
+      // scrolling the control into place was held after the control had moved away, and left the
+      // card scrolling inside a panel with half the screen free (a session card in a two-column
+      // overlap block, 2026-09-30). Released first, and trimmed again only if the full-height panel
+      // would cover the control — so the panel never grows past its own cap, and since both happen
+      // before the next paint, it does not flicker.
+      if (trimmedFor !== here) {
+        releasePanelTrim();
+        return;
+      }
+      releasePanelTrim();
+      if (coversTarget(target)) trimPanelToFitBeside(target, here);
+      else trimmedFor = null;
       return;
     }
     // The PANEL gives way first, because that repair is instant and cannot fail. Moving the control
@@ -477,14 +489,21 @@ export function startGuidedWalkthrough({
     // Away from the panel, not into the middle: `center` is exactly where it already is.
     target.scrollIntoView({
       block: el.overlay.classList.contains("is-top") ? "end" : "start",
-      behavior: prefersReducedMotion(doc) ? "auto" : "smooth",
+      behavior: instant ? "auto" : "smooth",
     });
   }
 
+    const instant = prefersReducedMotion(doc);
   /** The last resort: the panel gives up height until the control is clear of it.
    *
    * Some pages cannot scroll. The client's intake form on a 667px phone is one — measured
    * `scrollHeight === clientHeight`, so asking the control to move does nothing at all, and the name
+    // Measured again as soon as the control has moved, not at the next poll: the trim taken before
+    // the scroll was for where the control used to be, and until it is re-measured the card scrolls
+    // inside a panel that no longer needs to be short.
+    const remeasure = () => moveTargetOutFromUnderPanel(target);
+    if (instant) remeasure();
+    else doc.addEventListener("scrollend", remeasure, { once: true, capture: true });
    * field sits in the middle band where a panel docked at either end still reaches it.
    * Something has to give, and it is the prose: the card scrolls inside the panel, so the words are
    * all still there, one thumb-flick further.
@@ -526,6 +545,12 @@ export function startGuidedWalkthrough({
     el.panel.classList.remove("is-trimmed");
     el.panel.style.removeProperty("--walkthrough-panel-max-height");
   }
+  function coversTarget(target) {
+    const panelBox = el.panel.getBoundingClientRect();
+    const box = target.getBoundingClientRect();
+    return !(box.bottom <= panelBox.top || box.top >= panelBox.bottom);
+  }
+
 
   /** Whether the app is already on a step's route. Compared on the path the script writes — the
    * scripts name routes as the app's own paths, and the base path is the same for both. */
