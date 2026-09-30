@@ -121,7 +121,10 @@ import { driveSyncFailureNotice, prepareDriveSyncCard } from "./modules/common/d
 import { openEncryptedFileReader } from "./modules/common/encryptedFileReader.js";
 import { EVENT_PARAM, browserPlatform } from "./modules/common/eventTransports.js";
 import { openFeedbackModal } from "./modules/common/feedbackModal.js";
-import { renderNotificationArea } from "./modules/common/notificationArea.js";
+import {
+  renderNotificationArea,
+  toggleNotificationArea,
+} from "./modules/common/notificationArea.js";
 import { showOtherTabNotice } from "./modules/common/otherTabNotice.js";
 import { populateDropdownSelectors as populateDropdownsController } from "./modules/common/populateDropdownSelectors.js";
 import { registerShellRender, runShellRenders } from "./modules/common/renderRegistry.js";
@@ -907,7 +910,13 @@ async function switchToWorkspace(name) {
   // round. Deliberately not a teardown — a rest period must survive the switch.
   appBoot.rebindTimers();
   returnToLastView();
-  if (isSandbox()) await offerFreshSandboxIfStale();
+  if (isSandbox()) {
+    // The sandbox's own notice says to tap a chapter "in the list below", and that list lives in the
+    // drawer at the bottom. Closed, the first row sat 325px under a 844px screen, so the sentence
+    // pointed at nothing a trainer could see, and the only way to it was a 5px handle.
+    toggleNotificationArea(true);
+    await offerFreshSandboxIfStale();
+  }
 }
 
 /**
