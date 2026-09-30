@@ -39,6 +39,9 @@ function sessionsAttendedBy(state, clientId) {
       // A count, never the roster. The client is entitled to know they trained in a group of four;
       // they are not entitled to the other three people's names.
       groupSize: (session.participants || []).length,
+      // Whether it happened. The list is a record the client reads as attendance, so a Thursday the
+      // trainer has booked and a Thursday they trained cannot look the same on it.
+      completed: Boolean(session.completed),
     }));
 }
 
@@ -166,16 +169,40 @@ function consentLine(consent, w) {
   return `- ${w("export_doc_consent_none")}`;
 }
 
+// In date order, and each row says whether it happened. Unsorted and unmarked, the list mixed two
+// Thursdays the trainer has only booked in among the ones the client trained — and this list is a
+// document the client reads as a record of their attendance.
 function sessionLines(sessions, w) {
-  return sessions.map((session) => {
-    const when = session.startDate ? session.startDate.substring(0, 10) : session.day || "—";
-    const group =
-      session.groupSize > 1 ? ` · ${w("export_doc_group", { count: session.groupSize })}` : "";
-    return `- ${when} ${session.time || ""} ${session.title || ""}${group}`.trimEnd();
-  });
+  return [...sessions]
+    .sort((left, right) =>
+      String(left.startDate || "").localeCompare(String(right.startDate || "")),
+    )
+    .map((session) => {
+      const when = session.startDate ? session.startDate.substring(0, 10) : session.day || "—";
+      const group =
+        session.groupSize > 1 ? ` · ${w("export_doc_group", { count: session.groupSize })}` : "";
+      const state = w(session.completed ? "export_doc_session_held" : "export_doc_session_planned");
+      return `- ${when} ${session.time || ""} ${session.title || ""}${group} · ${state}`
+        .replace(/\s+·/g, " ·")
+        .trimEnd();
+    });
 }
 
-function trainingLines(history, w) {
+// The programme changes the trainer made off the back of this client's own feedback. They were
+// counted in the dialog's summary and then left out of the file, so the document promised a section
+// it did not have.
+function planChangeLines(planUpdates, w, tagText) {
+  return (planUpdates || [])
+    .map((update) => {
+      const when = (update.date || "").substring(0, 10);
+      const tag = tagText(update.tag);
+      const parts = [when, update.exerciseName, tag, update.note].filter(Boolean);
+      return `- ${parts.join(" · ")}`;
+    })
+    .filter((line) => line !== "- ");
+}
+
+function trainingLines(history, w, tagText) {
   const lines = [];
   for (const record of history.filter((entry) => !entry.isPlanning)) {
     const title = record.routineName || w("export_doc_session");
@@ -186,7 +213,11 @@ function trainingLines(history, w) {
       if (sets) lines.push(sets);
     }
     for (const item of record.feedback || []) {
-      lines.push(`- ${w("export_doc_feedback")} (${item.tag || "note"}): ${item.note || ""}`);
+      // The signal in the language the document is written in. The stored tag is an English
+      // identifier ("Too Hard - Reduce Load"), and printing it put two English lines in the middle of
+      // a Slovenian document the client had asked for.
+      const tag = tagText(item.tag) || w("export_doc_session");
+      lines.push(`- ${w("export_doc_feedback")} (${tag}): ${item.note || ""}`);
     }
     lines.push("");
   }
@@ -215,7 +246,15 @@ function preparedLine(payload, w) {
 }
 
 /** The same payload as prose, for the copy the client actually reads. */
-export function renderClientExportMarkdown(payload) {
+/**
+ * The readable copy, in the language the payload was built for.
+ *
+ * `tagText` turns a stored feedback tag into the words for it. It is INJECTED because the mapping is
+ * the domain's (domain/feedbackTags.js) and this module is a layer below it; without it the document
+ * printed the stored English identifier — "Too Hard - Reduce Load" — in the middle of a Slovenian
+ * document a client had asked for. Both callers live in modules/ and pass it.
+ */
+export function renderClientExportMarkdown(payload, { tagText = (tag) => tag || "" } = {}) {
   if (!payload) return "";
   const w = wordsFor(payload.lang);
   const { subject, counts } = payload;
@@ -232,7 +271,15 @@ export function renderClientExportMarkdown(payload) {
     "",
     w("export_doc_logged", { count: counts.loggedSessions }),
     "",
-    ...trainingLines(payload.history, w),
+    ...trainingLines(payload.history, w, tagText),
+    ...(counts.planUpdates
+      ? [
+          w("export_doc_plan_changes", { count: counts.planUpdates }),
+          "",
+          ...planChangeLines(payload.planUpdates, w, tagText),
+          "",
+        ]
+      : []),
     ...withheldLines(payload.redactedFields, w),
     w("export_doc_rights_title"),
     "",

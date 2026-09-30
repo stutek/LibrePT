@@ -19,6 +19,7 @@
 
 import { renderClientExportMarkdown } from "../../data/clientDataExport.js";
 import { decryptEnvelope, isEncryptedEnvelope } from "../../data/encryptedExport.js";
+import { feedbackTagTextFor } from "../../domain/feedbackTags.js";
 import { $id, closeModal, openModal, renderMarkupOnce } from "./dom.js";
 
 // The app's dictionary, injected at boot. Until then a key stands in, so a missing entry is visible.
@@ -94,7 +95,9 @@ async function openSelectedFile() {
     const payload = await decryptEnvelope(envelope, passphrase);
     // textContent, never innerHTML: this renders a file that arrived from outside the app, and the
     // whole point of the reader is that it is safe to open something a stranger emailed you.
-    output.textContent = renderClientExportMarkdown(payload) || JSON.stringify(payload, null, 2);
+    output.textContent =
+      renderClientExportMarkdown(payload, { tagText: feedbackTagTextFor(payload.lang) }) ||
+      JSON.stringify(payload, null, 2);
     output.hidden = false;
   } catch {
     // The envelope was checked above, so decryption fails only on a wrong passphrase or a changed

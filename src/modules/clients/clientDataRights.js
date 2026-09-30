@@ -32,6 +32,7 @@ import {
 } from "../../data/erasureSuppression.js";
 import { generatePassphrase } from "../../data/passphraseKey.js";
 import { readTrainerIdentity } from "../../data/trainerIdentity.js";
+import { feedbackTagTextFor } from "../../domain/feedbackTags.js";
 import { dictionaryFor } from "../../i18n/index.js";
 import { tellInApp } from "../common/appQuestion.js";
 import { mountDateField } from "../common/dateField.js";
@@ -227,7 +228,7 @@ function downloadReadableExport() {
   // Unencrypted, for handing over in person or printing — offered because encryption is protection
   // for the EMAIL hop, and a client sitting in front of you does not need a passphrase ceremony.
   downloadFile(
-    renderClientExportMarkdown(payload),
+    renderClientExportMarkdown(payload, { tagText: feedbackTagTextFor(payload.lang) }),
     clientExportFilename(client, { extension: "md" }),
     "text/markdown",
   );

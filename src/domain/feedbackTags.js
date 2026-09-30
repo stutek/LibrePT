@@ -14,7 +14,10 @@
 // A tag outside this list — a record written by an older version, such as the demo's former
 // "Form Break - Depth Alert" — is shown as it was stored.
 //
-// Pure: no DOM, no storage.
+// Pure: no DOM, no storage. The one import is the dictionary registry, for a document that must be
+// written in a language other than the app's current one.
+
+import { dictionaryFor } from "../i18n/index.js";
 
 // The first entry is the dialog's default, and it is the neutral one. A free note saved without
 // touching the chips used to be stored as "Too Easy - Increase Load", the old default, so the next
@@ -40,6 +43,17 @@ const TAGS_IMPLYING_PERFORMED = new Set(["Too Easy - Increase Load", "Completed 
 /** Whether this signal is itself a statement that the sets were performed. */
 export function tagImpliesPerformed(tag) {
   return TAGS_IMPLYING_PERFORMED.has(String(tag || ""));
+}
+
+/** A tag renderer for a document written in ONE language, whatever the app is currently set to.
+ *
+ * The client's data export is written in the language the client reads, which is not always the
+ * trainer's — so its words cannot come from the live `t`. English is the fallback, as everywhere.
+ */
+export function feedbackTagTextFor(lang) {
+  const words = dictionaryFor(lang);
+  const english = dictionaryFor("en");
+  return (tag) => feedbackTagText(tag, (key) => words[key] ?? english[key] ?? key);
 }
 
 const NOTE_SEPARATOR = " - ";

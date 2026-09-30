@@ -152,3 +152,60 @@ test("exporting an unknown client returns nothing rather than an empty shell", (
   assert.equal(buildClientExport(gymState(), "c-nobody"), null);
   assert.equal(renderClientExportMarkdown(null), "");
 });
+
+test("the session list is in date order and says which ones happened", () => {
+  // The client reads this list as a record of their attendance, so a Thursday the trainer has only
+  // booked cannot look like a Thursday they trained — and two future dates used to sit in the middle
+  // of the past ones, in no order at all.
+  const state = gymState();
+  state.sessions = [
+    {
+      id: "s-late",
+      participants: ["c-jane"],
+      title: "Later",
+      startDate: "2026-10-04T08:00:00.000Z",
+    },
+    {
+      id: "s-early",
+      participants: ["c-jane"],
+      title: "Earlier",
+      startDate: "2026-02-01T08:00:00.000Z",
+      completed: true,
+    },
+  ];
+
+  const markdown = renderClientExportMarkdown(buildClientExport(state, "c-jane"));
+  const rows = markdown.split("\n").filter((line) => /Earlier|Later/.test(line));
+
+  assert.match(rows[0], /Earlier/, "the earliest session leads");
+  assert.match(rows[0], /held$/);
+  assert.match(rows[1], /Later/);
+  assert.match(rows[1], /planned$/);
+});
+
+test("the plan changes the dialog counts are in the document", () => {
+  // The export dialog counts them in its summary; the file had no section for them at all, so it
+  // promised the reader something it did not contain.
+  const state = gymState();
+  state.planUpdates = [
+    {
+      id: "p1",
+      clientId: "c-jane",
+      clientName: "Jane Doe",
+      date: "2026-03-04T10:00:00.000Z",
+      exerciseName: "Bench Press",
+      tag: "Too Hard - Reduce Load",
+      note: "stopped at four",
+      resolved: true,
+    },
+  ];
+
+  const markdown = renderClientExportMarkdown(buildClientExport(state, "c-jane"), {
+    tagText: (tag) => (tag === "Too Hard - Reduce Load" ? "Pretežko" : tag),
+  });
+
+  assert.match(markdown, /Programme changes \(1\)/);
+  assert.match(markdown, /2026-03-04 · Bench Press · Pretežko · stopped at four/);
+  // The stored English identifier never reaches the reader when the words for it are given.
+  assert.doesNotMatch(markdown, /Too Hard - Reduce Load/);
+});
