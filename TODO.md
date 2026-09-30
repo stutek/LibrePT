@@ -7028,7 +7028,7 @@ vajah na napravi. Opaženo na `main` `e8e90d8`, sl, 390 × 844; najprej opazil t
 (stopnja, elastika, dodatna teža ali kg) (`22df0f8`). **Odprto, čaka na Simona:** kaj naredita Esc
 in ✕. Okno ne piše sproti kot obrazec, zato pravilo »zavrže le Prekliči« zanj ne velja samo po sebi;
 enako vprašanje je pri »Moji podatki«. Odprto ostaja tudi: »prej«, za koga, od katere seje,
-številska tipkovnica pri ponovitvah (P3, ne čaka na nikogar).
+ponovitve odprejo številsko tipkovnico, kadar je v polju število (`f5c0744`).
 
 Način 3. Naloga (podagent, pred ogledom obrazca): stranki je bila vaja pretežka, po treningu ji
 popravi program. Pot: »Treningi, ki čakajo na pregled« → vrstica stranke → »Razreši«. `main`
@@ -7065,9 +7065,12 @@ Tega ni mogel preveriti, ker trening brez zapisane vaje ne pride v zgodovino (§
 
 ### 80.134 [~] P1 — Ocena obrazca »Uredi načrt«: načrt za jutri po osvežitvi izgine, ogrevanje ne more biti časovno
 
-**Stanje 2026-09-30 (librept-02):** urejevalnik pravi »Krogi«, kot podloga (`b95c673`). Vse ostalo
-je odprto: izginuli načrt čaka na §80.52, opomba pri vaji na Simona; časovna vaja po meri, prazna
-vrstica v novem sklopu in dva nenaročena počitka ne čakajo na nikogar.
+**Stanje 2026-09-30 (librept-02):** urejevalnik pravi »Krogi«, kot podloga (`b95c673`). Vaja po
+meri je lahko časovna (»Merjeno v«), 8:00 šteje 8 minut, in vaja iz kataloga ne prinese več počitka
+60 s, ki ga trener ni dodal (`c1bd2b8`). Prazno vrstico v novem sklopu »Končano« odstrani (test
+`test_a_new_circuit_left_empty_leaves_no_nameless_row`); ostane le, če trener zapusti urejanje brez
+»Končano«, na primer z osvežitvijo, kar ostaja kot manjša nevšečnost. **Odprto:** izginuli načrt
+čaka na §80.52, opomba pri vaji na Simona.
 
 Način 3. Naloga (podagent, pred ogledom obrazca): zvečer načrt jutrišnjega enournega treninga za
 stranko z bolečo levo ramo: ogrevanje 8 min, štiri vaje s serijami, ponovitvami in težo, dve od
@@ -7123,33 +7126,10 @@ ko telefon izgubi, izgubi vse stranke. Iz brskalnika orodja tega ni mogoče loč
 Androidu in v Safariju na iPhonu izvoziti kopijo in pogledati, ali je v »Prenosi« datoteka. Če je,
 se zapis zapre kot omejitev orodja in ostane le protislovje sporočil (P3).
 
-### 80.137 [~] P2 — Stranka z angleškim »Jezik obrazca« dobi slovensko vabilo in slovensko stran za odgovor
+### 80.137 [x] P2 — Stranka z angleškim »Jezik obrazca« dobi slovensko vabilo in slovensko stran za odgovor — popravljeno 2026-09-30
 
-**Stanje 2026-09-30 (librept-02):** vabilo na trening je v jeziku obrazca stranke: e-pošta, SMS in
-stran za odgovor (`dcc2cae`). **Odprto:** »Povabi stranko« (spodaj, dodano 19:11). Nova stranka
-jezika obrazca še nima, zato ga okno ne more prebrati; potrebuje izbiro jezika v oknu.
-
-**Scenarij in koraki:** stranka Emily Stone, e-pošta vpisana, »Uredi profil« → privolitev →
-»Jezik obrazca: English« → »Shrani«. Nato trening »Moč« za jutri z Emily, »Shrani«, v oknu »Pošlji
-vabila v koledar« pogledati povezavo »Pošlji vabilo«.
-
-**Opaženo:** »Pošlji obrazec za privolitev« pripravi angleško sporočilo (»Hi Emily Stone, To prepare
-our workout schedules …«). »Pošlji vabilo« pa slovensko: zadeva »Trening: Moč«, besedilo
-»Pozdravljen/a Emily Stone, Tvoj trening: Moč … Sporoči mi, ali lahko prideš:« in povezava z
-`?lang=sl`. Zaprta §80.50 (`86aefd7`) je v povezavo dodala jezik, v katerem je vabilo napisano, to je
-trenerjev. Trenerka dneva 08 (stranka govori le angleško): »Emily dobi vabilo v slovenščini.«
-
-**Težava in vpliv:** stranka, ki slovensko ne bere, vabila ne razume, stran za odgovor pa je tudi
-slovenska. Trener mora vsako vabilo prevesti na roke ali ga ne pošlje.
-
-**Predlog:** vabilo in povezava naj uporabita jezik, ki ga ima stranka zapisan (»Jezik obrazca«),
-kot ga že obrazec za privolitev. Opaženo na `main` `e8e90d8`, sl, 390 × 844.
-
-Enako pri »Povabi stranko« (`main` `e2daf5e`): okno nima izbire jezika stranke; za
-`emily@primer.invalid` pripravi slovensko sporočilo (»Tvoji podatki za najin trening … Vzame minuto«),
-povezavo `intake?lang=sl` in slovensko obvestilo o zasebnosti (`privacy-notice-sl.html`). Stran za
-prijavo sama ponudi »English«, »Slovenščina«, »Deutsch«, a do nje stranka pride prek slovenskega
-sporočila.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80137-x-p2--stranka-z-angleškim-jezik-obrazca-dobi-slovensko-vabilo-in-slovensko-stran-za-odgovor--popravljeno-2026-09-30);
+what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ### 80.138 [x] P1 — Konec serije, vpisan pri današnjem večeru, podvoji današnji večer in serije ne konča — popravljeno 2026-09-30
 

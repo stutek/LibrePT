@@ -20,6 +20,34 @@ Read [CHANGELOG.md](CHANGELOG.md) for what shipped and when. This file is why.
 
 ---
 
+### 80.137 [x] P2 — Stranka z angleškim »Jezik obrazca« dobi slovensko vabilo in slovensko stran za odgovor — popravljeno 2026-09-30
+
+**Stanje 2026-09-30 (librept-02):** vabilo na trening je v jeziku obrazca stranke: e-pošta, SMS in
+stran za odgovor (`dcc2cae`). **Odprto:** »Povabi stranko« (spodaj, dodano 19:11). Nova stranka
+jezika obrazca še nima, zato ga okno ne more prebrati; potrebuje izbiro jezika v oknu.
+
+**Scenarij in koraki:** stranka Emily Stone, e-pošta vpisana, »Uredi profil« → privolitev →
+»Jezik obrazca: English« → »Shrani«. Nato trening »Moč« za jutri z Emily, »Shrani«, v oknu »Pošlji
+vabila v koledar« pogledati povezavo »Pošlji vabilo«.
+
+**Opaženo:** »Pošlji obrazec za privolitev« pripravi angleško sporočilo (»Hi Emily Stone, To prepare
+our workout schedules …«). »Pošlji vabilo« pa slovensko: zadeva »Trening: Moč«, besedilo
+»Pozdravljen/a Emily Stone, Tvoj trening: Moč … Sporoči mi, ali lahko prideš:« in povezava z
+`?lang=sl`. Zaprta §80.50 (`86aefd7`) je v povezavo dodala jezik, v katerem je vabilo napisano, to je
+trenerjev. Trenerka dneva 08 (stranka govori le angleško): »Emily dobi vabilo v slovenščini.«
+
+**Težava in vpliv:** stranka, ki slovensko ne bere, vabila ne razume, stran za odgovor pa je tudi
+slovenska. Trener mora vsako vabilo prevesti na roke ali ga ne pošlje.
+
+**Predlog:** vabilo in povezava naj uporabita jezik, ki ga ima stranka zapisan (»Jezik obrazca«),
+kot ga že obrazec za privolitev. Opaženo na `main` `e8e90d8`, sl, 390 × 844.
+
+Enako pri »Povabi stranko« (`main` `e2daf5e`): okno nima izbire jezika stranke; za
+`emily@primer.invalid` pripravi slovensko sporočilo (»Tvoji podatki za najin trening … Vzame minuto«),
+povezavo `intake?lang=sl` in slovensko obvestilo o zasebnosti (`privacy-notice-sl.html`). Stran za
+prijavo sama ponudi »English«, »Slovenščina«, »Deutsch«, a do nje stranka pride prek slovenskega
+sporočila.
+
 ### 80.127 [x] P1 — Datum, vpisan po slovensko »6.10.2026«, se tiho shrani kot 6102-02-06 — popravljeno 2026-09-30
 
 **Scenarij in koraki:** »Ustvari trening«, tapniti polje »DATUM« in vpisati »6.10.2026«, kot se datum
