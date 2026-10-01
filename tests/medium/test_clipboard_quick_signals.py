@@ -322,3 +322,28 @@ def test_too_easy_still_records_the_sets(page, local_server):
     assert result["completedBefore"] == 0
     assert result["signalLogged"] is True
     assert result["completedAfter"] == 3
+
+
+_SETS_AFTER_UNDO = """(args) => {
+    const { getActiveSession, logQuickSignal } = window.__signals;
+    const { clientId, undoTag } = args;
+    const logs = () => getActiveSession().clientRoutines[clientId].logs.ex1;
+    logs()[0].completed = true;  // done by hand before any signal
+    logQuickSignal("Too Easy - Increase Load");
+    const afterSignal = logs().map((l) => l.completed);
+    logQuickSignal(undoTag);
+    return { afterSignal, afterUndo: logs().map((l) => l.completed) };
+}"""
+
+
+def test_taking_a_signal_back_unticks_only_the_sets_it_ticked(page, local_server):
+    # A second tap on Too Easy takes the signal back, and tapping Too Hard swaps it; either way the
+    # sets Too Easy marked done are no longer claimed as done. The set the trainer ticked by hand
+    # before the signal stays done.
+    for undo_tag in (EASY, HARD):
+        _mount_with_logs(page, local_server, "Easy Exercise")
+        result = page.evaluate(
+            _SETS_AFTER_UNDO, {"clientId": CLIENT_ID, "undoTag": undo_tag}
+        )
+        assert result["afterSignal"] == [True, True, True], undo_tag
+        assert result["afterUndo"] == [True, False, False], undo_tag

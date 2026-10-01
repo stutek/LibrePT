@@ -24,6 +24,27 @@ export function hasQuickSignal(clientId, exerciseName, tag) {
   return hasPlainQuickSignal(getActiveSession()?.feedback, clientId, exerciseName, tag);
 }
 
+// The sets a signal ticked, so taking the signal back unticks exactly those and not a set the
+// trainer ticked by hand. Held in memory only: the session and its set logs are stored records, and
+// a field written into them for an undo would travel into history. After a reload, taking a signal
+// back leaves its sets ticked, as it did before this existed.
+const setsTickedBySignal = new Map();
+const tickKey = (sessionId, clientId, exerciseId, tag) =>
+  `${sessionId}|${clientId}|${exerciseId}|${tag}`;
+
+function untickSetsOf(activeSession, clientId, exerciseName, tag) {
+  const clientState = activeSession.clientRoutines?.[clientId];
+  for (const exercise of clientState?.exercises || []) {
+    if (exercise.name !== exerciseName) continue;
+    const key = tickKey(activeSession.id, clientId, exercise.id, tag);
+    for (const index of setsTickedBySignal.get(key) || []) {
+      const log = clientState.logs?.[exercise.id]?.[index];
+      if (log) log.completed = false;
+    }
+    setsTickedBySignal.delete(key);
+  }
+}
+
 // Drops every untouched quick-signal entry for this tag from BOTH lists that hold one.
 function removeQuickSignal(clientId, exerciseName, tag, state) {
   const activeSession = getActiveSession();
@@ -31,6 +52,7 @@ function removeQuickSignal(clientId, exerciseName, tag, state) {
   if (removedIds.size === 0) return;
   activeSession.feedback = activeSession.feedback.filter((entry) => !removedIds.has(entry.id));
   state.planUpdates = state.planUpdates.filter((update) => !removedIds.has(update.id));
+  untickSetsOf(activeSession, clientId, exerciseName, tag);
 }
 
 // The mutual-exclusion enforcement point for callers OTHER than logQuickSignal — specifically
@@ -85,9 +107,12 @@ export function logQuickSignal(tag, exId) {
     // the tags' own rule (domain/feedbackTags.js): Too Hard wrote three finished sets at the planned
     // weight for a set the client had just failed.
     if (tagImpliesPerformed(tag)) {
-      for (const log of clientState.logs[currentExercise.id] || []) {
+      const ticked = [];
+      (clientState.logs[currentExercise.id] || []).forEach((log, index) => {
+        if (!log.completed) ticked.push(index);
         log.completed = true;
-      }
+      });
+      setsTickedBySignal.set(tickKey(activeSession.id, clientId, currentExercise.id, tag), ticked);
     }
   }
 
