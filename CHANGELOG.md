@@ -100,7 +100,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   deletes a proof before its commit.
 - **Swapping an exercise for one measured differently no longer keeps the old load.** Leg Press at
   80 kg swapped for Wall Sit read "BW+80kg"; the sets not yet done now start from 10 reps and no
-  weight, and a swap to the same kind of exercise keeps the load.
+  weight. A swap to the same kind of exercise on other equipment keeps the reps and drops the load:
+  Barbell Back Squat at 75 kg swapped for Dumbbell Goblet Squat kept 75 kg. Only a swap on the same
+  equipment keeps both.
 - **"Copy this plan" says it copies to another client of the same session**, is hidden when there is
   nobody else, and says whose plan it became. It read as copying to another day.
 - **Offline, the Slovenian header says "Brez povezave"**, not "Offline".

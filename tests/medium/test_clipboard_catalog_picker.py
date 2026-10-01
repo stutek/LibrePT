@@ -253,7 +253,7 @@ def test_a_movement_added_from_the_catalog_brings_no_rest_the_trainer_did_not_as
     assert page.locator(".editor-rest-row").count() == rests_before
 
 
-def _swap_first_row_to(page, local_server, current, target, weight=80):
+def _swap_first_row_to(page, local_server, current, target, weight=80, reps=10):
     """Swap the only row from `current` to the catalog movement `target` through the picker."""
     load_with_stub(
         page,
@@ -268,8 +268,8 @@ def _swap_first_row_to(page, local_server, current, target, weight=80):
                         modality="strength",
                         metric="reps",
                         sets=[
-                            {"reps": 10, "weight": weight, "completed": False},
-                            {"reps": 10, "weight": weight, "completed": False},
+                            {"reps": reps, "weight": weight, "completed": False},
+                            {"reps": reps, "weight": weight, "completed": False},
                         ],
                     )
                 ]
@@ -320,3 +320,16 @@ def test_swapping_for_the_same_kind_of_movement_keeps_the_load(page, local_serve
     after = _swap_first_row_to(page, local_server, "Leg Press", "Leg Extension")
     assert after["name"] == "Leg Extension"
     assert after["sets"] == [[10, 80], [10, 80]]
+
+
+def test_swapping_to_other_equipment_drops_the_load_and_keeps_the_reps(
+    page, local_server
+):
+    """Barbell Back Squat at 75 kg swapped for Dumbbell Goblet Squat: both are counted in reps and kg,
+    but 75 kg is a barbell's load and one dumbbell held at the chest is a fraction of it. Kept, it is a
+    wrong number that looks right. The reps are the trainer's scheme and still hold."""
+    after = _swap_first_row_to(
+        page, local_server, "Barbell Back Squat", "Dumbbell Goblet Squat", weight=75, reps=5
+    )
+    assert after["name"] == "Dumbbell Goblet Squat"
+    assert after["sets"] == [[5, 0], [5, 0]]

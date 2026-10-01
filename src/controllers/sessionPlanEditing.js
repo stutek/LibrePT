@@ -88,14 +88,14 @@ function injectExerciseIntoActivePlan(baseEx, { sets, reps, weight, rest }) {
 const DEFAULT_REPS = 10;
 const DEFAULT_WEIGHT = 0;
 
-// Puts the row's not-yet-done targets back to the defaults. A set the trainer already completed is a
-// record of what was done and stays as it is.
-function resetTargets(item, clientState) {
-  if ("repsTarget" in item) item.repsTarget = DEFAULT_REPS;
+// Puts the row's not-yet-done targets back to the defaults — the load always, the reps unless
+// `keepReps`. A set the trainer already completed is a record of what was done and stays as it is.
+function resetTargets(item, clientState, { keepReps = false } = {}) {
+  if (!keepReps && "repsTarget" in item) item.repsTarget = DEFAULT_REPS;
   if ("weightTarget" in item) item.weightTarget = DEFAULT_WEIGHT;
   for (const set of [...(item.sets || []), ...(clientState.logs?.[item.id] || [])]) {
     if (set.completed) continue;
-    set.reps = DEFAULT_REPS;
+    if (!keepReps) set.reps = DEFAULT_REPS;
     set.weight = DEFAULT_WEIGHT;
   }
 }
@@ -118,6 +118,13 @@ function swapPlanItemMovement(slotId, baseEx) {
     (item.loadUnit || "kg") !== loadUnit ||
     modalityOf(item) !== modality ||
     primaryMetricOf(item) !== metric;
+  // The same kind on other equipment keeps the reps but not the load: 75 kg on a barbell, carried to
+  // one dumbbell held at the chest, is a wrong number that looks right. A row whose old movement is
+  // not in the catalog has no equipment to compare, and keeps its load.
+  const { state } = getAppDeps();
+  const oldId = resolveCurrentMovementId(item, state);
+  const oldEquipment = libraryExercises(state).find((e) => e.id === oldId)?.equipment;
+  const equipmentChanged = !!oldEquipment && oldEquipment !== baseEx.equipment;
   item.exerciseId = baseEx.id;
   item.name = baseEx.name;
   item.category = baseEx.category;
@@ -127,6 +134,7 @@ function swapPlanItemMovement(slotId, baseEx) {
   item.modality = modality;
   item.metric = metric;
   if (kindChanged) resetTargets(item, clientState);
+  else if (equipmentChanged) resetTargets(item, clientState, { keepReps: true });
   markEditorRow(slotId, { kind: "swap", focus: false });
   saveActiveSessionToCache();
   const { saveToLocalStorage } = getAppDeps();
