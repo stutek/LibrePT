@@ -9593,6 +9593,29 @@ Chrome CDP; brez prestreženih napak, brez pregledovanja kode.
 
 **Popravljeno 2026-10-01** (`1859e0a`): filtri plošče so shranjeni v `sessionStorage` kot napol izpolnjen obrazec: osvežitev jih ohrani, nov zavihek začne s celotno ploščo.
 
+### 80.162 [x] P2 — Brskalnikov Nazaj zamenja stran pod še odprtim obrazcem stranke — popravljeno 2026-10-02
+
+**Scenarij in koraki:** iz imenika odpreti »SIM Eva Dvojnik (jug)«, pritisniti
+»Uredi profil« in v »Opombe« vpisati »SIMULACIJA: ob petkih samo dopoldne.«.
+Uporabiti brskalnikovo navigacijo Nazaj.
+
+**Opaženo:** naslov strani se spremeni s profila na imenik `/clients?lang=sl`,
+pod obrazcem je seznam strank. Obrazec »Uredi profil stranke« pa ostane odprt,
+v njem sta ista oseba in vpisana opomba, seznam pod njim ni dosegljiv za dotik.
+Šele križec »Zapri« odstrani obrazec. Opomba se ohrani v profilu tudi po osvežitvi
+in ponovnem odprtju; izgube podatkov v tem scenariju ni.
+
+**Težava in vpliv:** trener z Nazaj ne zapusti obrazca, čeprav se stran pod njim
+že zamenja. Poiskati mora še ločeni izhod iz obrazca, da pride do imenika.
+To je posebej zavajajoče pri uporabi telefonske navigacije Nazaj.
+
+**Predlog:** Nazaj naj najprej zaključi odprti obrazec skladno s pravilom o
+ohranjanju vnosa in šele naslednji korak zamenja osnovni pogled. Preveriti odhod
+iz obstoječega profila z vpisano opombo. Opaženo na objavljeni `6c8b556`, sl,
+390 × 844, Chrome CDP; brez prestreženih napak in brez pregledovanja kode.
+
+**Popravljeno 2026-10-02** (`6da0e90`): urejanje stranke ima svojo pot, `/clients/{id}/edit`. Nazaj obrazec zapre in ohrani vpisano, stran stranke ostane. Ob tem odpravljeno še, da je zaključek obrazca po odhodu na drugo stran stran stranke spet prikazal čez novo stran. Testa `test_back_closes_the_client_editor_and_stays_on_the_client` in `test_leaving_the_client_editor_for_another_page_shows_that_page`.
+
 ## 99.1 [x] Padli test ni bil okolje, ampak iskanje niza v naključnem id-ju — popravljeno 2026-10-01
 
 Po potisku 212 commitov je 2026-10-01 padel tek »Build, Verify and Deploy«, opravilo »Stage 1 ·

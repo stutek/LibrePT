@@ -4428,26 +4428,9 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80160-x-p2--za�
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80161-x-p2--osvežitev-seznama-odstrani-izbrano-obdobje--popravljeno-2026-10-01).
 
-### 80.162 [ ] P2 — Brskalnikov Nazaj zamenja stran pod še odprtim obrazcem stranke
+### 80.162 [x] P2 — Brskalnikov Nazaj zamenja stran pod še odprtim obrazcem stranke — popravljeno 2026-10-02
 
-**Scenarij in koraki:** iz imenika odpreti »SIM Eva Dvojnik (jug)«, pritisniti
-»Uredi profil« in v »Opombe« vpisati »SIMULACIJA: ob petkih samo dopoldne.«.
-Uporabiti brskalnikovo navigacijo Nazaj.
-
-**Opaženo:** naslov strani se spremeni s profila na imenik `/clients?lang=sl`,
-pod obrazcem je seznam strank. Obrazec »Uredi profil stranke« pa ostane odprt,
-v njem sta ista oseba in vpisana opomba, seznam pod njim ni dosegljiv za dotik.
-Šele križec »Zapri« odstrani obrazec. Opomba se ohrani v profilu tudi po osvežitvi
-in ponovnem odprtju; izgube podatkov v tem scenariju ni.
-
-**Težava in vpliv:** trener z Nazaj ne zapusti obrazca, čeprav se stran pod njim
-že zamenja. Poiskati mora še ločeni izhod iz obrazca, da pride do imenika.
-To je posebej zavajajoče pri uporabi telefonske navigacije Nazaj.
-
-**Predlog:** Nazaj naj najprej zaključi odprti obrazec skladno s pravilom o
-ohranjanju vnosa in šele naslednji korak zamenja osnovni pogled. Preveriti odhod
-iz obstoječega profila z vpisano opombo. Opaženo na objavljeni `6c8b556`, sl,
-390 × 844, Chrome CDP; brez prestreženih napak in brez pregledovanja kode.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80162-x-p2--brskalnikov-nazaj-zamenja-stran-pod-še-odprtim-obrazcem-stranke--popravljeno-2026-10-02).
 
 ### 80.163 [~] Codexov pregled »listek ali aplikacija« — razvrščeno 2026-10-01
 
@@ -4475,6 +4458,26 @@ listka. Ta izdaja je bila 541 commitov za `main`; točke so razvrščene proti `
   filtri kataloga (All, Chest, Barbell) so že med odločitvami za Simona v §38.20.
 - **Preverjeno 2026-10-01 (`62e51aa2`):** delo brez povezave (vnos stranke in treninga, reload s servisnim delavcem ohrani IndexedDB; clean), varnostna kopija in obnova (izvoz JSON, uvoz in obnova v sveži seji zamenja podatke; clean), zapis v zgodovino po zaključku (brez zamrznitve, modal v aplikaciji, zgodovina v kartoteki stranke prikazuje opravljene serije in vaje; clean).
 - **Še ni preverjeno:** tisk, fizični telefon.
+
+### 80.165 [ ] P3 — Vrstica obvestil je v nemščini in slovenščini pri 390 pikah preširoka
+
+**Opaženo 2026-10-02** v testu postavitve, ko je obhod zaprl urejanje stranke in nato odprl rutine:
+zaprtje obrazca pokliče `renderNotificationArea`, ki izriše povzetek obvestil tudi na straneh, kjer
+ga zagon ni. Tam ikona `#notification-summary-icon` gleda 15 pik čez naslov, značke
+`.notification-summary-badges` 37 pik čez glavo in `#clipboard-bar-meta` 117 pik čez vrstico
+podloge (nemščina in slovenščina, 390 pik; enako na iPhone 14 in Galaxy S23 Ultra). Trener pride
+do tega, ko uredi stranko in odpre drugo stran. Obhod zato urejanje stranke zdaj obišče zadnje
+(`6da0e90`); ta točka je tisto, kar je s tem ostalo nepreverjeno.
+
+**Odprto:** dvoje. Ali je prav, da se povzetek izriše na vsaki strani (zagon ga ne), in kako se
+vrstica skrči, ko so besede dolge. Preizkus: obhod obišče urejanje stranke na svojem mestu in ne
+najde ničesar.
+
+**Ob tem, k §80.164:** na `main` `1feb6b4` (Playwright, Chromium) se ne ponovi noben del. Po Esc ima
+zapis nov telefon in stran stranke ga kaže; »Shrani stranko« je ob odprtju na zaslonu, dno na 804
+od 844 pik in na 640 od 680 pik. Test `test_escape_keeps_an_edit_of_a_client_on_record` drži prvi
+del. Ponoviti z orodjem, s katerim je bilo opaženo, in povedati, kako sta bili izmerjeni tipka in
+višina.
 
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
