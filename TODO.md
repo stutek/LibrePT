@@ -1377,10 +1377,15 @@ user-visible literals in markup. The count may not rise, and the baseline follow
 who cannot read the current language still finds the way to change it.
 
 **[ ] Still English, known:**
-- the erasure receipt, the email the Compose button writes to the client, and the confirmation word
-  `ERASE` ([clientDataRights.js](src/modules/clients/clientDataRights.js)). The email and the word are
-  wording decisions, not only translations: the email goes to the client, and the word is what stops
-  an erasure by reflex;
+- the erasure receipt and the email the Compose button writes to the client
+  ([clientDataRights.js](src/modules/clients/clientDataRights.js)). The email is a wording decision, not
+  only a translation: it goes to the client. (The confirmation word is translated: the Slovenian screen
+  asks for »IZBRIŠI«, seen 2026-10-01 on `main` `6230070`.) The receipt is what the trainer must act on
+  after an erasure: on a Slovenian screen it reads »Erased in the app as Client #I3W10R. The rest is
+  yours — LibrePT cannot reach these: The gym calendar — …«;
+- **waits on Simon:** the erased client's label »Client #I3W10R« is stored in the record and goes into
+  sync and exports, so translating it is a data decision (may a stored label carry a language?). This
+  question was left open in the archive when §80.101 closed, with no home here;
 - the restore warning's list of what would be lost ("3 clients"), in
   [backupRestore.js](src/modules/common/backupRestore.js);
 - screen-reader labels in `activeSessionOverlayView.js`, `applicationHeader.js` and
