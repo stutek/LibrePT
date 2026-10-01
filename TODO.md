@@ -4469,6 +4469,27 @@ izbor ohrani, osvežitev pa ga brez pojasnila odstrani.
 vrnitev na prejšnji izbor. Opaženo na objavljeni `6c8b556`, sl, 390 × 844,
 Chrome CDP; brez prestreženih napak, brez pregledovanja kode.
 
+### 80.162 [ ] P2 — Brskalnikov Nazaj zamenja stran pod še odprtim obrazcem stranke
+
+**Scenarij in koraki:** iz imenika odpreti »SIM Eva Dvojnik (jug)«, pritisniti
+»Uredi profil« in v »Opombe« vpisati »SIMULACIJA: ob petkih samo dopoldne.«.
+Uporabiti brskalnikovo navigacijo Nazaj.
+
+**Opaženo:** naslov strani se spremeni s profila na imenik `/clients?lang=sl`,
+pod obrazcem je seznam strank. Obrazec »Uredi profil stranke« pa ostane odprt,
+v njem sta ista oseba in vpisana opomba, seznam pod njim ni dosegljiv za dotik.
+Šele križec »Zapri« odstrani obrazec. Opomba se ohrani v profilu tudi po osvežitvi
+in ponovnem odprtju; izgube podatkov v tem scenariju ni.
+
+**Težava in vpliv:** trener z Nazaj ne zapusti obrazca, čeprav se stran pod njim
+že zamenja. Poiskati mora še ločeni izhod iz obrazca, da pride do imenika.
+To je posebej zavajajoče pri uporabi telefonske navigacije Nazaj.
+
+**Predlog:** Nazaj naj najprej zaključi odprti obrazec skladno s pravilom o
+ohranjanju vnosa in šele naslednji korak zamenja osnovni pogled. Preveriti odhod
+iz obstoječega profila z vpisano opombo. Opaženo na objavljeni `6c8b556`, sl,
+390 × 844, Chrome CDP; brez prestreženih napak in brez pregledovanja kode.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
