@@ -53,10 +53,8 @@ so there is no anonymous way around it. The annotations usually say only
 or for the log pasted in. A cause nobody measured is never reported as a cause: write what fell and
 what is missing, and stop there.
 
-The tool picks a login up by itself, in this order: `GH_TOKEN`, `GITHUB_TOKEN`, the file named by
-`GH_TOKEN_FILE`, then `gh auth token`. Where that file is kept is the maintainer's own note, not a
-line in this repository — the repository is public, and a credential's location belongs with the
-credential.
+The tool picks a login up by itself, in this order: `GH_TOKEN`, `GITHUB_TOKEN`, then `gh auth
+token`. The login is `gh`'s own; never write a token into a file, a message or this repository.
 
 ## The cheap narrowing that needs no log
 
