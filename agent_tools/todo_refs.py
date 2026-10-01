@@ -48,11 +48,6 @@ EXEMPT = {
     "tests/unit/test_todo_hygiene.py",
     "tests/unit/test_todo_refs.py",
     "tests/unit/test_catalog_coverage.py",
-    # TEMPORARY. Its comments still hold five pointers into TODO. The test suite refuses to run
-    # against a dev server whose copy of this file differs from the working tree, and the running
-    # server is the maintainer's to restart. Re-check condition: the next restart of the dev server —
-    # then remove the pointers and this line in the same change.
-    "deploy/local_http_server.py",
 }
 
 NAMES_TODO = re.compile(

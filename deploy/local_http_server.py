@@ -36,7 +36,7 @@ from urllib.parse import urlsplit
 # The one declaration of the dev-server port. `build` (the ZAP target), `tests/conftest.py` (which starts
 # and health-checks this server) and this module's own default all read it from here — before
 # 2026-08-18 it appeared in six places, which is the same shape of problem as the thirteen Python
-# pins: nothing wrong until one of them moves. Prose names it too (TODO §28.1): a comment quoting the
+# pins: nothing wrong until one of them moves. Prose names it too: a comment quoting the
 # number is a copy that goes stale silently, and `python -m agent_tools.constant_copies` finds those.
 #
 # A gate run in a snapshot (build/snapshot.py) serves its own copy of src/ on SNAPSHOT_SERVER_PORT and
@@ -54,7 +54,7 @@ def dev_server_url(path=""):
     """The address the dev server actually answers on, built from the two declarations above.
 
     Exists so no caller — a test, an agent tool, a usage example — has to write the port or the base
-    path out again (TODO §28.1). `path` is appended to the base, e.g. `?init=demo_data_load`.
+    path out again. `path` is appended to the base, e.g. `?init=demo_data_load`.
     """
     return f"http://localhost:{DEV_SERVER_PORT}{DEV_SERVER_BASE_PATH}{path}"
 
@@ -168,16 +168,16 @@ SECURITY_HEADERS = {
     "Content-Security-Policy": (
         "default-src 'self'; "
         # accounts.google.com serves Google Identity Services' token-client script, loaded lazily
-        # only when a trainer taps Connect Google Drive (TODO §1.5/§3.3) — never on boot, so the
+        # only when a trainer taps Connect Google Drive — never on boot, so the
         # normal offline-first path never touches it.
         "script-src 'self' https://accounts.google.com; "
-        # Every stylesheet and font is same-origin since Font Awesome was vendored (TODO §12.6):
+        # Every stylesheet and font is same-origin since Font Awesome was vendored into src/fonts/:
         # no external style or font origin remains, so neither directive needs a host allowance.
         "style-src 'self' 'unsafe-inline'; "
         "font-src 'self'; "
         "img-src 'self' data:; "
         # connect-src governs fetch()/XHR. googleapis.com/oauth2.googleapis.com/accounts.google.com
-        # are the Drive appDataFolder sync target and its token endpoints (TODO §1.5) — lazy,
+        # are the Drive appDataFolder sync target and its token endpoints — lazy,
         # connect-only-when-used. The precache needs no allowance now that the shell is same-origin.
         "connect-src 'self' https://www.googleapis.com https://oauth2.googleapis.com https://accounts.google.com; "
         "base-uri 'self'; "
