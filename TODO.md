@@ -5740,7 +5740,8 @@ ali iz `gh auth token`. **Kje je ta datoteka in katere pravice ima prijava, ni z
 repozitoriju** — ta je javen, zato to nosijo Simonova zasebna pravila. Brez prijave orodje pošteno
 izpiše, da dnevnika ne more brati, in nič ne ugiba.
 
-**Čaka na Simona:** nastavljena spremenljivka `GH_TOKEN_FILE` in prijava v tej datoteki. Prijave ne
+Prijava je v datoteki in 2026-10-01 bere teke tega repozitorija. **Čaka na Simona:** spremenljivka
+`GH_TOKEN_FILE` v okolju agentov ni nastavljena, zato je `watch.py` sam ne najde. Prijave ne
 pošiljaj v pogovor — s tem pride v zapis seje; prvi poskus je zato odpadel.
 
 ### 99.2 [ ] Python v `.agents/` ni lintan
