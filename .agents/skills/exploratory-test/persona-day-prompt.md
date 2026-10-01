@@ -44,11 +44,11 @@ Save the day, in Slovenian, to `{day_file}`: headings "Kdo sem", "Treningi", "Po
 
 Now try to run that day, hour by hour, with the app. It runs at `{app_url}`. Drive it with the
 browser tool described below; it holds one phone-sized headless browser open between commands. Start
-with an EMPTY app: run `rm -rf .claude/skills/exploratory-test/.session` before `start`. Enter your
+with an EMPTY app: `start` deletes the browser profile and begins with a fresh one. Enter your
 own clients, sessions and exercises; do not use the demo data or the sandbox.
 
 ```
-S=.claude/skills/exploratory-test/explore.py
+S=.agents/skills/exploratory-test/explore.py
 .venv/bin/python $S start
 .venv/bin/python $S goto '{app_url}?lang=sl'
 .venv/bin/python $S text 3000        # what the screen says
