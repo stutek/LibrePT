@@ -23,7 +23,7 @@ import {
   syncSessionFocusUrl,
 } from "./controllers/activeSessionController.js";
 import { primeBackupHealth, refreshBackupBadge } from "./controllers/backupHealthController.js";
-import { openNewClient } from "./controllers/clientFormsController.js";
+import { openClientEditor, openNewClient } from "./controllers/clientFormsController.js";
 import {
   openExerciseCreateDialog,
   setupExerciseForms as setupExerciseFormsController,
@@ -511,6 +511,7 @@ async function init() {
       if (routine) editRoutineLive(routine);
     },
     openAdjustmentWizard,
+    openClientEditor,
   });
 
   // Every view's shell markup is injected here, before any per-view setup step queries an element
@@ -1005,6 +1006,7 @@ function setupClientForms() {
     getState,
     t,
     navigateToPath,
+    urlFor,
     saveToLocalStorage: saveState,
     populateDropdownSelectors,
     showErrorView,

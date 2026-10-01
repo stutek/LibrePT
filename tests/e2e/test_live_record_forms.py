@@ -8,6 +8,9 @@
 # neither.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
+import re
+from urllib.parse import urlparse
+
 import pytest
 from playwright.sync_api import expect
 
@@ -130,6 +133,68 @@ def test_closing_with_the_cross_keeps_what_was_typed(page, local_server):
     expect(page.locator("#dialog-client")).to_be_hidden()
 
     assert _record(page, "clients", "Kept By Cross") is not None
+
+
+def test_escape_keeps_an_edit_of_a_client_on_record(page, local_server):
+    """An exploratory test changed a client's phone, pressed Escape and found the old number again.
+    Only Cancel undoes; Escape is one of the other ways out, and those keep what was typed."""
+    _open_clients(page, local_server)
+    page.locator(".client-card").first.click()
+    page.locator("#btn-edit-client").click()
+    name = page.locator("#client-name").input_value()
+    page.locator("#client-phone").fill("040 999 888")
+    page.keyboard.press("Escape")
+    expect(page.locator("#dialog-client")).to_be_hidden()
+
+    assert _record(page, "clients", name)["phone"] == "040 999 888"
+    page.locator("#btn-edit-client").click()
+    expect(page.locator("#client-phone")).to_have_value("040 999 888")
+
+
+def test_back_closes_the_client_editor_and_stays_on_the_client(page, local_server):
+    """With "Edit profile" open, the browser's Back changed the page underneath to the client list and
+    left the form on top of it, so the list could not be reached until the ✕ was found. Back now
+    closes the form, keeps what was typed, and leaves the client's page where it was."""
+    _open_clients(page, local_server)
+    page.locator(".client-card").first.click()
+    page.wait_for_url("**/clients/*")
+    client_url = page.url
+    page.locator("#btn-edit-client").click()
+    page.wait_for_url("**/edit*")
+    name = page.locator("#client-name").input_value()
+    page.locator("#client-notes").fill("Only mornings on Fridays.")
+
+    page.go_back()
+    expect(page.locator("#dialog-client")).to_be_hidden()
+    assert page.url == client_url
+    assert _record(page, "clients", name)["notes"] == "Only mornings on Fridays."
+
+    page.reload()
+    page.locator("#btn-edit-client").click()
+    page.wait_for_url("**/edit*")
+    page.reload()
+    expect(page.locator("#dialog-client")).to_be_visible()
+    expect(page.locator("#client-notes")).to_have_value("Only mornings on Fridays.")
+
+
+def test_leaving_the_client_editor_for_another_page_shows_that_page(page, local_server):
+    """The form is finished when its `close` event arrives, after the next page is already showing,
+    and finishing redrew the client's page on top of it: the address said /routines, the screen
+    showed the client."""
+    _open_clients(page, local_server)
+    page.locator(".client-card").first.click()
+    page.locator("#btn-edit-client").click()
+    page.wait_for_url("**/edit*")
+    page.evaluate(
+        "(path) => { window.history.pushState(null, '', path);"
+        "            window.dispatchEvent(new PopStateEvent('popstate')); }",
+        urlparse(local_server).path + "routines",
+    )
+    expect(page.locator("#view-routines")).to_have_class(re.compile(r"\bactive\b"))
+    page.wait_for_timeout(300)  # the `close` event arrives after the dialog closed
+    expect(page.locator("#view-client-detail")).not_to_have_class(
+        re.compile(r"\bactive\b")
+    )
 
 
 def test_a_client_typed_and_erased_again_is_not_kept(page, local_server):

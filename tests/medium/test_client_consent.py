@@ -35,6 +35,7 @@ CURRENT_FORM_VERSION = re.search(
 STUB = view_stub(
     imports="""
 import { bootClientForms } from './appBoot.js';
+import { openClientEditor } from './controllers/clientFormsController.js';
 import {
   renderClientDetailViewShell,
   renderClientDirectoryViewShell,
@@ -68,11 +69,19 @@ const state = {
 renderClientDirectoryViewShell();
 renderClientDetailViewShell();
 
+// No router here: the client.edit route's enter() is what opens the editor in the app, so this fake
+// does that one pairing itself, keyed on what urlFor() named.
+const routeTo = (path) => {
+  const [name, clientId] = path.split('/').filter(Boolean);
+  if (name === 'client.edit') openClientEditor(clientId);
+};
+const urlFor = (name, params = {}) => `/${name}/${params.clientId ?? ''}`;
 bootClientForms({
   // The controller reads the state WHEN a handler runs, not when it was wired.
   getState: () => state,
   t,
-  navigateToPath: noop,
+  navigateToPath: routeTo,
+  urlFor,
   saveToLocalStorage: noop,
   populateDropdownSelectors: noop,
   showErrorView: noop,

@@ -142,8 +142,18 @@ export function buildRouteTable() {
       render: (ctx) => ctx.deps.renderClientsList?.(),
     }),
   );
-  registry.register(
+  const clientDetail = registry.register(
     new ClientDetailRoute({ name: "client.detail", pattern: "/clients/:clientId" }),
+  );
+  // Over the client's own page, so Back closes the form and leaves that page where it was.
+  registry.register(
+    new DialogRoute({
+      name: "client.edit",
+      parent: clientDetail,
+      segment: "/edit",
+      dialogId: "dialog-client",
+      open: (ctx) => ctx.deps.openClientEditor?.(ctx.params.clientId),
+    }),
   );
 
   const adjustments = registry.register(

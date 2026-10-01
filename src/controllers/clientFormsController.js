@@ -122,10 +122,20 @@ export function openNewClient(options) {
   openNewClientDialog?.(options);
 }
 
+let openClientEditorDialog = null;
+
+/** Opens the client's edit form. Called by the `client.edit` route, so the form has a URL: Back
+ *  closes it and leaves the client's page underneath, and a reload opens it again. Without one, Back
+ *  replaced the page under a form that stayed open. */
+export function openClientEditor(clientId) {
+  openClientEditorDialog?.(clientId);
+}
+
 export function setupClientForms({
   getState,
   t,
   navigateToPath,
+  urlFor,
   saveToLocalStorage,
   populateDropdownSelectors,
   showErrorView,
@@ -147,7 +157,11 @@ export function setupClientForms({
     // The drawer's "nothing saved yet" welcome is judged from the state, and the first client
     // is what ends it; it went on greeting an empty app until the next reload.
     renderNotificationArea?.();
-    if (client && getActiveDetailClientId() === client.id) {
+    // Only while the client's page is on screen. The form is finished when its `close` event arrives,
+    // a moment after the dialog closed: when Back or a link closed it, the next page is already
+    // showing, and redrawing the client's page put it back over that page.
+    const detailOnScreen = $id("view-client-detail")?.classList.contains("active");
+    if (client && detailOnScreen && getActiveDetailClientId() === client.id) {
       showClientDetails({
         clientId: client.id,
         state: getState(),
@@ -248,8 +262,12 @@ export function setupClientForms({
   $id("btn-add-client").addEventListener("click", () => openNewClientDialog());
 
   $id("btn-edit-client").addEventListener("click", () => {
-    const activeId = getActiveDetailClientId();
-    const client = getState().clients.find((c) => c.id === activeId);
+    const clientId = getActiveDetailClientId();
+    if (clientId) navigateToPath(urlFor("client.edit", { clientId }));
+  });
+
+  openClientEditorDialog = (clientId) => {
+    const client = getState().clients.find((c) => c.id === clientId);
     if (!client) return;
 
     $id("client-modal-title").textContent = t("edit_client_profile");
@@ -266,7 +284,7 @@ export function setupClientForms({
 
     openModal("dialog-client");
     live.openExisting(client);
-  });
+  };
 
   // ✕ keeps what was typed, like Save; only Cancel undoes it (liveRecordForm.js).
   if (closeBtn) closeBtn.addEventListener("click", () => closeModal("dialog-client"));

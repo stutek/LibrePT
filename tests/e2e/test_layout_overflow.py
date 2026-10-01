@@ -69,7 +69,12 @@ STATIC_ROUTE_WALK = [
     ("wipe", "/wipe"),
 ]
 DASHBOARD_ROUTE = "sessions.day"
-RECORD_DETAIL_ROUTES = ["client.detail", "routine.edit", "adjustment.apply"]
+RECORD_DETAIL_ROUTES = [
+    "client.detail",
+    "client.edit",
+    "routine.edit",
+    "adjustment.apply",
+]
 LIVE_SESSION_ROUTES = [
     "session.focus",
     "session",
@@ -169,6 +174,19 @@ def _walk_record_details(page, base, findings):
         _sweep(page, findings, "adjustment.apply")
 
 
+def _walk_client_editor(page, base, findings):
+    """Last, because leaving the client's form redraws the notification area, and the routes swept
+    after it would then be swept in a state the rest of the walk never reaches."""
+    _nav(page, base + "/clients")
+    client_card = page.locator("#clients-list .client-card").first
+    if client_card.count():
+        client_card.click()
+        _settle(page)
+        page.locator("#btn-edit-client").click()
+        _settle(page)
+        _sweep(page, findings, "client.edit")
+
+
 def _walk_live_session(page, base, findings):
     """The live session and its editor — the densest screens in the app, and the ones a trainer
     reads at arm's length mid-set. Opening a session upgrades the URL to carry both ids, which is
@@ -215,6 +233,7 @@ def _walk_the_app(page, local_server, findings, query=""):
     _walk_static_routes(page, base, findings)
     _walk_record_details(page, base, findings)
     _walk_live_session(page, base, findings)
+    _walk_client_editor(page, base, findings)
 
 
 def _report(findings):
