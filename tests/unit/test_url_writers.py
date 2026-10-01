@@ -46,7 +46,7 @@ def test_router_history_writes_carry_the_query_string(src_dir):
     )
     writer = source[source.index("function writeHistory") :]
     body = writer[: writer.index("\n}")]
-    assert "carriedSearch()" in body, (
+    assert "urlCarryingSearch(route)" in body, (
         "writeHistory must carry the share params onto the new URL"
     )
     for state_call in ("pushState", "replaceState"):
@@ -54,8 +54,8 @@ def test_router_history_writes_carry_the_query_string(src_dir):
 
     # ?init= seeds demo data and is consumed once at boot. Carrying it onward would make every URL
     # copied out of the address bar a demo-seeding link for whoever opens it.
-    carried = source[source.index("function carriedSearch") :]
+    carried = source[source.index("function urlCarryingSearch") :]
     carried = carried[: carried.index("\n}")]
     assert "BOOT_ONLY_PARAMS" in carried and "delete" in carried, (
-        "carriedSearch must strip the boot-only params before re-appending the query string"
+        "urlCarryingSearch must strip the boot-only params before re-appending the query string"
     )

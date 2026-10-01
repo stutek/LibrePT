@@ -938,7 +938,11 @@ function determineParticipantRoutineValue(
   if (draft?.clientRoutines?.[client.id]) return draft.clientRoutines[client.id];
   if (isPlanningModeActive) return "empty_plan";
   if (targetSession?.participants.includes(client.id)) return targetSession.routineId;
-  if (preselectedRoutineId && preselectedClientId === client.id) return preselectedRoutineId;
+  // A routine chosen for one client is theirs; a routine chosen with nobody ("Start group session"
+  // on a routine) is for everyone the trainer adds.
+  if (preselectedRoutineId && (!preselectedClientId || preselectedClientId === client.id)) {
+    return preselectedRoutineId;
+  }
   // Someone added to a session that already has a programme joins that programme. Offering the
   // library's first routine instead replaced the session's plan when the form was saved.
   if (targetSession?.routineId) return targetSession.routineId;

@@ -4,7 +4,7 @@ Ensures /session/new and /session/setup/:id are URL-addressable routes and that 
 auto-persist across page reloads via localStorage.
 """
 
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 import pytest
 from playwright.sync_api import expect
@@ -85,6 +85,33 @@ def test_a_group_session_started_from_a_routine_survives_a_reload(page, local_se
     page.go_back()
     page.wait_for_selector("#routines-list")
     assert urlparse(page.url).path.rstrip("/").endswith("/routines")
+
+
+def test_a_group_session_started_from_a_routine_gives_everyone_that_routine(
+    page, local_server
+):
+    """ "Start group session" on a routine opened a form where every client added got "Empty plan,
+    no routine": the routine was handed only to a client chosen in advance, and a group start has
+    none. Opened from a Slovenian link, the routine's id also came back as "…?lang=sl", because
+    the language was glued onto a URL that already had a query."""
+    page.goto(f"{local_server}routines?lang=sl")
+    page.locator("#routines-list .btn-launch-routine").first.click()
+    page.wait_for_selector("#view-workout-setup.active")
+    query = parse_qs(urlparse(page.url).query)
+    assert query["lang"] == ["sl"]
+    [routine_id] = query["routine"]
+    assert "?" not in routine_id
+
+    for client_id, name in (("c1a9f0e2", "Jane"), ("c2b8e1d3", "John")):
+        page.fill("#setup-participant-search", name)
+        page.click(
+            f"#setup-participant-matches .participant-match[data-client-id='{client_id}']"
+        )
+        expect(
+            page.locator(
+                f".participant-setup-row[data-client-id='{client_id}'] .select-routine-dropdown"
+            )
+        ).to_have_value(routine_id)
 
 
 def test_a_running_session_keeps_its_day_and_says_why(page, local_server):

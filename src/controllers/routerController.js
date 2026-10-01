@@ -53,11 +53,16 @@ const BOOT_ONLY_PARAMS = [SHARE_INIT_PARAM, EVENT_PARAM];
 // `?theme`) survive, because a promo link must still look like itself after the first tap. Before
 // this, only the `/` redirect happened to re-append the query string, so those two died on any
 // other navigation.
-function carriedSearch() {
+// A route with a query of its own (`/session/new?routine=…`) keeps it and gains the carried params
+// it does not name: appended as a second `?…`, the language became part of the routine's id.
+function urlCarryingSearch(route) {
+  const [path, ownQuery = ""] = route.split("?");
   const params = new URLSearchParams(window.location.search);
   for (const name of BOOT_ONLY_PARAMS) params.delete(name);
-  const query = params.toString();
-  return query ? `?${query}` : "";
+  const own = new URLSearchParams(ownQuery);
+  for (const [name, value] of params) if (!own.has(name)) own.append(name, value);
+  const query = own.toString();
+  return toUrl(path) + (query ? `?${query}` : "");
 }
 
 // The two history writers. Every URL change in the app goes through one of them, so the rules about
@@ -67,7 +72,7 @@ function carriedSearch() {
 // push() when the user moved somewhere they should be able to come Back from; replace() when the URL
 // is catching up with a state they are already looking at.
 function writeHistory(route, { replace }) {
-  const url = toUrl(route) + carriedSearch();
+  const url = urlCarryingSearch(route);
   if (url === window.location.pathname + window.location.search) return false;
   if (replace) window.history.replaceState(null, "", url);
   else window.history.pushState(null, "", url);
@@ -81,7 +86,7 @@ function writeHistory(route, { replace }) {
 function ensureBackTargetForDialog(ctx) {
   if (!ctx.isBootPass || !(ctx.route instanceof DialogRoute)) return;
   const here = window.location.pathname + window.location.search;
-  window.history.replaceState(null, "", toUrl(ctx.route.parentUrl(ctx)) + carriedSearch());
+  window.history.replaceState(null, "", urlCarryingSearch(ctx.route.parentUrl(ctx)));
   window.history.pushState(null, "", here);
 }
 
