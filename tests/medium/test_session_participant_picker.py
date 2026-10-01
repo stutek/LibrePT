@@ -171,3 +171,29 @@ def test_a_typed_alias_finds_the_client(page, local_server):
     matches = page.locator(f"{MATCHES} .participant-match")
     expect(matches).to_have_count(1)
     expect(matches.first).to_contain_text("Jane")
+
+
+def test_a_client_who_withdrew_consent_is_shown_but_cannot_be_booked(
+    page, local_server
+):
+    """Withdrawal stops further processing — the consent letter says so to the client — so a
+    withdrawn client may not be put on a new session. The search still finds them, so the trainer
+    learns WHY rather than meeting a name that seems to have vanished."""
+    seeded = "  clients: structuredClone(DEFAULT_CLIENTS),"
+    assert seeded in STUB
+    stub = STUB.replace(
+        seeded,
+        "  clients: structuredClone(DEFAULT_CLIENTS).map((c) => c.name === 'Jane Doe'"
+        " ? { ...c, gdprConsent: { cloudSync: false, consentDate: '2026-06-15',"
+        " formVersion: '2026-08-09', withdrawnDate: '2026-09-21' } } : c),",
+    )
+    load_with_stub(page, local_server, stub)
+    page.fill("#setup-participant-search", "Jane")
+
+    match = page.locator(f"{MATCHES} .participant-match")
+    expect(match).to_have_count(1)
+    expect(match.first).to_be_disabled()
+    expect(match.first).to_contain_text("Consent withdrawn 2026-09-21")
+
+    page.press("#setup-participant-search", "Enter")
+    expect(page.locator(ROWS)).to_have_count(0)

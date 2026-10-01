@@ -68,8 +68,9 @@ das den amtlichen Text je Artikel wiedergibt; EUR-Lex war von hier aus nicht abr
 ist der Begriff der Datenschutzkonferenz (DSK), nicht der Verordnung. Die Hinweise wurden mit dem
 DSK-Kurzpapier Nr. 10 (Informationspflichten) und Nr. 20 (Einwilligung) abgeglichen; sie nennen jetzt
 auch die Aufsichtsbehörden in Deutschland und Österreich, weil sich eine Person dort beschwert, wo
-sie wohnt oder arbeitet (Art. 77). **Abweichung:** Alle gelesenen deutschen Muster und Formulare
-sagen „Sie“, die Vorlagen sagen „du“, wie die ganze deutsche Oberfläche. **Nicht erfolgt:** eine
+sie wohnt oder arbeitet (Art. 77). **Anrede:** „Sie“, wie alle gelesenen deutschen Muster
+(Entscheidung 2026-10-01: alle Texte, die der Kunde liest, folgen den amtlichen Mustern; die Bildschirme
+des Trainers bleiben beim „du“). **Nicht erfolgt:** eine
 Prüfung durch eine deutschsprachige Person und eine rechtliche Prüfung.
 
 ## Verwandt

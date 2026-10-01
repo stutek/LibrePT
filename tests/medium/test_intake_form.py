@@ -244,7 +244,7 @@ def test_the_client_reads_and_consents_in_their_own_language(page, local_server)
 
     page.click('[data-intake-lang="sl"]')
 
-    expect(page.locator("#intake-title")).to_contain_text("Predstavi se")
+    expect(page.locator("#intake-title")).to_contain_text("Predstavite se")
     # The links follow the choice — the notice they are being pointed at must be the one they can read.
     assert "consent-form-sl.html" in page.locator("#intake-form-link").get_attribute(
         "href"

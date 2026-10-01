@@ -16,43 +16,43 @@ tags:
 
 # Obvestilo o obdelavi osebnih podatkov
 
-To obvestilo ti izroči osebni trener, preden te prosi za privolitev. Pove, kaj o tebi beleži, zakaj,
-kdo podatke prejme, kako dolgo jih hrani in kakšne pravice imaš (Splošna uredba o varstvu podatkov,
+To obvestilo vam izroči osebni trener, preden vas prosi za privolitev. Pove, kaj o vas beleži, zakaj,
+kdo podatke prejme, kako dolgo jih hrani in kakšne pravice imate (Splošna uredba o varstvu podatkov,
 Uredba (EU) 2016/679 — GDPR, člen 13, in Zakon o varstvu osebnih podatkov, ZVOP-2).
 [Pismo s prošnjo za privolitev](Client_Consent_Form.md) ga povzema.
 
-## Kdo je odgovoren za tvoje podatke
+## Kdo je odgovoren za vaše podatke
 
-Za tvoje podatke odgovarja trener, ki ti je izročil to obvestilo: je *upravljavec* (člen 4(7)).
-Njegovo ime in kontakt sta v pismu ali sporočilu, ki te je pripeljalo sem. Vsa vprašanja in zahteve
-naslovi nanj.
+Za vaše podatke odgovarja trener, ki vam je izročil to obvestilo: je *upravljavec* (člen 4(7)).
+Njegovo ime in kontakt sta v pismu ali sporočilu, ki vas je pripeljalo sem. Vsa vprašanja in zahteve
+naslovite nanj.
 
 Trener zapise vodi v LibrePT, brezplačni odprtokodni aplikaciji, ki teče na njegovi napravi. Avtorji
-aplikacije LibrePT nimajo strežnika in ne prejmejo kopije tvojih podatkov. Ne morejo jih videti,
+aplikacije LibrePT nimajo strežnika in ne prejmejo kopije vaših podatkov. Ne morejo jih videti,
 spremeniti ali izbrisati.
 
-## Kaj se o tebi beleži
+## Kaj se o vas beleži
 
-- **Identiteta in kontakt**: tvoje ime ter e-poštni naslov ali telefonska številka, ki ju posreduješ.
-- **Trening**: tvoji cilji, datumi treningov, vaje, serije, ponovitve, bremena in potek vsakega
+- **Identiteta in kontakt**: vaše ime ter e-poštni naslov ali telefonska številka, ki ju posredujete.
+- **Trening**: vaši cilji, datumi treningov, vaje, serije, ponovitve, bremena in potek vsakega
   treninga.
 - **Zdravje**: poškodbe, bolečine, omejitve gibljivosti, telesna masa in podobne opombe, ki jih
   trener potrebuje za varno vadbo. Podatki o zdravju so po GDPR *posebne vrste osebnih podatkov*
-  (člen 9), zato trener za njih prosi za tvojo izrecno privolitev.
+  (člen 9), zato trener za njih prosi za vašo izrecno privolitev.
 
-O tvoji napravi in brskanju se samodejno ne beleži nič. Aplikacija nima analitike, sledilnih
+O vaši napravi in brskanju se samodejno ne beleži nič. Aplikacija nima analitike, sledilnih
 piškotkov in oglaševanja.
 
 ## Zakaj in na kateri pravni podlagi
 
-Za načrtovanje treningov, prilagajanje programa skozi čas in varno vadbo. Pravna podlaga je tvoja
-**izrecna privolitev** (člen 6(1)(a) in člen 9(2)(a)), ki jo daš z odgovorom na pismo ali s podpisom
+Za načrtovanje treningov, prilagajanje programa skozi čas in varno vadbo. Pravna podlaga je vaša
+**izrecna privolitev** (člen 6(1)(a) in člen 9(2)(a)), ki jo daste z odgovorom na pismo ali s podpisom
 obrazca.
 
-## Ali moraš podatke dati
+## Ali morate podatke dati
 
-Ne. Podatkov ti ne nalaga niti zakon niti pogodba in privolitve ti ni treba dati. Brez privolitve
-trener o tebi v aplikaciji ne sme voditi zapisov. Brez podatkov o zdravju ti vadbe ne more
+Ne. Podatkov vam ne nalaga niti zakon niti pogodba in privolitve vam ni treba dati. Brez privolitve
+trener o vas v aplikaciji ne sme voditi zapisov. Brez podatkov o zdravju vam vadbe ne more
 prilagoditi.
 
 ## Kje so podatki shranjeni in kdo jih prejme
@@ -66,44 +66,44 @@ prilagoditi.
   ZDA (Izvedbeni sklep (EU) 2023/1795).
 - **Orodje umetne inteligence**, če si trener z njim pomaga pri načrtovanju. Prejme le kopijo, ki jo
   naredi aplikacija: številko, datume treningov, vaje in serije. Kopija ne vsebuje imena, kontaktnih
-  podatkov, ciljev, opomb in podatkov o zdravju. Številko lahko s tabo poveže le trenerjeva naprava,
+  podatkov, ciljev, opomb in podatkov o zdravju. Številko lahko z vami poveže le trenerjeva naprava,
   zato je kopija po GDPR *psevdonimizirana* (člen 4(5)), ne anonimna. Orodje izbere trener in je
   lahko zunaj EU.
-- **Sporočila**, ki ti jih pošlje trener — e-pošta, SMS, vabila v koledar — gredo prek trenerjevih
+- **Sporočila**, ki vam jih pošlje trener — e-pošta, SMS, vabila v koledar — gredo prek trenerjevih
   storitev za e-pošto in telefon, kot vsako sporočilo.
-- **Tvojih podatkov nihče ne prodaja in ne deli z oglaševalci.** Nihče drug jih ne prejme.
+- **Vaših podatkov nihče ne prodaja in ne deli z oglaševalci.** Nihče drug jih ne prejme.
 
 ## Kako dolgo se hranijo
 
-Dokler treniraš pri trenerju in največ dve leti po zadnjem treningu, da je zgodovina na voljo, če se
-vrneš. Prej, če tako želiš. Podpisan obrazec privolitve ali tvoj odgovor na pismo se hrani kot
+Dokler trenirate pri trenerju in največ dve leti po zadnjem treningu, da je zgodovina na voljo, če se
+vrnete. Prej, če tako želite. Podpisan obrazec privolitve ali vaš odgovor na pismo se hrani kot
 dokazilo o privolitvi, tudi po izbrisu (člen 7(1), člen 17(3)(e)).
 
-## Tvoje pravice
+## Vaše pravice
 
 Kot posameznik, na katerega se nanašajo osebni podatki, lahko kadar koli in brezplačno od trenerja
-zahtevaš:
+zahtevate:
 
-- **Dostop** do podatkov o tebi in njihovo **kopijo** v strojno berljivi obliki (člen 15, člen 20).
+- **Dostop** do podatkov o vas in njihovo **kopijo** v strojno berljivi obliki (člen 15, člen 20).
   Aplikacija izvozi celotno zgodovino.
 - **Popravek** netočnih podatkov (člen 16).
 - **Izbris** (člen 17). Aplikacija nato s trenerjeve naprave in iz naslednje varnostne kopije
-  odstrani tvoje ime, kontakt, cilje, opombe, poškodbe in telesno maso. Zapisi treningov ostanejo,
-  povezani s številko, ki ne vodi več do tebe.
-- **Omejitev obdelave** (člen 18), na primer dokler izpodbijaš točnost podatkov.
+  odstrani vaše ime, kontakt, cilje, opombe, poškodbe in telesno maso. Zapisi treningov ostanejo,
+  povezani s številko, ki ne vodi več do vas.
+- **Omejitev obdelave** (člen 18), na primer dokler izpodbijate točnost podatkov.
 - **Preklic privolitve** (člen 7(3)), v kakršni koli obliki in brez navedbe razloga. Preklic je enako
   preprost kot privolitev. Ustavi nadaljnjo obdelavo in ne vpliva na zakonitost obdelave pred
   preklicem.
 
-Trener odgovori v enem mesecu (člen 12(3)). O tebi se ne sprejemajo avtomatizirane odločitve in se
+Trener odgovori v enem mesecu (člen 12(3)). O vas se ne sprejemajo avtomatizirane odločitve in se
 ne oblikujejo profili (člen 22).
 
-Če meniš, da tvoji podatki niso obdelani pravilno, se lahko **pritožiš** pri nadzornem organu,
-predvsem v državi, kjer živiš ali delaš (člen 77):
+Če menite, da vaši podatki niso obdelani pravilno, se lahko **pritožite** pri nadzornem organu,
+predvsem v državi, kjer živite ali delate (člen 77):
 
 - Slovenija: Informacijski pooblaščenec, Dunajska 22, 1000 Ljubljana, gp.ip@ip-rs.si,
   [www.ip-rs.si](https://www.ip-rs.si/)
-- Nemčija: nadzorni organ zvezne dežele, v kateri živiš; seznam vodi
+- Nemčija: nadzorni organ zvezne dežele, v kateri živite; seznam vodi
   [Datenschutzkonferenz](https://www.datenschutzkonferenz-online.de/datenschutzaufsichtsbehoerden.html)
 - Avstrija: Datenschutzbehörde, [dsb.gv.at](https://dsb.gv.at/)
 - Vse druge države EU in EGP: seznam nadzornih organov, ki ga vodi
@@ -111,7 +111,7 @@ predvsem v državi, kjer živiš ali delaš (člen 77):
 
 ---
 
-*Različica obvestila: 2026-09-30. Če je različica na tvojem pismu novejša, trenerja prosi za
+*Različica obvestila: 2026-09-30. Če je različica na vašem pismu novejša, trenerja prosite za
 aktualno obvestilo.*
 
 ## Povezano

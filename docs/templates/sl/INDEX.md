@@ -64,8 +64,8 @@ na gdpr-text.com/sl, ker EUR-Lex ni bil dosegljiv): izrazi v zgornji preslikavi 
 4(11), 9(2)(a), 13, 18, 22 in 68. Obvestilo je primerjano z uradnim vzorcem Informacijskega
 pooblaščenca (VZOREC OBVESTILA POSAMEZNIKOM PO 13. ČLENU, [ip-rs.si/obrazci](https://www.ip-rs.si/obrazci/varstvo-osebnih-podatkov/))
 in pokrije vsa njegova polja razen pooblaščene osebe za varstvo podatkov, ki je posamezen trener
-praviloma nima. **Odstop od vzorca:** vzorec stranko nagovarja z »vi«, predloge z »ti«, kot ves
-slovenski vmesnik. **Ni bilo opravljeno:** pregled pri odvetniku ali pooblaščeni osebi za varstvo
+praviloma nima. **Nagovor:** kot vzorec, z »vi« (odločitev 2026-10-01: vsa besedila, ki jih bere stranka, sledijo
+uradnim vzorcem; zasloni za trenerja ostanejo pri »ti«). **Ni bilo opravljeno:** pregled pri odvetniku ali pooblaščeni osebi za varstvo
 osebnih podatkov. Za resnično uporabo pri strankah je ta pregled še vedno pogoj.
 
 ## Povezano

@@ -157,6 +157,8 @@ export const sl = {
   no_matching_clients: "Stranke s tem imenom ni",
   no_clients_yet: "V imeniku še ni strank",
   participant_add_new: "Dodaj »{name}« kot novo stranko",
+  participant_consent_withdrawn:
+    "Privolitev preklicana {date} — te stranke ne moreš dodati na nov trening",
   remove_participant: "Odstrani s tega treninga:",
   select_routine_for: "Rutina za to stranko",
   btn_launch_clipboard: "Odpri v beležki",
@@ -507,47 +509,49 @@ export const sl = {
   session_invite_title: "Pošlji vabila v koledar",
   session_invite_desc:
     "Na novo dodeljenim udeležencem lahko pošlješ vabilo v koledar za ta trening.",
-  intake_title: "Predstavi se svojemu trenerju",
+  intake_title: "Predstavite se svojemu trenerju",
   intake_lede:
-    "Izpolni to in pošlji svojemu trenerju. Ustvari se le datoteka na tvojem telefonu — v LibrePT ni računa, ki bi ga bilo treba odpreti, in ni strežnika, ki bi to videl.",
+    "Izpolnite obrazec in ga pošljite svojemu trenerju. Nastane le datoteka na vašem telefonu — v LibrePT ni računa, ki bi ga morali odpreti, in ni strežnika, ki bi to videl.",
   intake_name: "Ime in priimek",
   intake_email: "E-pošta",
   intake_phone: "Telefon",
   intake_contact_hint: "Eno od obojega je dovolj — kar naj trener uporabi.",
-  intake_goals: "Kaj želiš doseči s treningom (neobvezno)",
+  intake_goals: "Kaj želite doseči s treningom (neobvezno)",
   intake_injury: "Poškodbe ali karkoli, kar naj trener ve (neobvezno)",
   intake_health_hint:
-    "Samo če želiš. Gre v datoteko, ki jo pošlješ trenerju, in nikamor drugam — ne v SMS in ne v nobeno povezavo.",
+    "Samo če želite. Gre v datoteko, ki jo pošljete trenerju, in nikamor drugam — ne v SMS in ne v nobeno povezavo.",
   intake_consent:
     "Izrecno privolim, da moj trener te podatke, vključno s podatki o mojem zdravju, hrani in uporablja za načrtovanje in beleženje mojih treningov. Shranjeni so na trenerjevi napravi. Šifrirana varnostna kopija, ki je ponudnik shrambe ne more prebrati, je lahko tudi v trenerjevi shrambi v oblaku. Orodje umetne inteligence lahko prejme kopijo brez mojega imena, kontaktnih podatkov in opomb. Nihče drug jih ne prejme. Privolitev lahko kadar koli prekličem, tako da to povem trenerju.",
-  intake_sender_for: "To izpolnjuješ za: {who}.",
+  intake_sender_for: "To izpolnjujete za: {who}.",
   intake_sender_save: "Shrani ta kontakt",
   intake_step_contact: "1. korak: Shrani ta kontakt",
   intake_step_form: "2. korak: Izpolni obrazec",
   intake_sender_check:
-    "Če to ni oseba, ki ti je dala povezavo, obrazca ne izpolnjuj. Ta stran sama ničesar ne pošlje: iz tvojih odgovorov nastane datoteka na tem telefonu, komu jo daš, pa izbereš ti.",
-  intake_notice_link: "Kaj se zgodi s tvojimi podatki",
+    "Če to ni oseba, ki vam je dala povezavo, obrazca ne izpolnjujte. Ta stran sama ničesar ne pošlje: iz vaših odgovorov nastane datoteka na tem telefonu, komu jo daste, pa izberete sami.",
+  intake_notice_link: "Kaj se zgodi z vašimi podatki",
   intake_form_link: "Celotno besedilo privolitve",
   intake_send: "Deli s trenerjem",
   intake_save: "Shrani datoteko za deljenje",
   intake_privacy_note:
-    "Nič ne zapusti tega telefona in nič se ne naloži v splet. Vpisano se hrani samo, dokler je zavihek odprt — ko ga zapreš, obrazca ni več.",
+    "Nič ne zapusti tega telefona in nič se ne naloži v splet. Vpisano se hrani samo, dokler je zavihek odprt — ko ga zaprete, obrazca ni več.",
   intake_share_title: "Moji podatki za trening",
   intake_share_text: "Tu so moji podatki — datoteka se odpre v LibrePT.",
-  intake_sent: "Deljeno. Trener te bo dodal iz te datoteke.",
-  intake_saved: "Shranjeno. Datoteko deli s trenerjem — pripni jo sporočilu.",
+  intake_sent: "Deljeno. Trener vas bo dodal iz te datoteke.",
+  intake_saved: "Shranjeno. Datoteko delite s trenerjem — pripnite jo sporočilu.",
   // Ponujeno po shranjevanju, ne prej: naslov je uporaben šele, ko datoteka obstaja. BESEDILO je
   // sporočilo, ki ga stranka pošlje, zato v njem ni navodil zanjo — ta so na strani, kjer jih bere
   // tisti, ki mora po njih ravnati.
   intake_send_to_email: "Napiši e-pošto: {who}",
   intake_send_to_subject: "Moji podatki za trening",
   intake_send_to_body: "Pozdravljeni, tu so moji podatki za trening.",
-  intake_send_to_hint: "Temu sporočilu pripni datoteko {file}. Telefon jo je shranil med prenose.",
-  intake_send_failed_detail: "Tvoj trener bo morda potreboval tole:",
+  intake_send_to_hint:
+    "Temu sporočilu pripnite datoteko {file}. Telefon jo je shranil med prenose.",
+  intake_send_failed_detail: "Vaš trener bo morda potreboval tole:",
   intake_send_failed_saved:
-    "Deljenje ni uspelo, zato je telefon datoteko {file} shranil med prenose. Pošlji jo tako: odpri sporočilo trenerju, dodaj prilogo in izberi to datoteko.",
-  intake_err_identity: "Prosim dodaj svoje ime in e-pošto ali telefonsko številko.",
-  intake_err_consent: "Prosim označi privolitev — brez nje trener ne sme hraniti tvojih podatkov.",
+    "Deljenje ni uspelo, zato je telefon datoteko {file} shranil med prenose. Pošljite jo tako: odprite sporočilo trenerju, dodajte prilogo in izberite to datoteko.",
+  intake_err_identity: "Prosimo, dodajte svoje ime in e-pošto ali telefonsko številko.",
+  intake_err_consent:
+    "Prosimo, označite privolitev — brez nje trener ne sme hraniti vaših podatkov.",
   signup_review_lede:
     "Odpri datoteko, ki ti jo je poslala stranka. Nič se ne doda med tvoje stranke, dokler tega ne potrdiš — datoteka je nastala na njenem telefonu in pošlje jo lahko kdorkoli.",
   signup_review_title: "Preglej podatke stranke",
@@ -715,10 +719,10 @@ export const sl = {
   label_repeat_until: "Do (neobvezno)",
   btn_invite_client: "Povabi stranko",
   intake_invite_message:
-    "{trainer} te vabi, da izpolniš svoje podatke za trening, prek aplikacije LibrePT. Vzame minuto:",
+    "{trainer} vas vabi, da prek aplikacije LibrePT izpolnite svoje podatke za trening. Vzame minuto:",
   intake_invite_message_unsigned:
-    "Vabim te, da prek aplikacije LibrePT izpolniš svoje podatke za trening. Vzame minuto:",
-  intake_invite_privacy: "Kaj se zgodi s tvojimi podatki:",
+    "Vabim vas, da prek aplikacije LibrePT izpolnite svoje podatke za trening. Vzame minuto:",
+  intake_invite_privacy: "Kaj se zgodi z vašimi podatki:",
   intake_invite_ready: "Povezava pripravljena — kopiraj jo spodaj",
   intake_invite_title: "Povabi stranko",
   intake_invite_lede:
@@ -1288,6 +1292,8 @@ export const sl = {
   profile_erased_banner:
     "Izbrisano {date} na zahtevo stranke. Spodnji zapisi treningov so anonimni.",
   consent_badge_withdrawn: "Privolitev preklicana ({dates})",
+  consent_withdrawn_effect:
+    "Te stranke ne moreš dodati na nov trening. Če želi tudi izbris podatkov, uporabi »Izbriši stranko (GDPR)«.",
   consent_badge_none: "Brez privolitve (samo lokalno)",
   consent_badge_given: "Privolitev dana ({detail})",
   consent_badge_verified: "Preverjeno",

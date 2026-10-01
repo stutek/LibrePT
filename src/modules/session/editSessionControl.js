@@ -4,6 +4,7 @@
 // Auto-persists form drafts to localStorage so user data survives page reloads.
 
 import { localDateString } from "../../data/calendarDay.js";
+import { isConsentWithdrawn } from "../../data/clientConsent.js";
 import { libraryExercises } from "../../data/exerciseLibrary.js";
 import { newRecordId } from "../../data/recordId.js";
 import {
@@ -1043,8 +1044,15 @@ function refreshParticipantSummary() {
   if (empty) empty.hidden = chosen > 0;
 }
 
+// A client who withdrew consent may not be put on a new session: withdrawal stops further
+// processing, which is what the consent letter promises them. They stay findable, with the reason.
+function isBookable(client) {
+  return !isConsentWithdrawn(client.gdprConsent);
+}
+
 function addParticipant(client) {
-  if (!participantRowContext || chosenParticipantIds().has(client.id)) return;
+  if (!participantRowContext || chosenParticipantIds().has(client.id) || !isBookable(client))
+    return;
   document
     .getElementById("setup-participants-assignment-list")
     ?.appendChild(buildParticipantRow(client, participantRowContext));
@@ -1108,6 +1116,18 @@ function renderParticipantMatches(query) {
     button.className = "participant-match";
     button.dataset.clientId = client.id;
     button.innerHTML = `<span>${deps.getClientDisplayNameHTML(client, false, deps.t("injury_mark_label"))}</span><i class="fa-solid fa-plus" aria-hidden="true"></i>`;
+    if (!isBookable(client)) {
+      button.disabled = true;
+      const reason = document.createElement("small");
+      reason.className = "participant-match-reason";
+      reason.textContent = t("participant_consent_withdrawn").replace(
+        "{date}",
+        client.gdprConsent.withdrawnDate,
+      );
+      // The "+" promised an addition that will not happen; the reason goes under the name instead.
+      button.querySelector("i")?.remove();
+      button.querySelector("span")?.append(document.createElement("br"), reason);
+    }
     button.addEventListener("click", () => {
       addParticipant(client);
       clearParticipantSearch();
@@ -1134,7 +1154,7 @@ function setupParticipantSearch() {
   search.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
       event.preventDefault();
-      const [first] = matchingClients(search.value);
+      const first = matchingClients(search.value).find(isBookable);
       if (first) {
         addParticipant(first);
         clearParticipantSearch();

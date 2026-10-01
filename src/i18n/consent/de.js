@@ -5,9 +5,9 @@
 // law — before German-speaking trainers are invited. Until then the English letter (./en.js) is what
 // was intended, and any difference is a bug in this translation.
 //
-// Standard German (de). Addressed informally ("du"), like the rest of the German UI and like sl.js.
-// Every published German template and form read for this letter says "Sie"; formality is not what
-// makes consent valid — being informed is — but a German reviewer may decide otherwise.
+// Standard German (de). Addressed formally ("Sie"), as every published German template and form
+// read for this letter does — ruled 2026-10-01: every text the CLIENT reads follows the official
+// templates, while the trainer's own screens keep "du".
 //
 // TERMINOLOGY IS REGULATED VOCABULARY HERE, not a style choice. It follows the official German text
 // of Regulation (EU) 2016/679 (Datenschutz-Grundverordnung, DSGVO); the mapping is tabulated in
@@ -25,38 +25,38 @@
 export const consentDe = {
   subject: "Personal Training — Einwilligung in die Verarbeitung personenbezogener Daten",
 
-  body: ({ clientName, noticeUrl, version, signature }) => `Hallo ${clientName},
+  body: ({ clientName, noticeUrl, version, signature }) => `Guten Tag ${clientName},
 
-ich nutze LibrePT, eine App auf meinem eigenen Gerät, um dein Training zu planen, deine Fortschritte zu verfolgen und dich sicher zu trainieren. Bevor ich Aufzeichnungen über dich führe, brauche ich deine Einwilligung. Diese Nachricht sagt dir, was ich aufzeichne, wer die Daten erhält und welche Rechte du hast. Verantwortlicher für deine personenbezogenen Daten im Sinne der Datenschutz-Grundverordnung (Verordnung (EU) 2016/679 — DSGVO) bin ich; mein Name und meine Kontaktdaten stehen unter dieser Nachricht.
+ich nutze LibrePT, eine App auf meinem eigenen Gerät, um Ihr Training zu planen, Ihre Fortschritte zu verfolgen und Sie sicher zu trainieren. Bevor ich Aufzeichnungen über Sie führe, brauche ich Ihre Einwilligung. Diese Nachricht sagt Ihnen, was ich aufzeichne, wer die Daten erhält und welche Rechte Sie haben. Verantwortlicher für Ihre personenbezogenen Daten im Sinne der Datenschutz-Grundverordnung (Verordnung (EU) 2016/679 — DSGVO) bin ich; mein Name und meine Kontaktdaten stehen unter dieser Nachricht.
 
 Was ich aufzeichne:
-1. Deinen Namen und die E-Mail-Adresse oder Telefonnummer, die du mir gibst.
-2. Dein Training: Ziele, Trainingstermine, Übungen, Sätze, Wiederholungen, Lasten und wie jedes Training verlaufen ist.
-3. Angaben zu deiner Gesundheit: Verletzungen, Schmerzen, Einschränkungen der Beweglichkeit und dein Körpergewicht, soweit ich sie brauche, um dich sicher zu trainieren. Gesundheitsdaten gehören nach der DSGVO zu den besonderen Kategorien personenbezogener Daten; deshalb brauche ich dafür deine ausdrückliche Einwilligung (Art. 9 Abs. 2 lit. a DSGVO).
+1. Ihren Namen und die E-Mail-Adresse oder Telefonnummer, die Sie mir geben.
+2. Ihr Training: Ziele, Trainingstermine, Übungen, Sätze, Wiederholungen, Lasten und wie jedes Training verlaufen ist.
+3. Angaben zu Ihrer Gesundheit: Verletzungen, Schmerzen, Einschränkungen der Beweglichkeit und Ihr Körpergewicht, soweit ich sie brauche, um Sie sicher zu trainieren. Gesundheitsdaten gehören nach der DSGVO zu den besonderen Kategorien personenbezogener Daten; deshalb brauche ich dafür Ihre ausdrückliche Einwilligung (Art. 9 Abs. 2 lit. a DSGVO).
 
 Wo die Daten gespeichert werden und wer sie erhält:
 1. Die Aufzeichnungen werden auf meinem eigenen Gerät gespeichert. Die Entwickler von LibrePT erhalten nichts.
 2. Wenn ich die Sicherung einschalte, wird eine Sicherungskopie in meinem eigenen Cloud-Speicher gespeichert. Mein Gerät verschlüsselt sie vorher mit meinem Passwort, deshalb kann der Speicheranbieter sie nicht lesen. Der Anbieter kann sie auch außerhalb der EU speichern; die Datenschutzhinweise nennen den Anbieter und die Grundlage dieser Übermittlung.
-3. Wenn ich einen KI-Assistenten nutze, um dein Training zu planen, erhält er nur eine Kopie ohne deinen Namen, deine Kontaktdaten, deine Ziele und Notizen: eine Nummer, die Trainingstermine und die Sätze, die du gemacht hast. Nur mein Gerät kann diese Nummer dir zuordnen.
-4. Ich verkaufe deine Daten nie und gebe sie nie an Werbetreibende weiter. Sonst erhält niemand deine Daten.
+3. Wenn ich einen KI-Assistenten nutze, um Ihr Training zu planen, erhält er nur eine Kopie ohne Ihren Namen, Ihre Kontaktdaten, Ihre Ziele und Notizen: eine Nummer, die Trainingstermine und die Sätze, die Sie gemacht haben. Nur mein Gerät kann diese Nummer Ihnen zuordnen.
+4. Ich verkaufe Ihre Daten nie und gebe sie nie an Werbetreibende weiter. Sonst erhält niemand Ihre Daten.
 
-Wie lange ich sie speichere: solange wir zusammen trainieren und höchstens zwei Jahre nach deinem letzten Training, damit dein Trainingsverlauf noch da ist, wenn du wiederkommst. Früher, wenn du es verlangst.
+Wie lange ich sie speichere: solange Sie bei mir trainieren und höchstens zwei Jahre nach Ihrem letzten Training, damit Ihr Trainingsverlauf noch da ist, wenn Sie wiederkommen. Früher, wenn Sie es verlangen.
 
-Deine Rechte: Du kannst jederzeit und kostenlos von mir Auskunft über deine Daten und eine Kopie verlangen, außerdem ihre Berichtigung, ihre Löschung oder die Einschränkung ihrer Verarbeitung. Ich antworte innerhalb eines Monats. Wenn du meinst, dass mit deinen Daten falsch umgegangen wurde, kannst du dich bei der Datenschutz-Aufsichtsbehörde an deinem Wohnort beschweren (in Deutschland bei der Behörde deines Bundeslandes, in Österreich bei der Datenschutzbehörde, dsb.gv.at). Über dich wird nichts automatisiert entschieden.
+Ihre Rechte: Sie können jederzeit und kostenlos von mir Auskunft über Ihre Daten und eine Kopie verlangen, außerdem ihre Berichtigung, ihre Löschung oder die Einschränkung ihrer Verarbeitung. Ich antworte innerhalb eines Monats. Wenn Sie meinen, dass mit Ihren Daten falsch umgegangen wurde, können Sie sich bei der Datenschutz-Aufsichtsbehörde an Ihrem Wohnort beschweren (in Deutschland bei der Behörde Ihres Bundeslandes, in Österreich bei der Datenschutzbehörde, dsb.gv.at). Über Sie wird nichts automatisiert entschieden.
 
-Du musst nicht einwilligen. Ohne deine Einwilligung kann ich in der App keine Aufzeichnungen über dich führen, und ohne Angaben zu deiner Gesundheit kann ich dein Training nicht darauf abstimmen.
+Sie müssen nicht einwilligen. Ohne Ihre Einwilligung kann ich in der App keine Aufzeichnungen über Sie führen, und ohne Angaben zu Ihrer Gesundheit kann ich Ihr Training nicht darauf abstimmen.
 
-Die vollständigen Datenschutzhinweise findest du hier: ${noticeUrl}
+Die vollständigen Datenschutzhinweise finden Sie hier: ${noticeUrl}
 
-Wenn du einwilligst, antworte auf diese E-Mail mit „ICH WILLIGE EIN“ oder unterschreibe das ausgedruckte Formular. Damit bestätigst du, dass du diese Nachricht gelesen hast und ausdrücklich in die Verarbeitung deiner personenbezogenen Daten einschließlich der Angaben zu deiner Gesundheit für dein Training einwilligst.
+Wenn Sie einwilligen, antworten Sie auf diese E-Mail mit „ICH WILLIGE EIN“ oder unterschreiben Sie das ausgedruckte Formular. Damit bestätigen Sie, dass Sie diese Nachricht gelesen haben und ausdrücklich in die Verarbeitung Ihrer personenbezogenen Daten einschließlich der Angaben zu Ihrer Gesundheit für Ihr Training einwilligen.
 
-Du kannst deine Einwilligung jederzeit ohne Angabe von Gründen widerrufen: Antworte auf diese Nachricht mit „WIDERRUF“ oder teile es mir auf andere Weise mit. Der Widerruf ist so einfach wie die Einwilligung. Er beendet die weitere Verarbeitung; die bis dahin erfolgte Verarbeitung bleibt rechtmäßig.
+Sie können Ihre Einwilligung jederzeit ohne Angabe von Gründen widerrufen: Antworten Sie auf diese Nachricht mit „WIDERRUF“ oder teilen Sie es mir auf andere Weise mit. Der Widerruf ist so einfach wie die Einwilligung. Er beendet die weitere Verarbeitung; die bis dahin erfolgte Verarbeitung bleibt rechtmäßig.
 
 Version des Einwilligungsformulars: ${version}
 
-Viele Grüße
-${signature || "Dein Personal Trainer"}`,
+Mit freundlichen Grüßen
+${signature || "Ihr Personal Trainer"}`,
 
   share: ({ clientName, noticeUrl, trainerName }) =>
-    `Hallo ${clientName}!${trainerName ? ` Hier schreibt dir ${trainerName}.` : ""} Für Aufzeichnungen über dein Training und deine Gesundheit brauche ich nach der DSGVO deine ausdrückliche Einwilligung. Lies bitte zuerst die Datenschutzhinweise: ${noticeUrl} Antworte mit ICH WILLIGE EIN oder unterschreibe das Formular im Studio. Mit WIDERRUF kannst du sie jederzeit widerrufen.`,
+    `Guten Tag ${clientName}.${trainerName ? ` Hier schreibt Ihnen ${trainerName}.` : ""} Für Aufzeichnungen über Ihr Training und Ihre Gesundheit brauche ich nach der DSGVO Ihre ausdrückliche Einwilligung. Bitte lesen Sie zuerst die Datenschutzhinweise: ${noticeUrl} Antworten Sie mit ICH WILLIGE EIN oder unterschreiben Sie im Studio. Mit WIDERRUF widerrufen Sie sie jederzeit.`,
 };

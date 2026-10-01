@@ -157,6 +157,8 @@ export const de = {
   no_matching_clients: "Kein Kunde mit diesem Namen",
   no_clients_yet: "Noch keine Kunden im Verzeichnis",
   participant_add_new: "„{name}“ als neuen Kunden anlegen",
+  participant_consent_withdrawn:
+    "Einwilligung widerrufen am {date} — diese Person kann keinem neuen Training hinzugefügt werden",
   remove_participant: "Aus diesem Training nehmen:",
   select_routine_for: "Routine für diesen Kunden",
   btn_launch_clipboard: "Im Klemmbrett öffnen",
@@ -526,52 +528,53 @@ export const de = {
     "Neu eingetragene Teilnehmer können eine Kalendereinladung für dieses Training bekommen.",
   // The client intake page — the only screen in the app written FOR the client, so
   // the voice is theirs and not the trainer's: "dein Trainer", never "der Kunde".
-  intake_title: "Stell dich deinem Trainer vor",
+  intake_title: "Stellen Sie sich Ihrem Trainer vor",
   intake_lede:
-    "Füll das aus und schick es deinem Trainer. Es entsteht eine Datei auf deinem Telefon, sonst nichts — bei LibrePT gibt es kein Konto und keinen Server, der etwas davon sieht.",
+    "Füllen Sie das aus und schicken Sie es Ihrem Trainer. Es entsteht nur eine Datei auf Ihrem Telefon — bei LibrePT gibt es kein Konto und keinen Server, der etwas davon sieht.",
   intake_name: "Vor- und Nachname",
   intake_email: "E-Mail",
   intake_phone: "Telefon",
-  intake_contact_hint: "Eins von beiden reicht — das, über das dein Trainer dich erreichen soll.",
-  intake_goals: "Was du mit dem Training erreichen willst (freiwillig)",
+  intake_contact_hint: "Eins von beiden reicht — das, über das Ihr Trainer Sie erreichen soll.",
+  intake_goals: "Was Sie mit dem Training erreichen wollen (freiwillig)",
   intake_injury: "Verletzungen oder etwas, das ein Trainer wissen sollte (freiwillig)",
   intake_health_hint:
-    "Nur wenn du willst. Es steht in der Datei, die du deinem Trainer schickst, und nirgendwo sonst — nicht in einer SMS und in keinem Link.",
+    "Nur wenn Sie wollen. Es steht in der Datei, die Sie Ihrem Trainer schicken, und nirgendwo sonst — nicht in einer SMS und in keinem Link.",
   // Informed consent (see en.js): the line a client ticks says what the linked notice says, and it
   // names no storage vendor.
   intake_consent:
     "Ich willige ausdrücklich ein, dass mein Trainer diese Angaben einschließlich der Angaben zu meiner Gesundheit speichert und nutzt, um mein Training zu planen und aufzuzeichnen. Die Angaben werden auf dem eigenen Gerät meines Trainers gespeichert. Eine verschlüsselte Sicherungskopie, die der Speicheranbieter nicht lesen kann, kann zusätzlich im eigenen Cloud-Speicher meines Trainers gespeichert werden. Ein KI-Assistent kann eine Kopie ohne meinen Namen, meine Kontaktdaten und Notizen erhalten. Sonst erhält niemand die Angaben. Ich kann diese Einwilligung jederzeit widerrufen, indem ich es meinem Trainer mitteile.",
-  intake_sender_for: "Du füllst das für {who} aus.",
+  intake_sender_for: "Sie füllen das für {who} aus.",
   intake_sender_save: "Diesen Kontakt speichern",
-  intake_step_contact: "Schritt 1: Speichere diesen Kontakt",
-  intake_step_form: "Schritt 2: Fülle das Formular aus",
+  intake_step_contact: "Schritt 1: Diesen Kontakt speichern",
+  intake_step_form: "Schritt 2: Formular ausfüllen",
   intake_sender_check:
-    "Wenn das nicht die Person ist, die dir diesen Link gegeben hat, füll ihn nicht aus. Diese Seite sendet selbst nichts: Aus deinen Antworten wird eine Datei auf diesem Telefon, und du entscheidest, mit wem du sie teilst.",
-  intake_notice_link: "Was mit deinen Daten passiert",
+    "Wenn das nicht die Person ist, die Ihnen diesen Link gegeben hat, füllen Sie das Formular nicht aus. Diese Seite sendet selbst nichts: Aus Ihren Antworten wird eine Datei auf diesem Telefon, und Sie entscheiden, mit wem Sie sie teilen.",
+  intake_notice_link: "Was mit Ihren Daten passiert",
   intake_form_link: "Der vollständige Text der Einwilligung",
   intake_send: "Mit meinem Trainer teilen",
   intake_save: "Datei zum Teilen speichern",
   intake_privacy_note:
-    "Nichts verlässt dieses Telefon, und nichts wird hochgeladen. Was du eingibst, bleibt nur, bis du den Tab schließt — dann ist das Formular weg.",
+    "Nichts verlässt dieses Telefon, und nichts wird hochgeladen. Was Sie eingeben, bleibt nur, bis Sie den Tab schließen — dann ist das Formular weg.",
   intake_share_title: "Meine Angaben für das Training",
   intake_share_text: "Hier sind meine Angaben — diese Datei öffnet sich in LibrePT.",
-  intake_sent: "Geteilt. Dein Trainer fügt dich aus dieser Datei hinzu.",
-  intake_saved: "Gespeichert. Teile die Datei mit deinem Trainer — häng sie an eine Nachricht an.",
+  intake_sent: "Geteilt. Ihr Trainer fügt Sie aus dieser Datei hinzu.",
+  intake_saved:
+    "Gespeichert. Teilen Sie die Datei mit Ihrem Trainer — hängen Sie sie an eine Nachricht an.",
   // Offered after the save, not before it. The BODY is the message the client sends, so it holds no
   // instructions to the client.
   intake_send_to_email: "E-Mail an {who} schreiben",
   intake_send_to_subject: "Meine Angaben für das Training",
   intake_send_to_body: "Hallo, hier sind meine Angaben für das Training.",
   intake_send_to_hint:
-    "Häng die Datei {file} an diese Nachricht an. Dein Telefon hat sie bei deinen Downloads gespeichert.",
+    "Hängen Sie die Datei {file} an diese Nachricht an. Ihr Telefon hat sie bei Ihren Downloads gespeichert.",
   // Precedes the browser's own untranslated message.
-  intake_send_failed_detail: "Das braucht dein Trainer vielleicht:",
+  intake_send_failed_detail: "Das braucht Ihr Trainer vielleicht:",
   intake_send_failed_saved:
-    "Das Teilen hat nicht geklappt, deshalb hat dein Telefon die Datei {file} bei deinen Downloads gespeichert. Schick sie selbst: Öffne eine Nachricht an deinen Trainer, füge einen Anhang hinzu und wähle diese Datei.",
+    "Das Teilen hat nicht funktioniert, deshalb hat Ihr Telefon die Datei {file} bei Ihren Downloads gespeichert. Schicken Sie sie selbst: Öffnen Sie eine Nachricht an Ihren Trainer, fügen Sie einen Anhang hinzu und wählen Sie diese Datei.",
   intake_err_identity:
-    "Gib deinen Namen an und entweder eine E-Mail-Adresse oder eine Telefonnummer.",
+    "Geben Sie Ihren Namen an und entweder eine E-Mail-Adresse oder eine Telefonnummer.",
   intake_err_consent:
-    "Setz das Häkchen bei der Einwilligung — ohne sie darf dein Trainer deine Angaben nicht speichern.",
+    "Setzen Sie das Häkchen bei der Einwilligung — ohne sie darf Ihr Trainer Ihre Angaben nicht speichern.",
   // Reviewing a submission a client sent in.
   signup_review_lede:
     "Öffne die Datei, die dir dein Kunde geschickt hat. Nichts wird zu deinen Kunden hinzugefügt, bevor du sie annimmst — die Datei wurde auf dem Telefon des Kunden erstellt, und jeder könnte dir eine schicken.",
@@ -756,10 +759,10 @@ export const de = {
   btn_invite_client: "Kunden einladen",
   // The trainer's own name leads the message. {trainer} is filled in by intakeInvite.js.
   intake_invite_message:
-    "{trainer} lädt dich ein, deine Angaben für das Training selbst einzutragen, mit einer App namens LibrePT. Es dauert eine Minute:",
+    "{trainer} lädt Sie ein, Ihre Angaben für das Training selbst einzutragen, mit einer App namens LibrePT. Es dauert eine Minute:",
   intake_invite_message_unsigned:
-    "Du bist eingeladen, deine Angaben für das Training selbst einzutragen, mit einer App namens LibrePT. Es dauert eine Minute:",
-  intake_invite_privacy: "Was mit deinen Daten passiert:",
+    "Sie sind eingeladen, Ihre Angaben für das Training selbst einzutragen, mit einer App namens LibrePT. Es dauert eine Minute:",
+  intake_invite_privacy: "Was mit Ihren Daten passiert:",
   intake_invite_ready: "Link bereit — unten kopieren",
   intake_invite_title: "Kunden einladen",
   intake_invite_lede:
@@ -1348,6 +1351,8 @@ export const de = {
   profile_erased_banner:
     "Am {date} auf Antrag des Kunden gelöscht. Die Trainingsaufzeichnungen unten sind anonym.",
   consent_badge_withdrawn: "Einwilligung widerrufen ({dates})",
+  consent_withdrawn_effect:
+    "Diese Person kann keinem neuen Training hinzugefügt werden. Wenn sie auch die Löschung ihrer Daten wünscht, nutze »Kunden löschen (DSGVO)«.",
   consent_badge_none: "Keine Einwilligung (nur lokal)",
   consent_badge_given: "Eingewilligt ({detail})",
   consent_badge_verified: "Bestätigt",

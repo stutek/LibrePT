@@ -141,7 +141,7 @@ def test_a_trainers_qr_can_hand_over_the_language(page, local_server):
     page.goto(f"{local_server}intake?lang=sl")
 
     expect(page.locator("#intake-title")).to_contain_text(
-        "Predstavi se", timeout=15_000
+        "Predstavite se", timeout=15_000
     )
     assert page.evaluate("() => document.documentElement.lang") == "sl"
 

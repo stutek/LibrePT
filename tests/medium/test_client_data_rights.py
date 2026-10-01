@@ -41,6 +41,12 @@ let state = {
       id: 'c-jane-b', name: 'Jane Doe', alias: 'evening', email: 'jane.b@example.com',
       goals: '', notes: '', weightHistory: [], active: true, joinedDate: '2026-02-02',
     },
+    {
+      id: 'c-withdrawn', name: 'Rok Zajc', goals: '', notes: '', weightHistory: [], active: true,
+      joinedDate: '2026-03-03',
+      gdprConsent: { cloudSync: false, consentDate: '2026-06-15', formVersion: '2026-08-09',
+        formLang: 'en', withdrawnDate: '2026-09-21' },
+    },
   ],
   history: [
     { id: 'h1', clientId: 'c-jane-a', clientName: 'Jane Doe', date: '2026-03-01T09:00:00.000Z',
@@ -254,3 +260,15 @@ def test_empty_notes_do_not_claim_the_client_is_healthy(page, local_server):
 
     expect(page.locator("#profile-injury")).to_have_text("Bolečine v kolenu")
     expect(page.locator("#profile-notes")).to_have_text("Ni opomb.")
+
+
+def test_a_withdrawal_says_on_the_profile_what_it_stops(page, local_server):
+    """The badge used to give two dates and nothing else, and the trainer took the untick as the
+    whole of honouring a withdrawal. The line under it says what now stops and names the control
+    that erases, by the label it shows."""
+    load_with_stub(page, local_server, STUB)
+    _open_detail(page, "c-withdrawn")
+    effect = page.locator("#profile-gdpr-status")
+    expect(effect).to_contain_text("Date withdrawn: 2026-09-21")
+    expect(effect).to_contain_text("cannot be added to a new session")
+    expect(effect).to_contain_text("Erase client (GDPR)")

@@ -141,6 +141,8 @@ export const en = {
   no_matching_clients: "No client of that name",
   no_clients_yet: "No clients in the directory yet",
   participant_add_new: 'Add "{name}" as a new client',
+  // A withdrawn client is still found, so the trainer learns why they cannot be booked.
+  participant_consent_withdrawn: "Consent withdrawn {date} — cannot be added to a new session",
   remove_participant: "Take off this session:",
   select_routine_for: "Routine for this client",
   btn_launch_clipboard: "Open in Clipboard",
@@ -1363,6 +1365,8 @@ export const en = {
   profile_erased_banner:
     "Erased on {date} at the client's request. The training records below are anonymous.",
   consent_badge_withdrawn: "Consent Withdrawn ({dates})",
+  consent_withdrawn_effect:
+    "This client cannot be added to a new session. If they also want their data erased, use Erase client (GDPR).",
   consent_badge_none: "Not Consented (Local Only)",
   consent_badge_given: "Consented ({detail})",
   consent_badge_verified: "Verified",

@@ -322,7 +322,9 @@ function renderConsentStatus(client, t) {
       .map(([label, value]) => `${label}: ${value}`)
       .join(" · ");
     const safeLabel = escapeHTML(t("consent_badge_withdrawn").replace("{dates}", dates));
-    statusEl.innerHTML = `<span class="badge badge-warning"><i class="fa-solid fa-ban mr-1"></i> ${safeLabel}</span>`;
+    // What the withdrawal stops, and where erasure is: the untick alone was taken for the whole of it.
+    const safeEffect = escapeHTML(t("consent_withdrawn_effect"));
+    statusEl.innerHTML = `<span class="badge badge-warning"><i class="fa-solid fa-ban mr-1"></i> ${safeLabel}</span><p class="consent-meta">${safeEffect}</p>`;
     return;
   }
   if (!isConsentActive(consent)) {
