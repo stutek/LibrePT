@@ -4431,6 +4431,22 @@ projekta), drugič dobi vprašanje, na katero je že odgovoril, in za njim angle
 shranita tema in podatki trenerja; povezave za demo so morda namenoma brez trajnega učinka — opaženo
 na `main` `6230070` (zamrznjena kopija), 390 × 844.
 
+### 80.160 [ ] P2 — »Začni skupinski trening« pri rutini odpre trening brez te rutine
+
+**Scenarij in koraki:** stranki »Lan Hribar« in »Pia Jereb«; ☰ → »Vaje in rutine« → »Rutine« →
+»Ustvari rutino« »Noge B« (Barbell Back Squat), »Shrani«; pri »Noge B« »Začni skupinski trening«; v
+obrazcu dodati obe stranki, ime »Skupina noge«, »Odpri v beležki«, v oknu vabil »Končano«.
+
+**Opaženo:** obrazec se odpre na `session/new?routine=034Y66gLAUQlof5MQwFJcX`, nikjer ne piše »Noge B«;
+pri obeh strankah je izbrano »Prazen načrt, brez rutine«; beležka: »Ni vstavljenih vaj / Vaj še ni.
+Pritisni tri pike (⋮) …«. Z `?lang=sl` v naslovu postane vrednost `routine` »034Y60LI1ClFPz7yLmFTpF?lang=sl«.
+
+**Težava in vpliv:** trener izbere rutino in pritisne gumb, ki obljublja skupinski trening po njej;
+dobi prazen trening in mora rutino vsaki stranki izbrati sam ali jo poiskati v »Vsi na ta načrt«.
+
+**Predlog:** stranke, dodane na trening, odprt s tem gumbom, naj dobijo to rutino — opaženo na `main`
+`6230070` (zamrznjena kopija), 390 × 844, sl.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
