@@ -9530,6 +9530,69 @@ delovnem prostoru zamenjala z 20 angleškimi vzorčnimi in izpisala »Koledar je
 sinhroniziran!«. Preizkušeno na `main`; trenerjev trening je izginil. Odstranjeno v `080ab10`, s ključi
 in handlerjem; test `test_sync_and_backup_offers_no_calendar_it_does_not_have`.
 
+### 80.150 [x] P2 — Trening, ustvarjen s čipom »jutri«, na podlogi ostane »Jutri« tudi naslednji dan — popravljeno 2026-10-01
+
+**Scenarij in koraki:** 2026-09-30 ob 23:59 »Ustvari trening«, ime »Test B«, obrazec sam izbere
+jutri 00:00–01:00, stranka »Vesna Lipnik«, »Odpri v beležki«, v oknu vabil »Končano«. Po polnoči
+(2026-10-01 00:02) trening znova odpreti s kartice na plošči, nato stran še osvežiti. Za primerjavo
+po polnoči ustvariti »Test D« za danes 00:30 in »Test C« za včeraj 23:00.
+
+**Opaženo:** glava podloge »Test B« še ob 00:02 in po osvežitvi piše »Jutri · 00:00 - 01:00«, plošča
+pa isti trening pravilno pokaže pod »četrtek 2026-10-01« z »Zamuja 00h 01m«. »Test D« ima »Danes ·
+00:30 - 01:30«, »Test C« »Včeraj · 23:00 - 23:30«. V bazi ima zapis »Test B« poleg pravilnega
+`startDate` tudi `"day":"tomorrow"`.
+
+**Težava in vpliv:** trener zvečer pripravi jutrišnji trening, naslednji dan pa podloga za današnji
+trening piše »Jutri«. Na telovadnici, kjer je glava podloge edini kraj s časom, ne ve, ali je odprl
+pravi trening.
+
+**Predlog:** dan v glavi podloge naj pove odnos do današnjega dne ob odprtju, ne do dneva, ko je bil
+trening ustvarjen — opaženo na različici `main` `6230070` (zamrznjena kopija, vrata 8093), sl,
+390 × 844.
+
+**Popravljeno 2026-10-01** (`02a5a6c`): glava, naslov urejevalnika, način načrta in barva kartice zdaj dan preberejo iz začetka treninga; trening, starejši od včeraj, pove dan v tednu in datum.
+
+### 80.160 [x] P2 — »Začni skupinski trening« pri rutini odpre trening brez te rutine — popravljeno 2026-10-01
+
+**Scenarij in koraki:** stranki »Lan Hribar« in »Pia Jereb«; ☰ → »Vaje in rutine« → »Rutine« →
+»Ustvari rutino« »Noge B« (Barbell Back Squat), »Shrani«; pri »Noge B« »Začni skupinski trening«; v
+obrazcu dodati obe stranki, ime »Skupina noge«, »Odpri v beležki«, v oknu vabil »Končano«.
+
+**Opaženo:** obrazec se odpre na `session/new?routine=034Y66gLAUQlof5MQwFJcX`, nikjer ne piše »Noge B«;
+pri obeh strankah je izbrano »Prazen načrt, brez rutine«; beležka: »Ni vstavljenih vaj / Vaj še ni.
+Pritisni tri pike (⋮) …«. Z `?lang=sl` v naslovu postane vrednost `routine` »034Y60LI1ClFPz7yLmFTpF?lang=sl«.
+
+**Težava in vpliv:** trener izbere rutino in pritisne gumb, ki obljublja skupinski trening po njej;
+dobi prazen trening in mora rutino vsaki stranki izbrati sam ali jo poiskati v »Vsi na ta načrt«.
+
+**Predlog:** stranke, dodane na trening, odprt s tem gumbom, naj dobijo to rutino — opaženo na `main`
+`6230070` (zamrznjena kopija), 390 × 844, sl.
+
+**Popravljeno 2026-10-01** (`65d0b8b`): rutina gre vsem strankam, dodanim na obrazec, odprt brez izbrane stranke; usmerjevalnik prenesene parametre združi z lastno poizvedbo poti, zato `?lang=sl` ne pride več v id rutine.
+
+### 80.161 [x] P2 — Osvežitev seznama odstrani izbrano obdobje — popravljeno 2026-10-01
+
+**Scenarij in koraki:** trener pregleduje termine čez konec leta. Na plošči
+»Treningi« odpre »Datumi«, z izbirnikoma meseca in leta ter gumboma »Od« in »Do«
+izbere 2026-11-10–2027-02-28. Zapre koledar, nato osveži stran.
+
+**Opaženo:** pred osvežitvijo čip kaže »2026-11-10 – 2027-02-28« in seznam dve
+kartici: »Serija z obrnjenim obdobjem« na začetni datum ter »Kontrola datuma« na
+končni datum. Meji sta vključeni pravilno. Po osvežitvi čip spet kaže »Datumi« in
+seznam vseh 13 kartic, tudi septembrske. Primerjalno: ponovna izbira istega obdobja,
+odprtje kartice »Kontrola datuma« in vrnitev z »Zapri trening in se vrni na začetek«
+ohranijo čip in obe kartici.
+
+**Težava in vpliv:** po ponovnem nalaganju mora trener znova nastaviti meseca, leto
+in obe meji, da nadaljuje pregled istega obdobja. Običajna vrnitev iz treninga
+izbor ohrani, osvežitev pa ga brez pojasnila odstrani.
+
+**Predlog:** ob obnovitvi seznama ohraniti izbrano obdobje ali jasno ponuditi
+vrnitev na prejšnji izbor. Opaženo na objavljeni `6c8b556`, sl, 390 × 844,
+Chrome CDP; brez prestreženih napak, brez pregledovanja kode.
+
+**Popravljeno 2026-10-01** (`1859e0a`): filtri plošče so shranjeni v `sessionStorage` kot napol izpolnjen obrazec: osvežitev jih ohrani, nov zavihek začne s celotno ploščo.
+
 ## 99.1 [x] Padli test ni bil okolje, ampak iskanje niza v naključnem id-ju — popravljeno 2026-10-01
 
 Po potisku 212 commitov je 2026-10-01 padel tek »Build, Verify and Deploy«, opravilo »Stage 1 ·

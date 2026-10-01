@@ -4207,25 +4207,9 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80148-x-p2--zam
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80149-x-p3--brez-povezave-glava-slovenske-aplikacije-napiše-offline--popravljeno-2026-09-30).
 
-### 80.150 [ ] P2 — Trening, ustvarjen s čipom »jutri«, na podlogi ostane »Jutri« tudi naslednji dan
+### 80.150 [x] P2 — Trening, ustvarjen s čipom »jutri«, na podlogi ostane »Jutri« tudi naslednji dan — popravljeno 2026-10-01
 
-**Scenarij in koraki:** 2026-09-30 ob 23:59 »Ustvari trening«, ime »Test B«, obrazec sam izbere
-jutri 00:00–01:00, stranka »Vesna Lipnik«, »Odpri v beležki«, v oknu vabil »Končano«. Po polnoči
-(2026-10-01 00:02) trening znova odpreti s kartice na plošči, nato stran še osvežiti. Za primerjavo
-po polnoči ustvariti »Test D« za danes 00:30 in »Test C« za včeraj 23:00.
-
-**Opaženo:** glava podloge »Test B« še ob 00:02 in po osvežitvi piše »Jutri · 00:00 - 01:00«, plošča
-pa isti trening pravilno pokaže pod »četrtek 2026-10-01« z »Zamuja 00h 01m«. »Test D« ima »Danes ·
-00:30 - 01:30«, »Test C« »Včeraj · 23:00 - 23:30«. V bazi ima zapis »Test B« poleg pravilnega
-`startDate` tudi `"day":"tomorrow"`.
-
-**Težava in vpliv:** trener zvečer pripravi jutrišnji trening, naslednji dan pa podloga za današnji
-trening piše »Jutri«. Na telovadnici, kjer je glava podloge edini kraj s časom, ne ve, ali je odprl
-pravi trening.
-
-**Predlog:** dan v glavi podloge naj pove odnos do današnjega dne ob odprtju, ne do dneva, ko je bil
-trening ustvarjen — opaženo na različici `main` `6230070` (zamrznjena kopija, vrata 8093), sl,
-390 × 844.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80150-x-p2--trening-ustvarjen-s-čipom-jutri-na-podlogi-ostane-jutri-tudi-naslednji-dan--popravljeno-2026-10-01).
 
 ### 80.151 [ ] P2 — Pri urejanju načrta se katalog zapre po vsaki vaji, v »Ustvari rutino« pa ostane odprt
 
@@ -4244,6 +4228,8 @@ tu ne gre.
 
 **Predlog:** katalog pri urejanju načrta naj ostane odprt, dokler trener ne pritisne »Končano«, kot v
 »Ustvari rutino« — opaženo na različici `main` `6230070` (zamrznjena kopija), sl, 390 × 844.
+
+**Odprto, čaka na Simona (2026-10-01):** v »Ustvari rutino« je katalog del obrazca in nove vrstice so vidne pod njim. Pri urejanju načrta je katalog okno čez urejevalnik: če ostane odprt, trener ne vidi, da je vaja dodana, in jo lahko doda dvakrat. Predlog: katalog ostane odprt, izbrana vaja dobi ✓, gumb »Končano« v oknu pove število dodanih vaj. Odločitev: ali tako.
 
 ### 80.152 [ ] P3 — Med urejanjem načrta prazna kartica še vedno pravi »izberi Uredi načrt«, namig pa imenuje gumb brez besede
 
@@ -4415,6 +4401,8 @@ Med treningom, ko spet vodi počep, opozorila ni; vidi ga le, če pred tem odpre
 **Predlog:** bolečina, shranjena v kartoteko, naj se na podlogi pokaže tam kot vpisana poškodba,
 ali vsaj pri vaji, kjer je nastala — opaženo na `main` `6230070` (zamrznjena kopija), 390 × 844, sl.
 
+**Odprto, čaka na Simona (2026-10-01):** predloga sta dva in se izključujeta po prostoru na podlogi. Predlog: opozorilo pri vaji, kjer je bolečina nastala, ker trener tam vodi gib; pod imenom stranke ostane le vpisana poškodba. Odločitev: kje.
+
 ### 80.159 [ ] P3 — Prvi zagon prek povezave z `?lang=sl` jezika ne shrani: naslednjič aplikacija spet vpraša — čaka na Simona
 
 **Scenarij in koraki:** prvi obisk `/LibrePT/?lang=sl`: »Se strinjam«, tema »Dan«, podatki trenerke
@@ -4432,42 +4420,13 @@ projekta), drugič dobi vprašanje, na katero je že odgovoril, in za njim angle
 shranita tema in podatki trenerja; povezave za demo so morda namenoma brez trajnega učinka — opaženo
 na `main` `6230070` (zamrznjena kopija), 390 × 844.
 
-### 80.160 [ ] P2 — »Začni skupinski trening« pri rutini odpre trening brez te rutine
+### 80.160 [x] P2 — »Začni skupinski trening« pri rutini odpre trening brez te rutine — popravljeno 2026-10-01
 
-**Scenarij in koraki:** stranki »Lan Hribar« in »Pia Jereb«; ☰ → »Vaje in rutine« → »Rutine« →
-»Ustvari rutino« »Noge B« (Barbell Back Squat), »Shrani«; pri »Noge B« »Začni skupinski trening«; v
-obrazcu dodati obe stranki, ime »Skupina noge«, »Odpri v beležki«, v oknu vabil »Končano«.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80160-x-p2--začni-skupinski-trening-pri-rutini-odpre-trening-brez-te-rutine--popravljeno-2026-10-01).
 
-**Opaženo:** obrazec se odpre na `session/new?routine=034Y66gLAUQlof5MQwFJcX`, nikjer ne piše »Noge B«;
-pri obeh strankah je izbrano »Prazen načrt, brez rutine«; beležka: »Ni vstavljenih vaj / Vaj še ni.
-Pritisni tri pike (⋮) …«. Z `?lang=sl` v naslovu postane vrednost `routine` »034Y60LI1ClFPz7yLmFTpF?lang=sl«.
+### 80.161 [x] P2 — Osvežitev seznama odstrani izbrano obdobje — popravljeno 2026-10-01
 
-**Težava in vpliv:** trener izbere rutino in pritisne gumb, ki obljublja skupinski trening po njej;
-dobi prazen trening in mora rutino vsaki stranki izbrati sam ali jo poiskati v »Vsi na ta načrt«.
-
-**Predlog:** stranke, dodane na trening, odprt s tem gumbom, naj dobijo to rutino — opaženo na `main`
-`6230070` (zamrznjena kopija), 390 × 844, sl.
-
-### 80.161 [ ] P2 — Osvežitev seznama odstrani izbrano obdobje
-
-**Scenarij in koraki:** trener pregleduje termine čez konec leta. Na plošči
-»Treningi« odpre »Datumi«, z izbirnikoma meseca in leta ter gumboma »Od« in »Do«
-izbere 2026-11-10–2027-02-28. Zapre koledar, nato osveži stran.
-
-**Opaženo:** pred osvežitvijo čip kaže »2026-11-10 – 2027-02-28« in seznam dve
-kartici: »Serija z obrnjenim obdobjem« na začetni datum ter »Kontrola datuma« na
-končni datum. Meji sta vključeni pravilno. Po osvežitvi čip spet kaže »Datumi« in
-seznam vseh 13 kartic, tudi septembrske. Primerjalno: ponovna izbira istega obdobja,
-odprtje kartice »Kontrola datuma« in vrnitev z »Zapri trening in se vrni na začetek«
-ohranijo čip in obe kartici.
-
-**Težava in vpliv:** po ponovnem nalaganju mora trener znova nastaviti meseca, leto
-in obe meji, da nadaljuje pregled istega obdobja. Običajna vrnitev iz treninga
-izbor ohrani, osvežitev pa ga brez pojasnila odstrani.
-
-**Predlog:** ob obnovitvi seznama ohraniti izbrano obdobje ali jasno ponuditi
-vrnitev na prejšnji izbor. Opaženo na objavljeni `6c8b556`, sl, 390 × 844,
-Chrome CDP; brez prestreženih napak, brez pregledovanja kode.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80161-x-p2--osvežitev-seznama-odstrani-izbrano-obdobje--popravljeno-2026-10-01).
 
 ### 80.162 [ ] P2 — Brskalnikov Nazaj zamenja stran pod še odprtim obrazcem stranke
 
@@ -5839,3 +5798,18 @@ Pravilo projekta pravi, da sta `build check` in GitHubov delotok v koraku. Tu je
 samo na GitHubu, in njegovih najdb ni videl nihče šest tednov. **Predlog:** opravilo v delotoku, ki
 prebere odprta opozorila (`security-events: read` zadošča) in pade, kadar je katero odprto brez
 zapisanega razloga. **Čaka na Simona:** ali to hoče, ker vsako novo opozorilo s tem ustavi objavo.
+
+## 102. [ ] Tri najdbe v orodju `build`, 2026-10-01
+
+- **`build --help` zažene celoten gate.** Pomoči ne izpiše. Vzame `.build-reports/gate.lock` in ga
+  drži, dokler teka nekdo ne ustavi; vse druge seje medtem čakajo. Popravek: neznano stikalo naj
+  izpiše uporabo in konča brez teka.
+- **Datoteka z zelenim gatom je lahko neoblikovana.** `22cf2ed` je prešel gate s testno vrstico,
+  daljšo od meje Ruff, in `build commit` jo je commital takšno. Naslednji `build lint` v delovnem
+  drevesu jo je preoblikoval, z njo še dve datoteki iz `e5bd1f3`, in jih pustil spremenjene tistemu,
+  ki ga je pognal (popravljeno v `d45de4f`). Popravek: v gatu Ruff in Biome samo preverjata, ne
+  pišeta, in neoblikovana datoteka ustavi gate.
+- **ZAP je enkrat padel, ne da bi pregledal stran.** Gate ob 23:13 se je ustavil na 5. stopnji z
+  izhodno kodo 3; dnevnik ima le »Failed to access summary file /home/zap/zap_out.json«. Isto drevo
+  je ob 23:29 prešlo z WARN-NEW: 0. Vzrok ni znan. Če se ponovi: ohraniti izpis vsebnika (`-silent`
+  ga skrije) in preveriti, ali je bil cilj `ZAP_TARGET` takrat dosegljiv.
