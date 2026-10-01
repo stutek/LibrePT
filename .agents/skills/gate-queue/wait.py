@@ -82,12 +82,18 @@ def gate_python():
 
 
 def run_gate(paths):
-    """One run, output kept whole in a log and printed whole. Returns (exit code, output)."""
+    """One run, output kept whole in a log and printed whole. Returns (exit code, output).
+
+    PYTHONUNBUFFERED, because the gate's output goes to a file here rather than to a terminal: Python
+    then holds it in a buffer and the log stays EMPTY for the whole run. Eight minutes of a run
+    nobody can watch looks exactly like a run that never started.
+    """
     with open(LOG, "w", encoding="utf-8") as handle:
         code = subprocess.run(
             (gate_python(), "-m", "build", "check", "--", *paths),
             stdout=handle,
             stderr=subprocess.STDOUT,
+            env={**os.environ, "PYTHONUNBUFFERED": "1"},
             check=False,
         ).returncode
     with open(LOG, encoding="utf-8") as handle:
@@ -159,6 +165,10 @@ def cmd_lock(args):
 
 
 def main(argv=None):
+    # Same reason as PYTHONUNBUFFERED in run_gate: this tool is usually started in the background
+    # with its output redirected, and a buffered line about a wait that is still going arrives after
+    # the wait has ended.
+    sys.stdout.reconfigure(line_buffering=True)
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="what", required=True)
     gate = sub.add_parser("gate", help="wait for the lock, then gate these paths once")
