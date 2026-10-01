@@ -50,8 +50,8 @@ so there is no anonymous way around it. The annotations usually say only
 `Process completed with exit code 1`, which is the consequence, not the cause.
 
 **When the log is out of reach, say so.** Report which job and which step fell, and ask for a login
-or for the log pasted in. A guess at the cause is forbidden: see
-[AGENT_RULES.md](../../../AGENT_RULES.md), "no guess dressed as a measurement".
+or for the log pasted in. A cause nobody measured is never reported as a cause: write what fell and
+what is missing, and stop there.
 
 The tool picks a login up by itself from `GH_TOKEN`, `GITHUB_TOKEN` or `gh auth token`. To grant one:
 `gh auth login`. A browser session logged in as the repository owner can read the log page too, but
