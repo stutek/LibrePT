@@ -5686,20 +5686,9 @@ poročilo v `.private/BUILD_WATCH/<sha>.md`; izhodna koda 0 uspeh, 1 padec, 2 ni
 Poganja jo najcenejši model, ki zna poganjati ukaze. V repozitoriju je namenoma: čist clone mora
 imeti orodje s sabo, tudi če projekt zamenja lastnika.
 
-### 99.1 [ ] Padli test ni bil okolje, ampak iskanje niza v naključnem id-ju
+### 99.1 [x] Padli test ni bil okolje, ampak iskanje niza v naključnem id-ju — popravljeno 2026-10-01
 
-Simon se je prijavil in dnevnik je bil berljiv. Padlo je:
-`tests/unit_js/domain/routineFromSession.test.mjs:110`,
-`assert.ok(!JSON.stringify(first).includes("h1"))`.
-
-Trditev hoče povedati, da rutina ne nosi povezave na izvorni zapis, preveri pa to z iskanjem niza
-`"h1"` po celotnem JSON-u. `"h1"` je tudi lahko del id-ja nove rutine: `newRecordId()` vrne 22
-znakov iz abecede base62, ki vsebuje tako `h` kot `1`. Test torej pade takrat, ko naključje postavi
-`h1` v id — tu je šlo skozi, v CI ni.
-
-Moja prejšnja domneva v tem razdelku (okolje v CI, ker je opravilo padlo v 30 s) je bila napačna.
-
-**Popravek:** trditev naj primerja vrednosti z id-jem zapisa, ne iskanja niza. V delu.
+Razlog je v [TODO_ARCHIVE.md](TODO_ARCHIVE.md), razdelek 99.1. Popravek: `9297a0d`.
 
 ### 99.3 [ ] Prijava za branje dnevnikov — podrobnosti so zasebne
 

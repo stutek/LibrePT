@@ -9516,3 +9516,24 @@ obljubljala rezervacije iz povezanega koledarja. Koledarja ni: po 1,2 sekunde je
 delovnem prostoru zamenjala z 20 angleškimi vzorčnimi in izpisala »Koledar je bil uspešno
 sinhroniziran!«. Preizkušeno na `main`; trenerjev trening je izginil. Odstranjeno v `080ab10`, s ključi
 in handlerjem; test `test_sync_and_backup_offers_no_calendar_it_does_not_have`.
+
+## 99.1 [x] Padli test ni bil okolje, ampak iskanje niza v naključnem id-ju — popravljeno 2026-10-01
+
+Po potisku 212 commitov je 2026-10-01 padel tek »Build, Verify and Deploy«, opravilo »Stage 1 ·
+JavaScript Unit Tests«, korak 4, v 30 sekundah. Pripis je povedal le `Process completed with exit
+code 1.`, dnevnika pa brez prijave ni bilo mogoče brati: anonimni zahtevek vrne `403 Must have admin
+rights to Repository.`, stran teka v brskalniku je prazno ogrodje.
+
+Dokler dnevnika ni bilo, je bila zapisana domneva, da gre za okolje v CI, ker isti nabor tu uspe v
+4,17 s, tudi v svežem kloniranju istega commita in pri `TZ=UTC`, padlo opravilo pa je trajalo 30
+sekund z vsem pripravljanjem. **Ta domneva je bila napačna.** Ko se je Simon prijavil, je dnevnik
+pokazal pravo trditev: `tests/unit_js/domain/routineFromSession.test.mjs:110`,
+`assert.ok(!JSON.stringify(first).includes("h1"))`.
+
+Trditev pove, da rutina, shranjena iz treninga, ne nosi povezave na izvorni zapis — preverila pa je
+to z iskanjem niza `"h1"` po celotnem JSON-u. `newRecordId()` vrne 22 znakov iz abecede base62, ki
+vsebuje tako `h` kot `1`, zato iskanje najde **lastni id nove rutine**, kadar naključje postavi `h1`
+vanj; približno enkrat na dvesto tekov. Na vseh računalnikih je šlo skozi, na strežniku je padlo.
+
+Popravek `9297a0d`: id zapisa v testu nosi vezaj, ki ga ustvarjen id ne more vsebovati, iskanje pa
+gre za tem id-jem in ne za zapisanim nizom. Trditev obdrži moč in izgubi naključje.
