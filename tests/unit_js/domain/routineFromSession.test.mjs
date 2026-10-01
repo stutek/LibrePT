@@ -101,13 +101,18 @@ test("a skipped movement is kept", () => {
 });
 
 test("name, date and soft provenance; a taken name gets a number; no link to the record", () => {
-  const log = { id: "h1", exercises: [ex("sq", "Back Squat")] };
+  // The record id carries a dash on purpose. The search below looks for it anywhere in the routine,
+  // and a minted record id is 22 base62 characters — letters and digits only — so a short id like
+  // "h1" is a string the generator can produce by chance. It did: this test failed in CI on
+  // 2026-10-01 because the new routine's own id happened to contain "h1". A dash cannot appear in
+  // one, so the search can only find a real link back to the record.
+  const log = { id: "h1-record", exercises: [ex("sq", "Back Squat")] };
   const first = build(log).routine;
   assert.equal(first.name, "Legs 2026-09-30");
   assert.equal(first.description, "Saved from the session of 2026-09-30");
   assert.equal(build(log, [{ name: first.name }]).routine.name, "Legs 2026-09-30 (2)");
   assert.deepEqual(Object.keys(first).sort(), ["description", "exercises", "id", "name"]);
-  assert.ok(!JSON.stringify(first).includes("h1"));
+  assert.ok(!JSON.stringify(first).includes(log.id));
 });
 
 test("a record with no routine name uses the fallback", () => {
