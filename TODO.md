@@ -5516,6 +5516,13 @@ angleškima obrazcema za trenerje.
   Cloud). Besedila Googla ne imenujejo več obdelovalca; kopija je šifrirana. Ali to trenerju zadošča,
   je pravno vprašanje.
 - **97.6 Pravni pregled** ni opravljen v nobenem jeziku; nemščine ni prebral nihče, ki govori nemško.
+- **97.7 Kaj preklic ustavi.** Pismo zdaj obljublja: »Preklic … ustavi nadaljnjo obdelavo.« Preizkus
+  2026-10-01 na `main` `6230070`: Maja Kovač, privolitev dana 2026-10-01, nato odkljukano, »Datum
+  preklica« 2026-10-01, »Shrani«. Profil: »Privolitev preklicana (Datum podpisa: 2026-10-01 · Datum
+  preklica: 2026-10-01)«. Nato »Ustvari trening« z Majo, »Odpri v beležki«, »Pošlji vabilo«, »Začni
+  trening«: nikjer opozorila, podloga pokaže njeno poškodbo. Ostanek zaprte §80.102 (»kaj se s
+  preklicem ustavi, na zaslonu še ni povedano«) je bil le v arhivu. Odločitev je ista kot 97.2: kaj
+  aplikacija s stranko brez privolitve sme, in to naj pove ob dodajanju na trening.
 
 **Vrzel v aplikaciji, ni zgrajeno:** aplikacija ne pokaže, katere stranke so privolile po starejši
 različici. Po tej spremembi so to vse obstoječe stranke, trener pa tega ne izve nikjer.
