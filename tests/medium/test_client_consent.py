@@ -27,7 +27,9 @@ pytestmark = pytest.mark.clean_start
 # legitimate bump of the letter rather than on a record stamped with the wrong version.
 CURRENT_FORM_VERSION = re.search(
     r'CONSENT_FORM_VERSION = "([0-9-]+)"',
-    (Path(__file__).parents[2] / "src/modules/common/consentForm.js").read_text(encoding="utf-8"),
+    (Path(__file__).parents[2] / "src/modules/common/consentForm.js").read_text(
+        encoding="utf-8"
+    ),
 ).group(1)
 
 STUB = view_stub(
@@ -113,7 +115,9 @@ def test_date_field_appears_only_once_consent_is_ticked(page, local_server):
     expect(page.locator("#client-consent-date-group")).to_be_visible()
     # Defaults to today, but stays editable: the paper is often signed before anyone opens the app.
     expect(page.locator("#client-consent-date")).to_have_value(_today())
-    expect(page.locator("#client-consent-version")).to_contain_text(CURRENT_FORM_VERSION)
+    expect(page.locator("#client-consent-version")).to_contain_text(
+        CURRENT_FORM_VERSION
+    )
 
 
 def test_existing_consent_shows_its_signed_date_and_the_version_signed_under(

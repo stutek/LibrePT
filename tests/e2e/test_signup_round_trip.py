@@ -20,7 +20,9 @@ from tests.conftest import wait_for_stored_record
 # The wording version the intake page stamps, read from its one declaration rather than copied.
 CURRENT_FORM_VERSION = re.search(
     r'CONSENT_FORM_VERSION = "([0-9-]+)"',
-    (Path(__file__).parents[2] / "src/modules/common/consentForm.js").read_text(encoding="utf-8"),
+    (Path(__file__).parents[2] / "src/modules/common/consentForm.js").read_text(
+        encoding="utf-8"
+    ),
 ).group(1)
 
 

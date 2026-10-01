@@ -329,7 +329,12 @@ def test_swapping_to_other_equipment_drops_the_load_and_keeps_the_reps(
     but 75 kg is a barbell's load and one dumbbell held at the chest is a fraction of it. Kept, it is a
     wrong number that looks right. The reps are the trainer's scheme and still hold."""
     after = _swap_first_row_to(
-        page, local_server, "Barbell Back Squat", "Dumbbell Goblet Squat", weight=75, reps=5
+        page,
+        local_server,
+        "Barbell Back Squat",
+        "Dumbbell Goblet Squat",
+        weight=75,
+        reps=5,
     )
     assert after["name"] == "Dumbbell Goblet Squat"
     assert after["sets"] == [[5, 0], [5, 0]]
