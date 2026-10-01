@@ -1475,9 +1475,9 @@ Four asks, one subject: the parts of the journey that happen outside this app.
 The rule for all of them, written in demoNarratorCard.js: a step outside this app is drawn on
 something nobody could mistake for one of its screens.
 
-### 39.9 [x] BUG — Show me skips what it is there to show — fixed 2026-10-01 (a13799a)
+### 39.9 [x] BUG — Show me skips what it is there to show — fixed 2026-10-01 (2e6e9785)
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#399-x-bug--show-me-skips-what-it-is-there-to-show--fixed-2026-10-01-a13799a).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#399-x-bug--show-me-skips-what-it-is-there-to-show--fixed-2026-10-01-2e6e9785).
 
 ### 39.10 [x] CHANGE — the intake-link button is named for the intent
 
@@ -5652,7 +5652,7 @@ od danes živijo tukaj:
 - **§80.108, čaka na Simona:** `logQuickSignal` v
   [sessionQuickSignals.js](src/controllers/sessionQuickSignals.js) ob tapu signala označi vse serije
   vaje kot opravljene (manj dotikov, §48); ugotovitev pravi, da zapis trdi delo, ki ga ni bilo.
-  Katero branje velja, je Simonova odločitev. **Popravljeno 2026-10-01 (`6b3b4e8`):** umik signala
+  Katero branje velja, je Simonova odločitev. **Popravljeno 2026-10-01 (`dfe0d7dd`):** umik signala
   vrne serije, ki jih je označil signal, ročno označene ostanejo. Po osvežitvi strani tega ne zmore,
   ker si tega podatka namenoma ne shrani v zapis.
 - **§80.104, čaka na Simona:** nenačrtovanega programa trener ne more odstraniti. Program se ob

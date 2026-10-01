@@ -20,7 +20,7 @@ Read [CHANGELOG.md](CHANGELOG.md) for what shipped and when. This file is why.
 
 ---
 
-### 39.9 [x] BUG — Show me skips what it is there to show — fixed 2026-10-01 (a13799a)
+### 39.9 [x] BUG — Show me skips what it is there to show — fixed 2026-10-01 (2e6e9785)
 
 **Fixed 2026-09-30 (`5c269da`):** Show me filled two fields as one and closed the ✕ without drawing
 the tap (cards 6→7, walked backwards), and drew no tap on card 20. Replays now carry the hand, a
