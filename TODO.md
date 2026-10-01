@@ -1442,6 +1442,16 @@ timers, and "Copy this plan to…". The last four were found by walks of the pub
 name is saved. §80.69 records the opposite pull: the alias field is always visible, and a first
 visit does not need it.
 
+**[ ] P2 — Filter stranke na plošči še izpusti vzdevek, objavljena `6c8b556`.**
+**Scenarij:** v imeniku sta TEST Luka Kovač (jutranji · Studio A) in TEST Luka Kovač
+(večerni). Na plošči »Treningi« odpreti filter »Stranka« in izbrati vsako od obeh
+istoimenskih možnosti. **Opaženo:** obe možnosti in izbrani čip kažeta samo »TEST
+Luka Kovač«; vzdevka ni niti v dodatni oznaki možnosti. Prva izbira pokaže pet
+kartic, druga deset, torej gre za različni stranki. Imenik še vedno pokaže oba
+vzdevka. **Vpliv:** trener mora pravo stranko uganiti po vrstnem redu ali po njenih
+terminih. **Predlog:** vzdevek prikazati tudi v možnostih filtra in v izbrani
+vrednosti. Sl, 390 × 844, brez prestreženih napak in brez pregledovanja kode.
+
 ### 39.6 [x] BUG — the clipboard says which session, and the chapter builds a programme
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#396-x-bug-the-clipboard-says-which-session-and-the-chapter-builds-a-programme); what shipped is in [CHANGELOG.md](CHANGELOG.md).
