@@ -5682,19 +5682,30 @@ poročilo v `.private/BUILD_WATCH/<sha>.md`; izhodna koda 0 uspeh, 1 padec, 2 ni
 Poganja jo najcenejši model, ki zna poganjati ukaze. V repozitoriju je namenoma: čist clone mora
 imeti orodje s sabo, tudi če projekt zamenja lastnika.
 
-### 99.1 [ ] Vzroka padca brez prijave ni mogoče ugotoviti — čaka na Simona
+### 99.1 [ ] Padli test ni bil okolje, ampak iskanje niza v naključnem id-ju
 
-Dnevnik opravila zahteva prijavo: anonimni zahtevek vrne `403 Must have admin rights to
-Repository.`, stran teka v brskalniku je prazno ogrodje, razhroščevalni profil Chroma pa v GitHub ni
-prijavljen (»Sign in to view logs«). `gh auth status` pravi, da prijave ni, in na računalniku ni
-nobenega žetona.
+Simon se je prijavil in dnevnik je bil berljiv. Padlo je:
+`tests/unit_js/domain/routineFromSession.test.mjs:110`,
+`assert.ok(!JSON.stringify(first).includes("h1"))`.
 
-Kar je izmerjeno: isti nabor tu uspe v 4,17 s, tudi v svežem kloniranju istega commita `cdf6cf5`,
-tudi pri `TZ=UTC`. Trajanje padlega opravila (30 s za ves korak, vključno s pripravo okolja) govori
-za okolje v CI, ne za trditev v testu — a to je domneva, dokler dnevnika ne preberemo.
+Trditev hoče povedati, da rutina ne nosi povezave na izvorni zapis, preveri pa to z iskanjem niza
+`"h1"` po celotnem JSON-u. `"h1"` je tudi lahko del id-ja nove rutine: `newRecordId()` vrne 22
+znakov iz abecede base62, ki vsebuje tako `h` kot `1`. Test torej pade takrat, ko naključje postavi
+`h1` v id — tu je šlo skozi, v CI ni.
 
-**Čaka na Simona:** `gh auth login` (dovolj je `actions:read`), ali prijava v GitHub v profilu
-`~/.chrome-debug-profile`, ali prilepljen dnevnik. Brez enega od treh se vzroka ne išče.
+Moja prejšnja domneva v tem razdelku (okolje v CI, ker je opravilo padlo v 30 s) je bila napačna.
+
+**Popravek:** trditev naj primerja vrednosti z id-jem zapisa, ne iskanja niza. V delu.
+
+### 99.3 [ ] Prijava za branje dnevnikov — podrobnosti so zasebne
+
+`watch.py` prebere prijavo iz `GH_TOKEN`, `GITHUB_TOKEN`, datoteke, ki jo imenuje `GH_TOKEN_FILE`,
+ali iz `gh auth token`. **Kje je ta datoteka in katere pravice ima prijava, ni zapisano v tem
+repozitoriju** — ta je javen, zato to nosijo Simonova zasebna pravila. Brez prijave orodje pošteno
+izpiše, da dnevnika ne more brati, in nič ne ugiba.
+
+**Čaka na Simona:** nastavljena spremenljivka `GH_TOKEN_FILE` in prijava v tej datoteki. Prijave ne
+pošiljaj v pogovor — s tem pride v zapis seje; prvi poskus je zato odpadel.
 
 ### 99.2 [ ] Python v `.agents/` ni lintan
 
