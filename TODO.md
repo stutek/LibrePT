@@ -4395,6 +4395,25 @@ sekunde.
 **Predlog:** **čaka na Simona** — ali je pet sekund vredno zadrževati ob vsakem hladnem zagonu ali le
 ob prvem obisku — opaženo na `#8b2ce80` in `main` `6230070`, 390 × 844, sl.
 
+### 80.158 [ ] P2 — Bolečina, shranjena »v kartoteko stranke«, se na naslednjem treningu ne pokaže na podlogi
+
+**Scenarij in koraki:** rutina »Noge B« (Barbell Back Squat 60 kg), nova stranka »Vid Kralj«, trening
+»Prvi«, »Začni trening«, kartica počepa → »Opombe« → »🔥 Bolečina ali nelagodje v sklepu«, »Opombe po
+meri«: »levo koleno pri globini«, obkljukano »Shrani to v kartoteko stranke«, »Zapiši opozorilo«,
+»Zaključi vadbo«. Nato nov trening »Drugi« z isto rutino in »Začni trening«.
+
+**Opaženo:** v profilu je opomba pod »OPOMBE«: »2026-10-01 — Barbell Back Squat: Bolečina ali nelagodje
+v sklepu - levo koleno pri globini«; »POŠKODBE IN OMEJITVE« ostane »Ni navedeno«. Urejevalnik načrta
+naslednjega treninga jo pokaže pod »PREDHODNE POŠKODBE IN OPOMBE«. Podloga med treningom pa pod imenom
+stranke ne pokaže ničesar; pri stranki z vpisano poškodbo tam stoji poškodba (»Zvin desnega gležnja
+2023.«). Vodeni ogled obljublja: »Johnovo koleno je v njegovi kartoteki in v načrtu.«
+
+**Težava in vpliv:** trener zapiše bolečino med vajo prav zato, da jo naslednjič vidi pri isti vaji.
+Med treningom, ko spet vodi počep, opozorila ni; vidi ga le, če pred tem odpre urejevalnik načrta.
+
+**Predlog:** bolečina, shranjena v kartoteko, naj se na podlogi pokaže tam kot vpisana poškodba,
+ali vsaj pri vaji, kjer je nastala — opaženo na `main` `6230070` (zamrznjena kopija), 390 × 844, sl.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
