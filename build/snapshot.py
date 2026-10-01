@@ -10,8 +10,8 @@ the tree with `git stash` so another could run the gate, and putting it back col
 session's staged files. A snapshot removes the reason to wait: the run sees HEAD and the named paths
 and nothing else, so nobody else's edit can fail it or has to pause for it.
 
-**What is proved is what is committed.** A green run writes `.build-reports/proof.json`: the HEAD it
-started from and the SHA-256 of every named path. `build commit` refuses unless each path still has
+**What is proved is what is committed.** A green run writes a proof under `.build-reports/proofs/`,
+one per set of paths: the HEAD it started from and the SHA-256 of every named path. `build commit` refuses unless each path still has
 that content, and unless HEAD has not moved or has moved only by Markdown files — a commit of code by
 another session since then makes the combined tree unproven, and the answer is another run. The
 commit is built in a private index, so the shared one (where another session may have staged its own
@@ -47,7 +47,36 @@ from .testreport import REPORT_DIR
 SNAPSHOT_DIR = os.path.join(
     os.path.expanduser("~"), ".cache", "librept", "gate-snapshot"
 )
-PROOF_PATH = os.path.join(REPORT_DIR, "proof.json")
+# One proof per set of paths, so a run started by another session (which clears only its own) never
+# deletes the proof a session is about to commit with. A single shared proof.json did exactly that:
+# a run that began one second after another's ended wiped its proof before the commit.
+PROOF_DIR = os.path.join(REPORT_DIR, "proofs")
+
+
+def proof_path(paths):
+    """Where the proof for this set of paths lives: named by the set, not by who ran it."""
+    name = hashlib.sha256("\n".join(sorted(paths)).encode("utf-8")).hexdigest()[:16]
+    return os.path.join(PROOF_DIR, f"{name}.json")
+
+
+def find_proof(paths):
+    """(file, proof) of the newest proof whose uncommitted paths include all of `paths`, or None."""
+    if not os.path.isdir(PROOF_DIR):
+        return None
+    found = []
+    for entry in os.listdir(PROOF_DIR):
+        file = os.path.join(PROOF_DIR, entry)
+        with open(file, encoding="utf-8") as handle:
+            proof = json.load(handle)
+        open_paths = set(proof["paths"]) - set(proof.get("committed", []))
+        if set(paths) <= open_paths:
+            found.append((os.path.getmtime(file), file, proof))
+    if not found:
+        return None
+    _, file, proof = max(found)
+    return file, proof
+
+
 RUN_HISTORY_NAME = "last-run.json"
 
 
@@ -166,7 +195,9 @@ def start_server(snapshot=SNAPSHOT_DIR, port=SNAPSHOT_SERVER_PORT):
     return server
 
 
-def write_proof(head, digests, path=PROOF_PATH):
+def write_proof(head, digests, path=None):
+    path = path or proof_path(digests)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", encoding="utf-8") as handle:
         json.dump({"head": head, "paths": digests}, handle, indent=2)
 
@@ -183,8 +214,8 @@ def run_check(paths):
         return 1
     server = None
     try:
-        if os.path.exists(PROOF_PATH):
-            os.remove(PROOF_PATH)
+        if os.path.exists(proof_path(paths)):
+            os.remove(proof_path(paths))
         head, digests = prepare(paths)
         print(f">>> Snapshot at {SNAPSHOT_DIR}: HEAD {head[:7]} + {len(paths)} path(s)")
         for path in paths:
@@ -203,7 +234,7 @@ def run_check(paths):
         if code == 0:
             write_proof(head, digests)
             print(
-                f"\n  ✓ Proof written ({PROOF_PATH}). Commit them, all at once or in parts, with:\n"
+                f"\n  ✓ Proof written ({proof_path(paths)}). Commit them, all at once or in parts, with:\n"
                 f"    .venv/bin/python -m build commit -F <message file> -- {' '.join(paths)}"
             )
         else:
@@ -252,11 +283,13 @@ def stale_reasons(proof, paths, head, changed_since, current_digest=digest):
 
 def run_commit(message_file, paths):
     """`build commit -F <msg> -- <paths>`: commit proved paths, all or some. Returns the exit code."""
-    if not os.path.exists(PROOF_PATH):
-        print("  ✗ No proof: run  .venv/bin/python -m build check -- <paths>  first.")
+    located = find_proof(paths)
+    if located is None:
+        print(
+            "  ✗ No proof covers these paths: run  .venv/bin/python -m build check -- <paths>  first."
+        )
         return 1
-    with open(PROOF_PATH, encoding="utf-8") as handle:
-        proof = json.load(handle)
+    proof_file, proof = located
     with open(message_file, encoding="utf-8") as handle:
         if "Co-Authored-By:" not in handle.read():
             print("  ✗ The message has no Co-Authored-By line.")
@@ -285,9 +318,9 @@ def run_commit(message_file, paths):
     _git("reset", "--quiet", "--", *paths)
     proof["committed"] = sorted(set(proof.get("committed", [])) | set(paths))
     if set(proof["committed"]) == set(proof["paths"]):
-        os.remove(PROOF_PATH)
+        os.remove(proof_file)
     else:
-        with open(PROOF_PATH, "w", encoding="utf-8") as handle:
+        with open(proof_file, "w", encoding="utf-8") as handle:
             json.dump(proof, handle, indent=2)
     print(
         _git("show", "--stat", "--format=%h %s%n%(trailers:key=Co-Authored-By)", "HEAD")

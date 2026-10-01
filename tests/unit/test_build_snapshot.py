@@ -3,7 +3,6 @@
 # another session staged, the shared index keeps that session's work, and a path or HEAD that moved
 # after the run is refused. Runs git in a throwaway repository; no browser, no gate.
 
-import json
 import os
 import subprocess
 
@@ -58,6 +57,20 @@ def test_the_commit_holds_the_proved_paths_and_leaves_another_sessions_staging(r
     assert git("diff", "--cached", "--name-only", cwd=repo).split() == ["theirs.js"]
 
 
+def test_another_sessions_run_leaves_this_sessions_proof(repo):
+    # A run clears only the proof of its own path set. With one shared proof file, a run started a
+    # second after another ended deleted that session's proof before it could commit.
+    (repo / "mine.js").write_text("mine\n")
+    (repo / "theirs.js").write_text("theirs\n")
+    prove(repo, ["mine.js"])
+    prove(repo, ["theirs.js"])
+    os.remove(
+        snapshot.proof_path(["theirs.js"])
+    )  # what the other session's next run does first
+
+    assert snapshot.run_commit(message(repo), ["mine.js"]) == 0
+
+
 def test_one_run_yields_one_commit_per_change_and_no_path_twice(repo):
     (repo / "mine.js").write_text("mine\n")
     (repo / "theirs.js").write_text("second change\n")
@@ -69,7 +82,8 @@ def test_one_run_yields_one_commit_per_change_and_no_path_twice(repo):
 
     subjects = git("log", "--format=%s", cwd=repo).split("\n")[:3]
     assert subjects == ["fix: mine", "fix: mine", "base"]
-    assert not (repo / snapshot.PROOF_PATH).exists()
+    assert snapshot.find_proof(["mine.js"]) is None
+    assert snapshot.find_proof(["theirs.js"]) is None
 
 
 def test_a_path_changed_after_the_run_is_refused(repo):
@@ -86,7 +100,7 @@ def test_head_moved_by_markdown_only_is_accepted_and_by_code_is_refused(repo):
     prove(repo, ["mine.js"])
     (repo / "notes.md").write_text("another session's note\n")
     git("commit", "-qm", "docs", "--", "notes.md", cwd=repo)
-    proof = json.loads((repo / snapshot.PROOF_PATH).read_text())
+    _, proof = snapshot.find_proof(["mine.js"])
     head = git("rev-parse", "HEAD", cwd=repo).strip()
 
     assert snapshot.stale_reasons(proof, ["mine.js"], head, ["notes.md"]) == []
