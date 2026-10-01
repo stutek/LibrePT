@@ -4514,8 +4514,8 @@ listka. Ta izdaja je bila 541 commitov za `main`; točke so razvrščene proti `
   zaslonu le del prve vaje. Na `main` še ni preverjeno.
 - **F6 — mešan jezik: dialog opombe popravljen** (oznake prevedene, glasovne opombe ni več). Angleški
   filtri kataloga (All, Chest, Barbell) so že med odločitvami za Simona v §38.20.
-- **Ni preverjeno:** delo brez povezave, varnostna kopija in obnova, tisk, fizični telefon. Prav tako
-  ne zapis v zgodovino po zaključku, ker ga je F1 preprečil. Ponoviti na `6c8b556` ali novejši.
+- **Preverjeno 2026-10-01 (`62e51aa2`):** delo brez povezave (vnos stranke in treninga, reload s servisnim delavcem ohrani IndexedDB; clean), varnostna kopija in obnova (izvoz JSON, uvoz in obnova v sveži seji zamenja podatke; clean), zapis v zgodovino po zaključku (brez zamrznitve, modal v aplikaciji, zgodovina v kartoteki stranke prikazuje opravljene serije in vaje; clean).
+- **Še ni preverjeno:** tisk, fizični telefon.
 
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
@@ -4851,12 +4851,15 @@ Dan 10 (2026-09-30): enkratna delavnica za 20 članov tekaškega kluba. Trening 
 stranko (»Izbrati moraš vsaj eno stranko.«); trener je vpisal eno izmišljeno »stranko« z imenom kluba.
 Števila udeležencev in postaj ni; ocena 0.
 
+Dan 12 (2026-10-01): kondicijski trener mladinske selekcije; vnos 12 igralcev ekipe je vzel 18 minut namesto 4 v klubskem spisku; ocena 1.
+
 ### 88.3 [ ] Nadomestni trener dobi načrt po WhatsAppu
 
 Nadomeščanje: dan 01 pošlje načrt kolegici po WhatsAppu; dan 03 prevzame stranko bolnega kolega,
 dogovor po SMS-u, pojasnilo v polju za zdravstvene opombe; dan 04 prek sporočila ali tabele kluba. Trije
 dnevi od štirih. Dan 09: fizioterapevtka stranke želi videti program; edini izvoz pri stranki je
 šifriran izvoz po GDPR (3 minute v aplikaciji, 4 zunaj, trenerjeva ocena).
+Dan 12 (2026-10-01): nadomeščanje kolega za vadbo kadetov U15; načrt prejet po sporočilu, »Uvozi program« pa sprejme le obliko JSON, zato je moral trener vaje ročno poiskati in sestaviti; ocena 1.
 
 **Presoja: izplača se majhen del** — »Deli kot besedilo« za načrt in zapis treninga, brez drugega
 trenerja v aplikaciji. Pokrije tudi fizioterapevtko. Več trenerjev na enem računu je EnterprisePT.
@@ -5009,6 +5012,23 @@ besedila opombe. **5 minut v aplikaciji proti 3 na papirju, ocena 1** (trenerjev
 naslednji trening stranke; zdaj zapis izgine z vajo. **Cena:** majhna: signal bolečine naj se zapiše
 pri stranki, ne le pri vaji, in naj bo na seznamu za pregled viden kot drugačen. **Presoja: izplača
 se** za ta del; ločen obrazec za poročilo o nesreči čaka na Simona.
+
+### 88.17 [ ] Mladinska selekcija: vnos celotne ekipe, evidenca prisotnosti ter sezonske meritve
+
+Dan 12 (2026-10-01, `main` `62e51aa2`; kondicijski trener mladinske selekcije, Novo mesto, 12 igralcev
+U17 ter kadeti U15): sezonske meritve ekipe (skok v cm, šprint v s), skupinski trening moči,
+rehabilitacija kapetana z zvijem gležnja ter nadomeščanje bolnega kolega.
+**18 minut v aplikaciji proti 4 v preglednici za vnos ekipe, ocena 1.** Aplikacija nima pojma ekipe
+ali skupine: 12 mladincev zahteva 12 celih obrazcev (§88.2). Pri skupinskem treningu ni evidence
+prisotnosti (kdo manjka, npr. šola ali bolezen; ocena 1). Motoričnih testov (skok, šprint) ni mogoče
+voditi nikjer razen v prostem besedilu opomb; ocena 0. Prevzem načrta od bolnega kolega (nadomeščanje,
+§88.3): »Uvozi program« obljubi program iz klepeta, sprejme le JSON (§80.147); ocena 1.
+**Vrednost:** vsi klubski in kondicijski trenerji mladinskih ter članskih selekcij (pomemben segment
+uporabnikov ob samostojnih osebnih trenerjih). **Cena:** srednja do velika: enostaven uvoz seznama imen
+za ekipo, kljukica prisoten/odsoten pri skupinski vadbi ter modul za preproste meritve (§86.4).
+**Presoja: čaka na Simona** — ali LibrePT ostaja orodje izključno za osebne trenerje z individualnimi
+in malimi skupinami (1–4 stranke), ali pa naj podpira tudi klubske kondicijske trenerje z ekipami
+(10–20 športnikov).
 
 ## 89. [~] Pregled 2026-09-28: isti podatek na več mestih
 
