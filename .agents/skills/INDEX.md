@@ -30,6 +30,7 @@ settings, local state, a pointer to a skill here. Everything another agent would
 | Skill | What it covers |
 | --- | --- |
 | [build-watch/SKILL.md](build-watch/SKILL.md) | Waiting for the GitHub Actions runs of a pushed commit and reporting which job and which step fell, for the cheapest model that can run a command. Ships with `watch.py`, one command that waits, reads and writes the report. |
+| [gate-queue/SKILL.md](gate-queue/SKILL.md) | Queueing for the two things a parallel session waits on: the gate lock, and a file another session's note claims. Ships with `wait.py`, which waits once a minute and runs the gate once — never re-running a failed one. |
 | [exploratory-test/SKILL.md](exploratory-test/SKILL.md) | Testing the app as a trainer who has never seen it and reads no documentation: forms, short scenarios, and a whole invented working day. Ships with `explore.py`, which holds one headless browser open across shell calls. |
 
 ## Adding one
