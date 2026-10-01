@@ -4438,6 +4438,27 @@ dobi prazen trening in mora rutino vsaki stranki izbrati sam ali jo poiskati v �
 **Predlog:** stranke, dodane na trening, odprt s tem gumbom, naj dobijo to rutino — opaženo na `main`
 `6230070` (zamrznjena kopija), 390 × 844, sl.
 
+### 80.161 [ ] P2 — Osvežitev seznama odstrani izbrano obdobje
+
+**Scenarij in koraki:** trener pregleduje termine čez konec leta. Na plošči
+»Treningi« odpre »Datumi«, z izbirnikoma meseca in leta ter gumboma »Od« in »Do«
+izbere 2026-11-10–2027-02-28. Zapre koledar, nato osveži stran.
+
+**Opaženo:** pred osvežitvijo čip kaže »2026-11-10 – 2027-02-28« in seznam dve
+kartici: »Serija z obrnjenim obdobjem« na začetni datum ter »Kontrola datuma« na
+končni datum. Meji sta vključeni pravilno. Po osvežitvi čip spet kaže »Datumi« in
+seznam vseh 13 kartic, tudi septembrske. Primerjalno: ponovna izbira istega obdobja,
+odprtje kartice »Kontrola datuma« in vrnitev z »Zapri trening in se vrni na začetek«
+ohranijo čip in obe kartici.
+
+**Težava in vpliv:** po ponovnem nalaganju mora trener znova nastaviti meseca, leto
+in obe meji, da nadaljuje pregled istega obdobja. Običajna vrnitev iz treninga
+izbor ohrani, osvežitev pa ga brez pojasnila odstrani.
+
+**Predlog:** ob obnovitvi seznama ohraniti izbrano obdobje ali jasno ponuditi
+vrnitev na prejšnji izbor. Opaženo na objavljeni `6c8b556`, sl, 390 × 844,
+Chrome CDP; brez prestreženih napak, brez pregledovanja kode.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
