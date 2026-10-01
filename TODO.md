@@ -4305,6 +4305,9 @@ steče. Enkrat stran ni odgovorila niti na `1+1` prek CDP.
 **Težava in vpliv, če je aplikacija:** trener vidi angleški zaslon, ki se ne premakne; trener, ki
 povezavo povabila preizkusi na svojem telefonu, ne pride do obrazca.
 
+**Dokaz k orodju:** v enem procesu Playwright, ki je ves čas priklopljen na svoj brskalnik (brez
+explore.py), je deset zaporednih celih zagonov z urejanjem rutine steklo brez zastoja.
+
 **Preverba za Simona, na telefonu, brez orodja:** odpri aplikacijo in jo uporabljaj kot trener, nato v
 istem brskalniku odpri povezavo iz »Povabi stranko« in stran nekajkrat osveži. Če obrazec vedno pride,
 je bil zastoj orodje in se ta točka zapre — opaženo na `#8b2ce80` in `main` `6230070`, 390 × 844, sl.
@@ -4545,6 +4548,10 @@ mesec (4–5 na dan), večina ena na ena in dve manjši skupini, brez recepcije,
 Dan 07 (2026-09-30): paket stranke (6 od 10) in plačilo z gotovino je trener zapisal v »Opombe«;
 ocena 0, 15 minut na dan zunaj aplikacije (trenerjeva ocena).
 
+Dan 11 (2026-10-01, trener v Kopru, hišni obiski in studio): kdo je danes plačal (4 min na dan), stanje
+karte za 10 (3 min na dan) in račun za september za eno stranko (4 × 35 €, 6 min, okoli 10 računov na
+mesec) — vse ocena 0, vse v »Opombe« ali zunaj aplikacije. Minute so trenerjeva ocena.
+
 ### 86.3 Termini
 
 | Opravilo                                     | Kaj aplikacija dela danes                                             | Kje je že prevzeto | Ocena vrednosti |
@@ -4560,6 +4567,11 @@ termin odstrani s plošče in program premakne med nedodeljene (»Individualna v
 napis gumba te posledice ne pove, evidence odpovedi ni. Pri skupini velja za cel trening; za eno
 stranko, ki ni prišla, je le »Odstrani s tega treninga: <ime>«, ki sprosti mesto in o odsotnosti ne
 pusti nič. Zapis prisotnosti po strankah je pogoj tudi za skupine.
+
+Dan 11 (2026-10-01): pozna odpoved (17,50 €) in neprihod (35 €) — ocena 0. »Ni se zgodil« in »Izbriši
+trening« le izbrišeta termin, brez sledi in zneska; trener: »zamudim 17,50 do 35 EUR vsakič, ko pozabim
+v zvezku«. Naročilo po sporočilu (»ali lahko v soboto ob 10:00«): trener vpiše sam, 2 minuti in eno
+sporočilo za potrditev.
 
 Dan 07 (2026-09-30): vikend tabor za 15 udeležencev v treh skupinah. Najvišjega števila mest, čakalne
 vrste, skupin znotraj termina in predplačila ni. Vpis treh udeležencev 8 minut; trener ocenjuje 20
@@ -4732,6 +4744,10 @@ opozorilo, jih prenese sam.
 **Odprto** — dan 08 (2026-09-30): nova stranka mora pred vadbo prinesti zdravniško potrdilo. Trenerka
 ga je lahko zapisala le v »Opombe«, brez datuma veljavnosti in brez opomnika, ko poteče; ocena 1.
 Vrednost in cena še nista presojeni.
+
+Dan 11 (2026-10-01): stranka s kolenom; trener je želel opozorilo ob sami vaji (»koleno« pri počepu),
+aplikacija pa poškodbo pokaže enkrat, na vrhu podloge pod imenom stranke (preverjeno na `6230070`:
+»Desna rama, brez potiskanja nad glavo.«). Ocena 1. Vrednost in cena še nista presojeni.
 
 ### 88.8 [ ] Prehransko svetovanje nima mesta
 
