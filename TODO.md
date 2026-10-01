@@ -4414,6 +4414,23 @@ Med treningom, ko spet vodi počep, opozorila ni; vidi ga le, če pred tem odpre
 **Predlog:** bolečina, shranjena v kartoteko, naj se na podlogi pokaže tam kot vpisana poškodba,
 ali vsaj pri vaji, kjer je nastala — opaženo na `main` `6230070` (zamrznjena kopija), 390 × 844, sl.
 
+### 80.159 [ ] P3 — Prvi zagon prek povezave z `?lang=sl` jezika ne shrani: naslednjič aplikacija spet vpraša — čaka na Simona
+
+**Scenarij in koraki:** prvi obisk `/LibrePT/?lang=sl`: »Se strinjam«, tema »Dan«, podatki trenerke
+»Tara Zorko«, »Začni s prazno aplikacijo« — vse v slovenščini, po jeziku aplikacija ne vpraša. Nato v
+istem brskalniku `/LibrePT/` brez `?lang`, kot ga odpre ikona na zaslonu.
+
+**Opaženo:** okno »Choose your language · Izberi jezik · Wähle deine Sprache«, za njim angleška plošča
+(»Sessions«, »No sessions scheduled.«). V shrambi `meta` je `lang: null`. Tema in podatki trenerke so
+shranjeni, jezik ne.
+
+**Težava in vpliv:** trener, ki je aplikacijo prvič odprl s slovensko povezavo (z vabila, s strani
+projekta), drugič dobi vprašanje, na katero je že odgovoril, in za njim angleščino.
+
+**Predlog:** **čaka na Simona** — ali naj se jezik povezave ob prvem zagonu shrani kot izbira, kot se
+shranita tema in podatki trenerja; povezave za demo so morda namenoma brez trajnega učinka — opaženo
+na `main` `6230070` (zamrznjena kopija), 390 × 844.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
