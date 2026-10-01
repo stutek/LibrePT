@@ -92,6 +92,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Fixed
 
+- **"Start group session" on a routine gives that routine to everyone added.** Every client got
+  "Empty plan, no routine", and from a link with `?lang=sl` the routine's id read "…?lang=sl".
+- **The session header says Today for a session made yesterday for today.** It kept saying
+  Tomorrow after midnight. A session more than a day back names its weekday and date, not Yesterday.
+- **The board's filters survive a reload of the page**; a new tab starts with the whole board.
 - **Taking a signal back unticks the sets it ticked.** A second tap on Too Easy, or a swap to Too
   Hard, left the exercise's sets marked done; a set ticked by hand before the signal stays done.
 - **A demonstration that fails part-way closes what it opened**, so the welcome card no longer leaves
