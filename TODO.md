@@ -5760,16 +5760,9 @@ imeti orodje s sabo, tudi če projekt zamenja lastnika.
 
 Razlog je v [TODO_ARCHIVE.md](TODO_ARCHIVE.md), razdelek 99.1. Popravek: `2c2331c4`.
 
-### 99.3 [ ] Prijava za branje dnevnikov — podrobnosti so zasebne
+### 99.3 [x] Prijava za branje dnevnikov — urejeno 2026-10-01
 
-`watch.py` prebere prijavo iz `GH_TOKEN`, `GITHUB_TOKEN`, datoteke, ki jo imenuje `GH_TOKEN_FILE`,
-ali iz `gh auth token`. **Kje je ta datoteka in katere pravice ima prijava, ni zapisano v tem
-repozitoriju** — ta je javen, zato to nosijo Simonova zasebna pravila. Brez prijave orodje pošteno
-izpiše, da dnevnika ne more brati, in nič ne ugiba.
-
-Prijava je v datoteki in 2026-10-01 bere teke tega repozitorija. **Čaka na Simona:** spremenljivka
-`GH_TOKEN_FILE` v okolju agentov ni nastavljena, zato je `watch.py` sam ne najde. Prijave ne
-pošiljaj v pogovor — s tem pride v zapis seje; prvi poskus je zato odpadel.
+Razlog je v [TODO_ARCHIVE.md](TODO_ARCHIVE.md), razdelek 99.3. Popravek: `337ae23d`.
 
 ### 99.2 [ ] Python v `.agents/` ni lintan
 

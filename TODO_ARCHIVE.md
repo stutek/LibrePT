@@ -9550,3 +9550,14 @@ vanj; približno enkrat na dvesto tekov. Na vseh računalnikih je šlo skozi, na
 
 Popravek `2c2331c4`: id zapisa v testu nosi vezaj, ki ga ustvarjen id ne more vsebovati, iskanje pa
 gre za tem id-jem in ne za zapisanim nizom. Trditev obdrži moč in izgubi naključje.
+
+## 99.3 [x] Prijava za branje dnevnikov — urejeno 2026-10-01
+
+`watch.py` je bral prijavo iz `GH_TOKEN`, `GITHUB_TOKEN`, iz datoteke, ki jo imenuje `GH_TOKEN_FILE`,
+in nazadnje iz `gh auth token`. Datoteka je bila tam, ker naj `gh auth login` ne bi sprejel fino
+nastavljenega žetona samo za branje; prvi poskus je res padel.
+
+2026-10-01 je `gh auth login --with-token` isti tip žetona sprejel brez napake in ga shranil v
+sistemsko shrambo gesel. Datoteka z žetonom je zbrisana, `watch.py` bere samo še `GH_TOKEN`,
+`GITHUB_TOKEN` in `gh auth token` (`337ae23d`), `GH_TOKEN_FILE` ni več potrebna. Kje je prijava in
+katere pravice ima, še vedno ni zapisano v tem repozitoriju, ker je javen.
