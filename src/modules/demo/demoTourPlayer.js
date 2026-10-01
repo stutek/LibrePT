@@ -443,9 +443,17 @@ export async function performStep(
  * after this one tells the trainer to open a menu that is already open and grades itself done
  * before they touch anything. Each beat keeps performStep's idempotence — a beat whose outcome
  * already holds is pointed at but not fired — so tapping Show me twice leaves the same screen.
+ *
+ * A beat flagged `closing: true` is that closing beat: it still runs after an earlier beat failed.
  */
 async function demonstrateBeats(step, { doc, hand, wait }) {
+  let failure = null;
   for (const [index, beat] of step.demonstrate.entries()) {
+    // After a failure only the beats flagged `closing: true` still run: they undo what an earlier
+    // beat opened (the ☰ menu), and a failed demonstration must not leave that open over the next
+    // card. A closing beat whose outcome already holds is pointed at but not tapped, so one that
+    // runs before anything was opened opens nothing.
+    if (failure && !beat.closing) continue;
     const outcome = await performStep(
       {
         ...beat,
@@ -454,9 +462,12 @@ async function demonstrateBeats(step, { doc, hand, wait }) {
       },
       { doc, hand, wait },
     );
-    if (!outcome.ok) return { id: step.id, ok: false, reason: `${outcome.id}: ${outcome.reason}` };
+    // The first failure is the one reported; a closing beat that also fails does not replace it.
+    if (!outcome.ok && !failure) {
+      failure = { id: step.id, ok: false, reason: `${outcome.id}: ${outcome.reason}` };
+    }
   }
-  return stepOutcomeNow(step, doc);
+  return failure ?? stepOutcomeNow(step, doc);
 }
 
 /**

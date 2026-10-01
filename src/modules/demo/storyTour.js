@@ -167,6 +167,7 @@ const WELCOME_CHAPTER = {
           target: "#btn-app-menu",
           expect: { selector: "#app-menu", visible: false },
           settleMs: 400,
+          closing: true,
         },
       ],
     }),
