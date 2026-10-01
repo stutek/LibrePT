@@ -8,6 +8,8 @@
 // is recovered from cache, is cancelled to null — and a module that imported the binding directly
 // would be reading whatever value it held at import time.
 
+import { sessionDayOf } from "../domain/sessionRecord.js";
+
 let activeSession = null;
 let appDeps = {};
 
@@ -50,7 +52,8 @@ export function getAppDeps() {
 export function currentPlanMode() {
   const ss = activeSession?.sourceSession;
   if (ss?.isPlanning) return "planning";
-  if (ss?.day === "tomorrow" || ss?.day === "upcoming") return "future";
+  const day = sessionDayOf(ss);
+  if (day === "tomorrow" || day === "upcoming") return "future";
   return "live";
 }
 

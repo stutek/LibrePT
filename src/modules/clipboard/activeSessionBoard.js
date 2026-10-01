@@ -30,6 +30,7 @@ import { libraryExercises } from "../../data/exerciseLibrary.js";
 import { feedbackTagText } from "../../domain/feedbackTags.js";
 import { gymNotesForPlan } from "../../domain/gymNotes.js";
 import { bindingFor, bindingMembers } from "../../domain/participantBinding.js";
+import { sessionDayOf } from "../../domain/sessionRecord.js";
 import { renderActiveUsersList } from "../common/activeUsersList.js";
 import { openFeedbackModal } from "../common/feedbackModal.js";
 import {
@@ -184,12 +185,13 @@ function buildEditModeTitleHTML(activeClient) {
   const namesHTML = titles
     .map((title) => `<span class="edit-mode-session">${escapeHTML(title)}</span>`)
     .join("");
+  const day = sessionDayOf(b);
   // Concrete schedule beats a vague "Live": the day and time of the booked session, or
   // "Unscheduled" for a date-less planning programme.
   const when =
     mode === "planning"
       ? t("unscheduled") || "Unscheduled"
-      : [b?.day ? t(b.day) || b.day : "", b?.timeLabel || ""].filter(Boolean).join(" · ") ||
+      : [day ? t(day) || day : "", b?.timeLabel || ""].filter(Boolean).join(" · ") ||
         t("live") ||
         "Live";
 

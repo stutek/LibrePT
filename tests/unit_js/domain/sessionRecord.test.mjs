@@ -20,6 +20,7 @@ import {
   computeTimeLabel,
   newlyAssignedParticipantIds,
   sessionBelongsToSlot,
+  sessionDayOf,
   upsertSessionRecord,
 } from "../../../src/domain/sessionRecord.js";
 
@@ -48,6 +49,16 @@ test("the day bucket is a calendar comparison, not an elapsed-hours one", () => 
   assert.equal(computeSessionDayBucket(new Date(`${isoDate(3)}T09:00`)), "upcoming");
   assert.equal(computeSessionDayBucket(new Date(`${isoDate(-1)}T09:00`)), "yesterday");
   assert.equal(computeSessionDayBucket(new Date(`${isoDate(-9)}T09:00`)), "yesterday");
+});
+
+// A session created at 23:59 for 00:00 was stored with day "tomorrow", and after midnight the
+// session's header still said "Tomorrow" for the session running today.
+test("a session's day is read from its start, not from the day stored when it was written", () => {
+  const start = new Date(`${isoDate(0)}T00:00`).toISOString();
+  assert.equal(sessionDayOf({ day: "tomorrow", startDate: start }), "today");
+  // A record without a start has only the stored day to go by.
+  assert.equal(sessionDayOf({ day: "upcoming" }), "upcoming");
+  assert.equal(sessionDayOf(null), null);
 });
 
 test("a session record carries every field the dashboard reads", () => {

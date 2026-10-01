@@ -38,6 +38,14 @@ export function computeSessionDayBucket(startDateTime) {
   return "yesterday";
 }
 
+// The bucket a session is in NOW. A record's stored `day` is the bucket on the day it was written,
+// and nothing moves it at midnight: a session created at 23:59 for 00:00 still said "tomorrow"
+// while it ran. Read from the start date where there is one.
+export function sessionDayOf(session) {
+  if (session?.startDate) return computeSessionDayBucket(new Date(session.startDate));
+  return session?.day ?? null;
+}
+
 // The local calendar date a session falls on, as `YYYY-MM-DD` — the day timeline's grouping key, and
 // what the edit form puts back in its date field.
 //

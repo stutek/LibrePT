@@ -23,6 +23,7 @@
 //   t(key)                            — for the day label ("today" / "tomorrow")
 // }
 
+import { sessionDayOf } from "../../domain/sessionRecord.js";
 import { sessionSlotOfTitle } from "../common/utils.js";
 import { formatCalendarDayLabel } from "../sessionList/sessionTimeline.js";
 
@@ -41,14 +42,21 @@ function whenAndWhere(sourceSession, activeSession) {
   // The DAY as a person says it where the app has one ("today", "tomorrow"); the date otherwise,
   // which is what a session further out has. A trainer standing in the gym reads the first and
   // never needs the second.
-  // "Upcoming" is every day from the day after tomorrow on, so it names no day: the weekday and the
-  // ISO date say which one it is.
+  // "Upcoming" is every day from the day after tomorrow on, and "yesterday" every day before today,
+  // so neither names a day beyond the one next to today: the weekday and the ISO date say which.
+  // The bucket is read from the start, as of now — see sessionDayOf.
   const isoDay = deps.getISODateString(start);
+  const bucket = sessionDayOf(sourceSession);
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const isBeyondNextDay =
+    bucket === "upcoming" ||
+    (bucket === "yesterday" && isoDay !== deps.getISODateString(yesterday));
   let day;
-  if (sourceSession?.day === "upcoming") {
+  if (isBeyondNextDay) {
     day = `${formatCalendarDayLabel(isoDay).weekdayShort} ${isoDay}`;
-  } else if (sourceSession?.day) {
-    day = deps.t?.(sourceSession.day) || sourceSession.day;
+  } else if (bucket) {
+    day = deps.t?.(bucket) || bucket;
   } else {
     day = isoDay;
   }

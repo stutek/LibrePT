@@ -8,6 +8,7 @@
 
 import { localDateString } from "../../data/calendarDay.js";
 import { computeActiveSessionCountdown } from "../../domain/sessionClock.js";
+import { sessionDayOf } from "../../domain/sessionRecord.js";
 import { parseTimeRange } from "../../domain/timeRange.js";
 import { formatDurationHM, formatDurationHourMin, parseDurationHM } from "../common/utils.js";
 import { getSessionDayDate } from "./sessionTimeline.js";
@@ -329,7 +330,7 @@ export function renderSessionCard(b, colContainer, deps) {
   const card = document.createElement("div");
   // Layout lives in .session-card (index.css) so it can stack to a single column on mobile.
   // The temporal class tints the title to match the day-selection line (past/future).
-  const temporal = sessionDayTemporal(b.day);
+  const temporal = sessionDayTemporal(sessionDayOf(b));
   card.className = `session-card card glassmorphic${temporal !== "today" ? ` session-${temporal}` : ""}`;
   const activeSession = deps.getActiveSession ? deps.getActiveSession() : null;
   const isLaunched = computeIsLaunched(b, activeSession);

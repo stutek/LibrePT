@@ -20,6 +20,7 @@
 import { newRecordId } from "../../data/recordId.js";
 import { isRestRecord } from "../../domain/sessionItemRecord.js";
 import { blankExercise } from "../../domain/sessionPlanFactory.js";
+import { sessionDayOf } from "../../domain/sessionRecord.js";
 import { CircuitDeckCard } from "./circuitCard.js";
 import { trackDeckScroll } from "./deckScrollFocus.js";
 import { ExerciseDeckCard } from "./exerciseCard.js";
@@ -205,7 +206,7 @@ export function renderExerciseDeck(deckContainer, deps) {
 
   // A launched future-day session is a plan, not a live workout — its exercises get the
   // same amber tint the dashboard uses for future days (mirrors the purple past history).
-  const launchedDay = activeSession.sourceSession ? activeSession.sourceSession.day : null;
+  const launchedDay = sessionDayOf(activeSession.sourceSession);
   const isFutureSession = launchedDay === "tomorrow" || launchedDay === "upcoming";
 
   // ONE session's worth of cards, and nothing else (Simon, 2026-09-30). The client's most recent

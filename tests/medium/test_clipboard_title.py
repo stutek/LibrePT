@@ -59,7 +59,8 @@ def _render_real_title(page, titles):
                 day: 'today',
                 timeLabel: '17:00 - 19:00',
                 location: 'Trib gym base',
-                startDate: '2026-09-01T15:00:00.000Z',
+                // Now: the day is read from the start, and this test is not about the day.
+                startDate: new Date().toISOString(),
               },
             }),
             getISODateString: (d) => new Date(d).toISOString().slice(0, 10),
@@ -379,31 +380,69 @@ def test_a_finished_session_with_no_name_says_that_it_is_finished(page, local_se
     )
 
 
-def test_a_session_days_ahead_names_its_weekday_and_date(page, local_server):
-    """Two days or more ahead, the line under the name said only "Prihodnje" ("Upcoming"): the
-    trainer building Saturday's plan could not see on that screen that it was Saturday's."""
-    _mount(page, local_server)
-    page.evaluate(
-        """async () => {
+def _render_day_line(page, offset_days, stored_day):
+    """The line under the name for a session `offset_days` from today at noon, whose record still
+    carries `stored_day` — the bucket it had when it was written. Returns that line, the session's
+    ISO date and its short Slovenian weekday."""
+    return page.evaluate(
+        """async ([offsetDays, storedDay]) => {
           const bar = await import(new URL('modules/session/sessionTitleBar.js', document.baseURI).href);
           const timeline = await import(new URL('modules/sessionList/sessionTimeline.js', document.baseURI).href);
           timeline.initSessionTimeline({
             getState: () => ({ lang: 'sl' }), t: (key) => key, activeRouteName: () => 'sessions',
             pushRoute: () => {}, urlFor: (name) => `/${name}`,
           });
+          const start = new Date();
+          start.setDate(start.getDate() + offsetDays);
+          start.setHours(12, 0, 0, 0);
+          const iso = (d) => {
+            const x = new Date(d);
+            return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`;
+          };
           bar.initSessionTitleBar({
             getActiveSession: () => ({
               sourceSession: {
-                titles: ['Par'], day: 'upcoming', timeLabel: '13:30 - 14:30', location: 'Studio',
-                startDate: '2026-10-03T12:00:00.000Z',
+                titles: ['Par'], day: storedDay, timeLabel: '13:30 - 14:30', location: 'Studio',
+                startDate: start.toISOString(),
               },
             }),
-            getISODateString: (d) => new Date(d).toISOString().slice(0, 10),
+            getISODateString: iso,
             formatClockFromMinutes: () => '13:30',
-            t: (key) => (key === 'upcoming' ? 'Prihodnje' : key),
+            t: (key) => key,
           });
           bar.renderSessionTitle();
-        }"""
+          return {
+            under: document.querySelector('.clipboard-title-when').innerText,
+            iso: iso(start),
+            weekday: timeline.formatCalendarDayLabel(iso(start)).weekdayShort,
+          };
+        }""",
+        [offset_days, stored_day],
     )
-    under = page.locator(".clipboard-title-when").inner_text()
-    assert under == "sob. 2026-10-03 · 13:30 - 14:30 · Studio", under
+
+
+def test_a_session_days_ahead_names_its_weekday_and_date(page, local_server):
+    """Two days or more ahead, the line under the name said only "Prihodnje" ("Upcoming"): the
+    trainer building Saturday's plan could not see on that screen that it was Saturday's."""
+    _mount(page, local_server)
+    got = _render_day_line(page, 4, "upcoming")
+    assert got["under"] == f"{got['weekday']} {got['iso']} · 13:30 - 14:30 · Studio", (
+        got
+    )
+
+
+def test_a_session_made_yesterday_for_today_says_today(page, local_server):
+    """Created at 23:59 for 00:00, the session was stored as "tomorrow", and after midnight its header
+    still said "Jutri" while the board listed it under today."""
+    _mount(page, local_server)
+    got = _render_day_line(page, 0, "tomorrow")
+    assert got["under"] == "today · 13:30 - 14:30 · Studio", got
+
+
+def test_a_session_a_week_back_names_its_weekday_and_date(page, local_server):
+    """Every day before today is the "yesterday" bucket; a session from last week is not yesterday's."""
+    _mount(page, local_server)
+    got = _render_day_line(page, -7, "yesterday")
+    assert got["under"] == f"{got['weekday']} {got['iso']} · 13:30 - 14:30 · Studio", (
+        got
+    )
