@@ -5591,21 +5591,25 @@ angleškima obrazcema za trenerje.
 - **97.2 Pravna podlaga.** Vse sloni na privolitvi. EDPB (05/2020, točka 26) pravi, da se privolitev
   in pogodba ne smeta mešati; za ime, kontakt in dnevnik treningov bi bila podlaga lahko pogodba
   (člen 6(1)(b)), privolitev pa le za zdravje. Sprememba vpliva na to, kaj naredi preklic.
-- **97.3 »ti« in »du«.** Vzorec IP RS in vsi prebrani nemški vzorci nagovarjajo z »vi« oziroma »Sie«.
-  Besedila ostajajo pri »ti« in »du« kot ves vmesnik.
+- **97.3 »ti« in »du« — odločeno 2026-10-01 (Simon): »sledi uradnim vzorcem«; narejeno (02938a5).**
+  Vsa besedila, ki jih bere stranka, so v sl z »vi«, v de s »Sie«: pismo, SMS, obvestilo, stran z
+  obrazcem za vpis in sporočilo povabila. Zasloni za trenerja ostanejo pri »ti« in »du«. Napisi
+  gumbov na strani za vpis so ostali, da se ne spremeni noben korak vodenega ogleda, ki jih imenuje.
+  Različica obrazca ostane 2026-09-30, ker se je spremenil nagovor, ne obljube.
 - **97.4 AI kopija kot ločen namen.** EDPB (točka 42) želi ločeno privolitev za ločen namen. Zdaj je
   AI kopija razkrita kot prejemnik, brez ločene kljukice.
 - **97.5 Google ni obdelovalec po členu 28** pri brezplačnem računu (pogodbo DPA ima le Workspace in
   Cloud). Besedila Googla ne imenujejo več obdelovalca; kopija je šifrirana. Ali to trenerju zadošča,
   je pravno vprašanje.
 - **97.6 Pravni pregled** ni opravljen v nobenem jeziku; nemščine ni prebral nihče, ki govori nemško.
-- **97.7 Kaj preklic ustavi.** Pismo zdaj obljublja: »Preklic … ustavi nadaljnjo obdelavo.« Preizkus
-  2026-10-01 na `main` `6230070`: Maja Kovač, privolitev dana 2026-10-01, nato odkljukano, »Datum
-  preklica« 2026-10-01, »Shrani«. Profil: »Privolitev preklicana (Datum podpisa: 2026-10-01 · Datum
-  preklica: 2026-10-01)«. Nato »Ustvari trening« z Majo, »Odpri v beležki«, »Pošlji vabilo«, »Začni
-  trening«: nikjer opozorila, podloga pokaže njeno poškodbo. Ostanek zaprte §80.102 (»kaj se s
-  preklicem ustavi, na zaslonu še ni povedano«) je bil le v arhivu. Odločitev je ista kot 97.2: kaj
-  aplikacija s stranko brez privolitve sme, in to naj pove ob dodajanju na trening.
+- **97.7 Kaj preklic ustavi — popravljeno 2026-10-01 na Simonovo zahtevo (02938a5).** Stranka s
+  preklicano privolitvijo se v iskalniku na obrazcu treninga pokaže onemogočena, z razlogom
+  »Privolitev preklicana <datum> — te stranke ne moreš dodati na nov trening«; tudi tipka Enter je ne
+  doda. Profil pod značko pove, da je ni mogoče dodati na nov trening in da je izbris pod »Izbriši
+  stranko (GDPR)«. Ostanek zaprte §80.102 je s tem zaprt. **Ostaja odprto:** trening, na katerega je
+  bila stranka dodana PRED preklicem, se še vedno lahko začne z njo; in stranka, ki privolitve ni dala
+  nikoli (»Brez privolitve (samo lokalno)«), se še vedno lahko doda — to je 97.2. Komentar pri znački v
+  `clientsView.js` za oba primera pravi »processing must stop for both«.
 
 **Vrzel v aplikaciji, ni zgrajeno:** aplikacija ne pokaže, katere stranke so privolile po starejši
 različici. Po tej spremembi so to vse obstoječe stranke, trener pa tega ne izve nikjer.
