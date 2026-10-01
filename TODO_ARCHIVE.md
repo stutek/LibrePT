@@ -20,6 +20,19 @@ Read [CHANGELOG.md](CHANGELOG.md) for what shipped and when. This file is why.
 
 ---
 
+### 39.9 [x] BUG — Show me skips what it is there to show — fixed 2026-10-01 (a13799a)
+
+**Fixed 2026-09-30 (`5c269da`):** Show me filled two fields as one and closed the ✕ without drawing
+the tap (cards 6→7, walked backwards), and drew no tap on card 20. Replays now carry the hand, a
+control at 0,0 is not taken as settled, and the hand presses again where a control moved.
+`test_every_tap_show_me_performs_is_drawn_by_the_hand_first` walks the story forward and every
+chapter back.
+
+**[ ] Open (found 2026-09-30): a demonstration that fails part-way leaves open what it opened.**
+`demonstrateBeats` stops at the first beat that does not come true, so a later closing beat never
+runs: on the welcome card the ☰ menu stays open (§91.5 says how the tests reached it). Proposed: run
+a sequence's closing beat even after a failure.
+
 ## 82. [x] Links run one way, out of TODO.md — done 2026-10-01
 
 **Ruled 2026-09-26 (Simon):** TODO.md holds only soft links to other files, which nothing checks; no

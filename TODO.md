@@ -1475,18 +1475,9 @@ Four asks, one subject: the parts of the journey that happen outside this app.
 The rule for all of them, written in demoNarratorCard.js: a step outside this app is drawn on
 something nobody could mistake for one of its screens.
 
-### 39.9 [ ] BUG — Show me skips what it is there to show
+### 39.9 [x] BUG — Show me skips what it is there to show — fixed 2026-10-01 (a13799a)
 
-**Fixed 2026-09-30 (`5c269da`):** Show me filled two fields as one and closed the ✕ without drawing
-the tap (cards 6→7, walked backwards), and drew no tap on card 20. Replays now carry the hand, a
-control at 0,0 is not taken as settled, and the hand presses again where a control moved.
-`test_every_tap_show_me_performs_is_drawn_by_the_hand_first` walks the story forward and every
-chapter back.
-
-**[ ] Open (found 2026-09-30): a demonstration that fails part-way leaves open what it opened.**
-`demonstrateBeats` stops at the first beat that does not come true, so a later closing beat never
-runs: on the welcome card the ☰ menu stays open (§91.5 says how the tests reached it). Proposed: run
-a sequence's closing beat even after a failure.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#399-x-bug--show-me-skips-what-it-is-there-to-show--fixed-2026-10-01-a13799a).
 
 ### 39.10 [x] CHANGE — the intake-link button is named for the intent
 
@@ -5661,9 +5652,9 @@ od danes živijo tukaj:
 - **§80.108, čaka na Simona:** `logQuickSignal` v
   [sessionQuickSignals.js](src/controllers/sessionQuickSignals.js) ob tapu signala označi vse serije
   vaje kot opravljene (manj dotikov, §48); ugotovitev pravi, da zapis trdi delo, ki ga ni bilo.
-  Katero branje velja, je Simonova odločitev. **Ne čaka:** ponovni tap, ki signal umakne, pusti
-  serije označene kot opravljene; umik mora vrniti serije, kakršne so bile pred tapom (v delu,
-  librept-02).
+  Katero branje velja, je Simonova odločitev. **Popravljeno 2026-10-01 (`6b3b4e8`):** umik signala
+  vrne serije, ki jih je označil signal, ročno označene ostanejo. Po osvežitvi strani tega ne zmore,
+  ker si tega podatka namenoma ne shrani v zapis.
 - **§80.104, čaka na Simona:** nenačrtovanega programa trener ne more odstraniti. Program se ob
   brisanju termina namerno ohrani; ali naj pot za odstranitev obstaja in kje, je odločitev.
 - **§42.11, odprto:** ali naj `--baseline` pri izrisu ikon zavrne znak, ki ga podmnožica pisave
@@ -5705,3 +5696,13 @@ pošiljaj v pogovor — s tem pride v zapis seje; prvi poskus je zato odpadel.
 `PYTHON_LINT_TARGETS` v `build/__init__.py` zajema `build/`, `deploy/`, `tests/` in `agent_tools/`.
 Orodij ob veščinah (`explore.py`, `watch.py`) ruff ne vidi. **Čaka na Simona:** ali `.agents/`
 dodamo med cilje; dodatek lahko najprej pokaže napake v `explore.py`.
+
+## 100. [ ] `build commit` zavrne commit, ko HEAD premakne datoteka, ki je gate ne bere
+
+**Najdeno 2026-10-01 (librept-06).** `build commit` (`build/snapshot.py`, `stale_reasons`) sprejme
+premik HEAD med tekom gata le, če so vse spremenjene datoteke Markdown. librept-cd je gate opravil
+dvakrat in obakrat dobil zavrnitev, ker je druga seja commitala `.agents/skills/…/*.py`; gate teh
+datotek ne bere (ruff jih ne zajema, §99). Pri več sejah, ki commitajo hkrati, tako seja lahko
+ostane brez commita. **Predlog:** premik sprejeti tudi za datoteke, ki jih gate ne bere, in ta
+seznam vzeti iz istega mesta kot cilje gata (`PYTHON_LINT_TARGETS` in mape testov), ne iz ročne
+kopije. **Čaka na:** odločitev v §99, ker ta spremeni, katere datoteke gate bere.

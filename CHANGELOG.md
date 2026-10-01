@@ -92,6 +92,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Fixed
 
+- **Taking a signal back unticks the sets it ticked.** A second tap on Too Easy, or a swap to Too
+  Hard, left the exercise's sets marked done; a set ticked by hand before the signal stays done.
+- **A demonstration that fails part-way closes what it opened**, so the welcome card no longer leaves
+  the ☰ menu open.
+- **The gate's proof belongs to one set of files**, so a run started by another session no longer
+  deletes a proof before its commit.
 - **Swapping an exercise for one measured differently no longer keeps the old load.** Leg Press at
   80 kg swapped for Wall Sit read "BW+80kg"; the sets not yet done now start from 10 reps and no
   weight, and a swap to the same kind of exercise keeps the load.
