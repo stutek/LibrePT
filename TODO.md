@@ -4345,6 +4345,33 @@ gumb na zaslonu, cilji niso manjši od palca.
 - »Besedilo privolitve« pokaže »2026-09-30«, torej različico, ne besedila. Bolje »Različica besedila
   privolitve«. P3.
 
+### 80.156 [ ] P2 — Ocena obrazca »Moji podatki«: Esc in »Zapri« zavržeta vpisano
+
+Naloga (podagent brez konteksta): trener je zamenjal telefonsko številko in e-pošto in hoče, da jih
+odslej dobijo stranke v vabilih in v pismu privolitve. Pot: ☰ → »Nastavitve« → »Moji podatki« (trije
+dotiki). Na `main` `6230070` (zamrznjena kopija), sl, 390 × 844 in 320 × 680, v enem procesu Playwright.
+
+**Kar drži:** štiri polja (»Ime«, »Priimek«, »Telefon«, »E-pošta«) s pravimi tipi in samodejnim
+izpolnjevanjem; »tara@studio« zavrnjeno ob polju (»To ni e-poštni naslov. Popravi ga.«); po shranitvi
+in ponovnem odprtju »+386 31 777 888« in »info@studio-zorko.invalid«; pismo privolitve se konča s
+»Tara Zorko / +386 31 777 888 / info@studio-zorko.invalid«, SMS se začne »Piše ti Tara Zorko«.
+»Shrani moje podatke« je na zaslonu pri obeh velikostih.
+
+**1. Odveč:** nič.
+
+**2. Manjka:**
+- Ime podjetja ali studia, ki ga naloga navaja kot »SOMETIMES«; podpis pisma ima le ime in priimek.
+  P3, **čaka na Simona**.
+
+**3. Ne deluje:**
+- Esc in »Zapri« (✕ zgoraj) zavržeta vpisano: telefon spremenjen, izhod, ponovno odprtje — spet
+  stara številka. Pravilo 2026-09-17: zavrže le »Prekliči«. P2. Enako po osvežitvi strani.
+- Gumbi v »Nastavitvah« (»Moji podatki«, »Verzija aplikacije«, …) so visoki 42 pik, manj od 44. P3.
+
+**4. Napačen tip ali vrstni red:**
+- Uvodno besedilo »tvoje ime podpiše povabilo, telefon in e-pošta pa sta pot, po kateri ti stranka
+  odgovori« ne pove, da isti podatki podpišejo pismo privolitve in tam povedo, kdo je upravljavec. P3.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
