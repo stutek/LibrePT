@@ -5679,7 +5679,7 @@ imeti orodje s sabo, tudi če projekt zamenja lastnika.
 
 ### 99.1 [x] Padli test ni bil okolje, ampak iskanje niza v naključnem id-ju — popravljeno 2026-10-01
 
-Razlog je v [TODO_ARCHIVE.md](TODO_ARCHIVE.md), razdelek 99.1. Popravek: `9297a0d`.
+Razlog je v [TODO_ARCHIVE.md](TODO_ARCHIVE.md), razdelek 99.1. Popravek: `2c2331c4`.
 
 ### 99.3 [ ] Prijava za branje dnevnikov — podrobnosti so zasebne
 

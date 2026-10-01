@@ -9548,5 +9548,5 @@ to z iskanjem niza `"h1"` po celotnem JSON-u. `newRecordId()` vrne 22 znakov iz 
 vsebuje tako `h` kot `1`, zato iskanje najde **lastni id nove rutine**, kadar naključje postavi `h1`
 vanj; približno enkrat na dvesto tekov. Na vseh računalnikih je šlo skozi, na strežniku je padlo.
 
-Popravek `9297a0d`: id zapisa v testu nosi vezaj, ki ga ustvarjen id ne more vsebovati, iskanje pa
+Popravek `2c2331c4`: id zapisa v testu nosi vezaj, ki ga ustvarjen id ne more vsebovati, iskanje pa
 gre za tem id-jem in ne za zapisanim nizom. Trditev obdrži moč in izgubi naključje.
