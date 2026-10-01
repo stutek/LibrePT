@@ -5587,3 +5587,17 @@ kljukico in obvestilo, ne pa napisov v vmesniku trenerja, ki trdijo drugače:
 - Gumb »Anonimna kopija za AI« je trdil anonimnost, ki je ni. **Popravljeno 2026-10-01 (da929f9):** »Kopija
   za AI brez imen«, »Copy for AI, without names«, »Kopie für KI ohne Namen«, tudi v PRIVACY.md in
   vodniku za trenerje.
+
+## 98. [ ] Odprti ostanki zaprtih točk živijo le v arhivu
+
+**Najdeno 2026-10-01 pri raziskovalnem testiranju.** Pravilo pravi, da ob zaprtju točke odprti deli
+ostanejo v TODO.md. Dvakrat v eni noči pa je bila odprta odločitev le v arhivu: »kaj se s preklicem
+ustavi« (§80.102, zdaj §97.7) in »ali sme shranjena oznaka »Client #…« nositi jezik« (§80.101, zdaj na
+seznamu angleških besedil). Iskanje po arhivu najde 13 zaprtih razdelkov z besedilom »Odprto«,
+»Open«, »čaka na Simona« ali »waits on Simon«: §1.7, §27.6, §42.11, §55.2, §80.10, §80.11, §80.101,
+§80.102, §80.104, §80.108, §80.137, §80.145, §89.1. Nekateri imajo dom drugje (§80.11 je združen v
+§80.86, §80.145 kaže na §83); kateri ga nimajo, še ni pregledano.
+
+**Predlog:** pregledati teh 13 in vsakemu odprtemu ostanku dati vrstico v TODO.md ali ga zapreti z
+razlogom; nato preverba v `todo_hygiene`, ki zavrne arhivski razdelek z »Odprto«/»Open« brez kazalca
+na odprto mesto. **Čaka na Simona:** ali preverbo hoče, ker spremeni, kako se točke zapirajo.
