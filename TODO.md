@@ -5668,6 +5668,22 @@ seznamu angleških besedil). Iskanje po arhivu najde 13 zaprtih razdelkov z bese
 §80.102, §80.104, §80.108, §80.137, §80.145, §89.1. Nekateri imajo dom drugje (§80.11 je združen v
 §80.86, §80.145 kaže na §83); kateri ga nimajo, še ni pregledano.
 
-**Predlog:** pregledati teh 13 in vsakemu odprtemu ostanku dati vrstico v TODO.md ali ga zapreti z
-razlogom; nato preverba v `todo_hygiene`, ki zavrne arhivski razdelek z »Odprto«/»Open« brez kazalca
+**Pregledano 2026-10-01 (librept-02).** Dom v TODO.md imajo: §80.11 (§80.86), §80.101 (§38.20),
+§80.102 (§97.7), §89.1 (§90.4). Nič odprtega ni več v §1.7, §27.6, §55.2 in §80.145; §80.10 pokriva
+test `test_session_start_time_adjust.py`, §80.137 je dokončan v `7ef66eb`. Brez doma so bili trije;
+od danes živijo tukaj:
+
+- **§80.108, čaka na Simona:** `logQuickSignal` v
+  [sessionQuickSignals.js](src/controllers/sessionQuickSignals.js) ob tapu signala označi vse serije
+  vaje kot opravljene (manj dotikov, §48); ugotovitev pravi, da zapis trdi delo, ki ga ni bilo.
+  Katero branje velja, je Simonova odločitev. **Ne čaka:** ponovni tap, ki signal umakne, pusti
+  serije označene kot opravljene; umik mora vrniti serije, kakršne so bile pred tapom (v delu,
+  librept-02).
+- **§80.104, čaka na Simona:** nenačrtovanega programa trener ne more odstraniti. Program se ob
+  brisanju termina namerno ohrani; ali naj pot za odstranitev obstaja in kje, je odločitev.
+- **§42.11, odprto:** ali naj `--baseline` pri izrisu ikon zavrne znak, ki ga podmnožica pisave
+  nima, namesto da zapiše nadomestnega. Preverba praznih znakov ujame znak, ki ne nariše ničesar, ne
+  pa znaka, ki nariše nekaj drugega.
+
+**Predlog:** preverba v `todo_hygiene`, ki zavrne arhivski razdelek z »Odprto«/»Open« brez kazalca
 na odprto mesto. **Čaka na Simona:** ali preverbo hoče, ker spremeni, kako se točke zapirajo.
