@@ -4490,6 +4490,33 @@ ohranjanju vnosa in šele naslednji korak zamenja osnovni pogled. Preveriti odho
 iz obstoječega profila z vpisano opombo. Opaženo na objavljeni `6c8b556`, sl,
 390 × 844, Chrome CDP; brez prestreženih napak in brez pregledovanja kode.
 
+### 80.163 [~] Codexov pregled »listek ali aplikacija« — razvrščeno 2026-10-01
+
+**Izvor:** [ocena-trener-listki.md](.private/ocena-trener-listki.md), Codex prek Chrome CDP,
+2026-09-29, javna izdaja `0625bd6` (2026-09-24), sl, 390 × 844, peskovnik. Ocena 2/5 kot zamenjava
+listka. Ta izdaja je bila 541 commitov za `main`; točke so razvrščene proti `main` `0d8d434`.
+
+- **F1 — zaključek nepopolnega treninga zamrzne zavihek: že popravljeno** (`f49f7e4`, 2026-09-27;
+  na javni strani od objave `6c8b556`). V `0625bd6` je zaključek odprl dva brskalnikova `confirm()`
+  zapored. Dokler je tako okno odprto, stran ne izvede ničesar, tudi ukaza prek CDP ne. Zdaj vpraša
+  dialog aplikacije. Test enote ustavi build, če se brskalnikov dialog vrne.
+- **F2 — dejanskega rezultata serije ni mogoče vpisati neposredno: odprto, čaka na Simona.** Vnos
+  dejanskih ponovitev ima le vaja »do odpovedi« ([circuitCard.js](src/modules/clipboard/circuitCard.js)).
+  Za »danes 4 × 75 namesto 5 × 80« trener uporabi opombo ali spremeni načrt. Blokira odločitev,
+  ali se predpis in izvedba vpišeta ločeno in kje. Od nje je odvisna oblika zapisa izvedbe na vaji
+  v načrtu (§95.4).
+- **F3 — opomba je privzeto »Too Easy«: že popravljeno.** Prva in privzeta izbira je »Samo opomba,
+  brez ocene« ([feedbackTags.js](src/domain/feedbackTags.js)).
+- **F4 — zamenjava vaje na drugo opremo ohrani breme: popravljeno 2026-10-01** (`22cf2ed`).
+  Ponovitve ostanejo, breme se postavi na 0.
+- **F5 — na obrazcu »Nastavitev treninga« so stranke zadnje: že v §80.70**, čaka na Simona. Novo:
+  v urejevalniku med treningom so cilji in opombe nad vajami. Po eni daljši opombi je na prvem
+  zaslonu le del prve vaje. Na `main` še ni preverjeno.
+- **F6 — mešan jezik: dialog opombe popravljen** (oznake prevedene, glasovne opombe ni več). Angleški
+  filtri kataloga (All, Chest, Barbell) so že med odločitvami za Simona v §38.20.
+- **Ni preverjeno:** delo brez povezave, varnostna kopija in obnova, tisk, fizični telefon. Prav tako
+  ne zapis v zgodovino po zaključku, ker ga je F1 preprečil. Ponoviti na `6c8b556` ali novejši.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
