@@ -49,11 +49,30 @@ def owner_repo():
     return f"{match.group(1)}/{match.group(2)}"
 
 
+# Where the token file is kept is NOT written here: this repository is public, and a credential's
+# location belongs with the credential, not in a published file. The path comes from the environment,
+# and the maintainer's own notes say what it is.
+TOKEN_FILE_ENV = "GH_TOKEN_FILE"
+
+
 def token():
-    """A token lifts the one wall that matters: without it the log endpoint answers 403."""
+    """A login lifts the one wall that matters: without it the log endpoint answers 403.
+
+    A file is read before `gh auth token` because `gh auth login` will not hold a narrow token — it
+    requires scopes wide enough to write to every repository on the account — so the login that can
+    read a build log does not have to be the login that can push.
+    """
     for name in ("GH_TOKEN", "GITHUB_TOKEN"):
         if os.environ.get(name):
             return os.environ[name]
+    path = os.environ.get(TOKEN_FILE_ENV)
+    try:
+        with open(path, encoding="utf-8") as handle:
+            stored = handle.read().strip()
+        if stored:
+            return stored
+    except (OSError, TypeError):
+        pass
     try:
         value = subprocess.run(
             ("gh", "auth", "token"), capture_output=True, text=True, check=True
