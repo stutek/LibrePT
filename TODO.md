@@ -4377,6 +4377,24 @@ in ponovnem odprtju »+386 31 777 888« in »info@studio-zorko.invalid«; pismo 
 - Uvodno besedilo »tvoje ime podpiše povabilo, telefon in e-pošta pa sta pot, po kateri ti stranka
   odgovori« ne pove, da isti podatki podpišejo pismo privolitve in tam povedo, kdo je upravljavec. P3.
 
+### 80.157 [ ] P3 — Ob prvem odprtju po zagonu brskalnika zaslon za nalaganje čaka pet sekund — čaka na Simona
+
+**Scenarij in koraki:** brskalnik s profilom, v katerem je aplikacija že uporabljena (trenerka »Tara
+Zorko«, stranka »Gaja Mlakar«). Brskalnik zapreti in znova zagnati, odpreti `/?lang=sl`, nato isto stran
+še dvakrat. Merjeno od navigacije do trenutka, ko zaslon za nalaganje začne izginjati.
+
+**Opaženo:** prvo odprtje po zagonu brskalnika 5,02–5,04 s, drugo in tretje 0,07–0,11 s. Enako na
+objavljeni `#8b2ce80` (4,95–5,02 s) in na `main` `6230070`. Aplikacija je slovenska in preusmerjena na
+ploščo že po 0,6 s; preostanek je zadrževanje zaslona za nalaganje. Zadrževanje je namerno (arhiv:
+»the splash hold (`max(5s, boot)`)«, z lastnim testom).
+
+**Težava in vpliv:** telefon brskalnik v ozadju pogosto ugasne, zato je »prvo odprtje po zagonu«
+običajno odprtje med dvema strankama. Pet sekund vsakič, čeprav je aplikacija pripravljena po pol
+sekunde.
+
+**Predlog:** **čaka na Simona** — ali je pet sekund vredno zadrževati ob vsakem hladnem zagonu ali le
+ob prvem obisku — opaženo na `#8b2ce80` in `main` `6230070`, 390 × 844, sl.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
