@@ -5706,3 +5706,43 @@ datotek ne bere (ruff jih ne zajema, §99). Pri več sejah, ki commitajo hkrati,
 ostane brez commita. **Predlog:** premik sprejeti tudi za datoteke, ki jih gate ne bere, in ta
 seznam vzeti iz istega mesta kot cilje gata (`PYTHON_LINT_TARGETS` in mape testov), ne iz ročne
 kopije. **Čaka na:** odločitev v §99, ker ta spremeni, katere datoteke gate bere.
+
+## 101. [ ] CodeQL teče na repozitoriju in ima 7 odprtih opozoril, ki jih nihče ni videl
+
+**Najdeno 2026-10-01**, prvič, ko je kdo lahko prebral GitHubova varnostna opozorila. CodeQL ni v
+nobenem delotoku v `.github/workflows/`, torej teče po GitHubovi privzeti nastavitvi. Opozorila so
+odprta od **2026-08-18**, kar je šest tednov, in gate o njih ne ve ničesar.
+
+| # | Resnost | Pravilo | Mesto |
+| - | ------- | ------- | ----- |
+| 1 | high    | `py/clear-text-storage-sensitive-data` | `agent_tools/google_credential.py:252` |
+| 2 | high    | `py/redos`                            | `agent_tools/icon_coverage.py:133`     |
+| 3 | high    | `py/redos`                            | `agent_tools/font_subset.py:67`        |
+| 4 | high    | `py/redos`                            | `agent_tools/icon_coverage.py:126`     |
+| 5 | medium  | `js/client-side-unvalidated-url-redirection` | `src/modules/intake/intakeView.js:283` |
+| 6 | medium  | `js/client-side-unvalidated-url-redirection` | `src/modules/intake/intakeView.js:288` |
+| 7 | medium  | `js/client-side-unvalidated-url-redirection` | `src/modules/intake/intakeView.js:326` |
+
+### 101.1 [ ] Tri opozorila o preusmeritvi so po pregledu kode napačna najdba
+
+Vsa tri mesta postavljajo `href` z nespremenljivo shemo: `tel:${dialledForm(sender.phone)}` in
+`mailto:${encodeURIComponent(sender.email)}` s poizvedbo, ki je prav tako kodirana. Sheme se iz
+podatkov ne da zamenjati, zato `javascript:` ali tuja stran od tod ne nastane. **Predlog:** zavrniti
+kot napačno najdbo z zapisanim razlogom. Zavrnitev zahteva pravico pisanja za `Code scanning
+alerts`, ki je prijava nima — opravi jo Simon, ali pravico za to eno opravilo doda in po njem
+odvzame.
+
+### 101.2 [ ] Štiri opozorila v `agent_tools/` zahtevajo odločitev, ne popravka na slepo
+
+`py/redos` v `icon_coverage.py` in `font_subset.py`: oba poganja gate nad datotekami tega
+repozitorija, ne nad vnosom od zunaj, zato napada ni od kod sprožiti; vzorca se da prepisati poceni.
+`py/clear-text-storage-sensitive-data` v `google_credential.py:252` je namerno — poverilnica se
+zapiše v `.private/` kot navadno besedilo. **Čaka na Simona:** ali vzorca prepišemo in poverilnico
+pustimo, kot je, z zapisanim razlogom.
+
+### 101.3 [ ] Gate o teh opozorilih ne ve ničesar
+
+Pravilo projekta pravi, da sta `build check` in GitHubov delotok v koraku. Tu je pregled, ki teče
+samo na GitHubu, in njegovih najdb ni videl nihče šest tednov. **Predlog:** opravilo v delotoku, ki
+prebere odprta opozorila (`security-events: read` zadošča) in pade, kadar je katero odprto brez
+zapisanega razloga. **Čaka na Simona:** ali to hoče, ker vsako novo opozorilo s tem ustavi objavo.
