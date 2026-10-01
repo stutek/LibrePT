@@ -39,6 +39,7 @@ import {
   participantsOf,
 } from "../../domain/sessionFilters.js";
 import { sessionCalendarDate } from "../../domain/sessionRecord.js";
+import { loadFormDraft, saveFormDraft } from "../common/formDraft.js";
 import { escapeHTML } from "../common/utils.js";
 
 const BAR_ID = "sessions-filter-bar";
@@ -48,7 +49,11 @@ const CALENDAR_SLOT_ID = "sessions-filter-calendar-slot";
 const CALENDAR_ID = "sessions-filter-calendar";
 
 let deps = null;
-let filters = { ...NO_SESSION_FILTERS };
+// The filters outlive a reload of the tab — a trainer reviewing November to February who reloaded
+// had to set both months, the year and both ends again — and no more than that: kept in
+// sessionStorage, as a half-typed form is (formDraft.js), so a new tab starts with the whole board.
+const FILTERS_DRAFT_KEY = "session-filters";
+let filters = { ...NO_SESSION_FILTERS, ...loadFormDraft(FILTERS_DRAFT_KEY) };
 // Which end the next tap on a day moves, when the trainer has said so: "from", "to", or null. Held
 // here rather than in the filter itself because it is about the CONTROL, not about what is filtered
 // — and it is only ever true while the chip that says so is lit on screen.
@@ -286,6 +291,7 @@ function changed() {
   // Only onChange: the board re-renders, and its render is what paints this row with the freshly
   // filtered list. Painting here first would draw the row against the OLD selection and then
   // immediately again — two renders where one is correct.
+  saveFormDraft(FILTERS_DRAFT_KEY, filters);
   deps.onChange();
 }
 

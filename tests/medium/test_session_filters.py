@@ -74,6 +74,35 @@ def test_clearing_puts_every_session_back(page, local_server):
     assert page.locator("#filter-clear").is_hidden()
 
 
+def _reload(page):
+    """A reload of the same tab. The stubbed app never takes the splash down, so it is removed here
+    as tests/medium/_harness.py removes it on the first load."""
+    page.reload()
+    page.wait_for_selector("#sessions-filter-bar")
+    page.evaluate("() => document.getElementById('app-splash')?.remove()")
+
+
+def test_the_filters_survive_a_reload_and_a_clear_survives_it_too(page, local_server):
+    """A trainer reviewing November to February reloaded the page, and the board came back with every
+    session and the chip saying "Datumi": the months, the year and both ends had to be set again."""
+    load_with_stub(page, local_server, SESSIONS_STUB)
+    page.wait_for_selector("#sessions-filter-bar")
+    before = _card_count(page)
+    client = page.locator("#filter-chip-client")
+    value = client.locator("option").nth(1).get_attribute("value")
+    client.select_option(value)
+    narrowed = _card_count(page)
+
+    _reload(page)
+    assert page.locator("#filter-chip-client").input_value() == value
+    assert _card_count(page) == narrowed
+
+    page.locator("#filter-clear").click()
+    _reload(page)
+    assert _card_count(page) == before
+    assert page.locator("#filter-clear").is_hidden()
+
+
 def test_the_calendar_selects_a_day_then_a_range_then_starts_over(page, local_server):
     load_with_stub(page, local_server, SESSIONS_STUB)
     page.wait_for_selector("#sessions-filter-bar")
