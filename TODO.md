@@ -4578,28 +4578,9 @@ datoteke):
 **Vrstni red je bistven:** strožja preverba je varna šele, ko ima zavrnitev izhod. Dokler ga nima,
 vsaka izboljšava preverbe stane več, kot prinese.
 
-## 82. [ ] Links run one way, out of TODO.md
+## 82. [x] Links run one way, out of TODO.md — done 2026-10-01
 
-**Ruled 2026-09-26 (Simon):** TODO.md holds only soft links to other files, which nothing checks; no
-other file points at a section of TODO.md, because its content is not stable. Naming the file as the
-home of open work stays allowed. The rule is in `AGENT_RULES.md`, the references were removed (§82.2),
-and `agent_tools/todo_refs.py` fails the build on a new one. One exemption is left: §82.3.
-
-### 82.1 [x] The link check stops scanning TODO.md and its archive — done 2026-09-26
-
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#821-x-the-link-check-stops-scanning-todomd-and-its-archive--done-2026-09-26).
-
-### 82.2 [x] Remove every reference into TODO.md, then make one fail the build — done 2026-09-27
-
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#822-x-remove-every-reference-into-todomd-then-make-one-fail-the-build--done-2026-09-27).
-
-### 82.3 [ ] Five pointers left in the dev server's own file — blocked on a restart
-
-`deploy/local_http_server.py` keeps five pointers into TODO in its comments, and
-`agent_tools/todo_refs.py` exempts it. The test suite refuses to run against a dev server whose copy
-of that file differs from the working tree, and the server on :8081 has been running since
-2026-09-23; restarting it is Simon's call. **Blocks:** removing the last exemption. When the server
-is next restarted, remove the pointers and the exemption in one change.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#82-x-links-run-one-way-out-of-todomd--done-2026-10-01).
 
 ## 84. [x] A session with no participants stops the boot — test data, not a defect — closed 2026-09-27
 

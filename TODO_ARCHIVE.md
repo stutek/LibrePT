@@ -20,6 +20,33 @@ Read [CHANGELOG.md](CHANGELOG.md) for what shipped and when. This file is why.
 
 ---
 
+## 82. [x] Links run one way, out of TODO.md — done 2026-10-01
+
+**Ruled 2026-09-26 (Simon):** TODO.md holds only soft links to other files, which nothing checks; no
+other file points at a section of TODO.md, because its content is not stable. Naming the file as the
+home of open work stays allowed. The rule is in `AGENT_RULES.md`, the references were removed (§82.2),
+and `agent_tools/todo_refs.py` fails the build on a new one. One exemption is left: §82.3.
+
+### 82.1 [x] The link check stops scanning TODO.md and its archive — done 2026-09-26
+
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#821-x-the-link-check-stops-scanning-todomd-and-its-archive--done-2026-09-26).
+
+### 82.2 [x] Remove every reference into TODO.md, then make one fail the build — done 2026-09-27
+
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#822-x-remove-every-reference-into-todomd-then-make-one-fail-the-build--done-2026-09-27).
+
+### 82.3 [x] Five pointers left in the dev server's own file — blocked on a restart — done 2026-10-01 (4d4ee18)
+
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#823-x-five-pointers-left-in-the-dev-servers-own-file--blocked-on-a-restart--done-2026-10-01-4d4ee18).
+
+### 82.3 [x] Five pointers left in the dev server's own file — blocked on a restart — done 2026-10-01 (4d4ee18)
+
+`deploy/local_http_server.py` keeps five pointers into TODO in its comments, and
+`agent_tools/todo_refs.py` exempts it. The test suite refuses to run against a dev server whose copy
+of that file differs from the working tree, and the server on :8081 has been running since
+2026-09-23; restarting it is Simon's call. **Blocks:** removing the last exemption. When the server
+is next restarted, remove the pointers and the exemption in one change.
+
 ### 80.148 [x] P2 — Zamenjava vaje obdrži težo prejšnje: Wall Sit dobi »BW+80kg« — popravljeno 2026-09-30
 
 **Scenarij in koraki:** trening »Noge« za Barbaro Kos, v »Uredi načrt« Leg Press 3 × 10 × 80 kg. V
