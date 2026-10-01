@@ -5687,3 +5687,36 @@ od danes živijo tukaj:
 
 **Predlog:** preverba v `todo_hygiene`, ki zavrne arhivski razdelek z »Odprto«/»Open« brez kazalca
 na odprto mesto. **Čaka na Simona:** ali preverbo hoče, ker spremeni, kako se točke zapirajo.
+
+## 99. [ ] Spremljanje GitHub Actions po potisku — veščina, in padec, ki ga brez prijave ne vidimo
+
+Simon je 2026-10-01 potisnil 212 commitov. Teka »Push on main« in »Graph Update« sta uspela, tek
+»Build, Verify and Deploy to GitHub Pages« na commitu `cdf6cf5` je padel: opravilo »Stage 1 ·
+JavaScript Unit Tests (node:test) and their coverage«, korak 4 »Run JavaScript Unit Tests«, celo
+opravilo v 30 sekundah. Edini pripis je `Process completed with exit code 1.`
+
+Spremljanje je zdaj veščina v repozitoriju: `.agents/skills/build-watch/SKILL.md` z orodjem
+`watch.py` počaka na vse teke commita, izpiše, katero opravilo in kateri korak sta padla, in zapiše
+poročilo v `.private/BUILD_WATCH/<sha>.md`; izhodna koda 0 uspeh, 1 padec, 2 ni kaj spremljati.
+Poganja jo najcenejši model, ki zna poganjati ukaze. V repozitoriju je namenoma: čist clone mora
+imeti orodje s sabo, tudi če projekt zamenja lastnika.
+
+### 99.1 [ ] Vzroka padca brez prijave ni mogoče ugotoviti — čaka na Simona
+
+Dnevnik opravila zahteva prijavo: anonimni zahtevek vrne `403 Must have admin rights to
+Repository.`, stran teka v brskalniku je prazno ogrodje, razhroščevalni profil Chroma pa v GitHub ni
+prijavljen (»Sign in to view logs«). `gh auth status` pravi, da prijave ni, in na računalniku ni
+nobenega žetona.
+
+Kar je izmerjeno: isti nabor tu uspe v 4,17 s, tudi v svežem kloniranju istega commita `cdf6cf5`,
+tudi pri `TZ=UTC`. Trajanje padlega opravila (30 s za ves korak, vključno s pripravo okolja) govori
+za okolje v CI, ne za trditev v testu — a to je domneva, dokler dnevnika ne preberemo.
+
+**Čaka na Simona:** `gh auth login` (dovolj je `actions:read`), ali prijava v GitHub v profilu
+`~/.chrome-debug-profile`, ali prilepljen dnevnik. Brez enega od treh se vzroka ne išče.
+
+### 99.2 [ ] Python v `.agents/` ni lintan
+
+`PYTHON_LINT_TARGETS` v `build/__init__.py` zajema `build/`, `deploy/`, `tests/` in `agent_tools/`.
+Orodij ob veščinah (`explore.py`, `watch.py`) ruff ne vidi. **Čaka na Simona:** ali `.agents/`
+dodamo med cilje; dodatek lahko najprej pokaže napake v `explore.py`.
