@@ -92,6 +92,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ### Fixed
 
+- **Back closes a client's edit form** and keeps what was typed; it used to change the page under
+  a form that stayed open. A reload opens the form again.
 - **"Start group session" on a routine gives that routine to everyone added.** Every client got
   "Empty plan, no routine", and from a link with `?lang=sl` the routine's id read "…?lang=sl".
 - **The session header says Today for a session made yesterday for today.** It kept saying
