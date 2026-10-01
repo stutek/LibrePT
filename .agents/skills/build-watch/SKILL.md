@@ -39,10 +39,10 @@ one look walks several endpoints, so a shorter interval buys a `403` instead of 
 
 ## What you can see, and what needs a login
 
-| Access                  | What it gives                                                         |
-| ----------------------- | --------------------------------------------------------------------- |
-| no login (public repo)  | the runs, the jobs, which step fell, the failure annotations           |
-| `GH_TOKEN` or `gh auth` | all of the above, and the log of the fallen job                        |
+| Access                 | What it gives                                                |
+| ---------------------- | ------------------------------------------------------------ |
+| no login (public repo) | the runs, the jobs, which step fell, the failure annotations  |
+| a login (see below)    | all of the above, and the log of the fallen job               |
 
 Without a login the log endpoint answers `403 Must have admin rights to Repository.`, and the run
 page in a browser is an empty shell whose content is fetched by JavaScript from a signed address —
@@ -53,9 +53,10 @@ so there is no anonymous way around it. The annotations usually say only
 or for the log pasted in. A cause nobody measured is never reported as a cause: write what fell and
 what is missing, and stop there.
 
-The tool picks a login up by itself from `GH_TOKEN`, `GITHUB_TOKEN` or `gh auth token`. To grant one:
-`gh auth login`. A browser session logged in as the repository owner can read the log page too, but
-this repository ships no tool for driving one.
+The tool picks a login up by itself, in this order: `GH_TOKEN`, `GITHUB_TOKEN`, the file named by
+`GH_TOKEN_FILE`, then `gh auth token`. Where that file is kept is the maintainer's own note, not a
+line in this repository — the repository is public, and a credential's location belongs with the
+credential.
 
 ## The cheap narrowing that needs no log
 
