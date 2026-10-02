@@ -165,6 +165,9 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
 - **Look and layout are written only in CSS, and a theme is a whole stylesheet** that may restyle
   any component. Code sets classes, state attributes and custom properties — never `style="…"` or
   `el.style.*`, which beats every theme.
+- **A prototype redraws only what the request changes; every other element is copied from the
+  app as it is, read from its module, never drawn from memory.** A placeholder that cannot be
+  copied is labelled one.
 - Choose the test tier and what an assertion may look at by [tests/INDEX.md](tests/INDEX.md); group
   by feature, not one file per test.
 - A module added, moved or removed updates [docs/SRC_MODULES.md](docs/SRC_MODULES.md) in the same
