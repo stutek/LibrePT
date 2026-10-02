@@ -4516,15 +4516,9 @@ višina.
 
 **Predlog:** poleg vrste opombe prikaži celotno vneseno besedilo — opaženo na objavljeni različici `933dbc0`, 390 × 844, sl, 2026-10-02.
 
-### 80.168 [ ] P1 — Ob zaključku dveh sočasnih treningov se zabeleži le prvi, program druge stranke pa se izgubi
+### 80.168 [x] P1 — Ob zaključku dveh sočasnih treningov se zabeleži le prvi, program druge stranke pa se izgubi — popravljeno 2026-10-02
 
-**Scenarij in koraki:** vnos dveh strank (»TEST Matej Golob« in »TEST Sonja Zupan«) → ustvari prvi trening (»Moč za hrbet«, Matej) in ga začni → odpri drugi trening v istem terminu (»Kondicija in noge«, Sonja) in ga začni → oba treninga tečeta vzporedno na skupni podlogi z zavihkoma strank → pri Sonji vpis »Pretežko« na počepu → »Zaključi vadbo« → »Zaključi zdaj« → odpri profil Sonje Zupan.
-
-**Opaženo:** na plošči sta oba treninga označena kot »Zaključeno 00:03«. V kartoteki Mateja Goloba je vadba pravilno zabeležena pod »ZGODOVINA ZABELEŽENIH VADB«. V kartoteki Sonje Zupan pa piše »Ni še zabeleženih vadb.« Pregled IndexedDB (`schema6`) razkrije, da je Matejev zapis v `clientPrograms` dobil status `done` in zapis v `sessionAttendance` (`attended`), medtem ko je Sonjin živi program (`clientPrograms` s statusom `live`) ob zaključku popolnoma izbrisan iz baze brez ustvarjenega zapisa o prisotnosti ali zaključenem programu. Sonjin signal ostane v `exerciseNotes` kot sirota.
-
-**Težava in vpliv:** ko trener na telovadnici vodi dve stranki vzporedno ali se treninga prekrivata, zaključek vadbe nepovratno izbriše program in opravljene vaje druge stranke. Kartoteka stranke ostane prazna, podatki o teži in serijah pa so izgubljeni.
-
-**Predlog:** ob zaključku vzporedne podloge mora zaključek obdelati programe vseh udeleženih strank v vseh odprtih sejah ter vsakemu udeležencu shraniti `clientPrograms` (status `done`) in `sessionAttendance` (status `attended`) — opaženo na različici `403715f9`, 390 × 844, sl, 2026-10-02.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80168-x-p1--ob-zaključku-dveh-sočasnih-treningov-se-zabeleži-le-prvi-program-druge-stranke-pa-se-izgubi--popravljeno-2026-10-02).
 
 ### 80.169 [ ] P1 — Zaključek skupinskega treninga zabeleži program in prisotnost le za aktivnega udeleženca, programi ostalih članov skupine pa se izgubijo
 

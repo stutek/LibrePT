@@ -9616,6 +9616,18 @@ iz obstoječega profila z vpisano opombo. Opaženo na objavljeni `6c8b556`, sl,
 
 **Popravljeno 2026-10-02** (`6da0e90`): urejanje stranke ima svojo pot, `/clients/{id}/edit`. Nazaj obrazec zapre in ohrani vpisano, stran stranke ostane. Ob tem odpravljeno še, da je zaključek obrazca po odhodu na drugo stran stran stranke spet prikazal čez novo stran. Testa `test_back_closes_the_client_editor_and_stays_on_the_client` in `test_leaving_the_client_editor_for_another_page_shows_that_page`.
 
+### 80.168 [x] P1 — Ob zaključku dveh sočasnih treningov se zabeleži le prvi, program druge stranke pa se izgubi — popravljeno 2026-10-02
+
+**Scenarij in koraki:** vnos dveh strank (»TEST Matej Golob« in »TEST Sonja Zupan«) → ustvari prvi trening (»Moč za hrbet«, Matej) in ga začni → odpri drugi trening v istem terminu (»Kondicija in noge«, Sonja) in ga začni → oba treninga tečeta vzporedno na skupni podlogi z zavihkoma strank → pri Sonji vpis »Pretežko« na počepu → »Zaključi vadbo« → »Zaključi zdaj« → odpri profil Sonje Zupan.
+
+**Opaženo:** na plošči sta oba treninga označena kot »Zaključeno 00:03«. V kartoteki Mateja Goloba je vadba pravilno zabeležena pod »ZGODOVINA ZABELEŽENIH VADB«. V kartoteki Sonje Zupan pa piše »Ni še zabeleženih vadb.« Pregled IndexedDB (`schema6`) razkrije, da je Matejev zapis v `clientPrograms` dobil status `done` in zapis v `sessionAttendance` (`attended`), medtem ko je Sonjin živi program (`clientPrograms` s statusom `live`) ob zaključku popolnoma izbrisan iz baze brez ustvarjenega zapisa o prisotnosti ali zaključenem programu. Sonjin signal ostane v `exerciseNotes` kot sirota.
+
+**Težava in vpliv:** ko trener na telovadnici vodi dve stranki vzporedno ali se treninga prekrivata, zaključek vadbe nepovratno izbriše program in opravljene vaje druge stranke. Kartoteka stranke ostane prazna, podatki o teži in serijah pa so izgubljeni.
+
+**Predlog:** ob zaključku vzporedne podloge mora zaključek obdelati programe vseh udeleženih strank v vseh odprtih sejah ter vsakemu udeležencu shraniti `clientPrograms` (status `done`) in `sessionAttendance` (status `attended`) — opaženo na različici `403715f9`, 390 × 844, sl, 2026-10-02.
+
+**Popravljeno 2026-10-02 22:13** (`82617180`). Vzrok ni bil v vzporednih treningih. Sonja je imela samo »Pretežko«, ki namenoma ne odkljuka nobene serije, zato je zaključek njen trening štel za trening brez opravljenega dela in program izbrisal; signal je od sheme 6 shranjen ob programu in je izginil z njim. Ista stranka s »Prelahko« je trening obdržala. Zdaj stranka s signalom dobi zapis tudi brez odkljukane serije; stranka brez serije in brez signala ostane brez zapisa kot prej. Testa `test_a_participant_with_only_a_too_hard_signal_keeps_the_training` (stranka drugega treninga na združeni podlogi) in »a client with a signal but no set ticked is recorded, with the signal« v `tests/unit_js/domain/sessionHistoryRecord.test.mjs`.
+
 ## 99.1 [x] Padli test ni bil okolje, ampak iskanje niza v naključnem id-ju — popravljeno 2026-10-01
 
 Po potisku 212 commitov je 2026-10-01 padel tek »Build, Verify and Deploy«, opravilo »Stage 1 ·
