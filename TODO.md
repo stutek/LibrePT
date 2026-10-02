@@ -5572,10 +5572,10 @@ exercises with the session's routine; restoring an old backup again must not dup
    it neither sweeps nor skips with a reason (`9f91645`).
 2. [x] The conversion from `history`, as a pure function: a program per record with the record's
    id, linked to the one finished session that fits, with attendance "attended" (`b9eba7f`).
-3. [~] Schema 6 cut and read by every install: memory holds programs, attendance and notes; stores 4
+3. [x] Schema 6 cut and read by every install: memory holds programs, attendance and notes; stores 4
    and 5 get `history` and `planUpdates` built from them at every save; old stores, backups, sync
    files and seed data are converted on the way in; every reader goes through
-   `data/trainingRecords.js`. Written 2026-10-02, tests being ported, not yet committed.
+   `data/trainingRecords.js` (`a2aa577`). App version 2026-11 is the default; backup formats 7 and 8.
 4. [ ] The code reads the new entities natively instead of through a history-shaped view where it
    still does.
 5. [ ] A session in progress is a program with status live; the live-session cache goes.
