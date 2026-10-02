@@ -5558,9 +5558,30 @@ what a trainer sees, so they are Simon's:
 - On migration, old `history` records are made consistent with the new schema.
 - Schema 4 does not track groups.
 
-**[ ] Open, asked 2026-10-02:** "remove `bindings`" against "a mapping entity per session", which is
-what `bindings` is; whether feedback is the `notes` entity already in `SCHEMA_PREVIEW`; whether
-schema 4 (and 5) stay live, since an old build reads `history`; question 4.
+**Ruled by Simon 2026-10-02, third round:** `bindings` becomes `groupSharedPrograms`; feedback is
+`exerciseNotes`; a note about the person is its own entity, `clientNotes`; attendance also has the
+statuses sick and force majeure, and the trainer decides whether a cancellation uses up a package
+session; schemas 4 and 5 stay live for at least one or two months, so the star write builds their
+`history` from the new entities; question 4 is B, and it may also compare the old record's
+exercises with the session's routine; restoring an old backup again must not duplicate anything.
+
+**The steps:**
+
+1. [x] The five entities declared in `SCHEMA_PREVIEW`, written by nothing (`16a305a`), and the
+   anonymisation covering them and the note on every set, with a test that fails on a collection
+   it neither sweeps nor skips with a reason (`9f91645`).
+2. [ ] The conversion from `history`, as a pure function: a program per record with the record's
+   id, linked to the one finished session that fits, with attendance "attended".
+3. [ ] The projection back: `history` records for schemas 4 and 5, built from programs, attendance
+   and notes on every save.
+4. [ ] The code that reads `history` (the client's page, "last time", statistics, routine from a
+   session, backup) reads the new entities.
+5. [ ] A session in progress is a program with status live; the live-session cache goes.
+6. [ ] Beside them: a prototype of the screen for several sessions at once (the counter on the
+   board, the clipboard bar, the timers), before step 5.
+
+**[ ] Open:** the anonymisation receipt says nothing about deleted client notes; it needs a line
+when step 4 starts writing them.
 
 **[ ] After the implementation (Simon, 2026-10-02):** start agy for at least four hours of
 exploratory testing by `.agents/skills/exploratory-test/SKILL.md`, against the dev server, because
