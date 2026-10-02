@@ -53,6 +53,16 @@ const SESSION_ITEM_SHAPE = {
   rest: { required: false, type: "number" },
 };
 
+// An item of a `clientPrograms` row (PREVIEW). `id` is required and names THIS item, so an
+// exercise note can point at it; on a session item `id` is the clipboard row's and is sometimes
+// absent. `exerciseId` is the catalogue exercise it was made from, while `name` keeps the name as
+// it was, so a renamed or deleted catalogue exercise leaves the past readable.
+const PROGRAM_ITEM_SHAPE = {
+  ...SESSION_ITEM_SHAPE,
+  id: { required: true, type: "string" },
+  exerciseId: { required: false, type: "string" },
+};
+
 // Fields ANY record may carry, whatever its collection, so a shape does not have to repeat them.
 // `testData` is the provenance stamp the seeder writes (data/seedProvenance.js) and `seededDemo` is
 // what it was called before — both say "this row is sample or test data", which is true of a client
@@ -276,42 +286,79 @@ export const SCHEMA_PREVIEW = {
     ...SCHEMA_5.sessions,
     startDate: { required: true, type: "string" },
   },
-  // WHICH CLIENTS SHARE ONE PROGRAM inside one session — the M:N `sessions.participants` does not
-  // express. Two clients in a group of five may be given the same plan and logged together; the
-  // other three each have their own. That grouping exists today only as `bindings` on the live
-  // session object in memory: no schema declares it, `boundClientRoutines` re-applies it at
-  // recovery, and it dies with the clipboard cache. It is the one part of a session never written
-  // down, which is why it is declared here first and written by nothing yet.
+  // THE NEW SESSION MODEL, declared and written by nothing yet (ruled 2026-10-02, Simon). It replaces
+  // `history`, which holds a plan not yet performed (`isPlanning`) and a training that happened in one
+  // shape, and the live-session cache, which holds one session at a time. A session (`sessions`)
+  // stays the booked slot; what each client does in it is a program of their own.
+
+  // ONE CLIENT'S PROGRAM. Every client has their own copy, also inside a group, because each one's
+  // performed sets differ; a shared program is a `groupSharedPrograms` row, never one shared record.
+  // A program belongs to zero or one session: none while it waits unscheduled, which is where a
+  // client's cancellation moves it. One session holds many.
   //
-  // A record per group rather than a field on the client or the session: a client is in one group
-  // per session and in different groups across sessions, which is precisely what neither of those
-  // two can hold without repeating itself.
-  bindings: {
+  // `status` is "planned", "live" or "done". "Unscheduled" is not a status: it is a planned program
+  // with no `sessionId`. `performedAt` is set when it becomes done (ISO-8601 UTC instant) and is the
+  // only date a program carries, because a program migrated from `history` may have no session.
+  // A program migrated from `history` keeps that record's id, so restoring the same old backup twice
+  // overwrites rather than duplicates.
+  clientPrograms: {
+    id: { required: true, type: "string" },
+    clientId: { required: true, type: "string" },
+    sessionId: { required: false, type: "string" },
+    status: { required: true, type: "string" },
+    performedAt: { required: false, type: "string" },
+    duration: { required: false, type: "number" }, // seconds
+    title: { required: false, type: "string" },
+    routineId: { required: false, type: "string" },
+    routineName: { required: false, type: "string" }, // soft ref, as on history
+    exercises: { required: true, type: "array", items: PROGRAM_ITEM_SHAPE },
+  },
+
+  // WHICH CLIENTS SHARE ONE PROGRAM inside one session, as a circuit groups exercises. Each member
+  // still has their own `clientPrograms` row; this is only the grouping, which today exists on the
+  // live session object in memory alone (`boundClientRoutines` re-applies it at recovery).
+  groupSharedPrograms: {
     id: { required: true, type: "string" },
     sessionId: { required: true, type: "string" },
     clientIds: { required: true, type: "array" },
   },
 
-  // ZAZNAMKI — everything the trainer notes about a client, which today has three homes and no
-  // record of its own: a free-text `notes` field on the client, an untyped `feedback` array inside
-  // each history record, and the `planUpdates` collection for the ones that should change the next
-  // plan. The three already share a signature — `(clientId, exerciseName, tag)` is what
-  // `controllers/sessionQuickSignals.js` matches on and what a planUpdates row carries — so they are
-  // one thing filed three ways, and only the third can be found, listed or resolved.
-  //
-  // Everything but the client is optional because the three sources carry different subsets: a note
-  // about a person has no exercise, a signal tapped on the clipboard has no text, and only a plan
-  // update has a resolved state.
-  notes: {
+  // ONE CLIENT AT ONE SESSION: whether they came, and whether it uses up a session of their package.
+  // `status` is "attended", "noShow", "cancelled", "sick" or "forceMajeure". `consumesQuota` is
+  // stored, not derived from the status, because the trainer decides when a cancellation counts.
+  sessionAttendance: {
+    id: { required: true, type: "string" },
+    sessionId: { required: true, type: "string" },
+    clientId: { required: true, type: "string" },
+    programId: { required: false, type: "string" },
+    status: { required: true, type: "string" },
+    consumesQuota: { required: true, type: "boolean" },
+  },
+
+  // WHAT THE TRAINER NOTES ABOUT ONE EXERCISE OF ONE CLIENT'S PROGRAM: a quick signal tapped on the
+  // clipboard ("Too Easy - Increase Load", in `tag`), a written remark, or both. It replaces the
+  // `feedback` array inside a history record and the `planUpdates` collection. Linked by id, never
+  // by exercise name, which changes when an exercise is renamed. `resolved` is for a note that should
+  // change the next plan. No voice-note field: the coming schema carries none (Simon, 2026-09-27).
+  exerciseNotes: {
+    id: { required: true, type: "string" },
+    clientId: { required: true, type: "string" },
+    programId: { required: false, type: "string" },
+    programItemId: { required: false, type: "string" },
+    exerciseId: { required: false, type: "string" },
+    createdAt: { required: false, type: "string" }, // ISO-8601 UTC instant, never a local date
+    tag: { required: false, type: "string" },
+    text: { required: false, type: "string" },
+    resolved: { required: false, type: "boolean" },
+  },
+
+  // WHAT THE TRAINER NOTES ABOUT THE CLIENT AS A PERSON, one dated record each. It replaces the
+  // single free-text `clients.notes`, which every edit overwrites.
+  clientNotes: {
     id: { required: true, type: "string" },
     clientId: { required: true, type: "string" },
     createdAt: { required: false, type: "string" }, // ISO-8601 UTC instant, never a local date
-    text: { required: false, type: "string" },
-    tag: { required: false, type: "string" },
-    sessionId: { required: false, type: "string" },
-    exerciseName: { required: false, type: "string" },
-    resolved: { required: false, type: "boolean" },
-    hasVoiceNote: { required: false, type: "boolean" },
+    text: { required: true, type: "string" },
   },
 
   // A collection ONLY this shape declares, so staging is always exercised by the real schemas: a

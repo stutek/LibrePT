@@ -305,16 +305,18 @@ test("reading an older schema hides the newer fields; reading the newest hides n
   assert.deepEqual(m.fieldsHiddenFrom(4, 5, "circuits"), [], "4 never holds circuits in memory");
 });
 
-test("the two entities a session cannot express today are declared, and only in PREVIEW", () => {
+const NEW_SESSION_MODEL = [
+  "clientPrograms",
+  "groupSharedPrograms",
+  "sessionAttendance",
+  "exerciseNotes",
+  "clientNotes",
+];
+
+test("the new session model is declared, and only in PREVIEW", () => {
   // Expand-first: storage for a field exists in a schema before anything writes it, and
-  // SCHEMA_PREVIEW is where a shape waits until it is ready for a number. These two are waiting.
-  //
-  // `bindings` is which clients inside one session share ONE program — not the same question as
-  // `sessions.participants`, and the one part of a live session that was never written down: it
-  // exists only on the in-memory session object and dies with the clipboard cache.
-  // `notes` is everything the trainer writes about a client, which today has three homes and no
-  // record: a field on the client, an untyped array inside a history record, and `planUpdates`.
-  for (const collection of ["bindings", "notes"]) {
+  // SCHEMA_PREVIEW is where a shape waits until it is ready for a number. These are waiting.
+  for (const collection of NEW_SESSION_MODEL) {
     assert.ok(m.SCHEMA_PREVIEW[collection], `${collection} is not declared in the preview shape`);
     for (const numbered of [4, 5]) {
       assert.equal(
@@ -326,27 +328,44 @@ test("the two entities a session cannot express today are declared, and only in 
   }
 });
 
-test("a binding and a note validate clean in the shape that will carry them", () => {
-  // The records the app would write if it wrote them today: a binding is the grouping
-  // `boundClientRoutines` re-applies at recovery, and a note is a quick signal tapped on the
-  // clipboard — the case with no text at all, which is why only the client is required.
-  const binding = {
-    id: "b1",
-    sessionId: "s01f2e3d",
-    clientIds: ["c1a9f0e2", "c2b8e1d3"],
+test("the records of one group training validate clean in the new session model", () => {
+  // Ana and Bojan share one program in session s1, each with their own copy; Cene was sick.
+  const squat = {
+    id: "i1",
+    exerciseId: "ex-squat",
+    type: "exercise",
+    position: 0,
+    name: "Barbell Back Squat",
+    sets: [{ reps: 5, weight: 62.5, completed: true }],
   };
-  const signal = {
-    id: "n1",
-    clientId: "c1a9f0e2",
-    createdAt: "2026-09-30T18:00:00.000Z",
-    sessionId: "s01f2e3d",
-    exerciseName: "Barbell Back Squat",
-    tag: "Too Easy - Increase Load",
-    resolved: false,
+  const records = {
+    clientPrograms: [
+      { id: "p1", clientId: "ana", sessionId: "s1", status: "done", exercises: [squat] },
+      { id: "p2", clientId: "bojan", sessionId: "s1", status: "live", exercises: [squat] },
+      // Unscheduled: Cene's plan waits for a new date.
+      { id: "p3", clientId: "cene", status: "planned", exercises: [squat] },
+    ],
+    groupSharedPrograms: [{ id: "g1", sessionId: "s1", clientIds: ["ana", "bojan"] }],
+    sessionAttendance: [
+      { id: "a1", sessionId: "s1", clientId: "ana", programId: "p1", status: "attended", consumesQuota: true },
+      { id: "a2", sessionId: "s1", clientId: "cene", status: "sick", consumesQuota: false },
+    ],
+    exerciseNotes: [
+      // A quick signal tapped on the clipboard has no text; a written remark has no tag.
+      { id: "n1", clientId: "ana", programId: "p1", programItemId: "i1", tag: "Too Easy - Increase Load" },
+      { id: "n2", clientId: "ana", programId: "p1", programItemId: "i1", text: "Knees in on rep 4." },
+    ],
+    clientNotes: [{ id: "c1", clientId: "ana", createdAt: "2026-10-02T08:00:00.000Z", text: "Prefers mornings." }],
   };
-  const aboutThePerson = { id: "n2", clientId: "c1a9f0e2", text: "Shoulder still sore." };
+  for (const [collection, rows] of Object.entries(records)) {
+    for (const row of rows) {
+      assert.deepEqual(m.fieldIssues(row, m.SCHEMA_PREVIEW[collection]), [], `${collection} ${row.id}`);
+    }
+  }
+});
 
-  assert.deepEqual(m.fieldIssues(binding, m.SCHEMA_PREVIEW.bindings), []);
-  assert.deepEqual(m.fieldIssues(signal, m.SCHEMA_PREVIEW.notes), []);
-  assert.deepEqual(m.fieldIssues(aboutThePerson, m.SCHEMA_PREVIEW.notes), []);
+test("a program item without its own id is refused, because a note could not point at it", () => {
+  const item = { type: "exercise", name: "Plank" };
+  const program = { id: "p1", clientId: "ana", status: "planned", exercises: [item] };
+  assert.notDeepEqual(m.fieldIssues(program, m.SCHEMA_PREVIEW.clientPrograms), []);
 });

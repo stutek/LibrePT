@@ -561,6 +561,29 @@ cache as `circuitRounds[circuitId]`, never in a history record — a finished re
 rounds were **prescribed** (`circuitSeries`) and what was **performed** (each member's `sets`), which
 is enough to reconstruct the block without storing a cursor into a session that has ended.
 
+### The new session model — declared in PREVIEW, written by nothing yet (ruled 2026-10-02)
+
+It replaces `history` and the live-session cache of §7. A **session** stays the booked slot, and is
+marked `cancelled` when the trainer cancels it. What each client does in it is a **program** of their
+own (`clientPrograms`, status planned, live or done), linked to zero or one session: a client's
+cancellation moves their program off the session, to unscheduled or to another date. Clients who
+share one program are a **group** (`groupSharedPrograms`), and each member still has their own copy.
+**Attendance** (`sessionAttendance`) says whether a client came and whether the session uses up one
+of their package. A note about an exercise of a program is an **exercise note** (`exerciseNotes`); a
+note about the person is a **client note** (`clientNotes`). Schemas 4 and 5 stay live for at least
+two months beside it, so the star write (§4) must keep producing their `history` records from these.
+
+```mermaid
+erDiagram
+    SESSION ||--o{ CLIENT_PROGRAM : "holds (zero or one session per program)"
+    CLIENT ||--o{ CLIENT_PROGRAM : "has its own copy"
+    SESSION ||--o{ GROUP_SHARED_PROGRAM : "groups clients"
+    SESSION ||--o{ SESSION_ATTENDANCE : "records"
+    CLIENT ||--o{ SESSION_ATTENDANCE : "attended or not"
+    CLIENT_PROGRAM ||--o{ EXERCISE_NOTE : "noted on one item"
+    CLIENT ||--o{ CLIENT_NOTE : "about the person"
+```
+
 ---
 
 ## 4. Star writes — one domain object, every live schema
