@@ -3089,6 +3089,8 @@ naredil po načrtu, ima na izbiro le »prazno vadbo«. Po »Zaključi zdaj« plo
 »Program ni določen«, odprta kartica pa »Ni vstavljenih vaj / Vaj še ni. Pritisni tri pike (⋮) …«.
 Načrt s tremi vajami ni nikjer več viden. Isto opiše dnevnik prvega odprtja 04.
 
+**Dokaz 2026-10-02**, objavljena `933dbc0`: »Večerna moč«, »TEST Živa Dolgoime Koren«, Dumbbell Goblet Squat, samo opomba brez ocene, zaključek po obeh opozorilih. Urnik kaže »Zaključeno / 00:02 / Program ni določen«, profil pa »Ni še zabeleženih vadb.«. Opozorilo o nezabeleženih serijah je bilo prikazano; novih izjem v konzoli pri zaključku ni bilo.
+
 ### 80.7 [x] P2 — Prvi prikaz novega termina pokaže 1970-01-01 — popravljeno 2026-09-27
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#807-x-p2--prvi-prikaz-novega-termina-pokaže-1970-01-01--popravljeno-2026-09-27).
@@ -4498,6 +4500,16 @@ višina.
 **Težava in vpliv:** najkrajša pot nazaj do pripravljene vadbe odpove po ponovnem odprtju aplikacije. Trener mora odkriti drugo pot skozi obvestila; angleška napaka ne pove, kako nadaljevati.
 
 **Predlog:** spodnja vrstica naj odpre isti shranjeni načrt kot obvestilo tudi po osvežitvi — opaženo na objavljeni različici `933dbc0`, 390 × 844, sl, 2026-10-02. Ločeno od že opisane odsotnosti termina v §80.5.
+
+### 80.167 [ ] P2 — Pregled pokaže »Samo opomba, brez ocene«, besedilo opombe pa manjka
+
+**Scenarij in koraki:** »Večerna moč« za »TEST Živa Dolgoime Koren« → pri Dumbbell Goblet Squat »Opombe« → privzeto »Samo opomba, brez ocene« → vpis »Danes 8 ponovitev, naslednjič preveri tehniko.« → »Zapiši opozorilo« → zaključek vadbe → razpri obvestila → »TEST Živa Dolgoime Koren — Večerna moč (1)«.
+
+**Opaženo:** stran »Čakajoče na pregled« pokaže stranko, »Samo opomba, brez ocene«, ime vaje in gumb »Razreši«. Napisanega stavka ni v besedilu kartice niti v njenem DOM; pritisk na kartico ga ne odpre. IndexedDB stavek hrani v zapisu `planUpdates` kot `Note - Danes 8 ponovitev, naslednjič preveri tehniko.`.
+
+**Težava in vpliv:** trener pri pregledu nima podatka, kaj mora naslednjič upoštevati. Opombo lahko razreši, ne more pa je prebrati.
+
+**Predlog:** poleg vrste opombe prikaži celotno vneseno besedilo — opaženo na objavljeni različici `933dbc0`, 390 × 844, sl, 2026-10-02.
 
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
