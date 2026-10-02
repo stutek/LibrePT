@@ -5590,7 +5590,10 @@ exercises with the session's routine; restoring an old backup again must not dup
    other in that one widget, each with its running time; ONE list of clients from all of them; the
    "Tudi v teku" strip goes. Clients are not grouped by session; only clients who share one
    program (`groupSharedPrograms`) are joined into one tile ("John + Priya"). The session of the
-   selected client shows above its card. The footer keeps the rest timer only.
+   selected client shows above its card. The clipboard has no footer: the "Počitek 1:30" button
+   drawn there was Claude's (the app's footer held Finish alone; a rest is its own item in the
+   program, with its countdown on its card), removed in version 14. The exercise cards drawn on
+   screen 2 are placeholders, not the app's deck, and are not part of this design.
    **Corrected 2026-10-02 (version 8):** the "2 v teku" button in the app's header was Claude's,
    drawn without looking at the app, and duplicated the clipboard bar every view already shows
    at the bottom (`modules/session/sessionBar.js`). It is gone; the clipboard bar lists the running
