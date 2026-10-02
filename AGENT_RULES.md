@@ -195,6 +195,10 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
   and a locale passed to `toLocaleDateString` must be the APP's language, never the device default.
 - Support surfaces carry the commit SHA, with richer identity one tap away. Code version and
   data-schema version stay separate axes.
+- **A numbered schema is cut, changed after it shipped, or retired only on Simon's explicit
+  ruling.** Propose it first with what it costs: the stores every save writes, the backup format
+  number, which builds can still read the data and the files, and what an install sees on its first
+  boot after the update. Staging in PREVIEW needs no ruling.
 
 ## Documents and tools
 
