@@ -5590,8 +5590,9 @@ exercises with the session's routine; restoring an old backup again must not dup
    other in that one widget, each with its running time; ONE list of clients from all of them; the
    "Tudi v teku" strip goes. Clients are not grouped by session; only clients who share one
    program (`groupSharedPrograms`) are joined into one tile ("John + Priya"). The session of the
-   selected client shows above its card, and Finish names the session it finishes. Drawn so in
-   version 6.
+   selected client shows above its card. Finish is per session: a "Zaključi" button on that
+   session's line in the header, beside its time; the footer keeps the rest timer only. Drawn so in
+   version 7.
 
 **[ ] Open:** the anonymisation receipt says nothing about deleted client notes; it needs a line
 when client notes are written.
