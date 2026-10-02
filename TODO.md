@@ -4459,6 +4459,16 @@ listka. Ta izdaja je bila 541 commitov za `main`; točke so razvrščene proti `
 - **Preverjeno 2026-10-01 (`62e51aa2`):** delo brez povezave (vnos stranke in treninga, reload s servisnim delavcem ohrani IndexedDB; clean), varnostna kopija in obnova (izvoz JSON, uvoz in obnova v sveži seji zamenja podatke; clean), zapis v zgodovino po zaključku (brez zamrznitve, modal v aplikaciji, zgodovina v kartoteki stranke prikazuje opravljene serije in vaje; clean).
 - **Še ni preverjeno:** tisk, fizični telefon.
 
+### 80.164 [ ] P2 — Ocena obrazca »Urejanje profila stranke«: gumb »Shrani stranko« odpre pod robom, Esc tiho zavrže spremembe
+
+**Scenarij in koraki:** ☰ → »Imenik strank« → odpri stranko (»Maja Golob«) → »Uredi profil«.
+
+**Opaženo:** Ob odprtju obrazca je dno gumba »Shrani stranko« na 889 pikah, kar je pri 390 × 844 natanko 45 pik pod robom zaslona, pri 320 × 680 pa 209 pik pod robom. Trener mora podrsati navzdol, da doseže gumb za shranjevanje. Pritisk tipke Escape zapre modal in tiho zavrže vpisano spremembo (sprememba telefona z 040 123 456 na 040 999 888 se po Esc izgubi brez opozorila, profil ohrani staro številko).
+
+**Težava in vpliv:** Na telefonu z eno roko se trener sprašuje, kje je gumb za shranjevanje. Pri delu z namensko tipkovnico ali tipko Nazaj/Esc pa se vpisani popravki zdravstvenega stanja ali kontakta tiho izgubijo.
+
+**Predlog:** Gumba »Shrani stranko« in »Prekliči« naj bosta v fiksni vrstici na dnu modala (kot pri drugih obrazcih); Esc ali zapiranje zunaj naj opozori ali shrani skladno s pravilom o ohranjanju vnosa. Opaženo na `0e94b8f5`, sl, 390 × 844 in 320 × 680.
+
 ### 80.165 [ ] P3 — Vrstica obvestil je v nemščini in slovenščini pri 390 pikah preširoka
 
 **Opaženo 2026-10-02** v testu postavitve, ko je obhod zaprl urejanje stranke in nato odprl rutine:
@@ -4991,6 +5001,24 @@ za ekipo, kljukica prisoten/odsoten pri skupinski vadbi ter modul za preproste m
 **Presoja: čaka na Simona** — ali LibrePT ostaja orodje izključno za osebne trenerje z individualnimi
 in malimi skupinami (1–4 stranke), ali pa naj podpira tudi klubske kondicijske trenerje z ekipami
 (10–20 športnikov).
+
+### 88.18 [ ] Tekaški in vzdržljivostni trening: razdalja, tempo in tedenski volumen v kilometrih
+
+Dan 13 (2026-10-01, `main` `0e94b8f5`; tekaški trener za maraton, Ljubljana, 8 tekačev za polmaraton
+in 2 individualno): maratonski intervali 5 × 2000 m na tempo/čas, fartlek, krepitev za ahilovo tetivo,
+cone srčnega utripa ter prehrana pred maratonom.
+**11 minut v aplikaciji proti 3 za intervalni tek, ocena 1.** Aplikacija za kardio vaje ne omogoča
+vnosa razdalje (m, km) ali tempa (min/km), temveč le trajanje (min:s) ali ponovitve/kg. Trener mora
+razdaljo 2000 m pri tempu 3:58/km ročno preračunati v 7:56 min. V katalogu slovensko iskanje »tek«
+vrne 0 zadetkov (le angleški »Treadmill Run«; §80.3). Spremljanje tedenskega volumna v kilometrih (npr.
+82 km na teden), con srčnega utripa (Z1–Z5) ter prehrane/hidracije pred tekmo (carbo-loading, geli;
+ocena 0) v aplikaciji nima podpore in ostaja v zvezku ali sporočilih (§88.8).
+**Vrednost:** vsi tekaški, triatlonski in vzdržljivostni trenerji ter fitnes trenerji, ki strankam
+predpisujejo tek ali kardio (pomemben del rekreativnega trga). **Cena:** srednja do velika:
+razširitev parametrov vaje s tipom »razdalja + tempo« ter skupni tedenski seštevek kilometrov.
+**Presoja: ne izplača se za samostojno tekaško orodje**, saj tekači uporabljajo namenske aplikacije
+(Garmin Connect, Strava, TrainingPeaks). Izplača se le majhen del: možnost izbire enote »km« ali »m«
+ob času pri vajah tipa kardio ter slovenski sinonim »tek« v katalogu.
 
 ## 89. [~] Pregled 2026-09-28: isti podatek na več mestih
 
