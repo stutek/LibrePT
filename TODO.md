@@ -5601,6 +5601,9 @@ exercises with the session's routine; restoring an old backup again must not dup
    still its own button (feedback is per client). Drawn in version 9 for seven: a framed group
    that wraps onto several lines rather than one scrolling line, so no client is hidden; cost
    about 150 px of height.
+   **Corrected 2026-10-02 (version 10):** the "Odpri" button on each card was Claude's as well; the
+   whole card opens the session (`modules/sessionList/sessionCard.js`), and a button like it was
+   removed from the app once already for duplicating that. Gone.
    **[ ] Open for Simon:** whether Finish stays in the header (proposed instead: tapping a
    session's line opens that session's actions, Finish among them, named).
    **[ ] Open for Simon:** screen 3 was opened from that button and now has no way in. Proposed
