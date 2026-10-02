@@ -5579,8 +5579,12 @@ exercises with the session's routine; restoring an old backup again must not dup
 4. [ ] The code reads the new entities natively instead of through a history-shaped view where it
    still does.
 5. [ ] A session in progress is a program with status live; the live-session cache goes.
-6. [ ] Beside them: a prototype of the screen for several sessions at once (the counter on the
-   board, the clipboard bar, the timers), before step 5.
+6. [~] Beside them: a prototype of the screen for several sessions at once (the counter on the
+   board, the clipboard bar, the timers). Drawn 2026-10-02, **waits for Simon's review**:
+   https://claude.ai/artifact/6LSPmrzwmMCceoJtjLUx5g — a "2 v teku" counter in the header, each
+   running session's own time on its card, a strip "Tudi v teku … Preklopi" above the clipboard's
+   footer, and a list of running sessions with their rest countdowns. Step 5 builds the data
+   without this screen; the screen is built after the review.
 
 **[ ] Open:** the anonymisation receipt says nothing about deleted client notes; it needs a line
 when client notes are written.
