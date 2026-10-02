@@ -164,3 +164,58 @@ def test_a_participant_with_only_a_too_hard_signal_keeps_the_training(page, loca
 
     stored = page.evaluate(WHAT_IS_STORED, program_id)
     assert stored == {"status": "done", "attended": 1, "notes": 1}, stored
+
+
+PROGRAM_OF_ACTIVE_CLIENT = """async () => {
+    const live = await import(new URL('controllers/activeSessionStore.js', document.baseURI).href);
+    const session = live.getActiveSession();
+    return session.programIds[session.activeClientId];
+}"""
+
+
+def _too_hard_on_the_first_card(page):
+    page.locator(".exercise-deck-card").first.click(force=True)
+    page.wait_for_selector(".exercise-deck-card .deck-action-hard")
+    page.locator(".exercise-deck-card .deck-action-hard").first.click()
+    page.wait_for_timeout(200)
+
+
+def test_finishing_a_group_on_one_members_tab_keeps_every_member(page, local_server):
+    """Two members of one group session; the first only gets Too Hard, the second Too Easy, and the
+    trainer finishes on the second member's tab. Only the second member's training was recorded."""
+    _open_a(page, local_server)
+    page.click("#btn-start-session")
+    page.wait_for_selector("#dialog-session-start-time[open]")
+    page.click("#btn-session-start-time-keep")
+    page.wait_for_selector("#dialog-session-start-time[open]", state="detached")
+    # The seeded group arrives with sets already ticked; start from none, as a new session does.
+    page.evaluate(
+        """async () => {
+            const live = await import(new URL('controllers/activeSessionStore.js', document.baseURI).href);
+            const session = live.getActiveSession();
+            for (const clientState of Object.values(session.clientRoutines)) {
+                for (const set of Object.values(clientState.logs || {}).flat()) set.completed = false;
+            }
+        }"""
+    )
+    members = page.locator(".client-tab-participant", has_text=SESSION_A)
+
+    members.nth(0).click()
+    page.wait_for_timeout(300)
+    _too_hard_on_the_first_card(page)
+    first = page.evaluate(PROGRAM_OF_ACTIVE_CLIENT)
+    members.nth(1).click()
+    page.wait_for_timeout(300)
+    _too_easy_on_the_first_card(page)
+    second = page.evaluate(PROGRAM_OF_ACTIVE_CLIENT)
+    assert first != second
+
+    page.locator("#btn-finish-session").click()
+    if page.locator("#dialog-app-question[open]").count():
+        page.click("#app-question-confirm")
+    page.wait_for_selector("#active-session-overlay", state="hidden")
+    _flush(page)
+
+    for program_id in (first, second):
+        stored = page.evaluate(WHAT_IS_STORED, program_id)
+        assert stored == {"status": "done", "attended": 1, "notes": 1}, (program_id, stored)
