@@ -299,7 +299,7 @@ lists in that order; each point gives its evidence in one line and its priority 
 blocks, P2 costs time or misleads, P3 cosmetic). A point that is a defect is a defect; a point that
 would add, remove or reorder a field changes what the form IS, and is marked **čaka na Simona** — the
 evaluation says what is wrong and why, the ruling is his. The ledger gets a row in its third table,
-"Obrazci": | datum | obrazec (kako se odpre) | naloga | SHA | izid (the finding's number) | polja / dotiki |, the last
+"Obrazci": | čas | obrazec (kako se odpre) | naloga | SHA | izid (the finding's number) | polja / dotiki |, the last
 column the fields and taps of the shortest save that is of use. Read it first: a form evaluated on
 the same SHA is not evaluated again.
 
@@ -322,11 +322,13 @@ Simon does not see: when it is spawned, and for every gap it judges afterwards.
 The ledger is `.private/exploratory-test/scenarios.md` (gitignored, so named rather than linked: a
 link into it is dead in every clone and in CI). Scenarios have one table, days (mode 2) another,
 "Dnevi trenerja", with one row per day:
-| datum | št. | kdo je trener | dan v enem stavku | oznake | izid (the numbers it produced) |.
+| čas | št. | kdo je trener | dan v enem stavku | oznake | izid (the numbers it produced) |.
 **Read it before inventing anything**, and add a row the moment a scenario ends —
 clean runs included, because a clean run is what stops the next session repeating it. One row:
 
-| date | viewport+lang | scenario in one sentence | result |
+| time | viewport+lang | scenario in one sentence | result |
+
+Every time in the ledger and in a finding is `YYYY-MM-DD HH:MM`, read from `date` in the same step.
 
 `result` is `clean`, `§80.N` (the finding it produced), or `blocked: …`. Keep the invented names in
 the row, so a later session can tell which records in the app are its own.
@@ -351,7 +353,8 @@ written in Slovenian and its subsections have a fixed shape; follow it:
 
 **Težava in vpliv:** <what it costs the trainer at work>
 
-**Predlog:** <what would help the trainer, in their terms> — opaženo na različici `<sha>`.
+**Predlog:** <what would help the trainer, in their terms> — opaženo `<YYYY-MM-DD HH:MM>` na
+različici `<sha>`.
 ```
 
 Priority: **P1** blocks the work or loses data. **P2** costs the trainer real time or misleads them.
