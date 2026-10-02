@@ -5616,6 +5616,14 @@ exercises with the session's routine; restoring an old backup again must not dup
 **[ ] Open:** the anonymisation receipt says nothing about deleted client notes; it needs a line
 when client notes are written.
 
+**Ruled by Simon 2026-10-02, groups on the clipboard:** members of a group are NOT merged into
+one tab. Each keeps their own tab, their own copy of the program and its exercises, their own
+active card (they move through the session at different speeds) and their own notes and logged
+sets. The group records only who started from the same program; changing one member's program
+takes that member out of the group with the changed copy. Joining a group is per member ("click to
+add group members"); the screen for it belongs with step 6. Replaces the shared plan object of
+`domain/participantBinding.js`, and with it the demo story's step 39 works again unchanged.
+
 **[ ] Drive sync between an old and a new build stops until both update.** A schema-6 sync file is
 backup format 8, and a build that knows only 4 to 6 refuses it, as it refuses any newer file. Local
 stores 4 and 5 are unaffected. Blocks nothing; the trainer has to be told when the version ships.
