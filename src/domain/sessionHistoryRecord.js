@@ -18,11 +18,13 @@ import { newRecordId } from "../data/recordId.js";
 import { buildProgramSnapshot } from "./sessionItemRecord.js";
 
 // A session where nothing was performed writes no history — there is nothing to look back on, and a
-// record of it would only clutter the client's timeline. A PLANNING draft is the exception: it is
+// record of it would only clutter the client's timeline. Two exceptions. A PLANNING draft is
 // authored rather than performed, so it is always worth keeping (it is what backs the notification
-// feed's "unscheduled plans" list).
-function isWorthRecording(program, isPlanning) {
-  if (isPlanning) return true;
+// feed's "unscheduled plans" list). And a client the trainer gave a signal is recorded even with no
+// set ticked: Too Hard, pain and a form break tick none on purpose, and a signal is stored against
+// the client's program, so no record would delete the signal with the program.
+function isWorthRecording(program, isPlanning, ownFeedback) {
+  if (isPlanning || ownFeedback.length > 0) return true;
   return program.some((item) => item.type === "exercise" && item.completed);
 }
 
@@ -40,7 +42,8 @@ export function buildSessionHistoryRecord({
   // The WHOLE program as an immutable snapshot — rests, circuit grouping and prescribed-but-skipped
   // exercises included — rather than flattening to performed sets only.
   const program = buildProgramSnapshot(clientState, { isPlanning });
-  if (!isWorthRecording(program, isPlanning)) return null;
+  const ownFeedback = feedback.filter((entry) => entry.clientId === client.id);
+  if (!isWorthRecording(program, isPlanning, ownFeedback)) return null;
 
   const record = {
     id: newRecordId(),
@@ -50,7 +53,7 @@ export function buildSessionHistoryRecord({
     date: dateISO,
     duration,
     exercises: program,
-    feedback: feedback.filter((entry) => entry.clientId === client.id),
+    feedback: ownFeedback,
   };
   if (isPlanning) {
     record.isPlanning = true;

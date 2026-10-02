@@ -112,3 +112,55 @@ def test_a_started_session_is_on_the_bar_after_a_reload_on_the_board(
     page.wait_for_selector("#view-clients.active")
     page.wait_for_selector("#clipboard-bar:not(.hidden)", state="attached")
     assert page.evaluate(WHAT_IS_LOGGED)["started"] is True
+
+
+WHAT_IS_STORED = """async (programId) => {
+    const s = await import(new URL('data/stateStore.js', document.baseURI).href);
+    const state = s.getState();
+    const program = (state.clientPrograms || []).find((p) => p.id === programId);
+    return {
+        status: program ? program.status : null,
+        attended: (state.sessionAttendance || []).filter((a) => a.programId === programId).length,
+        notes: (state.exerciseNotes || []).filter((n) => n.programId === programId).length,
+    };
+}"""
+
+
+def test_a_participant_with_only_a_too_hard_signal_keeps_the_training(page, local_server):
+    """On a clipboard holding two sessions, one client logs sets and a client of the other session
+    only gets Too Hard, which deliberately ticks no set. Finishing kept the first client's training
+    and deleted the second's program as a session where nothing was performed, with no attendance
+    and with the Too Hard signal stored against it."""
+    _open_a(page, local_server)
+    page.click("#btn-start-session")
+    page.wait_for_selector("#dialog-session-start-time[open]")
+    page.click("#btn-session-start-time-keep")
+    page.wait_for_selector("#dialog-session-start-time[open]", state="detached")
+    _too_easy_on_the_first_card(page)
+
+    # A client of the other session on the merged clipboard.
+    page.locator(".client-tab-participant", has_text="Return-to-Play Rehab").first.click()
+    page.wait_for_timeout(300)
+    page.locator(".exercise-deck-card").first.click(force=True)
+    page.wait_for_selector(".exercise-deck-card .deck-action-hard")
+    page.locator(".exercise-deck-card .deck-action-hard").first.click()
+    page.wait_for_timeout(200)
+    # The second client's program in this session, by the id the session gave it.
+    program_id = page.evaluate(
+        """async () => {
+            const live = await import(new URL('controllers/activeSessionStore.js', document.baseURI).href);
+            const session = live.getActiveSession();
+            return session.programIds[session.activeClientId];
+        }"""
+    )
+    assert page.evaluate(WHAT_IS_STORED, program_id)["notes"] == 1
+
+    page.locator("#btn-finish-session").click()
+    question = page.locator("#dialog-app-question[open]")
+    if question.count():
+        page.click("#app-question-confirm")
+    page.wait_for_selector("#active-session-overlay", state="hidden")
+    _flush(page)
+
+    stored = page.evaluate(WHAT_IS_STORED, program_id)
+    assert stored == {"status": "done", "attended": 1, "notes": 1}, stored

@@ -56,6 +56,26 @@ test("a session where nothing was performed writes no record", () => {
   assert.equal(buildSessionHistoryRecord({ ...base, clientState: null }), null);
 });
 
+test("a client with a signal but no set ticked is recorded, with the signal", () => {
+  // Too Hard deliberately ticks no set. Without a record the finish deleted the client's program,
+  // and the signal, which is stored against that program, went with it.
+  const record = buildSessionHistoryRecord({
+    ...base,
+    clientState: planWith(false),
+    feedback: [{ id: "f1", clientId: "c1", exerciseName: "Bench Press", tag: "Too Hard - Reduce Load" }],
+  });
+  assert.notEqual(record, null);
+  assert.deepEqual(record.feedback.map((entry) => entry.id), ["f1"]);
+
+  // Another participant's signal does not make this client's empty session worth a record.
+  const other = buildSessionHistoryRecord({
+    ...base,
+    clientState: planWith(false),
+    feedback: [{ id: "f2", clientId: "c2", exerciseName: "Bench Press", tag: "Too Hard - Reduce Load" }],
+  });
+  assert.equal(other, null);
+});
+
 test("a planning draft is recorded even though nothing was performed", () => {
   const draft = buildSessionHistoryRecord({
     ...base,
