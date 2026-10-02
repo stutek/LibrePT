@@ -5597,6 +5597,12 @@ exercises with the session's routine; restoring an old backup again must not dup
    drawn without looking at the app, and duplicated the clipboard bar every view already shows
    at the bottom (`modules/session/sessionBar.js`). It is gone; the clipboard bar lists the running
    sessions one under the other, each with its time, and opens the clipboard.
+   **Ruled 2026-10-02:** clients who share a program stay joined, and each one in the group is
+   still its own button (feedback is per client). Drawn in version 9 for seven: a framed group
+   that wraps onto several lines rather than one scrolling line, so no client is hidden; cost
+   about 150 px of height.
+   **[ ] Open for Simon:** whether Finish stays in the header (proposed instead: tapping a
+   session's line opens that session's actions, Finish among them, named).
    **[ ] Open for Simon:** screen 3 was opened from that button and now has no way in. Proposed
    (Claude): drop it, because screen 2's header already shows every running session; its one extra
    — each session's rest countdown — goes on that session's line in the header.
