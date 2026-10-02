@@ -5538,6 +5538,23 @@ what a trainer sees, so they are Simon's:
    get one — the trening they belonged to was never written. Do old records become single-participant
    trenings, or does history keep two shapes with a migration boundary and a date?
 
+**Ruled by Simon 2026-10-02:**
+
+1. When a client cancels, their načrt moves to *unscheduled* or to a replacement date. When the
+   trainer cancels, every affected načrt moves the same way. The slot itself is marked `cancelled`.
+2. Attendance is its own entity, *prisotnost*, with a reference to the client, the session and the
+   program. It matters for prepaid packages.
+3. The načrt (program) is an entity separate from the slot (termin, seja), relation 1:[0,1].
+4. Open — to be discussed and decided together.
+
+**[ ] Not yet clear, asked 2026-10-02:** the direction of 1:[0,1] in a group; where each client's
+performed sets are written when several share one program; whether *prisotnost* replaces the
+`bindings` collection declared in `SCHEMA_PREVIEW`.
+
+**[ ] After the implementation (Simon, 2026-10-02):** start agy for at least four hours of
+exploratory testing by `.agents/skills/exploratory-test/SKILL.md`, against the dev server, because
+the published app has the new schema only after a push.
+
 ### 95.3 [ ] Every entity stored today, read out of the schema rather than recalled
 
 Asked by Simon 2026-09-30, before normalising anything. Read from `data/recordSchemas.js`, which is
