@@ -5547,9 +5547,20 @@ what a trainer sees, so they are Simon's:
 3. The načrt (program) is an entity separate from the slot (termin, seja), relation 1:[0,1].
 4. Open — to be discussed and decided together.
 
-**[ ] Not yet clear, asked 2026-10-02:** the direction of 1:[0,1] in a group; where each client's
-performed sets are written when several share one program; whether *prisotnost* replaces the
-`bindings` collection declared in `SCHEMA_PREVIEW`.
+**Ruled by Simon 2026-10-02, second round:**
+
+- One program belongs to zero or one session; one session has several programs.
+- Every client has their own copy of a program. A group is a mapping entity, as a circuit groups
+  exercises: it links client ids into one group per session.
+- Feedback is always per client, its own entity, linked to one exercise of the program.
+- `history` goes. Programs and exercises stay, and they are how the app goes back in time.
+- Attendance (*prisotnost*) is its own entity and is what consumption of a package is counted from.
+- On migration, old `history` records are made consistent with the new schema.
+- Schema 4 does not track groups.
+
+**[ ] Open, asked 2026-10-02:** "remove `bindings`" against "a mapping entity per session", which is
+what `bindings` is; whether feedback is the `notes` entity already in `SCHEMA_PREVIEW`; whether
+schema 4 (and 5) stay live, since an old build reads `history`; question 4.
 
 **[ ] After the implementation (Simon, 2026-10-02):** start agy for at least four hours of
 exploratory testing by `.agents/skills/exploratory-test/SKILL.md`, against the dev server, because
