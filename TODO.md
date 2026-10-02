@@ -4489,6 +4489,16 @@ od 844 pik in na 640 od 680 pik. Test `test_escape_keeps_an_edit_of_a_client_on_
 del. Ponoviti z orodjem, s katerim je bilo opaženo, in povedati, kako sta bili izmerjeni tipka in
 višina.
 
+### 80.166 [ ] P2 — Spodnja vrstica načrta po osvežitvi javi »Invalid time value«
+
+**Scenarij in koraki:** profil »TEST Živa Dolgoime Koren« → »Načrtuj program« → »Hrib priprava«, »jutri«, 20:30–21:30 → »Odpri v beležki« → iz kataloga Standing Calf Raise in Wall Sit → kljukica za konec urejanja → »Zapri trening in se vrni na začetek« → osvežitev → spodnja vrstica »Hrib priprava / Načrtovanje«.
+
+**Opaženo:** načrt se ne odpre. Predal pokaže »Nekaj je šlo narobe / Invalid time value«; konzola `Uncaught RangeError: Invalid time value`. Obvestilo »Hrib priprava · TEST Živa Dolgoime Koren · 2026-10-02« isti načrt odpre z obema vajama. Branje IndexedDB potrdi obe vaji v shranjenem zapisu; izgube podatkov ni bilo.
+
+**Težava in vpliv:** najkrajša pot nazaj do pripravljene vadbe odpove po ponovnem odprtju aplikacije. Trener mora odkriti drugo pot skozi obvestila; angleška napaka ne pove, kako nadaljevati.
+
+**Predlog:** spodnja vrstica naj odpre isti shranjeni načrt kot obvestilo tudi po osvežitvi — opaženo na objavljeni različici `933dbc0`, 390 × 844, sl, 2026-10-02. Ločeno od že opisane odsotnosti termina v §80.5.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
