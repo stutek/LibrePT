@@ -5630,6 +5630,21 @@ for the whole group is not one edit. **Re-check when** trainers change a group's
 everyone mid-session often enough that "change one, group again" costs them; then one shared plan
 with per-member performance (schema 7) is worth it.
 
+**[ ] Ruled by Simon 2026-10-02: retire schemas 4 and 5; every trainer goes to 6.** Nothing is
+pushed yet, so the published app goes from 5 straight to 6 in one release. What it takes:
+1. **The first boot fills 6 from the newest older store the phone holds** (5, else 4, else P), once
+   and read-only. Without it a phone whose data is in store 5 opens the new build EMPTY: a new store
+   is filled from the live schema below it, and with 4 and 5 retired there is none.
+   `tests/e2e/test_device_database_corpus.py` (a schema-4 phone) is the proof.
+2. App versions 2026-09 and 2026-10 go; 2026-11 is the only one, and the "Verzija aplikacije" menu
+   item is hidden while there is only one to choose.
+3. Saves write 6 and PREVIEW only; `schemaShapes.js` keeps converting old shapes on the way in
+   (backups of formats 1 to 6, sync files from older builds, the old stores at first boot).
+4. Old stores 4 and 5 stay in the phone's database, unread, as a safety net; deleting them is a
+   later decision.
+5. A phone that already ran the new build and then went back to an old one would lose what the old
+   one wrote. Without a rollback that cannot happen.
+
 **[ ] Drive sync between an old and a new build stops until both update.** A schema-6 sync file is
 backup format 8, and a build that knows only 4 to 6 refuses it, as it refuses any newer file. Local
 stores 4 and 5 are unaffected. Blocks nothing; the trainer has to be told when the version ships.
