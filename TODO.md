@@ -5600,7 +5600,17 @@ exercises with the session's routine; restoring an old backup again must not dup
    `data/trainingRecords.js` (`a2aa577`). App version 2026-11 is the default; backup formats 7 and 8.
 4. [ ] The code reads the new entities natively instead of through a history-shaped view where it
    still does.
-5. [ ] A session in progress is a program with status live; the live-session cache goes.
+5. [x] A session in progress is a program with status live; the live-session cache goes
+   (`403715f9`). Every change writes each participant's program, planned while staged and live
+   from Start; Finish turns the same program into the done one with attendance. Leaving a session
+   keeps it, so a second session no longer overwrites the first (§92.6, §95.1). The old storage key
+   `librept_active_session` is read once, converted and removed. Step 5b in the same commit: group
+   members keep their own tab and copy of the plan, as ruled below.
+   **[ ] Known losses on reload, left as they are:** a circuit's current round restarts at 1 (the
+   ticked sets stay); a plan for no session reopens with its first participant only.
+   **[ ] Changed behaviour, for Simon to confirm or reverse:** a started session no longer
+   expires 2 hours after its slot; grouping copies the plan shown on screen ("Vsi na ta načrt"),
+   not the first participant's plan.
 6. [~] Beside them: a prototype of the screen for several sessions at once (the counter on the
    board, the clipboard bar, the timers). Drawn 2026-10-02, **waits for Simon's review**:
    https://claude.ai/artifact/6LSPmrzwmMCceoJtjLUx5g — a "2 v teku" counter in the header, each
@@ -5635,8 +5645,8 @@ exercises with the session's routine; restoring an old backup again must not dup
    **Ruled 2026-10-02 (version 12):** the message area is the same on the board and pulled up, so
    screen 3 (a separate list of running sessions) is redundant and gone.
 
-**[ ] Open:** the anonymisation receipt says nothing about deleted client notes; it needs a line
-when client notes are written.
+**[x] Closed in `403715f9`:** the anonymisation receipt said nothing about deleted client notes,
+and since `a2aa577` it read 0; it now counts the client's programs and notes.
 
 **Ruled by Simon 2026-10-02, groups on the clipboard:** members of a group are NOT merged into
 one tab. Each keeps their own tab, their own copy of the program and its exercises, their own
@@ -5652,7 +5662,8 @@ for the whole group is not one edit. **Re-check when** trainers change a group's
 everyone mid-session often enough that "change one, group again" costs them; then one shared plan
 with per-member performance (schema 7) is worth it.
 
-**[ ] Ruled by Simon 2026-10-02: retire schemas 4 and 5; every trainer goes to 6.** Nothing is
+**[x] Ruled by Simon 2026-10-02: retire schemas 4 and 5; every trainer goes to 6** — done in
+`403715f9`, points 1 to 4 below as written. Nothing is
 pushed yet, so the published app goes from 5 straight to 6 in one release. What it takes:
 1. **The first boot fills 6 from the newest older store the phone holds** (5, else 4, else P), once
    and read-only. Without it a phone whose data is in store 5 opens the new build EMPTY: a new store
@@ -5676,7 +5687,7 @@ never prints the trainer's remark under "Programme changes" (it prints a field n
 AI-safe summary's "Recent sessions" takes the first ten records in storage order, so with more than
 ten it lists the oldest.
 
-**[ ] After the implementation (Simon, 2026-10-02):** start agy for at least four hours of
+**[~] After the implementation (Simon, 2026-10-02):** start agy for at least four hours of
 exploratory testing by `.agents/skills/exploratory-test/SKILL.md`, against the dev server, because
 the published app has the new schema only after a push.
 
