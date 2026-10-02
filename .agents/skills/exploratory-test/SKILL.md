@@ -328,7 +328,8 @@ clean runs included, because a clean run is what stops the next session repeatin
 
 | time | viewport+lang | scenario in one sentence | result |
 
-Every time in the ledger and in a finding is `YYYY-MM-DD HH:MM`, read from `date` in the same step.
+Every time in the ledger and in a finding is `YYYY-MM-DD HH:MM:SS.mmm`, from
+`date '+%F %T.%N' | cut -c1-23` in the same step (this machine's `date` ignores `%3N`).
 
 `result` is `clean`, `§80.N` (the finding it produced), or `blocked: …`. Keep the invented names in
 the row, so a later session can tell which records in the app are its own.
@@ -353,7 +354,7 @@ written in Slovenian and its subsections have a fixed shape; follow it:
 
 **Težava in vpliv:** <what it costs the trainer at work>
 
-**Predlog:** <what would help the trainer, in their terms> — opaženo `<YYYY-MM-DD HH:MM>` na
+**Predlog:** <what would help the trainer, in their terms> — opaženo `<YYYY-MM-DD HH:MM:SS.mmm>` na
 različici `<sha>`.
 ```
 
