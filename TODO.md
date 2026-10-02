@@ -4520,15 +4520,9 @@ višina.
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80168-x-p1--ob-zaključku-dveh-sočasnih-treningov-se-zabeleži-le-prvi-program-druge-stranke-pa-se-izgubi--popravljeno-2026-10-02).
 
-### 80.169 [ ] P1 — Zaključek skupinskega treninga zabeleži program in prisotnost le za aktivnega udeleženca, programi ostalih članov skupine pa se izgubijo
+### 80.169 [x] P1 — Zaključek skupinskega treninga zabeleži program in prisotnost le za aktivnega udeleženca, programi ostalih članov skupine pa se izgubijo — popravljeno 2026-10-02
 
-**Scenarij in koraki:** ustvari skupinski termin z dvema strankama (»Skupina Moč«: Matej Golob in Sonja Zupan) → Mateju dodaj vajo Barbell Row (3×10) → preklopi na zavihek Sonja Zupan in ji uredi lasten načrt z vajo Dumbbell Goblet Squat (3×10×15 kg) → začni trening (status `live` za oba v `schema6`) → zabeleži signal za oba → na odprtem Sonjinem zavihku pritisni »Zaključi vadbo« → potrdi »Zaključi zdaj« → odpri kartoteko Mateja Goloba.
-
-**Opaženo:** na plošči je termin »Skupina Moč« označen kot »Zaključeno 00:00«. V kartoteki Sonje Zupan je skupinska vadba pravilno zabeležena pod »ZGODOVINA ZABELEŽENIH VADB« z vajo Dumbbell Goblet Squat. V kartoteki Mateja Goloba pa skupinske vadbe sploh ni (v zgodovini ostane le njegov prejšnji individualni trening). Poizvedba po IndexedDB (`schema6`) potrdi, da sta bila za ta termin ustvarjena dva zapisa `clientPrograms` s statusom `live`, ob zaključku pa je le Sonjin program prešel v status `done` in prejel zapis `sessionAttendance` (`attended`); Matejev živi program za to skupinsko vadbo je bil izbrisan, zapis o prisotnosti zanj pa ni bil nikoli ustvarjen.
-
-**Težava in vpliv:** v vsakem skupinskem treningu (2 ali več članov) zaključek vadbe nepovratno izbriše program vseh članov razen tistega, katerega zavihek je imel trener v trenutku zaključka odprt na zaslonu. Kartoteke ostalih udeležencev ostanejo brez vadbe in brez zabeležene prisotnosti.
-
-**Predlog:** funkcija za zaključek skupinskega treninga mora prehoditi vse udeležence termina, za vsakega pretvoriti program iz `live` v `done` ter ustvariti zapis `sessionAttendance` za vsakega prisotnega člana — opaženo na različici `403715f9`, 390 × 844, sl, 2026-10-02.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80169-x-p1--zaključek-skupinskega-treninga-zabeleži-program-in-prisotnost-le-za-aktivnega-udeleženca-programi-ostalih-članov-skupine-pa-se-izgubijo--popravljeno-2026-10-02).
 
 ### 80.170 [ ] P1 — Obvestilo o nenačrtovanih programih odpre neveljaven URL z ID-jem programa namesto termina in ostane na seznamu
 

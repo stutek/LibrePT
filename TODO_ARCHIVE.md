@@ -9628,6 +9628,18 @@ iz obstoječega profila z vpisano opombo. Opaženo na objavljeni `6c8b556`, sl,
 
 **Popravljeno 2026-10-02 22:13** (`82617180`). Vzrok ni bil v vzporednih treningih. Sonja je imela samo »Pretežko«, ki namenoma ne odkljuka nobene serije, zato je zaključek njen trening štel za trening brez opravljenega dela in program izbrisal; signal je od sheme 6 shranjen ob programu in je izginil z njim. Ista stranka s »Prelahko« je trening obdržala. Zdaj stranka s signalom dobi zapis tudi brez odkljukane serije; stranka brez serije in brez signala ostane brez zapisa kot prej. Testa `test_a_participant_with_only_a_too_hard_signal_keeps_the_training` (stranka drugega treninga na združeni podlogi) in »a client with a signal but no set ticked is recorded, with the signal« v `tests/unit_js/domain/sessionHistoryRecord.test.mjs`.
 
+### 80.169 [x] P1 — Zaključek skupinskega treninga zabeleži program in prisotnost le za aktivnega udeleženca, programi ostalih članov skupine pa se izgubijo — popravljeno 2026-10-02
+
+**Scenarij in koraki:** ustvari skupinski termin z dvema strankama (»Skupina Moč«: Matej Golob in Sonja Zupan) → Mateju dodaj vajo Barbell Row (3×10) → preklopi na zavihek Sonja Zupan in ji uredi lasten načrt z vajo Dumbbell Goblet Squat (3×10×15 kg) → začni trening (status `live` za oba v `schema6`) → zabeleži signal za oba → na odprtem Sonjinem zavihku pritisni »Zaključi vadbo« → potrdi »Zaključi zdaj« → odpri kartoteko Mateja Goloba.
+
+**Opaženo:** na plošči je termin »Skupina Moč« označen kot »Zaključeno 00:00«. V kartoteki Sonje Zupan je skupinska vadba pravilno zabeležena pod »ZGODOVINA ZABELEŽENIH VADB« z vajo Dumbbell Goblet Squat. V kartoteki Mateja Goloba pa skupinske vadbe sploh ni (v zgodovini ostane le njegov prejšnji individualni trening). Poizvedba po IndexedDB (`schema6`) potrdi, da sta bila za ta termin ustvarjena dva zapisa `clientPrograms` s statusom `live`, ob zaključku pa je le Sonjin program prešel v status `done` in prejel zapis `sessionAttendance` (`attended`); Matejev živi program za to skupinsko vadbo je bil izbrisan, zapis o prisotnosti zanj pa ni bil nikoli ustvarjen.
+
+**Težava in vpliv:** v vsakem skupinskem treningu (2 ali več članov) zaključek vadbe nepovratno izbriše program vseh članov razen tistega, katerega zavihek je imel trener v trenutku zaključka odprt na zaslonu. Kartoteke ostalih udeležencev ostanejo brez vadbe in brez zabeležene prisotnosti.
+
+**Predlog:** funkcija za zaključek skupinskega treninga mora prehoditi vse udeležence termina, za vsakega pretvoriti program iz `live` v `done` ter ustvariti zapis `sessionAttendance` za vsakega prisotnega člana — opaženo na različici `403715f9`, 390 × 844, sl, 2026-10-02.
+
+**Popravljeno 2026-10-02 22:35** z `82617180` (popravek §80.168), test `b188bd95`. Zaključek že obdela vse udeležence; odprti zavihek ni pomemben. Matejev program je izginil, ker je imel samo signal, ki ne odkljuka serije, in je veljal za udeleženca brez opravljenega dela. Kateri signal je dal agy, ni zapisano, zato je vzrok sklepan: test `test_finishing_a_group_on_one_members_tab_keeps_every_member` (prvi član samo »Pretežko«, drugi »Prelahko«, zaključek na zavihku drugega) na `403715f9` pade natanko tako, kot je opisano zgoraj, od `82617180` pa uspe. Če se izguba ponovi pri članu z odkljukano serijo, je to nova ugotovitev.
+
 ## 99.1 [x] Padli test ni bil okolje, ampak iskanje niza v naključnem id-ju — popravljeno 2026-10-01
 
 Po potisku 212 commitov je 2026-10-01 padel tek »Build, Verify and Deploy«, opravilo »Stage 1 ·
