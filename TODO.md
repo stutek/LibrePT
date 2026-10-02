@@ -5593,6 +5593,13 @@ exercises with the session's routine; restoring an old backup again must not dup
    selected client shows above its card. Finish is per session: a "Zaključi" button on that
    session's line in the header, beside its time; the footer keeps the rest timer only. Drawn so in
    version 7.
+   **Corrected 2026-10-02 (version 8):** the "2 v teku" button in the app's header was Claude's,
+   drawn without looking at the app, and duplicated the clipboard bar every view already shows
+   at the bottom (`modules/session/sessionBar.js`). It is gone; the clipboard bar lists the running
+   sessions one under the other, each with its time, and opens the clipboard.
+   **[ ] Open for Simon:** screen 3 was opened from that button and now has no way in. Proposed
+   (Claude): drop it, because screen 2's header already shows every running session; its one extra
+   — each session's rest countdown — goes on that session's line in the header.
 
 **[ ] Open:** the anonymisation receipt says nothing about deleted client notes; it needs a line
 when client notes are written.
