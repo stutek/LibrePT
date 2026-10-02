@@ -5604,7 +5604,11 @@ exercises with the session's routine; restoring an old backup again must not dup
    **Corrected 2026-10-02 (version 10):** the "Odpri" button on each card was Claude's as well; the
    whole card opens the session (`modules/sessionList/sessionCard.js`), and a button like it was
    removed from the app once already for duplicating that. Gone.
-   **[ ] Open for Simon:** whether Finish stays in the header (proposed instead: tapping a
+   **Ruled 2026-10-02 (version 11):** on the board the running sessions are part of the message area
+   at the bottom (`modules/common/notificationArea.js`), not a component of their own: one line
+   each with its time, a tap on the line opens that session, and each line has its own Zaključi.
+   **[ ] Open for Simon:** whether Finish then leaves the clipboard's header (proposed: yes, the
+   clipboard is where the thumb taps sets fast); and whether Finish stays in the header (proposed instead: tapping a
    session's line opens that session's actions, Finish among them, named).
    **[ ] Open for Simon:** screen 3 was opened from that button and now has no way in. Proposed
    (Claude): drop it, because screen 2's header already shows every running session; its one extra
