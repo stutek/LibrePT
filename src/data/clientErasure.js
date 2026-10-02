@@ -194,10 +194,33 @@ function eraseHistoryRecord(record, name, pseudonym, marker, counters) {
       })
     : record.feedback;
 
+  return { ...eraseProgramProse(record, name, marker, counters), clientName: pseudonym, feedback };
+}
+
+// The prose of one client's program, a history record or a `clientPrograms` row alike: its title, and
+// the note the trainer can type on every set.
+function eraseProgramProse(record, name, marker, counters) {
   const title = scrubName(record.title, name, marker);
   if (title.hit) counters.scrubbedTextFields += 1;
+  const exercises = Array.isArray(record.exercises)
+    ? record.exercises.map((item) => {
+        if (!Array.isArray(item?.sets)) return item;
+        const sets = item.sets.map((set) => {
+          const note = scrubName(set?.note, name, marker);
+          if (!note.hit) return set;
+          counters.scrubbedTextFields += 1;
+          return { ...set, note: note.text };
+        });
+        return { ...item, sets };
+      })
+    : record.exercises;
+  return { ...record, title: title.text, exercises };
+}
 
-  return { ...record, clientName: pseudonym, title: title.text, feedback };
+// One collection of the new session model, rewritten only where the install holds it: an absent
+// collection stays absent, or every start would count the sweep as a change and save.
+function sweptCollection(state, key, rewrite) {
+  return Array.isArray(state?.[key]) ? { [key]: rewrite(state[key]) } : {};
 }
 
 /**
@@ -312,8 +335,31 @@ export function eraseClientInState(state, clientId, { requestedOn = "", now = ne
     sweptSeries(series, { clientId, name, marker, state, client, counters }),
   );
 
+  // The new session model (recordSchemas.js, SCHEMA_PREVIEW). A program and an exercise note
+  // describe the work and stay, with the name taken out of their prose; a client note describes the
+  // person, as `clients.notes` does, and goes with them.
+  const sessionModel = {
+    ...sweptCollection(state, "clientPrograms", (rows) =>
+      rows.map((row) =>
+        row.clientId === clientId ? eraseProgramProse(row, name, marker, counters) : row,
+      ),
+    ),
+    ...sweptCollection(state, "exerciseNotes", (rows) =>
+      rows.map((row) => {
+        if (row.clientId !== clientId) return row;
+        const text = scrubName(row.text, name, marker);
+        if (!text.hit) return row;
+        counters.scrubbedTextFields += 1;
+        return { ...row, text: text.text };
+      }),
+    ),
+    ...sweptCollection(state, "clientNotes", (rows) =>
+      rows.filter((row) => row.clientId !== clientId),
+    ),
+  };
+
   return {
-    state: { ...state, clients, history, planUpdates, sessions, sessionSeries },
+    state: { ...state, clients, history, planUpdates, sessions, sessionSeries, ...sessionModel },
     summary: {
       clientId,
       pseudonym,
@@ -332,7 +378,30 @@ export function eraseClientInState(state, clientId, { requestedOn = "", now = ne
 
 // The collections an erasure rewrites. Compared after a repeat sweep, so the start saves only when
 // the sweep changed something: every save counts as a change not yet backed up.
-const SWEPT_COLLECTIONS = ["clients", "history", "planUpdates", "sessions", "sessionSeries"];
+export const SWEPT_COLLECTIONS = [
+  "clients",
+  "history",
+  "planUpdates",
+  "sessions",
+  "sessionSeries",
+  "clientPrograms",
+  "exerciseNotes",
+  "clientNotes",
+];
+
+// Every other collection a live schema declares, and why an erasure leaves it alone.
+// clientErasure.test.mjs fails the build on a collection in neither list, so a new collection that
+// names a client cannot be missed by an erasure without somebody writing down why.
+export const ERASURE_SKIPS = {
+  invites: "two ids and the facts about the message; no name, no prose",
+  sessionAttendance: "ids, a status and a yes or no; no name, no prose",
+  groupSharedPrograms: "a session id and client ids; an erased client stays as an opaque id",
+  notifications: "app messages from translation keys; no client",
+  exercises: "the trainer's catalogue; `source` names who shared it, not a client",
+  routines: "templates with no date and no participants",
+  circuits: "templates with no date and no participants",
+  previewProbe: "written by tests only",
+};
 
 /**
  * Run every erasure again (ruled 2026-09-18 by Simon: after every migration and at every

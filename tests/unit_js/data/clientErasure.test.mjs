@@ -11,6 +11,8 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import {
+  ERASURE_SKIPS,
+  SWEPT_COLLECTIONS,
   clientDisambiguator,
   clientsSharingName,
   eraseClientInState,
@@ -18,6 +20,7 @@ import {
   isErased,
   resweepErasedClients,
 } from "../../../src/data/clientErasure.js";
+import { LIVE_SCHEMAS } from "../../../src/data/recordSchemas.js";
 
 function stateWithTwoJanes() {
   return {
@@ -240,6 +243,80 @@ test("prose inside the client's OWN records is rewritten even with a namesake pr
 
   assert.equal(record.feedback[0].note, "[c-jane-a] flew through this");
   assert.equal(record.title, "[c-jane-a] — deload week");
+});
+
+test("the note typed on a set is rewritten too", () => {
+  const before = stateWithTwoJanes();
+  before.history[0].exercises = [
+    { id: "i1", type: "exercise", name: "Squat", sets: [{ reps: 5, note: "Jane Doe grinded it" }] },
+  ];
+  const { state, summary } = eraseClientInState(before, "c-jane-a", {});
+
+  const set = state.history.find((entry) => entry.id === "h1").exercises[0].sets[0];
+  assert.equal(set.note, "[c-jane-a] grinded it");
+  assert.equal(set.reps, 5, "what was lifted stays");
+  assert.ok(summary.scrubbedTextFields >= 1);
+});
+
+test("the new session model: the work stays without the name, a note about the person goes", () => {
+  const before = {
+    ...stateWithTwoJanes(),
+    clientPrograms: [
+      {
+        id: "pr1",
+        clientId: "c-jane-a",
+        status: "done",
+        title: "Jane Doe — test day",
+        exercises: [{ id: "i1", name: "Squat", sets: [{ reps: 3, note: "Jane Doe PR" }] }],
+      },
+      { id: "pr2", clientId: "c-jane-b", status: "done", title: "Jane Doe — test day", exercises: [] },
+    ],
+    exerciseNotes: [
+      { id: "en1", clientId: "c-jane-a", text: "Jane Doe needs a lower box" },
+      { id: "en2", clientId: "c-jane-b", text: "Jane Doe needs a lower box" },
+    ],
+    clientNotes: [
+      { id: "cn1", clientId: "c-jane-a", text: "Works night shifts" },
+      { id: "cn2", clientId: "c-marko", text: "Works night shifts" },
+    ],
+  };
+  const { state } = eraseClientInState(before, "c-jane-a", {});
+
+  const program = state.clientPrograms.find((row) => row.id === "pr1");
+  assert.equal(program.title, "[c-jane-a] — test day");
+  assert.equal(program.exercises[0].sets[0].note, "[c-jane-a] PR");
+  assert.equal(program.exercises[0].sets[0].reps, 3);
+  assert.equal(state.exerciseNotes.find((row) => row.id === "en1").text, "[c-jane-a] needs a lower box");
+  assert.deepEqual(
+    state.clientNotes.map((row) => row.id),
+    ["cn2"],
+    "a note about the person goes with them, as `clients.notes` does",
+  );
+  // The other Jane's records are hers, and she did not ask to be forgotten.
+  assert.equal(state.clientPrograms.find((row) => row.id === "pr2").title, "Jane Doe — test day");
+  assert.equal(state.exerciseNotes.find((row) => row.id === "en2").text, "Jane Doe needs a lower box");
+});
+
+test("an install without the new collections is not given empty ones", () => {
+  const { state } = eraseClientInState(stateWithTwoJanes(), "c-jane-a", {});
+  for (const key of ["clientPrograms", "exerciseNotes", "clientNotes"]) {
+    assert.equal(key in state, false, `${key} appeared`);
+  }
+});
+
+test("every collection a live schema declares is either swept by an erasure or skipped with a reason", () => {
+  const declared = new Set(Object.values(LIVE_SCHEMAS).flatMap((schema) => Object.keys(schema)));
+  const skipped = Object.keys(ERASURE_SKIPS);
+  for (const collection of declared) {
+    const swept = SWEPT_COLLECTIONS.includes(collection);
+    assert.ok(
+      swept !== skipped.includes(collection),
+      `${collection}: add it to SWEPT_COLLECTIONS or to ERASURE_SKIPS with the reason`,
+    );
+  }
+  for (const collection of [...SWEPT_COLLECTIONS, ...skipped]) {
+    assert.ok(declared.has(collection), `${collection} is listed but no live schema declares it`);
+  }
 });
 
 test("the disambiguator always says something, and prefers the trainer's own alias", () => {
