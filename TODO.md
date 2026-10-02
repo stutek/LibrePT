@@ -5610,9 +5610,8 @@ exercises with the session's routine; restoring an old backup again must not dup
    **[ ] Open for Simon:** whether Finish then leaves the clipboard's header (proposed: yes, the
    clipboard is where the thumb taps sets fast); and whether Finish stays in the header (proposed instead: tapping a
    session's line opens that session's actions, Finish among them, named).
-   **[ ] Open for Simon:** screen 3 was opened from that button and now has no way in. Proposed
-   (Claude): drop it, because screen 2's header already shows every running session; its one extra
-   — each session's rest countdown — goes on that session's line in the header.
+   **Ruled 2026-10-02 (version 12):** the message area is the same on the board and pulled up, so
+   screen 3 (a separate list of running sessions) is redundant and gone.
 
 **[ ] Open:** the anonymisation receipt says nothing about deleted client notes; it needs a line
 when client notes are written.
