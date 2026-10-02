@@ -30,13 +30,18 @@ import {
   withTransaction,
 } from "./indexedDb.js";
 import { PREVIEW_VERSION } from "./migrationSteps.js";
-import { COLLECTIONS, projectCollection, toDomainObject } from "./recordProjections.js";
+import {
+  collectionsForSchema,
+  groupRecordsByCollection,
+  projectCollection,
+} from "./recordProjections.js";
 import {
   DEFAULT_READ_SCHEMA,
   LIVE_SCHEMAS,
   STABLE_SCHEMA,
   narrowToSchema,
 } from "./recordSchemas.js";
+import { stateForSchema, toDomainState } from "./schemaShapes.js";
 
 // localStorage, not the database: boot has to know WHICH store to read before it can read anything,
 // so this cannot live in the thing it selects.
@@ -111,17 +116,19 @@ async function backfillSchema(db, schema, sourceSchema) {
   const sourceStore = storeNameForSchema(sourceSchema);
   const targetStore = storeNameForSchema(schema);
   const records = await getAll(db.transaction([sourceStore], "readonly").objectStore(sourceStore));
+  // Into memory's shape and out in the target's, exactly as a read and a save do (schemaShapes.js):
+  // schema 6 filled from schema 5 turns `history` into programs, and the reverse builds it back.
+  // Routed through the same functions so the write path and the backfill can never disagree about
+  // what a record of this schema looks like.
+  const shaped = stateForSchema(toDomainState(groupRecordsByCollection(records)), schema);
 
   await withTransaction(db, [targetStore, META_STORE], "readwrite", ({ store }) => {
-    for (const record of records) {
-      // Through the projection path rather than a row copy: this is where a real schema change's
-      // transform will live, and routing it here now means the write path and the backfill can
-      // never disagree about what a record of this schema looks like.
-      const { collection } = record;
-      if (!COLLECTIONS.includes(collection)) continue;
-      store(targetStore).put(
-        narrowToSchema(projectCollection(collection, toDomainObject(record)), collection, schema),
-      );
+    for (const collection of collectionsForSchema(LIVE_SCHEMAS[schema])) {
+      for (const record of shaped[collection] || []) {
+        store(targetStore).put(
+          narrowToSchema(projectCollection(collection, record), collection, schema),
+        );
+      }
     }
     store(META_STORE).put({ key: backfilledKey(schema), value: true });
   });
@@ -153,12 +160,28 @@ export async function ensureLiveSchemasBackfilled(db) {
   }
 }
 
-// The build that last wrote the preview store. Absent means unknown, which counts as changed.
+// The build that last wrote the preview store, with the preview SHAPE it was written in. Absent
+// means unknown, which counts as changed.
 const PREVIEW_BUILD_KEY = "previewBuild";
 
+// The preview shape as a short string: its collections and their fields. The build alone is not
+// enough, because every build served by the dev server is stamped "dev": schema 6 changed the
+// preview shape under one stamp, and a store full of `history` records was kept and read as current.
+function previewShapeStamp() {
+  const shape = Object.entries(LIVE_SCHEMAS[PREVIEW_VERSION])
+    .map(([collection, fields]) => `${collection}:${Object.keys(fields).sort().join(",")}`)
+    .sort()
+    .join(";");
+  let hash = 5381;
+  for (let index = 0; index < shape.length; index++) {
+    hash = (hash * 33) ^ shape.charCodeAt(index);
+  }
+  return (hash >>> 0).toString(36);
+}
+
 /**
- * Throw the PREVIEW store away when the build has changed, and refill it only for an install that
- * reads it.
+ * Throw the PREVIEW store away when the build or the preview shape has changed, and refill it only
+ * for an install that reads it.
  *
  * Ruled 2026-09-17/18 (Simon): PREVIEW is for CI and for previewing an upcoming version,
  * never live for a client, and it is emptied when the build number changes. Within one build it is
@@ -185,7 +208,8 @@ export async function refreshPreviewStoreIfBuildChanged(db, currentBuildSha) {
     PREVIEW_BUILD_KEY,
   );
   const storedBuild = entry?.value ?? null;
-  const stale = !(storedBuild && currentBuildSha && storedBuild === currentBuildSha);
+  const currentStamp = currentBuildSha ? `${currentBuildSha}|${previewShapeStamp()}` : null;
+  const stale = !(storedBuild && currentStamp && storedBuild === currentStamp);
 
   if (stale) {
     // The rows, the "backfilled" marker and the build stamp go in ONE transaction: a kill between
@@ -194,7 +218,7 @@ export async function refreshPreviewStoreIfBuildChanged(db, currentBuildSha) {
     await withTransaction(db, [previewStore, META_STORE], "readwrite", ({ store }) => {
       store(previewStore).clear();
       store(META_STORE).delete(backfilledKey(PREVIEW_VERSION));
-      store(META_STORE).put({ key: PREVIEW_BUILD_KEY, value: currentBuildSha ?? null });
+      store(META_STORE).put({ key: PREVIEW_BUILD_KEY, value: currentStamp });
     });
   }
 

@@ -17,6 +17,7 @@
 
 import { stateHasData } from "../../data/stateStore.js";
 import { readVersionScoped, writeVersionScoped } from "../../data/storageNamespace.js";
+import { programById } from "../../data/trainingRecords.js";
 import { isSandbox } from "../../data/workspace.js";
 import { resolveNotificationItems } from "../../domain/notificationItems.js";
 import { renderMarkupOnce } from "./dom.js";
@@ -244,15 +245,16 @@ function wireNotificationCardActions(container, deps, t, readIds) {
 
   // Resume a planning-mode draft straight from the feed (the "unscheduled plans" item's actions):
   // reopens via the SAME reconstruction openSessionFromHistory already does for a real past
-  // session, just looked up by id in state.history rather than passed in directly.
+  // session, just looked up by id among the stored programs rather than passed in directly.
   for (const btn of container.querySelectorAll("button[data-action-resume]")) {
     btn.addEventListener("click", (e) => {
       e.stopPropagation();
       const planId = btn.getAttribute("data-action-resume");
-      const log = (deps.getState?.().history || []).find((h) => h.id === planId);
-      if (log && deps.openSessionFromHistory) {
+      const state = deps.getState?.();
+      const program = state ? programById(state, planId) : null;
+      if (program && deps.openSessionFromHistory) {
         toggleNotificationArea(false);
-        deps.openSessionFromHistory(log);
+        deps.openSessionFromHistory(program);
       }
     });
   }

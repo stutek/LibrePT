@@ -165,9 +165,9 @@ test("absent collections are filled in but corrupt ones still fail", () => {
   });
 
   assert.equal(sparse.ok, true);
-  assert.deepEqual(sparse.state.history, []);
+  assert.deepEqual(sparse.state.clientPrograms, []);
   assert.deepEqual(sparse.state.notifications, []);
-  assert.deepEqual(sparse.state.planUpdates, []);
+  assert.deepEqual(sparse.state.exerciseNotes, []);
   // filling in blanks never touches data that is actually there
   assert.equal(sparse.state.clients.length, 1);
   assert.equal(corrupt.ok, false);
@@ -207,9 +207,9 @@ test("the chain from 0 clears a non-English stored language too", async () => {
   assert.equal(migrated.state.lang, null);
 });
 
-test("schema 5 is active; a legacy P reads as 4 and a preview shape is refused", () => {
-  // Schema 5 is the active schema. Everything P held moved into schema 4.
-  assert.equal(CURRENT_SCHEMA_VERSION, 5);
+test("schema 6 is active; a legacy P reads as 4 and a preview shape is refused", () => {
+  // Schema 6 is the active schema. Everything P held moved into schema 4.
+  assert.equal(CURRENT_SCHEMA_VERSION, 6);
 
   // A stored "P" is schema 4: accepted and brought forward from 4, not walked back through the chain.
   // Walking it from the floor would run the 3 → 4 step again and ask a trainer who chose a language

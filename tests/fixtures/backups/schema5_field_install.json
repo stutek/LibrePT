@@ -1,0 +1,164 @@
+{
+  "formatVersion": 5,
+  "schemaVersion": 5,
+  "exportedAt": "2026-10-01T19:30:00.000Z",
+  "buildSha": "b9eba7f",
+  "runtimeSchema": 5,
+  "workspace": null,
+  "lang": "sl",
+  "clients": [
+    { "id": "c5ana", "name": "Ana Field", "active": true, "notes": "Left knee" },
+    { "id": "c5bor", "name": "Bor Field", "active": true }
+  ],
+  "exercises": [
+    { "id": "x5squat", "name": "Back Squat", "category": "Legs" },
+    { "id": "x5sled", "name": "Sled Push", "category": "Legs", "source": "Studio Gibanje" }
+  ],
+  "routines": [
+    {
+      "id": "r5legs",
+      "name": "Legs",
+      "exercises": [{ "id": "x5squat", "setsTargetCount": 3, "repsTarget": 5, "weightTarget": 60 }]
+    }
+  ],
+  "sessions": [
+    {
+      "id": "s5tue",
+      "time": "18:00 - 19:00",
+      "title": "Tuesday legs",
+      "location": "Studio",
+      "participants": ["c5ana", "c5bor"],
+      "routineId": "r5legs",
+      "maxCapacity": 4,
+      "startDate": "2026-09-29T16:00:00.000Z",
+      "completed": true,
+      "duration": 3300
+    },
+    {
+      "id": "s5thu",
+      "time": "18:00 - 19:00",
+      "title": "Thursday legs",
+      "location": "Studio",
+      "participants": ["c5ana", "c5bor"],
+      "routineId": "r5legs",
+      "maxCapacity": 4,
+      "startDate": "2026-10-02T16:00:00.000Z"
+    }
+  ],
+  "history": [
+    {
+      "id": "h5ana",
+      "clientId": "c5ana",
+      "clientName": "Ana Field",
+      "routineName": "Legs",
+      "date": "2026-09-29T16:02:00.000Z",
+      "duration": 3300,
+      "exercises": [
+        {
+          "type": "exercise",
+          "id": "x5squat",
+          "name": "Back Squat",
+          "loadUnit": "kg",
+          "modality": "strength",
+          "metric": "reps",
+          "completed": true,
+          "circuitId": null,
+          "circuitTitle": "",
+          "circuitSeries": 1,
+          "position": 0,
+          "sets": [
+            { "reps": 5, "weight": 62.5, "completed": true, "note": "" },
+            { "reps": 5, "weight": 62.5, "completed": true, "note": "grind" }
+          ]
+        }
+      ],
+      "feedback": [
+        { "id": "n5easy", "clientId": "c5ana", "exerciseName": "Back Squat", "tag": "Too Easy - Increase Load", "note": "" }
+      ]
+    },
+    {
+      "id": "h5bor",
+      "clientId": "c5bor",
+      "clientName": "Bor Field",
+      "routineName": "Legs",
+      "date": "2026-09-29T16:02:00.000Z",
+      "duration": 3300,
+      "exercises": [
+        {
+          "type": "exercise",
+          "id": "x5squat",
+          "name": "Back Squat",
+          "loadUnit": "kg",
+          "modality": "strength",
+          "metric": "reps",
+          "completed": true,
+          "circuitId": null,
+          "circuitTitle": "",
+          "circuitSeries": 1,
+          "position": 0,
+          "sets": [{ "reps": 5, "weight": 80, "completed": true, "note": "" }]
+        }
+      ],
+      "feedback": []
+    },
+    {
+      "id": "h5draft",
+      "clientId": "c5bor",
+      "clientName": "Bor Field",
+      "routineName": "Legs",
+      "date": "2026-09-30T08:00:00.000Z",
+      "duration": 0,
+      "exercises": [
+        {
+          "type": "exercise",
+          "id": "x5sled",
+          "name": "Sled Push",
+          "loadUnit": "kg",
+          "modality": "strength",
+          "metric": "reps",
+          "completed": false,
+          "circuitId": null,
+          "circuitTitle": "",
+          "circuitSeries": 1,
+          "position": 0,
+          "sets": [{ "reps": 10, "weight": 40, "completed": false, "note": "" }]
+        }
+      ],
+      "feedback": [],
+      "isPlanning": true,
+      "title": "Bor next week"
+    }
+  ],
+  "planUpdates": [
+    {
+      "id": "n5easy",
+      "clientId": "c5ana",
+      "clientName": "Ana Field",
+      "date": "2026-09-29T16:40:00.000Z",
+      "exerciseName": "Back Squat",
+      "tag": "Too Easy - Increase Load",
+      "resolved": false
+    },
+    {
+      "id": "u5wrist",
+      "clientId": "c5bor",
+      "clientName": "Bor Field",
+      "date": "2026-09-30T09:00:00.000Z",
+      "exerciseName": "Sled Push",
+      "tag": "Pain - wrist",
+      "resolved": true
+    }
+  ],
+  "notifications": [],
+  "invites": [],
+  "sessionSeries": [],
+  "circuits": [
+    {
+      "id": "k5legs",
+      "name": "Leg finisher",
+      "series": 3,
+      "exercises": [{ "id": "x5sled", "setsTargetCount": 1, "repsTarget": 10 }],
+      "source": "Studio Gibanje"
+    }
+  ]
+}

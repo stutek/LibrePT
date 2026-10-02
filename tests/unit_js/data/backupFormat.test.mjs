@@ -24,19 +24,20 @@ test("a written backup declares the current envelope version", () => {
   assert.equal(payload.formatVersion, CURRENT_BACKUP_FORMAT);
 });
 
-test("the envelope version of a PLAIN file IS the schema version", () => {
-  // The design decision, pinned: for a plain container, one number written twice, never two numbers
-  // that could disagree. A file whose envelope and payload differ is corrupt or hand-edited, not a
-  // valid combination.
+test("a plain file's envelope names the schema its payload states", () => {
+  // Version 6 already named the encrypted schema-5 file when schema 6 was cut, so a plain file's
+  // number stopped being its schema. What must still hold: the row the envelope points at and the
+  // payload agree. A file where they differ is corrupt or hand-edited, not a valid combination.
   const payload = buildBackupPayload({ lang: "en" });
-  assert.equal(payload.formatVersion, payload.schemaVersion);
-  assert.equal(resolveBackupFormat(payload).schema, BACKUP_SCHEMA);
+  assert.equal(resolveBackupFormat(payload).schema, payload.schemaVersion);
+  assert.equal(payload.schemaVersion, BACKUP_SCHEMA);
 });
 
-test("the version written today has a row saying how to open it", () => {
-  // If BACKUP_SCHEMA moves without a matching row, this build writes files it cannot itself read.
-  assert.equal(CURRENT_BACKUP_FORMAT, BACKUP_SCHEMA);
+test("the versions written today have rows saying how to open them, at today's schema", () => {
+  // If BACKUP_SCHEMA moves without matching rows, this build writes files it cannot itself read.
   assert.equal(BACKUP_FORMATS[CURRENT_BACKUP_FORMAT].container, "json");
+  assert.equal(BACKUP_FORMATS[CURRENT_BACKUP_FORMAT].schema, BACKUP_SCHEMA);
+  assert.equal(BACKUP_FORMATS[ENCRYPTED_BACKUP_FORMAT].schema, BACKUP_SCHEMA);
 });
 
 test("an unknown envelope version is refused, not guessed at", () => {
@@ -75,17 +76,19 @@ test("version 4 stays a plain-JSON container", () => {
 });
 
 test("the encrypted container has its own version, and it names the schema inside", () => {
-  // Version 6 is schema 5's records in an AES-GCM envelope. The row has to state the schema, because
-  // the payload's own `schemaVersion` is under the ciphertext where no reader can see it before
-  // decrypting — which is also what stops anyone altering it.
-  const row = BACKUP_FORMATS[ENCRYPTED_BACKUP_FORMAT];
-  assert.equal(row.container, AES_GCM_CONTAINER);
-  assert.equal(row.schema, 5);
-
-  const resolved = resolveBackupFormat({ formatVersion: ENCRYPTED_BACKUP_FORMAT, ciphertext: "…" });
-  assert.equal(resolved.container, AES_GCM_CONTAINER);
-  assert.equal(resolved.schema, 5, "an encrypted file must not be read at schema 6");
-  assert.equal(resolved.unsupported, undefined);
+  // Version 6 is schema 5's records in an AES-GCM envelope, version 8 schema 6's. A row has to state
+  // the schema, because the payload's own `schemaVersion` is under the ciphertext where no reader
+  // can see it before decrypting — which is also what stops anyone altering it.
+  for (const [version, schema] of [
+    [6, 5],
+    [8, 6],
+  ]) {
+    assert.equal(BACKUP_FORMATS[version].container, AES_GCM_CONTAINER);
+    const resolved = resolveBackupFormat({ formatVersion: version, ciphertext: "…" });
+    assert.equal(resolved.container, AES_GCM_CONTAINER);
+    assert.equal(resolved.schema, schema, `an encrypted file at ${version} is read at ${schema}`);
+    assert.equal(resolved.unsupported, undefined);
+  }
 });
 
 test("every row can be opened by something this build has", () => {

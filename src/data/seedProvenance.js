@@ -30,6 +30,7 @@ import {
   DEFAULT_SESSIONS,
 } from "./index.js";
 import { COLLECTIONS } from "./recordProjections.js";
+import { sessionModelFromHistory } from "./sessionModelConversion.js";
 
 // The flag written onto every seeded record. Named for what it means to a reader of raw stored
 // JSON, not for the function that sets it.
@@ -61,12 +62,24 @@ export const TEST_ORIGIN = "test";
 // live — which nothing in the app can detect, so it is a decision, not a check.
 const LEGACY_PROVENANCE_FIELD = "seededDemo";
 
+// The demo's trainings are written in the old `history` / `planUpdates` shape and converted when
+// seeded (stateStore.js). Converting them here the same way gives the ids the seeded programs, notes
+// and attendance carry, because the conversion carries ids and never invents them at random.
+const SEED_TRAININGS = sessionModelFromHistory({
+  history: DEFAULT_HISTORY,
+  planUpdates: DEFAULT_PLAN_UPDATES,
+  sessions: DEFAULT_SESSIONS,
+  routines: DEFAULT_ROUTINES,
+  exercises: DEFAULT_EXERCISES,
+});
+
 const SEED_RECORDS_BY_COLLECTION = {
   clients: DEFAULT_CLIENTS,
   exercises: DEFAULT_EXERCISES,
   routines: DEFAULT_ROUTINES,
-  history: DEFAULT_HISTORY,
-  planUpdates: DEFAULT_PLAN_UPDATES,
+  clientPrograms: SEED_TRAININGS.clientPrograms,
+  exerciseNotes: SEED_TRAININGS.exerciseNotes,
+  sessionAttendance: SEED_TRAININGS.sessionAttendance,
   sessions: DEFAULT_SESSIONS,
   notifications: DEFAULT_MESSAGES,
 };

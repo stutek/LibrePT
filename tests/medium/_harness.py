@@ -99,7 +99,8 @@ import { TRANSLATIONS } from './i18n/index.js';
 const t = (key) => TRANSLATIONS[state.lang]?.[key] || TRANSLATIONS.en[key] || key;
 const noop = () => {};
 const state = {
-  lang: 'en', clients: [], routines: [], exercises: [], history: [], planUpdates: [], sessions: [],
+  lang: 'en', clients: [], routines: [], exercises: [], clientPrograms: [], exerciseNotes: [],
+  sessionAttendance: [], sessions: [],
 };
 // The real app.js's applyTranslations() also re-renders the sessions title bar and notification
 // area for the new language, on top of this — irrelevant here since neither is mounted, but the
@@ -187,8 +188,9 @@ const state = {
   clients: structuredClone(DEFAULT_CLIENTS),
   routines: structuredClone(DEFAULT_ROUTINES),
   exercises: [],
-  history: [],
-  planUpdates: [],
+  clientPrograms: [],
+  exerciseNotes: [],
+  sessionAttendance: [],
   notifications: [],
 };
 
@@ -362,8 +364,9 @@ const state = {
   exercises: structuredClone(DEFAULT_EXERCISES),
   routines: structuredClone(DEFAULT_ROUTINES),
   sessions: [],
-  history: [],
-  planUpdates: [],
+  clientPrograms: [],
+  exerciseNotes: [],
+  sessionAttendance: [],
 };
 
 // The taxonomy picker is route-backed, and the editor only ever ASKS for its URL — the router's

@@ -29,11 +29,11 @@ PLAN = [exercise_item("exA", "Barbell Row"), exercise_item("exB", "Overhead Pres
 # Two unanswered signals: one about a movement in the plan on screen, one about a movement that is
 # not, and the second is the NEWER — so date alone would put the wrong one first.
 SEEDED_NOTES = """
-state.planUpdates.push(
-  { id: 'n1', clientId: '%s', clientName: 'Jane Doe', exerciseName: 'Barbell Row',
-    tag: 'Too Hard - Reduce Load', date: '2026-08-01T10:00:00.000Z', resolved: false },
-  { id: 'n2', clientId: '%s', clientName: 'Jane Doe', exerciseName: 'Deadlift',
-    tag: 'Form Break - Watch Position', date: '2026-08-12T10:00:00.000Z', resolved: false },
+state.exerciseNotes.push(
+  { id: 'n1', clientId: '%s', exerciseName: 'Barbell Row',
+    tag: 'Too Hard - Reduce Load', createdAt: '2026-08-01T10:00:00.000Z', resolved: false },
+  { id: 'n2', clientId: '%s', exerciseName: 'Deadlift',
+    tag: 'Form Break - Watch Position', createdAt: '2026-08-12T10:00:00.000Z', resolved: false },
 );
 renderActiveGroupBoard();
 """ % (CLIENT_ID, CLIENT_ID)
@@ -89,9 +89,9 @@ def test_a_note_the_trainer_already_dealt_with_does_not_come_back(page, local_se
         page,
         local_server,
         """
-state.planUpdates.push(
+state.exerciseNotes.push(
   { id: 'done', clientId: '%s', exerciseName: 'Barbell Row',
-    tag: 'Too Easy - Increase Load', date: '2026-08-01T10:00:00.000Z', resolved: true },
+    tag: 'Too Easy - Increase Load', createdAt: '2026-08-01T10:00:00.000Z', resolved: true },
 );
 renderActiveGroupBoard();
 """

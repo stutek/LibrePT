@@ -25,10 +25,12 @@ import {
   renderClientWorkoutHistory,
 } from './modules/clients/clientsView.js';
 import { DEFAULT_HISTORY } from './data/index.js';
+import { toDomainState } from './data/schemaShapes.js';
 """,
     view_id="client-detail",
     body="""
-const state = { lang: 'en', history: structuredClone(DEFAULT_HISTORY) };
+// The seed is still written in the old shape; the app reads it converted.
+const state = toDomainState({ lang: 'en', history: structuredClone(DEFAULT_HISTORY) });
 
 renderClientDetailViewShell();
 renderClientWorkoutHistory({

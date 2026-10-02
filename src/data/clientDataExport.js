@@ -23,6 +23,8 @@ import { dictionaryFor } from "../i18n/index.js";
 import { localDateString } from "./calendarDay.js";
 import { consentSignedDate, isConsentActive, isConsentWithdrawn } from "./clientConsent.js";
 import { clientDisambiguator } from "./clientErasure.js";
+import { historyFromSessionModel } from "./sessionModelConversion.js";
+import { allExerciseNotes, allPrograms } from "./trainingRecords.js";
 
 export const EXPORT_FORMAT_VERSION = "1";
 
@@ -45,6 +47,21 @@ function sessionsAttendedBy(state, clientId) {
     }));
 }
 
+// The client's trainings and plan changes, read through data/trainingRecords.js and written in the
+// shape format 1 of this file has always carried (`history`, `planUpdates`): a client's file must
+// not change because the app stores trainings differently. Plan changes run in the order they were
+// taken.
+function trainingsOf(state, clientId) {
+  const owned = (record) => record.clientId === clientId;
+  const { history, planUpdates } = historyFromSessionModel({
+    clientPrograms: allPrograms(state).filter(owned),
+    exerciseNotes: allExerciseNotes(state).filter(owned),
+    clients: state.clients,
+  });
+  planUpdates.sort((a, b) => String(a.date || "").localeCompare(String(b.date || "")));
+  return { history, planUpdates };
+}
+
 /**
  * Build the disclosure payload for one client.
  *
@@ -61,8 +78,7 @@ export function buildClientExport(
   const client = (state?.clients || []).find((candidate) => candidate.id === clientId);
   if (!client) return null;
 
-  const history = (state?.history || []).filter((record) => record.clientId === clientId);
-  const planUpdates = (state?.planUpdates || []).filter((record) => record.clientId === clientId);
+  const { history, planUpdates } = trainingsOf(state, clientId);
   const sessions = sessionsAttendedBy(state, clientId);
 
   return {

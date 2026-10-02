@@ -155,19 +155,20 @@ def test_a_session_without_a_routine_says_which_thing_is_missing(page, local_ser
 
 SEED_PLANLESS_SESSIONS = """
 // Two finished sessions with no routine. The first was run from a hand-built plan of three
-// exercises, which is kept in its participant's history record; the second has nothing anywhere.
+// exercises, which is kept in its participant's finished program; the second has nothing anywhere.
 const withPlan = state.sessions.find((s) => s.id === 's00f2e3d');
 const withoutPlan = state.sessions.find((s) => s.id === 's07f2e3d');
 withPlan.routineId = '';
 withoutPlan.routineId = '';
-state.history.push({
+const { recordTrainings } = await import('./data/trainingRecords.js');
+recordTrainings(state, [{
   id: 'h-built', clientId: withPlan.participants[0], routineName: 'Empty plan, no routine',
   date: withPlan.startDate, duration: 3600, feedback: [],
   exercises: ['a', 'b', 'c'].map((id) => ({
     id, type: 'exercise', name: 'Move ' + id, metric: 'reps', completed: true,
     sets: [{ reps: 10, weight: 0, completed: true }],
   })),
-});
+}]);
 renderClientsViewShell();
 initSessionTimeline({"""
 

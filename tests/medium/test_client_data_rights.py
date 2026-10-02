@@ -48,11 +48,12 @@ let state = {
         formLang: 'en', withdrawnDate: '2026-09-21' },
     },
   ],
-  history: [
-    { id: 'h1', clientId: 'c-jane-a', clientName: 'Jane Doe', date: '2026-03-01T09:00:00.000Z',
-      routineName: 'Upper A', exercises: [], feedback: [] },
+  clientPrograms: [
+    { id: 'h1', clientId: 'c-jane-a', status: 'done', performedAt: '2026-03-01T09:00:00.000Z',
+      routineName: 'Upper A', exercises: [] },
   ],
-  planUpdates: [],
+  exerciseNotes: [],
+  sessionAttendance: [],
   sessions: [{ id: 's1', participants: ['c-jane-a'], title: 'Jane Doe 1:1', day: 'Mon' }],
 };
 

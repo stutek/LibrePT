@@ -156,15 +156,16 @@ def test_it_can_be_undone_from_the_same_control(page, local_server):
 
 # Each client with an injury and a last session of their own.
 BOTH_INJURED_WITH_HISTORY = """
+const { recordTrainings } = await import('./data/trainingRecords.js');
 for (const [id, injury] of [['%s', 'Left shoulder'], ['%s', 'Right knee']]) {
   Object.assign(state.clients.find((client) => client.id === id), { hasInjury: true, injury });
-  state.history.push({
+  recordTrainings(state, [{
     id: 'h-' + id, clientId: id, routineName: 'Lower Body', date: '2026-07-20T17:30:00',
     exercises: [{ id: 'p-' + id, type: 'exercise', name: 'Back Squat', completed: true,
       loadUnit: 'kg', metric: 'reps', modality: 'strength',
       sets: [{ reps: 8, weight: 60, completed: true }] }],
     feedback: [],
-  });
+  }]);
 }
 renderActiveGroupBoard();
 """ % (JANE, JOHN)

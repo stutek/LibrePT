@@ -26,26 +26,26 @@ CLIENT_ID = (
 )
 ANCHOR_DATE = "2026-09-14T18:00:00.000Z"
 
-# Neighbours are sourced entirely from state.history — both a FINISHED day before the anchor and
+# Neighbours are sourced entirely from the finished programs (state.clientPrograms) — both a FINISHED day before the anchor and
 # one after it satisfy clientSessionNeighbours.js's `previous`/`next` without needing state.sessions
 # or a routine, which keeps the fixture small.
 PREVIOUS_RECORD = """
-state.history.push({
+recordTrainings(state, [{
   id: 'hprev1', clientId: '%(client)s', routineName: 'Prev Plan', date: '2026-09-10T18:00:00.000Z',
   duration: 1800, feedback: [],
   exercises: [%(item)s],
-});
+}]);
 """ % {
     "client": CLIENT_ID,
     "item": json.dumps(exercise_item("px1", "Prev Exercise One")),
 }
 
 NEXT_RECORD = """
-state.history.push({
+recordTrainings(state, [{
   id: 'hnext1', clientId: '%(client)s', routineName: 'Next Plan', date: '2026-09-18T18:00:00.000Z',
   duration: 1800, feedback: [],
   exercises: [%(item)s],
-});
+}]);
 """ % {
     "client": CLIENT_ID,
     "item": json.dumps(exercise_item("nx1", "Next Exercise One")),
@@ -54,6 +54,7 @@ state.history.push({
 # No router here: record what the clipboard asks to open instead of opening it.
 RECORD_OPENS_IMPORT = (
     "import { mergeAppDeps } from './controllers/activeSessionStore.js';\n"
+    "import { recordTrainings } from './data/trainingRecords.js';\n"
 )
 RECORD_OPENS = """
 window.__opened = [];
@@ -166,7 +167,7 @@ def test_a_short_tap_opens_the_card_as_before(page, local_server):
 
 def test_dragging_right_reveals_the_previous_plan(page, local_server):
     """A left-to-right drag pulls the blanket aside and uncovers the client's previous plan,
-    drawn from state.history by clientSessionNeighbours.js + planSheet.js."""
+    drawn from the finished programs by clientSessionNeighbours.js + planSheet.js."""
     _mount(page, local_server)
     title_before = page.locator(".session-title-bar").bounding_box()["x"]
     body_before = page.locator(".clipboard-body").bounding_box()["x"]
@@ -339,11 +340,11 @@ def _row_and_card_tops(page, name):
 # the right row was chosen.
 SHARED_MOVEMENT = "Barbell Back Squat"
 PREVIOUS_WITH_SHARED_MOVEMENT = """
-state.history.push({
+recordTrainings(state, [{
   id: 'hprev1', clientId: '%(client)s', routineName: 'Prev Plan', date: '2026-09-10T18:00:00.000Z',
   duration: 1800, feedback: [],
   exercises: [%(first)s, %(second)s, %(third)s],
-});
+}]);
 """ % {
     "client": CLIENT_ID,
     "first": json.dumps(exercise_item("px1", "Prev Exercise One")),

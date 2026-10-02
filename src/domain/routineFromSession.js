@@ -16,8 +16,8 @@
 // most items; otherwise the movement is found by name with catalogMatch.js's own rule. An item that
 // matches nothing is left out and counted, so the trainer is told.
 //
-// Provenance is soft, as text in the routine's description. A field pointing back at the history
-// record would make history → routine → history, which the migration order forbids.
+// Provenance is soft, as text in the routine's description. A field pointing back at the program
+// would make program → routine → program, which the migration order forbids.
 
 import { localDateString } from "../data/calendarDay.js";
 import { newRecordId } from "../data/recordId.js";
@@ -64,7 +64,7 @@ function routineItemFrom(item, movement) {
 
 /**
  * @param {object} args
- * @param {object} args.log        the history record
+ * @param {object} args.log        the performed program (data/trainingRecords.js)
  * @param {object[]} args.library  libraryExercises(state)
  * @param {object[]} args.routines the routines that exist, for a name that is not taken
  * @param {string} args.fallbackName name used when the record has no routine name
@@ -102,7 +102,7 @@ export function buildRoutineFromRecord({
     exercises.push(previous);
   }
 
-  const date = localDateString(log.date);
+  const date = localDateString(log.performedAt);
   const taken = new Set(routines.map((routine) => routine.name));
   // A session that had no routine is recorded under the empty-plan text; that is not a name.
   const recorded = log.routineName && log.routineName !== emptyPlanName ? log.routineName : "";

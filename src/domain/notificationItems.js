@@ -8,7 +8,8 @@
 //   • SYNTHETIC items are computed fresh on every render and never stored anywhere. They are not
 //     messages, they are WORK the trainer still owes a client — a plan drafted but never scheduled,
 //     feedback signals nobody has reviewed. Storing them would mean maintaining a second copy of a
-//     truth that already lives in `state.history` / `state.planUpdates`, and the two would drift.
+//     truth that already lives in the stored programs and exercise notes (data/trainingRecords.js),
+//     and the two would drift.
 //
 // Synthetic items lead the feed for that reason: outstanding work outranks FYI. The ONE exception
 // is the demo-mode notice — see DEMO_NOTICE_TYPE below.
@@ -19,6 +20,7 @@
 import { crashIssueUrl } from "../data/crashReport.js";
 import { planDemoRemoval } from "../data/demoDataRemoval.js";
 import { escapedTestRecords } from "../data/seedProvenance.js";
+import { draftPrograms, pendingNotes, programDate } from "../data/trainingRecords.js";
 import { resolveLang } from "../i18n/index.js";
 import { countedText } from "../i18n/plural.js";
 import { walkthroughDataPresent } from "./walkthroughReadiness.js";
@@ -56,21 +58,26 @@ export function buildEscapedTestDataItem(state, t, { sandbox = false, testRun = 
   };
 }
 
-// A planning-mode session is never "finished" (it has no Start/Complete footer), so it lives on in
-// state.history as `isPlanning: true` — which means it survives being replaced by the next session
-// the trainer opens, but they have no other place to rediscover it. One action per plan resumes it.
-/** The local calendar day a planning record was written for, or "" when it carries no date. */
+// A planning-mode session is never "finished" (it has no Start/Complete footer), so it lives on as a
+// planned program — which means it survives being replaced by the next session the trainer opens,
+// but they have no other place to rediscover it. One action per plan resumes it.
+/** The local calendar day a planned program was written for, or "" when it carries no date. */
 function planCalendarDate(plan) {
-  if (!plan?.date) return "";
-  const date = new Date(plan.date);
+  if (!programDate(plan)) return "";
+  const date = new Date(programDate(plan));
   if (Number.isNaN(date.getTime())) return "";
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
   return `${date.getFullYear()}-${month}-${day}`;
 }
 
+// The client's name as the client list holds it now.
+function clientNameOf(state, clientId) {
+  return (state.clients || []).find((client) => client.id === clientId)?.name;
+}
+
 export function buildUnscheduledPlansItem(state, t) {
-  const plans = (state.history || []).filter((entry) => entry.isPlanning);
+  const plans = draftPrograms(state);
   if (plans.length === 0) return null;
   const fallbackTitle = t("planned_program") || "Planned Program";
   return {
@@ -90,7 +97,11 @@ export function buildUnscheduledPlansItem(state, t) {
     // getters, the same way a session's calendar day is: `substring(0, 10)` of a UTC instant is
     // yesterday for anyone east of UTC late in the evening.
     actions: plans.map((plan) => ({
-      label: [plan.title || fallbackTitle, plan.clientName, planCalendarDate(plan)]
+      label: [
+        plan.title || fallbackTitle,
+        clientNameOf(state, plan.clientId),
+        planCalendarDate(plan),
+      ]
         .filter(Boolean)
         .join(" · "),
       resumePlanId: plan.id,
@@ -98,18 +109,18 @@ export function buildUnscheduledPlansItem(state, t) {
   };
 }
 
-// `state.planUpdates` already IS the Pending Plan Adjustments feature's durable store
+// The pending exercise notes already ARE the Pending Plan Adjustments feature's durable store
 // (`resolved: false` = awaiting the trainer's review). This re-presents that same data grouped by
 // CLIENT — cross-referenced to state.sessions for a friendlier label where one exists — so it
 // surfaces here too, not only in the dedicated Adjustments view every action links to.
 export function buildPendingSessionsItem(state, t) {
-  const unresolved = (state.planUpdates || []).filter((update) => !update.resolved);
+  const unresolved = pendingNotes(state);
   if (unresolved.length === 0) return null;
 
   const byClient = new Map();
-  for (const update of unresolved) {
-    if (!byClient.has(update.clientId)) byClient.set(update.clientId, []);
-    byClient.get(update.clientId).push(update);
+  for (const note of unresolved) {
+    if (!byClient.has(note.clientId)) byClient.set(note.clientId, []);
+    byClient.get(note.clientId).push(note);
   }
 
   const sessions = state.sessions || [];
@@ -129,8 +140,8 @@ export function buildPendingSessionsItem(state, t) {
       "notif_pending_sessions_desc",
       byClient.size,
     ),
-    actions: [...byClient.entries()].map(([clientId, updates]) => ({
-      label: `${labelFor(clientId, updates[0].clientName)} (${updates.length})`,
+    actions: [...byClient.entries()].map(([clientId, notes]) => ({
+      label: `${labelFor(clientId, clientNameOf(state, clientId))} (${notes.length})`,
       view: "/adjustments",
     })),
   };

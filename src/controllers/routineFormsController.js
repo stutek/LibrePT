@@ -35,10 +35,10 @@ export function openRoutineCreateDialog() {
   openRoutineCreateForm();
 }
 
-// A history record carries no session id, so the session is found by what the record does hold:
-// the client and the day. Two such sessions on one day are ambiguous, and then no title is used.
+// The session is found by what the performed program holds for certain: the client and the day. Two
+// such sessions on one day are ambiguous, and then no title is used.
 function titleOfSessionBehind(log, state) {
-  const day = localDateString(log.date);
+  const day = localDateString(log.performedAt);
   const matches = (state.sessions || []).filter(
     (session) =>
       session.completed &&

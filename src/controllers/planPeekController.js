@@ -15,18 +15,19 @@
 // Step 4 — opening what the pull uncovered, through the app's EXISTING entry points only:
 // - a previous/next plan opens by its route, `session.client` (`/session/:sessionId/client/:clientId`),
 //   the same URL every other way into a session writes. The router's showSessionView then picks the
-//   loader by what the id names: a scheduled row goes through launchClipboardDirectly, a history
-//   record AND a planning draft through openSessionFromHistory (drafts live in state.history, and that
-//   is how the History view and the notification feed reopen one).
+//   loader by what the id names: a scheduled row goes through launchClipboardDirectly, a performed
+//   AND a planned program through openSessionFromHistory (both are stored programs, and that is how
+//   the History view and the notification feed reopen one).
 // - no next plan: the create-a-plan card opens the client's planning form, the flow the client card's
 //   "Plan Program" button opens (`openPlanningForClient`, injected by app.js).
-// - Today: the client's session today, derived by clientSessionToday from the same history and
+// - Today: the client's session today, derived by clientSessionToday from the same programs and
 //   schedule — no separate "launched today" record to fall out of step.
 // A STARTED session is never left by the gesture (`canOpen`): opening another session replaces the one
 // clipboard slot, and a running session's logs would go with it. Uncovering still works — comparing
 // is the point of the gesture; leaving is not.
 
 import { libraryExercises } from "../data/exerciseLibrary.js";
+import { feedbackFromNotes, notesForProgram } from "../data/trainingRecords.js";
 import { clientSessionNeighbours, clientSessionToday } from "../domain/clientSessionNeighbours.js";
 import { isRestRecord } from "../domain/sessionItemRecord.js";
 import {
@@ -75,11 +76,11 @@ function planFor(entry, { state, t }) {
       date: entry.date,
     };
   }
-  // "history" or "draft" — both are a stored history/planning snapshot.
+  // "history" or "draft" — both are a stored program, performed or planned.
   const clientState = buildClientStateFromHistoryLog(entry.record, libraryExercises(state));
   return {
     items: clientState.exercises,
-    feedback: entry.record.feedback || [],
+    feedback: feedbackFromNotes(notesForProgram(state, entry.record.id)),
     title: clientState.routineName || entry.record.title || t("untitled_session") || "",
     date: entry.date,
   };

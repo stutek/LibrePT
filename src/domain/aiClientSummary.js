@@ -9,7 +9,7 @@
 //
 // The summary stays in English: it is data for an AI tool, not text on the trainer's screen.
 //
-// Pure: a client record and the history in, a string out.
+// Pure: a client record and the programs (data/trainingRecords.js) in, a string out.
 
 import { exerciseRecordsOf, isSkippedRecord } from "./sessionItemRecord.js";
 
@@ -23,14 +23,17 @@ function exerciseLine(record) {
   return `- ${record.name}: ${sets || "no sets recorded"}`;
 }
 
-export function aiClientSummary(client, history) {
-  // A planning draft is a plan awaiting a session, not a session that happened.
-  const sessions = (history || []).filter((log) => log.clientId === client.id && !log.isPlanning);
+export function aiClientSummary(client, programs) {
+  // A planned program is awaiting a session, not a session that happened.
+  const sessions = (programs || []).filter(
+    (program) => program.clientId === client.id && program.status === "done",
+  );
   const recent = sessions
     .slice(0, RECENT_SESSIONS)
-    .map((log) => {
-      const lines = exerciseRecordsOf(log.exercises || []).map(exerciseLine);
-      return [`### Session on ${String(log.date || "").slice(0, 10)}`, ...lines].join("\n");
+    .map((program) => {
+      const lines = exerciseRecordsOf(program.exercises || []).map(exerciseLine);
+      const day = String(program.performedAt || "").slice(0, 10);
+      return [`### Session on ${day}`, ...lines].join("\n");
     })
     .join("\n\n");
   return [

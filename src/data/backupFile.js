@@ -63,7 +63,7 @@ const SETTINGS_KEYS = ["lang"];
  *
  * Keyed by the one version integer. A row names the container and, where it is not the version
  * itself, the record schema inside: version 4 is schema 4 in plain JSON, version 6 is schema 5's
- * records inside an AES-GCM envelope. */
+ * records inside an AES-GCM envelope, version 7 is schema 6 in plain JSON. */
 export const BACKUP_FORMATS = {
   4: { container: "json" },
   // Schema 5: the same plain-JSON container; the records gained `exercises.source` and
@@ -73,17 +73,21 @@ export const BACKUP_FORMATS = {
   // it is NOT the version integer here, and because the payload's own `schemaVersion` is under the
   // ciphertext where a reader cannot reach it before decrypting.
   6: { container: AES_GCM_CONTAINER, schema: 5 },
+  // 2026-10-02: schema 6, the session model — programs, attendance and exercise notes instead of
+  // `history` and `planUpdates`. Plain and encrypted, each its own row. Plain is 7 and not 6 because
+  // 6 already names the encrypted schema-5 file, so from here on a plain file's number is not its
+  // schema: every row states the schema it holds.
+  7: { container: "json", schema: 6 },
+  8: { container: AES_GCM_CONTAINER, schema: 6 },
 };
 
-/** The version a PLAIN file is written at. Tied to BACKUP_SCHEMA rather than restated, because for a
- * plain container they are one number by design and a second literal here is the one place they could
- * drift apart. */
-export const CURRENT_BACKUP_FORMAT = BACKUP_SCHEMA;
+/** The version a PLAIN file is written at. Its row must name BACKUP_SCHEMA (backupFormat.test.mjs). */
+export const CURRENT_BACKUP_FORMAT = 7;
 
 /** The version an ENCRYPTED file is written at. A literal, because it is deliberately not a function
- * of the record schema: the next record change bumps 6 to 7 by adding a row, and the row keeps
- * saying which schema its ciphertext holds. */
-export const ENCRYPTED_BACKUP_FORMAT = 6;
+ * of the record schema: the next record change adds a row, and the row keeps saying which schema
+ * its ciphertext holds. */
+export const ENCRYPTED_BACKUP_FORMAT = 8;
 
 /** Decides how to open a parsed file and how to read its records, from the single envelope integer.
  *
@@ -125,9 +129,9 @@ export function buildBackupPayload(
     // The envelope integer, first key in the file so it is the first thing a reader (or a human in a
     // text editor) meets. It binds container and record schema together — see BACKUP_FORMATS.
     formatVersion: CURRENT_BACKUP_FORMAT,
-    // The SAME number, written twice: the migration chain has always keyed off `schemaVersion` and
-    // every file ever written already depends on it, so it stays. A test asserts the two agree —
-    // which makes a disagreement a corrupt or hand-edited file, never a legitimate combination.
+    // The schema the envelope's row names, written again inside: the migration chain has always
+    // keyed off `schemaVersion` and every file ever written already depends on it, so it stays. A
+    // test asserts the two agree — a disagreement is a corrupt or hand-edited file.
     schemaVersion: BACKUP_SCHEMA,
     // Recorded so a future migration needing a temporal anchor has one, instead of reaching for
     // `new Date()` at restore time and dating a two-year-old backup as though it were taken today.

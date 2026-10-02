@@ -153,10 +153,11 @@ def test_a_note_written_without_choosing_a_rating_stays_neutral(page, local_serv
         """async () => {
             const m = await import(new URL('controllers/activeSessionController.js', document.baseURI).href);
             const store = await import(new URL('data/stateStore.js', document.baseURI).href);
+            const records = await import(new URL('data/trainingRecords.js', document.baseURI).href);
             return {
                 session: m.getActiveSession().feedback.map((f) => f.tag),
-                review: store.getState().planUpdates
-                    .filter((u) => u.exerciseName === 'Barbell Row').map((u) => u.tag),
+                review: records.pendingNotes(store.getState())
+                    .filter((n) => n.exerciseName === 'Barbell Row').map(records.noteTagLine),
             };
         }"""
     )

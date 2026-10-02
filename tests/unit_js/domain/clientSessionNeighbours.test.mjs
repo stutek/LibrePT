@@ -5,10 +5,16 @@
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { toDomainState } from "../../../src/data/schemaShapes.js";
 import {
-  clientSessionNeighbours,
-  clientSessionToday,
+  clientSessionNeighbours as neighboursOf,
+  clientSessionToday as todayOf,
 } from "../../../src/domain/clientSessionNeighbours.js";
+
+// The fixtures below are written in the old `history` shape, which reads well as a list of dated
+// trainings. They reach the functions the way an older store reaches memory: through the conversion.
+const clientSessionNeighbours = (state, ...rest) => neighboursOf(toDomainState(state), ...rest);
+const clientSessionToday = (state, ...rest) => todayOf(toDomainState(state), ...rest);
 
 const history = (over = {}) => ({
   id: "h1",

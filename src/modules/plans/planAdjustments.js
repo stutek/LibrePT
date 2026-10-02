@@ -1,7 +1,18 @@
 // src/modules/plans/planAdjustments.js
 // Logic for displaying the pending plan adjustments widget on the dashboard,
 // as well as launching and submitting the interactive Apply Plan Adjustment Dialog wizard.
+//
+// An adjustment is an exercise note the next plan waits for (data/trainingRecords.js pendingNotes).
+// Its tag and remark are shown as one line, `noteTagLine`, the form the feedback form has always
+// stored and these screens have always shown.
 import { libraryExercises } from "../../data/exerciseLibrary.js";
+import {
+  allPrograms,
+  noteById,
+  noteTagLine,
+  pendingNotes,
+  resolveNote,
+} from "../../data/trainingRecords.js";
 import { performedTarget, suggestedTarget } from "../../domain/adjustmentSuggestion.js";
 import { feedbackTagText, readFeedbackTag } from "../../domain/feedbackTags.js";
 import { DECIMAL_PATTERN, loadUnitForEquipment, parseDecimal } from "../../domain/repsAndLoad.js";
@@ -44,6 +55,11 @@ function resolveAdjustmentBadgeClass(tag) {
   return BADGE_CLASS[readFeedbackTag(tag).known?.id] || "badge-primary";
 }
 
+// The client's name as the client list holds it now.
+function clientNameOf(state, clientId) {
+  return (state.clients || []).find((client) => client.id === clientId)?.name;
+}
+
 function buildAdjustmentCard(u, ctx) {
   const { state, t, escapeHTML, navigateToPath, urlFor } = ctx;
 
@@ -52,11 +68,12 @@ function buildAdjustmentCard(u, ctx) {
 
   const info = document.createElement("div");
   info.className = "adjustment-card-info";
-  const badgeClass = resolveAdjustmentBadgeClass(u.tag);
+  const tagLine = noteTagLine(u);
+  const badgeClass = resolveAdjustmentBadgeClass(tagLine);
   info.innerHTML = `
       <div class="adjustment-card-row">
-        <strong class="adjustment-client-name">${escapeHTML(u.clientName)}</strong>
-        <span class="badge ${badgeClass} adjustment-tag-badge">${escapeHTML(feedbackTagText(u.tag, t))}</span>
+        <strong class="adjustment-client-name">${escapeHTML(clientNameOf(state, u.clientId))}</strong>
+        <span class="badge ${badgeClass} adjustment-tag-badge">${escapeHTML(feedbackTagText(tagLine, t))}</span>
       </div>
       <div class="adjustment-exercise-line">
         ${t("exercise_of")}: <span class="font-semibold adjustment-exercise-name">${escapeHTML(u.exerciseName)}</span>
@@ -115,7 +132,7 @@ export function renderPendingPlanAdjustmentsComponent(container, countBadge, ctx
   if (!container) return;
   container.innerHTML = "";
 
-  const unresolved = (state.planUpdates || []).filter((u) => !u.resolved);
+  const unresolved = pendingNotes(state);
 
   if (countBadge) {
     countBadge.textContent = unresolved.length;
@@ -236,8 +253,8 @@ function resolveAdjustmentTargets(state, update) {
 function prefillAdjustmentFields(exMapping, update, state) {
   const target = suggestedTarget({
     routineEntry: exMapping,
-    performed: performedTarget(state.history, update),
-    tagId: readFeedbackTag(update.tag).known?.id,
+    performed: performedTarget(allPrograms(state), update),
+    tagId: readFeedbackTag(noteTagLine(update)).known?.id,
   });
   document.getElementById("adjust-weight").value = target.weight;
   const repsField = document.getElementById("adjust-reps");
@@ -272,8 +289,10 @@ export function openAdjustmentWizardComponent(updateId, ctx) {
     renderPendingPlanAdjustments,
   } = ctx;
 
-  const update = state.planUpdates.find((u) => u.id === updateId);
-  if (!update) return;
+  // Only a note the next plan waits for, resolved or not, is an adjustment; a note that only records
+  // what happened in a session has nothing to apply.
+  const update = noteById(state, updateId);
+  if (typeof update?.resolved !== "boolean") return;
 
   const dialog = document.getElementById("dialog-apply-adjustment");
   if (!dialog) return;
@@ -283,13 +302,15 @@ export function openAdjustmentWizardComponent(updateId, ctx) {
   document.getElementById("adjust-client-id").value = update.clientId;
 
   // Set text labels
-  document.getElementById("adjust-client-name").textContent = update.clientName;
+  document.getElementById("adjust-client-name").textContent =
+    clientNameOf(state, update.clientId) ?? "";
   // The tag in the trainer's language, and the note they typed after it, if any.
-  const { known, note } = readFeedbackTag(update.tag);
-  document.getElementById("adjust-feedback-tag").textContent = feedbackTagText(update.tag, t);
+  const tagLine = noteTagLine(update);
+  const { known, note } = readFeedbackTag(tagLine);
+  document.getElementById("adjust-feedback-tag").textContent = feedbackTagText(tagLine, t);
   document.getElementById("adjust-details").textContent = known
     ? note || t("no_details_specified")
-    : update.tag;
+    : tagLine;
 
   const { exercise, exerciseId, routine, exMapping } = resolveAdjustmentTargets(state, update);
 
@@ -383,11 +404,7 @@ export function openAdjustmentWizardComponent(updateId, ctx) {
       }
     }
 
-    // Resolve alert
-    const updateIdx = state.planUpdates.findIndex((u) => u.id === updateId);
-    if (updateIdx !== -1) {
-      state.planUpdates[updateIdx].resolved = true;
-    }
+    resolveNote(state, updateId);
 
     saveToLocalStorage();
     renderPendingPlanAdjustments();

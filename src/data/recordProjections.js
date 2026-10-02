@@ -1,12 +1,11 @@
 // src/data/recordProjections.js — domain object → IndexedDB record, one schema.
 //
 // The star-write model projects a live domain object DIRECTLY into every live schema, never through
-// a chain (see docs/DATA_MODEL.md §4). Today there is exactly one live schema (recordSchemas.js's
-// SCHEMA_4), so each projection here is necessarily small — pick the record's collection and stamp
-// the IndexedDB routing fields (`collection`, and `clientId` where the collection is owned by a
-// client) onto the domain object. That triviality is not a shortcut: the star write model predicts
-// it directly — a "downgrade" is just a projection that was already being written all along, and
-// the day a second schema is cut, ITS projection is where the real transform work lands, not here.
+// a chain (see docs/DATA_MODEL.md §4). Each projection here is small — pick the record's collection
+// and stamp the IndexedDB routing fields (`collection`, and `clientId` where the collection is owned
+// by a client) onto the domain object. A schema whose records differ in kind, not only in fields,
+// is shaped before this runs: schemas 4 and 5 hold trainings as `history` and `planUpdates`, built
+// from schema 6's programs and notes by schemaShapes.js.
 //
 // Record shape matches indexedDb.js exactly: `{ id, collection, ...domain fields, spread flat }` —
 // not nested under a `payload` key. `collection` is applied last so it always wins over any
@@ -39,6 +38,13 @@ export const projectSessionSeries = (series) => toRecord("sessionSeries", series
 // does not, so the fan-out writes it into store 5 alone.
 export const projectCircuit = (circuit) => toRecord("circuits", circuit);
 export const projectPreviewProbe = (probe) => toRecord("previewProbe", probe);
+// The session model (schema 6). `history` and `planUpdates` above stay projectable for schemas 4
+// and 5, which are written from these (schemaShapes.js).
+export const projectClientProgram = (program) => toRecord("clientPrograms", program);
+export const projectSessionAttendance = (row) => toRecord("sessionAttendance", row);
+export const projectGroupSharedProgram = (group) => toRecord("groupSharedPrograms", group);
+export const projectExerciseNote = (note) => toRecord("exerciseNotes", note);
+export const projectClientNote = (note) => toRecord("clientNotes", note);
 
 const PROJECTORS = {
   clients: projectClient,
@@ -52,6 +58,11 @@ const PROJECTORS = {
   sessionSeries: projectSessionSeries,
   circuits: projectCircuit,
   previewProbe: projectPreviewProbe,
+  clientPrograms: projectClientProgram,
+  sessionAttendance: projectSessionAttendance,
+  groupSharedPrograms: projectGroupSharedProgram,
+  exerciseNotes: projectExerciseNote,
+  clientNotes: projectClientNote,
 };
 
 export function projectCollection(collection, domainObject) {

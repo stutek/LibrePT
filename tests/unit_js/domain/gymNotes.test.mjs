@@ -10,21 +10,24 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { gymNotesForPlan, notesWithGymNote } from "../../../src/domain/gymNotes.js";
 
+// Exercise notes as data/trainingRecords.js reads them: `resolved` false is one the next plan waits
+// for, true one the trainer already acted on.
 const UPDATES = [
   {
     id: "u1",
     clientId: "jane",
     exerciseName: "Barbell Back Squat",
     tag: "Too Hard - Reduce Load",
-    date: "2026-08-01T10:00:00.000Z",
+    createdAt: "2026-08-01T10:00:00.000Z",
     resolved: false,
   },
   {
     id: "u2",
     clientId: "jane",
     exerciseName: "Deadlift",
-    tag: "Form Break - Watch Position - hips rise first",
-    date: "2026-08-10T10:00:00.000Z",
+    tag: "Form Break - Watch Position",
+    text: "hips rise first",
+    createdAt: "2026-08-10T10:00:00.000Z",
     resolved: false,
   },
   {
@@ -32,7 +35,7 @@ const UPDATES = [
     clientId: "jane",
     exerciseName: "Barbell Bench Press",
     tag: "Too Easy - Increase Load",
-    date: "2026-08-12T10:00:00.000Z",
+    createdAt: "2026-08-12T10:00:00.000Z",
     resolved: true,
   },
   {
@@ -40,13 +43,13 @@ const UPDATES = [
     clientId: "john",
     exerciseName: "Deadlift",
     tag: "Too Easy - Increase Load",
-    date: "2026-08-11T10:00:00.000Z",
+    createdAt: "2026-08-11T10:00:00.000Z",
     resolved: false,
   },
 ];
 
 const forJane = (planExerciseNames) =>
-  gymNotesForPlan({ planUpdates: UPDATES, clientId: "jane", planExerciseNames });
+  gymNotesForPlan({ notes: UPDATES, clientId: "jane", planExerciseNames });
 
 test("only this client's floor notes come back", () => {
   assert.deepEqual(
@@ -93,10 +96,7 @@ test("a movement is matched by name, whatever case it was typed in", () => {
 });
 
 test("nothing logged yet is an empty list, not a failure", () => {
-  assert.deepEqual(
-    gymNotesForPlan({ planUpdates: [], clientId: "jane", planExerciseNames: [] }),
-    [],
-  );
+  assert.deepEqual(gymNotesForPlan({ notes: [], clientId: "jane", planExerciseNames: [] }), []);
   assert.deepEqual(gymNotesForPlan({}), []);
 });
 

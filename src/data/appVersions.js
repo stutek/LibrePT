@@ -35,9 +35,18 @@ export const APP_VERSIONS = [
   {
     id: "2026-10",
     schema: 5,
-    status: "default",
+    status: "supported",
     descriptionKey: "app_version_2026_10_desc",
     // Importing a trainer's own exercise library and circuits.
+    behaviours: ["libraryImport"],
+  },
+  {
+    // Every client's training is a program of their own, linked to the session it was run in
+    // (recordSchemas.js, SCHEMA_6). Schemas 4 and 5 are still written for the two versions above.
+    id: "2026-11",
+    schema: 6,
+    status: "default",
+    descriptionKey: "app_version_2026_11_desc",
     behaviours: ["libraryImport"],
   },
 ];

@@ -49,7 +49,7 @@ therefore CLEARS the stored language for every pre-release database rather than 
 intent from it. One tap for someone who did want English; the alternative is a Slovene trainer
 stuck in an English app with no prompt.
 
-### The schema-version line: 1 → 4, with 5 reserved
+### The schema-version line: 1 → 6
 
 `schemaVersion` is a **chain**, not a single current value. A database enters it wherever it was
 last stamped and walks only the steps it is missing.
@@ -60,9 +60,10 @@ last stamped and walks only the steps it is missing.
 | **1 → 2** | `bookings` carried over to `sessions` |
 | **2 → 3** | every session given an absolute `startDate` |
 | **3 → 4** | stored language cleared so every trainer is asked once |
-| **4** | **the active schema** (since 2026-09-17): what this build reads, writes and stamps, and the shape backups are written at |
+| **4 → 5** | nothing to convert: schema 5 only adds `exercises.source` and `circuits` |
+| **5 → 6** | `history` and `planUpdates` become programs, attendance and exercise notes (§3, the session model) |
+| **6** | **the active schema** (since 2026-10-02): what this build reads, writes and stamps, and the shape backups are written at. 4 and 5 stay live and are written from it |
 | **"P"** | the preview schema installs were stamped with before 4 became active. Read as 4, never written: everything it held moved into 4. Replaced by **PREVIEW**, which a live build refuses rather than migrates |
-| **5** | **does not exist yet.** Reserved for the first stable release. A preview shape never becomes a step on the way to it |
 
 **Every numbered version is a live input, not history.** Two preview instances are demoed on real
 PTs' devices and backups restore from 1–4, so each step has real work to do. The chain was briefly
@@ -83,7 +84,7 @@ back through the chain, which would re-ask the language question.
 **A preview shape is a dead branch, never a step** (ruled 2026-09-17): a chain 4 → PREVIEW → 5 must
 not exist. `migrateState` refuses a preview version by WHAT IT IS — `isPreviewVersion`: the name
 PREVIEW, or any fractional number — before it compares ranks, because a rank would only refuse it
-while the active schema is lower. `PREVIEW_SCHEMA_RANK` (5.5) is left for ordering alone.
+while the active schema is lower. `PREVIEW_SCHEMA_RANK` (6.5) is left for ordering alone.
 
 **Preview data is dropped on every preview change** rather than migrated — that is what makes an
 unstable shape safe to iterate on, and why a preview shape needs no migration steps of its own.
@@ -561,17 +562,27 @@ cache as `circuitRounds[circuitId]`, never in a history record — a finished re
 rounds were **prescribed** (`circuitSeries`) and what was **performed** (each member's `sets`), which
 is enough to reconstruct the block without storing a cursor into a session that has ended.
 
-### The new session model — declared in PREVIEW, written by nothing yet (ruled 2026-10-02)
+### The session model — schema 6 (ruled 2026-10-02)
 
-It replaces `history` and the live-session cache of §7. A **session** stays the booked slot, and is
+It replaces `history` and `planUpdates`, and is to replace the live-session cache of §7. A **session** stays the booked slot, and is
 marked `cancelled` when the trainer cancels it. What each client does in it is a **program** of their
 own (`clientPrograms`, status planned, live or done), linked to zero or one session: a client's
 cancellation moves their program off the session, to unscheduled or to another date. Clients who
 share one program are a **group** (`groupSharedPrograms`), and each member still has their own copy.
 **Attendance** (`sessionAttendance`) says whether a client came and whether the session uses up one
 of their package. A note about an exercise of a program is an **exercise note** (`exerciseNotes`); a
-note about the person is a **client note** (`clientNotes`). Schemas 4 and 5 stay live for at least
-two months beside it, so the star write (§4) must keep producing their `history` records from these.
+note about the person is a **client note** (`clientNotes`, still only in PREVIEW: no screen writes
+it yet). Schemas 4 and 5 stay live for at least two months beside it, so every save builds their
+`history` and `planUpdates` from these ([schemaShapes.js](../src/data/schemaShapes.js)), and everything
+read from an older store, backup or sync file is converted on the way in. Feature code reads and
+writes trainings only through [trainingRecords.js](../src/data/trainingRecords.js).
+
+A finished record from before schema 6 never said which session it came from. The conversion links
+it where exactly one session fits — finished, not cancelled, the same day, the client among its
+participants, narrowed by the routine — and records attendance there; otherwise the program has no
+session. Ids are carried, so the same old backup restored twice overwrites instead of duplicating.
+**Deletes are reconciled per store**: a note can stop being a plan update in schemas 4 and 5 while it
+stays an exercise note in 6, so the stores no longer share one id set.
 
 ```mermaid
 erDiagram
@@ -654,8 +665,8 @@ durable copy makes PREVIEW rebuildable rather than something that must be preser
 cost the backup and sync surfaces warn about, applied at the same boundary.
 
 - **Reads come from one DECLARED schema**, never derived. `DEFAULT_READ_SCHEMA` in
-  [recordSchemas.js](../src/data/recordSchemas.js) is what every install reads — schema 5 since
-  2026-09-23, 4 from 2026-09-17, P before. **It is the newest numbered schema, whatever app version the
+  [recordSchemas.js](../src/data/recordSchemas.js) is what every install reads — schema 6 since
+  2026-10-02, 5 from 2026-09-23, 4 from 2026-09-17, P before. **It is the newest numbered schema, whatever app version the
   trainer runs**: the app version decides behaviour, never what is read. Memory holds only
   what the read brings in, and a save, a backup and a Drive sync are all built from memory — so
   reading a narrower schema would drop from the next backup what only the wider one holds, and a

@@ -18,21 +18,23 @@
 // own small transform again, which is what lets the import banner tell a trainer what actually
 // moved rather than "upgraded from the floor".
 //
-// **Schema 5 is the active schema** (2026-09-23): the shape this build reads, writes and
-// stamps. Schema 4 was, from 2026-09-17 (Simon); before that the build read and stamped the
-// preview schema "P". Everything P held beyond 4 was moved into schema 4 that day, so a stored "P"
+// **Schema 6 is the active schema** (2026-10-02): the shape this build reads, writes and
+// stamps. Schema 5 was, from 2026-09-23; schema 4 from 2026-09-17 (Simon); before that the build
+// read and stamped the preview schema "P". Everything P held beyond 4 was moved into schema 4 that day, so a stored "P"
 // means schema 4 and ranks as 4 — neither refused as newer nor walked back through the chain from
 // the floor.
 //
 // A PREVIEW shape is a dead branch, never a step: newer than 4, but a chain 4 → PREVIEW → 5 must not
 // exist. A live build therefore refuses data stamped with a preview shape rather than migrating it.
 
+import { toDomainState } from "./schemaShapes.js";
+
 // Legacy databases predate the field entirely; anything without a `schemaVersion` is version 1.
 // A value BELOW the floor — 0, or anything unrecognisable — means the same thing and enters here.
 // The frozen corpus stamps 0 deliberately, so the chain's entry point is visible in the fixture.
 export const BASELINE_SCHEMA_VERSION = 1;
 
-export const CURRENT_SCHEMA_VERSION = 5;
+export const CURRENT_SCHEMA_VERSION = 6;
 
 // The preview schema installs were stamped with before schema 4 became active. Read, never written.
 export const LEGACY_PREVIEW_VERSION = "P";
@@ -49,13 +51,13 @@ export function isPreviewVersion(version) {
 
 // How a preview shape ORDERS against numbered versions — never stored, never shown. Above the active
 // schema, so a live build refuses preview data as newer instead of migrating it into the chain.
-export const PREVIEW_SCHEMA_RANK = 5.5;
+export const PREVIEW_SCHEMA_RANK = 6.5;
 
 /**
  * Comparable rank for a stored version: a number, the legacy "P", or null when it is unrecognisable.
  *
  * A fractional version is a preview shape, and every one ranks the same: preview data is disposable,
- * so there is nothing to gain from telling 4.5 apart from 5.5.
+ * so there is nothing to gain from telling 4.5 apart from 6.5.
  */
 export function schemaRank(version) {
   if (version === LEGACY_PREVIEW_VERSION) return 4;
@@ -167,6 +169,23 @@ export const MIGRATION_STEPS = [
     // chain, so a schema-4 file is read as 4 and stamped 5 with its history complete.
     apply(state) {
       return { state, notes: [] };
+    },
+  },
+  {
+    from: 5,
+    to: 6,
+    description: "Store each client's training as a program of their own",
+    // `history` and `planUpdates` become programs, attendance and exercise notes (ruled 2026-10-02,
+    // Simon). The conversion is the same one every read of an older store runs (schemaShapes.js), so a
+    // restored schema-5 file and a phone's schema-5 store arrive in memory alike.
+    apply(state) {
+      const trainings = (state.history || []).length;
+      const updates = (state.planUpdates || []).length;
+      const converted = toDomainState(state);
+      const notes = [];
+      if (trainings > 0) notes.push(`${trainings} training record(s) became client programs`);
+      if (updates > 0) notes.push(`${updates} plan update(s) became exercise notes`);
+      return { state: converted, notes };
     },
   },
 ];

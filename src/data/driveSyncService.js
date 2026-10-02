@@ -82,7 +82,9 @@ import {
   revokeAccess,
 } from "./googleAuth.js";
 import { withoutOpenEdits } from "./openRecordEdits.js";
-import { COLLECTIONS } from "./recordProjections.js";
+import { collectionsForSchema } from "./recordProjections.js";
+import { BACKUP_SCHEMA, LIVE_SCHEMAS } from "./recordSchemas.js";
+import { toDomainState } from "./schemaShapes.js";
 import { withoutSeedRecords } from "./seedProvenance.js";
 import {
   getState,
@@ -107,6 +109,11 @@ let lockedSnapshot = null;
 // until `primeAheadCache()` resolves at boot or a sync completes — and while it is null every local
 // record counts as ahead, because none of them has reached Drive. See getAheadCount below for why
 // that replaced an earlier "report 0 until we have something to diff against".
+// The collections a sync file carries: those of the schema a backup is written at, the same file
+// shape a downloaded backup has. Not every projectable collection: `history` and `planUpdates` are
+// still projectable for schemas 4 and 5, but memory and the sync file hold the session model.
+const SYNCED_COLLECTIONS = collectionsForSchema(LIVE_SCHEMAS[BACKUP_SCHEMA]);
+
 let cachedAncestor = null;
 
 /** Populates `cachedAncestor` from IndexedDB meta — a local-only read, no network. Called once at
@@ -146,7 +153,7 @@ export function getAheadCount() {
   //
   // A record still open in its form counts as it was before the form opened.
   return countChangedRecords(
-    COLLECTIONS,
+    SYNCED_COLLECTIONS,
     withoutSeedRecords(cachedAncestor || {}),
     withoutSeedRecords(withoutOpenEdits(getState())),
   );
@@ -213,7 +220,7 @@ export async function refreshSyncCounts() {
     const { remoteState, locked } = await fetchRemoteSnapshot(token, meta);
     // No key for this file: the counts stay as they were, like every other failure here.
     if (locked) return;
-    cachedBehind = countChangedRecords(COLLECTIONS, meta.ancestor || {}, remoteState);
+    cachedBehind = countChangedRecords(SYNCED_COLLECTIONS, meta.ancestor || {}, remoteState);
     notifyCountsChanged();
   } catch (error) {
     console.warn("Drive sync counter refresh failed:", error);
@@ -320,7 +327,9 @@ async function fetchRemoteSnapshot(token, meta) {
     if (existing) fileId = existing.id;
   }
   const downloaded = fileId ? (await downloadSyncFile(token, fileId)) || {} : {};
-  if (!isEncryptedBackup(downloaded)) return { fileId, remoteState: downloaded };
+  // A file another device wrote with an older build holds trainings in the old shape; it is merged
+  // with memory record by record, so it arrives in memory's shape (schemaShapes.js).
+  if (!isEncryptedBackup(downloaded)) return { fileId, remoteState: toDomainState(downloaded) };
 
   // Encrypted on Drive. Without the key this pass CANNOT continue: see the header — an unreadable
   // snapshot is indistinguishable from an empty one, and merging an empty remote would delete
@@ -331,7 +340,7 @@ async function fetchRemoteSnapshot(token, meta) {
     return { fileId, remoteState: null, locked: true };
   }
   try {
-    const remoteState = await decryptBackup(downloaded, { key: stored.key });
+    const remoteState = toDomainState(await decryptBackup(downloaded, { key: stored.key }));
     lockedSnapshot = null;
     return { fileId, remoteState };
   } catch {
@@ -419,13 +428,13 @@ export async function syncNow() {
     const { token, meta, fileId, remoteState } = prepared;
 
     const localState = getState();
-    const { mergedState, conflicts } = mergeState(COLLECTIONS, {
+    const { mergedState, conflicts } = mergeState(SYNCED_COLLECTIONS, {
       base: meta.ancestor || {},
       local: localState,
       remote: remoteState,
     });
 
-    for (const collection of COLLECTIONS) {
+    for (const collection of SYNCED_COLLECTIONS) {
       localState[collection] = mergedState[collection];
     }
 
@@ -436,7 +445,7 @@ export async function syncNow() {
     const registerResult = await syncRegister(mergedState);
     if (registerResult) {
       const filtered = await applySuppressions(mergedState, registerResult.list);
-      for (const collection of COLLECTIONS) {
+      for (const collection of SYNCED_COLLECTIONS) {
         localState[collection] = filtered.state[collection];
       }
       reErasedOnSync = filtered.reErased;

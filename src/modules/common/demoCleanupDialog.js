@@ -30,8 +30,9 @@ export function initDemoCleanupDialog(injected) {
 const COLLECTION_LABEL_KEYS = {
   clients: "demo_cleanup_clients",
   sessions: "demo_cleanup_sessions",
-  history: "demo_cleanup_history",
-  planUpdates: "demo_cleanup_plan_updates",
+  clientPrograms: "demo_cleanup_history",
+  exerciseNotes: "demo_cleanup_exercise_notes",
+  sessionAttendance: "demo_cleanup_attendance",
   routines: "demo_cleanup_routines",
   exercises: "demo_cleanup_exercises",
   notifications: "demo_cleanup_notifications",
@@ -45,7 +46,14 @@ function label(collection) {
 // A record's human name, whatever the collection calls it. Falls back to the id so a row is never
 // blank — an unnamed row a trainer cannot identify is worse than a technical one.
 function displayName(record) {
-  return record.name || record.title || record.clientName || record.routineName || record.id;
+  return (
+    record.name ||
+    record.title ||
+    record.clientName ||
+    record.routineName ||
+    record.exerciseName ||
+    record.id
+  );
 }
 
 function findRecord(state, collection, id) {

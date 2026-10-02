@@ -5,7 +5,7 @@
 //     of freezing whatever language it was written in.
 //   • SYNTHETIC items are computed fresh and never stored — they are not messages, they are WORK the
 //     trainer still owes a client. Storing them would mean a second copy of a truth that already
-//     lives in state.history / state.planUpdates, and the two would drift.
+//     lives in the stored programs and exercise notes, and the two would drift.
 //
 // Synthetic items lead, because outstanding work outranks FYI.
 //
@@ -15,6 +15,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { planDemoRemoval } from "../../../src/data/demoDataRemoval.js";
 import { COLLECTIONS } from "../../../src/data/recordProjections.js";
+import { addPendingNote, recordTrainings } from "../../../src/data/trainingRecords.js";
 import {
   buildCrashReportItem,
   buildEscapedTestDataItem,
@@ -34,6 +35,22 @@ const t = (key) => {
   return "";
 };
 
+// A state holding these trainings and pending notes, written the one way the app writes them
+// (data/trainingRecords.js), with a client list the feed takes names from.
+const CLIENTS = [
+  { id: "c1", name: "Ana" },
+  { id: "c2", name: "Bo" },
+  { id: "c3", name: "Cy" },
+];
+function withTrainings({ trainings = [], notes = [], ...rest }) {
+  const state = { clients: CLIENTS, ...rest };
+  recordTrainings(state, trainings);
+  for (const note of notes) addPendingNote(state, note);
+  return state;
+}
+const DRAFT = { id: "h1", clientId: "c1", isPlanning: true, title: "Draft" };
+const PENDING = { id: "u1", clientId: "c1", resolved: false };
+
 test("an empty app produces an empty feed, not placeholder noise", () => {
   assert.deepEqual(resolveNotificationItems({}, t, []), []);
   assert.equal(buildUnscheduledPlansItem({}, t), null);
@@ -41,13 +58,13 @@ test("an empty app produces an empty feed, not placeholder noise", () => {
 });
 
 test("every drafted plan gets its own resume action", () => {
-  const state = {
-    history: [
-      { id: "h1", isPlanning: true, title: "Winter block", clientName: "Ana" },
-      { id: "h2", isPlanning: true, title: "", clientName: "Bo" },
-      { id: "h3", clientName: "Cy" }, // completed history, not a draft
+  const state = withTrainings({
+    trainings: [
+      { id: "h1", clientId: "c1", isPlanning: true, title: "Winter block" },
+      { id: "h2", clientId: "c2", isPlanning: true, title: "" },
+      { id: "h3", clientId: "c3" }, // completed history, not a draft
     ],
-  };
+  });
 
   const item = buildUnscheduledPlansItem(state, t);
 
@@ -64,18 +81,18 @@ test("a plan's row carries the day it was written for", () => {
   // Cancelling a course leaves one plan per evening it had. Named by title and client alone they
   // arrive as identical lines — seven of them, in the run that found this — and a trainer cannot
   // tell which is which or which one to resume.
-  const state = {
-    history: [
+  const state = withTrainings({
+    trainings: [
       {
         id: "h1",
+        clientId: "c1",
         isPlanning: true,
         title: "Morning series",
-        clientName: "Ana",
         date: new Date(2026, 9, 5, 7, 15).toISOString(),
       },
-      { id: "h2", isPlanning: true, title: "Morning series", clientName: "Ana" },
+      { id: "h2", clientId: "c1", isPlanning: true, title: "Morning series" },
     ],
-  };
+  });
 
   const [dated, undated] = buildUnscheduledPlansItem(state, t).actions;
   assert.equal(dated.label, "Morning series · Ana · 2026-10-05");
@@ -84,15 +101,15 @@ test("a plan's row carries the day it was written for", () => {
 });
 
 test("pending feedback is grouped by client, counted per client", () => {
-  const state = {
-    planUpdates: [
-      { id: "u1", clientId: "c1", clientName: "Ana", resolved: false },
-      { id: "u2", clientId: "c1", clientName: "Ana", resolved: false },
-      { id: "u3", clientId: "c2", clientName: "Bo", resolved: false },
-      { id: "u4", clientId: "c3", clientName: "Cy", resolved: true },
+  const state = withTrainings({
+    notes: [
+      { id: "u1", clientId: "c1", resolved: false },
+      { id: "u2", clientId: "c1", resolved: false },
+      { id: "u3", clientId: "c2", resolved: false },
+      { id: "u4", clientId: "c3", resolved: true },
     ],
     sessions: [{ id: "s1", title: "Group S&C", participants: ["c1"] }],
-  };
+  });
 
   const item = buildPendingSessionsItem(state, t);
 
@@ -109,7 +126,7 @@ test("pending feedback is grouped by client, counted per client", () => {
 });
 
 test("a resolved signal is not pending", () => {
-  const state = { planUpdates: [{ id: "u1", clientId: "c1", clientName: "Ana", resolved: true }] };
+  const state = withTrainings({ notes: [{ ...PENDING, resolved: true }] });
   assert.equal(buildPendingSessionsItem(state, t), null);
 });
 
@@ -144,11 +161,11 @@ test("stored items resolve their i18n keys, and pass literals through untouched"
 });
 
 test("work the trainer owes leads the feed, ahead of FYI messages", () => {
-  const state = {
+  const state = withTrainings({
     notifications: [{ id: "n1", title: "FYI", actions: [] }],
-    history: [{ id: "h1", isPlanning: true, title: "Draft", clientName: "Ana" }],
-    planUpdates: [{ id: "u1", clientId: "c1", clientName: "Ana", resolved: false }],
-  };
+    trainings: [DRAFT],
+    notes: [PENDING],
+  });
 
   assert.deepEqual(
     resolveNotificationItems(state, t, []).map((item) => item.id),
@@ -160,13 +177,13 @@ test("the demo-mode notice leads everything, even the work items", () => {
   // Wanted 2026-08-25: it was sitting under demo-generated bookings and pending work. Every other
   // item is a claim about the trainer's own gym — reading one before knowing the data is a fiction
   // is reading it wrong — and this card is also the collapsed drawer's summary line.
-  const state = {
+  const state = withTrainings({
     notifications: [
       { id: "spot-reservation-1", type: "reservation", title: "Booked", actions: [] },
       { id: "demo-mode-notice", type: "demo-mode", title: "Demo data", actions: [] },
     ],
-    history: [{ id: "h1", isPlanning: true, title: "Draft", clientName: "Ana" }],
-  };
+    trainings: [DRAFT],
+  });
 
   assert.deepEqual(
     resolveNotificationItems(state, t, []).map((item) => item.id),
@@ -175,10 +192,10 @@ test("the demo-mode notice leads everything, even the work items", () => {
 });
 
 test("read state applies to synthetic items too, or they could never be dismissed", () => {
-  const state = {
+  const state = withTrainings({
     notifications: [{ id: "n1", title: "FYI", actions: [] }],
-    history: [{ id: "h1", isPlanning: true, title: "Draft", clientName: "Ana" }],
-  };
+    trainings: [DRAFT],
+  });
 
   const items = resolveNotificationItems(state, t, ["synthetic-unscheduled-plans"]);
 
@@ -192,10 +209,10 @@ test("a failed sync leads the feed, ahead of the work items", () => {
   // Once a header tap syncs directly instead of opening the Sync & Backup dialog, the
   // feed is where a failure lives. Everything else here is work waiting; this is something the
   // trainer asked for that did not happen, so it goes first or it is missed.
-  const state = {
+  const state = withTrainings({
     notifications: [{ id: "n1", title: "FYI", actions: [] }],
-    history: [{ id: "h1", isPlanning: true, title: "Draft", clientName: "Ana" }],
-  };
+    trainings: [DRAFT],
+  });
   const failure = { at: 1_700_000_000_000, message: "Session expired — tap to reconnect." };
 
   const items = resolveNotificationItems(state, t, [], failure);

@@ -9,6 +9,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import * as proj from "../../../src/data/recordProjections.js";
 import * as schemas from "../../../src/data/recordSchemas.js";
+import { CONVERTED_COLLECTIONS, toDomainState } from "../../../src/data/schemaShapes.js";
 import * as rec from "../../../src/domain/sessionItemRecord.js";
 
 // Real object literals the app's write path actually builds — mirrors recordSchemas.test.mjs's
@@ -54,20 +55,32 @@ function buildLiveWriters() {
     exercises: rec.buildProgramSnapshot(clientState),
     feedback: [{ id: "u-new", clientId: "c1", exerciseName: "Squat", tag: "ok", note: "" }],
   };
-  return { clients: newClient, planUpdates: newFeedback, history: clientLog };
+  // The same training and note as memory holds them since schema 6, made by the one conversion every
+  // older store and file goes through.
+  const model = toDomainState({ history: [clientLog], planUpdates: [newFeedback], sessions: [] });
+  return {
+    clients: newClient,
+    planUpdates: newFeedback,
+    history: clientLog,
+    clientPrograms: model.clientPrograms[0],
+    exerciseNotes: model.exerciseNotes[0],
+  };
 }
 
 test("schema evolution is additive never drops a field", () => {
   // Expand-first: a field lands in every live schema before the UI that writes it
   // ever ships, so a live schema's declared field set may only grow release over release, never
   // shrink — a field disappearing would silently break every OLDER build still writing it.
+  // The one exception is a collection the conversion carries into newer ones (schema 6's
+  // `history` and `planUpdates`): not dropped, but converted wherever it arrives.
   const older = schemas.SCHEMA_4;
   const newer = schemas.SCHEMA_PREVIEW;
   const dropped = [];
   for (const collection of Object.keys(older)) {
     const newerShape = newer[collection];
     if (!newerShape) {
-      dropped.push(`${collection}: whole collection`);
+      if (!CONVERTED_COLLECTIONS.includes(collection))
+        dropped.push(`${collection}: whole collection`);
       continue;
     }
     for (const field of schemas.fieldNamesOf(older[collection])) {
@@ -81,11 +94,13 @@ test("every live writer shape validates against every live schema", () => {
   // The staging guard itself: every real object literal the write path builds must satisfy
   // EVERY live schema's required fields, not only the one it happened to be checked against first —
   // this is what makes writing into a newly-cut schema safe on day one, rather than discovered by a
-  // trainer on a downgrade.
+  // trainer on a downgrade. Every live schema that DECLARES the collection: a record goes into no
+  // other store (the test below).
   const liveWriters = buildLiveWriters();
   const failures = [];
   for (const [schemaMajor, schema] of Object.entries(schemas.LIVE_SCHEMAS)) {
     for (const [collection, record] of Object.entries(liveWriters)) {
+      if (!proj.schemaAcceptsCollection(schema, collection)) continue;
       const issues = proj.projectionIssues(collection, record, schema);
       if (issues.length) failures.push({ schema: schemaMajor, collection, issues });
     }
@@ -159,9 +174,19 @@ test("a record is written only to schemas that declare its collection", () => {
   assert.equal(proj.schemaAcceptsCollection(schemas.SCHEMA_4, "previewProbe"), false);
   // Everything that is not preview-only still goes everywhere, or staging would have quietly become
   // a way to lose ordinary records.
-  for (const collection of ["clients", "sessions", "history", "planUpdates", "invites"]) {
+  for (const collection of ["clients", "sessions", "invites"]) {
     assert.equal(proj.schemaAcceptsCollection(schemas.SCHEMA_4, collection), true, collection);
     assert.equal(proj.schemaAcceptsCollection(STAGED_PREVIEW, collection), true, collection);
+  }
+  // A training goes into each store in that store's shape, and into no other.
+  for (const [collection, oldShape] of [
+    ["history", true],
+    ["planUpdates", true],
+    ["clientPrograms", false],
+    ["exerciseNotes", false],
+  ]) {
+    assert.equal(proj.schemaAcceptsCollection(schemas.SCHEMA_5, collection), oldShape, collection);
+    assert.equal(proj.schemaAcceptsCollection(schemas.SCHEMA_6, collection), !oldShape, collection);
   }
 });
 

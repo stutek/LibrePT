@@ -3,7 +3,11 @@
 // History is shown in one place: a client's page (clientsView.js calls renderHistoryItems). The view
 // that listed every client's sessions together was removed — a trainer reads one person's history,
 // not everyone's.
+//
+// It draws programs and their exercise notes as data/trainingRecords.js reads them; where they are
+// stored is that module's business.
 import { orderedItems } from "../../data/sessionItemOrder.js";
+import { programDate } from "../../data/trainingRecords.js";
 import {
   formatCompactDuration,
   formatMetricValue,
@@ -29,16 +33,16 @@ function resolveFeedbackIconClass(tag) {
   );
 }
 
-function buildFeedbackIconsHTML(log, ex, t) {
-  const feedbackItems = (log.feedback || []).filter((f) => f.exerciseName === ex.name);
+// `notes` are the program's own exercise notes.
+function buildFeedbackIconsHTML(notes, ex, t) {
   let html = "";
-  for (const f of feedbackItems) {
-    const tooltipBody = f.note ? escapeHTML(f.note) : t("no_details_specified");
+  for (const note of notes.filter((entry) => entry.exerciseName === ex.name)) {
+    const tooltipBody = note.text ? escapeHTML(note.text) : t("no_details_specified");
     html += `
           <span class="history-feedback-icon">
-            <i class="${resolveFeedbackIconClass(f.tag)}"></i>
+            <i class="${resolveFeedbackIconClass(note.tag)}"></i>
             <span class="tooltip-content">
-              <div class="tooltip-title">${escapeHTML(feedbackTagText(f.tag, t))}</div>
+              <div class="tooltip-title">${escapeHTML(feedbackTagText(note.tag, t))}</div>
               <div class="tooltip-body">${tooltipBody}</div>
             </span>
           </span>
@@ -77,15 +81,15 @@ function buildExerciseSetsText(ex, metric, modality) {
     .join(", ");
 }
 
-function addSaveAsRoutineButton({ card, log, t, saveAsRoutine }) {
-  if (!saveAsRoutine || log.isPlanning) return;
+function addSaveAsRoutineButton({ card, program, t, saveAsRoutine }) {
+  if (!saveAsRoutine || program.status === "planned") return;
   const button = document.createElement("button");
   button.type = "button";
   button.className = "btn secondary-btn btn-sm history-save-routine";
   button.textContent = t("history_save_as_routine");
   button.addEventListener("click", (e) => {
     e.stopPropagation();
-    saveAsRoutine(log);
+    saveAsRoutine(program);
   });
   card.appendChild(button);
 }
@@ -95,21 +99,28 @@ function addSaveAsRoutineButton({ card, log, t, saveAsRoutine }) {
 // built on (controllers orchestrate views, not the reverse) — gated by
 // agent_tools/import_layers.py. Injected, this file stays independently mountable.
 //
-// `saveAsRoutine(log)` is injected for the same reason: it stores a routine and opens the editor,
-// which are the controllers' business. Without it, no button is drawn.
+// `saveAsRoutine(program)` is injected for the same reason: it stores a routine and opens the
+// editor, which are the controllers' business. Without it, no button is drawn.
+//
+// `notes` may hold other programs' notes too; each card shows only those written on its program.
+// `clientName` heads every card: the programs are one client's.
 export function renderHistoryItems({
-  historyList,
+  programs,
+  notes = [],
+  clientName = "",
   container,
   t,
   openSessionFromHistory,
   saveAsRoutine,
 }) {
   const fragment = document.createDocumentFragment();
-  for (const log of historyList) {
+  for (const program of programs) {
     const card = document.createElement("div");
     card.className = "history-card card glassmorphic";
+    const planned = program.status === "planned";
+    const programNotes = notes.filter((note) => note.programId === program.id);
 
-    const minutes = Math.floor(log.duration / 60);
+    const minutes = Math.floor(program.duration / 60);
     const durationText = minutes > 0 ? `${minutes} ${t("min_session")}` : t("less_than_minute");
 
     // One logged exercise row — greyed with a "skipped" badge when the movement was prescribed but
@@ -119,7 +130,7 @@ export function renderHistoryItems({
       const modality = ex.modality || "strength";
       const skipped = isSkippedRecord(ex);
       const setsText = skipped ? "" : buildExerciseSetsText(ex, metric, modality);
-      const feedbackIconsHTML = buildFeedbackIconsHTML(log, ex, t);
+      const feedbackIconsHTML = buildFeedbackIconsHTML(programNotes, ex, t);
       const skipBadge = skipped ? `<span class="history-skip-badge">${t("skipped")}</span>` : "";
       return `
         <div class="history-ex-row${skipped ? " history-ex-skipped" : ""}">
@@ -146,7 +157,7 @@ export function renderHistoryItems({
     };
     // A restored or hand-edited backup can carry a log with no exercises — render the header
     // rather than throwing partway through the list.
-    for (const item of orderedItems(log.exercises)) {
+    for (const item of orderedItems(program.exercises)) {
       const cid = item.circuitId || null;
       if (cid !== openCircuit) {
         closeCircuit();
@@ -167,10 +178,10 @@ export function renderHistoryItems({
     card.innerHTML = `
       <div class="history-card-header">
         <div class="history-header-meta">
-          <h4>${escapeHTML(log.clientName)}</h4>
-          <p>${escapeHTML(log.routineName)}${log.isPlanning ? "" : ` • ${durationText}`}</p>
+          <h4>${escapeHTML(clientName)}</h4>
+          <p>${escapeHTML(program.routineName)}${planned ? "" : ` • ${durationText}`}</p>
         </div>
-        <div class="history-date">${log.isPlanning ? t("planned_program") || "Planned Program" : formatDateStr(log.date)}</div>
+        <div class="history-date">${planned ? t("planned_program") || "Planned Program" : formatDateStr(programDate(program))}</div>
       </div>
       <div class="history-exercise-log">
         ${exercisesLogHTML}
@@ -178,11 +189,11 @@ export function renderHistoryItems({
     `;
 
     card.addEventListener("click", () => {
-      openSessionFromHistory(log);
+      openSessionFromHistory(program);
     });
 
     // A performed session can seed a routine; a planned one already is a prescription.
-    addSaveAsRoutineButton({ card, log, t, saveAsRoutine });
+    addSaveAsRoutineButton({ card, program, t, saveAsRoutine });
 
     // Tap a feedback/notes icon to toggle its tooltip; stop the tap from also opening the
     // session (the card's own click). Replaces inline onclick= so CSP can forbid inline script.

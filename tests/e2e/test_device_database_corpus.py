@@ -142,6 +142,26 @@ def test_a_schema_4_install_reads_schema_5_with_everything_it_had(page, local_se
     expected = {}
     for record in store4["records"]:
         expected[record["collection"]] = expected.get(record["collection"], 0) + 1
+    # Since schema 6 a training arrives as a program of its own, and a plan update and the feedback
+    # filed inside a record as exercise notes — one note per id, because the two were the same note
+    # filed twice (src/data/sessionModelConversion.js).
+    history = [
+        record for record in store4["records"] if record["collection"] == "history"
+    ]
+    note_ids = {
+        record["id"]
+        for record in store4["records"]
+        if record["collection"] == "planUpdates"
+    }
+    for record in history:
+        for index, item in enumerate(record.get("feedback") or []):
+            note_ids.add(item.get("id") or f"{record['id']}-f{index}")
+    expected.pop("history", None)
+    expected.pop("planUpdates", None)
+    if history:
+        expected["clientPrograms"] = len(history)
+    if note_ids:
+        expected["exerciseNotes"] = len(note_ids)
 
     _boot_snapshot(page, local_server, "schema4_era_install.json")
     loaded = page.evaluate(COUNTS)

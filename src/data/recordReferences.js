@@ -20,6 +20,13 @@ export const REFERENCES = {
   // is exactly the test this file applies. Still acyclic: invites point at sessions and clients, and
   // neither points back.
   invites: { sessionId: "sessions", clientId: "clients" },
+  // The session model (schema 6). Still acyclic: everything points down at sessions, clients and
+  // programs, and none of those points back.
+  clientPrograms: { clientId: "clients", sessionId: "sessions" },
+  sessionAttendance: { sessionId: "sessions", clientId: "clients", programId: "clientPrograms" },
+  groupSharedPrograms: { sessionId: "sessions" },
+  exerciseNotes: { clientId: "clients", programId: "clientPrograms" },
+  clientNotes: { clientId: "clients" },
 };
 
 const WHITE = 0;

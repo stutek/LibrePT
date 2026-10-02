@@ -34,8 +34,9 @@ const state = {
   ],
   routines: [{ id: 'r1', name: 'Upper Body' }],
   exercises: [],
-  history: [],
-  planUpdates: [],
+  clientPrograms: [],
+  exerciseNotes: [],
+  sessionAttendance: [],
 };
 
 // What a refused save must NOT do: reach the session at all.

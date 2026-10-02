@@ -22,7 +22,7 @@ import { openSessionInviteDialog } from './modules/session/sessionInviteDialog.j
 const state = {
   lang: 'en',
   clients: [{ id: 'c1', name: 'Jane Doe', email: 'jane@librept.test' }],
-  sessions: [], routines: [], exercises: [], history: [], planUpdates: [],
+  sessions: [], routines: [], exercises: [], clientPrograms: [], exerciseNotes: [], sessionAttendance: [],
 };
 
 bootSessionInviteDialog({ getState: () => state, t });

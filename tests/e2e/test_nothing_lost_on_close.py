@@ -63,7 +63,8 @@ def _review_tags(page):
     return page.evaluate(
         """async () => {
             const store = await import(new URL('data/stateStore.js', document.baseURI).href);
-            return store.getState().planUpdates.map((u) => u.tag);
+            const records = await import(new URL('data/trainingRecords.js', document.baseURI).href);
+            return records.pendingNotes(store.getState()).map(records.noteTagLine);
         }"""
     )
 

@@ -44,12 +44,13 @@ import {
 } from "./readSchema.js";
 import {
   COLLECTIONS,
+  collectionsForSchema,
   groupRecordsByCollection,
   projectCollection,
-  schemaAcceptsCollection,
 } from "./recordProjections.js";
 import { LIVE_SCHEMAS, fieldsHiddenFrom, narrowToSchema } from "./recordSchemas.js";
 import { STATE_COLLECTIONS, describeMigration, migrateState } from "./schemaMigrations.js";
+import { holdsOldTrainingShape, stateForSchema, toDomainState } from "./schemaShapes.js";
 import { DEMO_ORIGIN, stampAsSeeded } from "./seedProvenance.js";
 import { clearWorkspaceKeys, readVersionScoped, writeVersionScoped } from "./storageNamespace.js";
 import { isThisTabActive } from "./tabOwnership.js";
@@ -87,8 +88,15 @@ export function emptyState() {
     clients: [],
     exercises: [],
     routines: [],
-    history: [],
-    planUpdates: [],
+    // The session model (recordSchemas.js, SCHEMA_6): each client's own program, whether they came,
+    // which clients shared one program, and the notes on an exercise or about the person. Read and
+    // written through data/trainingRecords.js; schemas 4 and 5 get `history` and `planUpdates` built
+    // from them at every save (schemaShapes.js).
+    clientPrograms: [],
+    sessionAttendance: [],
+    groupSharedPrograms: [],
+    exerciseNotes: [],
+    clientNotes: [],
     sessions: [],
     // Invitations sent, and the answers that came back. Separate from `sessions` because
     // an RSVP is a fact about a message, and separate from `clients` because the same person answers
@@ -129,11 +137,19 @@ export function seedMockData({ origin = DEMO_ORIGIN } = {}) {
   state.clients = seeded(DEFAULT_CLIENTS);
   state.exercises = seeded(DEFAULT_EXERCISES);
   state.routines = seeded(DEFAULT_ROUTINES);
-  state.history = seeded(DEFAULT_HISTORY);
-  state.planUpdates = seeded(DEFAULT_PLAN_UPDATES);
   state.sessions = seeded(DEFAULT_SESSIONS);
   state.sessionSeries = seeded(DEFAULT_SESSION_SERIES);
   state.notifications = seeded(DEFAULT_MESSAGES);
+  // The demo's trainings are written in the old shape, so they read like any older data: converted
+  // once, after the sessions they were run in are in place to be found.
+  const trainings = toDomainState({
+    ...state,
+    history: seeded(DEFAULT_HISTORY),
+    planUpdates: seeded(DEFAULT_PLAN_UPDATES),
+  });
+  for (const key of ["clientPrograms", "sessionAttendance", "exerciseNotes"]) {
+    state[key] = trainings[key];
+  }
   // `lang` is deliberately UNTOUCHED. It used to be defaulted to "en" here, which made seeding the
   // demo answer the splash's language question on a store that had never chosen one — so a trainer
   // who cleared their browser and opened a demo link was never asked, and got a narrated demo in a
@@ -246,11 +262,11 @@ async function readMeta(db, key) {
 // re-serializes the whole blob every call — but a per-record store cannot get that for free the way
 // one blob key can: a record removed from `currentState[collection]` must be explicitly deleted, or
 // it lingers in IndexedDB forever and reappears on the next read (this is the reconciliation the
-// old engine got automatically from overwriting one key). Reads the CURRENT id set per collection
-// from the newest schema store — every live schema shares the same id set by construction, so one
-// read suffices for all of them — then star-writes the fan-out (put every current record) and the
-// delete set (every id no longer present) into every live schema store plus meta bookkeeping, in
-// one transaction.
+// old engine got automatically from overwriting one key). Reads each store's CURRENT id set per
+// collection, then star-writes the fan-out (put every current record) and that store's delete set
+// (every id it holds that its shape of the state no longer has) into every live schema store plus
+// meta bookkeeping, in one transaction.
+//
 // What each store already holds that the schema being read cannot see, keyed `${schema}|${id}`
 // Empty — and no read at all — while the install reads the newest shape, which is every
 // install today; it matters the moment one reads an older schema, where a save would otherwise put
@@ -277,57 +293,63 @@ async function fieldsTheReadSchemaCannotSee(db) {
   return kept;
 }
 
+// The collections a store of the old training shape (`history`, `planUpdates`) cannot hold at all,
+// so memory read from such a store never has them. A save made from that read must not take their
+// absence for a deletion, or the newer stores would lose them.
+const NOT_IN_OLD_TRAINING_SHAPE = ["sessionAttendance", "groupSharedPrograms", "clientNotes"];
+
+// What each store holds that the state it is written from no longer has. Per store, not once for
+// all of them: the stores no longer share one id set, because a note that stops being a plan update
+// leaves `planUpdates` in schemas 4 and 5 while it stays an exercise note in the newer ones.
+async function staleIdsPerStore(db, shaped) {
+  const readsOldShape = holdsOldTrainingShape(getReadSchema());
+  const stale = new Map();
+  for (const schema of SCHEMAS) {
+    const name = storeNameForSchema(schema);
+    const store = db.transaction([name], "readonly").objectStore(name);
+    const ids = [];
+    for (const collection of collectionsForSchema(LIVE_SCHEMAS[schema])) {
+      if (readsOldShape && NOT_IN_OLD_TRAINING_SHAPE.includes(collection)) continue;
+      const existing = await getAllKeysFromIndex(store, COLLECTION_INDEX, collection);
+      const current = new Set((shaped.get(schema)[collection] || []).map((record) => record.id));
+      ids.push(...existing.filter((id) => !current.has(id)));
+    }
+    stale.set(schema, ids);
+  }
+  return stale;
+}
+
 async function starWrite(db, currentState) {
   // Outside the transaction on purpose: it is a synchronous localStorage write, and anything that
   // is not an IDB request inside an open transaction ends it (see indexedDb.js's header).
   writeSharedLang(currentState.lang);
-  const staleIdsByCollection = {};
-  // Reconciled against the store this install READS (readSchema.js) — the one whose id set is
-  // authoritative for what the trainer is actually looking at.
-  const currentReadStore = readStoreName();
-  const readTx = db.transaction([currentReadStore], "readonly");
-  const readStore = readTx.objectStore(currentReadStore);
-  for (const collection of COLLECTIONS) {
-    const existingIds = await getAllKeysFromIndex(readStore, COLLECTION_INDEX, collection);
-    const currentIds = new Set((currentState[collection] || []).map((record) => record.id));
-    staleIdsByCollection[collection] = existingIds.filter((id) => !currentIds.has(id));
-  }
-
+  // Each store is written from the state in ITS shape: memory's own for the session model, and
+  // `history` and `planUpdates` built from it for schemas 4 and 5 (schemaShapes.js).
+  const shaped = new Map(SCHEMAS.map((schema) => [schema, stateForSchema(currentState, schema)]));
+  const stale = await staleIdsPerStore(db, shaped);
   const kept = await fieldsTheReadSchemaCannotSee(db);
 
   const storeNames = [...SCHEMAS.map(storeNameForSchema), META_STORE];
   await withTransaction(db, storeNames, "readwrite", ({ store }) => {
-    for (const collection of COLLECTIONS) {
-      // Only into stores whose schema DECLARES this collection (staging enforced 2026-08-17).
-      // Without this the fan-out wrote everything everywhere, so a preview-only
-      // collection was preview-only in name and durable in fact — and nothing said so.
-      const targets = SCHEMAS.filter((schema) =>
-        schemaAcceptsCollection(LIVE_SCHEMAS[schema], collection),
-      );
-      for (const record of currentState[collection] || []) {
-        const projected = projectCollection(collection, record);
-        for (const schema of targets) {
-          const row = narrowToSchema(projected, collection, schema);
+    for (const schema of SCHEMAS) {
+      const target = store(storeNameForSchema(schema));
+      // Only the collections this schema DECLARES (staging enforced 2026-08-17). Without this the
+      // fan-out wrote everything everywhere, so a preview-only collection was preview-only in name
+      // and durable in fact — and nothing said so.
+      for (const collection of collectionsForSchema(LIVE_SCHEMAS[schema])) {
+        for (const record of shaped.get(schema)[collection] || []) {
+          const row = narrowToSchema(projectCollection(collection, record), collection, schema);
           const hidden = kept.get(`${schema}|${record.id}`);
-          store(storeNameForSchema(schema)).put(hidden ? { ...row, ...hidden } : row);
+          target.put(hidden ? { ...row, ...hidden } : row);
         }
       }
-      // Deletes follow the same set: a store that never held the record has nothing to reconcile,
-      // and issuing the delete anyway would be a write to a shape that does not know the collection.
-      for (const id of staleIdsByCollection[collection]) {
-        for (const schema of targets) {
-          store(storeNameForSchema(schema)).delete(id);
-        }
-      }
+      for (const id of stale.get(schema)) target.delete(id);
     }
     store(META_STORE).put({ key: IMPORTED_META_KEY, value: true });
     // Persist the CHOSEN language verbatim, null included — coercing to "en" here would silently
     // record a choice the trainer never made, on the very first save.
     store(META_STORE).put({ key: LANG_META_KEY, value: currentState.lang ?? null });
   });
-  // Returned so the preview mirror deletes exactly what the canonical write just deleted, rather
-  // than re-deriving the stale set against a store that has already moved on.
-  return Object.values(staleIdsByCollection).flat();
 }
 
 // Reassemble the in-memory `state` shape from whichever live schema this install reads
@@ -382,7 +404,10 @@ function migrateLegacyBlob(savedData) {
   }
 }
 
-function finalizeLoadedState(candidate) {
+function finalizeLoadedState(loaded) {
+  // Whatever was read — an older store, a legacy blob, a page's unsaved copy from an older build —
+  // reaches memory in the shape memory holds.
+  const candidate = toDomainState(loaded);
   if (!candidate.sessions) candidate.sessions = [];
   // The shared key wins over whatever this workspace's own store remembers: the trainer answered
   // the language question once, as themselves, not once per database.
@@ -524,7 +549,10 @@ export async function readDriveSyncMeta() {
   if (!indexedDbSupported()) return null;
   const db = await getDb();
   const entry = await readMeta(db, DRIVE_SYNC_META_KEY);
-  return entry?.value || null;
+  const meta = entry?.value || null;
+  // The last state both sides agreed on, which an older build stored in the old training shape.
+  // A merge compares it record by record with memory, so it must be in memory's shape too.
+  return meta?.ancestor ? { ...meta, ancestor: toDomainState(meta.ancestor) } : meta;
 }
 
 export async function writeDriveSyncMeta(meta) {

@@ -28,10 +28,12 @@ import {
 } from './modules/plans/planAdjustments.js';
 import { escapeHTML } from './modules/common/utils.js';
 import { DEFAULT_CLIENTS, DEFAULT_PLAN_UPDATES, DEFAULT_ROUTINES } from './data/index.js';
+import { toDomainState } from './data/schemaShapes.js';
 """,
     view_id="adjustments",
     body="""
-const state = {
+// The seed and the fixtures below are written in the old shape; the app reads them converted.
+const state = toDomainState({
   lang: 'en',
   clients: structuredClone(DEFAULT_CLIENTS),
   routines: structuredClone(DEFAULT_ROUTINES),
@@ -39,7 +41,7 @@ const state = {
   exercises: [],
   sessions: [],
   history: [],
-};
+});
 window.__state = state;
 
 renderAdjustmentsViewShell();

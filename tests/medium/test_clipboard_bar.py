@@ -34,8 +34,8 @@ import { renderClipboardBar } from './modules/session/sessionBar.js';
 """,
         view_id="clients",
         body="""
-const state = { lang: 'en', clients: [], exercises: [], routines: [], sessions: [], history: [],
-                planUpdates: [], notifications: [] };
+const state = { lang: 'en', clients: [], exercises: [], routines: [], sessions: [], clientPrograms: [],
+                exerciseNotes: [], sessionAttendance: [], notifications: [] };
 const activeSession = __SESSION__;
 
 let navigatedTo = null;

@@ -1,6 +1,7 @@
 // src/controllers/sessionLifecycle.js — how a session begins and how it ends. Single responsibility:
 // the whole-session transitions — staging a plan, tapping Start, recovering one after a reload,
-// cancelling, deleting the slot behind it, and completing it into history. Injected dependencies:
+// cancelling, deleting the slot behind it, and completing it into the client's programs
+// (data/trainingRecords.js, the one way trainings are read and written). Injected dependencies:
 // `state`, `t`, `navigateToPath`, `saveToLocalStorage`, `focusSessionsColumn`, `renderSessions` and
 // `resolveRoute` arrive through activeSessionStore.js.
 //
@@ -10,6 +11,14 @@
 import { libraryExercises } from "../data/exerciseLibrary.js";
 import { newRecordId } from "../data/recordId.js";
 import { clearActiveSessionCache, readActiveSessionCache } from "../data/sessionCache.js";
+import {
+  draftPrograms,
+  feedbackFromNotes,
+  notesForProgram,
+  programDate,
+  recordTrainings,
+  removePrograms,
+} from "../data/trainingRecords.js";
 import { loggedSetsPerParticipant } from "../domain/loggedSets.js";
 import { boundClientRoutines } from "../domain/participantBinding.js";
 import { isCachedSessionStale } from "../domain/sessionClock.js";
@@ -54,31 +63,34 @@ function requestScreenWakeLock() {
   return requestScreenWakeLockHelper(getActiveSession);
 }
 
-export function openSessionFromHistory(log) {
+/** Put a stored program on the clipboard: a performed one to look back at, a planned one to edit.
+ *  The live session is rebuilt from the program, and its notes become the session's feedback. */
+export function openSessionFromHistory(program) {
   const { state, t, navigateToPath } = getAppDeps();
   if (!state || !t) return;
   clearAllTimers(); // fresh session — never inherit a previous session's timers
 
-  const clientState = buildClientStateFromHistoryLog(log, libraryExercises(state));
+  const clientState = buildClientStateFromHistoryLog(program, libraryExercises(state));
+  const planned = program.status === "planned";
 
   setActiveSession({
-    id: log.id,
-    startTime: new Date(log.date).getTime(),
-    duration: log.duration || 0,
-    participants: [log.clientId],
+    id: program.id,
+    startTime: new Date(programDate(program)).getTime(),
+    duration: program.duration || 0,
+    participants: [program.clientId],
     clientRoutines: {
-      [log.clientId]: clientState,
+      [program.clientId]: clientState,
     },
-    activeClientId: log.clientId,
-    feedback: log.feedback || [],
-    // Reopening a draft names it outright, so the sync edits THIS record even when the client has
-    // several open (upsertPlanningRecord's draftId).
-    planningDraftIds: log.isPlanning ? { [log.clientId]: log.id } : {},
-    sourceSession: log.isPlanning
+    activeClientId: program.clientId,
+    feedback: feedbackFromNotes(notesForProgram(state, program.id)),
+    // Reopening a draft names it outright, so the sync edits THIS draft even when the client has
+    // several open (saveDraft's draftId).
+    planningDraftIds: planned ? { [program.clientId]: program.id } : {},
+    sourceSession: planned
       ? {
-          id: `plan-${log.id}`,
+          id: `plan-${program.id}`,
           isPlanning: true,
-          titles: [log.title || t("planned_program") || "Planned Program"],
+          titles: [program.title || t("planned_program") || "Planned Program"],
           timeLabel: t("date_unknown") || "Date Unknown",
           location: "",
         }
@@ -89,10 +101,10 @@ export function openSessionFromHistory(log) {
     // `sourceSession`: that means "the booked slot this clipboard was launched from", and every
     // reader of it (the clipboard strip, the schedule-drift offer, the timers) would then be
     // handed a slot that was never booked.
-    finishedRecord: log.isPlanning ? null : { id: log.id, title: log.title || "" },
+    finishedRecord: planned ? null : { id: program.id, title: program.title || "" },
   });
 
-  setClipboardEditModeFlag(!!log.isPlanning);
+  setClipboardEditModeFlag(planned);
 
   saveActiveSessionToCache();
   requestScreenWakeLock();
@@ -101,7 +113,7 @@ export function openSessionFromHistory(log) {
   startSessionTimer();
 
   if (navigateToPath) {
-    navigateToPath(`/session/${log.id}/client/${log.clientId}`);
+    navigateToPath(`/session/${program.id}/client/${program.clientId}`);
   }
 }
 
@@ -202,19 +214,22 @@ export function beginWorkoutSession() {
 export function cancelWorkoutSession() {
   const activeSession = getActiveSession();
   const { state, navigateToPath, focusSessionsColumn, saveToLocalStorage } = getAppDeps();
-  // An explicit delete of a planning session must also drop its draft(s) from state.history —
+  // An explicit delete of a planning session must also drop its draft(s) from the stored programs —
   // otherwise a discarded plan keeps reappearing in the "unscheduled plans" notification message
   // it backs (syncPlanningSnapshotToHistory), which reads as the delete having silently failed.
-  if (activeSession?.sourceSession?.isPlanning && state && Array.isArray(state.history)) {
+  if (activeSession?.sourceSession?.isPlanning && state) {
     // By draft id where the clipboard knows it, so deleting one draft leaves a client's OTHER
     // drafts alone — falling back to the clientId sweep only for a session cached before drafts
     // were addressable, where the client can only have had the one.
     const ownDraftIds = new Set(Object.values(activeSession.planningDraftIds || {}));
     const participants = new Set(activeSession.participants || []);
-    state.history = state.history.filter((entry) => {
-      if (!entry.isPlanning) return true;
-      return ownDraftIds.size ? !ownDraftIds.has(entry.id) : !participants.has(entry.clientId);
-    });
+    const discarded = draftPrograms(state).filter((draft) =>
+      ownDraftIds.size ? ownDraftIds.has(draft.id) : participants.has(draft.clientId),
+    );
+    removePrograms(
+      state,
+      discarded.map((draft) => draft.id),
+    );
     if (saveToLocalStorage) saveToLocalStorage();
   }
   if (activeSession?.timerIntervalId) {
@@ -297,10 +312,10 @@ export function deleteScheduledSession() {
   const sourceSession = activeSession?.sourceSession;
   // A planning draft has no slot to remove, and deleting one is already cancelWorkoutSession's job.
   if (!state || !sourceSession || sourceSession.isPlanning) return;
-  if (!Array.isArray(state.history)) state.history = [];
   const title = sourceSession.titles?.[0] || "";
   const nowISO = new Date().toISOString();
 
+  const plans = [];
   for (const participantId of activeSession.participants) {
     const plan = buildSessionHistoryRecord({
       client: state.clients.find((client) => client.id === participantId),
@@ -310,12 +325,13 @@ export function deleteScheduledSession() {
       isPlanning: true,
       title,
     });
-    // Pushed rather than upserted: this is a NEW unscheduled plan, and a client already holding one
-    // must keep it (upsertPlanningRecord's draftId is what keeps the two apart from here on). An
-    // empty plan is not rescued — there is nothing in it to re-run, and it would only inflate the
-    // feed's outstanding-work count with a draft the trainer never wrote.
-    if (plan?.exercises?.length) state.history.push(plan);
+    // Recorded rather than saved as the client's draft: this is a NEW unscheduled plan, and a client
+    // already holding one must keep it (saveDraft's draftId is what keeps the two apart from here
+    // on). An empty plan is not rescued — there is nothing in it to re-run, and it would only
+    // inflate the feed's outstanding-work count with a draft the trainer never wrote.
+    if (plan?.exercises?.length) plans.push(plan);
   }
+  recordTrainings(state, plans);
 
   // Deleting an evening of a REPEATING session cannot mean removing the row: the rule would produce
   // that evening again on the next render, and the trainer would watch a session they just deleted
@@ -369,7 +385,7 @@ function countCompletedSets(activeSession) {
 
 // Stamp completion + elapsed time onto the session(s) this live session launched from, so the
 // dashboard's past-session status line (2.3) has something to show — previously finishing a
-// session never touched state.sessions at all, only state.history.
+// session never touched state.sessions at all, only the client's programs.
 function stampSourceSessionsCompleted(activeSession, state, sessionDuration) {
   const ss = activeSession.sourceSession;
   if (!ss || ss.isPlanning) return;
@@ -390,17 +406,21 @@ function appendHistoryRecordsForParticipants(
   sessionDateISO,
   sessionDuration,
 ) {
-  for (const pId of activeSession.participants) {
-    const clientLog = buildSessionHistoryRecord({
+  const records = activeSession.participants.map((pId) =>
+    buildSessionHistoryRecord({
       client: state.clients.find((c) => c.id === pId),
       clientState: activeSession.clientRoutines[pId],
       feedback: activeSession.feedback || [],
       dateISO: sessionDateISO,
       duration: sessionDuration,
       isPlanning: !!activeSession.sourceSession?.isPlanning,
-    });
-    if (clientLog) state.history.push(clientLog);
-  }
+    }),
+  );
+  // The session rows this clipboard was launched from, so each program is linked to the one its
+  // client was on and the client is recorded as having attended. A planning clipboard has no slot.
+  const slot = activeSession.sourceSession;
+  const sessionIds = slot && !slot.isPlanning ? [slot.id, ...(slot.ids || [])] : [];
+  recordTrainings(state, records, { sessionIds });
 }
 
 export async function finishWorkoutSession() {
@@ -432,7 +452,7 @@ export async function finishWorkoutSession() {
 
   cancelWorkoutSession();
 
-  // The finished session just produced its signals (state.planUpdates); the drawer lists them.
+  // The finished session just produced its signals (pending exercise notes); the drawer lists them.
   renderNotificationArea();
 
   renderClientsList({ state, t });

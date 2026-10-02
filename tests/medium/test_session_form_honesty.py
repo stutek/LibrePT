@@ -29,7 +29,7 @@ import { renderWorkoutSetupViewShell } from './modules/session/editSessionView.j
         view_id="workout-setup",
         body="""
 renderWorkoutSetupViewShell();
-const state = Object.assign({ exercises: [], history: [], planUpdates: [] }, __STATE__);
+const state = Object.assign({ exercises: [], clientPrograms: [], exerciseNotes: [], sessionAttendance: [] }, __STATE__);
 window.__state = state;
 bootWorkoutSetup({
   getState: () => state,

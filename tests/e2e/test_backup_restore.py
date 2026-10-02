@@ -41,8 +41,9 @@ CURRENT_BACKUP = {
     "clients": [{"id": "c1", "name": "Restored", "active": True}],
     "exercises": [],
     "routines": [],
-    "history": [],
-    "planUpdates": [],
+    "clientPrograms": [],
+    "exerciseNotes": [],
+    "sessionAttendance": [],
     "sessions": [],
     "notifications": [],
 }
@@ -92,10 +93,11 @@ def test_restore_keeps_every_collection_in_the_backup(page, local_server):
     assert [c["name"] for c in state["clients"]] == ["Restored Client"]
     assert [e["name"] for e in state["exercises"]] == ["Restored Squat"]
     assert [r["name"] for r in state["routines"]] == ["Restored Routine"]
-    assert len(state["history"]) == 1
+    # The old `history` record arrives converted: one finished program.
+    assert len(state["clientPrograms"]) == 1
     # The three collections a restore used to drop on the floor.
     assert len(state["sessions"]) == 1, "sessions must survive a restore"
-    assert len(state["planUpdates"]) == 1, (
+    assert len(state["exerciseNotes"]) == 1, (
         "pending plan adjustments must survive a restore"
     )
     assert len(state["notifications"]) == 1, "notifications must survive a restore"
@@ -188,6 +190,7 @@ def _restore_fixture(page, name):
         ("schema3_field_install.json", ["s1"], None),
         # Already past the language step: the stored choice survives.
         ("schema4_field_install.json", ["s1"], "sl"),
+        ("schema5_field_install.json", ["s5tue", "s5thu"], "sl"),
     ],
 )
 def test_restore_from_every_supported_version(
@@ -219,11 +222,24 @@ def test_restore_from_v4_preserves_logged_training(page, local_server):
 
     state = _restore_fixture(page, "schema4_field_install.json")
 
-    assert [h["id"] for h in state["history"]] == ["h1"]
-    assert state["history"][0]["exercises"][0]["sets"][0]["weight"] == 120
+    assert [p["id"] for p in state["clientPrograms"]] == ["h1"]
+    assert state["clientPrograms"][0]["exercises"][0]["sets"][0]["weight"] == 120
     # A real `startDate` is never recomputed from the coarse `day` bucket — doing so would silently
     # move a session on a trainer's calendar.
     assert state["sessions"][0]["startDate"] == "2026-08-09T16:00:00.000Z"
+
+
+def test_restore_from_v5_arrives_as_programs_and_notes(page, local_server):
+    """A schema-5 file still holds `history` and `planUpdates`. It is restored into the session
+    model: every record of the old shape is a program or a note afterwards, none dropped."""
+    page.goto(local_server)
+    page.wait_for_selector(".session-card")
+    page.wait_for_timeout(300)
+
+    state = _restore_fixture(page, "schema5_field_install.json")
+
+    assert {p["id"] for p in state["clientPrograms"]} >= {"h5ana", "h5bor", "h5draft"}
+    assert "history" not in state and "planUpdates" not in state
 
 
 def test_a_restore_over_existing_data_asks_before_replacing(page, local_server):

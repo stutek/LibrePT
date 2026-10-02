@@ -32,8 +32,9 @@ const state = {
   exercises: structuredClone(DEFAULT_EXERCISES),
   sessions: structuredClone(DEFAULT_SESSIONS),
   routines: [],
-  history: [],
-  planUpdates: [],
+  clientPrograms: [],
+  exerciseNotes: [],
+  sessionAttendance: [],
 };
 
 // What the dialog hands back, recorded rather than acted on: opening the editor is the app's job,

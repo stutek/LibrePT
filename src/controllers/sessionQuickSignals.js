@@ -1,12 +1,13 @@
 // src/controllers/sessionQuickSignals.js — one-tap "too easy / too hard / note" marks on a live
-// exercise. Single responsibility: MUTATE the session's feedback and the app's plan-adjustment queue
-// in step; the RULES (what supersedes what, which colour a card takes) are pure and live in
-// domain/quickSignals.js. Injected dependencies: `state`,
+// exercise. Single responsibility: MUTATE the session's feedback and the notes the next plan waits
+// for (data/trainingRecords.js) in step; the RULES (what supersedes what, which colour a card
+// takes) are pure and live in domain/quickSignals.js. Injected dependencies: `state`,
 // `saveToLocalStorage` and `renderPendingPlanAdjustments` arrive through activeSessionStore.js.
 //
 // The (clientId, exerciseName, tag) signatures are kept because exerciseDeckOfCards.js and feedbackModal.js
 // are wired against them.
 
+import { addPendingNote, removePendingNotes } from "../data/trainingRecords.js";
 import { tagImpliesPerformed } from "../domain/feedbackTags.js";
 import {
   buildQuickSignalEntries,
@@ -51,7 +52,7 @@ function removeQuickSignal(clientId, exerciseName, tag, state) {
   const removedIds = plainQuickSignalIds(activeSession.feedback, clientId, exerciseName, tag);
   if (removedIds.size === 0) return;
   activeSession.feedback = activeSession.feedback.filter((entry) => !removedIds.has(entry.id));
-  state.planUpdates = state.planUpdates.filter((update) => !removedIds.has(update.id));
+  removePendingNotes(state, [...removedIds]);
   untickSetsOf(activeSession, clientId, exerciseName, tag);
 }
 
@@ -98,7 +99,7 @@ export function logQuickSignal(tag, exId) {
       exerciseName: currentExercise.name,
       tag,
     });
-    state.planUpdates.push(planUpdate);
+    addPendingNote(state, planUpdate);
     if (!activeSession.feedback) activeSession.feedback = [];
     activeSession.feedback.push(sessionFeedback);
 

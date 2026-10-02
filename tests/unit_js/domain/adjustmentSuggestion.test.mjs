@@ -6,9 +6,11 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { performedTarget, suggestedTarget } from "../../../src/domain/adjustmentSuggestion.js";
 
+// A performed program and the note written on it, as data/trainingRecords.js reads them.
 const squatLog = {
   id: "h1",
   clientId: "c1",
+  status: "done",
   exercises: [
     {
       id: "exA",
@@ -20,13 +22,21 @@ const squatLog = {
       ],
     },
   ],
-  feedback: [{ id: "u1", exerciseName: "Barbell Back Squat", tag: "Too Easy - Increase Load" }],
 };
-const update = { id: "u1", clientId: "c1", exerciseName: "Barbell Back Squat" };
+const update = {
+  id: "u1",
+  clientId: "c1",
+  programId: "h1",
+  exerciseName: "Barbell Back Squat",
+  tag: "Too Easy - Increase Load",
+  resolved: false,
+};
 
 test("the performed target is read from the session the signal was given in", () => {
   assert.deepEqual(performedTarget([squatLog], update), { weight: 40, reps: 10, sets: 3 });
-  assert.equal(performedTarget([squatLog], { ...update, id: "other" }), null);
+  // A note taken outside any finished session has nothing performed to start from.
+  assert.equal(performedTarget([squatLog], { ...update, programId: undefined }), null);
+  assert.equal(performedTarget([squatLog], { ...update, programId: "other" }), null);
 });
 
 test("without a routine the suggestion starts from the performed weight, not from zero", () => {

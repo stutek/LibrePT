@@ -17,6 +17,7 @@
 // }
 
 import { localDateString } from "../../data/calendarDay.js";
+import { addPendingNote } from "../../data/trainingRecords.js";
 import { FEEDBACK_TAGS, feedbackTagText } from "../../domain/feedbackTags.js";
 import { notesWithGymNote } from "../../domain/gymNotes.js";
 import { $id, closeModal, openModal, renderMarkupOnce } from "./dom.js";
@@ -166,7 +167,7 @@ export function setupFeedbackForms() {
         resolved: false,
       };
 
-      state.planUpdates.push(newFeedback);
+      addPendingNote(state, newFeedback);
 
       // Kept on the person, not only on the session. A twinge mentioned between
       // rounds is the kind of thing that changes programming for months, and an alert on the

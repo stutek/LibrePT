@@ -15,6 +15,7 @@ import { fileURLToPath } from "node:url";
 import * as seeds from "../../../src/data/index.js";
 import * as proj from "../../../src/data/recordProjections.js";
 import * as m from "../../../src/data/recordSchemas.js";
+import { CONVERTED_COLLECTIONS } from "../../../src/data/schemaShapes.js";
 import * as rec from "../../../src/domain/sessionItemRecord.js";
 
 test("field issues catches missing required and wrong type", () => {
@@ -231,12 +232,17 @@ test("the schema every install reads declares everything any other live schema d
   // what a save, a backup and a sync are built from — holds only what that read brings in. A field
   // or collection some live schema declares and the read schema does not would be dropped from
   // memory at boot and from the next backup, and a restore of that backup would delete it.
+  // The one exception is a collection every read of an older store converts into the read schema's
+  // own (`history` and `planUpdates` into schema 6's programs and notes; sessionModelConversion
+  // .test.mjs proves nothing is lost on the way and back).
   const read = m.LIVE_SCHEMAS[m.DEFAULT_READ_SCHEMA];
   const missing = [];
   for (const schemaMajor of numberedLiveSchemas()) {
     for (const [collection, shape] of Object.entries(m.LIVE_SCHEMAS[schemaMajor])) {
       if (!read[collection]) {
-        missing.push(`${schemaMajor}: collection ${collection}`);
+        if (!CONVERTED_COLLECTIONS.includes(collection)) {
+          missing.push(`${schemaMajor}: collection ${collection}`);
+        }
         continue;
       }
       for (const field of Object.keys(shape)) {

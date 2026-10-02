@@ -22,7 +22,7 @@ def _state(page):
                 exercises: state.exercises.length,
                 routines: state.routines.map((r) => r.name),
                 sessions: state.sessions.length,
-                history: state.history.length,
+                programs: state.clientPrograms.length,
             };
         }"""
     )
@@ -101,7 +101,7 @@ def test_removal_survives_a_reload(page, local_server):
     assert after["exercises"] == before["exercises"], (
         "the movement catalog is kept — the real routine is built out of it"
     )
-    assert after["history"] == 0 and after["sessions"] == 0, (
+    assert after["programs"] == 0 and after["sessions"] == 0, (
         "the fake training records and fake sessions go"
     )
 

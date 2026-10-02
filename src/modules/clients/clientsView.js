@@ -8,6 +8,7 @@ import {
 } from "../../data/clientConsent.js";
 import { isErased } from "../../data/clientErasure.js";
 import { readTrainerIdentity } from "../../data/trainerIdentity.js";
+import { allExerciseNotes, allPrograms, performedPrograms } from "../../data/trainingRecords.js";
 import { aiClientSummary } from "../../domain/aiClientSummary.js";
 import { tellInApp } from "../common/appQuestion.js";
 import { consentEmailHref } from "../common/consentForm.js";
@@ -241,7 +242,7 @@ export function showClientDetails({
     aiCopyBtn.replaceWith(aiCopyBtn.cloneNode(true));
     document.getElementById("btn-ai-safe-copy").addEventListener("click", () => {
       // What goes in, and what is left out, is domain/aiClientSummary.js's decision.
-      const anonymizedSummary = aiClientSummary(client, state.history);
+      const anonymizedSummary = aiClientSummary(client, allPrograms(state));
       navigator.clipboard.writeText(anonymizedSummary).then(() => {
         tellInApp({ t, message: t("profile_ai_copied") });
       });
@@ -368,19 +369,19 @@ export function renderClientWorkoutHistory({
   if (!container) return;
   container.innerHTML = "";
 
-  // Excludes isPlanning drafts — this widget is the client's actual workout history, not their
-  // in-progress plans, which the notification area offers to resume.
-  const clientHistory = state.history
-    .filter((log) => log.clientId === client.id && !log.isPlanning)
-    .sort((a, b) => new Date(b.date) - new Date(a.date));
+  // Performed programs only — this widget is the client's actual workout history, not their
+  // planned ones, which the notification area offers to resume.
+  const programs = performedPrograms(state, client.id);
 
-  if (clientHistory.length === 0) {
+  if (programs.length === 0) {
     container.innerHTML = `<div class="card glassmorphic text-center text-muted text-sm">${t("no_workouts_logged")}</div>`;
     return;
   }
 
   renderHistoryItems({
-    historyList: clientHistory,
+    programs,
+    notes: allExerciseNotes(state),
+    clientName: client.name,
     container,
     t,
     openSessionFromHistory,

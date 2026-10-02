@@ -275,21 +275,21 @@ export const SCHEMA_5 = {
   },
 };
 
-// The PREVIEW shape: for CI and for previewing an upcoming version, never a step in the
-// migration chain. It is provisioned and written like any live schema — Simon, 2026-09-17: PREVIEW
-// uses the same mechanism as released schemas — and rebuilt from the stable schema when the build
-// changes. It replaced "P", whose fields and collections moved into schema 4 the same day. Built on
-// the NEWEST numbered shape, so reading it never narrows what an install holds.
-export const SCHEMA_PREVIEW = {
-  ...SCHEMA_5,
-  sessions: {
-    ...SCHEMA_5.sessions,
-    startDate: { required: true, type: "string" },
-  },
-  // THE NEW SESSION MODEL, declared and written by nothing yet (ruled 2026-10-02, Simon). It replaces
-  // `history`, which holds a plan not yet performed (`isPlanning`) and a training that happened in one
-  // shape, and the live-session cache, which holds one session at a time. A session (`sessions`)
-  // stays the booked slot; what each client does in it is a program of their own.
+// **FROZEN, like SCHEMA_4 and SCHEMA_5 above**, and held still by tests/fixtures/schemas/schema_6.json.
+//
+// THE SESSION MODEL (ruled 2026-10-02, Simon). It replaces `history`, which held a plan not yet
+// performed (`isPlanning`) and a training that happened in one shape, and `planUpdates`, which held
+// a second copy of the notes inside it. A session (`sessions`) stays the booked slot; what each
+// client does in it is a program of their own.
+//
+// The one numbered schema that does not only ADD: `history` and `planUpdates` are not here. What
+// they held is, in the collections below, and every read of an older store or file converts it
+// (schemaShapes.js), so reading this shape loses nothing an install holds. Schemas 4 and 5 are
+// written from it on every save for as long as they stay live.
+const { history: _history, planUpdates: _planUpdates, ...SCHEMA_5_WITHOUT_TRAININGS } = SCHEMA_5;
+
+export const SCHEMA_6 = {
+  ...SCHEMA_5_WITHOUT_TRAININGS,
 
   // ONE CLIENT'S PROGRAM. Every client has their own copy, also inside a group, because each one's
   // performed sets differ; a shared program is a `groupSharedPrograms` row, never one shared record.
@@ -297,9 +297,9 @@ export const SCHEMA_PREVIEW = {
   // client's cancellation moves it. One session holds many.
   //
   // `status` is "planned", "live" or "done". "Unscheduled" is not a status: it is a planned program
-  // with no `sessionId`. `createdAt` is when it was written and `performedAt` when it became done,
-  // both ISO-8601 UTC instants; a program converted from `history` may have no session, so it
-  // carries its own dates. It also keeps that record's id, so restoring the same old backup twice
+  // with no `sessionId`. `createdAt` is when it was written, `startedAt` when the trainer tapped
+  // Start (the running clock counts from it) and `performedAt` when it became done, all ISO-8601 UTC
+  // instants; a program converted from `history` may have no session, so it carries its own dates. It also keeps that record's id, so restoring the same old backup twice
   // overwrites rather than duplicates (data/sessionModelConversion.js).
   clientPrograms: {
     id: { required: true, type: "string" },
@@ -307,6 +307,7 @@ export const SCHEMA_PREVIEW = {
     sessionId: { required: false, type: "string" },
     status: { required: true, type: "string" },
     createdAt: { required: false, type: "string" },
+    startedAt: { required: false, type: "string" },
     performedAt: { required: false, type: "string" },
     duration: { required: false, type: "number" }, // seconds
     title: { required: false, type: "string" },
@@ -356,9 +357,23 @@ export const SCHEMA_PREVIEW = {
     text: { required: false, type: "string" },
     resolved: { required: false, type: "boolean" },
   },
+};
 
-  // WHAT THE TRAINER NOTES ABOUT THE CLIENT AS A PERSON, one dated record each. It replaces the
-  // single free-text `clients.notes`, which every edit overwrites.
+// The PREVIEW shape: for CI and for previewing an upcoming version, never a step in the
+// migration chain. It is provisioned and written like any live schema — Simon, 2026-09-17: PREVIEW
+// uses the same mechanism as released schemas — and rebuilt from the stable schema when the build
+// changes. It replaced "P", whose fields and collections moved into schema 4 the same day. Built on
+// the NEWEST numbered shape, so reading it never narrows what an install holds.
+export const SCHEMA_PREVIEW = {
+  ...SCHEMA_6,
+  sessions: {
+    ...SCHEMA_6.sessions,
+    startDate: { required: true, type: "string" },
+  },
+
+  // WHAT THE TRAINER NOTES ABOUT THE CLIENT AS A PERSON, one dated record each, meant to replace the
+  // single free-text `clients.notes`, which every edit overwrites. Waits here until a screen writes
+  // it: a frozen schema cannot change its mind about a shape nobody has used yet.
   clientNotes: {
     id: { required: true, type: "string" },
     clientId: { required: true, type: "string" },
@@ -382,19 +397,21 @@ export const SCHEMA_PREVIEW = {
 // cost real time in review before it was collapsed. `4` here is the SAME 4 the migration chain ends
 // at.
 //
-// Three shapes are live, and they do different jobs:
-//   - **5** is the active schema: what this build reads and stamps, what a backup is
+// Four shapes are live, and they do different jobs:
+//   - **6** is the active schema: what this build reads and stamps, what a backup is
 //     written at, and the copy PREVIEW is rebuilt FROM when the build changes.
-//   - **4** stays written for the build a phone may still have cached, which reads only store 4
-//     (the reason for the star write), and for the app version that behaves as 4 did.
+//   - **5** and **4** stay written for the builds a phone may still have cached, which read only
+//     their own store (the reason for the star write), and for the app versions that behave as they
+//     did. Both hold trainings in the old shape, built from 6 at every save (schemaShapes.js); kept
+//     live for at least a month or two beside 6 (Simon, 2026-10-02).
 //   - **PREVIEW** is the preview shape for CI and previews, written like any live schema and rebuilt
-//     from 5 when the build changes. Disposable by design: never a source of truth for anything that
+//     from 6 when the build changes. Disposable by design: never a source of truth for anything that
 //     has to outlive the build, and never a step in the migration chain.
-export const LIVE_SCHEMAS = { 4: SCHEMA_4, 5: SCHEMA_5, PREVIEW: SCHEMA_PREVIEW };
+export const LIVE_SCHEMAS = { 4: SCHEMA_4, 5: SCHEMA_5, 6: SCHEMA_6, PREVIEW: SCHEMA_PREVIEW };
 
 // The durable shape, and the one PREVIEW is rebuilt from. Not derived from LIVE_SCHEMAS by taking a
 // max: PREVIEW is not a number, and the stable shape is a decision rather than an accident of ordering.
-export const STABLE_SCHEMA = 5;
+export const STABLE_SCHEMA = 6;
 
 /**
  * The newest NUMBERED shape, and what a backup file is written at.
@@ -404,8 +421,9 @@ export const STABLE_SCHEMA = 5;
  * numbered shape does not move, so any build can restore it.
  *
  * Only ONE shape goes into a file, not every live one. Shapes only gain fields under expand-first —
- * SCHEMA_PREVIEW is SCHEMA_5 plus whatever the preview adds — a superset of the stable shape,
- * and an older copy alongside it stores strictly less information at full size. Restore re-derives
+ * SCHEMA_PREVIEW is SCHEMA_6 plus whatever the preview adds — a superset of the stable shape,
+ * and an older copy alongside it stores no information the stable one does not (schema 6 holds what
+ * `history` and `planUpdates` held, in its own collections). Restore re-derives
  * every live store from whatever it receives, through the same fan-out that keeps them current.
  */
 export const BACKUP_SCHEMA = STABLE_SCHEMA;
@@ -426,8 +444,8 @@ export const BACKUP_SCHEMA = STABLE_SCHEMA;
  * A per-install choice (data/readSchema.js) remains for the test passes that read PREVIEW or pin the
  * released shape; nothing offers it to a trainer.
  */
-// Schema 5 since 2026-09-23. Schema 4 from 2026-09-17; before that "P".
-export const DEFAULT_READ_SCHEMA = 5;
+// Schema 6 since 2026-10-02. Schema 5 from 2026-09-23; schema 4 from 2026-09-17; before that "P".
+export const DEFAULT_READ_SCHEMA = 6;
 
 function typeOf(value) {
   if (Array.isArray(value)) return "array";

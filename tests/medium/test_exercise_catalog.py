@@ -37,7 +37,9 @@ const state = {
   clients: [],
   routines: [],
   sessions: [],
-  history: [],
+  clientPrograms: [],
+  exerciseNotes: [],
+  sessionAttendance: [],
 };
 
 renderExercisesViewShell();

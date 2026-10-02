@@ -6,21 +6,21 @@
 // on the gym floor from an empty plan belongs to no routine; the dialog then added the 2.5 kg step
 // to nothing and proposed 2.5 kg for a squat done at 40 kg. With neither, no number is offered.
 //
-// Pure: history and records in, numbers out.
+// Pure: programs and notes (data/trainingRecords.js) in, numbers out.
 
 import { exerciseRecordsOf } from "./sessionItemRecord.js";
 
 const LOAD_STEP_KG = 2.5;
 
-/** Weight, reps and sets of the exercise in the session the signal came from, or null. The
- *  session record keeps each signal under the same id as its review entry, so this finds the
- *  exact session rather than guessing by date. */
-export function performedTarget(history, update) {
-  const log = (history || []).find((entry) =>
-    (entry.feedback || []).some((signal) => signal.id === update.id),
-  );
-  const record = log
-    ? exerciseRecordsOf(log.exercises || []).find((item) => item.name === update.exerciseName)
+/** Weight, reps and sets of the exercise in the session the signal came from, or null. A note
+ *  names the program it was written on, so this finds the exact session rather than guessing by
+ *  date. */
+export function performedTarget(programs, note) {
+  const program = note?.programId
+    ? (programs || []).find((entry) => entry.id === note.programId)
+    : null;
+  const record = program
+    ? exerciseRecordsOf(program.exercises || []).find((item) => item.name === note.exerciseName)
     : null;
   const sets = Array.isArray(record?.sets) ? record.sets : [];
   if (sets.length === 0) return null;

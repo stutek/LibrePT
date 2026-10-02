@@ -20,11 +20,24 @@
 // Injected dependencies: none.
 
 import { localDateString } from "./calendarDay.js";
+import { COMMON_RECORD_FIELDS } from "./recordSchemas.js";
 
 const ATTENDANCE_ID_PREFIX = "at-";
 
 function defined(object) {
   return Object.fromEntries(Object.entries(object).filter(([, value]) => value !== undefined));
+}
+
+// The fields any record may carry whatever its collection, the demo seeder's stamp above all: it is
+// how removing the demo data tells a demo training from the trainer's own. Carried from the record a
+// conversion starts from to every record it makes.
+function provenance(record) {
+  return Object.fromEntries(
+    COMMON_RECORD_FIELDS.filter((field) => record?.[field] !== undefined).map((field) => [
+      field,
+      record[field],
+    ]),
+  );
 }
 
 // The calendar day a session row falls on, read with local getters like the day timeline does.
@@ -89,6 +102,7 @@ function programItems(record, exercises) {
 function programFromRecord(record, session, exercises) {
   const planned = record.isPlanning === true;
   return defined({
+    ...provenance(record),
     id: record.id,
     clientId: record.clientId,
     sessionId: session?.id,
@@ -103,10 +117,18 @@ function programFromRecord(record, session, exercises) {
   });
 }
 
-function noteFromFeedback(item, record, program) {
+// A feedback item the app wrote carries the id its plan update shares. One without (a very old or
+// hand-edited record) gets an id made from its record and its place, so a second conversion gives
+// the same note rather than losing it or making another.
+function feedbackId(item, record, index) {
+  return item.id || `${record.id}-f${index}`;
+}
+
+function noteFromFeedback(item, record, program, id) {
   const programItem = program.exercises.find((entry) => entry.name === item.exerciseName);
   return defined({
-    id: item.id,
+    ...provenance(record),
+    id,
     clientId: item.clientId || record.clientId,
     programId: program.id,
     programItemId: programItem?.id,
@@ -130,6 +152,7 @@ function withPlanUpdate(note, update) {
 
 function noteFromPlanUpdate(update, exercises) {
   return defined({
+    ...provenance(update),
     id: update.id,
     clientId: update.clientId,
     exerciseId: exercises.find((exercise) => exercise.name === update.exerciseName)?.id,
@@ -160,6 +183,7 @@ export function sessionModelFromHistory({
       const id = `${ATTENDANCE_ID_PREFIX}${session.id}-${record.clientId}`;
       if (!attendanceById.has(id)) {
         attendanceById.set(id, {
+          ...provenance(record),
           id,
           sessionId: session.id,
           clientId: record.clientId,
@@ -169,9 +193,10 @@ export function sessionModelFromHistory({
         });
       }
     }
-    for (const item of record.feedback || []) {
-      if (!item?.id || notesById.has(item.id)) continue;
-      notesById.set(item.id, noteFromFeedback(item, record, program));
+    for (const [index, item] of (record.feedback || []).entries()) {
+      if (!item) continue;
+      const id = feedbackId(item, record, index);
+      if (!notesById.has(id)) notesById.set(id, noteFromFeedback(item, record, program, id));
     }
   }
 
@@ -205,19 +230,19 @@ function feedbackForHistory(note) {
   };
 }
 
-function recordFromProgram(program, notes, clients) {
+function recordFromProgram(program, notesByProgram, clientsById) {
   const planned = program.status === "planned";
-  const client = clients.find((candidate) => candidate.id === program.clientId);
   return defined({
+    ...provenance(program),
     id: program.id,
     clientId: program.clientId,
-    clientName: client?.name,
+    clientName: clientsById.get(program.clientId)?.name,
     routineId: program.routineId,
     routineName: program.routineName,
     date: planned ? program.createdAt : program.performedAt,
     duration: program.duration,
     exercises: (program.exercises || []).map(itemForHistory),
-    feedback: notes.filter((note) => note.programId === program.id).map(feedbackForHistory),
+    feedback: (notesByProgram.get(program.id) || []).map(feedbackForHistory),
     isPlanning: planned ? true : undefined,
     title: program.title,
   });
@@ -225,12 +250,12 @@ function recordFromProgram(program, notes, clients) {
 
 // The plan update an older build reads: one tag, with the remark after it as the feedback form
 // has always written it.
-function planUpdateFromNote(note, clients) {
-  const client = clients.find((candidate) => candidate.id === note.clientId);
+function planUpdateFromNote(note, clientsById) {
   return defined({
+    ...provenance(note),
     id: note.id,
     clientId: note.clientId,
-    clientName: client?.name,
+    clientName: clientsById.get(note.clientId)?.name,
     date: note.createdAt,
     exerciseName: note.exerciseName,
     tag: note.text ? `${note.tag} - ${note.text}` : note.tag,
@@ -247,12 +272,21 @@ export function historyFromSessionModel({
   exerciseNotes = [],
   clients = [],
 } = {}) {
+  // Grouped once: this runs on every save, and a lookup per program would grow with the square of
+  // a trainer's years of records.
+  const clientsById = new Map(clients.map((client) => [client.id, client]));
+  const notesByProgram = new Map();
+  for (const note of exerciseNotes) {
+    if (!note.programId) continue;
+    if (!notesByProgram.has(note.programId)) notesByProgram.set(note.programId, []);
+    notesByProgram.get(note.programId).push(note);
+  }
   return {
     history: clientPrograms
       .filter((program) => program.status !== "live")
-      .map((program) => recordFromProgram(program, exerciseNotes, clients)),
+      .map((program) => recordFromProgram(program, notesByProgram, clientsById)),
     planUpdates: exerciseNotes
       .filter((note) => typeof note.resolved === "boolean")
-      .map((note) => planUpdateFromNote(note, clients)),
+      .map((note) => planUpdateFromNote(note, clientsById)),
   };
 }

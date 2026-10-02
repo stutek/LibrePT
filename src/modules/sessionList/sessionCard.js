@@ -7,6 +7,7 @@
 //         saveToLocalStorage, rerenderSessions }
 
 import { localDateString } from "../../data/calendarDay.js";
+import { performedPrograms, programDate } from "../../data/trainingRecords.js";
 import { computeActiveSessionCountdown } from "../../domain/sessionClock.js";
 import { sessionDayOf } from "../../domain/sessionRecord.js";
 import { parseTimeRange } from "../../domain/timeRange.js";
@@ -43,7 +44,7 @@ function ensureCardTicker() {
 // Turn a past session's elapsed-time chip into an inline "HH:MM" edit field on click/Enter — commits
 // on blur/Enter (parsed via parseDurationHM), discards on Escape. Persists onto the session object
 // itself (b.duration, seconds) since that's the only place a finished ad-hoc/seed session's actual
-// elapsed time is recorded (state.history logs a duration per client, not per session).
+// elapsed time is recorded (a client's program logs a duration per client, not per session).
 function wireElapsedEdit(valueEl, b, deps) {
   const startEdit = (e) => {
     e.stopPropagation();
@@ -109,17 +110,16 @@ export function isRunningOn(activeSession, sessionId) {
 }
 
 // A session has a plan when it names a routine, or when a finished one was run from exercises the
-// trainer added by hand: those live only in its participants' history records for that day.
+// trainer added by hand: those live only in its participants' performed programs for that day.
 function sessionHasPlan(b, routineName, state) {
   if (routineName) return true;
   if (!b.completed || !b.startDate) return false;
   const day = localDateString(b.startDate);
-  return (state.history || []).some(
-    (log) =>
-      !log.isPlanning &&
-      b.participants.includes(log.clientId) &&
-      localDateString(log.date) === day &&
-      (log.exercises || []).some((item) => item.type === "exercise"),
+  return performedPrograms(state).some(
+    (program) =>
+      b.participants.includes(program.clientId) &&
+      localDateString(programDate(program)) === day &&
+      (program.exercises || []).some((item) => item.type === "exercise"),
   );
 }
 

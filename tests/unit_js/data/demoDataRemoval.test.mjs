@@ -25,8 +25,9 @@ function databaseWith(overrides = {}) {
     clients: [...DEFAULT_CLIENTS],
     exercises: [...DEFAULT_EXERCISES],
     routines: [...DEFAULT_ROUTINES],
-    history: [],
-    planUpdates: [],
+    clientPrograms: [],
+    exerciseNotes: [],
+    sessionAttendance: [],
     sessions: [],
     notifications: [],
     ...overrides,
@@ -72,10 +73,19 @@ test("a seeded exercise used by a real routine survives even when exercises are 
 });
 
 test("a demo client the trainer has logged real training against survives", () => {
-  // This is the renamed-demo-client case, settled without guessing at intent: a real history record
-  // depends on the client, so the client is retained by the same rule as everything else.
+  // This is the renamed-demo-client case, settled without guessing at intent: a real program the
+  // trainer logged depends on the client, so the client is retained by the same rule as everything
+  // else.
   const state = databaseWith({
-    history: [{ id: realId("h1"), clientId: seedClient.id, date: "2026-08-01T08:00:00.000Z" }],
+    clientPrograms: [
+      {
+        id: realId("h1"),
+        clientId: seedClient.id,
+        status: "done",
+        performedAt: "2026-08-01T08:00:00.000Z",
+        exercises: [],
+      },
+    ],
   });
 
   const plan = removal.planDemoRemoval(state);
@@ -173,8 +183,8 @@ test("a database with no demo data offers nothing to remove", () => {
     clients: [{ id: realId("c1"), name: "Real", active: true }],
     exercises: [],
     routines: [],
-    history: [],
-    planUpdates: [],
+    clientPrograms: [],
+    exerciseNotes: [],
     sessions: [],
     notifications: [],
   };

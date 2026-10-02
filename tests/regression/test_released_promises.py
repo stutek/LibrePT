@@ -47,12 +47,15 @@ def test_the_demo_still_works_on_the_released_schema(page, local_server):
                 exercises: (state.exercises || []).length,
                 routines: (state.routines || []).length,
                 sessions: (state.sessions || []).length,
+                programs: (state.clientPrograms || []).length,
             };
         }"""
     )
 
     assert counts["clients"] > 0 and counts["exercises"] > 0, counts
     assert counts["routines"] > 0 and counts["sessions"] > 0, counts
+    # Schema 6: the demo's past trainings arrive as each client's own programs.
+    assert counts["programs"] > 0, counts
     # And it is on the screen, not only in the store.
     assert page.locator(".client-card").count() > 0
 
@@ -93,9 +96,11 @@ def test_a_backup_carries_every_collection_the_release_promises(page, local_serv
             const file = backup.buildBackupPayload(store.getState());
             return {
                 schemaVersion: file.schemaVersion,
+                formatVersion: file.formatVersion,
                 collections: Object.fromEntries(
-                    ['clients', 'exercises', 'routines', 'sessions', 'history', 'planUpdates',
-                     'invites', 'sessionSeries', 'circuits']
+                    ['clients', 'exercises', 'routines', 'sessions', 'clientPrograms',
+                     'exerciseNotes', 'sessionAttendance', 'groupSharedPrograms', 'invites',
+                     'sessionSeries', 'circuits']
                         .map((name) => [name, Array.isArray(file[name])]),
                 ),
                 clients: (file.clients || []).length,
@@ -103,8 +108,10 @@ def test_a_backup_carries_every_collection_the_release_promises(page, local_serv
         }"""
     )
 
-    # Schema 5 since 2026-09-23: the file carries `circuits` as well.
-    assert payload["schemaVersion"] == 5, "the file says which shape it holds"
+    # Schema 6 since 2026-10-02: trainings are programs, attendance and exercise notes, in place of
+    # `history` and `planUpdates`; a plain file is format 7 (6 names the encrypted schema-5 file).
+    assert payload["schemaVersion"] == 6, "the file says which shape it holds"
+    assert payload["formatVersion"] == 7, "and which container"
     missing = [name for name, present in payload["collections"].items() if not present]
     assert missing == [], f"a backup written today cannot carry: {missing}"
     assert payload["clients"] > 0

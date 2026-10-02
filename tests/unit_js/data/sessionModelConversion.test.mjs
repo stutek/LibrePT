@@ -293,6 +293,38 @@ test("a note that only recorded what happened does not come back as a plan updat
   assert.deepEqual(historyFromSessionModel({ ...model, clients }).planUpdates, []);
 });
 
+test("a demo training stays marked as demo data, so removing the demo data still finds it", () => {
+  const record = performed("h-ana", "ana", {
+    testData: "demo",
+    feedback: [
+      { id: "n1", clientId: "ana", exerciseName: "Back Squat", tag: "Too Easy", note: "" },
+    ],
+  });
+  const update = { id: "u1", clientId: "ana", tag: "Pain", resolved: false, testData: "demo" };
+  const model = sessionModelFromHistory({
+    history: [record],
+    planUpdates: [update],
+    sessions: [groupEvening()],
+  });
+  for (const [collection, rows] of Object.entries(model)) {
+    for (const row of rows) assert.equal(row.testData, "demo", `${collection} ${row.id}`);
+  }
+  const back = historyFromSessionModel({ ...model, clients });
+  assert.equal(back.history[0].testData, "demo");
+  assert.equal(back.planUpdates[0].testData, "demo");
+});
+
+test("a feedback item written without an id is kept, under the same id every time", () => {
+  const record = performed("h-ana", "ana", {
+    feedback: [{ clientId: "ana", exerciseName: "Back Squat", tag: "Pain", note: "knee" }],
+  });
+  const first = sessionModelFromHistory({ history: [record] }).exerciseNotes;
+  const second = sessionModelFromHistory({ history: [record] }).exerciseNotes;
+  assert.equal(first.length, 1);
+  assert.equal(first[0].text, "knee");
+  assert.deepEqual(first, second);
+});
+
 test("a session in progress is not written into an older build's history", () => {
   const live = { id: "p-live", clientId: "ana", status: "live", exercises: [] };
   assert.deepEqual(historyFromSessionModel({ clientPrograms: [live], clients }).history, []);

@@ -139,7 +139,8 @@ def _unscheduled_plan_count(page):
     return page.evaluate(
         """async () => {
             const store = await import(new URL('data/stateStore.js', document.baseURI).href);
-            return store.getState().history.filter((entry) => entry.isPlanning).length;
+            const records = await import(new URL('data/trainingRecords.js', document.baseURI).href);
+            return records.draftPrograms(store.getState()).length;
         }"""
     )
 

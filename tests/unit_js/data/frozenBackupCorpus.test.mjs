@@ -146,16 +146,17 @@ test("the v0 demo corpus survives the chain with its records intact", () => {
   );
   assert.equal(r.state.exercises.length, 5);
   assert.equal(r.state.routines.length, 2);
-  assert.equal(r.state.history.length, 2);
-  assert.equal(r.state.planUpdates.length, 2);
+  // Since schema 6 the trainings are programs and the plan updates exercise notes, one each.
+  assert.equal(r.state.clientPrograms.length, 2);
+  assert.equal(r.state.exerciseNotes.length, 2);
   assert.equal(r.state.sessions.length, 6);
   assert.equal(r.state.notifications.length, 1);
 
   // Nested structure, not just the top-level counts: the sets a PT logged are the least
   // recoverable thing in the database.
-  const [firstHistory] = r.state.history;
-  assert.equal(firstHistory.exercises[0].sets.length, 3);
-  assert.equal(firstHistory.exercises[0].sets[0].note, "RPE 8");
+  const [firstProgram] = r.state.clientPrograms;
+  assert.equal(firstProgram.exercises[0].sets.length, 3);
+  assert.equal(firstProgram.exercises[0].sets[0].note, "RPE 8");
   assert.equal(r.state.routines[0].exercises[0].circuitTitle, "Chest & Back Strength Complex");
 });
 
@@ -236,11 +237,66 @@ test("a schema 4 field install loses no records and no timestamps", () => {
   assert.equal(r.state.clients.length, 1);
   assert.equal(r.state.exercises.length, 1);
   assert.equal(r.state.routines.length, 1);
-  assert.equal(r.state.history.length, 1);
+  assert.equal(r.state.clientPrograms.length, 1);
   assert.equal(r.state.sessions.length, 1);
   assert.equal(r.state.sessions[0].startDate, "2026-08-09T16:00:00.000Z");
-  assert.equal(r.state.history[0].date, "2026-08-01T08:00:00.000Z");
-  assert.equal(r.state.history[0].exercises[0].sets[0].weight, 120);
+  assert.equal(r.state.clientPrograms[0].performedAt, "2026-08-01T08:00:00.000Z");
+  assert.equal(r.state.clientPrograms[0].exercises[0].sets[0].weight, 120);
+});
+
+test("a schema 5 backup becomes the session model with nothing lost", () => {
+  // The first step that changes what a training IS. A group training finds the one session it was
+  // run in, and each client gets attendance there; the note filed both in a record and as a plan
+  // update arrives once; the library import's fields stay.
+  const r = migrate("schema5_field_install.json");
+
+  assert.equal(r.ok, true, JSON.stringify(r.problems));
+  assert.equal(r.state.schemaVersion, CURRENT_SCHEMA_VERSION);
+  assert.equal(r.state.lang, "sl");
+  assert.equal("history" in r.state, false);
+  assert.equal("planUpdates" in r.state, false);
+
+  const programs = Object.fromEntries(r.state.clientPrograms.map((p) => [p.id, p]));
+  assert.equal(programs.h5ana.sessionId, "s5tue");
+  assert.equal(programs.h5bor.sessionId, "s5tue");
+  assert.equal(programs.h5ana.exercises[0].sets[1].note, "grind");
+  assert.equal(programs.h5bor.exercises[0].sets[0].weight, 80);
+  assert.equal(programs.h5draft.status, "planned");
+  assert.equal(programs.h5draft.sessionId, undefined, "a draft waits unscheduled");
+  assert.deepEqual(
+    r.state.sessionAttendance.map((row) => [row.clientId, row.sessionId, row.status]),
+    [
+      ["c5ana", "s5tue", "attended"],
+      ["c5bor", "s5tue", "attended"],
+    ],
+  );
+
+  const notes = Object.fromEntries(r.state.exerciseNotes.map((note) => [note.id, note]));
+  assert.equal(r.state.exerciseNotes.length, 2);
+  assert.equal(notes.n5easy.programId, "h5ana");
+  assert.equal(notes.n5easy.resolved, false);
+  assert.equal(notes.u5wrist.resolved, true);
+
+  assert.equal(r.state.circuits[0].name, "Leg finisher");
+  assert.equal(r.state.exercises.find((e) => e.id === "x5sled").source, "Studio Gibanje");
+  // The restore prompt names what the step did.
+  const step = r.applied.find((applied) => applied.to === 6);
+  assert.deepEqual(step.notes, [
+    "3 training record(s) became client programs",
+    "2 plan update(s) became exercise notes",
+  ]);
+});
+
+test("restoring the same schema 5 backup twice gives the same records, not twice as many", () => {
+  const first = migrate("schema5_field_install.json").state;
+  const second = migrate("schema5_field_install.json").state;
+  for (const key of ["clientPrograms", "exerciseNotes", "sessionAttendance"]) {
+    assert.deepEqual(
+      second[key].map((row) => row.id),
+      first[key].map((row) => row.id),
+      key,
+    );
+  }
 });
 
 test("a schema 3 field install still gets its language cleared", () => {
@@ -278,6 +334,7 @@ test("every committed fixture is accounted for", () => {
     "schema2.json",
     "schema3_field_install.json",
     "schema4_field_install.json",
+    "schema5_field_install.json",
   ]);
   const onDisk = new Set(readdirSync(FIXTURES_DIR).filter((name) => name.endsWith(".json")));
   assert.deepEqual(

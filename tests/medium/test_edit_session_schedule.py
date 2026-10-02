@@ -35,8 +35,9 @@ const state = {
   clients: [{ id: 'c1', name: 'Jane Doe' }, { id: 'c2', name: 'Sam Ray' }],
   routines: [{ id: 'r1', name: 'Upper Body' }],
   exercises: [],
-  history: [],
-  planUpdates: [],
+  clientPrograms: [],
+  exerciseNotes: [],
+  sessionAttendance: [],
 };
 
 bootWorkoutSetup({

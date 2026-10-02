@@ -33,7 +33,7 @@ const state = {
     { id: 'BBBBBBBBBBBBBBBBBBBBBB', name: 'My Real Programme',
       exercises: [{ id: seedExercise.id, sets: 3, reps: 5 }] },
   ],
-  history: [], planUpdates: [], sessions: [], notifications: [],
+  clientPrograms: [], exerciseNotes: [], sessionAttendance: [], sessions: [], notifications: [],
 };
 
 window.__removalCalls = [];

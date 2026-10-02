@@ -14,11 +14,13 @@ const client = {
   goals: "Ana wants to run a half marathon",
   notes: "Ana has a sensitive left knee",
 };
+// The client's programs as data/trainingRecords.js reads them.
 const history = [
   {
     id: "h1",
     clientId: "c1a9f0e2",
-    date: "2026-09-20T08:00:00.000Z",
+    status: "done",
+    performedAt: "2026-09-20T08:00:00.000Z",
     exercises: [
       {
         id: "e1",
@@ -31,8 +33,14 @@ const history = [
       { id: "e2", name: "Plank", completed: false, sets: [] },
     ],
   },
-  { id: "p1", clientId: "c1a9f0e2", isPlanning: true, date: "2026-09-27", exercises: [] },
-  { id: "h2", clientId: "someone-else", date: "2026-09-21", exercises: [] },
+  { id: "p1", clientId: "c1a9f0e2", status: "planned", createdAt: "2026-09-27", exercises: [] },
+  {
+    id: "h2",
+    clientId: "someone-else",
+    status: "done",
+    performedAt: "2026-09-21",
+    exercises: [],
+  },
 ];
 
 test("the free text a trainer typed never goes into the copy", () => {

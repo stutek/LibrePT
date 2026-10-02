@@ -5,6 +5,7 @@
 // file holds only the parts that must know about the browser: the base path, history writes, and the
 // facade of operations a route is allowed to perform.
 
+import { programById } from "../data/trainingRecords.js";
 import { renderMarkupOnce } from "../modules/common/dom.js";
 import { EVENT_PARAM } from "../modules/common/eventTransports.js";
 import { toggleNotificationArea } from "../modules/common/notificationArea.js";
@@ -402,9 +403,9 @@ export function showSessionView(sessionId, clientId, focusRef = null, opts = {})
     return;
   }
 
-  const log = state?.history?.find((h) => h.id === sessionId);
-  if (log && routerDeps?.openSessionFromHistory) {
-    routerDeps.openSessionFromHistory(log);
+  const program = state ? programById(state, sessionId) : null;
+  if (program && routerDeps?.openSessionFromHistory) {
+    routerDeps.openSessionFromHistory(program);
     reenterIfBecameActive(sessionId, clientId, focusRef, opts);
     return;
   }

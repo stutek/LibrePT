@@ -33,7 +33,9 @@ const state = {
   routines: structuredClone(DEFAULT_ROUTINES),
   clients: [],
   sessions: [],
-  history: [],
+  clientPrograms: [],
+  exerciseNotes: [],
+  sessionAttendance: [],
 };
 
 // "New routine" navigates to the routine.new route rather than opening the dialog directly, so the

@@ -61,7 +61,17 @@ def test_what_a_restore_would_replace_is_named_in_slovenian(page, local_server):
     detail = page.locator("#restore-confirm-detail")
     detail.wait_for(state="visible")
     text = detail.inner_text()
-    for english in ["clients", "routines", "sessions", "planUpdates", "history"]:
+    for english in [
+        "clients",
+        "routines",
+        "sessions",
+        "planUpdates",
+        "history",
+        "clientPrograms",
+        "exerciseNotes",
+        "sessionAttendance",
+        "groupSharedPrograms",
+    ]:
         assert english not in text, text
     assert "strank" in text
 

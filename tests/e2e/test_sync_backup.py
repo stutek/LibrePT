@@ -213,7 +213,8 @@ def test_an_exported_backup_holds_nothing_readable(page, local_server):
 
     envelope = json.loads(written)
     assert envelope["container"] == "aes-gcm"
-    assert envelope["formatVersion"] == 6
+    # 8: schema 6 records in the encrypted container (backupFile.js BACKUP_FORMATS; 6 is schema 5's).
+    assert envelope["formatVersion"] == 8
     # The version and the key parameters are readable, because a file nobody can open still has to be
     # identifiable. Nothing else is.
     assert set(envelope) == {

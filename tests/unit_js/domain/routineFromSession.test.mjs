@@ -33,7 +33,7 @@ const rest = (seconds, extra = {}) => ({
 
 const build = (log, routines = []) =>
   buildRoutineFromRecord({
-    log: { date: "2026-09-30T10:00:00", routineName: "Legs", ...log },
+    log: { performedAt: "2026-09-30T10:00:00", routineName: "Legs", ...log },
     library,
     routines,
     fallbackName: "Session",
@@ -123,7 +123,7 @@ test("a record with no routine name uses the fallback", () => {
 test("a record from an empty plan takes the session's title, not the empty-plan text", () => {
   const { routine } = buildRoutineFromRecord({
     log: {
-      date: "2026-09-30T10:00:00",
+      performedAt: "2026-09-30T10:00:00",
       routineName: "Empty plan, no routine",
       exercises: [ex("sq", "Back Squat")],
     },
@@ -140,7 +140,7 @@ test("a record from an empty plan takes the session's title, not the empty-plan 
 test("an empty-plan record with no known session title falls back to the fallback name", () => {
   const { routine } = buildRoutineFromRecord({
     log: {
-      date: "2026-09-30T10:00:00",
+      performedAt: "2026-09-30T10:00:00",
       routineName: "Empty plan, no routine",
       exercises: [ex("sq", "Back Squat")],
     },

@@ -22,6 +22,44 @@
 // is a broken record.
 // Injected dependencies: none.
 
+// One field naming the ids of one collection, as a list: an empty or absent field depends on nothing.
+function ids(value) {
+  const list = (Array.isArray(value) ? value : [value]).filter(Boolean);
+  return list.length > 0 ? list : null;
+}
+
+// The dependencies each collection has, as `{ target collection: ids }` with empty entries dropped.
+function dependencies(entries) {
+  return Object.fromEntries(Object.entries(entries).filter(([, list]) => list));
+}
+
+const ownedByClient = (record) => dependencies({ clients: ids(record.clientId) });
+
+// A circuit holds its exercises exactly as a routine does. `exercises` is an array of prescription
+// objects, each carrying the exercise id as `id` — not an array of bare ids. Reading it as one would
+// silently produce no dependencies at all.
+const holdsExercises = (record) =>
+  dependencies({ exercises: ids((record.exercises || []).map((item) => item?.id)) });
+
+// clients and exercises are leaves: nothing in the domain sits below them, so they have no row here.
+const DEPENDENCIES = {
+  history: ownedByClient,
+  planUpdates: ownedByClient,
+  exerciseNotes: ownedByClient,
+  clientNotes: ownedByClient,
+  // A program and an attendance row belong to a client, and to the session they were run in.
+  clientPrograms: (record) =>
+    dependencies({ clients: ids(record.clientId), sessions: ids(record.sessionId) }),
+  sessionAttendance: (record) =>
+    dependencies({ clients: ids(record.clientId), sessions: ids(record.sessionId) }),
+  groupSharedPrograms: (record) =>
+    dependencies({ clients: ids(record.clientIds), sessions: ids(record.sessionId) }),
+  sessions: (record) =>
+    dependencies({ clients: ids(record.participants), routines: ids(record.routineId) }),
+  circuits: holdsExercises,
+  routines: holdsExercises,
+};
+
 /**
  * Ids this record depends on, as `{ collection: [id, ...] }`.
  *
@@ -30,34 +68,7 @@
  */
 export function dependenciesOf(collection, record) {
   if (!record || typeof record !== "object") return {};
-
-  switch (collection) {
-    case "history":
-    case "planUpdates":
-      // The only two the collection-level graph already declares.
-      return record.clientId ? { clients: [record.clientId] } : {};
-
-    case "sessions": {
-      const dependencies = {};
-      const participants = (record.participants || []).filter(Boolean);
-      if (participants.length > 0) dependencies.clients = participants;
-      if (record.routineId) dependencies.routines = [record.routineId];
-      return dependencies;
-    }
-
-    // A circuit holds its exercises exactly as a routine does.
-    case "circuits":
-    case "routines": {
-      // `exercises` is an array of prescription objects, each carrying the exercise id as `id` —
-      // not an array of bare ids. Reading it as one would silently produce no dependencies at all.
-      const exerciseIds = (record.exercises || []).map((item) => item?.id).filter(Boolean);
-      return exerciseIds.length > 0 ? { exercises: exerciseIds } : {};
-    }
-
-    default:
-      // clients and exercises are leaves: nothing in the domain sits below them.
-      return {};
-  }
+  return DEPENDENCIES[collection]?.(record) ?? {};
 }
 
 /**
