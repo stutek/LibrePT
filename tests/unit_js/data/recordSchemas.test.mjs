@@ -347,19 +347,49 @@ test("the records of one group training validate clean in the new session model"
     ],
     groupSharedPrograms: [{ id: "g1", sessionId: "s1", clientIds: ["ana", "bojan"] }],
     sessionAttendance: [
-      { id: "a1", sessionId: "s1", clientId: "ana", programId: "p1", status: "attended", consumesQuota: true },
+      {
+        id: "a1",
+        sessionId: "s1",
+        clientId: "ana",
+        programId: "p1",
+        status: "attended",
+        consumesQuota: true,
+      },
       { id: "a2", sessionId: "s1", clientId: "cene", status: "sick", consumesQuota: false },
     ],
     exerciseNotes: [
       // A quick signal tapped on the clipboard has no text; a written remark has no tag.
-      { id: "n1", clientId: "ana", programId: "p1", programItemId: "i1", tag: "Too Easy - Increase Load" },
-      { id: "n2", clientId: "ana", programId: "p1", programItemId: "i1", text: "Knees in on rep 4." },
+      {
+        id: "n1",
+        clientId: "ana",
+        programId: "p1",
+        programItemId: "i1",
+        tag: "Too Easy - Increase Load",
+      },
+      {
+        id: "n2",
+        clientId: "ana",
+        programId: "p1",
+        programItemId: "i1",
+        text: "Knees in on rep 4.",
+      },
     ],
-    clientNotes: [{ id: "c1", clientId: "ana", createdAt: "2026-10-02T08:00:00.000Z", text: "Prefers mornings." }],
+    clientNotes: [
+      {
+        id: "c1",
+        clientId: "ana",
+        createdAt: "2026-10-02T08:00:00.000Z",
+        text: "Prefers mornings.",
+      },
+    ],
   };
   for (const [collection, rows] of Object.entries(records)) {
     for (const row of rows) {
-      assert.deepEqual(m.fieldIssues(row, m.SCHEMA_PREVIEW[collection]), [], `${collection} ${row.id}`);
+      assert.deepEqual(
+        m.fieldIssues(row, m.SCHEMA_PREVIEW[collection]),
+        [],
+        `${collection} ${row.id}`,
+      );
     }
   }
 });

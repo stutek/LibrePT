@@ -297,15 +297,16 @@ export const SCHEMA_PREVIEW = {
   // client's cancellation moves it. One session holds many.
   //
   // `status` is "planned", "live" or "done". "Unscheduled" is not a status: it is a planned program
-  // with no `sessionId`. `performedAt` is set when it becomes done (ISO-8601 UTC instant) and is the
-  // only date a program carries, because a program migrated from `history` may have no session.
-  // A program migrated from `history` keeps that record's id, so restoring the same old backup twice
-  // overwrites rather than duplicates.
+  // with no `sessionId`. `createdAt` is when it was written and `performedAt` when it became done,
+  // both ISO-8601 UTC instants; a program converted from `history` may have no session, so it
+  // carries its own dates. It also keeps that record's id, so restoring the same old backup twice
+  // overwrites rather than duplicates (data/sessionModelConversion.js).
   clientPrograms: {
     id: { required: true, type: "string" },
     clientId: { required: true, type: "string" },
     sessionId: { required: false, type: "string" },
     status: { required: true, type: "string" },
+    createdAt: { required: false, type: "string" },
     performedAt: { required: false, type: "string" },
     duration: { required: false, type: "number" }, // seconds
     title: { required: false, type: "string" },
@@ -337,15 +338,19 @@ export const SCHEMA_PREVIEW = {
 
   // WHAT THE TRAINER NOTES ABOUT ONE EXERCISE OF ONE CLIENT'S PROGRAM: a quick signal tapped on the
   // clipboard ("Too Easy - Increase Load", in `tag`), a written remark, or both. It replaces the
-  // `feedback` array inside a history record and the `planUpdates` collection. Linked by id, never
-  // by exercise name, which changes when an exercise is renamed. `resolved` is for a note that should
-  // change the next plan. No voice-note field: the coming schema carries none (Simon, 2026-09-27).
+  // `feedback` array inside a history record and the `planUpdates` collection, which filed the same
+  // note twice under one id. Linked by id, never by exercise name, which changes when an exercise is
+  // renamed; `exerciseName` keeps the name as it was, as a program item does, because a note written
+  // outside a session has no program item to point at. A note that should change the next plan
+  // carries `resolved` (true or false); a note without it only records what happened. No voice-note
+  // field: the coming schema carries none (Simon, 2026-09-27).
   exerciseNotes: {
     id: { required: true, type: "string" },
     clientId: { required: true, type: "string" },
     programId: { required: false, type: "string" },
     programItemId: { required: false, type: "string" },
     exerciseId: { required: false, type: "string" },
+    exerciseName: { required: false, type: "string" },
     createdAt: { required: false, type: "string" }, // ISO-8601 UTC instant, never a local date
     tag: { required: false, type: "string" },
     text: { required: false, type: "string" },

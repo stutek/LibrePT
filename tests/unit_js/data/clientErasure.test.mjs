@@ -269,7 +269,13 @@ test("the new session model: the work stays without the name, a note about the p
         title: "Jane Doe — test day",
         exercises: [{ id: "i1", name: "Squat", sets: [{ reps: 3, note: "Jane Doe PR" }] }],
       },
-      { id: "pr2", clientId: "c-jane-b", status: "done", title: "Jane Doe — test day", exercises: [] },
+      {
+        id: "pr2",
+        clientId: "c-jane-b",
+        status: "done",
+        title: "Jane Doe — test day",
+        exercises: [],
+      },
     ],
     exerciseNotes: [
       { id: "en1", clientId: "c-jane-a", text: "Jane Doe needs a lower box" },
@@ -286,7 +292,10 @@ test("the new session model: the work stays without the name, a note about the p
   assert.equal(program.title, "[c-jane-a] — test day");
   assert.equal(program.exercises[0].sets[0].note, "[c-jane-a] PR");
   assert.equal(program.exercises[0].sets[0].reps, 3);
-  assert.equal(state.exerciseNotes.find((row) => row.id === "en1").text, "[c-jane-a] needs a lower box");
+  assert.equal(
+    state.exerciseNotes.find((row) => row.id === "en1").text,
+    "[c-jane-a] needs a lower box",
+  );
   assert.deepEqual(
     state.clientNotes.map((row) => row.id),
     ["cn2"],
@@ -294,7 +303,10 @@ test("the new session model: the work stays without the name, a note about the p
   );
   // The other Jane's records are hers, and she did not ask to be forgotten.
   assert.equal(state.clientPrograms.find((row) => row.id === "pr2").title, "Jane Doe — test day");
-  assert.equal(state.exerciseNotes.find((row) => row.id === "en2").text, "Jane Doe needs a lower box");
+  assert.equal(
+    state.exerciseNotes.find((row) => row.id === "en2").text,
+    "Jane Doe needs a lower box",
+  );
 });
 
 test("an install without the new collections is not given empty ones", () => {
