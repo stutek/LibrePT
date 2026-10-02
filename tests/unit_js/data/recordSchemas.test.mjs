@@ -15,7 +15,7 @@ import { fileURLToPath } from "node:url";
 import * as seeds from "../../../src/data/index.js";
 import * as proj from "../../../src/data/recordProjections.js";
 import * as m from "../../../src/data/recordSchemas.js";
-import { CONVERTED_COLLECTIONS } from "../../../src/data/schemaShapes.js";
+import { CONVERTED_COLLECTIONS, toDomainState } from "../../../src/data/schemaShapes.js";
 import * as rec from "../../../src/domain/sessionItemRecord.js";
 
 test("field issues catches missing required and wrong type", () => {
@@ -128,8 +128,8 @@ test("a live created client validates clean", () => {
   assert.deepEqual(issues, []);
 });
 
-test("a live finished session history record validates clean", () => {
-  // Reconstructs exactly what finishWorkoutSession pushes to state.history: a buildProgramSnapshot
+test("a live finished session validates clean as the program it is stored as", () => {
+  // Reconstructs exactly what finishWorkoutSession hands the store: a buildProgramSnapshot
   // output (already position-stamped) wrapped in the surrounding log fields.
   const clientState = {
     exercises: [
@@ -148,10 +148,13 @@ test("a live finished session history record validates clean", () => {
     exercises: rec.buildProgramSnapshot(clientState),
     feedback: [{ id: "u-new", clientId: "c1", exerciseName: "Squat", tag: "ok", note: "" }],
   };
-  const issues = proj.projectionIssues("history", clientLog, m.SCHEMA_4);
-  // id/type/position are schema-optional (DEFAULT_HISTORY predates them and stays
-  // valid) — but the CURRENT write path must carry all three on every item, rest
-  // included, which is what this half of the test actually pins.
+  // Stored the way the write path stores it since schema 6: as that client's program, through the
+  // one conversion every training goes through (data/trainingRecords.js).
+  const [program] = toDomainState({ history: [clientLog], sessions: [] }).clientPrograms;
+  const issues = proj.projectionIssues("clientPrograms", program, m.SCHEMA_6);
+  // id/type/position are schema-optional on an old record (DEFAULT_HISTORY predates them) — but the
+  // CURRENT write path must carry all three on every item, rest included, which is what this half
+  // of the test actually pins.
   const allHaveIdTypePosition = clientLog.exercises.every(
     (it) =>
       typeof it.id === "string" && typeof it.type === "string" && typeof it.position === "number",
@@ -160,8 +163,8 @@ test("a live finished session history record validates clean", () => {
   assert.equal(allHaveIdTypePosition, true);
 });
 
-test("a live feedback submission validates clean", () => {
-  // The exact object literal feedbackModal.js pushes to state.planUpdates.
+test("a live feedback submission validates clean as the exercise note it is stored as", () => {
+  // The exact object literal feedbackModal.js hands the store as a pending note.
   const newFeedback = {
     id: "u-live",
     clientId: "c1",
@@ -172,7 +175,8 @@ test("a live feedback submission validates clean", () => {
     hasVoiceNote: false,
     resolved: false,
   };
-  const issues = proj.projectionIssues("planUpdates", newFeedback, m.SCHEMA_4);
+  const [note] = toDomainState({ planUpdates: [newFeedback], sessions: [] }).exerciseNotes;
+  const issues = proj.projectionIssues("exerciseNotes", note, m.SCHEMA_6);
   assert.deepEqual(issues, []);
 });
 
@@ -284,31 +288,13 @@ test("every live numbered schema is frozen on disk", () => {
   );
 });
 
-// The store of an older live schema does not receive a field
-// that only a newer live schema declares — schema 4's store never gets `exercises.source`. Only that:
-// a field NO live schema declares is still written whole everywhere, because dropping unknown data
-// from every store would lose it for good.
-test("an older schema's store is written without the fields only a newer live schema declares", () => {
-  const exercise = { id: "x", name: "Sled Push", source: "Ana Novak", collection: "exercises" };
-  assert.deepEqual(m.narrowToSchema(exercise, "exercises", 4), {
-    id: "x",
-    name: "Sled Push",
-    collection: "exercises",
-  });
-  assert.deepEqual(m.narrowToSchema(exercise, "exercises", 5), exercise);
-});
-
+// A field NO live schema declares is still written whole into every store, because dropping unknown
+// data from every store would lose it for good.
 test("a field no live schema declares is kept in every store", () => {
   const exercise = { id: "x", name: "Sled Push", futureField: 1, collection: "exercises" };
   for (const schema of Object.keys(m.LIVE_SCHEMAS)) {
     assert.deepEqual(m.narrowToSchema(exercise, "exercises", schema), exercise);
   }
-});
-
-test("reading an older schema hides the newer fields; reading the newest hides nothing", () => {
-  assert.deepEqual(m.fieldsHiddenFrom(4, 5, "exercises"), ["source"]);
-  assert.deepEqual(m.fieldsHiddenFrom(5, 4, "exercises"), []);
-  assert.deepEqual(m.fieldsHiddenFrom(4, 5, "circuits"), [], "4 never holds circuits in memory");
 });
 
 const NEW_SESSION_MODEL = [
@@ -319,19 +305,15 @@ const NEW_SESSION_MODEL = [
   "clientNotes",
 ];
 
-test("the new session model is declared, and only in PREVIEW", () => {
-  // Expand-first: storage for a field exists in a schema before anything writes it, and
-  // SCHEMA_PREVIEW is where a shape waits until it is ready for a number. These are waiting.
-  for (const collection of NEW_SESSION_MODEL) {
-    assert.ok(m.SCHEMA_PREVIEW[collection], `${collection} is not declared in the preview shape`);
-    for (const numbered of [4, 5]) {
-      assert.equal(
-        m.LIVE_SCHEMAS[numbered][collection],
-        undefined,
-        `${collection} reached schema ${numbered} before anything writes it`,
-      );
-    }
+test("the session model is schema 6, with the client's own notes still staged in PREVIEW", () => {
+  // Cut into schema 6 on 2026-10-02; `clientNotes` waits in PREVIEW until a screen writes it.
+  for (const collection of NEW_SESSION_MODEL.filter((name) => name !== "clientNotes")) {
+    assert.ok(m.SCHEMA_6[collection], `${collection} is not in schema 6`);
   }
+  assert.equal(m.SCHEMA_6.clientNotes, undefined, "client notes reached a numbered schema");
+  assert.ok(m.SCHEMA_PREVIEW.clientNotes);
+  // Schemas 4 and 5 are retired: nothing reads or writes their stores any more.
+  assert.deepEqual(Object.keys(m.LIVE_SCHEMAS).sort(), ["6", "PREVIEW"]);
 });
 
 test("the records of one group training validate clean in the new session model", () => {

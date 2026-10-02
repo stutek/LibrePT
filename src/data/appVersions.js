@@ -9,7 +9,7 @@
 // save, backup and sync, always holds everything. A version that does not show something leaves it
 // stored, untouched.
 //
-// **Feature code asks for a behaviour by NAME** (`hasBehaviour("libraryImport")`), never for a version
+// **Feature code asks for a behaviour by NAME** (`hasBehaviour(<name>)`), never for a version
 // id. A comparison of versions would spread into every file that branches; a name lives in one entry
 // here. appVersions.test.mjs fails the build on a name the code asks for that no version declares, and
 // on a name every supported version turns on — its branch is then dead and must go.
@@ -26,28 +26,15 @@ const APP_VERSION_KEY = "librept_app_version";
  * "supported" (offered). Add a version; retire one only by a decision, never as a side effect. */
 export const APP_VERSIONS = [
   {
-    id: "2026-09",
-    schema: 4,
-    status: "supported",
-    descriptionKey: "app_version_2026_09_desc",
-    behaviours: [],
-  },
-  {
-    id: "2026-10",
-    schema: 5,
-    status: "supported",
-    descriptionKey: "app_version_2026_10_desc",
-    // Importing a trainer's own exercise library and circuits.
-    behaviours: ["libraryImport"],
-  },
-  {
     // Every client's training is a program of their own, linked to the session it was run in
-    // (recordSchemas.js, SCHEMA_6). Schemas 4 and 5 are still written for the two versions above.
+    // (recordSchemas.js, SCHEMA_6). Versions 2026-09 and 2026-10, which wrote schemas 4 and 5, were
+    // retired with those schemas (ruled 2026-10-02, Simon); a device that chose one runs this.
     id: "2026-11",
     schema: 6,
     status: "default",
     descriptionKey: "app_version_2026_11_desc",
-    behaviours: ["libraryImport"],
+    // Importing a library, which 2026-09 lacked, is no longer a behaviour: every build has it.
+    behaviours: [],
   },
 ];
 

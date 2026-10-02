@@ -714,9 +714,6 @@ export const en = {
   app_version_in_use: "In use",
   app_version_refused_in_session:
     "A session is running. Finish or cancel it first, then change the version.",
-  app_version_2026_09_desc:
-    "The app as it was in September 2026, without importing an exercise library.",
-  app_version_2026_10_desc: "Adds importing your own exercise library and circuits from a file.",
   app_version_2026_11_desc:
     "Each client has their own programme, and a group training stays linked to its session.",
   trainer_details_lede:

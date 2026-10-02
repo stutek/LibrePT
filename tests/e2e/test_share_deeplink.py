@@ -104,8 +104,16 @@ def test_fresh_start_is_empty_without_init(page, local_server):
     assert page.locator("#clients-list .client-card").count() == 0
     db = _db(page)
     assert len(db.get("clients", [])) == 0 and len(db.get("sessions") or []) == 0
-    # No stale/demo active session either.
-    assert page.evaluate("() => localStorage.getItem('librept_active_session')") is None
+    # No stale/demo session on the clipboard either.
+    assert (
+        page.evaluate(
+            """async () => {
+                const store = await import(new URL('controllers/activeSessionStore.js', document.baseURI).href);
+                return store.getActiveSession();
+            }"""
+        )
+        is None
+    )
 
 
 def test_init_param_loads_demo_data(page, local_server):

@@ -325,7 +325,21 @@ test("a feedback item written without an id is kept, under the same id every tim
   assert.deepEqual(first, second);
 });
 
-test("a session in progress is not written into an older build's history", () => {
-  const live = { id: "p-live", clientId: "ana", status: "live", exercises: [] };
-  assert.deepEqual(historyFromSessionModel({ clientPrograms: [live], clients }).history, []);
+test("a session in progress, or a booked one being planned, is not written into an older build's history", () => {
+  const live = { id: "p-live", clientId: "ana", status: "live", sessionId: "s1", exercises: [] };
+  const booked = {
+    id: "p-booked",
+    clientId: "ana",
+    status: "planned",
+    sessionId: "s1",
+    exercises: [],
+  };
+  const draft = { id: "p-draft", clientId: "ana", status: "planned", exercises: [] };
+  assert.deepEqual(
+    historyFromSessionModel({ clientPrograms: [live, booked, draft], clients }).history.map(
+      (r) => r.id,
+    ),
+    ["p-draft"],
+    "only the plan written for no session is an unscheduled plan",
+  );
 });

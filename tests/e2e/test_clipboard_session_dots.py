@@ -38,8 +38,9 @@ def _read(page):
 def _expected_tab_titles(page):
     """Per participant, the title of the session the record says the client belongs to."""
     return page.evaluate(
-        """() => {
-          const c = JSON.parse(localStorage.getItem('librept_active_session'));
+        """async () => {
+          const store = await import(new URL('controllers/activeSessionStore.js', document.baseURI).href);
+          const c = store.getActiveSession();
           const ss = c.sourceSession;
           return c.participants.map((id) => ss.sessionTitles[ss.clientSessions[id]]);
         }"""

@@ -30,6 +30,11 @@ function attendance(state) {
   return state.sessionAttendance;
 }
 
+function groups(state) {
+  if (!Array.isArray(state.groupSharedPrograms)) state.groupSharedPrograms = [];
+  return state.groupSharedPrograms;
+}
+
 /** Every program, in no particular order. */
 export function allPrograms(state) {
   return state?.clientPrograms || [];
@@ -59,6 +64,29 @@ export function draftPrograms(state) {
 
 export function programById(state, id) {
   return allPrograms(state).find((program) => program.id === id) ?? null;
+}
+
+/** The programs of the sessions named, planned or live: what a session not yet finished holds. */
+export function openProgramsOfSessions(state, sessionIds) {
+  const ids = new Set(sessionIds.filter(Boolean));
+  return allPrograms(state).filter(
+    (program) => ids.has(program.sessionId) && program.status !== "done",
+  );
+}
+
+/** Live programs, the one started last first. */
+export function livePrograms(state) {
+  return allPrograms(state)
+    .filter((program) => program.status === "live")
+    .sort((a, b) => String(b.startedAt || "").localeCompare(String(a.startedAt || "")));
+}
+
+/** Which clients share one program in the sessions named: one list of client ids per group. */
+export function groupsOfSessions(state, sessionIds) {
+  const ids = new Set(sessionIds.filter(Boolean));
+  return (state?.groupSharedPrograms || [])
+    .filter((group) => ids.has(group.sessionId))
+    .map((group) => [...group.clientIds]);
 }
 
 /** The notes written on one program's exercises, in the order they were written. */
@@ -98,7 +126,7 @@ export function feedbackFromNotes(noteList) {
   }));
 }
 
-// --- Writes. They take the record the clipboard builds today, in the old shape. ---
+// --- Writes. What the clipboard hands in goes through the old shape and the one conversion. ---
 
 function converted(state, { history = [], planUpdates = [] }) {
   // No sessions: a write is never guessed onto a session. The caller names it (recordTrainings).
@@ -154,7 +182,8 @@ function sessionOf(state, sessionIds, clientId) {
 /**
  * Store finished or planned trainings, one record per client. `sessionIds` are the session rows the
  * clipboard was launched from: a finished program is linked to the one its client was on, and the
- * client is recorded as having attended it.
+ * client is recorded as having attended it. A record carrying the id of a program already held
+ * replaces it: that is how a live program becomes the finished one.
  */
 export function recordTrainings(state, records, { sessionIds = [] } = {}) {
   const model = converted(state, { history: records.filter(Boolean) });
@@ -162,7 +191,7 @@ export function recordTrainings(state, records, { sessionIds = [] } = {}) {
     const session =
       program.status === "done" ? sessionOf(state, sessionIds, program.clientId) : null;
     if (session) program.sessionId = session.id;
-    programs(state).push(program);
+    storeProgram(state, program, notesFiledOn(model, program.id));
     if (!session) continue;
     const id = `at-${session.id}-${program.clientId}`;
     if (attendance(state).some((row) => row.id === id)) continue;
@@ -175,32 +204,98 @@ export function recordTrainings(state, records, { sessionIds = [] } = {}) {
       consumesQuota: true,
     });
   }
-  upsertNotes(state, model.exerciseNotes);
 }
 
 /**
- * Store a planning draft, or update the one being edited. `draftId` names WHICH draft: a client can
- * hold several, because a deleted session leaves an unscheduled plan per participant. Without it the
- * client's only draft is updated. The stored draft keeps its id and its notes, because a deep link
- * and the feed are keyed on the id. Returns the id.
+ * Store the programs of a session that is not finished, one per participant, each under the id the
+ * clipboard keeps for it, so saving again replaces what is held instead of adding a program.
+ *
+ * Each entry is one participant's program as the clipboard holds it: `{ id, clientId, status,
+ * sessionId?, createdAt?, startedAt?, title?, routineId?, routineName?, exercises, feedback }`.
+ * `status` is "planned" while the session is staged or is a plan with no session, "live" once the
+ * trainer tapped Start. `feedback` is what the session holds on this client; it becomes the notes
+ * filed on the program. A seed stamp on the entry (`testData`, `seededDemo`) is carried onto the
+ * program and its notes, as the conversion carries it from any record. `groups` are the clients sharing one program in session `sessionId`, as
+ * lists of client ids; they replace the groups that session had.
  */
-export function saveDraft(state, record, draftId = null) {
-  const drafts = draftPrograms(state);
-  const existing = draftId
-    ? drafts.find((program) => program.id === draftId)
-    : drafts.find((program) => program.clientId === record.clientId);
-  const model = converted(state, { history: [record] });
-  const [incoming] = model.clientPrograms;
-  if (!existing) {
-    programs(state).push(incoming);
-    upsertNotes(state, model.exerciseNotes);
-    return incoming.id;
+export function saveSessionPrograms(
+  state,
+  entries,
+  { sessionId = null, groups: shared = [] } = {},
+) {
+  const records = entries.map(({ status, sessionId, startedAt, createdAt, ...record }) => ({
+    ...record,
+    date: createdAt,
+    feedback: record.feedback || [],
+    // Read as a plan, so the conversion links no session and stamps no performance date; the
+    // status, the session and the start are the entry's own.
+    isPlanning: true,
+  }));
+  const model = converted(state, { history: records });
+  model.clientPrograms.forEach((program, index) => {
+    const { status, sessionId: programSession, startedAt } = entries[index];
+    storeProgram(
+      state,
+      defined({ ...program, status, sessionId: programSession, startedAt }),
+      notesFiledOn(model, program.id),
+    );
+  });
+  if (sessionId) {
+    state.groupSharedPrograms = groups(state)
+      .filter((group) => group.sessionId !== sessionId)
+      .concat(
+        shared.map((clientIds, index) => ({
+          id: `${sessionId}-group-${index}`,
+          sessionId,
+          clientIds: [...clientIds],
+        })),
+      );
   }
-  existing.routineName = incoming.routineName;
-  existing.title = incoming.title;
-  existing.createdAt = incoming.createdAt;
-  existing.exercises = incoming.exercises;
-  return existing.id;
+}
+
+/** A session discarded before it finished: its programs go (removePrograms), and so do its groups. */
+/** A client taken off a booked session takes their plan for it along. A program already running or
+ *  done is a record of work and stays. */
+export function dropPlansOfRemovedClients(state, sessionId, participants) {
+  const kept = new Set(participants || []);
+  const gone = allPrograms(state)
+    .filter(
+      (program) =>
+        program.sessionId === sessionId &&
+        program.status === "planned" &&
+        !kept.has(program.clientId),
+    )
+    .map((program) => program.id);
+  if (gone.length > 0) removePrograms(state, gone);
+}
+
+export function discardSessionPrograms(state, programIds, sessionId = null) {
+  removePrograms(state, programIds);
+  if (sessionId) {
+    state.groupSharedPrograms = groups(state).filter((group) => group.sessionId !== sessionId);
+  }
+}
+
+function notesFiledOn(model, programId) {
+  return model.exerciseNotes.filter((note) => note.programId === programId);
+}
+
+// A program stored again under its id replaces the copy held, and keeps when it was started:
+// finishing a live program is what makes it the performed one, never a second program beside it.
+// The notes filed on it become exactly `filed`. A note no longer among them was taken back by the
+// trainer: it goes, or stays unfiled while a next plan still waits for it.
+function storeProgram(state, program, filed) {
+  const list = programs(state);
+  const index = list.findIndex((held) => held.id === program.id);
+  if (index === -1) list.push(program);
+  else list[index] = defined({ ...program, startedAt: program.startedAt ?? list[index].startedAt });
+
+  upsertNotes(state, filed);
+  const kept = new Set(filed.map((note) => note.id));
+  const takenBack = (note) => note.programId === program.id && !kept.has(note.id);
+  state.exerciseNotes = notes(state)
+    .filter((note) => !takenBack(note) || typeof note.resolved === "boolean")
+    .map((note) => (takenBack(note) ? unfiled(note) : note));
 }
 
 /** Remove programs by id. A note filed on one that the next plan still waits for stays, unfiled; the

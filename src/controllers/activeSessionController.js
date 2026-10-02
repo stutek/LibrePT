@@ -2,7 +2,7 @@
 // responsibility: WIRE the session up — hand the board everything it paints with, wire the overlay's
 // title-bar chrome, own edit mode, and present one import surface for the session to the rest of the
 // app. The work itself lives in the sibling modules it re-exports from (activeSessionStore.js,
-// activeSessionCache.js, sessionLifecycle.js, sessionTimers.js, sessionQuickSignals.js,
+// sessionPrograms.js, sessionLifecycle.js, sessionTimers.js, sessionQuickSignals.js,
 // sessionCircuits.js, sessionPlanEditing.js, sessionFocusUrl.js). Injected dependencies: everything
 // app.js supplies, merged into activeSessionStore.js's appDeps.
 //
@@ -13,8 +13,7 @@
 import { newRecordId } from "../data/recordId.js";
 import {
   bindingFor,
-  boundClientRoutines,
-  unboundClientRoutines,
+  groupedClientRoutines,
   withBinding,
   withoutBinding,
 } from "../domain/participantBinding.js";
@@ -39,7 +38,6 @@ import { updateClientTabsFadeState } from "../modules/common/activeUsersList.js"
 import { askInApp } from "../modules/common/appQuestion.js";
 import { isGuideSurface } from "../modules/common/dom.js";
 import { clientDisplayName } from "../modules/common/utils.js";
-import { saveActiveSessionToCache, savePlanEdit } from "./activeSessionCache.js";
 import {
   currentPlanMode,
   getActiveSession,
@@ -68,6 +66,7 @@ import {
   openCatalogPicker,
   wireAddExerciseAndCatalogDialogs,
 } from "./sessionPlanEditing.js";
+import { saveActiveSession, savePlanEdit } from "./sessionPrograms.js";
 import {
   getExerciseSignalColor,
   hasExerciseNote,
@@ -83,7 +82,7 @@ import { startClientTimer } from "./sessionTimers.js";
 export { isRestItem };
 export { focusIndexFromRef, isCircuitFocus };
 export { getActiveExercise, getActiveSession, setActiveSession } from "./activeSessionStore.js";
-export { saveActiveSessionToCache } from "./activeSessionCache.js";
+export { saveActiveSession } from "./sessionPrograms.js";
 export { sessionFocusPath, syncSessionFocusUrl, focusExerciseByIndex } from "./sessionFocusUrl.js";
 export { startSessionTimer, updateOverlaySessionTimer } from "./sessionTimers.js";
 export {
@@ -174,8 +173,8 @@ initActiveSessionBoard({
   rerender: () => renderActiveGroupBoard(),
   enterEditMode: enterClipboardEditMode,
   exitEditMode: exitClipboardEditMode,
-  saveActiveSessionToCache: () => saveActiveSessionToCache(),
-  savePlanEdit: () => savePlanEdit(),
+  saveActiveSession: () => saveActiveSession(),
+  savePlanEdit: (clientId) => savePlanEdit(clientId),
   openAddExercise: () => openAddSessionExerciseDialog(),
   // Routed so a reload reopens the picker. `query`/`category` are transient typing state and stay
   // out of the URL; the route re-derives the filter from the row it is swapping.
@@ -286,11 +285,12 @@ function wireSessionMenuAndActions(t) {
     });
   }
 
-  /** Puts every participant on the plan currently on screen — or gives them their own back.
+  /** Puts every participant on the plan currently on screen — or ends the group.
    *
-   * Applied to the live session immediately, so the very next set logged counts for the whole group:
-   * bound participants SHARE one plan object (domain/participantBinding.js), which is what makes one
-   * tap do the work of three without a single logging site knowing that bindings exist.
+   * Grouping gives each member a copy of the plan on screen, under the same item ids
+   * (domain/participantBinding.js); each keeps their own tab, active card, sets and notes, so people
+   * moving at different speeds are still logged one by one. Ending the group changes nobody's plan:
+   * each member goes on with the copy they have.
    */
   function toggleParticipantBinding() {
     const activeSession = getActiveSession();
@@ -300,24 +300,19 @@ function wireSessionMenuAndActions(t) {
 
     const group = bindingFor(activeSession.bindings, activeSession.activeClientId);
     if (group) {
-      // Everyone in the group goes back to their own plan — a COPY of what they were training, since
-      // dropping the binding alone would leave them holding one object and the next set logged would
-      // still appear for both.
       activeSession.bindings = group.reduce(
         (bindings, clientId) => withoutBinding(bindings, clientId),
         activeSession.bindings,
       );
-      activeSession.clientRoutines = unboundClientRoutines(activeSession.clientRoutines, group);
     } else {
+      activeSession.clientRoutines = groupedClientRoutines(activeSession.clientRoutines, {
+        sourceId: activeSession.activeClientId,
+        memberIds: participants,
+        bindings: activeSession.bindings,
+      });
       activeSession.bindings = withBinding(activeSession.bindings, participants);
-      // Applied here rather than at render: the identity of these objects IS the binding, and a
-      // render that rebuilt it would quietly discard whatever was logged into the shared plan.
-      activeSession.clientRoutines = boundClientRoutines(
-        activeSession.clientRoutines,
-        activeSession.bindings,
-      );
     }
-    saveActiveSessionToCache();
+    saveActiveSession();
     renderActiveGroupBoard();
   }
 
@@ -385,7 +380,7 @@ function wireSessionMenuAndActions(t) {
     target.logs = {};
     target.activeExerciseIndex = 0;
     target.routineName = source.routineName;
-    saveActiveSessionToCache();
+    savePlanEdit(clientId);
     renderActiveGroupBoard();
   }
 

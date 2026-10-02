@@ -103,6 +103,18 @@ test("planning draft is used only when there is no later scheduled session", () 
   assert.equal(withoutScheduled.next.id, "d1");
 });
 
+test("a session's own staged plan is never offered as the next plan", () => {
+  // Opening a session stores each participant's plan for it as a planned program of that session.
+  const state = {
+    sessions: [session({ id: "s1", startDate: "2026-09-10T18:00:00.000Z" })],
+    clientPrograms: [
+      { id: "p1", clientId: "ana", sessionId: "s1", status: "planned", exercises: [] },
+    ],
+  };
+  const { next } = neighboursOf(state, "ana", { date: "2026-09-10T18:00:00.000Z", id: "s1" });
+  assert.equal(next, null);
+});
+
 test("null on both sides when the client has nothing before or after", () => {
   const state = { history: [], sessions: [] };
   const { previous, next } = clientSessionNeighbours(state, "ana", {

@@ -122,7 +122,7 @@ export function renderErasureReceipt(summary, checklist, client) {
     "",
     "Erased in the app:",
     "- client record: name, contact, goals, notes, injuries, body-weight history",
-    `- ${summary.history} training record(s) and ${summary.planUpdates} plan update(s) re-labelled`,
+    `- ${summary.programs} training record(s) and ${summary.notes} exercise note(s) checked`,
     `- ${summary.sessions} session(s) checked; ${summary.scrubbedTextFields} free-text field(s) rewritten`,
   ];
 

@@ -60,8 +60,6 @@ function buildLiveWriters() {
   const model = toDomainState({ history: [clientLog], planUpdates: [newFeedback], sessions: [] });
   return {
     clients: newClient,
-    planUpdates: newFeedback,
-    history: clientLog,
     clientPrograms: model.clientPrograms[0],
     exerciseNotes: model.exerciseNotes[0],
   };

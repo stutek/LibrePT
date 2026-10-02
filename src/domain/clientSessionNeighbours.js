@@ -83,8 +83,10 @@ export function clientSessionNeighbours(state, clientId, anchor) {
   }
 
   if (!next) {
+    // A draft is a plan written for no session. A planned program WITH a session is that session's
+    // plan, staged on the clipboard — the session itself, never the next one.
     const draft = programs.find(
-      (program) => program.status === "planned" && program.id !== anchor?.id,
+      (program) => program.status === "planned" && !program.sessionId && program.id !== anchor?.id,
     );
     if (draft)
       next = {

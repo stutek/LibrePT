@@ -35,7 +35,7 @@ import {
   schemaAcceptsCollection,
   toDomainObject,
 } from "./recordProjections.js";
-import { LIVE_SCHEMAS } from "./recordSchemas.js";
+import { SCHEMA_4 } from "./recordSchemas.js";
 
 const LEGACY_PREVIEW = "P";
 // Schema 4 by name, not the stable schema: the P-only records belong in the store that was stable
@@ -62,7 +62,9 @@ export async function transferRecordsOnlyInPreview(db) {
       (record) => record.id,
     ),
   );
-  const stable = LIVE_SCHEMAS[TRANSFER_TARGET];
+  // The frozen shape, not the live registry: schema 4 is retired, and its shape still decides what
+  // belongs in its store on a phone that holds one.
+  const stable = SCHEMA_4;
   const missing = inPreview.filter(
     (record) =>
       !inStable.has(record.id) &&

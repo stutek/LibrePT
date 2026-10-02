@@ -41,7 +41,7 @@ import {
   STABLE_SCHEMA,
   narrowToSchema,
 } from "./recordSchemas.js";
-import { stateForSchema, toDomainState } from "./schemaShapes.js";
+import { toDomainState } from "./schemaShapes.js";
 
 // localStorage, not the database: boot has to know WHICH store to read before it can read anything,
 // so this cannot live in the thing it selects.
@@ -116,11 +116,10 @@ async function backfillSchema(db, schema, sourceSchema) {
   const sourceStore = storeNameForSchema(sourceSchema);
   const targetStore = storeNameForSchema(schema);
   const records = await getAll(db.transaction([sourceStore], "readonly").objectStore(sourceStore));
-  // Into memory's shape and out in the target's, exactly as a read and a save do (schemaShapes.js):
-  // schema 6 filled from schema 5 turns `history` into programs, and the reverse builds it back.
-  // Routed through the same functions so the write path and the backfill can never disagree about
-  // what a record of this schema looks like.
-  const shaped = stateForSchema(toDomainState(groupRecordsByCollection(records)), schema);
+  // Into memory's shape, exactly as every read of older data is (schemaShapes.js): schema 6 filled
+  // from a retired store turns its `history` into programs. Routed through the same function so a
+  // read and the backfill can never disagree about what a record of this schema looks like.
+  const shaped = toDomainState(groupRecordsByCollection(records));
 
   await withTransaction(db, [targetStore, META_STORE], "readwrite", ({ store }) => {
     for (const collection of collectionsForSchema(LIVE_SCHEMAS[schema])) {
@@ -145,19 +144,40 @@ async function backfillSchema(db, schema, sourceSchema) {
  * into it, marked the older store as filled from it, and the trainer saw an empty app. The schema
  * below is complete on every install that ran the build before this one, because that build's star
  * write kept every live store current. Ascending order carries a jump of two numbers: 5 is filled
- * from 4 before 6 is filled from 5. The lowest numbered schema is the one data has always been in,
- * and is never a target.
+ * from 4 before 6 is filled from 5.
+ *
+ * **The lowest live schema is filled from a RETIRED store** (ruled 2026-10-02: schemas 4 and 5
+ * retired, every install on 6). An install that used an older build holds its data — the trainer's
+ * own clients and sessions, not sample data — in store 5, 4 or P, which this build no longer writes
+ * or reads. Filled from none of them, it would open with nothing in it. The newest such store that
+ * holds anything is the source, once, read-only; a fresh install has none and stays empty.
  *
  * PREVIEW is left out: it is emptied when the build changes and filled only for an install that reads
  * it (`refreshPreviewStoreIfBuildChanged`), or at activation, so filling it here would be work undone.
  */
 export async function ensureLiveSchemasBackfilled(db) {
   const numbered = liveSchemas().filter((schema) => String(schema) !== String(PREVIEW_VERSION));
-  for (let index = 1; index < numbered.length; index++) {
+  for (let index = 0; index < numbered.length; index++) {
     const schema = numbered[index];
     if (await isBackfilled(db, schema)) continue;
-    await backfillSchema(db, schema, numbered[index - 1]);
+    const source = index > 0 ? numbered[index - 1] : await newestRetiredStoreWithData(db, schema);
+    if (source !== null) await backfillSchema(db, schema, source);
   }
+}
+
+// The stores of schemas this build no longer writes, newest first: where an install that used an
+// older build keeps its data. "P" is the preview store installs wrote before schema 4.
+const RETIRED_STORES = [5, 4, "P"];
+
+async function newestRetiredStoreWithData(db, below) {
+  for (const schema of RETIRED_STORES) {
+    if (typeof schema === "number" && schema >= Number(below)) continue;
+    const name = storeNameForSchema(schema);
+    if (!db.objectStoreNames.contains(name)) continue;
+    const records = await getAll(db.transaction([name], "readonly").objectStore(name));
+    if (records.length > 0) return schema;
+  }
+  return null;
 }
 
 // The build that last wrote the preview store, with the preview SHAPE it was written in. Absent

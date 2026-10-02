@@ -19,12 +19,13 @@
 //   * a PRE-ERASURE BACKUP still names them — that is what erasureSuppression.js exists for;
 //   * the trainer's own memory and their paper files are outside any software's reach.
 //
-// Three fan-out surfaces, and missing any one of them means the erasure silently failed:
-//   1. the client record itself;
-//   2. `clientName`, DENORMALISED onto every history and planUpdate record (recordSchemas.js) —
-//      the exact "one store keeps the name" failure DATA_MODEL §5 warns about;
-//   3. trainer-typed free text that happens to contain the name (session titles, draft titles,
-//      feedback notes), which no schema marks as identifying because it is prose.
+// Two fan-out surfaces, and missing either means the erasure silently failed:
+//   1. the client record itself, and a note about the person (`clientNotes`), which goes with them;
+//   2. trainer-typed free text that happens to contain the name (session titles and places, program
+//      titles, the note on a set, exercise notes), which no schema marks as identifying because it
+//      is prose.
+// The name is no longer copied onto other records: schema 6's programs and notes carry the client's
+// id only. The `clientName` copies on `history` and `planUpdates` went with those collections.
 //
 // Injected dependencies: none.
 
@@ -182,23 +183,7 @@ function namesakeOnRecord(participantIds, state, client) {
   });
 }
 
-// A history record belongs to exactly one client, so prose inside it is unambiguous EVEN when the
-// name is shared — a note on Jane A's session is about Jane A. Ambiguity only reaches records that
-// several clients share, which is sessions.
-function eraseHistoryRecord(record, name, pseudonym, marker, counters) {
-  const feedback = Array.isArray(record.feedback)
-    ? record.feedback.map((item) => {
-        const scrubbed = scrubName(item?.note, name, marker);
-        if (scrubbed.hit) counters.scrubbedTextFields += 1;
-        return { ...item, note: scrubbed.text };
-      })
-    : record.feedback;
-
-  return { ...eraseProgramProse(record, name, marker, counters), clientName: pseudonym, feedback };
-}
-
-// The prose of one client's program, a history record or a `clientPrograms` row alike: its title, and
-// the note the trainer can type on every set.
+// The prose of one client's program: its title, and the note the trainer can type on every set.
 function eraseProgramProse(record, name, marker, counters) {
   const title = scrubName(record.title, name, marker);
   if (title.hit) counters.scrubbedTextFields += 1;
@@ -273,8 +258,8 @@ export function eraseClientInState(state, clientId, { requestedOn = "", now = ne
   const marker = textMarkerFor(clientId);
   const namesakes = clientsSharingName(state, client);
   const counters = {
-    history: 0,
-    planUpdates: 0,
+    programs: 0,
+    notes: 0,
     sessions: 0,
     scrubbedTextFields: 0,
     // Session titles this refused to touch, and why. Surfaced, never silently skipped: an
@@ -291,18 +276,6 @@ export function eraseClientInState(state, clientId, { requestedOn = "", now = ne
   const clients = state.clients.map((candidate) =>
     candidate.id === clientId ? eraseClientRecord(candidate, { requestedOn, now }) : candidate,
   );
-
-  const history = (state.history || []).map((record) => {
-    if (record.clientId !== clientId) return record;
-    counters.history += 1;
-    return eraseHistoryRecord(record, name, pseudonym, marker, counters);
-  });
-
-  const planUpdates = (state.planUpdates || []).map((record) => {
-    if (record.clientId !== clientId) return record;
-    counters.planUpdates += 1;
-    return { ...record, clientName: pseudonym };
-  });
 
   // A session keeps the participant id — the slot happened and the other participants' records
   // depend on it. Only the trainer-typed title can carry the name, and it is the one field several
@@ -340,13 +313,16 @@ export function eraseClientInState(state, clientId, { requestedOn = "", now = ne
   // person, as `clients.notes` does, and goes with them.
   const sessionModel = {
     ...sweptCollection(state, "clientPrograms", (rows) =>
-      rows.map((row) =>
-        row.clientId === clientId ? eraseProgramProse(row, name, marker, counters) : row,
-      ),
+      rows.map((row) => {
+        if (row.clientId !== clientId) return row;
+        counters.programs += 1;
+        return eraseProgramProse(row, name, marker, counters);
+      }),
     ),
     ...sweptCollection(state, "exerciseNotes", (rows) =>
       rows.map((row) => {
         if (row.clientId !== clientId) return row;
+        counters.notes += 1;
         const text = scrubName(row.text, name, marker);
         if (!text.hit) return row;
         counters.scrubbedTextFields += 1;
@@ -359,7 +335,7 @@ export function eraseClientInState(state, clientId, { requestedOn = "", now = ne
   };
 
   return {
-    state: { ...state, clients, history, planUpdates, sessions, sessionSeries, ...sessionModel },
+    state: { ...state, clients, sessions, sessionSeries, ...sessionModel },
     summary: {
       clientId,
       pseudonym,
@@ -380,8 +356,6 @@ export function eraseClientInState(state, clientId, { requestedOn = "", now = ne
 // the sweep changed something: every save counts as a change not yet backed up.
 export const SWEPT_COLLECTIONS = [
   "clients",
-  "history",
-  "planUpdates",
   "sessions",
   "sessionSeries",
   "clientPrograms",

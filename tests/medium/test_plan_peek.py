@@ -527,19 +527,19 @@ def test_the_plan_stays_where_it_was_pulled_while_the_finger_travels_up(
     page.mouse.up()
 
 
-def test_a_running_session_is_never_left_by_a_pull(page, local_server):
-    """Opening another session replaces the one clipboard slot, so a pull from a STARTED session
-    uncovers the plan but is never armed and opens nothing — a sweep between sets cannot throw away
-    the session's logs."""
+def test_a_running_session_is_left_by_a_pull_like_any_other(page, local_server):
+    """A started session is stored in its programs, so leaving it loses nothing: the pull arms and the
+    upward stroke opens the neighbour, as it does from a session not yet started. Letting go still
+    opens nothing."""
     _mount(page, local_server, started=True)
     _drag(page, LEFT_START, 200, release=False)
-    assert not _label_shown(page, "past", "open")
+    assert _label_shown(page, "past", "open")
     page.mouse.up()
     page.wait_for_timeout(450)
     assert _opened(page) == []
 
     _drag_then_up(page, LEFT_START, 200)
-    assert _opened(page) == [], "an upward stroke left a running session"
+    assert _opened(page) == [["route", f"/session.client/hprev1/{CLIENT_ID}"]]
 
 
 def test_with_no_next_plan_the_future_layer_offers_to_create_one(page, local_server):

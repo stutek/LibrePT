@@ -67,7 +67,8 @@ export function initRestTimer(d) {
 }
 
 // Wire the stack's delegated dismiss control once. Restoration of persisted timers is driven by the
-// session lifecycle (see restoreSessionTimers, called from recoverActiveSession).
+// session lifecycle (see restoreSessionTimers, called when a session is opened into an empty
+// clipboard, which is what a reload leaves).
 export function setupRestTimer() {
   const stack = document.getElementById("clipboard-timer-stack");
   if (!stack) return;
@@ -161,13 +162,17 @@ export function clearAllTimers() {
   if (allTimers().length === 0) stopTicking();
 }
 
-// Rehydrate the stack from localStorage (called when a session is recovered on reload). Each timer
-// recomputes its remaining time from the stored absolute end time.
-export function restoreSessionTimers() {
+// Rehydrate the stack from localStorage, for the session put on the clipboard after a reload. Each
+// timer recomputes its remaining time from the stored absolute end time. A timer started in another
+// session is dropped: it would count a rest for a client who is not on the clipboard.
+export function restoreSessionTimers(sessionId = null) {
   timers = parseTimers(
     safely(() => readVersionScoped(STORE_KEY)),
     activeWorkspace(),
   );
+  for (const [clientId, timer] of Object.entries(timers)) {
+    if (sessionId && timer.sessionId && timer.sessionId !== sessionId) delete timers[clientId];
+  }
   otherTimers = parseTimers(
     safely(() => readForWorkspace(STORE_KEY, otherWorkspace())),
     otherWorkspace(),

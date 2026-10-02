@@ -6,8 +6,8 @@
 import { clampFocusIndex, isRestItem } from "../domain/sessionPlanFactory.js";
 import { renderActiveSessionBoard } from "../modules/clipboard/activeSessionBoard.js";
 import { stopTimerIfMatches } from "../modules/clipboard/exerciseAndRestTimer.js";
-import { saveActiveSessionToCache } from "./activeSessionCache.js";
 import { getActiveSession, getAppDeps } from "./activeSessionStore.js";
+import { saveActiveSession } from "./sessionPrograms.js";
 
 export function buildCircuitUnits(list) {
   const units = [];
@@ -75,7 +75,7 @@ export function completeCircuitRound(circuitId) {
     // and clears it themselves with ✕.
     stopTimerIfMatches(activeSession.activeClientId, { type: "circuit", id: circuitId });
   }
-  saveActiveSessionToCache();
+  saveActiveSession();
   if (saveToLocalStorage) saveToLocalStorage();
   renderActiveSessionBoard();
 }

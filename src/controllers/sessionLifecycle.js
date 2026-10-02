@@ -1,30 +1,30 @@
 // src/controllers/sessionLifecycle.js — how a session begins and how it ends. Single responsibility:
-// the whole-session transitions — staging a plan, tapping Start, recovering one after a reload,
-// cancelling, deleting the slot behind it, and completing it into the client's programs
-// (data/trainingRecords.js, the one way trainings are read and written). Injected dependencies:
-// `state`, `t`, `navigateToPath`, `saveToLocalStorage`, `focusSessionsColumn`, `renderSessions` and
-// `resolveRoute` arrive through activeSessionStore.js.
+// the whole-session transitions — opening one (staged, reopened, or put back after a reload), tapping
+// Start, cancelling, deleting the slot behind it, and completing it. Each transition changes the
+// session's programs (sessionPrograms.js, over data/trainingRecords.js): planned while staged, live
+// once started, done when completed, removed when discarded. Injected dependencies: `state`, `t`,
+// `navigateToPath`, `saveToLocalStorage`, `focusSessionsColumn`, `renderSessions`, `resolveRoute`
+// and `launchClipboardDirectly` arrive through activeSessionStore.js.
 //
-// Everything here writes to the SAME single `activeSession` slot, which is why these transitions
-// belong together: opening one session is inseparable from discarding whatever occupied the slot.
+// The clipboard holds one session at a time, the `activeSession` slot. Opening another one leaves
+// the first in its programs, where every change was already written, and the trainer can come back
+// to it.
 
 import { libraryExercises } from "../data/exerciseLibrary.js";
 import { newRecordId } from "../data/recordId.js";
-import { clearActiveSessionCache, readActiveSessionCache } from "../data/sessionCache.js";
+import { readVersionScoped, removeVersionScoped } from "../data/storageNamespace.js";
 import {
-  draftPrograms,
   feedbackFromNotes,
+  livePrograms,
   notesForProgram,
+  programById,
   programDate,
   recordTrainings,
   removePrograms,
 } from "../data/trainingRecords.js";
 import { loggedSetsPerParticipant } from "../domain/loggedSets.js";
-import { boundClientRoutines } from "../domain/participantBinding.js";
-import { isCachedSessionStale } from "../domain/sessionClock.js";
 import { buildSessionHistoryRecord } from "../domain/sessionHistoryRecord.js";
 import {
-  buildClientStateFromHistoryLog,
   buildClientStateFromImportedItems,
   buildClientStateFromRoutine,
 } from "../domain/sessionPlanFactory.js";
@@ -49,13 +49,21 @@ import {
 } from "../modules/common/wakeLock.js";
 import { renderRoutinesList } from "../modules/plans/plansView.js";
 import { renderClipboardBar } from "../modules/session/sessionBar.js";
-import { saveActiveSessionToCache } from "./activeSessionCache.js";
 import {
   getActiveSession,
   getAppDeps,
   mergeAppDeps,
   setActiveSession,
 } from "./activeSessionStore.js";
+import {
+  clientStateFromProgram,
+  discardSession,
+  programIdFor,
+  saveActiveSession,
+  saveSession,
+  slotIdsOf,
+  storedSession,
+} from "./sessionPrograms.js";
 import { offerScheduleAdjustment } from "./sessionScheduleAdjustment.js";
 import { startSessionTimer } from "./sessionTimers.js";
 
@@ -63,29 +71,47 @@ function requestScreenWakeLock() {
   return requestScreenWakeLockHelper(getActiveSession);
 }
 
-/** Put a stored program on the clipboard: a performed one to look back at, a planned one to edit.
- *  The live session is rebuilt from the program, and its notes become the session's feedback. */
-export function openSessionFromHistory(program) {
-  const { state, t, navigateToPath } = getAppDeps();
-  if (!state || !t) return;
-  clearAllTimers(); // fresh session — never inherit a previous session's timers
+// The session leaving the slot keeps its programs; only its clock and the rest timers on screen
+// stop. Returns whether the slot held a session.
+function leaveSlot() {
+  const previous = getActiveSession();
+  if (!previous) return false;
+  if (previous.timerIntervalId) clearInterval(previous.timerIntervalId);
+  clearAllTimers();
+  return true;
+}
 
-  const clientState = buildClientStateFromHistoryLog(program, libraryExercises(state));
+// Into an empty slot, which is what a reload leaves, the rest timers stored for this session come
+// back. A session that is running gets its clock and keeps the screen awake.
+function enterSlot(session, slotWasHeld) {
+  setActiveSession(session);
+  if (!slotWasHeld) restoreSessionTimers(session.id);
+  if (session.started) {
+    startSessionTimer();
+    requestScreenWakeLock();
+  }
+}
+
+// A clipboard holding one stored program, for its one client.
+function sessionOfProgram(program, state, t) {
   const planned = program.status === "planned";
-
-  setActiveSession({
+  const live = program.status === "live";
+  return {
     id: program.id,
-    startTime: new Date(programDate(program)).getTime(),
-    duration: program.duration || 0,
+    started: live,
+    startTime: new Date((live && program.startedAt) || programDate(program)).getTime(),
+    duration: live
+      ? Math.floor((Date.now() - Date.parse(program.startedAt)) / 1000)
+      : program.duration || 0,
     participants: [program.clientId],
     clientRoutines: {
-      [program.clientId]: clientState,
+      [program.clientId]: clientStateFromProgram(program, libraryExercises(state)),
     },
     activeClientId: program.clientId,
     feedback: feedbackFromNotes(notesForProgram(state, program.id)),
-    // Reopening a draft names it outright, so the sync edits THIS draft even when the client has
-    // several open (saveDraft's draftId).
-    planningDraftIds: planned ? { [program.clientId]: program.id } : {},
+    // A program not yet done is written back to itself on every save, even when the client holds
+    // several drafts.
+    programIds: planned || live ? { [program.clientId]: program.id } : {},
     sourceSession: planned
       ? {
           id: `plan-${program.id}`,
@@ -101,34 +127,113 @@ export function openSessionFromHistory(program) {
     // `sourceSession`: that means "the booked slot this clipboard was launched from", and every
     // reader of it (the clipboard strip, the schedule-drift offer, the timers) would then be
     // handed a slot that was never booked.
-    finishedRecord: planned ? null : { id: program.id, title: program.title || "" },
-  });
+    finishedRecord: planned || live ? null : { id: program.id, title: program.title || "" },
+  };
+}
 
-  setClipboardEditModeFlag(planned);
+/** Put a stored program on the clipboard: a performed one to look back at, a planned one to edit, a
+ *  live one with no session to go on with. A program of a session not yet finished opens as that
+ *  session, with everybody in it. The clipboard is rebuilt from the program, and its notes become
+ *  the session's feedback. `navigate: false` opens it without moving to its address. */
+export function openSessionFromHistory(program, { navigate = true } = {}) {
+  const { state, t, navigateToPath } = getAppDeps();
+  if (!state || !t) return;
+  if (openAsItsSession(program, navigate)) return;
+  const slotWasHeld = leaveSlot();
+  enterSlot(sessionOfProgram(program, state, t), slotWasHeld);
 
-  saveActiveSessionToCache();
-  requestScreenWakeLock();
-
+  setClipboardEditModeFlag(program.status === "planned");
+  saveActiveSession();
   renderClipboardBar();
-  startSessionTimer();
 
-  if (navigateToPath) {
+  if (navigate && navigateToPath) {
     navigateToPath(`/session/${program.id}/client/${program.clientId}`);
   }
 }
 
+// A program of a booked session that is not finished is opened as that session, so a save writes it
+// back to its session and nobody in the session is left out. Returns false when the session row is
+// gone: the program then opens on its own, as a program with no session.
+function openAsItsSession(program, navigate) {
+  if (!program.sessionId || program.status === "done") return false;
+  const { navigateToPath, launchClipboardDirectly } = getAppDeps();
+  const showing = getActiveSession();
+  if (showing && slotIdsOf(showing).includes(program.sessionId)) {
+    if (navigate) navigateToPath?.(`/session/${showing.id}/client/${program.clientId}`);
+    return true;
+  }
+  launchClipboardDirectly?.({ sessionId: program.sessionId }, { navigate });
+  return getActiveSession() !== showing;
+}
+
+// The routine a participant's plan is built from, as the built plan records it: a routine id that
+// names no routine is the trainer's choice of an empty plan, which records none.
+function routineIdOf(state, routineId) {
+  return (state.routines || []).some((routine) => routine.id === routineId) ? routineId : "";
+}
+
+// One participant's plan. The program stored for this session is used while it is still the plan
+// the session names: started, or built from the routine the session has now. Otherwise the plan is
+// built from the routine, or from an imported programme, and saved under the stored program's id,
+// so it replaces that program rather than standing beside it.
+function planFor(session, assignment, program, options) {
+  const { state, t } = getAppDeps();
+  const exercises = libraryExercises(state);
+  if (program) session.programIds[assignment.clientId] = program.id;
+  const stillTheSessionsPlan =
+    program?.status === "live" ||
+    (program?.routineId || "") === routineIdOf(state, assignment.routineId);
+  if (program && stillTheSessionsPlan && !options.plan) {
+    return clientStateFromProgram(program, exercises);
+  }
+  const clientState = buildClientStateFromRoutine({
+    routineId: assignment.routineId,
+    routines: state.routines,
+    exercises,
+    emptyPlanName: t("custom_empty_plan") || "Empty plan, no routine",
+  });
+  // An IMPORTED programme arrives as plan items rather than as a routine, so it
+  // replaces what the routine would have supplied. Handled here, at the one place a plan is built,
+  // rather than by writing over the session afterwards — an import that patched a session the
+  // moment after it was created would be a second way to construct one.
+  if (options.plan) {
+    const imported = buildClientStateFromImportedItems(
+      options.plan,
+      exercises,
+      session.sourceSession?.titles?.[0] || "",
+    );
+    Object.assign(clientState, {
+      exercises: imported.exercises,
+      logs: imported.logs,
+      routineName: imported.routineName,
+    });
+  }
+  return clientState;
+}
+
+// What the session's stored programs say about it as a whole: whether and when it was started, its
+// notes, and who started from one plan. Each member's plan is their own, rebuilt from their program.
+function resumeStored(session, stored) {
+  session.started = stored.started;
+  session.startTime = stored.startTime;
+  session.duration = stored.started ? Math.floor((Date.now() - stored.startTime) / 1000) : 0;
+  session.feedback = stored.feedback;
+  session.bindings = stored.bindings;
+}
+
+/** Open a session on the clipboard: a booked one, a plan written for no session, or an imported
+ *  programme. What its programs already hold — sets logged, notes, Start — is put back, so leaving a
+ *  session and opening it again, or reloading, loses nothing. */
 export function startWorkoutSession(clientRoutines, sessionMeta = null, deps = {}, options = {}) {
   mergeAppDeps(deps);
   const { navigate = true } = options;
-  const { state, navigateToPath, t } = getAppDeps();
+  const { state, navigateToPath } = getAppDeps();
   if (!state) return;
-  clearAllTimers(); // fresh session — never inherit a previous session's timers
+  const slotWasHeld = leaveSlot();
 
   const participantIds = clientRoutines.map((cr) => cr.clientId);
-  const sessionId = sessionMeta ? sessionMeta.id : newRecordId();
-
   const session = {
-    id: sessionId,
+    id: sessionMeta ? sessionMeta.id : newRecordId(),
     started: false,
     startTime: null,
     duration: 0,
@@ -136,41 +241,28 @@ export function startWorkoutSession(clientRoutines, sessionMeta = null, deps = {
     clientRoutines: {},
     activeClientId: participantIds[0],
     sourceSession: sessionMeta,
+    programIds: {},
   };
-  setActiveSession(session);
-
-  for (const cr of clientRoutines) {
-    session.clientRoutines[cr.clientId] = buildClientStateFromRoutine({
-      routineId: cr.routineId,
-      routines: state.routines,
-      exercises: libraryExercises(state),
-      emptyPlanName: t("custom_empty_plan") || "Empty plan, no routine",
-    });
-    // An IMPORTED programme arrives as plan items rather than as a routine, so it
-    // replaces what the routine would have supplied. Handled here, at the one place a plan is built,
-    // rather than by writing over the session afterwards — an import that patched a session the
-    // moment after it was created would be a second way to construct one.
-    if (options.plan) {
-      const imported = buildClientStateFromImportedItems(
-        options.plan,
-        libraryExercises(state),
-        sessionMeta?.titles?.[0] || "",
-      );
-      Object.assign(session.clientRoutines[cr.clientId], {
-        exercises: imported.exercises,
-        logs: imported.logs,
-        routineName: imported.routineName,
-      });
-    }
+  const stored = storedSession(state, session);
+  for (const assignment of clientRoutines) {
+    session.clientRoutines[assignment.clientId] = planFor(
+      session,
+      assignment,
+      stored.programs[assignment.clientId],
+      options,
+    );
   }
+  resumeStored(session, stored);
+  // A plan with no session is found again by its first participant's program: that id is its
+  // address, so a reload of the address opens it.
+  if (!slotIdsOf(session).length) session.id = programIdFor(session, participantIds[0]);
 
+  enterSlot(session, slotWasHeld);
   setClipboardEditModeFlag(!!sessionMeta?.isPlanning);
+  saveSession(session);
 
-  saveActiveSessionToCache();
-
-  const sId = session.id || newRecordId();
   if (navigate && navigateToPath) {
-    navigateToPath(`/session/${sId}/client/${session.activeClientId}`);
+    navigateToPath(`/session/${session.id}/client/${session.activeClientId}`);
   }
 }
 
@@ -198,7 +290,7 @@ export function beginWorkoutSession() {
   activeSession.started = true;
   activeSession.startTime = Date.now();
   activeSession.duration = 0;
-  saveActiveSessionToCache();
+  saveActiveSession();
   requestScreenWakeLock();
   startSessionTimer();
   renderActiveSessionBoard();
@@ -211,34 +303,30 @@ export function beginWorkoutSession() {
   });
 }
 
+/** The trainer gives the session up: its programs go, so a discarded plan does not come back in the
+ *  feed's "unscheduled plans" and a deleted session leaves no plan behind on the board. The notes a
+ *  next plan waits for stay. Then the clipboard closes. */
 export function cancelWorkoutSession() {
   const activeSession = getActiveSession();
-  const { state, navigateToPath, focusSessionsColumn, saveToLocalStorage } = getAppDeps();
-  // An explicit delete of a planning session must also drop its draft(s) from the stored programs —
-  // otherwise a discarded plan keeps reappearing in the "unscheduled plans" notification message
-  // it backs (syncPlanningSnapshotToHistory), which reads as the delete having silently failed.
-  if (activeSession?.sourceSession?.isPlanning && state) {
-    // By draft id where the clipboard knows it, so deleting one draft leaves a client's OTHER
-    // drafts alone — falling back to the clientId sweep only for a session cached before drafts
-    // were addressable, where the client can only have had the one.
-    const ownDraftIds = new Set(Object.values(activeSession.planningDraftIds || {}));
-    const participants = new Set(activeSession.participants || []);
-    const discarded = draftPrograms(state).filter((draft) =>
-      ownDraftIds.size ? ownDraftIds.has(draft.id) : participants.has(draft.clientId),
-    );
-    removePrograms(
-      state,
-      discarded.map((draft) => draft.id),
-    );
-    if (saveToLocalStorage) saveToLocalStorage();
+  const { saveToLocalStorage } = getAppDeps();
+  if (activeSession) {
+    discardSession(activeSession);
+    saveToLocalStorage?.();
   }
+  closeWorkoutSession();
+}
+
+// The clipboard empties and the trainer is back on the board. The session's programs are left as
+// they are: finishing has already made them done, and cancelling has already removed them.
+function closeWorkoutSession() {
+  const activeSession = getActiveSession();
+  const { navigateToPath, focusSessionsColumn } = getAppDeps();
   if (activeSession?.timerIntervalId) {
     clearInterval(activeSession.timerIntervalId);
   }
   releaseScreenWakeLock();
   setActiveSession(null);
   setClipboardEditModeFlag(false);
-  clearActiveSessionCache();
   clearAllTimers(); // timers are session-scoped
 
   renderClipboardBar();
@@ -397,30 +485,28 @@ function stampSourceSessionsCompleted(activeSession, state, sessionDuration) {
   }
 }
 
-// Log a record for every participant who performed something (skipped work is kept alongside it),
-// or always for a planning template. A session where nothing was done writes no history — the
+// Every participant who performed something gets their program finished: the live program becomes
+// the done one, under the same id, with skipped work kept alongside it. A planning template stays
+// planned. A participant who did nothing has no training to keep, so their program goes — the
 // record's own shape and that judgement both live in domain/sessionHistoryRecord.js.
-function appendHistoryRecordsForParticipants(
-  activeSession,
-  state,
-  sessionDateISO,
-  sessionDuration,
-) {
-  const records = activeSession.participants.map((pId) =>
-    buildSessionHistoryRecord({
+function finishProgramsOfParticipants(activeSession, state, sessionDateISO, sessionDuration) {
+  const records = activeSession.participants.map((pId) => {
+    const record = buildSessionHistoryRecord({
       client: state.clients.find((c) => c.id === pId),
       clientState: activeSession.clientRoutines[pId],
       feedback: activeSession.feedback || [],
       dateISO: sessionDateISO,
       duration: sessionDuration,
       isPlanning: !!activeSession.sourceSession?.isPlanning,
-    }),
-  );
+    });
+    if (record) record.id = programIdFor(activeSession, pId);
+    return record;
+  });
   // The session rows this clipboard was launched from, so each program is linked to the one its
   // client was on and the client is recorded as having attended. A planning clipboard has no slot.
-  const slot = activeSession.sourceSession;
-  const sessionIds = slot && !slot.isPlanning ? [slot.id, ...(slot.ids || [])] : [];
-  recordTrainings(state, records, { sessionIds });
+  recordTrainings(state, records, { sessionIds: slotIdsOf(activeSession) });
+  const unperformed = activeSession.participants.filter((_, index) => !records[index]);
+  removePrograms(state, unperformed.map((pId) => activeSession.programIds?.[pId]).filter(Boolean));
 }
 
 export async function finishWorkoutSession() {
@@ -446,11 +532,11 @@ export async function finishWorkoutSession() {
   const sessionDuration = activeSession.duration;
 
   stampSourceSessionsCompleted(activeSession, state, sessionDuration);
-  appendHistoryRecordsForParticipants(activeSession, state, sessionDateISO, sessionDuration);
+  finishProgramsOfParticipants(activeSession, state, sessionDateISO, sessionDuration);
 
   if (saveToLocalStorage) saveToLocalStorage();
 
-  cancelWorkoutSession();
+  closeWorkoutSession();
 
   // The finished session just produced its signals (pending exercise notes); the drawer lists them.
   renderNotificationArea();
@@ -468,63 +554,90 @@ export async function finishWorkoutSession() {
   getAppDeps().renderSessions?.();
 }
 
-export function recoverActiveSession() {
-  const parsed = readActiveSessionCache();
-  if (!parsed) return;
+// Before sessions were stored as programs, the one in progress lived in this key. The first start of
+// this build converts what it holds into programs, once, so a trainer in the middle of a session
+// when the update arrives loses nothing, and the key goes.
+const LEGACY_SESSION_KEY = "librept_active_session";
 
+function legacySession() {
+  const raw = readVersionScoped(LEGACY_SESSION_KEY);
+  if (raw === null) return null;
+  removeVersionScoped(LEGACY_SESSION_KEY);
   try {
-    setActiveSession(parsed);
-    const activeSession = parsed;
-    // Bound participants SHARE one plan object, and object identity does not survive JSON — so a
-    // session restored from the cache would come back silently unbound, logging each
-    // set for one person. The list of bindings is what does survive; the sharing is re-applied from
-    // it here, at the one place a cached session becomes a live one again.
-    activeSession.clientRoutines = boundClientRoutines(
-      activeSession.clientRoutines,
-      activeSession.bindings,
-    );
-    activeSession.duration = activeSession.started
-      ? Math.floor((Date.now() - activeSession.startTime) / 1000)
-      : 0;
-
-    if (activeSession.sourceSession) {
-      activeSession.sourceSession.startDate = new Date(activeSession.sourceSession.startDate);
-      activeSession.sourceSession.endDate = new Date(activeSession.sourceSession.endDate);
-    }
-
-    if (isCachedSessionStale(activeSession)) {
-      setActiveSession(null);
-      clearActiveSessionCache();
-      renderClipboardBar();
-      return;
-    }
-
-    if (activeSession.sourceSession?.isPlanning) {
-      setClipboardEditModeFlag(true);
-    }
-    // Recovery runs before the first route is entered (app.js boots the session, then routes), so
-    // the URL is the only thing that knows the trainer was in the editor. Ask the router what the
-    // address bar names rather than sniffing the path for a suffix — the same question, answered by
-    // the code that owns the patterns, and it keeps working as edit-mode URLs gain segments.
-    //
-    // The row id has to be taken here too, not left to the router: recovery renders the board, that
-    // render syncs the URL, and a sync with no row id would erase the very segment the router is
-    // about to read. The router validates it a moment later and drops it if the row is gone.
-    const bootRoute = getAppDeps().resolveRoute?.(window.location.pathname);
-    if (bootRoute?.isEditor) {
-      setClipboardEditModeFlag(true);
-      markEditorRow(bootRoute.params.slotId ?? null, { kind: "restored", focus: false });
-    }
-
-    renderClipboardBar();
-
-    renderActiveSessionBoard();
-    restoreSessionTimers();
-    if (activeSession.started) {
-      startSessionTimer();
-      requestScreenWakeLock();
-    }
-  } catch (e) {
-    console.error("Error recovering active session cache:", e);
+    const session = JSON.parse(raw);
+    return session?.id ? session : null;
+  } catch {
+    return null;
   }
+}
+
+function importLegacySession(cached) {
+  // A plan's drafts were addressed by `planningDraftIds`; they are the plan's programs.
+  const { planningDraftIds, ...session } = cached;
+  session.programIds = { ...planningDraftIds, ...session.programIds };
+  session.timerIntervalId = null;
+  // An older build had bound participants share one plan object, which JSON stored as a copy per
+  // member: each member's own plan, which is what a group is now. `bindings` says who is grouped.
+  session.duration = session.started ? Math.floor((Date.now() - session.startTime) / 1000) : 0;
+  if (session.sourceSession?.startDate) {
+    session.sourceSession.startDate = new Date(session.sourceSession.startDate);
+  }
+  if (session.sourceSession?.endDate) {
+    session.sourceSession.endDate = new Date(session.sourceSession.endDate);
+  }
+  enterSlot(session, false);
+  setClipboardEditModeFlag(Boolean(session.sourceSession?.isPlanning));
+  saveSession(session);
+}
+
+// The session an address names, when it is a clipboard's address: `/session/<id>/…`, the dialogs
+// over it included. The setup form's address names a session too, but opens no clipboard.
+function sessionInAddress(route) {
+  return route?.name !== "session.setup" ? route?.params?.sessionId || null : null;
+}
+
+// Open the session or program an id names, without moving to its address: the router then finds it
+// on the clipboard and only applies the address's focus.
+function openById(id) {
+  const { state, launchClipboardDirectly } = getAppDeps();
+  launchClipboardDirectly?.({ sessionId: id }, { navigate: false });
+  if (getActiveSession()) return;
+  const program = programById(state, id);
+  if (program) openSessionFromHistory(program, { navigate: false });
+}
+
+/**
+ * Put a session back on the empty clipboard at start, or when the trainer changes workspace. There is
+ * no copy to recover it from: it is read from its programs. The session the address names comes
+ * back; at any other address, the live session started last, so the clipboard bar shows it. The
+ * focus, the participant and the editor come from the address, as the router enters it.
+ */
+export function recoverActiveSession() {
+  const imported = legacySession();
+  if (imported && !getActiveSession()) importLegacySession(imported);
+  if (getActiveSession()) {
+    renderRestored();
+    return;
+  }
+  const { state, resolveRoute } = getAppDeps();
+  if (!state) return;
+  const route = resolveRoute?.(window.location.pathname);
+  const named = sessionInAddress(route);
+  const [startedLast] = livePrograms(state);
+  if (named) openById(named);
+  else if (startedLast) openSessionFromHistory(startedLast, { navigate: false });
+  if (!getActiveSession()) return;
+  // The address is the only thing that knows the trainer was in the editor, and which row. The row
+  // is taken here, not left to the router: the render below syncs the address, and a sync with no
+  // row would erase the segment the router is about to read. The router drops it if the row is gone.
+  if (route?.isEditor) {
+    setClipboardEditModeFlag(true);
+    markEditorRow(route.params.slotId ?? null, { kind: "restored", focus: false });
+  }
+  renderRestored();
+}
+
+function renderRestored() {
+  renderClipboardBar();
+  renderActiveSessionBoard();
 }

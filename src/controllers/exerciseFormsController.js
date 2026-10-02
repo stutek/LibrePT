@@ -5,7 +5,6 @@
 // Split 2026-08-01 out of the old formsController.js, which bundled Client, Routine, and Exercise
 // forms in one file despite the three sharing nothing but boilerplate.
 
-import { hasBehaviour } from "../data/appVersions.js";
 import { localDateString } from "../data/calendarDay.js";
 import { libraryExercises } from "../data/exerciseLibrary.js";
 import { newRecordId } from "../data/recordId.js";
@@ -32,17 +31,14 @@ export function openExerciseCreateDialog(options = {}) {
 }
 
 /** The two ways on the pickers offer when a typed search finds nothing (exercisePicker.js): they
- *  spread this into `mountExercisePicker`. The import is left out in an app version without it,
- *  which is asked each time a picker opens: the trainer can switch versions while the app runs. */
+ *  spread this into `mountExercisePicker`. */
 export function pickerEmptyWays() {
   return {
     onCreateExercise: (name, done) => openExerciseCreateDialog({ name, onFinished: done }),
-    onImportLibrary: hasBehaviour("libraryImport")
-      ? (done) => {
-          openLibraryImportDialog();
-          $id("dialog-library-import")?.addEventListener("close", () => done(), { once: true });
-        }
-      : null,
+    onImportLibrary: (done) => {
+      openLibraryImportDialog();
+      $id("dialog-library-import")?.addEventListener("close", () => done(), { once: true });
+    },
   };
 }
 

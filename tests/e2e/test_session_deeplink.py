@@ -57,7 +57,8 @@ def test_legacy_superset_deep_link_still_resolves(page, local_server):
     )
 
     cache = page.evaluate(
-        "() => JSON.parse(localStorage.getItem('librept_active_session'))"
+        "async () => (await import(new URL('controllers/activeSessionStore.js', document.baseURI).href))"
+        ".getActiveSession()"
     )
     circuit_id = next(
         ex["circuitId"]
@@ -85,7 +86,8 @@ def test_session_view_deep_links_to_focused_card(page, local_server):
     # A seeded circuit id (different from whatever is focused now) resolves on navigation:
     # the app keeps the URL on that card (it would rewrite it away if the id didn't resolve).
     cache = page.evaluate(
-        "() => JSON.parse(localStorage.getItem('librept_active_session'))"
+        "async () => (await import(new URL('controllers/activeSessionStore.js', document.baseURI).href))"
+        ".getActiveSession()"
     )
     circuits = []
     for ex in cache["clientRoutines"][client_id]["exercises"]:
@@ -178,7 +180,8 @@ def test_a_cold_deep_link_names_the_session_it_opened(page, local_server):
     _open_session(page, local_server)
     deep_link = page.evaluate("() => location.pathname")
     when = page.evaluate(
-        "() => JSON.parse(localStorage.getItem('librept_active_session'))"
+        "async () => (await import(new URL('controllers/activeSessionStore.js', document.baseURI).href))"
+        ".getActiveSession()"
         "        .sourceSession.timeLabel.slice(0, 5)"
     )
 
@@ -207,7 +210,8 @@ def test_leaving_the_editor_puts_the_session_back_not_the_placeholder(
     _open_session(page, local_server)
     deep_link = page.evaluate("() => location.pathname")
     when = page.evaluate(
-        "() => JSON.parse(localStorage.getItem('librept_active_session'))"
+        "async () => (await import(new URL('controllers/activeSessionStore.js', document.baseURI).href))"
+        ".getActiveSession()"
         "        .sourceSession.timeLabel.slice(0, 5)"
     )
     page.goto(f"{page.evaluate('() => location.origin')}{deep_link}")
@@ -238,7 +242,8 @@ def test_the_clipboard_names_the_session_without_truncating_it(page, local_serve
     _open_session(page, local_server)
 
     name = page.evaluate(
-        "() => JSON.parse(localStorage.getItem('librept_active_session'))"
+        "async () => (await import(new URL('controllers/activeSessionStore.js', document.baseURI).href))"
+        ".getActiveSession()"
         "        .sourceSession.titles[0]"
     )
     bar = page.locator("#session-title-text")

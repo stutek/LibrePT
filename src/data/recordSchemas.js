@@ -316,9 +316,9 @@ export const SCHEMA_6 = {
     exercises: { required: true, type: "array", items: PROGRAM_ITEM_SHAPE },
   },
 
-  // WHICH CLIENTS SHARE ONE PROGRAM inside one session, as a circuit groups exercises. Each member
-  // still has their own `clientPrograms` row; this is only the grouping, which today exists on the
-  // live session object in memory alone (`boundClientRoutines` re-applies it at recovery).
+  // WHICH CLIENTS STARTED FROM ONE PROGRAM inside one session, as a circuit groups exercises. Each
+  // member still has their own `clientPrograms` row, their own tab and their own logged sets; this
+  // is only the grouping (ruled 2026-10-02, Simon; domain/participantBinding.js).
   groupSharedPrograms: {
     id: { required: true, type: "string" },
     sessionId: { required: true, type: "string" },
@@ -397,17 +397,18 @@ export const SCHEMA_PREVIEW = {
 // cost real time in review before it was collapsed. `4` here is the SAME 4 the migration chain ends
 // at.
 //
-// Four shapes are live, and they do different jobs:
-//   - **6** is the active schema: what this build reads and stamps, what a backup is
+// Two shapes are live, and they do different jobs:
+//   - **6** is the active schema: what this build reads, writes and stamps, what a backup is
 //     written at, and the copy PREVIEW is rebuilt FROM when the build changes.
-//   - **5** and **4** stay written for the builds a phone may still have cached, which read only
-//     their own store (the reason for the star write), and for the app versions that behave as they
-//     did. Both hold trainings in the old shape, built from 6 at every save (schemaShapes.js); kept
-//     live for at least a month or two beside 6 (Simon, 2026-10-02).
 //   - **PREVIEW** is the preview shape for CI and previews, written like any live schema and rebuilt
 //     from 6 when the build changes. Disposable by design: never a source of truth for anything that
 //     has to outlive the build, and never a step in the migration chain.
-export const LIVE_SCHEMAS = { 4: SCHEMA_4, 5: SCHEMA_5, 6: SCHEMA_6, PREVIEW: SCHEMA_PREVIEW };
+//
+// Schemas 4 and 5 are RETIRED (ruled 2026-10-02, Simon): no build from this one on writes or reads
+// their stores. SCHEMA_4 and SCHEMA_5 stay declared and frozen above, because the files and the old
+// stores written in them still exist: a backup at format 4 or 5 is restored through the migration
+// chain, and a phone's old store fills store 6 once on its first boot (readSchema.js).
+export const LIVE_SCHEMAS = { 6: SCHEMA_6, PREVIEW: SCHEMA_PREVIEW };
 
 // The durable shape, and the one PREVIEW is rebuilt from. Not derived from LIVE_SCHEMAS by taking a
 // max: PREVIEW is not a number, and the stable shape is a decision rather than an accident of ordering.

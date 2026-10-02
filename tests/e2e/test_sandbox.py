@@ -137,11 +137,14 @@ def test_a_sandbox_older_than_twelve_hours_offers_a_fresh_one(page, local_server
     _switch(page, "sandbox")
 
     # Age the sandbox by hand rather than waiting twelve hours: the meta store is what staleness is
-    # measured against, and this is the same value seeding writes.
+    # measured against, and this is the same value seeding writes. Opened with the schemas the app
+    # opens it with: a store the database lacks makes openDatabase upgrade it, and that upgrade
+    # waits forever behind the app's own open connection.
     page.evaluate(
         """async () => {
             const idb = await import(new URL('data/indexedDb.js', document.baseURI).href);
-            const db = await idb.openDatabase({ schemas: ['4'], name: 'librept_sandbox' });
+            const { liveSchemas } = await import(new URL('data/readSchema.js', document.baseURI).href);
+            const db = await idb.openDatabase({ schemas: liveSchemas(), name: 'librept_sandbox' });
             await idb.withTransaction(db, ['meta'], 'readwrite', ({ store: s }) => {
                 s('meta').put({
                     key: 'sandbox',
@@ -174,13 +177,12 @@ def test_a_session_opened_in_the_sandbox_leaves_the_bar_with_it(page, local_serv
     sample clients and a running clock, over the trainer's own empty work."""
     page.goto(f"{local_server}?init=demo_data_load&lang=en")
     page.wait_for_selector(".session-card")
-    # The trainer's own work has no live session: the demo data starts one, so it is ended here.
+    # The trainer's own work has no session on the clipboard: the demo data opens one, never
+    # started, so it is taken off the clipboard here and stays in its programs.
     page.evaluate(
         """async () => {
             const ctrl = await import(new URL('controllers/activeSessionController.js', document.baseURI).href);
-            const cache = await import(new URL('data/sessionCache.js', document.baseURI).href);
             ctrl.setActiveSession(null);
-            cache.clearActiveSessionCache();
         }"""
     )
     _switch(page, "sandbox")

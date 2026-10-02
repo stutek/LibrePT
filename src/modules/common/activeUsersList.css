@@ -20,12 +20,12 @@
 .client-tab-btn {
   flex: 0 0 auto;
   white-space: nowrap;
-  /* Real tap target (44px) for every tab, bound-group or per-participant — vertical padding
-     alone can't shrink below this floor anyway. */
+  /* Real tap target (44px) for every tab — vertical padding alone can't shrink below this floor
+     anyway. */
   min-height: 44px;
 }
-/* The per-participant tab (bound-group tabs stay plain, see .client-tab-bound below): unified
-   primary gradient with on-primary text on the active one for clear, vibrant emphasis. */
+/* The per-participant tab, one per client, a group member's too (it adds a link glyph,
+   `.client-tab-group-mark`): unified primary gradient with on-primary text on the active one. */
 .client-tab-participant {
   display: flex;
   align-items: center;

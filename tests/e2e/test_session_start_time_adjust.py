@@ -11,8 +11,8 @@
 #      tests/unit_js/domain/sessionClock.test.mjs).
 #   2. Past a ±15 minute tolerance the trainer is offered the schedule, prefilled with the session
 #      shifted onto the clock — because it is the SCHEDULE that is wrong by then, not the session.
-#   3. The session so started must SURVIVE a reload. Recovery aged a cached session out against its
-#      scheduled end, which for a late start is already hours gone (isCachedSessionStale).
+#   3. The session so started must SURVIVE a reload. Recovery once aged a cached session out against
+#      its scheduled end, which for a late start is already hours gone.
 #
 # "Group Strength & Conditioning" is seeded currentHour-1..currentHour+1 and NOT completed
 # (src/data/sessions.js), so its start is always in the past and always outside the tolerance —
@@ -99,25 +99,16 @@ def test_a_session_started_late_survives_a_reload(page, local_server):
     # Recovery used to age a cached session out against its SCHEDULED end, so a session begun well
     # after its slot — the very case the dialog above exists for — was already "abandoned" the
     # second Start was tapped. The next reload dropped it: the clipboard came back staged with the
-    # Start button restored, and everything logged into the session went with it.
-    #
-    # The slot is pushed into the far past through the cache rather than by waiting or by seeding a
-    # hand-built session, so the flow up to here stays the REAL one (launch, Start, dismiss) and the
-    # test does not quietly depend on what time of day the suite runs (see the header note on the
-    # seed's clamped currentHour).
+    # Start button restored, and everything logged into the session went with it. A started session
+    # is now a live program, which nothing ages out: only finishing or deleting it ends it.
     _launch_and_start(page, local_server)
     page.click(f"{DIALOG} .modal-close-btn")
     page.wait_for_selector(f"{DIALOG}[open]", state="detached")
     session_url = page.url
-
     page.evaluate(
-        """() => {
-            const key = 'librept_active_session';
-            const cached = JSON.parse(localStorage.getItem(key));
-            const sixHours = 6 * 60 * 60 * 1000;
-            cached.sourceSession.startDate = new Date(cached.startTime - 2 * sixHours).toISOString();
-            cached.sourceSession.endDate = new Date(cached.startTime - sixHours).toISOString();
-            localStorage.setItem(key, JSON.stringify(cached));
+        """async () => {
+            const queue = await import(new URL('data/writeQueue.js', document.baseURI).href);
+            await queue.flushWrites();
         }"""
     )
 
@@ -127,9 +118,13 @@ def test_a_session_started_late_survives_a_reload(page, local_server):
     assert page.locator("#btn-start-session").is_visible() is False
     assert (
         page.evaluate(
-            "() => JSON.parse(localStorage.getItem('librept_active_session')).started"
+            """async () => {
+            const store = await import(new URL('data/stateStore.js', document.baseURI).href);
+            const records = await import(new URL('data/trainingRecords.js', document.baseURI).href);
+            return records.livePrograms(store.getState()).length;
+        }"""
         )
-        is True
+        > 0
     )
 
 
@@ -271,6 +266,8 @@ def test_start_opens_the_first_exercise_not_yet_done(page, local_server):
           const cs = session.clientRoutines[session.activeClientId];
           cs.activeExerciseIndex = cs.exercises.length - 1;
           cs.deckAllCollapsed = false;
+          // The demo opens this session with progress logged in it; this test logs its own.
+          for (const sets of Object.values(cs.logs)) for (const set of sets) set.completed = false;
           const first = cs.exercises[0];
           cs.logs[first.id] = (cs.logs[first.id] || []).map((set) => ({ ...set, completed: true }));
         }"""

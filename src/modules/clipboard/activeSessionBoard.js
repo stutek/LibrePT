@@ -17,29 +17,24 @@
 //   ensureRestItems(cs), clampFocusIndex(cs)  — plan normalisation, applied before painting
 //   rerender()              — re-render this board (what the editor/deck call after a mutation)
 //   enterEditMode(), exitEditMode()           — mode switches that render
-//   saveActiveSessionToCache()
-//   savePlanEdit()          — the editor's save: stamps when the plan was last edited, then caches
+//   saveActiveSession()     — writes the session's programs (controllers/sessionPrograms.js)
+//   savePlanEdit(clientId)  — the same, after a change to that client's plan, which takes them out
+//                             of their group
 //   openAddExercise(), openCatalogPicker(opts)
 //   buildCircuitUnits, getExerciseSignalColor, hasExerciseNote, hasQuickSignal, logQuickSignal,
 //   completeCircuitRound, focusExerciseByIndex, activateExerciseByScroll, startRestTimer
 //                           — deck card callbacks
 //   newRecordId()
 
-import { hasBehaviour } from "../../data/appVersions.js";
 import { libraryExercises } from "../../data/exerciseLibrary.js";
 import { noteTagLine, pendingNotes } from "../../data/trainingRecords.js";
 import { feedbackTagText } from "../../domain/feedbackTags.js";
 import { gymNotesForPlan } from "../../domain/gymNotes.js";
-import { bindingFor, bindingMembers } from "../../domain/participantBinding.js";
+import { bindingFor } from "../../domain/participantBinding.js";
 import { sessionDayOf } from "../../domain/sessionRecord.js";
 import { renderActiveUsersList } from "../common/activeUsersList.js";
 import { openFeedbackModal } from "../common/feedbackModal.js";
-import {
-  clientDisplayName,
-  escapeHTML,
-  getClientDisplayNameHTML,
-  getInitials,
-} from "../common/utils.js";
+import { escapeHTML, getClientDisplayNameHTML, getInitials } from "../common/utils.js";
 import { renderClipboardEditor } from "./clipboardEditor.js";
 import { isClipboardEditMode, markEditorRow, takePendingCallout } from "./editModeState.js";
 import { renderExerciseDeck } from "./exerciseDeckOfCards.js";
@@ -71,33 +66,14 @@ function renderClientTabsBar(activeClientId) {
 const injuryTextOf = (client) =>
   client?.hasInjury && (client.injury || client.notes) ? client.injury || client.notes : "";
 
-// On its own tab a client's injury needs no name: the tab says whose it is. Clients bound to one
-// plan share one tab, so every member's injury is listed, each under its client's name. Showing
-// only the tapped client's, unnamed, let a trainer apply one person's limit to another and miss the
-// limits of the rest.
-function renderInjuryAlertBanner(activeClient, session, clients) {
+// Every client has a tab of their own, group members included, so the injury shown is the one of
+// the client on screen and needs no name: the tab says whose it is.
+function renderInjuryAlertBanner(activeClient) {
   const alertBanner = document.getElementById("clipboard-client-alert");
   const alertText = document.getElementById("clipboard-client-notes-text");
   if (!alertBanner || !alertText || !activeClient) return;
-  const group = bindingFor(session.bindings, activeClient.id);
-  const members = group
-    ? bindingMembers(group, session.participants).map((id) => clients.find((c) => c.id === id))
-    : [activeClient];
-  const injured = members.filter((client) => injuryTextOf(client));
-  alertText.replaceChildren();
-  if (!group && injured.length) {
-    alertText.textContent = injuryTextOf(activeClient);
-  } else {
-    for (const client of injured) {
-      const line = document.createElement("span");
-      line.className = "client-caveat-line";
-      const name = document.createElement("strong");
-      name.textContent = `${clientDisplayName(client)}: `;
-      line.append(name, injuryTextOf(client));
-      alertText.appendChild(line);
-    }
-  }
-  alertBanner.classList.toggle("hidden", injured.length === 0);
+  alertText.textContent = injuryTextOf(activeClient);
+  alertBanner.classList.toggle("hidden", !injuryTextOf(activeClient));
 }
 
 // How many gym notes the panel shows before it starts hiding them. The panel shares a 390px
@@ -326,10 +302,10 @@ function syncStartCompleteVisibility(canStartSession, started) {
   }
 }
 
-/** What every editor's save does: stamp the plan as edited, write the cache, write the state. */
-function persistPlanEdit() {
-  deps.savePlanEdit();
-  deps.getAppDeps().saveToLocalStorage?.();
+/** What every editor's save does: the plan of `clientId` changed, which takes them out of their
+ *  group, and the session's programs are written. */
+function persistPlanEdit(clientId) {
+  deps.savePlanEdit(clientId);
 }
 
 /** The dependency bag one editor needs, for one client. Split out of renderPlanEditor so the column
@@ -340,13 +316,13 @@ function editorDepsFor(clientId, clientState, callout) {
   return {
     activeClientState: clientState,
     libraryExercises: libraryExercises(state),
-    libraryCircuits: hasBehaviour("libraryImport") ? state.circuits || [] : [],
+    libraryCircuits: state.circuits || [],
     clientName: editClient ? editClient.name : "",
     slotLabel: deps.getActiveSession()?.sourceSession?.timeLabel || "",
     allExerciseNames: libraryExercises(state).map((e) => e.name),
     t,
     escapeHTML,
-    save: persistPlanEdit,
+    save: () => persistPlanEdit(clientId),
     rerender: deps.rerender,
     openAddExercise: deps.openAddExercise,
     openCatalogPicker: deps.openCatalogPicker,
@@ -406,7 +382,7 @@ function renderPlanEditor(deckContainer, activeClientId, activeClientState, call
   return renderClipboardEditor(deckContainer, {
     activeClientState,
     libraryExercises: libraryExercises(state),
-    libraryCircuits: hasBehaviour("libraryImport") ? state.circuits || [] : [],
+    libraryCircuits: state.circuits || [],
     clientName: editClient ? editClient.name : "",
     // The slot the plan has to fit in. Read from the session the clipboard is running,
     // which is also the only place that knows whether there IS one — a planning programme has none.
@@ -414,7 +390,7 @@ function renderPlanEditor(deckContainer, activeClientId, activeClientState, call
     allExerciseNames: libraryExercises(state).map((e) => e.name),
     t,
     escapeHTML,
-    save: persistPlanEdit,
+    save: () => persistPlanEdit(activeClientId),
     rerender: deps.rerender,
     openAddExercise: deps.openAddExercise,
     openCatalogPicker: deps.openCatalogPicker,
@@ -443,7 +419,8 @@ function renderLiveDeck(deckContainer, activeClientId, activeClientState) {
     completeCircuitRound: deps.completeCircuitRound,
     focusExerciseByIndex: deps.focusExerciseByIndex,
     activateExerciseByScroll: deps.activateExerciseByScroll,
-    saveActiveSessionToCache: deps.saveActiveSessionToCache,
+    saveActiveSession: deps.saveActiveSession,
+    savePlanEdit: deps.savePlanEdit,
     saveToLocalStorage: appDeps.saveToLocalStorage,
     onRerender: deps.rerender,
     startRestTimer: deps.startRestTimer,
@@ -512,7 +489,7 @@ export function renderActiveSessionBoard() {
   const activeClient = state.clients.find((c) => c.id === activeClientId);
 
   renderClientTabsBar(activeClientId);
-  renderInjuryAlertBanner(activeClient, activeSession, state.clients);
+  renderInjuryAlertBanner(activeClient);
   renderClientFocusPanel(activeClient, activeClientState);
   renderTitleBarForEditMode(activeClient);
 

@@ -13,7 +13,7 @@
 //   t, escapeHTML, buildCircuitUnits, getExerciseSignalColor, hasExerciseNote, hasQuickSignal,
 //   logQuickSignal, openFeedbackModal, completeCircuitRound, focusExerciseByIndex,
 //   activateExerciseByScroll(index)   // the trainer scrolled another card to the focus line
-//   saveActiveSessionToCache, saveToLocalStorage,
+//   saveActiveSession, savePlanEdit, saveToLocalStorage,
 //   onRerender()   // re-render the whole board (a circuit save)
 // }
 
@@ -80,13 +80,7 @@ function buildCurrentExerciseDeckItem(ex, idx, currentExIdx, activeClientState) 
 // The trainer inserting an exercise/circuit/rest right after the in-focus card mid-session — drops
 // them into the editor pointed at the new (blank) item, same shape whichever kind was tapped.
 function insertFastAdjustmentItem(type, activeItem, ctx) {
-  const {
-    activeClientState,
-    saveActiveSessionToCache,
-    saveToLocalStorage,
-    enterEditMode,
-    onRerender,
-  } = ctx;
+  const { activeClientState, savePlanEdit, saveToLocalStorage, enterEditMode, onRerender } = ctx;
   let insertIndex = -1;
   if (activeItem.type === "circuit") {
     const circuitId = activeItem.circuitId;
@@ -135,7 +129,8 @@ function insertFastAdjustmentItem(type, activeItem, ctx) {
   activeClientState.activeExerciseIndex = newIdx;
   activeClientState.deckAllCollapsed = false;
 
-  saveActiveSessionToCache();
+  // A change to this client's plan: it takes them out of their group (sessionPrograms.js).
+  savePlanEdit();
   if (saveToLocalStorage) saveToLocalStorage();
 
   if (enterEditMode) {
@@ -195,7 +190,8 @@ export function renderExerciseDeck(deckContainer, deps) {
     completeCircuitRound,
     focusExerciseByIndex,
     activateExerciseByScroll,
-    saveActiveSessionToCache,
+    saveActiveSession,
+    savePlanEdit,
     saveToLocalStorage,
     onRerender,
     startRestTimer,
@@ -271,7 +267,7 @@ export function renderExerciseDeck(deckContainer, deps) {
         completeCircuitRound,
         startRestTimer,
         saveSessionState: () => {
-          saveActiveSessionToCache();
+          saveActiveSession();
           saveToLocalStorage();
           onRerender();
         },
@@ -299,7 +295,7 @@ export function renderExerciseDeck(deckContainer, deps) {
     if (item.isInFocus && !isFutureSession) {
       renderFastAdjustBar(deckContainer, item, {
         activeClientState,
-        saveActiveSessionToCache,
+        savePlanEdit,
         saveToLocalStorage,
         enterEditMode,
         onRerender,

@@ -715,10 +715,6 @@ export const de = {
   app_version_in_use: "In Verwendung",
   app_version_refused_in_session:
     "Ein Training läuft. Beende oder verwirf es zuerst, dann wechsle die Version.",
-  app_version_2026_09_desc:
-    "Die App im Stand von September 2026, ohne Import einer Übungsbibliothek.",
-  app_version_2026_10_desc:
-    "Mit Import deiner eigenen Übungsbibliothek und Zirkel aus einer Datei.",
   app_version_2026_11_desc:
     "Jede Person hat ihr eigenes Programm, und ein Gruppentraining bleibt mit seinem Termin verbunden.",
   trainer_details_lede:

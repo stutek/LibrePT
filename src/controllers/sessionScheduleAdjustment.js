@@ -16,8 +16,8 @@ import { askInApp } from "../modules/common/appQuestion.js";
 import { formatClockFromMinutes } from "../modules/common/utils.js";
 import { renderClipboardBar, updateSessionBarTimer } from "../modules/session/sessionBar.js";
 import { openSessionStartTimeDialog } from "../modules/session/sessionStartTimeDialog.js";
-import { saveActiveSessionToCache } from "./activeSessionCache.js";
 import { getActiveSession, getAppDeps } from "./activeSessionStore.js";
+import { saveActiveSession } from "./sessionPrograms.js";
 import { updateOverlaySessionTimer } from "./sessionTimers.js";
 
 // Writes an adjusted slot to both places that hold one: the live session's own copy (every
@@ -58,7 +58,7 @@ function applyAdjustedSchedule({ startMs, endMs }) {
     session.day = day;
   }
 
-  saveActiveSessionToCache();
+  saveActiveSession();
   appDeps.saveToLocalStorage?.();
   appDeps.renderSessionTitle?.();
   renderClipboardBar();

@@ -59,23 +59,16 @@ def test_timer_survives_reload_and_goes_overtime(page, local_server):
     _start_a_timer(page)
 
     # Force the running timer into overtime by rewinding its stored end time, then reload: the session
-    # (and its timers) rehydrate from cache. Also push the cached session's own sourceSession.endDate
-    # safely into the future first -- recoverActiveSession() discards (and freshly relaunches,
-    # wiping every timer) any cached session more than 2h past its scheduled end, and this seed
-    # session's end time is clamped to at most 18:00 (src/data/sessions.js), so this test would
-    # otherwise start failing every evening once real wall-clock time passes ~20:00, regardless of
-    # the timer logic under test.
+    # comes back from its programs, and its timers from their own key. The writes land first, because
+    # the reload reads the session from the database.
     page.evaluate(
-        """() => {
+        """async () => {
             const list = JSON.parse(localStorage.getItem('librept_active_timers'));
             list.forEach(t => { t.endTime = Date.now() - 5000; });
             localStorage.setItem('librept_active_timers', JSON.stringify(list));
 
-            const cached = JSON.parse(localStorage.getItem('librept_active_session'));
-            if (cached?.sourceSession) {
-                cached.sourceSession.endDate = new Date(Date.now() + 3600000).toISOString();
-                localStorage.setItem('librept_active_session', JSON.stringify(cached));
-            }
+            const queue = await import(new URL('data/writeQueue.js', document.baseURI).href);
+            await queue.flushWrites();
         }"""
     )
     page.reload()

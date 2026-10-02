@@ -263,10 +263,15 @@ function planUpdateFromNote(note, clientsById) {
   });
 }
 
-/**
- * The new model as the `history` and `planUpdates` an older schema holds. A live program is left
- * out: an older build keeps a session in progress in its own cache, never in `history`.
- */
+// What the old `history` held: a finished training, and a plan written for no session. A session
+// in progress, or a booked one being planned, lived in an older build's own cache, never in
+// `history`; written there, every session ever opened would read as an unscheduled plan.
+function inOldHistory(program) {
+  if (program.status === "done") return true;
+  return program.status === "planned" && !program.sessionId;
+}
+
+/** The new model as the `history` and `planUpdates` an older schema holds. */
 export function historyFromSessionModel({
   clientPrograms = [],
   exerciseNotes = [],
@@ -283,7 +288,7 @@ export function historyFromSessionModel({
   }
   return {
     history: clientPrograms
-      .filter((program) => program.status !== "live")
+      .filter(inOldHistory)
       .map((program) => recordFromProgram(program, notesByProgram, clientsById)),
     planUpdates: exerciseNotes
       .filter((note) => typeof note.resolved === "boolean")

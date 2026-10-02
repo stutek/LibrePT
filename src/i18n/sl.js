@@ -685,8 +685,6 @@ export const sl = {
   app_version_in_use: "V uporabi",
   app_version_refused_in_session:
     "Trening teče. Najprej ga končaj ali prekliči, nato zamenjaj verzijo.",
-  app_version_2026_09_desc: "Aplikacija, kot je bila septembra 2026, brez uvoza knjižnice vaj.",
-  app_version_2026_10_desc: "Doda uvoz lastne knjižnice vaj in sklopov iz datoteke.",
   app_version_2026_11_desc:
     "Vsaka stranka ima svoj program, trening v skupini pa ostane povezan s svojim terminom.",
   trainer_details_lede:

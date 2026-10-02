@@ -144,10 +144,11 @@ def test_clearing_the_demo_also_drops_the_live_clipboard_bar(page, local_server)
     page.click("#btn-demo-cleanup-confirm")
 
     page.wait_for_selector("#clipboard-bar.hidden", state="attached")
-    cached = page.evaluate(
+    unfinished = page.evaluate(
         """async () => {
-            const cache = await import(new URL('data/sessionCache.js', document.baseURI).href);
-            return cache.readActiveSessionCache();
+            const store = await import(new URL('data/stateStore.js', document.baseURI).href);
+            const records = await import(new URL('data/trainingRecords.js', document.baseURI).href);
+            return records.allPrograms(store.getState()).filter((p) => p.status !== 'done').length;
         }"""
     )
-    assert cached is None, "the cached live session is gone as well as the bar"
+    assert unfinished == 0, "the session's programs are gone as well as the bar"

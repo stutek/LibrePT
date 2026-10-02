@@ -62,7 +62,7 @@ last stamped and walks only the steps it is missing.
 | **3 → 4** | stored language cleared so every trainer is asked once |
 | **4 → 5** | nothing to convert: schema 5 only adds `exercises.source` and `circuits` |
 | **5 → 6** | `history` and `planUpdates` become programs, attendance and exercise notes (§3, the session model) |
-| **6** | **the active schema** (since 2026-10-02): what this build reads, writes and stamps, and the shape backups are written at. 4 and 5 stay live and are written from it |
+| **6** | **the active schema** (since 2026-10-02): what this build reads, writes and stamps, and the shape backups are written at. The only live numbered schema: 4 and 5 were retired the same day |
 | **"P"** | the preview schema installs were stamped with before 4 became active. Read as 4, never written: everything it held moved into 4. Replaced by **PREVIEW**, which a live build refuses rather than migrates |
 
 **Every numbered version is a live input, not history.** Two preview instances are demoed on real
@@ -172,6 +172,14 @@ never as a side effect of cutting the next one — the same rule the physical la
 where a retired schema's store is never dropped by booting. The quantity being managed by that
 decision is **how many star writes happen at once**: each live schema costs one more store, one more
 full copy of the data, and one more write in every fan-out.
+
+**Schemas 4 and 5 were retired on 2026-10-02 (Simon)**, before schema 6 was published, so trainers
+go from 5 to 6 in one release. No build writes or reads their stores again; they stay in the
+database, unread, as a safety net. The first boot of a build whose lowest live schema has never
+been filled fills it from the newest retired store that holds anything (5, else 4, else P), once,
+through the same conversion every older file goes through (`ensureLiveSchemasBackfilled`,
+[readSchema.js](../src/data/readSchema.js)) — without it, an install whose data was in store 5 would
+open with nothing in it. A fresh install has no retired store and starts empty.
 
 #### An older build refuses a newer file, and that is now the price of one field
 
@@ -498,9 +506,7 @@ derived.
 > was ever held in.
 >
 > **Legacy data needs no migration.** An item with no `position` falls back to its index in the list
-> it arrived in, so old history rows, old backups and the seed data stay readable. A session cached
-> by a build that predates the field is renumbered on read, at the last moment its array order is
-> still recoverable. That fallback is an import concern, not a permanent reader path: once the store
+> it arrived in, so old history rows, old backups and the seed data stay readable. That fallback is an import concern, not a permanent reader path: once the store
 > no longer guarantees list order there is no index left to fall back to.
 
 ### Circuits — a grouping key, not a record
@@ -554,17 +560,17 @@ schema major: `circuitId` / `circuitTitle` / `circuitSeries` read the same in a 
 ago as in one written today, and no migration was needed. Two compatibility surfaces do carry the old
 spelling forward, deliberately and permanently — the `/session/…/superset/{id}` deep-link segment
 (links are bookmarked and shared; a URL that once worked must not start erroring) and a persisted
-`focusRef.type: "superset"` in a live session cached by an older build (a running timer must not lose
+`focusRef.type: "superset"` on a rest timer stored by an older build (a running timer must not lose
 the card it belongs to). Both normalise to `circuit` on arrival.
 
-**Round position is live-only.** The *current* round a trainer is on lives in the active-session
-cache as `circuitRounds[circuitId]`, never in a history record — a finished record stores how many
+**Round position is live-only.** The *current* round a trainer is on lives on the clipboard in memory
+as `circuitRounds[circuitId]`, never in a program, so a reload starts the circuit's count again — a finished record stores how many
 rounds were **prescribed** (`circuitSeries`) and what was **performed** (each member's `sets`), which
 is enough to reconstruct the block without storing a cursor into a session that has ended.
 
 ### The session model — schema 6 (ruled 2026-10-02)
 
-It replaces `history` and `planUpdates`, and is to replace the live-session cache of §7. A **session** stays the booked slot, and is
+It replaces `history` and `planUpdates`, and a session in progress is stored in it too (§7). A **session** stays the booked slot, and is
 marked `cancelled` when the trainer cancels it. What each client does in it is a **program** of their
 own (`clientPrograms`, status planned, live or done), linked to zero or one session: a client's
 cancellation moves their program off the session, to unscheduled or to another date. Clients who
@@ -572,17 +578,16 @@ share one program are a **group** (`groupSharedPrograms`), and each member still
 **Attendance** (`sessionAttendance`) says whether a client came and whether the session uses up one
 of their package. A note about an exercise of a program is an **exercise note** (`exerciseNotes`); a
 note about the person is a **client note** (`clientNotes`, still only in PREVIEW: no screen writes
-it yet). Schemas 4 and 5 stay live for at least two months beside it, so every save builds their
-`history` and `planUpdates` from these ([schemaShapes.js](../src/data/schemaShapes.js)), and everything
-read from an older store, backup or sync file is converted on the way in. Feature code reads and
+it yet). Nothing writes `history` or `planUpdates` any more (schemas 4 and 5 are retired); everything
+read from an older store, backup or sync file is converted on the way in
+([schemaShapes.js](../src/data/schemaShapes.js)). Feature code reads and
 writes trainings only through [trainingRecords.js](../src/data/trainingRecords.js).
 
 A finished record from before schema 6 never said which session it came from. The conversion links
 it where exactly one session fits — finished, not cancelled, the same day, the client among its
 participants, narrowed by the routine — and records attendance there; otherwise the program has no
 session. Ids are carried, so the same old backup restored twice overwrites instead of duplicating.
-**Deletes are reconciled per store**: a note can stop being a plan update in schemas 4 and 5 while it
-stays an exercise note in 6, so the stores no longer share one id set.
+**Deletes are reconciled per store**, each against the collections its own schema declares.
 
 ```mermaid
 erDiagram
@@ -864,18 +869,33 @@ The database holds the **only** copy of a trainer's records — there is no serv
 
 ---
 
-## 7. `activeSession` — the transient counterpart
+## 7. `activeSession` — the clipboard's working object
 
-Everything above describes the **persisted** model. `activeSession` is its transient twin: the live
-clipboard a trainer has open on the gym floor. It is never a record — it is cached to
-`librept_active_session` so a reload or a dropped connection does not lose the session in progress,
-and it is *converted* into records only when the session finishes. It is documented here because it
-has no other home, and because two independent components rely on its shape implicitly.
+Everything above describes the **persisted** model. `activeSession` is the object the clipboard
+works on while a trainer has a session open on the gym floor. It is held in memory only, and **a
+session in progress is stored nowhere else than in its programs** (§3, "The session model"): one
+`clientPrograms` row per participant, `planned` while the session is staged or is a plan written
+for no session, `live` from the moment the trainer taps Start (`startedAt`), and `done` when they
+complete it — the same row, under the same id, never a second one. The session's notes are
+`exerciseNotes` filed on those programs, and participants who started from one plan are a
+`groupSharedPrograms` row for the session: each member keeps their own plan, tab, sets and notes,
+and changing one member's plan takes them out of the group
+([participantBinding.js](../src/domain/participantBinding.js)). Several sessions may hold live programs at once; the
+clipboard shows one of them.
 
-It is constructed in exactly two places, both in
-[activeSessionController.js](../src/controllers/activeSessionController.js) — `startWorkoutSession`
-(a session launched from the dashboard) and the `openSessionFromHistory` path (a finished session
-re-opened, rebuilt from its stored program snapshot).
+[sessionPrograms.js](../src/controllers/sessionPrograms.js) is the mapping in both directions.
+Every change to the clipboard writes the programs (`saveActiveSession()`). Opening a session reads
+them back: a session opened again after the trainer looked at another one, or after a reload, comes
+back with what was logged in it. At start, the session the address names is opened from its
+programs; at any other address, the live session started last, so the clipboard bar shows it.
+Cancelling or deleting a session removes its programs; leaving it does not.
+
+It is built in three places, all in [sessionLifecycle.js](../src/controllers/sessionLifecycle.js) —
+`startWorkoutSession` (a booked session, a plan for no session, an imported programme; from the
+stored programs where they exist, from the routine where they do not), `openSessionFromHistory` (one
+stored program: a performed one to look at, a draft, or a live one with no session), and once, the
+first time this build starts, from the `librept_active_session` key an earlier build kept a session
+in progress in.
 
 ```
 activeSession = {
@@ -884,6 +904,8 @@ activeSession = {
   activeClientId,                     // whose plan is on screen
   clientRoutines: { [clientId]: clientState },
   feedback: [],                       // quick signals and modal submissions land here
+  bindings: [[clientId]],             // who started from one plan; each keeps their own clientState
+  programIds: { [clientId]: id },     // each participant's program, made once
   sourceSession,                      // the scheduled session this came from, or null
 }
 
@@ -894,6 +916,13 @@ clientState = {
   logs: { [exerciseId]: [set...] },
 }
 ```
+
+**What a reload does not bring back**, because a program does not hold it: which card was open and
+whose plan was on screen come from the address instead; the current round of a circuit
+(`circuitRounds`) starts again at one; a set's target is read back from the first set as it was
+logged; a plan for no session comes back with its first participant only (each participant's draft
+is kept); a performed program reopened to be looked at is never written, so a change made to it is
+not kept. Rest timers are kept in their own key and come back with the session they were started in.
 
 The canonical, executable copy of this contract is
 [`active_session_fixture()`](../tests/medium/_harness.py), which the medium-tier clipboard tests
@@ -928,10 +957,6 @@ Two shapes do **not** come from `buildSessionMeta` and are the ones that break n
   absence.
 - **A session opened from history** has `sourceSession: null` unless it was a plan. Every read is
   therefore optional-chained; a non-null `sourceSession` is not something the clipboard may assume.
-
-The `endDate` clamp is load-bearing rather than cosmetic: `recoverActiveSession()` discards a cached
-session more than two hours past its scheduled end, so a same-day session whose window has already
-closed would otherwise be thrown away the moment it was recovered.
 
 **`startDate`/`endDate`/`timeLabel` are the one part of the seam that is writable after the fact.**
 Tapping Start more than ±15 minutes from `startDate` offers the trainer an adjusted slot

@@ -4,9 +4,9 @@
 // each other. Injected dependencies: none — this is the bottom of the session controller stack;
 // everything above it imports from here and nothing here imports back.
 //
-// Accessors rather than exported bindings: `activeSession` is REASSIGNED — a session starts,
-// is recovered from cache, is cancelled to null — and a module that imported the binding directly
-// would be reading whatever value it held at import time.
+// Accessors rather than exported bindings: `activeSession` is REASSIGNED — a session starts, is
+// read back from its programs, is cancelled to null — and a module that imported the binding
+// directly would be reading whatever value it held at import time.
 
 import { sessionDayOf } from "../domain/sessionRecord.js";
 

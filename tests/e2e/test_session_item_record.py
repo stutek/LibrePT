@@ -35,8 +35,9 @@ def test_reopening_a_structured_record_rebuilds_rests_and_modality(page, local_s
     page.wait_for_timeout(400)
 
     plan = page.evaluate(
-        """() => {
-            const s = JSON.parse(localStorage.getItem('librept_active_session'));
+        """async () => {
+            const store = await import(new URL('controllers/activeSessionStore.js', document.baseURI).href);
+            const s = store.getActiveSession();
             const cr = s.clientRoutines[s.activeClientId];
             return {
                 hasRest: cr.exercises.some(e => e.type === 'rest'),

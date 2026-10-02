@@ -219,41 +219,6 @@ test("an unparseable field is rejected rather than silently zeroing the schedule
   );
 });
 
-test("a session started long after its slot is not instantly stale", () => {
-  // The exact shape the adjust dialog exists for: a 16:00-18:00 slot the trainer opens at 23:45.
-  // Measured against the SCHEDULED end it is already 5h45m old the second Start is tapped, so the
-  // next reload discarded a session that had been running for seconds — the clipboard came back
-  // staged, Start button restored, logged sets gone.
-  const startedAt = Date.parse("2026-08-07T23:45:00");
-  const lateStart = sessionAt({
-    startedAt,
-    scheduledStart: Date.parse("2026-08-07T16:00:00"),
-    scheduledEnd: Date.parse("2026-08-07T18:00:00"),
-  });
-
-  assert.equal(clock.isCachedSessionStale(lateStart, startedAt + MINUTE), false);
-  assert.equal(clock.isCachedSessionStale(lateStart, startedAt + 119 * MINUTE), false);
-  // It still ages out — from when it actually ran, not from a slot it never ran in.
-  assert.equal(clock.isCachedSessionStale(lateStart, startedAt + 121 * MINUTE), true);
-});
-
-test("a session only staged ages out against its slot", () => {
-  // Nothing was started, so there is no elapsed time to lose and a plan left open this morning is
-  // not this evening's next session.
-  const staged = {
-    started: false,
-    startTime: null,
-    sourceSession: {
-      id: "s1",
-      startDate: new Date(Date.parse("2026-08-07T16:00:00")),
-      endDate: new Date(Date.parse("2026-08-07T18:00:00")),
-    },
-  };
-
-  assert.equal(clock.isCachedSessionStale(staged, Date.parse("2026-08-07T19:59:00")), false);
-  assert.equal(clock.isCachedSessionStale(staged, Date.parse("2026-08-07T20:01:00")), true);
-});
-
 test("before its start, a session counts to its start; once started or past it, not", () => {
   const now = Date.parse("2026-09-28T23:52:00");
   const friday = {
@@ -281,40 +246,4 @@ test("past its start and not started, a session counts from the start it missed"
   assert.equal(clock.secondsSinceMissedStart({ ...slot, started: true }, later), null);
   assert.equal(clock.secondsSinceMissedStart(slot, Date.parse("2026-09-29T08:59:00.000Z")), null);
   assert.equal(clock.secondsSinceMissedStart({ started: false, sourceSession: null }, later), null);
-});
-
-test("a staged session whose plan is being written up after its slot is kept", () => {
-  // The morning session recorded in the afternoon: the slot ended hours ago, but the trainer edited
-  // the plan a minute ago. The window runs from that edit, not from the slot.
-  const writtenUp = {
-    started: false,
-    startTime: null,
-    planEditedAt: Date.parse("2026-08-07T15:00:00"),
-    sourceSession: {
-      id: "s1",
-      startDate: new Date(Date.parse("2026-08-07T08:00:00")),
-      endDate: new Date(Date.parse("2026-08-07T09:00:00")),
-    },
-  };
-
-  assert.equal(clock.isCachedSessionStale(writtenUp, Date.parse("2026-08-07T15:01:00")), false);
-  assert.equal(clock.isCachedSessionStale(writtenUp, Date.parse("2026-08-07T17:01:00")), true);
-  // An edit never gives an undated clipboard an expiry it did not have.
-  const draft = {
-    started: false,
-    planEditedAt: Date.parse("2026-08-07T15:00:00"),
-    sourceSession: null,
-  };
-  assert.equal(clock.isCachedSessionStale(draft, Date.parse("2026-08-09T15:00:00")), false);
-});
-
-test("a session with no schedule at all is kept until it has run its window", () => {
-  // An ad-hoc clipboard and a planning draft carry no dates (docs/DATA_MODEL.md §7): with nothing
-  // to age against, a staged one is never stale, and a started one ages from its own start.
-  assert.equal(clock.isCachedSessionStale({ started: false, sourceSession: null }), false);
-
-  const startedAt = Date.parse("2026-08-07T23:45:00");
-  const adHoc = { started: true, startTime: startedAt, sourceSession: null };
-  assert.equal(clock.isCachedSessionStale(adHoc, startedAt + MINUTE), false);
-  assert.equal(clock.isCachedSessionStale(adHoc, startedAt + 121 * MINUTE), true);
 });

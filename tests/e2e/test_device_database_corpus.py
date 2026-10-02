@@ -160,6 +160,13 @@ def test_a_schema_4_install_reads_schema_5_with_everything_it_had(page, local_se
     expected.pop("planUpdates", None)
     if history:
         expected["clientPrograms"] = len(history)
+    # The session the phone had open, which builds before schema 6 kept in localStorage, is
+    # converted once into one program per participant (src/controllers/sessionLifecycle.js).
+    in_progress = snapshot["localStorage"].get("librept_active_session")
+    if in_progress:
+        expected["clientPrograms"] = expected.get("clientPrograms", 0) + len(
+            json.loads(in_progress)["clientRoutines"]
+        )
     if note_ids:
         expected["exerciseNotes"] = len(note_ids)
 

@@ -50,7 +50,7 @@ import {
 } from "./recordProjections.js";
 import { LIVE_SCHEMAS, fieldsHiddenFrom, narrowToSchema } from "./recordSchemas.js";
 import { STATE_COLLECTIONS, describeMigration, migrateState } from "./schemaMigrations.js";
-import { holdsOldTrainingShape, stateForSchema, toDomainState } from "./schemaShapes.js";
+import { toDomainState } from "./schemaShapes.js";
 import { DEMO_ORIGIN, stampAsSeeded } from "./seedProvenance.js";
 import { clearWorkspaceKeys, readVersionScoped, writeVersionScoped } from "./storageNamespace.js";
 import { isThisTabActive } from "./tabOwnership.js";
@@ -293,25 +293,17 @@ async function fieldsTheReadSchemaCannotSee(db) {
   return kept;
 }
 
-// The collections a store of the old training shape (`history`, `planUpdates`) cannot hold at all,
-// so memory read from such a store never has them. A save made from that read must not take their
-// absence for a deletion, or the newer stores would lose them.
-const NOT_IN_OLD_TRAINING_SHAPE = ["sessionAttendance", "groupSharedPrograms", "clientNotes"];
-
-// What each store holds that the state it is written from no longer has. Per store, not once for
-// all of them: the stores no longer share one id set, because a note that stops being a plan update
-// leaves `planUpdates` in schemas 4 and 5 while it stays an exercise note in the newer ones.
-async function staleIdsPerStore(db, shaped) {
-  const readsOldShape = holdsOldTrainingShape(getReadSchema());
+// What each store holds that the state no longer has, per store and per collection the store's
+// schema declares: a store only ever holds collections its own schema declares (staging, 2026-08-17).
+async function staleIdsPerStore(db, currentState) {
   const stale = new Map();
   for (const schema of SCHEMAS) {
     const name = storeNameForSchema(schema);
     const store = db.transaction([name], "readonly").objectStore(name);
     const ids = [];
     for (const collection of collectionsForSchema(LIVE_SCHEMAS[schema])) {
-      if (readsOldShape && NOT_IN_OLD_TRAINING_SHAPE.includes(collection)) continue;
       const existing = await getAllKeysFromIndex(store, COLLECTION_INDEX, collection);
-      const current = new Set((shaped.get(schema)[collection] || []).map((record) => record.id));
+      const current = new Set((currentState[collection] || []).map((record) => record.id));
       ids.push(...existing.filter((id) => !current.has(id)));
     }
     stale.set(schema, ids);
@@ -323,10 +315,7 @@ async function starWrite(db, currentState) {
   // Outside the transaction on purpose: it is a synchronous localStorage write, and anything that
   // is not an IDB request inside an open transaction ends it (see indexedDb.js's header).
   writeSharedLang(currentState.lang);
-  // Each store is written from the state in ITS shape: memory's own for the session model, and
-  // `history` and `planUpdates` built from it for schemas 4 and 5 (schemaShapes.js).
-  const shaped = new Map(SCHEMAS.map((schema) => [schema, stateForSchema(currentState, schema)]));
-  const stale = await staleIdsPerStore(db, shaped);
+  const stale = await staleIdsPerStore(db, currentState);
   const kept = await fieldsTheReadSchemaCannotSee(db);
 
   const storeNames = [...SCHEMAS.map(storeNameForSchema), META_STORE];
@@ -337,7 +326,7 @@ async function starWrite(db, currentState) {
       // fan-out wrote everything everywhere, so a preview-only collection was preview-only in name
       // and durable in fact — and nothing said so.
       for (const collection of collectionsForSchema(LIVE_SCHEMAS[schema])) {
-        for (const record of shaped.get(schema)[collection] || []) {
+        for (const record of currentState[collection] || []) {
           const row = narrowToSchema(projectCollection(collection, record), collection, schema);
           const hidden = kept.get(`${schema}|${record.id}`);
           target.put(hidden ? { ...row, ...hidden } : row);

@@ -32,8 +32,8 @@ export class WorkoutSetupRoute extends Route {
 
 // `/session/:sessionId[/client/:clientId[/edit | /(exercise|superset)/:focusId]]`.
 // One class, several registered instances: they differ only in which part of the focus the URL names, and
-// showSessionView already owns the hard part (recover from cache, launch from a scheduled session, or replay a
-// history log — and the error view when the id matches none of them).
+// showSessionView already owns the hard part (focus the session already on the clipboard, open a booked session
+// from its programs, or open a stored program — and the error view when the id matches none of them).
 export class SessionRoute extends Route {
   constructor({ mode = "plain", ...routeOptions }) {
     // A session owns the overlay itself — showSessionView shows it on success and hides it on a miss —

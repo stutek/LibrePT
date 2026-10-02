@@ -22,12 +22,12 @@ function sourceFiles(dir) {
 }
 
 // Every behaviour the code asks for, read from the source the way a reviewer would find it.
+const BEHAVIOUR_CALL = /hasBehaviour\("([A-Za-z]+)"\)/g;
+
 function behavioursAskedFor() {
   const names = new Set();
   for (const file of sourceFiles(SRC)) {
-    for (const match of readFileSync(file, "utf-8").matchAll(/hasBehaviour\("([A-Za-z]+)"\)/g)) {
-      names.add(match[1]);
-    }
+    for (const match of readFileSync(file, "utf-8").matchAll(BEHAVIOUR_CALL)) names.add(match[1]);
   }
   return names;
 }
@@ -70,7 +70,12 @@ test("every numbered live schema is written by some version, and every version's
 test("every behaviour the code asks for is declared, and every declared one is asked for", () => {
   const asked = behavioursAskedFor();
   const declared = new Set(v.APP_VERSIONS.flatMap((version) => version.behaviours));
-  assert.ok(asked.size > 0, "no behaviour is asked for, so this test would pass for free");
+  // Since 2026-10-02 one version is offered and no behaviour exists, so an empty set is the honest
+  // answer; the scanner is proved on a line of code instead, or this would pass for free.
+  assert.deepEqual(
+    [...'if (hasBehaviour("someName")) {}'.matchAll(BEHAVIOUR_CALL)].map((match) => match[1]),
+    ["someName"],
+  );
   assert.deepEqual(
     [...asked].filter((name) => !declared.has(name)),
     [],
@@ -96,17 +101,20 @@ test("a device that never chose, or chose a version since retired, runs the defa
   withStorage({ librept_app_version: "1999-01" }, () =>
     assert.equal(v.activeAppVersion().id, fallback),
   );
+  // The two versions retired with schemas 4 and 5 (2026-10-02): a phone that chose one is not
+  // stranded on a version this build no longer has.
+  for (const retired of ["2026-09", "2026-10"]) {
+    withStorage({ librept_app_version: retired }, () =>
+      assert.equal(v.activeAppVersion().id, "2026-11"),
+    );
+  }
 });
 
-test("a chosen version decides the behaviours, and an unknown one is refused", () => {
-  const without = v.APP_VERSIONS.find((version) => !version.behaviours.includes("libraryImport"));
-  const withIt = v.APP_VERSIONS.find((version) => version.behaviours.includes("libraryImport"));
+test("a supported version can be chosen, and an unknown one is refused without changing anything", () => {
+  const offered = v.defaultAppVersion().id;
   withStorage({}, (store) => {
-    v.setAppVersion(without.id);
-    assert.equal(v.hasBehaviour("libraryImport"), false);
-    v.setAppVersion(withIt.id);
-    assert.equal(v.hasBehaviour("libraryImport"), true);
+    v.setAppVersion(offered);
     assert.throws(() => v.setAppVersion("1999-01"));
-    assert.equal(store.get("librept_app_version"), withIt.id, "a refused choice changes nothing");
+    assert.equal(store.get("librept_app_version"), offered, "a refused choice changes nothing");
   });
 });

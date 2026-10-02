@@ -26,17 +26,12 @@ def _open_live_session(page, local_server):
     page.wait_for_timeout(400)
 
 
-def _keep_cached_session_fresh(page):
-    """recoverActiveSession discards a cache more than 2h past its scheduled end."""
+def _wait_until_saved(page):
+    """A reload reads the session from its programs in the database: every write has to land first."""
     page.evaluate(
-        """() => {
-             const raw = localStorage.getItem('librept_active_session');
-             if (!raw) return;
-             const cached = JSON.parse(raw);
-             if (cached.sourceSession) {
-               cached.sourceSession.endDate = new Date(Date.now() + 3600000).toISOString();
-             }
-             localStorage.setItem('librept_active_session', JSON.stringify(cached));
+        """async () => {
+             const queue = await import(new URL('data/writeQueue.js', document.baseURI).href);
+             await queue.flushWrites();
            }"""
     )
 
@@ -101,7 +96,7 @@ def test_row_swap_picker_names_the_row_and_survives_a_reload(page, local_server)
     path = _path(page)
     assert "/catalog/slot/" in path, f"the swap picker does not name its row: {path}"
 
-    _keep_cached_session_fresh(page)
+    _wait_until_saved(page)
     page.reload()
     page.wait_for_selector("#dialog-catalog-picker[open]")
     assert _path(page) == path

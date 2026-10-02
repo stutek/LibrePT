@@ -12,9 +12,9 @@ import { loadUnitForEquipment, parseDecimal } from "../domain/repsAndLoad.js";
 import { renderActiveSessionBoard } from "../modules/clipboard/activeSessionBoard.js";
 import { markEditorRow } from "../modules/clipboard/editModeState.js";
 import { mountExercisePicker, pickerLabels } from "../modules/exercises/exercisePicker.js";
-import { saveActiveSessionToCache } from "./activeSessionCache.js";
 import { getActiveSession, getAppDeps } from "./activeSessionStore.js";
 import { pickerEmptyWays } from "./exerciseFormsController.js";
+import { savePlanEdit } from "./sessionPrograms.js";
 
 // Opens the existing "add exercise to session" dialog (also used by the in-clipboard editor).
 export function openAddSessionExerciseDialog() {
@@ -80,7 +80,7 @@ function injectExerciseIntoActivePlan(baseEx, { sets, reps, weight, rest }) {
   // Called out in the editor so the injected movement isn't lost in the list. No focus: the catalog
   // already filled the name in, so there is nothing to type.
   markEditorRow(slotId, { kind: "new", focus: false });
-  saveActiveSessionToCache();
+  savePlanEdit();
   renderBoardUnlessDialogIsOpen();
 }
 
@@ -136,7 +136,7 @@ function swapPlanItemMovement(slotId, baseEx) {
   if (kindChanged) resetTargets(item, clientState);
   else if (equipmentChanged) resetTargets(item, clientState, { keepReps: true });
   markEditorRow(slotId, { kind: "swap", focus: false });
-  saveActiveSessionToCache();
+  savePlanEdit();
   const { saveToLocalStorage } = getAppDeps();
   if (saveToLocalStorage) saveToLocalStorage();
   renderBoardUnlessDialogIsOpen();
@@ -253,7 +253,7 @@ export function clearActivePlan() {
   cs.logs = {};
   cs.circuitRounds = {};
   cs.activeExerciseIndex = 0;
-  saveActiveSessionToCache();
+  savePlanEdit();
   const { saveToLocalStorage } = getAppDeps();
   if (saveToLocalStorage) saveToLocalStorage();
   renderActiveSessionBoard();

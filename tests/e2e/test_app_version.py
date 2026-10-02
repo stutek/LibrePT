@@ -1,7 +1,8 @@
 # tests/e2e/test_app_version.py
-# Choosing the app version: the ☰ menu offers the supported versions, a tap reloads the
-# app under the chosen version's behaviours, and no choice changes the data the trainer holds.
-# A real boot, because the promise includes the reload. Fixtures come from tests/conftest.py.
+# The app version a device runs. Since schemas 4 and 5 were retired (ruled 2026-10-02, Simon) the
+# build offers one version, 2026-11, so the ☰ menu offers no choice, and a device that had chosen one
+# of the retired versions runs 2026-11 without losing anything it holds. A real boot, because the
+# promise is about what a device finds when the app starts. Fixtures come from tests/conftest.py.
 
 COUNTS = """async () => {
     const s = await import(new URL('data/stateStore.js', document.baseURI).href);
@@ -11,79 +12,39 @@ COUNTS = """async () => {
     );
 }"""
 
+FLUSH = """async () => {
+    const q = await import(new URL('data/writeQueue.js', document.baseURI).href);
+    await q.flushWrites();
+}"""
+
 
 def _open_exercises(page, local_server):
     page.goto(local_server + "exercises")
     page.wait_for_selector("#view-exercises.active")
 
 
-def _with_no_session_running(page, local_server):
-    """The demo seed has a session in progress, and a running session refuses the switch. The trainer
-    would finish it; here the stored session is removed and the app loaded again without it."""
+def test_with_one_version_the_menu_offers_no_choice(page, local_server):
     _open_exercises(page, local_server)
-    page.evaluate("localStorage.removeItem('librept_active_session')")
-    _open_exercises(page, local_server)
-    running = page.evaluate(
-        """async () => {
-            const a = await import(new URL('controllers/activeSessionStore.js', document.baseURI).href);
-            return a.getActiveSession() !== null;
-        }"""
-    )
-    assert not running, "a session is still running, so the switch would be refused"
-
-
-def _choose(page, version):
     page.locator("#btn-app-menu").click()
     page.wait_for_selector("#app-menu:not(.hidden)")
     page.locator("#menu-settings").click()
-    page.locator("#menu-app-version").click()
-    page.wait_for_selector("#dialog-app-version[open]")
-    with page.expect_navigation():
-        page.locator(f'#dialog-app-version [data-version="{version}"]').click()
-    # The reload comes back where the choice was made, in Settings; the library is one tap away.
-    page.wait_for_selector("#dialog-settings[open]")
-    page.goto(page.url.replace("/settings", "/exercises"))
-    page.wait_for_selector("#view-exercises.active")
-
-
-def test_a_version_changes_what_the_app_offers_and_nothing_it_holds(page, local_server):
-    _with_no_session_running(page, local_server)
-    assert page.locator("#btn-import-library").count() == 1, (
-        "the default version imports a library"
+    assert page.locator("#menu-app-version").is_hidden(), (
+        "a menu item that opens a choice of one is a dead end"
     )
+
+
+def test_a_device_on_a_retired_version_runs_the_current_one_and_keeps_everything(
+    page, local_server
+):
+    _open_exercises(page, local_server)
+    page.evaluate(FLUSH)
     before = page.evaluate(COUNTS)
 
-    _choose(page, "2026-09")
-    assert page.locator("#btn-import-library").count() == 0, (
-        "2026-09 does not import a library"
-    )
-    assert page.evaluate(COUNTS) == before, "choosing a version changed the data"
-
-    _choose(page, "2026-10")
-    assert page.locator("#btn-import-library").count() == 1
-    assert page.evaluate(COUNTS) == before
-
-
-def test_the_version_cannot_change_while_a_session_is_running(page, local_server):
-    """A reload in front of a client is the one moment the switch must not happen."""
+    page.evaluate("() => localStorage.setItem('librept_app_version', '2026-09')")
     _open_exercises(page, local_server)
-    result = page.evaluate(
-        """async () => {
-            const d = await import(new URL('modules/common/appVersionDialog.js', document.baseURI).href);
-            window.__reloads = 0;
-            d.initAppVersionDialog({
-                t: (key) => key,
-                isSessionRunning: () => true,
-                reload: () => { window.__reloads += 1; },
-            });
-            d.openAppVersionDialog();
-            const options = [...document.querySelectorAll('#dialog-app-version .app-version-option')];
-            options.forEach((option) => option.click());
-            return {
-                refusalShown: !document.getElementById('app-version-refused').classList.contains('hidden'),
-                allDisabled: options.length > 1 && options.every((option) => option.disabled),
-                reloads: window.__reloads,
-            };
-        }"""
+
+    # 2026-09 had no library import; the version it falls back to has it.
+    assert page.locator("#btn-import-library").is_visible()
+    assert page.evaluate(COUNTS) == before, (
+        "falling back to the current version lost data"
     )
-    assert result == {"refusalShown": True, "allDisabled": True, "reloads": 0}

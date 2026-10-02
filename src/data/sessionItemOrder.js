@@ -2,7 +2,6 @@
 //
 // In data/ rather than domain/ because `position` is a stored FIELD and this is the
 // logic that keeps it well-formed — the same family as recordSchemas.js and recordProjections.js.
-// sessionCache.js, itself a data/ module, needs it, and data/ may not import upward.
 //
 // Order is DATA, carried on the record — never implied by array index. On the localStorage JSON
 // store sequence rode along free inside an array; the move to IndexedDB retires that,

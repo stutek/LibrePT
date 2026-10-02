@@ -1,6 +1,6 @@
 ---
 name: exploratory-test
-description: Exploratory testing of LibrePT in a headless browser, in the role of a trainer who has never seen it and reads no documentation, including switching between app versions and between schemas 4, 5 and P. Three modes. FORMS — judge one form at a time: which fields are too many, which are missing, where a control does not work, where a field has the wrong type or order; judged against what a context-free trainer subagent says the task needs, written before the form is seen; one subsection of the first-use trial section per form. SCENARIOS — hunt for defects no scripted test covers in the published app, one short scenario at a time, findings into the first-use trial section of TODO.md. A TRAINER'S DAY — a context-free subagent invents a whole working day (sessions, exercises, packages, billing, messages) and then tries to live it in the app; the orchestrator judges which gaps are worth automating and writes them into the trainer's-day section of TODO.md. Use when asked to explore, probe, "test as a trainer", run cycles of exploratory testing, or continue the first-use trial or the trainer's-day work. Every scenario and every day is recorded so none is repeated.
+description: Exploratory testing of LibrePT in a headless browser, in the role of a trainer who has never seen it and reads no documentation, including the first start after a data schema update. Three modes. FORMS — judge one form at a time: which fields are too many, which are missing, where a control does not work, where a field has the wrong type or order; judged against what a context-free trainer subagent says the task needs, written before the form is seen; one subsection of the first-use trial section per form. SCENARIOS — hunt for defects no scripted test covers in the published app, one short scenario at a time, findings into the first-use trial section of TODO.md. A TRAINER'S DAY — a context-free subagent invents a whole working day (sessions, exercises, packages, billing, messages) and then tries to live it in the app; the orchestrator judges which gaps are worth automating and writes them into the trainer's-day section of TODO.md. Use when asked to explore, probe, "test as a trainer", run cycles of exploratory testing, or continue the first-use trial or the trainer's-day work. Every scenario and every day is recorded so none is repeated.
 type: Skill
 title: "Raziskovalno preizkušanje v vlogi novega trenerja"
 tags: [testing, exploratory, browser, playwright, first-use-trial, all-agents]
@@ -58,43 +58,30 @@ is already fixed on `main`, and where in `src/` it lives, is the implementer's c
 tester never opens the source, not even after the observation. The SHA is what lets the implementer
 make that check in a minute.
 
-## Scenarios that switch the app version or the schema
+## Scenarios across an update of the data schema
 
-The trainer can change how the app behaves in ☰ → *Verzija aplikacije*: today *2026-09* (without the
-exercise library import) and *2026-10*, the default. The data sit in one database store per schema —
-4, 5 and the preview shape P — and every save writes all of them. A trainer also meets two cases
-without choosing them: a phone that still runs an older build reads store 4 only, and a preview build
-reads P. No control offers those two. The tester stands in for them by setting the store the install
-reads, and this is the one setting the skill hands over, as it hands over `?init=`:
+Since 2026-10-02 the app has ONE numbered schema, 6 (schemas 4 and 5 were retired), and one app
+version, 2026-11, so there is no version or schema to switch between. What a trainer still meets is
+the **first start of a new build on a phone that holds data from an older one**: the app fills
+schema 6 once from the old store and from then on keeps only 6. A trainer never chooses it; it
+happens on the day an update lands. The tester stands in for it by putting an older build's data in
+place before the app starts — a backup file from that build restored in the app (☰ → the backup
+dialog), which a trainer can do too, is the honest way from here.
 
-```bash
-.venv/bin/python $S eval 'localStorage.setItem("librept_read_schema", "4")'   # "4", "5" or "PREVIEW"
-.venv/bin/python $S goto '<the same URL>'                                      # the choice applies at load
-.venv/bin/python $S eval 'localStorage.removeItem("librept_read_schema")'     # back to the default
-```
+**What must hold:** every client, session, finished training, plan for no session and note the old
+data held is there after the update, once — nothing missing, nothing doubled, a group training still
+one training with each client's own record. Run it as scenarios of their own:
 
-**What must hold, after every switch:** nothing the trainer did not delete is missing, nothing they
-deleted comes back, and every edit shows in its edited form. Run each path as its own scenario, with
-records created and changed on BOTH sides of the switch:
+- **A backup from the published build restored into this one.** Then restore the same file again:
+  still nothing doubled.
+- **The same with something in progress:** a plan written for no session, a note the next plan waits
+  for, a client anonymised before the backup was made (they must not come back).
+- **Reload in the middle of a restore**, and **offline**, once each.
 
-- **Version 2026-10 → 2026-09 → 2026-10.** Import a library and a circuit on 2026-10, switch, create,
-  edit and delete clients and sessions on 2026-09, switch back. The import is there, and so is the
-  work done on 2026-09.
-- **Schema 4 → 5 → 4 and 4 → P → 4.** Create records while reading 4; switch; edit one, delete one,
-  create one, and create something schema 4 cannot hold (an imported circuit); switch back to 4 and
-  check the shared records. **Then edit a record while reading 4 and return to 5 or P:** the circuit
-  must still be there. This is the phone with an old build saving into data a newer build wrote, and
-  the path where data is most likely to be lost.
-- **A switch while a session runs.** The version dialog must refuse it in words the trainer
-  understands. A schema switch by reload must keep the session in progress.
-- **A backup across schemas.** Export while reading P or 5, restore while reading 4, return to 5.
-- **Offline**, once: the same switch in the gym basement.
-
-Before writing "lost", read the database itself: `eval` over `indexedDB` can list each store's
-records, which tells "not shown by this version" from "not stored". A version that does not show
-something has not lost it. Name the version and the read schema at every step in the finding and in
-the ledger row (`4→P→4`, `2026-10→2026-09→2026-10`), beside the SHA. `stop` and `start` afterwards:
-the profile is deleted, so the next scenario does not inherit a pinned schema.
+Before writing "lost", read the database itself: `eval` over `indexedDB` lists what store 6 holds,
+which tells "not shown" from "not stored". Name the file and its build in the finding and in the
+ledger row, beside the SHA. `stop` and `start` afterwards, so the next scenario begins on a clean
+profile.
 
 ## Driving the browser
 
@@ -322,12 +309,11 @@ Simon follows the work in your output, not in the ledger. So in every mode, writ
 reply, in Simon's language, BEFORE each scenario, form or day starts, and one line when it ends:
 
 ```
-▶ Scenarij 4 (390×844, sl, a1b2c3d, shema 4→P→4): TEST Ana — nova stranka na shemi 4, urejena na P.
+▶ Scenarij 4 (390×844, sl, a1b2c3d): TEST Ana — varnostna kopija iz objavljene različice, obnovljena dvakrat.
 ■ Scenarij 4: čisto. / §80.N P2 — <what the trainer sees>. / ustavljeno: <why>.
 ```
 
-The start line names the scenario in one sentence, and the viewport, language, SHA and, where it
-applies, the app version and schema. A scenario that changes course midway gets a new start line.
+The start line names the scenario in one sentence, and the viewport, language and SHA. A scenario that changes course midway gets a new start line.
 In modes 2 and 3 the orchestrator writes these lines for the trainer subagent, whose own output
 Simon does not see: when it is spawned, and for every gap it judges afterwards.
 

@@ -9,12 +9,13 @@
 // numbers into this person's history, and the history is the thing this app promises to keep
 // honest.
 //
-// **A copy is NOT a binding**, and keeping the two distinguishable is why both exist. Bound
-// participants share one plan object and stay identical for as long as they are bound; a copy is
-// separate from the moment it is made, which is what a trainer wants when someone is doing the same
-// session but at their own loads. Every item therefore gets a fresh id — including the circuits,
-// whose ids are remapped together so the copy's circuit is its own rather than a second plan
-// claiming the first one's.
+// **A copy is NOT a group**, and keeping the two distinguishable is why both exist. Grouped
+// participants each hold their own copy too, but under the SAME item ids and marked as one group
+// (domain/participantBinding.js), so the app knows they started from one plan. A copy made here is
+// another client's plan from the moment it is made, with no group behind it, which is what a trainer
+// wants when someone is doing the same session at their own loads. Every item therefore gets a
+// fresh id — including the circuits, whose ids are remapped together so the copy's circuit is its
+// own rather than a second plan claiming the first one's.
 //
 // Injected dependencies: `newId` — the caller owns where ids come from.
 

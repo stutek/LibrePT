@@ -24,8 +24,6 @@ export const projectClient = (client) => toRecord("clients", client);
 export const projectExercise = (exercise) => toRecord("exercises", exercise);
 export const projectRoutine = (routine) => toRecord("routines", routine);
 export const projectSession = (session) => toRecord("sessions", session);
-export const projectHistory = (historyEntry) => toRecord("history", historyEntry);
-export const projectPlanUpdate = (update) => toRecord("planUpdates", update);
 export const projectNotification = (notification) => toRecord("notifications", notification);
 // An invitation, and with it the RSVP that came back. Declaring it here is what makes it
 // persist at all: COLLECTIONS is derived from this table, and the fan-out and the backup file both
@@ -38,8 +36,9 @@ export const projectSessionSeries = (series) => toRecord("sessionSeries", series
 // does not, so the fan-out writes it into store 5 alone.
 export const projectCircuit = (circuit) => toRecord("circuits", circuit);
 export const projectPreviewProbe = (probe) => toRecord("previewProbe", probe);
-// The session model (schema 6). `history` and `planUpdates` above stay projectable for schemas 4
-// and 5, which are written from these (schemaShapes.js).
+// The session model (schema 6). `history` and `planUpdates` are no longer projected: no live
+// schema holds them, and what an older build wrote in them is converted on the way in
+// (schemaShapes.js).
 export const projectClientProgram = (program) => toRecord("clientPrograms", program);
 export const projectSessionAttendance = (row) => toRecord("sessionAttendance", row);
 export const projectGroupSharedProgram = (group) => toRecord("groupSharedPrograms", group);
@@ -51,8 +50,6 @@ const PROJECTORS = {
   exercises: projectExercise,
   routines: projectRoutine,
   sessions: projectSession,
-  history: projectHistory,
-  planUpdates: projectPlanUpdate,
   notifications: projectNotification,
   invites: projectInvite,
   sessionSeries: projectSessionSeries,

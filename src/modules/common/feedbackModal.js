@@ -11,7 +11,7 @@
 //   getActiveSession(),
 //   t,
 //   newRecordId(),
-//   saveActiveSessionToCache(),
+//   saveActiveSession(),
 //   saveToLocalStorage(),
 //   renderPendingPlanAdjustments()
 // }
@@ -134,7 +134,7 @@ export function setupFeedbackForms() {
   const fbForm = $id("form-feedback");
   const {
     newRecordId,
-    saveActiveSessionToCache,
+    saveActiveSession,
     saveToLocalStorage,
     renderPendingPlanAdjustments,
     enforceQuickSignalExclusivity,
@@ -203,7 +203,7 @@ export function setupFeedbackForms() {
           tag: tagVal,
           note: customNote,
         });
-        saveActiveSessionToCache();
+        saveActiveSession();
       }
 
       saveToLocalStorage();

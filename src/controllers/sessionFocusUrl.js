@@ -7,7 +7,6 @@
 import { focusRefForItem } from "../domain/sessionFocus.js";
 import { renderActiveSessionBoard } from "../modules/clipboard/activeSessionBoard.js";
 import { getEditorRowId, isClipboardEditMode } from "../modules/clipboard/editModeState.js";
-import { saveActiveSessionToCache } from "./activeSessionCache.js";
 import { getActiveSession, getAppDeps } from "./activeSessionStore.js";
 
 export function sessionFocusPath() {
@@ -87,7 +86,7 @@ export function focusExerciseByIndex(index) {
   // deckAllCollapsed's own comment (clientRoutines' shape, above startWorkoutSession).
   cs.deckAllCollapsed = false;
   activeSession.expandedPastId = null;
-  saveActiveSessionToCache();
+  // Not saved: which card is open is the address's to keep (syncSessionFocusUrl), not the program's.
   renderActiveSessionBoard();
 }
 
@@ -102,7 +101,6 @@ export function activateExerciseByScroll(index) {
   const wasOpen = !cs.deckAllCollapsed;
   cs.activeExerciseIndex = index;
   cs.deckAllCollapsed = true;
-  saveActiveSessionToCache();
   if (wasOpen) renderActiveSessionBoard();
   else syncSessionFocusUrl();
 }

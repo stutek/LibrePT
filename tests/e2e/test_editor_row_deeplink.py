@@ -19,17 +19,12 @@ def _open_live_session(page, local_server):
     page.wait_for_timeout(400)
 
 
-def _keep_cached_session_fresh(page):
-    """recoverActiveSession discards a cache more than 2h past its scheduled end."""
+def _wait_until_saved(page):
+    """A reload reads the session from its programs in the database: every write has to land first."""
     page.evaluate(
-        """() => {
-             const raw = localStorage.getItem('librept_active_session');
-             if (!raw) return;
-             const cached = JSON.parse(raw);
-             if (cached.sourceSession) {
-               cached.sourceSession.endDate = new Date(Date.now() + 3600000).toISOString();
-             }
-             localStorage.setItem('librept_active_session', JSON.stringify(cached));
+        """async () => {
+             const queue = await import(new URL('data/writeQueue.js', document.baseURI).href);
+             await queue.flushWrites();
            }"""
     )
 
@@ -64,7 +59,7 @@ def test_the_called_out_row_survives_a_reload(page, local_server):
     _insert_exercise_from_the_deck(page)
     path_before = page.evaluate("() => location.pathname")
 
-    _keep_cached_session_fresh(page)
+    _wait_until_saved(page)
     page.reload()
     page.wait_for_selector(".clipboard-editor")
     page.wait_for_timeout(500)
@@ -79,7 +74,7 @@ def test_a_restored_row_takes_no_caret_and_carries_no_badge(page, local_server):
     _open_live_session(page, local_server)
     _insert_exercise_from_the_deck(page)
 
-    _keep_cached_session_fresh(page)
+    _wait_until_saved(page)
     page.reload()
     page.wait_for_selector(".clipboard-editor")
     page.wait_for_timeout(500)

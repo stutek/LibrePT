@@ -2,9 +2,8 @@
 // Erasure as anonymization (src/data/clientErasure.js) — pure state-in/state-out, no DOM.
 //
 // The tests that matter most are not "the name was removed" but the two ways this can go wrong
-// silently: a DENORMALISED copy of the name left behind in another collection (history and
-// planUpdates both carry `clientName`), and a same-named client's records being rewritten as
-// collateral damage. Both produce a database that looks erased and is not, or a second client whose
+// silently: a copy of the name left behind in another record (a program's title, a note the
+// trainer typed), and a same-named client's records being rewritten as collateral damage. Both produce a database that looks erased and is not, or a second client whose
 // records were quietly edited under someone else's request.
 
 import assert from "node:assert/strict";
@@ -41,20 +40,32 @@ function stateWithTwoJanes() {
       { id: "c-jane-b", name: "Jane Doe", email: "jane.b@example.com", active: true },
       { id: "c-marko", name: "Marko Novak", active: true },
     ],
-    history: [
+    clientPrograms: [
       {
         id: "h1",
         clientId: "c-jane-a",
-        clientName: "Jane Doe",
+        status: "done",
         title: "Jane Doe — deload week",
         exercises: [],
-        feedback: [{ id: "f1", tag: "Too Easy", note: "Jane Doe flew through this" }],
       },
-      { id: "h2", clientId: "c-jane-b", clientName: "Jane Doe", exercises: [] },
+      { id: "h2", clientId: "c-jane-b", status: "done", title: "Jane Doe evening", exercises: [] },
     ],
-    planUpdates: [
-      { id: "p1", clientId: "c-jane-a", clientName: "Jane Doe", resolved: false },
-      { id: "p2", clientId: "c-marko", clientName: "Marko Novak", resolved: false },
+    exerciseNotes: [
+      {
+        id: "f1",
+        clientId: "c-jane-a",
+        programId: "h1",
+        tag: "Too Easy",
+        text: "Jane Doe flew through this",
+      },
+      { id: "p1", clientId: "c-jane-a", tag: "Pain", resolved: false },
+      {
+        id: "p2",
+        clientId: "c-marko",
+        tag: "Pain",
+        text: "Marko Novak: left knee",
+        resolved: false,
+      },
     ],
     sessionSeries: [
       {
@@ -178,13 +189,17 @@ test("a rule the two same-named clients share keeps its title and is reported", 
   assert.deepEqual(summary.reviewSeriesIds, ["ser-two-janes"]);
 });
 
-test("the denormalised name copies are rewritten too", () => {
+test("no program or note of the client keeps the name, and the receipt counts them", () => {
   // DATA_MODEL §5: "if one store keeps the name, the erasure has failed".
-  const { state } = eraseClientInState(stateWithTwoJanes(), "c-jane-a", {});
+  const { state, summary } = eraseClientInState(stateWithTwoJanes(), "c-jane-a", {});
 
-  const pseudonym = erasurePseudonym("c-jane-a");
-  assert.equal(state.history.find((record) => record.id === "h1").clientName, pseudonym);
-  assert.equal(state.planUpdates.find((record) => record.id === "p1").clientName, pseudonym);
+  const theirs = [
+    ...state.clientPrograms.filter((record) => record.clientId === "c-jane-a"),
+    ...state.exerciseNotes.filter((record) => record.clientId === "c-jane-a"),
+  ];
+  assert.equal(JSON.stringify(theirs).includes("Jane Doe"), false);
+  assert.equal(summary.programs, 1);
+  assert.equal(summary.notes, 2);
 });
 
 test("another client with the same name is left completely untouched", () => {
@@ -194,8 +209,8 @@ test("another client with the same name is left completely untouched", () => {
   const janeB = state.clients.find((client) => client.id === "c-jane-b");
   assert.equal(janeB.name, "Jane Doe");
   assert.equal(janeB.email, "jane.b@example.com");
-  // Their history record still carries their own name, not the other Jane's pseudonym.
-  assert.equal(state.history.find((record) => record.id === "h2").clientName, "Jane Doe");
+  // Their program still says their own name, not the other Jane's marker.
+  assert.equal(state.clientPrograms.find((record) => record.id === "h2").title, "Jane Doe evening");
 });
 
 test("text is judged on the record it sits on, not on the whole book", () => {
@@ -239,20 +254,21 @@ test("prose inside the client's OWN records is rewritten even with a namesake pr
   // A feedback note on Jane A's session is unambiguously about Jane A — ambiguity only reaches
   // records that several clients share.
   const { state } = eraseClientInState(stateWithTwoJanes(), "c-jane-a", {});
-  const record = state.history.find((entry) => entry.id === "h1");
+  const record = state.clientPrograms.find((entry) => entry.id === "h1");
+  const note = state.exerciseNotes.find((entry) => entry.id === "f1");
 
-  assert.equal(record.feedback[0].note, "[c-jane-a] flew through this");
+  assert.equal(note.text, "[c-jane-a] flew through this");
   assert.equal(record.title, "[c-jane-a] — deload week");
 });
 
 test("the note typed on a set is rewritten too", () => {
   const before = stateWithTwoJanes();
-  before.history[0].exercises = [
+  before.clientPrograms[0].exercises = [
     { id: "i1", type: "exercise", name: "Squat", sets: [{ reps: 5, note: "Jane Doe grinded it" }] },
   ];
   const { state, summary } = eraseClientInState(before, "c-jane-a", {});
 
-  const set = state.history.find((entry) => entry.id === "h1").exercises[0].sets[0];
+  const set = state.clientPrograms.find((entry) => entry.id === "h1").exercises[0].sets[0];
   assert.equal(set.note, "[c-jane-a] grinded it");
   assert.equal(set.reps, 5, "what was lifted stays");
   assert.ok(summary.scrubbedTextFields >= 1);
@@ -310,7 +326,8 @@ test("the new session model: the work stays without the name, a note about the p
 });
 
 test("an install without the new collections is not given empty ones", () => {
-  const { state } = eraseClientInState(stateWithTwoJanes(), "c-jane-a", {});
+  const { clientPrograms: _programs, exerciseNotes: _notes, ...withoutThem } = stateWithTwoJanes();
+  const { state } = eraseClientInState(withoutThem, "c-jane-a", {});
   for (const key of ["clientPrograms", "exerciseNotes", "clientNotes"]) {
     assert.equal(key in state, false, `${key} appeared`);
   }

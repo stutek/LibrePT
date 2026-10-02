@@ -1,7 +1,7 @@
 # tests/e2e/test_session_reload_follows_id.py
-# A deep link must follow the session id in the URL. When the in-memory session is gone (a reload)
-# and its persisted cache has expired, the router resolves the URL's {sessionId} against known
-# sessions and re-launches that session — instead of opening a blank "Workout Session Setup" modal.
+# A deep link must follow the session id in the URL. When the in-memory session is gone (a reload),
+# the app resolves the URL's {sessionId} against known sessions and opens that session from its
+# programs — instead of opening a blank "Workout Session Setup" modal.
 # An id that names nothing lands on the not-found view rather than the setup modal.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
@@ -31,9 +31,7 @@ def _open_session(page, local_server):
     page.wait_for_timeout(400)
 
 
-def test_reload_with_expired_cache_relaunches_from_the_url_session_id(
-    page, local_server
-):
+def test_reload_relaunches_from_the_url_session_id(page, local_server):
     _open_session(page, local_server)
     base = _base(page)
 
@@ -42,9 +40,7 @@ def test_reload_with_expired_cache_relaunches_from_the_url_session_id(
     m = re.match(re.escape(base) + r"/session/([^/]+)", url)
     assert m, f"expected a /session/ URL, got {url}"
 
-    # Simulate the cache expiring (recoverActiveSession also purges sessions >2h past their end):
-    # drop the persisted session but keep the deep-link URL, then reload as a cold boot.
-    page.evaluate("() => localStorage.removeItem('librept_active_session')")
+    # Keep the deep-link URL and reload as a cold boot: nothing but the URL says which session.
     page.reload()
     page.wait_for_timeout(800)
 

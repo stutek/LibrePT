@@ -14,6 +14,7 @@
 //   navigateToPath(path),
 // }
 
+import { APP_VERSIONS } from "../../data/appVersions.js";
 import { driveSyncStatus } from "../../data/driveSyncService.js";
 import { ISSUE_TRACKER_URL } from "../../data/publicUrls.js";
 import { isDemoOnlyStore } from "../../data/seedProvenance.js";
@@ -698,6 +699,9 @@ function setupAppMenu() {
     closeMenu();
     deps.openTrainerDetails?.();
   });
+  // Nothing to choose while the build offers one version: since schemas 4 and 5 were retired
+  // (2026-10-02) that is 2026-11 alone. It comes back by itself with a second one.
+  document.getElementById("menu-app-version")?.classList.toggle("hidden", APP_VERSIONS.length < 2);
   on("menu-app-version", () => {
     closeMenu();
     deps.openAppVersion?.();

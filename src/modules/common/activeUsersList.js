@@ -5,37 +5,17 @@
 // function that a caller can forget to pass is an escaping function that will eventually be missing.
 import { escapeHTML, sessionSlotOfTitle, sessionTitleOfClient } from "./utils.js";
 
+// A client in a group: they started from the same plan as the others in it. Each still has their own
+// tab, because group members train at their own speed and are logged one by one.
 function isBound(activeSession, clientId) {
   return (activeSession?.bindings || []).some((group) => group.includes(clientId));
 }
 
-/** The single tab a bound group gets, or null when nobody is bound.
- *
- * It carries every member's initials and behaves like any other tab — tapping it puts the shared
- * plan on screen. Per-person work is still one tap away: unbinding from the session menu gives
- * everyone their own tab back, which is where a signal that belongs to one of them is logged.
- */
-function boundGroupTab(activeSession, ctx) {
-  const { clients, activeClientId, getInitials, navigateToPath, t } = ctx;
-  const group = (activeSession?.bindings || [])[0];
-  if (!group || group.length < 2) return null;
-  const members = (activeSession.participants || []).filter((id) => group.includes(id));
-  if (members.length < 2) return null;
-
-  const isActive = members.includes(activeClientId);
-  const tab = document.createElement("button");
-  tab.className = `client-tab-btn client-tab-bound ${isActive ? "active" : ""}`;
-  const initials = members
-    .map((id) => clients.find((client) => client.id === id))
-    .filter(Boolean)
-    .map((client) => client.avatar || getInitials(client.name))
-    .join(" · ");
-  // textContent, not innerHTML: initials come from client names a trainer typed.
-  tab.textContent = `${t ? t("bound_group_label") : "Together"} ${initials}`;
-  tab.addEventListener("click", () => {
-    navigateToPath(`/session/${activeSession.id}/client/${members[0]}`);
-  });
-  return tab;
+// The group mark on a tab: the link glyph the session menu's "Everyone on this plan" carries, and the
+// word for it for a screen reader, so the mark is not only a picture.
+function groupMarkHTML(t) {
+  const label = t ? t("bound_group_label") : "Together";
+  return `<i class="fa-solid fa-link client-tab-group-mark" aria-hidden="true"></i><span class="sr-only">${escapeHTML(label)}</span>`;
 }
 
 export function updateClientTabsFadeState() {
@@ -57,22 +37,16 @@ export function renderActiveUsersList(tabsContainer, activeSession, ctx) {
   if (!tabsContainer) return;
   tabsContainer.innerHTML = "";
 
-  // People training ONE plan read as ONE tab: the trainer is looking at a single
-  // programme, and three tabs that always show the same thing invite three taps to check. The
-  // members are still named on it, because a tab that says "group" tells nobody who is in it.
-  const bound = boundGroupTab(activeSession, ctx);
-  if (bound) tabsContainer.appendChild(bound);
-
   // Everyone on this session, so a tab can tell two clients who share a first name apart.
   const participants = activeSession.participants.map((id) => clients.find((c) => c.id === id));
   for (const pId of activeSession.participants) {
-    if (isBound(activeSession, pId)) continue;
     const client = clients.find((c) => c.id === pId);
     if (!client) continue;
 
     const isActive = pId === activeClientId;
     const tab = document.createElement("button");
-    tab.className = `client-tab-btn client-tab-participant ${isActive ? "active" : ""}`;
+    const bound = isBound(activeSession, pId);
+    tab.className = `client-tab-btn client-tab-participant${bound ? " client-tab-bound" : ""} ${isActive ? "active" : ""}`;
 
     // Selected tab: uses unified primary gradient with on-primary text for clear, vibrant emphasis.
     // Width-side chrome (padding/gap/avatar size) trimmed further so more tabs fit per row — a
@@ -96,7 +70,7 @@ export function renderActiveUsersList(tabsContainer, activeSession, ctx) {
       <div class="avatar client-tab-avatar ${isActive ? "active" : ""}">
         ${escapeHTML(client.avatar || getInitials(client.name))}
       </div>
-      <span class="client-tab-name">${getClientDisplayNameHTML(client, true, t("injury_mark_label"), participants)}</span>${sessionMark}
+      <span class="client-tab-name">${getClientDisplayNameHTML(client, true, t("injury_mark_label"), participants)}</span>${sessionMark}${bound ? groupMarkHTML(t) : ""}
     `;
 
     tab.addEventListener("click", () => {

@@ -28,6 +28,9 @@ def _open_session_with_items(page, local_server, exercises, log_id="rest-focus-l
             ctrl.openSessionFromHistory({
                 id: args.logId,
                 clientId,
+                // In progress, so it is written and a reload of its address finds it.
+                status: 'live',
+                startedAt: new Date().toISOString(),
                 routineName: 'Rest Focus Test',
                 date: new Date().toISOString(),
                 duration: 0,

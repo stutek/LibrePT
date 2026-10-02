@@ -1,15 +1,11 @@
 // tests/unit_js/data/schemaShapes.test.mjs
 // When a training changes shape (src/data/schemaShapes.js): on its way into memory from anything an
-// older build wrote, and on its way out into the stores of schemas 4 and 5.
+// older build wrote. Nothing writes the old shape since schemas 4 and 5 were retired.
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import {
-  holdsOldTrainingShape,
-  stateForSchema,
-  toDomainState,
-} from "../../../src/data/schemaShapes.js";
+import { toDomainState } from "../../../src/data/schemaShapes.js";
 
 const record = {
   id: "h1",
@@ -18,13 +14,6 @@ const record = {
   exercises: [{ id: "i1", type: "exercise", name: "Plank", sets: [] }],
   feedback: [],
 };
-
-test("schemas 4 and 5 hold the old shape; 6 and the preview hold the session model", () => {
-  assert.equal(holdsOldTrainingShape(4), true);
-  assert.equal(holdsOldTrainingShape(5), true);
-  assert.equal(holdsOldTrainingShape(6), false);
-  assert.equal(holdsOldTrainingShape("PREVIEW"), false);
-});
 
 test("an old-shape state reaches memory as programs and notes, with the old collections gone", () => {
   const state = toDomainState({
@@ -57,17 +46,4 @@ test("a record already in the new shape wins over a conversion with the same id"
   const newer = { id: "h1", clientId: "ana", status: "done", title: "Edited later", exercises: [] };
   const state = toDomainState({ history: [record], clientPrograms: [newer], sessions: [] });
   assert.deepEqual(state.clientPrograms, [newer]);
-});
-
-test("each store gets the state in its own shape", () => {
-  const memory = toDomainState({
-    clients: [{ id: "ana", name: "Ana" }],
-    history: [record],
-    sessions: [],
-  });
-  assert.deepEqual(
-    stateForSchema(memory, 5).history.map((entry) => entry.id),
-    ["h1"],
-  );
-  assert.equal(stateForSchema(memory, 6), memory, "schema 6 is memory's own shape");
 });

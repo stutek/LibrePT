@@ -46,23 +46,15 @@ def test_edit_mode_deeplinks_and_survives_reload(page, local_server):
     first_name.fill(name)
     page.wait_for_timeout(150)
 
-    # Push the cached session's sourceSession.endDate safely into the future before reloading:
-    # recoverActiveSession() discards (and freshly relaunches from the routine template, losing
-    # any in-memory edit) any cached session more than 2h past its scheduled end, and this seed
-    # session's end time is clamped to at most 18:00 (src/data/sessions.js) -- without this, the
-    # test starts failing every evening once real wall-clock time passes ~20:00, regardless of
-    # whether edit-mode reload-persistence itself works.
+    # The reload reads the session from its programs in the database, so every write lands first.
     page.evaluate(
-        """() => {
-            const cached = JSON.parse(localStorage.getItem('librept_active_session'));
-            if (cached?.sourceSession) {
-                cached.sourceSession.endDate = new Date(Date.now() + 3600000).toISOString();
-                localStorage.setItem('librept_active_session', JSON.stringify(cached));
-            }
+        """async () => {
+            const queue = await import(new URL('data/writeQueue.js', document.baseURI).href);
+            await queue.flushWrites();
         }"""
     )
 
-    # Reload as a cold boot: no in-memory session, only the persisted cache + the /edit URL.
+    # Reload as a cold boot: no in-memory session, only the stored programs + the /edit URL.
     page.reload()
     page.wait_for_timeout(900)
 

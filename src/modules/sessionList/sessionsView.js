@@ -157,6 +157,10 @@ export function seedDemoActiveSession({ state }) {
     i++;
   }
 
+  // The key a session in progress was kept under before schema 6 (controllers/sessionPrograms.js).
+  // Written on purpose, and only on a boot under the test switch: the one-time import at start-up
+  // turns it into programs, so every such boot exercises the path a trainer mid-session takes on the
+  // day the update lands.
   localStorage.setItem("librept_active_session", JSON.stringify(session));
 }
 

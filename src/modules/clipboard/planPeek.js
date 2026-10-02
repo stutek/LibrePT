@@ -22,8 +22,7 @@
 // trainer had to pull the plan back before lifting the thumb. The two strokes separate the look from
 // the leaving, and the look is now free at every distance.
 //
-// WHAT opening means — a route, the planning form — is the controller's; so is whether this session
-// may be left at all (`canOpen`).
+// WHAT opening means — a route, the planning form — is the controller's.
 //
 // The one inline style this module sets is `--plan-pull` (docs/ARCHITECTURE.md "look and layout
 // live only in CSS" — a drag offset is exactly the kind of runtime number that rule carves out for
@@ -80,16 +79,12 @@ function prefersReducedMotion() {
  * clipboard body (#active-session-blanket). `deps`:
  *   getUnderLayers()  — () => { past: HTMLElement|null, future: HTMLElement|null }
  *   isDisabled()      — () => bool; true in edit mode, where the reorder drag owns the surface
- *   canOpen()         — () => bool; false when the upward stroke must not leave this session
  *   onOpen(side)      — ("past"|"future") => void; called once the blanket has slid off
  *   onPeekBegin()     — () => void; the under-layers are about to become visible. Whatever has to
  *                       be MEASURED about them is measured here, not when they were drawn.
  * Idempotent: wiring twice on the same element is a no-op (the controller calls this once).
  */
-export function initPlanPeek(
-  blanket,
-  { getUnderLayers, isDisabled, canOpen, onOpen, onPeekBegin },
-) {
+export function initPlanPeek(blanket, { getUnderLayers, isDisabled, onOpen, onPeekBegin }) {
   if (!blanket || blanket.dataset.planPeekWired) return;
   blanket.dataset.planPeekWired = "1";
 
@@ -239,7 +234,7 @@ export function initPlanPeek(
       drag.side = side;
       setSide(side);
     }
-    const ready = neighbour && Math.abs(pull) >= width * OPEN_PULL_PCT && canOpen?.() !== false;
+    const ready = neighbour && Math.abs(pull) >= width * OPEN_PULL_PCT;
     if (ready !== drag.ready) {
       drag.ready = ready;
       setOpenReady(side, ready);

@@ -15,7 +15,7 @@
 //
 // deps: {
 //   activeClientState, allExerciseNames, t, escapeHTML,
-//   save(),        // cache + localStorage, NO re-render (for live field edits)
+//   save(),        // writes the session's programs, NO re-render (for live field edits)
 //   rerender(),    // re-render the board (stays in edit mode) after structural changes
 //   openAddExercise(),  // opens the existing #dialog-add-session-exercise (kept for compatibility)
 //   exit(),        // leave edit mode
@@ -239,9 +239,10 @@ export function renderClipboardEditor(container, deps) {
   if (callout?.id) activeClientState.editorExpandedId = callout.id;
   const isRowExpanded = (it) => activeClientState.editorExpandedId === it.id;
   const toggleRowExpanded = (it) => {
+    // Not saved: which row is open is not part of the plan, and a save is a change to the plan,
+    // which would take this client out of their group.
     activeClientState.editorExpandedId =
       activeClientState.editorExpandedId === it.id ? null : it.id;
-    save();
     rerender();
   };
 
@@ -482,7 +483,7 @@ export function renderClipboardEditor(container, deps) {
 
   // ---------- exercise field edits: mutate live session without a re-render (keeps focus/caret) ----------
   // Persist on every keystroke (input) AND on commit (change): edit mode is deep-linked, so a reload
-  // mid-typing must restore the exact in-progress value — save() only writes the cache, never renders.
+  // mid-typing must restore the exact in-progress value — save() only writes, never renders.
   const bindField = (selector, apply) => {
     for (const input of listEl.querySelectorAll(selector)) {
       const handler = () => {

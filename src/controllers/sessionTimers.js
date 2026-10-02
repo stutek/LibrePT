@@ -9,7 +9,6 @@ import { focusRefForItem } from "../domain/sessionFocus.js";
 import { startTimer } from "../modules/clipboard/exerciseAndRestTimer.js";
 import { clientDisplayName, formatDurationHourMin } from "../modules/common/utils.js";
 import { updateSessionBarTimer } from "../modules/session/sessionBar.js";
-import { saveActiveSessionToCache } from "./activeSessionCache.js";
 import { getActiveSession, getAppDeps } from "./activeSessionStore.js";
 
 export function startSessionTimer() {
@@ -27,10 +26,10 @@ export function startSessionTimer() {
       updateSessionBarTimer();
       return;
     }
+    // Not saved: the running time is read from when the session started, which its programs hold.
     session.duration = Math.floor((Date.now() - session.startTime) / 1000);
     updateOverlaySessionTimer();
     updateSessionBarTimer();
-    saveActiveSessionToCache();
   };
 
   activeSession.timerIntervalId = setInterval(tick, 1000);

@@ -22,9 +22,8 @@
 //   "Plan Program" button opens (`openPlanningForClient`, injected by app.js).
 // - Today: the client's session today, derived by clientSessionToday from the same programs and
 //   schedule — no separate "launched today" record to fall out of step.
-// A STARTED session is never left by the gesture (`canOpen`): opening another session replaces the one
-// clipboard slot, and a running session's logs would go with it. Uncovering still works — comparing
-// is the point of the gesture; leaving is not.
+// Opening a neighbour leaves the session on the clipboard, started or not: everything in it is
+// already in its programs (sessionPrograms.js), and coming back to it opens it as it was left.
 
 import { libraryExercises } from "../data/exerciseLibrary.js";
 import { feedbackFromNotes, notesForProgram } from "../data/trainingRecords.js";
@@ -327,7 +326,6 @@ export function initPlanPeekController() {
     }),
     // The reorder drag in clipboardEditor.js owns the same pointer surface while editing.
     isDisabled: () => isClipboardEditMode(),
-    canOpen: () => !getActiveSession()?.started,
     onOpen: openNeighbour,
     onPeekBegin: alignBothSheetsToFocus,
   });

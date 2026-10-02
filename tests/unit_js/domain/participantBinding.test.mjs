@@ -1,57 +1,116 @@
 // tests/unit_js/domain/participantBinding.test.mjs
-// Several participants training ONE programme (src/domain/participantBinding.js).
+// Several participants starting from ONE programme (src/domain/participantBinding.js).
 //
-// The promise: the trainer logs the set once and it counts for everyone doing it, while what each
-// person THOUGHT of it stays their own — one client can find a shared circuit too hard while
-// another finds it too easy.
+// The promise (ruled 2026-10-02): a group records who started from the same plan. Every member gets
+// that plan's prescription under the same item ids, and keeps their own plan object, place, sets and
+// notes — people in one group move at different speeds. Changing one member's plan takes them out.
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   bindingFor,
-  bindingMembers,
-  boundClientRoutines,
-  unboundClientRoutines,
+  groupedClientRoutines,
   withBinding,
   withoutBinding,
 } from "../../../src/domain/participantBinding.js";
 
-const plan = (name) => ({
-  routineName: name,
-  exercises: [{ id: "e1", name: "Back Squat" }],
-  logs: {},
+const squat = {
+  id: "e1",
+  name: "Back Squat",
+  setsTargetCount: 2,
+  repsTarget: 5,
+  weightTarget: 80,
+  circuitId: "c1",
+};
+const rest = { id: "r1", type: "rest", rest: 90, circuitId: "c1" };
+
+const janesPlan = () => ({
+  routineId: "strength",
+  routineName: "Jane's",
+  activeExerciseIndex: 1,
+  exercises: [structuredClone(squat), structuredClone(rest)],
+  logs: { e1: [{ reps: 5, weight: 80, completed: true, note: "easy" }] },
 });
 
-test("participants with no binding keep their own plans", () => {
-  const routines = { jane: plan("Jane's"), john: plan("John's") };
-
-  const bound = boundClientRoutines(routines, []);
-
-  assert.notEqual(bound.jane, bound.john);
+const johnsPlan = () => ({
+  routineId: "mobility",
+  routineName: "John's",
+  activeExerciseIndex: 3,
+  exercises: [{ id: "m1", name: "Hip Opener", setsTargetCount: 1 }],
+  logs: { m1: [{ reps: 10, weight: 0, completed: true, note: "" }] },
 });
 
-test("bound participants share ONE plan, so logging it once counts for all of them", () => {
-  const routines = { jane: plan("Shared"), john: plan("John's"), sarah: plan("Sarah's") };
+test("grouping gives a member the plan's prescription under the same ids, with no logged sets", () => {
+  const routines = { jane: janesPlan(), john: johnsPlan() };
 
-  const bound = boundClientRoutines(routines, [["jane", "john"]]);
-  bound.jane.logs.e1 = [{ reps: 10, completed: true }];
+  const grouped = groupedClientRoutines(routines, {
+    sourceId: "jane",
+    memberIds: ["jane", "john"],
+  });
 
-  assert.equal(bound.john.logs.e1[0].completed, true, "the set was logged once, for both");
-  assert.notEqual(bound.sarah, bound.jane, "somebody outside the binding is untouched");
+  assert.deepEqual(
+    grouped.john.exercises.map((item) => item.id),
+    ["e1", "r1"],
+    "the same item ids as the plan it was copied from",
+  );
+  assert.equal(grouped.john.exercises[0].circuitId, "c1");
+  assert.equal(grouped.john.routineName, "Jane's");
+  assert.deepEqual(grouped.john.logs, {
+    e1: [
+      { reps: 5, weight: 80, completed: false, note: "" },
+      { reps: 5, weight: 80, completed: false, note: "" },
+    ],
+  });
+  // Jane's own plan and what she logged in it are untouched.
+  assert.equal(grouped.jane.logs.e1[0].completed, true);
 });
 
-test("the shared plan is the FIRST member's, so nobody's work is silently discarded", () => {
-  // Binding is a decision made in front of the trainer: the plan they are looking at is the one
-  // that survives, rather than whichever happened to sort first.
-  const routines = { jane: plan("Jane's"), john: plan("John's") };
+test("each member keeps their own plan object, so a set logged lands for one member only", () => {
+  const grouped = groupedClientRoutines(
+    { jane: janesPlan(), john: johnsPlan() },
+    { sourceId: "jane", memberIds: ["jane", "john"] },
+  );
+  assert.notEqual(grouped.john, grouped.jane);
+  assert.notEqual(grouped.john.exercises[0], grouped.jane.exercises[0]);
 
-  const bound = boundClientRoutines(routines, [["jane", "john"]]);
+  grouped.john.logs.e1[1].completed = true;
+  grouped.john.exercises[0].weightTarget = 60;
 
-  assert.equal(bound.jane.routineName, "Jane's");
-  assert.equal(bound.john.routineName, "Jane's");
+  assert.equal(grouped.jane.logs.e1.length, 1, "John's set is not Jane's");
+  assert.equal(grouped.jane.exercises[0].weightTarget, 80);
 });
 
-test("a client's binding is findable from either side", () => {
+test("a member keeps their own place in the plan, inside its length", () => {
+  const grouped = groupedClientRoutines(
+    { jane: janesPlan(), john: johnsPlan() },
+    { sourceId: "jane", memberIds: ["jane", "john"] },
+  );
+  assert.equal(grouped.john.activeExerciseIndex, 1, "John was at card 3 of a plan of 1");
+  assert.equal(grouped.jane.activeExerciseIndex, 1);
+});
+
+test("what a joining member logged on an item the group's plan also has stays theirs", () => {
+  const john = janesPlan();
+  john.logs = { e1: [{ reps: 4, weight: 70, completed: true, note: "" }] };
+  const grouped = groupedClientRoutines(
+    { jane: janesPlan(), john },
+    { sourceId: "jane", memberIds: ["jane", "john"] },
+  );
+  assert.deepEqual(grouped.john.logs.e1, [{ reps: 4, weight: 70, completed: true, note: "" }]);
+});
+
+test("members already grouped with the plan on screen keep what they logged", () => {
+  const sarahs = janesPlan();
+  sarahs.logs = { e1: [{ reps: 3, weight: 80, completed: true, note: "" }] };
+  const grouped = groupedClientRoutines(
+    { jane: janesPlan(), sarah: sarahs, john: johnsPlan() },
+    { sourceId: "jane", memberIds: ["jane", "sarah", "john"], bindings: [["jane", "sarah"]] },
+  );
+  assert.equal(grouped.sarah, sarahs, "Sarah's plan object is the one she had");
+  assert.equal(grouped.john.exercises[0].id, "e1", "John, who was not grouped, gets the plan");
+});
+
+test("a client's group is findable from either side", () => {
   const bindings = [["jane", "john"]];
 
   assert.deepEqual(bindingFor(bindings, "john"), ["jane", "john"]);
@@ -59,9 +118,7 @@ test("a client's binding is findable from either side", () => {
   assert.equal(bindingFor([], "jane"), null);
 });
 
-test("binding is additive and never leaves someone in two groups at once", () => {
-  // Two groups claiming the same person would make "log it once" ambiguous, and the answer would
-  // depend on iteration order — which is the kind of thing nobody sees until a set goes missing.
+test("grouping is additive and never leaves someone in two groups at once", () => {
   const first = withBinding([], ["jane", "john"]);
   const second = withBinding(first, ["john", "sarah"]);
 
@@ -73,29 +130,8 @@ test("a group of one is not a group", () => {
   assert.deepEqual(withBinding([], ["jane"]), []);
 });
 
-test("unbinding gives everyone their own plan back", () => {
-  const bindings = withBinding([], ["jane", "john"]);
-
-  assert.deepEqual(withoutBinding(bindings, "john"), []);
+test("a member whose plan is changed leaves the group, and a group left with one ends", () => {
+  // savePlanEdit (controllers/sessionPrograms.js) calls this for the client whose plan changed.
   assert.deepEqual(withoutBinding(withBinding([], ["a", "b", "c"]), "c")[0].sort(), ["a", "b"]);
-});
-
-test("the members are listed in the order the session holds them", () => {
-  const members = bindingMembers(["john", "jane"], ["jane", "john", "sarah"]);
-
-  assert.deepEqual(members, ["jane", "john"]);
-});
-
-test("unbinding hands back separate plans, not the same one twice", () => {
-  // Dropping the binding alone leaves the members holding one object, so the next set logged for
-  // one would go on appearing for the other — the exact surprise unbinding exists to end.
-  const routines = { jane: plan("Shared"), john: plan("John's") };
-  const bound = boundClientRoutines(routines, [["jane", "john"]]);
-
-  const separated = unboundClientRoutines(bound, ["jane", "john"]);
-  separated.jane.logs.e1 = [{ reps: 10, completed: true }];
-
-  assert.equal(separated.john.logs.e1, undefined);
-  // ...and each keeps what they were training, because they were training it.
-  assert.equal(separated.john.exercises[0].name, "Back Squat");
+  assert.deepEqual(withoutBinding(withBinding([], ["jane", "john"]), "john"), []);
 });

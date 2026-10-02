@@ -46,6 +46,14 @@ COUNT_SESSIONS_TITLED = """async (title) => {
     const store = await import(new URL('data/stateStore.js', document.baseURI).href);
     return store.getState().sessions.filter((s) => s.title === title).length;
 }"""
+# The demo opens this session with progress already logged in it, and a session keeps what was
+# logged in it. The questions below are about what THIS test logs, so the session starts clean.
+CLEAR_LOGGED_SETS = """async () => {
+    const live = await import(new URL('controllers/activeSessionStore.js', document.baseURI).href);
+    for (const clientState of Object.values(live.getActiveSession().clientRoutines)) {
+        for (const sets of Object.values(clientState.logs)) for (const set of sets) set.completed = false;
+    }
+}"""
 LOG_ONE_SET = """async () => {
     const live = await import(new URL('controllers/activeSessionStore.js', document.baseURI).href);
     const session = live.getActiveSession();
@@ -103,6 +111,7 @@ def test_a_started_session_says_its_sets_and_is_deleted_only_by_sliding_to_the_e
     page.click("#btn-start-session")
     page.wait_for_selector("#dialog-session-start-time[open], #btn-finish-session")
     page.keyboard.press("Escape")
+    page.evaluate(CLEAR_LOGGED_SETS)
     page.evaluate(LOG_ONE_SET)
     before = page.evaluate(COUNT_SESSIONS_TITLED, CARD_TITLE)
     _ask_to_delete(page)
@@ -159,6 +168,7 @@ def test_a_started_session_can_be_deleted_from_the_keyboard_with_the_end_key(
     page.click("#btn-start-session")
     page.wait_for_selector("#dialog-session-start-time[open], #btn-finish-session")
     page.keyboard.press("Escape")
+    page.evaluate(CLEAR_LOGGED_SETS)
     before = page.evaluate(COUNT_SESSIONS_TITLED, CARD_TITLE)
     _ask_to_delete(page)
 

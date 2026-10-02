@@ -18,8 +18,8 @@ import {
   quickSignalColor,
 } from "../domain/quickSignals.js";
 import { renderActiveSessionBoard } from "../modules/clipboard/activeSessionBoard.js";
-import { saveActiveSessionToCache } from "./activeSessionCache.js";
 import { getActiveSession, getAppDeps } from "./activeSessionStore.js";
+import { saveActiveSession } from "./sessionPrograms.js";
 
 export function hasQuickSignal(clientId, exerciseName, tag) {
   return hasPlainQuickSignal(getActiveSession()?.feedback, clientId, exerciseName, tag);
@@ -117,7 +117,7 @@ export function logQuickSignal(tag, exId) {
     }
   }
 
-  saveActiveSessionToCache();
+  saveActiveSession();
   if (saveToLocalStorage) saveToLocalStorage();
   if (renderPendingPlanAdjustments) renderPendingPlanAdjustments();
   renderActiveSessionBoard();

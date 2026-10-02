@@ -14,7 +14,7 @@ import {
   openSessionFromHistory,
   recoverActiveSession as recoverActiveSessionController,
   renderActiveGroupBoard as renderActiveGroupBoardController,
-  saveActiveSessionToCache as saveActiveSessionToCacheController,
+  saveActiveSession as saveActiveSessionController,
   sessionFocusPath,
   setActiveSession,
   setClipboardEditMode,
@@ -432,7 +432,7 @@ async function init() {
   finishErasures(state);
 
   // First entry fills the sandbox. Before the `?init=` branch below, or an unseeded sandbox reads as
-  // an empty app and has its open-session key cleared out from under it. `?init=` itself is left
+  // an empty app. `?init=` itself is left
   // alone by all of this: it still seeds whichever workspace is open, which is what the whole e2e
   // suite runs on.
   await ensureSandboxSeeded();
@@ -448,8 +448,6 @@ async function init() {
     // a boot without the switch is test data that escaped into the trainer's records.
     seedMockData({ origin: TEST_ORIGIN });
     sessionsViewSeedDemo({ state: getState() });
-  } else if (!stateHasData(state)) {
-    localStorage.removeItem("librept_active_session");
   }
 
   // A reply the trainer just tapped. The answer lands on the INVITATION — decided
@@ -469,7 +467,6 @@ async function init() {
     getState,
     t,
     getActiveSession,
-    recoverActiveSession: () => recoverActiveSession(),
     startWorkoutSession: (cr, bm) => startWorkoutSession(cr, bm),
     launchClipboardDirectly: (arg) => launchClipboardDirectly(arg),
     openSessionFromHistory: (log) => openSessionFromHistory(log),
@@ -585,7 +582,7 @@ async function init() {
     getActiveSession: () => getActiveSession(),
     t,
     newRecordId,
-    saveActiveSessionToCache,
+    saveActiveSession,
     saveToLocalStorage: saveState,
     renderPendingPlanAdjustments,
     enforceQuickSignalExclusivity,
@@ -947,9 +944,9 @@ function returnToLastView() {
   const remembered = rememberedRoute();
   const target = remembered && resolveRoute(remembered) ? toRoute(remembered) : "/";
   replaceRoute(target);
-  // The live session belongs to the workspace too — its cache key carries the suffix — so the one
-  // held in memory has to go before the entering workspace's is read. Without this, stepping into
-  // the sandbox keeps the trainer's real session on the clipboard bar.
+  // The live session belongs to the workspace too — its programs are in that workspace's database —
+  // so the one held in memory has to go before the entering workspace's is read. Without this,
+  // stepping into the sandbox keeps the trainer's real session on the clipboard bar.
   setActiveSession(null);
   recoverActiveSession();
   // The bar draws the session in memory, which has just been replaced. Without this, leaving the
@@ -1144,27 +1141,13 @@ function cancelWorkoutSession() {
   renderSessions();
 }
 
-function saveActiveSessionToCache() {
-  saveActiveSessionToCacheController();
+function saveActiveSession() {
+  saveActiveSessionController();
 }
 
+// The session controller was wired with everything it needs when the clipboard was set up.
 function recoverActiveSession() {
-  recoverActiveSessionController({
-    getState,
-    t,
-    newRecordId,
-    navigateToPath,
-    focusSessionsColumn,
-    toRoute,
-    replaceRoute,
-    resolveRoute,
-    activeRouteName,
-    activeRouteIsDialog,
-    urlFor,
-    launchClipboardDirectly,
-    renderClipboardBar,
-    saveToLocalStorage: saveState,
-  });
+  recoverActiveSessionController();
   renderSessions();
 }
 

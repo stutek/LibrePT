@@ -51,7 +51,6 @@ TESTED_IN_THE_BROWSER = {
     "src/data/lastRoute.js": "tests/e2e/test_sandbox.py",
     "src/data/previewTransfer.js": "tests/e2e/test_device_database_corpus.py",
     "src/data/readSchema.js": "tests/e2e/test_read_schema_toggle.py",
-    "src/data/sessionCache.js": "tests/e2e/test_sandbox.py",
     "src/data/stateStore.js": "tests/e2e/test_indexed_db.py",
     "src/data/tabOwnership.js": "tests/e2e/test_two_tabs.py",
 }

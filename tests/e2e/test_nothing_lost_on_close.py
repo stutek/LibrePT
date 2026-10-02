@@ -25,6 +25,8 @@ def _open_session_with_one_exercise(page, local_server):
             const store = await import(new URL('data/stateStore.js', document.baseURI).href);
             ctrl.openSessionFromHistory({
                 id: 'close-test-log', clientId: store.getState().clients[0].id,
+                // A session in progress, so it is written and a reload of its address finds it.
+                status: 'live', startedAt: new Date().toISOString(),
                 routineName: 'Close Test', date: new Date().toISOString(), duration: 0,
                 exercises: [{ id: 'exA', type: 'exercise', name: 'Barbell Row',
                               sets: [{ reps: 10, weight: 40, completed: false }], circuitId: null }],

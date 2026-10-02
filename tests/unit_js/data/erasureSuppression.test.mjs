@@ -30,8 +30,12 @@ function backupState() {
       { id: "c-jane", name: "Jane Doe", email: "jane@example.com", notes: "L4 disc", active: true },
       { id: "c-marko", name: "Marko Novak", email: "marko@example.com", active: true },
     ],
-    history: [{ id: "h1", clientId: "c-jane", clientName: "Jane Doe", exercises: [] }],
-    planUpdates: [],
+    // A restore converts an old file to schema 6 before suppression runs (backupRestore.js), so the
+    // state here is in memory's shape.
+    clientPrograms: [
+      { id: "h1", clientId: "c-jane", status: "done", title: "Jane Doe deload", exercises: [] },
+    ],
+    exerciseNotes: [],
     sessions: [],
   };
 }
@@ -105,7 +109,11 @@ test("restoring a pre-erasure backup re-erases the client on the way in", async 
   assert.ok(!jane.name.includes("Jane Doe"), "the restored record must not still name them");
   assert.equal(jane.email, "");
   assert.equal(jane.notes, "");
-  assert.equal(state.history[0].clientName, jane.name, "and their history matches, not the backup");
+  assert.equal(
+    state.clientPrograms[0].title.includes("Jane Doe"),
+    false,
+    "and their program no longer names them, as the backup did",
+  );
   assert.deepEqual(reErased, ["c-jane"]);
 
   // Everyone else comes back from the backup untouched.

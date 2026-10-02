@@ -332,15 +332,6 @@ export function setupNavigation({ setupSessionsDayNav } = {}) {
   }
 }
 
-function recoverActiveSessionIfNeeded() {
-  const activeSession = routerDeps?.getActiveSession ? routerDeps.getActiveSession() : null;
-  if (activeSession) return;
-  const cached = localStorage.getItem("librept_active_session");
-  if (cached && routerDeps?.recoverActiveSession) {
-    routerDeps.recoverActiveSession();
-  }
-}
-
 // Everything that happens when the address bar already names the session that's live: unhide the
 // bar/overlay, make sure its timer is ticking, apply a deep link's focus/edit intent, and re-render.
 function enterActiveSessionFocus(currentActive, clientId, focusRef, opts) {
@@ -375,21 +366,27 @@ function enterActiveSessionFocus(currentActive, clientId, focusRef, opts) {
   routerDeps?.syncSessionFocusUrl?.();
 }
 
-// launchClipboardDirectly/openSessionFromHistory stage a session but don't always leave it "active"
-// synchronously — re-entering only when it did, and only when the caller asked for more than just
-// launching (a client/focus/edit deep link), avoids a redundant no-op showSessionView call.
-function reenterIfBecameActive(sessionId, clientId, focusRef, opts) {
-  if (routerDeps.getActiveSession() && (clientId || focusRef || opts.edit)) {
-    showSessionView(sessionId, clientId, focusRef, opts);
+// launchClipboardDirectly/openSessionFromHistory stage a session but don't always leave one on the
+// clipboard — the session row may be gone. The address's focus is applied to the session that DID
+// arrive, which may carry another id than the address (a program of a booked session opens as that
+// session), and only when the address asked for more than the session (a client/focus/edit link).
+function reenterIfBecameActive(before, clientId, focusRef, opts) {
+  const arrived = routerDeps.getActiveSession();
+  if (arrived && arrived !== before && (clientId || focusRef || opts.edit)) {
+    enterActiveSessionFocus(arrived, clientId, focusRef, opts);
   }
 }
 
-export function showSessionView(sessionId, clientId, focusRef = null, opts = {}) {
-  recoverActiveSessionIfNeeded();
+// Whether the clipboard already shows the session an address names: by its own id, or by one of the
+// booked sessions merged into it.
+function isOnClipboard(session, sessionId) {
+  return session.id === sessionId || (session.sourceSession?.ids || []).includes(sessionId);
+}
 
+export function showSessionView(sessionId, clientId, focusRef = null, opts = {}) {
   const currentActive = routerDeps?.getActiveSession ? routerDeps.getActiveSession() : null;
 
-  if (currentActive && currentActive.id === sessionId) {
+  if (currentActive && isOnClipboard(currentActive, sessionId)) {
     enterActiveSessionFocus(currentActive, clientId, focusRef, opts);
     return;
   }
@@ -399,14 +396,14 @@ export function showSessionView(sessionId, clientId, focusRef = null, opts = {})
   const session = sessions?.find((s) => s.id === sessionId);
   if (session && routerDeps?.launchClipboardDirectly) {
     routerDeps.launchClipboardDirectly({ sessionId });
-    reenterIfBecameActive(sessionId, clientId, focusRef, opts);
+    reenterIfBecameActive(currentActive, clientId, focusRef, opts);
     return;
   }
 
   const program = state ? programById(state, sessionId) : null;
   if (program && routerDeps?.openSessionFromHistory) {
     routerDeps.openSessionFromHistory(program);
-    reenterIfBecameActive(sessionId, clientId, focusRef, opts);
+    reenterIfBecameActive(currentActive, clientId, focusRef, opts);
     return;
   }
 

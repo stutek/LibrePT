@@ -12,6 +12,7 @@ import {
   removeVersionScoped,
   writeVersionScoped,
 } from "../../data/storageNamespace.js";
+import { dropPlansOfRemovedClients } from "../../data/trainingRecords.js";
 import { clientNameWords, clientNamesIn } from "../../domain/clientNameWords.js";
 import {
   BUSY_ELSEWHERE,
@@ -503,6 +504,8 @@ function commitRealSession(
     state.sessions,
     claimFirstEvening(buildSessionRecord({ ...identity, startTime, clientRoutines }), series),
   );
+  const written = state.sessions.find((session) => session.id === sessionId);
+  if (written) dropPlansOfRemovedClients(state, sessionId, written.participants);
   deps.saveToLocalStorage?.();
   deps.rerenderSessions?.();
 
