@@ -4534,6 +4534,18 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80169-x-p1--zak
 
 **Predlog:** povezava ali klik na nenačrtovani program mora odpreti urejevalnik načrta za osnutek (npr. namensko pot za osnutek ali ustvarjanje novega termina z vnaprej naloženim osnutkom), namesto da poskuša navigirati na neobstoječ `sessionId` — opaženo na različici `403715f9`, 390 × 844, sl, 2026-10-02.
 
+**Ni ponovljeno (Claude, 2026-10-02 22:36:20.340, na `6ca7b361`, brskalnik Playwright, ne agyjev).**
+Naslov `/session/<id programa>/client/<id stranke>` je nameren: podloga za načrt brez termina ima
+za id kar id programa (`openSessionFromHistory` v `controllers/sessionLifecycle.js`), ob
+ponovnem nalaganju pa ga `openById` poišče med programi. V štirih različicah se je podloga vsakič
+odprla v urejanju: (1) program brez termina, vpisan neposredno; (2) izbris demo termina
+»Jutranja kondicija« z `deleteScheduledSession`, kar pokliče potrjen »Izbriši termin«, nato gumb
+v obvestilih; (3) isto, ko drug trening teče; (4) isto, nato ponovno nalaganje strani na tem
+naslovu. Ostane odprto. Manjka, kar je pri agyju drugače: trening, ki ga je ustvaril sam, in kako
+je odprl stran (`explore.py goto` ima zapisano zgodovino zastajanja). Naslednji korak: ponoviti
+agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pathname` ter ali je
+`#active-session-overlay` viden.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
