@@ -861,6 +861,11 @@ needs no GitHub account (2026-08-22, [docs/BUG_REPORTING.md](docs/BUG_REPORTING.
       ([GOOGLE_CLOUD_SETUP.md](docs/GOOGLE_CLOUD_SETUP.md)): up to 100 users, with Google's
       unverified-app warning, until Google verifies it (§1.5). Google Calendar is no longer claimed
       (README, §68.3).
+- [ ] **[docs/PREVIEW.md](docs/PREVIEW.md) describes an older app** (found 2026-10-02 22:00): it says
+      the data lives in `localStorage` with a ~5 MB cap and that nothing syncs. The data is in
+      IndexedDB, and Drive sync exists within the limit above. The landing page links this page as
+      the honest account of the risks, so a trainer reads false facts there. Blocks any outreach
+      that links the landing page.
 
 ### 23.6 [ ] Campaign plan — kept private, not in this repo
 
