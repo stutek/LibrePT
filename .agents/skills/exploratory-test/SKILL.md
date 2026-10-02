@@ -1,6 +1,6 @@
 ---
 name: exploratory-test
-description: Exploratory testing of LibrePT in a headless browser, in the role of a trainer who has never seen it and reads no documentation. Three modes. FORMS — judge one form at a time: which fields are too many, which are missing, where a control does not work, where a field has the wrong type or order; judged against what a context-free trainer subagent says the task needs, written before the form is seen; one subsection of the first-use trial section per form. SCENARIOS — hunt for defects no scripted test covers in the published app, one short scenario at a time, findings into the first-use trial section of TODO.md. A TRAINER'S DAY — a context-free subagent invents a whole working day (sessions, exercises, packages, billing, messages) and then tries to live it in the app; the orchestrator judges which gaps are worth automating and writes them into the trainer's-day section of TODO.md. Use when asked to explore, probe, "test as a trainer", run cycles of exploratory testing, or continue the first-use trial or the trainer's-day work. Every scenario and every day is recorded so none is repeated.
+description: Exploratory testing of LibrePT in a headless browser, in the role of a trainer who has never seen it and reads no documentation, including switching between app versions and between schemas 4, 5 and P. Three modes. FORMS — judge one form at a time: which fields are too many, which are missing, where a control does not work, where a field has the wrong type or order; judged against what a context-free trainer subagent says the task needs, written before the form is seen; one subsection of the first-use trial section per form. SCENARIOS — hunt for defects no scripted test covers in the published app, one short scenario at a time, findings into the first-use trial section of TODO.md. A TRAINER'S DAY — a context-free subagent invents a whole working day (sessions, exercises, packages, billing, messages) and then tries to live it in the app; the orchestrator judges which gaps are worth automating and writes them into the trainer's-day section of TODO.md. Use when asked to explore, probe, "test as a trainer", run cycles of exploratory testing, or continue the first-use trial or the trainer's-day work. Every scenario and every day is recorded so none is repeated.
 type: Skill
 title: "Raziskovalno preizkušanje v vlogi novega trenerja"
 tags: [testing, exploratory, browser, playwright, first-use-trial, all-agents]
@@ -57,6 +57,44 @@ nobody else holds it.
 is already fixed on `main`, and where in `src/` it lives, is the implementer's check, not yours: a
 tester never opens the source, not even after the observation. The SHA is what lets the implementer
 make that check in a minute.
+
+## Scenarios that switch the app version or the schema
+
+The trainer can change how the app behaves in ☰ → *Verzija aplikacije*: today *2026-09* (without the
+exercise library import) and *2026-10*, the default. The data sit in one database store per schema —
+4, 5 and the preview shape P — and every save writes all of them. A trainer also meets two cases
+without choosing them: a phone that still runs an older build reads store 4 only, and a preview build
+reads P. No control offers those two. The tester stands in for them by setting the store the install
+reads, and this is the one setting the skill hands over, as it hands over `?init=`:
+
+```bash
+.venv/bin/python $S eval 'localStorage.setItem("librept_read_schema", "4")'   # "4", "5" or "PREVIEW"
+.venv/bin/python $S goto '<the same URL>'                                      # the choice applies at load
+.venv/bin/python $S eval 'localStorage.removeItem("librept_read_schema")'     # back to the default
+```
+
+**What must hold, after every switch:** nothing the trainer did not delete is missing, nothing they
+deleted comes back, and every edit shows in its edited form. Run each path as its own scenario, with
+records created and changed on BOTH sides of the switch:
+
+- **Version 2026-10 → 2026-09 → 2026-10.** Import a library and a circuit on 2026-10, switch, create,
+  edit and delete clients and sessions on 2026-09, switch back. The import is there, and so is the
+  work done on 2026-09.
+- **Schema 4 → 5 → 4 and 4 → P → 4.** Create records while reading 4; switch; edit one, delete one,
+  create one, and create something schema 4 cannot hold (an imported circuit); switch back to 4 and
+  check the shared records. **Then edit a record while reading 4 and return to 5 or P:** the circuit
+  must still be there. This is the phone with an old build saving into data a newer build wrote, and
+  the path where data is most likely to be lost.
+- **A switch while a session runs.** The version dialog must refuse it in words the trainer
+  understands. A schema switch by reload must keep the session in progress.
+- **A backup across schemas.** Export while reading P or 5, restore while reading 4, return to 5.
+- **Offline**, once: the same switch in the gym basement.
+
+Before writing "lost", read the database itself: `eval` over `indexedDB` can list each store's
+records, which tells "not shown by this version" from "not stored". A version that does not show
+something has not lost it. Name the version and the read schema at every step in the finding and in
+the ledger row (`4→P→4`, `2026-10→2026-09→2026-10`), beside the SHA. `stop` and `start` afterwards:
+the profile is deleted, so the next scenario does not inherit a pinned schema.
 
 ## Driving the browser
 
