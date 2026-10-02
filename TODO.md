@@ -5623,6 +5623,12 @@ sets. The group records only who started from the same program; changing one mem
 takes that member out of the group with the changed copy. Joining a group is per member ("click to
 add group members"); the screen for it belongs with step 6. Replaces the shared plan object of
 `domain/participantBinding.js`, and with it the demo story's step 39 works again unchanged.
+**Chosen 2026-10-02 (Claude, Simon left it to the recommendation):** each member keeps their own
+program id; the group does not share one. A client's history stays one record per program, schema
+6 stays as frozen, and schemas 4 and 5 keep their one `history` record per client. Cost: a change
+for the whole group is not one edit. **Re-check when** trainers change a group's program for
+everyone mid-session often enough that "change one, group again" costs them; then one shared plan
+with per-member performance (schema 7) is worth it.
 
 **[ ] Drive sync between an old and a new build stops until both update.** A schema-6 sync file is
 backup format 8, and a build that knows only 4 to 6 refuses it, as it refuses any newer file. Local
