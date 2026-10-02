@@ -5570,18 +5570,29 @@ exercises with the session's routine; restoring an old backup again must not dup
 1. [x] The five entities declared in `SCHEMA_PREVIEW`, written by nothing (`16a305a`), and the
    anonymisation covering them and the note on every set, with a test that fails on a collection
    it neither sweeps nor skips with a reason (`9f91645`).
-2. [ ] The conversion from `history`, as a pure function: a program per record with the record's
-   id, linked to the one finished session that fits, with attendance "attended".
-3. [ ] The projection back: `history` records for schemas 4 and 5, built from programs, attendance
-   and notes on every save.
-4. [ ] The code that reads `history` (the client's page, "last time", statistics, routine from a
-   session, backup) reads the new entities.
+2. [x] The conversion from `history`, as a pure function: a program per record with the record's
+   id, linked to the one finished session that fits, with attendance "attended" (`b9eba7f`).
+3. [~] Schema 6 cut and read by every install: memory holds programs, attendance and notes; stores 4
+   and 5 get `history` and `planUpdates` built from them at every save; old stores, backups, sync
+   files and seed data are converted on the way in; every reader goes through
+   `data/trainingRecords.js`. Written 2026-10-02, tests being ported, not yet committed.
+4. [ ] The code reads the new entities natively instead of through a history-shaped view where it
+   still does.
 5. [ ] A session in progress is a program with status live; the live-session cache goes.
 6. [ ] Beside them: a prototype of the screen for several sessions at once (the counter on the
    board, the clipboard bar, the timers), before step 5.
 
 **[ ] Open:** the anonymisation receipt says nothing about deleted client notes; it needs a line
-when step 4 starts writing them.
+when client notes are written.
+
+**[ ] Drive sync between an old and a new build stops until both update.** A schema-6 sync file is
+backup format 8, and a build that knows only 4 to 6 refuses it, as it refuses any newer file. Local
+stores 4 and 5 are unaffected. Blocks nothing; the trainer has to be told when the version ships.
+
+**[ ] Found while porting (Claude helper, 2026-10-02), left as they were:** the client's data export
+never prints the trainer's remark under "Programme changes" (it prints a field nothing writes); the
+AI-safe summary's "Recent sessions" takes the first ten records in storage order, so with more than
+ten it lists the oldest.
 
 **[ ] After the implementation (Simon, 2026-10-02):** start agy for at least four hours of
 exploratory testing by `.agents/skills/exploratory-test/SKILL.md`, against the dev server, because
