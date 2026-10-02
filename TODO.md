@@ -5590,9 +5590,7 @@ exercises with the session's routine; restoring an old backup again must not dup
    other in that one widget, each with its running time; ONE list of clients from all of them; the
    "Tudi v teku" strip goes. Clients are not grouped by session; only clients who share one
    program (`groupSharedPrograms`) are joined into one tile ("John + Priya"). The session of the
-   selected client shows above its card. Finish is per session: a "Zaključi" button on that
-   session's line in the header, beside its time; the footer keeps the rest timer only. Drawn so in
-   version 7.
+   selected client shows above its card. The footer keeps the rest timer only.
    **Corrected 2026-10-02 (version 8):** the "2 v teku" button in the app's header was Claude's,
    drawn without looking at the app, and duplicated the clipboard bar every view already shows
    at the bottom (`modules/session/sessionBar.js`). It is gone; the clipboard bar lists the running
@@ -5607,9 +5605,8 @@ exercises with the session's routine; restoring an old backup again must not dup
    **Ruled 2026-10-02 (version 11):** on the board the running sessions are part of the message area
    at the bottom (`modules/common/notificationArea.js`), not a component of their own: one line
    each with its time, a tap on the line opens that session, and each line has its own Zaključi.
-   **[ ] Open for Simon:** whether Finish then leaves the clipboard's header (proposed: yes, the
-   clipboard is where the thumb taps sets fast); and whether Finish stays in the header (proposed instead: tapping a
-   session's line opens that session's actions, Finish among them, named).
+   **Ruled 2026-10-02 (version 13):** Finish is in the message area only, one per running session;
+   the clipboard has none, in its header or anywhere else.
    **Ruled 2026-10-02 (version 12):** the message area is the same on the board and pulled up, so
    screen 3 (a separate list of running sessions) is redundant and gone.
 
