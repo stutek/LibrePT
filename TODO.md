@@ -5587,8 +5587,10 @@ exercises with the session's routine; restoring an old backup again must not dup
    without this screen; the screen is built after the review.
    **Ruled by Simon 2026-10-02:** screens 1 (the board) and 3 (the list) stand. Screen 2: every
    running session in the clipboard's header, and ONE list of clients from all of them; the
-   "Tudi v teku" strip goes. Drawn so (version 3): the clients grouped by session behind its
-   letter (A, B), never by colour alone, and Finish names the session it finishes.
+   "Tudi v teku" strip goes. Clients are not grouped by session; only clients who share one
+   program (`groupSharedPrograms`) are joined into one tile ("John + Priya"). The session of the
+   selected client shows above its card, and Finish names the session it finishes. Drawn so in
+   version 4.
 
 **[ ] Open:** the anonymisation receipt says nothing about deleted client notes; it needs a line
 when client notes are written.
