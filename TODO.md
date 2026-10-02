@@ -5725,6 +5725,11 @@ ten it lists the oldest.
 **[~] After the implementation (Simon, 2026-10-02):** start agy for at least four hours of
 exploratory testing by `.agents/skills/exploratory-test/SKILL.md`, against the dev server, because
 the published app has the new schema only after a push.
+**Ran 38 minutes, not four hours** (2026-10-02 21:47 to 22:25, gemini-3.8-flash-high, frozen copy
+of `403715f9`): six scenarios, three P1 findings (§80.168, §80.169 fixed in `82617180`; §80.170 does
+not reproduce), three clean (GDPR export, backup restored twice, a schema-5 backup restored twice).
+It stopped on Gemini's quota (HTTP 429, reset about 02:04). **Three hours and twenty minutes are
+still owed.**
 
 ### 95.3 [ ] Every entity stored today, read out of the schema rather than recalled
 
