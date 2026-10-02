@@ -5585,6 +5585,10 @@ exercises with the session's routine; restoring an old backup again must not dup
    running session's own time on its card, a strip "Tudi v teku … Preklopi" above the clipboard's
    footer, and a list of running sessions with their rest countdowns. Step 5 builds the data
    without this screen; the screen is built after the review.
+   **Ruled by Simon 2026-10-02:** screens 1 (the board) and 3 (the list) stand. Screen 2: every
+   running session in the clipboard's header, and ONE list of clients from all of them; the
+   "Tudi v teku" strip goes. Drawn so (version 3): the clients grouped by session behind its
+   letter (A, B), never by colour alone, and Finish names the session it finishes.
 
 **[ ] Open:** the anonymisation receipt says nothing about deleted client notes; it needs a line
 when client notes are written.
