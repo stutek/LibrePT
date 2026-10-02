@@ -4530,6 +4530,16 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80168-x-p1--ob-
 
 **Predlog:** funkcija za zaključek skupinskega treninga mora prehoditi vse udeležence termina, za vsakega pretvoriti program iz `live` v `done` ter ustvariti zapis `sessionAttendance` za vsakega prisotnega člana — opaženo na različici `403715f9`, 390 × 844, sl, 2026-10-02.
 
+### 80.170 [ ] P1 — Obvestilo o nenačrtovanih programih odpre neveljaven URL z ID-jem programa namesto termina in ostane na seznamu
+
+**Scenarij in koraki:** ustvari prihodnji termin za stranko (npr. Sonja Zupan) in ji dodaj načrt vadbe z vajo (npr. Lat Pulldown) → izbriši ta termin preko pogovornega okna »Uredi termin« → »Izbriši termin« → v predalu za obvestila se pojavi razdelek »Nenačrtovani programi« z vsebino »1 program je pripravljen, a še ni dodeljen treningu« in gumbom »Jutrišnji načrt · Sonja Zupan · 2026-10-02« → tapni na ta gumb.
+
+**Opaženo:** brskalnik se premakne na naslov `/LibrePT/session/<programId>/client/<clientId>/edit?lang=sl`, kjer je prvi ID pravzaprav identifikator programa (`clientPrograms.id`), ne pa obstoječ termin (`sessionId` je po izbrisu termina `null`). Ker termin s tem ID-jem ne obstaja, usmerjevalnik ne more odpreti pogleda za urejanje načrta (`view-workout-setup`). Uporabnik tiho ostane na seznamu terminov (`view-clients`) z neveljavnim URL-jem v naslovni vrstici, brez napake ali obvestila. Nenačrtovani načrt je za trenerja popolnoma nedosegljiv in ga preko obvestila ni mogoče pregledati, urediti ali dodeliti novemu terminu.
+
+**Težava in vpliv:** ob izbrisu termina aplikacija načrt pravilno ohrani kot osnutek/nenačrtovan program v `clientPrograms` (status `planned`), vendar pa povezava v predalu obvestil ID programa napačno podtakne v pot `/session/:sessionId/client/:clientId/edit`. Trener do shranjenega osnutka ne more več dostopati, funkcija nenačrtovanih programov pa vodi v slepo ulico.
+
+**Predlog:** povezava ali klik na nenačrtovani program mora odpreti urejevalnik načrta za osnutek (npr. namensko pot za osnutek ali ustvarjanje novega termina z vnaprej naloženim osnutkom), namesto da poskuša navigirati na neobstoječ `sessionId` — opaženo na različici `403715f9`, 390 × 844, sl, 2026-10-02.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
