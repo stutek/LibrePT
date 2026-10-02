@@ -316,6 +316,21 @@ evaluation says what is wrong and why, the ruling is his. The ledger gets a row 
 column the fields and taps of the shortest save that is of use. Read it first: a form evaluated on
 the same SHA is not evaluated again.
 
+## Say what you are testing, while you test
+
+Simon follows the work in your output, not in the ledger. So in every mode, write one line in your
+reply, in Simon's language, BEFORE each scenario, form or day starts, and one line when it ends:
+
+```
+▶ Scenarij 4 (390×844, sl, a1b2c3d, shema 4→P→4): TEST Ana — nova stranka na shemi 4, urejena na P.
+■ Scenarij 4: čisto. / §80.N P2 — <what the trainer sees>. / ustavljeno: <why>.
+```
+
+The start line names the scenario in one sentence, and the viewport, language, SHA and, where it
+applies, the app version and schema. A scenario that changes course midway gets a new start line.
+In modes 2 and 3 the orchestrator writes these lines for the trainer subagent, whose own output
+Simon does not see: when it is spawned, and for every gap it judges afterwards.
+
 ## Never run the same scenario twice
 
 The ledger is `.private/exploratory-test/scenarios.md` (gitignored, so named rather than linked: a
