@@ -4690,6 +4690,16 @@ agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pa
 
 **Predlog:** »PM« naj se razume kot popoldne ali zavrne z oblačkom kot »31.2.2026«; »25:00« in »2026-02-31« naj se zavrneta z oblačkom — opaženo `2026-10-03 05:43:05.003` na različici `e51fea88`, 390 × 844, sl.
 
+### 80.184 [ ] P3 — Ime stranke brez presledka in dolgo 300 znakov raztegne vse kartice v imeniku na 2468 pik; imena drugih strank odidejo z zaslona
+
+**Scenarij in koraki:** ☰ → »Imenik strank« → »Dodaj stranko« → »Ime in priimek«: 300 znakov brez presledka (»Dolgoimenski« 25-krat) → »Shrani«.
+
+**Opaženo:** polje sprejme vseh 300 znakov brez opozorila. V imeniku je vsaka od petih kartic široka 2468 pik (zaslon 390). Ime »Aleksandra Vrhovnik« stoji na x = 1150, onkraj roba; na zaslonu so vidne prazne kartice. Vodoravnega drsenja ni (`scrollWidth` strani je 390). Ime z 45 znaki in presledki (»Marija Alexandra Vrhovnik-Zupančič Kosmatinec«) se prelomi v dve vrstici in kartice ostanejo široke 358 pik. Po preimenovanju v »Kratko Ime« se vse vrne.
+
+**Težava in vpliv:** en zapis, vpisan po pomoti ali prilepljen, naredi imenik neberljiv, trener pa ne vidi, kateri zapis je kriv.
+
+**Predlog:** polje naj ima zgornjo mejo dolžine, kartica pa naj dolgo besedo prelomi ali odreže — opaženo `2026-10-03 05:44:54.576` na različici `e51fea88`, 390 × 844, sl.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
