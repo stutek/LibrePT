@@ -5713,6 +5713,13 @@ pushed yet, so the published app goes from 5 straight to 6 in one release. What 
 5. A phone that already ran the new build and then went back to an old one would lose what the old
    one wrote. Without a rollback that cannot happen.
 
+**Ruled by Simon 2026-10-03 03:20: schema 6 stays numbered and the default, and stays open for
+improvements until it is pushed.** It was never published (`origin/main` reads schema 5), so a
+change to `SCHEMA_6` before the push changes nobody's data; it is made together with its frozen
+copy `tests/fixtures/schemas/schema_6.json` in the same commit. Turning 6 back into PREVIEW was
+rejected: it would bring schemas 4 and 5 back to life and the code that wrote `history` for them.
+Until the push the trainers' app stays on 5; pushing publishes 6 as it is on that day.
+
 **[ ] Drive sync between an old and a new build stops until both update.** A schema-6 sync file is
 backup format 8, and a build that knows only 4 to 6 refuses it, as it refuses any newer file. Local
 stores 4 and 5 are unaffected. Blocks nothing; the trainer has to be told when the version ships.
