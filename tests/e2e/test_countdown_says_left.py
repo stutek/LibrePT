@@ -3,7 +3,9 @@
 # minutes ago read "00h 58m" next to "Active session" as the time the session had run.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
-SESSION_A = "Group Strength & Conditioning"  # seeded from an hour ago to an hour from now
+SESSION_A = (
+    "Group Strength & Conditioning"  # seeded from an hour ago to an hour from now
+)
 
 
 def test_a_session_counting_down_to_its_end_says_left(page, local_server):

@@ -280,7 +280,9 @@ def test_no_component_overflows_in_german(page, local_server):
     assert not findings, f"German at {profile['width']}px\n{_report(findings)}"
 
 
-def test_the_drawer_drawn_again_during_a_running_session_does_not_overflow(page, local_server):
+def test_the_drawer_drawn_again_during_a_running_session_does_not_overflow(
+    page, local_server
+):
     """The message drawer is drawn when the app boots and again whenever a signal changes. The
     boot draw happens before any session runs, so the walk above never saw the second draw: with a
     session running, the drawer's summary row sits beside the session bar, and the second draw

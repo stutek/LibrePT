@@ -121,7 +121,10 @@ def test_the_remark_typed_on_the_floor_is_on_the_card(page, local_server):
     load_with_stub(page, local_server, NO_ROUTINE_STUB)
     page.wait_for_selector("#view-adjustments.active")
 
-    assert _cards(page).first.locator(".adjustment-remark").inner_text() == "knees stayed out"
+    assert (
+        _cards(page).first.locator(".adjustment-remark").inner_text()
+        == "knees stayed out"
+    )
 
 
 def test_a_signal_from_a_session_without_a_routine_has_no_pencil(page, local_server):
@@ -130,7 +133,9 @@ def test_a_signal_from_a_session_without_a_routine_has_no_pencil(page, local_ser
     page.wait_for_selector("#view-adjustments.active")
 
     card = _cards(page).first
-    assert card.locator(".btn-edit-plan-alert").count() == 0, "a pencil that opens nothing"
+    assert card.locator(".btn-edit-plan-alert").count() == 0, (
+        "a pencil that opens nothing"
+    )
     card.locator(".btn-resolve-alert").click()
     assert _cards(page).count() == 0
 

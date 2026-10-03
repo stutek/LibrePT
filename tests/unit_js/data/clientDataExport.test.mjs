@@ -160,7 +160,11 @@ test("an exercise not done reads as skipped, and only sets done are listed", () 
   assert.match(markdown, /\*\*Back Squat\*\*\n {2}skipped/);
   assert.doesNotMatch(markdown, /10 reps @ bodyweight/);
   assert.equal((markdown.match(/5 reps @ 40kg/g) || []).length, 1, "the set not done is listed");
-  assert.match(markdown, /\(Too Hard - Reduce Load\)\n/, "a signal with no remark ends without a colon");
+  assert.match(
+    markdown,
+    /\(Too Hard - Reduce Load\)\n/,
+    "a signal with no remark ends without a colon",
+  );
 });
 
 test("the document is written in the client's language", () => {

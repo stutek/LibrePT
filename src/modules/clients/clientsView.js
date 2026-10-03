@@ -1,12 +1,12 @@
 // src/modules/clients/clientsView.js — renders the client directory and the client profile.
 // Modular view renderer. It owns the markup of `#view-client-directory` and `#view-client-detail`.
 
+import { localDayOfInstant } from "../../data/calendarDay.js";
 import {
   consentSignedDate,
   isConsentActive,
   isConsentWithdrawn,
 } from "../../data/clientConsent.js";
-import { localDayOfInstant } from "../../data/calendarDay.js";
 import { isErased } from "../../data/clientErasure.js";
 import { readTrainerIdentity } from "../../data/trainerIdentity.js";
 import { allExerciseNotes, allPrograms, performedPrograms } from "../../data/trainingRecords.js";
