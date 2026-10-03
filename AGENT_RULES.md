@@ -175,6 +175,10 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
 
 ## Product constraints that outlive a feature
 
+- **The app sets no training targets.** It never proposes, computes or writes a load, a number of
+  reps or sets from a signal or a past session: the trainer is the expert and enters an exercise's
+  parameters when building a plan. A signal is shown to the trainer and resolved; it changes no plan.
+
 - A step that asks for an action says the action, naming the control, its glyph and where it is;
   never shortened to save room. **It names the control by the label the control shows in that
   language.** Renaming a control means searching every text that names it, in every language, and
