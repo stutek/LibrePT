@@ -6,6 +6,7 @@
 import { localDateString } from "../../data/calendarDay.js";
 import { isConsentWithdrawn } from "../../data/clientConsent.js";
 import { libraryExercises } from "../../data/exerciseLibrary.js";
+import { EMPTY_PLAN_ID } from "../../data/recordDependencies.js";
 import { newRecordId } from "../../data/recordId.js";
 import {
   readVersionScoped,
@@ -951,7 +952,7 @@ function determineParticipantRoutineValue(
   preselectedClientId,
 ) {
   if (draft?.clientRoutines?.[client.id]) return draft.clientRoutines[client.id];
-  if (isPlanningModeActive) return "empty_plan";
+  if (isPlanningModeActive) return EMPTY_PLAN_ID;
   if (targetSession?.participants.includes(client.id)) return targetSession.routineId;
   // A routine chosen for one client is theirs; a routine chosen with nobody ("Start group session"
   // on a routine) is for everyone the trainer adds.
@@ -963,7 +964,7 @@ function determineParticipantRoutineValue(
   if (targetSession?.routineId) return targetSession.routineId;
   // No routine is chosen for someone the trainer has not picked one for: the library's first
   // routine was written for another client.
-  return "empty_plan";
+  return EMPTY_PLAN_ID;
 }
 
 function buildParticipantRow(client, ctx) {
@@ -993,7 +994,7 @@ function buildParticipantRow(client, ctx) {
 
   select.innerHTML = `<option value="" disabled>${t("select_routine")}</option>`;
   const emptyOpt = document.createElement("option");
-  emptyOpt.value = "empty_plan";
+  emptyOpt.value = EMPTY_PLAN_ID;
   emptyOpt.textContent = t("custom_empty_plan") || "Empty plan, no routine";
   select.appendChild(emptyOpt);
 

@@ -22,6 +22,11 @@
 // is a broken record.
 // Injected dependencies: none.
 
+// The routine id a session stores when the trainer chose "Empty plan, no routine". It names no
+// routine, so it is a choice and not a dependency: reading it as one reported a routine that never
+// existed as missing, and clearing the demo data was refused for any trainer with such a session.
+export const EMPTY_PLAN_ID = "empty_plan";
+
 // One field naming the ids of one collection, as a list: an empty or absent field depends on nothing.
 function ids(value) {
   const list = (Array.isArray(value) ? value : [value]).filter(Boolean);
@@ -55,7 +60,7 @@ const DEPENDENCIES = {
   // A group is its programs; who and where are on them.
   groupSharedPrograms: (record) => dependencies({ clientPrograms: ids(record.programIds) }),
   sessions: (record) =>
-    dependencies({ clients: ids(record.participants), routines: ids(record.routineId) }),
+    dependencies({ clients: ids(record.participants), routines: ids(record.routineId === EMPTY_PLAN_ID ? null : record.routineId) }),
   circuits: holdsExercises,
   routines: holdsExercises,
 };

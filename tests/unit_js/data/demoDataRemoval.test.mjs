@@ -192,3 +192,27 @@ test("a database with no demo data offers nothing to remove", () => {
   assert.equal(removal.hasRemovableDemoData(own), false);
   assert.equal(removal.hasRemovableDemoData(databaseWith()), true);
 });
+
+test("a session with the empty plan chosen depends on no routine, so clearing the demo goes through", () => {
+  // "Empty plan, no routine" is a choice in the session form and is stored as the routine id
+  // "empty_plan". It names no routine, so reading it as one made the check after planning report a
+  // missing routine and the dialog refuse to remove anything.
+  const realClient = { id: realId("ela"), name: "Ela Test" };
+  const state = databaseWith({
+    clients: [...DEFAULT_CLIENTS, realClient],
+    sessions: [
+      {
+        id: realId("elin"),
+        title: "Elin trening",
+        participants: [realClient.id],
+        routineId: "empty_plan",
+      },
+    ],
+  });
+
+  const plan = removal.planDemoRemoval(state);
+
+  assert.deepEqual(removal.brokenDependenciesAfter(state, plan), []);
+  assert.ok(plan.removals.clients.length > 0, "the fake people are removed");
+  assert.ok(!plan.removals.clients.includes(realClient.id), "the trainer's client stays");
+});
