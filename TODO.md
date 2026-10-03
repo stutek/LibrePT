@@ -5844,6 +5844,49 @@ Not worth fixing twice, so it waits here.
 Until then the walkthrough places the gesture before anything is logged. That is a workaround, and this
 is why.
 
+### 95.5 [ ] Schema 6 reviewed before the push: what it breaks of good database design
+
+Asked by Simon 2026-10-03 03:32:01.582; reviewed by Claude, recorded 2026-10-03 03:34:44.498. After
+the push every change below costs schema 7, backup format 9 and another stop of Drive sync between
+old and new builds, so each one is decided now or accepted as it is. **All wait for Simon.**
+
+1. **One fact, two places.** A finished session is `sessions.completed` + `sessions.duration` AND
+   `clientPrograms.status: "done"` + `duration`; Finish writes both (`controllers/sessionLifecycle.js`
+   `stampSourceSessionsCompleted`, `data/trainingRecords.js` `recordTrainings`). They can disagree,
+   e.g. a group finished on one tab. Proposal: schema 6 drops `completed` and `duration` from
+   `sessions`; a session is done when its programs are. That also removes the second flag beside
+   `cancelled`, which §95 forbids ("one status, never a second flag").
+2. **No allowed values.** `clientPrograms.status`, `sessionAttendance.status` and `invites.status`
+   are any string; `fieldIssues` checks only the type. "Done" instead of "done" drops a training
+   from `performedPrograms` without an error. Proposal: a descriptor key `values: [...]` that
+   `fieldIssues` checks, with `schema_6.json` changed in the same commit. Cheapest item here.
+3. **A meaning held in a missing field.** `exerciseNotes.resolved` absent = a record only, false =
+   waits for the next plan, true = done. Proposal: one required field with three named values.
+4. **A display text stored as the key.** `exerciseNotes.tag` holds "Too Easy - Increase Load";
+   `domain/feedbackTags.js` already has `id: "too_easy"`. Proposal: store the id; the conversion
+   maps the known texts, an unknown old tag goes into `text`. Touches `quickSignals.js`.
+5. **A group points at clients, not at programs, and its id is its position.**
+   `groupSharedPrograms` is `{sessionId, clientIds}` with id `<sessionId>-group-<index>`, rewritten
+   on every save; `syncMerge.js` merges by id, so after one device removes a group the next one
+   takes its id. A plan for no session cannot hold a group (the known loss in step 5). Proposal:
+   `{id, programIds}` with an id made once, when the group is formed.
+6. **A no-show leaves no record.** Finish deletes the program of a participant who did nothing and
+   writes no attendance (`finishProgramsOfParticipants`), so the package count never sees the
+   no-show and the trainer's plan is gone. Not a schema change: schema 6 already has `noShow`.
+   Needs Simon: does a no-show use up a package session by default, and does the plan move to
+   unscheduled as on a cancellation?
+7. **References no check follows.** `recordReferences.js` checks neither `groupSharedPrograms.clientIds`
+   nor `exerciseNotes.programItemId`, which points inside a program's `exercises`. Code only.
+8. **From PREVIEW:** `sessions.startDate` required is ready for 6 — migration step 2 → 3 fills it on
+   every older session; not checked that every writer sets it. `clientNotes` stays in PREVIEW: no
+   screen writes it.
+
+**Accepted as they are, not violations:** names copied into programs and notes (`name`,
+`routineName`, `exerciseName`) keep the past readable; `consumesQuota` is the trainer's decision,
+not derived; a program stored whole with its sets nested suits IndexedDB; the attendance id
+`at-<session>-<client>` keeps one row per client per session. `circuitTitle` and `circuitSeries`
+repeated on each member of a circuit stay for now: moving them touches 129 uses of `circuitId`.
+
 ## 96. [ ] Predstaviti Simonu najdbe in meritve raziskovalnega testiranja 2026-09-30
 
 **Naročil Simon 2026-09-30 zvečer:** ko bo čas, mu predstaviti, kaj je raziskovalno testiranje tistega
