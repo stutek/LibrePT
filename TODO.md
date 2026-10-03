@@ -4718,7 +4718,7 @@ agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pa
 
 **Opaženo:** okna ali vprašanja ni. Cvetkin načrt ima po ukazu samo Barbell Row. V bazi ni nobenega programa Cvetke z Overhead Press, tudi ne med nenačrtovanimi.
 
-**Težava in vpliv:** vaje, ki jih je trener vpisal za Cvetko, izginejo ob dotiku, ki je bil mišljen kot dodajanje načrta. Pri praznem načrtu je ukaz koristen; pri vpisanem je izguba dela. Isto velja verjetno za »Vsi na ta načrt« (ni preizkušeno).
+**Težava in vpliv:** vaje, ki jih je trener vpisal za Cvetko, izginejo ob dotiku, ki je bil mišljen kot dodajanje načrta. Pri praznem načrtu je ukaz koristen; pri vpisanem je izguba dela. Isto velja za »Vsi na ta načrt«: trening »Vsi na načrt« (Zora Test Barbell Row, Jan Test Wall Sit) → zavihek Zora → ⋮ → »Vsi na ta načrt«; Jan ima po ukazu samo Barbell Row, Wall Sit ni nikjer v bazi, vprašanja ni bilo.
 
 **Predlog:** ko ima ciljna stranka že vaje, naj ukaz vpraša »Zamenjam Cvetkin načrt?« in navede vaje, ki bi se izgubile, ali pa naj stari načrt ostane med nenačrtovanimi — opaženo `2026-10-03 05:51:45.566` na različici `e51fea88`, 390 × 844, sl.
 
