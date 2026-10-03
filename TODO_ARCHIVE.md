@@ -9795,6 +9795,154 @@ iz obstoječega profila z vpisano opombo. Opaženo na objavljeni `6c8b556`, sl,
 
 **Popravljeno 2026-10-03 08:55:45.222 v e64b9b8:** pri shranjevanju stranke z obstoječim imenom brez vzdevka aplikacija vpraša, ali shrani brez vzdevka; opozorilo o istem imenu ne šteje več stranke same.
 
+### 80.171 [x] P2 — Izvoz podatkov stranke navede tri opravljene serije za vajo, ki jo stran stranke pravi »PRESKOČENO«
+
+**Scenarij in koraki:** skupinski trening »Skupina Moč« (Ana Kranjc, Bojan Pirc, Cvetka Mlakar), pri Ani vaja Barbell Back Squat, »Pretežko« → »Zaključi vadbo« → »Zaključi zdaj« → ☰ → »Imenik strank« → »Ana Kranjc« → »Izvozi podatke (GDPR)« → »Berljiva kopija«.
+
+**Opaženo:** stran stranke pod »ZGODOVINA ZABELEŽENIH VADB« piše »Barbell Back Squat PRESKOČENO«. Berljiva kopija pod »Zapisani treningi« piše za isto vajo »1. 10 ponovitev @ lastna teža«, »2. …«, »3. …«, nato vrstico »Povratna informacija (Pretežko – zmanjšaj težo): « z dvopičjem in praznim koncem.
+
+**Težava in vpliv:** datoteka, ki jo stranka dobi po členu 15, trdi, da je naredila tri serije po deset ponovitev, čeprav nobena ni bila zaznamovana, trener pa isto vajo vidi kot preskočeno. Vaja s ponovitvami in težo 0 se v izvozu bere kot vaja z lastno težo.
+
+**Predlog:** izvoz naj za serije, ki niso bile opravljene, napiše »preskočeno« kot stran stranke, vrstice s povratno informacijo brez opombe pa ne konča z dvopičjem — opaženo `2026-10-03 04:28:03.817` na različici `e51fea88`, 390 × 844, sl.
+
+**Popravljeno 2026-10-03 09:20:04.054 v 0549174d:** berljiva kopija za vajo, ki ni bila opravljena, piše »preskočeno« in navede samo opravljene serije; signal brez opombe nima dvopičja.
+
+
+### 80.172 [x] P2 — »Čakajoče na pregled« iz obvestila pokaže prazen ali nepopoln seznam, po osvežitvi pa so vsi signali tam
+
+**Scenarij in koraki:** prazna aplikacija → trening »Skupina Moč« (Ana Kranjc, Bojan Pirc, Cvetka Mlakar), pri Ani »Pretežko«, pri Bojanu »Prelahko« → »Zaključi vadbo« → »Zaključi zdaj« → ☰ ostane zaprt, odpri predal z obvestili → »Treningi, ki čakajo na pregled« → »Bojan Pirc — Skupina Moč (1)«. Drugič: nov trening »Jutranja dvojica« za jutri (Dana Vidmar, Emil Zorc), pri Emilu »Prelahko« → na podlogi »Možnosti treninga« → »Izbriši trening« → »Izbriši trening« → obvestilo »Emil Zorc (1)«.
+
+**Opaženo:** prvič stran »Čakajoče na pregled« piše »Nič ne čaka na pregled. Vsi signali s tal so usklajeni!«, predal pa piše »2 stranki imata nerešene povratne signale iz treninga.« Drugič seznam kaže Bojana in Ano, Emila pa ne, predal piše »3 stranke imajo nerešene povratne signale«. Po ponovnem nalaganju strani (`goto` na isti naslov) seznam kaže vse: Bojana, Ano in Emila. Ko sem stran odprl iz predala na sveže naloženi aplikaciji, je bil seznam poln. Isto pri izbrisu načrta brez termina (Dana Vidmar: podloga »Možnosti treninga« → »Izbriši trening« → »Izbriši trening«): predal je še pisal »2 programa sta pripravljena, a še nista dodeljena treningu« z obema imenoma, po ponovnem nalaganju je ostal le Emil Zorc. Baza je imela Danin program že kot `discarded`. Tretjič pri odstranitvi stranke z obrazca termina (»Večerni par«, Gal Oven: »Uredi« → ✕ »Odstrani s tega treninga: Gal Oven« → »Shrani«): predal je pisal »1 program je pripravljen« brez Gala, spodnja vrstica »2 stranki · 18:00 - 19:00«, po ponovnem nalaganju »2 programa« in »Načrtovan program · Gal Oven · 2026-10-03«. Pri Emilu, ki je prišel z izbrisom termina, piše »Jutranja dvojica · Emil Zorc«: Galov program ima isto vsebino, a ne nosi imena treninga. Najkrajši postopek, ponovljen še enkrat: ena stranka (Sara Lah), trening z vajo Barbell Row in »Prelahko« → »Zaključi vadbo« → »Zaključi zdaj« → brez osvežitve predal obvestil → »Sara Lah — Stara serija (1)« → stran »Čakajoče na pregled« piše samo »Nič ne čaka na pregled. Vsi signali s tal so usklajeni!«. V predalu piše ime starejšega treninga (»Stara serija«), ne »Brez osvežitve«, v katerem je signal nastal. Stran stranke pokaže zaključeno vadbo takoj, brez osvežitve.
+
+**Težava in vpliv:** trener po treningu pritisne na obvestilo, vidi »vse usklajeno« in sklene, da signalov ni. Prelahko in Pretežko sta navodili za naslednji trening; spregledan signal pomeni isto težo kot prejšnjič.
+
+**Predlog:** seznam naj se ob odprtju prebere iz shranjenih zapisov, ne iz stanja, nastalega pred zaključkom ali izbrisom — opaženo `2026-10-03 04:31:35.520` na različici `e51fea88`, 390 × 844, sl.
+
+**Popravljeno 2026-10-03 09:20:04.054 v 0549174d:** »Čakajoče na pregled« in predal z obvestili se ob vsakem odprtju izrišeta iz shranjenih zapisov, brez osvežitve strani.
+
+
+### 80.173 [x] P1 — Stranka, ki je že v prekrivajočem se zaključenem treningu, ima novi trening zapisan pod zaključenim: prisotnost in signal pristaneta drugje
+
+**Scenarij in koraki:** prazna aplikacija, stranke Ana Kranjc, Bojan Pirc, Cvetka Mlakar. Trening »Skupina Moč« (vsi trije, 04:30–05:30) začet in zaključen. Nato »Dvojček B« (Ana, Bojan, 04:40–05:40) in »Dvojček A« (Cvetka, 04:45–05:45), za oba »Vseeno razporedi«; oba začeta in zaključena. Nato »Trojček C« (Ana, 04:50–05:20) in »Trojček D« (Bojan, 04:50–05:20), vsak z »Vseeno razporedi«. »Trojček C« → »Začni trening« → ⋮ »Možnosti treninga« → »Uredi načrt« → »Dodaj iz kataloga« → Dumbbell Bench Press → Esc → »Pretežko« → »Zaključi vadbo« → »Zaključi zdaj« → »Zaključi zdaj«.
+
+**Opaženo:** podloga ob začetku naslavlja pet treningov hkrati: »Skupina Moč«, »Dvojček B«, »Dvojček A«, »Trojček C«, »Trojček D«, med njimi tri že zaključene; pod Ano, Bojanom in Cvetko piše pri vseh »Skupina Moč«. Po zaključku piše stran stranke Ana Kranjc pod »Zgodovina zabeleženih vadb« dve vadbi, Barbell Back Squat in Dumbbell Bench Press. Predal piše »Ana Kranjc — Skupina Moč (2)«; signal iz »Trojček C« nosi torej ime »Skupina Moč«. V bazi (`schema6`) ima Anin zapis z Dumbbell Bench Press `sessionId` zaključenega »Skupina Moč«; `sessionAttendance` ima po koncu le vrstici za »Skupina Moč« (Ana, Bojan), za »Trojček C«, »Trojček D«, »Dvojček B« in »Dvojček A« nobene, čeprav so vsi »Zaključeno«. Pred zaključkom so imeli živi programi vseh treh strank že `sessionId` zaključenega »Skupina Moč«, medtem ko sta bila »Dvojček B« in »Dvojček A« po bazi še `scheduled`.
+
+**Težava in vpliv:** Anina vadba pri »Trojček C« se šteje kot druga vadba pri »Skupina Moč«, »Trojček C« pa nima nobene prisotnosti. Paket ur, plačilo ali seznam prisotnih za »Trojček C« zato ne drži. Signal »Pretežko« nosi napačno ime treninga, tako da trener ne najde, kje je nastal.
+
+**Predlog:** program in prisotnost naj se zapišeta pod trening, ki ga je trener začel in zaključil, zaključeni trening pa naj podloge ne sme sestaviti — opaženo `2026-10-03 04:40:13.151` na različici `e51fea88`, 390 × 844, sl. Prejšnji popravek §80.168 pokriva dva sočasna aktivna treninga; tu je tretji, že zaključen, prvi v skupini prekrivanja.
+
+**Dokaz 2026-10-03 (e51fea88):** trening »Trojka« (Lan Habjan, Maja Ferk, Nik Zore, 05:05–06:05) se prekriva z že zaključenim »Moč solo« (04:40–05:40, ena anonimizirana stranka). Ob začetku ima podloga tri zavihke. Po osvežitvi strani ima štiri: prvi je »— Client« z imenom treninga »Moč solo«, izbran, brez vaj; ostali trije nosijo pod imenom še »Trojka«. Zaključeni trening torej pride v podlogo šele po osvežitvi.
+
+**Najkrajši postopek (e51fea88, 320 × 680):** »Dolga skupina« (Aleksandra, Bojan, Cvetka, 05:30–06:30) začet in zaključen. »Živi trening« (samo Bojan, 05:30–06:30, »Vseeno razporedi«) → »Začni trening«. Podloga ima naslov »Dolga skupina / Živi trening« in tri zavihke: Aleksandra, Bojan, Cvetka, vse tri z imenom »Dolga skupina«. Bojan, ki je v »Živi trening«, nosi pod zavihkom ime zaključenega treninga.
+
+**Pogoj, preverjen v čistem profilu 2026-10-03 (e51fea88, 390 × 844, 2026-10-03 07:07:57.730):** napaka nastane, kadar je stranka novega treninga že tudi v zaključenem treningu, s katerim se prekriva. Ana Alfa v »Prvi« (19:00–20:00, zaključen, Plank). »Drugi« (Bor Beta, 19:30–20:30, druga stranka): podloga se odpre z naslovom »Prvi / Drugi« in zavihkoma Ana, Bor, a Borov program in prisotnost sta pravilno pod »Drugi« (ATT Drugi, Bor Beta). »Tretji« (Ana Alfa, 19:15–20:15, ista stranka): Anin Wall Sit z »Prelahko« se po zaključku zapiše pod »Prvi« (`PROG Ana Alfa done Prvi ['Wall Sit']`), `sessionAttendance` za »Tretji« ne obstaja, »Tretji« je »done«.
+
+**Popravljeno 2026-10-03 09:20:04.054 v 0549174d:** trening, ki se prekriva z že izvedenim, teče na svoji podlogi; program in prisotnost stranke se zapišeta pod trening, ki ga je trener začel.
+
+
+### 80.177 [x] P3 — Obvestila ne imenujejo treninga: »Načrtovan program« brez imena in »Dolga skupina (2)« za signal iz drugega treninga
+
+**Scenarij in koraki:** 320 × 680. Trening »Dolga skupina« (Aleksandra Vrhovnik, Bojan Kosmatinec, Cvetka Vidmar-Zupan): vsak dobi Barbell Back Squat, Aleksandra »Prelahko«, Bojan »Pretežko« → »Zaključi vadbo«. Nato »Druga skupina« (Aleksandra, Bojan): pri obeh Barbell Overhead Press, pri Bojanu »Pretežko«, pri Aleksandri nič → »Zaključi vadbo« → »Zaključi zdaj« → »Zaključi zdaj« → predal obvestil.
+
+**Opaženo:** »Nenačrtovani programi« kaže »Načrtovan program · Aleksandra Vrhovnik · 2026-10-03«. Aleksandrin Overhead Press je ostal kot načrt brez termina, vendar vrstica ne pove, iz katerega treninga je. Isto pri Galu Ovnu, ki je bil odstranjen iz obrazca termina »Večerni par«. Program, ki je ostal po izbrisu termina, nosi ime treninga (»Jutranja dvojica · Emil Zorc · 2026-10-03«). V »Treningi, ki čakajo na pregled« piše »Bojan Kosmatinec — Dolga skupina (2)«: dva signala, drugi je iz »Druga skupina«. Isto 2026-10-03 pri 390 × 844: signal Cvetke, nastal v treningu »Alfa«, piše »Cvetka Novak — Dolga skupina (1)«; Cvetka je bila prej tudi v »Dolga skupina«.
+
+**Težava in vpliv:** trener ima dva načrta ali dva signala iste stranke in iz vrstice ne ve, kateri trening je kateri. Datum »2026-10-03« je datum nastanka načrta, ne datum odpovedanega ali zaključenega termina.
+
+**Predlog:** vrstica naj ima ime treninga, iz katerega je načrt ali signal nastal, in pri več signalih naj loči treninge — opaženo `2026-10-03 05:24:02.278` na različici `e51fea88`, 320 × 680, sl.
+
+**Popravljeno 2026-10-03 09:20:04.054 v 0549174d:** nenačrtovan načrt nosi ime treninga, s katerega je bil odstranjen; signali so v predalu ločeni po treningu, v katerem so nastali.
+
+
+### 80.179 [x] P2 — »Nazaj na današnji trening« odpre zaključen trening, ne tistega, ki teče
+
+**Scenarij in koraki:** 320 × 680, isti dan trije treningi: »Dolga skupina« (Aleksandra, Bojan, Cvetka, 05:30–06:30) zaključen; »Živi trening« (Bojan, 05:30–06:30) začet in teče; »Nova ura« (Aleksandra, 09:00–10:00) začet in teče. Na podlogi »Nova ura« → zeleni gumb »Danes« (oznaka »Nazaj na današnji trening«).
+
+**Opaženo:** odpre se stran »Zaključen trening«, »2026-10-03 · 05:18«, Aleksandra, Barbell Back Squat, vrstica »Zaključeno«, to je »Dolga skupina« od 05:30. Oba treninga, ki tečeta, ostaneta na kartici »Aktiven trening«. Enako pri 390 × 844 po obnovi kopije in z istimi tremi treningi. Ponovljeno v čistem profilu (2026-10-03 07:09:48.853, 390 × 844): zaključen »Drugi« (Bor Beta, Walking Lunges, 07:06), nezačeta »AX« in »AY« (isti Bor, 10:00 in 12:00), »AX« začet in zaprt z ✕; v »AY« gumb »Danes« odpre »Zaključen trening 2026-10-03 · 07:06 … Bor … Walking Lunges … Zaključeno«.
+
+**Težava in vpliv:** gumb obljublja pot do današnjega treninga. Trener ob dveh vzporednih treningih pristane v zaključenem, tretjem. Tistega, ki teče, mora poiskati na seznamu.
+
+**Predlog:** gumb naj odpre trening, ki teče; če jih teče več, naj ponudi izbiro — opaženo `2026-10-03 05:29:06.278` na različici `e51fea88`, 320 × 680, sl.
+
+**Popravljeno 2026-10-03 09:20:04.054 v 0549174d:** »Danes« odpre trening stranke, ki teče, nato današnjega, ki še ni bil izveden, šele nato zaključenega.
+
+
+### 80.180 [x] P3 — Izvoz podatkov stranke v angleščini in nemščini nosi slovensko ime načrta »Prazen načrt, brez rutine«
+
+**Scenarij in koraki:** slovenska aplikacija, trening brez rutine z vajo (Barbell Row) za stranko Bojan Kosmatinec, zaključen. `?lang=en` (nato `?lang=de`) → ☰ → »Client directory« → »Bojan Kosmatinec« → »Export data (GDPR)« → »Readable copy«.
+
+**Opaženo:** besedilo datoteke je v angleščini (»Your training data«, »Feedback (Too hard – reduce the load)«), pod »Logged training (3)« pa so naslovi »### 2026-10-03 — Prazen načrt, brez rutine«. V nemški datoteki: »### 2026-10-03 — Prazen načrt, brez rutine« pod »Erfasstes Training (3)«. Oznake signalov so pravilno v jeziku datoteke.
+
+**Težava in vpliv:** stranka, ki dobi datoteko po členu 15 v angleščini ali nemščini, vidi slovenske besede brez razlage. Isti niz stoji tudi na strani stranke pod »Zgodovina zabeleženih vadb«. Isto v predalu obvestil: program Cvetke Novak, ki je ostal po odstranitvi z obrazca termina »Vrnitev«, piše v angleščini »Načrtovan program · Cvetka Novak · 2026-10-03« in v nemščini enako, medtem ko sta programa Aleksandre in Bojana v istem seznamu prevedena (»Planned Program«, »Geplantes Programm«).
+
+**Predlog:** ime načrta brez rutine naj se piše v jeziku izpisa, ne v jeziku, v katerem je bil trening ustvarjen — opaženo `2026-10-03 05:34:07.600` na različici `e51fea88`, 390 × 844, en in de.
+
+**Popravljeno 2026-10-03 09:20:04.054 v 0549174d:** ime, ki ga je načrtu dala aplikacija (»Prazen načrt, brez rutine«, »Načrtovan program«), je v jeziku zaslona in izvoza.
+
+
+### 80.186 [x] P2 — »Kopiraj ta načrt drugi stranki« prepiše že vpisan načrt druge stranke brez vprašanja
+
+**Scenarij in koraki:** trening »Kopija načrta« za jutri 20:00 (Aleksandra Vrhovnik, Cvetka Novak). Pri Aleksandri Barbell Row, pri Cvetki Barbell Overhead Press → zavihek »Aleksandra« → ⋮ »Možnosti treninga« → »Kopiraj ta načrt drugi stranki na tem treningu« → »Cvetka Novak«.
+
+**Opaženo:** okna ali vprašanja ni. Cvetkin načrt ima po ukazu samo Barbell Row. V bazi ni nobenega programa Cvetke z Overhead Press, tudi ne med nenačrtovanimi.
+
+**Težava in vpliv:** vaje, ki jih je trener vpisal za Cvetko, izginejo ob dotiku, ki je bil mišljen kot dodajanje načrta. Pri praznem načrtu je ukaz koristen; pri vpisanem je izguba dela. Isto velja za »Vsi na ta načrt«: trening »Vsi na načrt« (Zora Test Barbell Row, Jan Test Wall Sit) → zavihek Zora → ⋮ → »Vsi na ta načrt«; Jan ima po ukazu samo Barbell Row, Wall Sit ni nikjer v bazi, vprašanja ni bilo.
+
+**Predlog:** ko ima ciljna stranka že vaje, naj ukaz vpraša »Zamenjam Cvetkin načrt?« in navede vaje, ki bi se izgubile, ali pa naj stari načrt ostane med nenačrtovanimi — opaženo `2026-10-03 05:51:45.566` na različici `e51fea88`, 390 × 844, sl.
+
+**Popravljeno 2026-10-03 09:20:04.054 v 0549174d:** načrt, ki ga »Kopiraj ta načrt …« ali »Vsi na ta načrt« zamenja, ostane med nenačrtovanimi programi.
+
+
+### 80.187 [x] P3 — Po izbrisu treninga, ki teče, ostane nenačrtovan načrt z vsemi tremi serijami še vedno zaznamovanimi kot opravljene
+
+**Scenarij in koraki:** trening »Tekoči« (Lea Test, 06:00–07:00) → »Začni trening« → ⋮ »Uredi načrt« → »Dodaj iz kataloga« → Barbell Row → »Prelahko« → ⋮ »Možnosti treninga« → »Izbriši trening« → okno »Teh zabeleženih serij ni mogoče obnoviti. Lea Test: 3 serije« → drsnik »Povleci do konca, da izbrišeš ta trening«.
+
+**Opaženo:** okno obljubi: »program vsakega udeleženca se ohrani med nenačrtovanimi programi«. Po izbrisu predal piše »Tekoči · Lea Test · 2026-10-03«, načrt vsebuje Barbell Row, 3 serije × 10. V bazi (`schema6`) ima ta program status `planned`, in vse tri serije imajo `completed: true`. Pogled urejanja ne kaže, da so serije opravljene.
+
+**Težava in vpliv:** okno pravi, da so zabeležene serije izgubljene, načrt pa naj bi ostal. Zapis jih ima še vedno. Dokler načrt ni mogoče dodeliti terminu (§80.182), trener posledice ne vidi; ko bo mogoče, bo načrt nosil opravljene serije prejšnjega, izbrisanega treninga.
+
+**Predlog:** ob izbrisu naj se serije vrnejo na neopravljene, kot pove besedilo okna — opaženo `2026-10-03 05:57:45.522` na različici `e51fea88`, 390 × 844, sl.
+
+**Popravljeno 2026-10-03 09:20:04.054 v 0549174d:** načrt, ki ostane po izbrisu začetega treninga, nima nobene serije označene kot opravljene.
+
+
+### 80.189 [x] P3 — Kartica nezačetega treninga z vpisanim načrtom še vedno piše rdeče »Program ni določen«
+
+**Scenarij in koraki:** trening »Vsi na načrt« za jutri 15:00 (Zora Test, Jan Test) → »Odpri v beležki« → pri vsaki stranki vaja iz kataloga (Zora Barbell Row in Wall Sit, Jan Barbell Row) → »Zapri trening in se vrni na začetek« → seznam treningov.
+
+**Opaženo:** kartica pokaže »2/2 mest zasedenih« in rdečo oznako z opozorilnim znakom »Program ni določen«. V bazi (`schema6`) imata obe stranki program `planned` z `sessionId` tega treninga in z vajami. Enako pri vseh drugih nezačetih treningih z načrtom iz tega zapisa (»Vrnitev«, »Kopija načrta«, »Tri«).
+
+**Težava in vpliv:** oznaka pravi, da načrta ni, trener pa ga je pravkar vpisal. Rdeče opozorilo lahko trenerja napelje, da načrt vpiše še enkrat.
+
+**Predlog:** oznaka naj se pokaže le pri treningu, katerega nobena stranka nima vaj. §80.114 je pri nezačetem treningu pustil odprto, ker načrt ni bil shranjen pri treningu; zdaj je shranjen — opaženo `2026-10-03 06:26:26.447` na različici `e51fea88`, 390 × 844, sl.
+
+**Popravljeno 2026-10-03 09:20:04.054 v 0549174d:** kartica treninga, za katerega je načrt vpisan na podlogi, ne piše več »Program ni določen«.
+
+
+### 80.190 [x] P2 — Rutina, izbrana za stranko, ki jo dodam v obrazec že shranjenega termina, se ne uporabi: načrt je prazen
+
+**Scenarij in koraki:** rutina »Rutina Plank« (ena vaja, Plank) iz »Vaje in rutine« → »Rutine« → »Ustvari rutino«. Trening »Meja 23:30« za jutri (Zora Test) → kartica → »Uredi« → polje »Poišči stranko po imenu...« → »Eva Test« (nova stranka) → pri Evi v spustnem seznamu »Izberi rutino« izberem »Rutina Plank« → »Shrani« → odprem trening → zavihek »Eva«.
+
+**Opaženo:** zavihek »Eva« piše »Ni vstavljenih vaj«. V bazi je Evin program `planned` brez vaj. Isto pri stranki »Mia Test« na terminu »Vsi na načrt« (izbirnik nastavljen z `select` in z dotikom). Pri novem terminu »Z rutino« (»Ustvari trening«, stranka Eva Test, isti izbirnik, »Rutina Plank«) pa se zavihek »Eva« odpre z vajo »Plank«, »S3 × 0:10 × BW« in »Počitek 60s«.
+
+**Težava in vpliv:** isti izbirnik deluje pri novem terminu in ne pri urejanju. Trener, ki doda stranko k že shranjenemu terminu in izbere rutino, dobi prazen načrt brez opozorila. Vaje mora vpisati sam.
+
+**Predlog:** rutina, izbrana za novo dodano stranko, naj se uporabi tudi v obrazcu že shranjenega termina — opaženo `2026-10-03 06:29:14.533` na različici `e51fea88`, 390 × 844, sl.
+
+**Popravljeno 2026-10-03 09:20:04.054 v 0549174d:** stranka, dodana v shranjen termin z lastno rutino, dobi to rutino tudi, ko trening odpreš s kartice.
+
+
+### 80.191 [x] P2 — Trening, zapisan za včeraj in zaključen danes z »Ohrani urnik«, je v zgodovini stranke datiran z današnjim dnem
+
+**Scenarij in koraki:** »Ustvari trening« → ime »Včeraj dva«, polje »Datum« 2026-10-02, 19:00–20:00, stranka Sara Lah → »Odpri v beležki« → »Končano« → »Začni trening« → okno »Trening se je začel izven urnika« (»začeto … prepozno«) → »Ohrani urnik« → ⋮ »Uredi načrt« → Walking Lunges → »Prelahko« → »Zaključi vadbo« → »Zaključi zdaj«.
+
+**Opaženo:** kartica na seznamu piše »19:00 - 20:00 Včeraj dva … Zaključeno«, termin 2026-10-02. Stran stranke pod »Zgodovina zabeleženih vadb« pokaže vadbo z datumom »2026-10-03« (danes). V bazi ima program `performedAt` 2026-10-03T04:39, termin pa `startDate` 2026-10-02T17:00.
+
+**Težava in vpliv:** trener, ki pozno vpiše včerajšnji trening in izbere, naj ostane na urniku, dobi v kartoteki stranke današnji datum. Izvoz podatkov stranke ju vodi pod različnima dnevoma: pod »Treningi« piše »2026-10-02 19:00 - 20:00 Včeraj dva · opravljen«, pod »Zapisani treningi« pa »2026-10-03 — Prazen načrt, brez rutine« z Walking Lunges.
+
+**Predlog:** ob »Ohrani urnik« naj bo datum vadbe dan termina — opaženo `2026-10-03 06:40:36.456` na različici `e51fea88`, 390 × 844, sl.
+
+**Popravljeno 2026-10-03 09:20:04.054 v 0549174d:** trening, začet na drug dan kot njegov termin (z »Ohrani urnik«), je v zgodovini stranke datiran z dnem termina.
+
 ## 99.1 [x] Padli test ni bil okolje, ampak iskanje niza v naključnem id-ju — popravljeno 2026-10-01
 
 Po potisku 212 commitov je 2026-10-01 padel tek »Build, Verify and Deploy«, opravilo »Stage 1 ·
