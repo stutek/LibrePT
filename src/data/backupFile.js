@@ -2,18 +2,18 @@
 // Single responsibility: turn the live database into a portable file and back. Pure: no DOM, no
 // download, no storage — the dialog owns those.
 //
-// **A backup is written at the newest NUMBERED schema, never at P.** P's shape can change on any
+// **A backup is written at the newest NUMBERED schema, never at PREVIEW.** PREVIEW's shape can change on any
 // commit, so a file written at it is restorable only by the exact build that produced it — which is
 // the opposite of what a backup is for. A numbered shape does not move, so any build can restore it
 // through the migration chain.
 //
-// The cost is real and has to be said out loud rather than discovered: **a P-only field does not
-// reach the file.** A field added in P, backed up, restored — gone. That is the price of a portable
+// The cost is real and has to be said out loud rather than discovered: **a PREVIEW-only field does not
+// reach the file.** A field added in PREVIEW, backed up, restored — gone. That is the price of a portable
 // backup while the runtime shape is unstable, and it is why the export surfaces carry a
 // preview-mode warning instead of pretending the file is complete.
 //
-// ONE shape per file, not every live one. Shapes only gain fields under expand-first (SCHEMA_P is
-// SCHEMA_4 plus `startDate`), so the newest is a strict superset of the rest and older copies would
+// ONE shape per file, not every live one. Shapes only gain fields under expand-first (SCHEMA_PREVIEW
+// is SCHEMA_6 plus `clientNotes` and `previewProbe`), so the newest is a strict superset of the rest and older copies would
 // store strictly less information at full size. Restore re-derives every live store anyway.
 //
 // **ONE version number, on the envelope, and the TABLE below says what it means.**
@@ -119,7 +119,7 @@ export function resolveBackupFormat(parsed) {
  * deliberately NOT consulted when restoring: the file is written at a NUMBERED schema, and two
  * files declaring the same number have the same shape by definition. That is what a numbered schema
  * means. Comparing SHAs would imply a doubt that cannot exist here; the only shape that could vary
- * between builds is P, and P is never written to a file.
+ * between builds is PREVIEW, and PREVIEW is never written to a file.
  */
 export function buildBackupPayload(
   state,
