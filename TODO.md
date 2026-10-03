@@ -1340,6 +1340,15 @@ candidate, and the two are not distinguishable from one log.
 **Re-check condition:** the next time this stage fails, compare the log against the block above. Two
 matches make it the image, and the tag gets pinned.
 
+**Matched twice more, 2026-10-03 03:30 (Claude):** 2026-10-02 22:23 and 2026-10-03 03:24, the same
+three lines, exit 3 after 11 s, out of five runs that night; the re-run after the first passed. The
+rule above would now pin the image, but the evidence points elsewhere: the `Unable to copy yaml`
+line is also in PASSING runs (the 2026-09-30 log), so it does not separate the two. What does is
+load — all three failures came after a Stage 3 that averaged 12.7 to 13.7 of 16 cores, the passes
+after 7.9 to 12.2. Not proven either, because the container is started with `--rm` and ZAP's own log
+goes with it. **In progress:** keep ZAP's log when the scan fails (a writable scratch directory for
+`/zap/wrk`, which also removes the yaml line), so the next failure names its cause.
+
 ### 38.21 [ ] OPEN — the demo's card copy, waiting on the maintainer
 
 **Said 2026-08-30 (Simon):** the demo's card texts are poor; edit the English together, then
