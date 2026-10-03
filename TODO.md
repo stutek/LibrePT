@@ -4730,6 +4730,16 @@ agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pa
 
 **Predlog:** ob izbrisu naj se serije vrnejo na neopravljene, kot pove besedilo okna — opaženo `2026-10-03 05:57:45.522` na različici `e51fea88`, 390 × 844, sl.
 
+### 80.188 [ ] P2 — »Uveljavi in razreši« s ciljnim bremenom 20 kg pri treningu brez rutine nič ne zapiše, signal pa izgine
+
+**Scenarij in koraki:** trening »Za breme« brez rutine (Nina Bor, Barbell Row) → kartica vaje → »Pretežko« → predal obvestil → »Treningi, ki čakajo na pregled« → ✓ »Razreši« → »Vrsta spremembe« ostane »Spremeni ciljno breme in ponovitve«, »Ciljna teža (kg)« 20 → »Uveljavi in razreši«.
+
+**Opaženo:** obrazec ima ob pošiljanju 20, 10, 3 (teža, ponovitve, serije). Signal postane `resolved` in izgine s seznama. V bazi (`schema6`) ima načrt »Za breme« po ukazu za vse tri serije `weight: 0`. Nobena vrednost 20 ni shranjena nikjer. Ponovljeno še enkrat z drugim signalom (Nina Bor, Barbell Row, »Prelahko«, brez programa): enako.
+
+**Težava in vpliv:** trener ob razrešitvi vnese ciljno breme in pričakuje, da ga bo naslednji načrt vseboval. Pri treningu brez rutine ga ne vsebuje, aplikacija pa ne pove, da ni imela kam zapisati. Signal izgine s seznama, kot da bi bila sprememba uveljavljena.
+
+**Predlog:** če sprememba nima kam, naj okno pove »Ta trening nima rutine, sprememba ni shranjena« (ali naj ponudi ustvariti rutino) — opaženo `2026-10-03 06:09:58.548` na različici `e51fea88`, 390 × 844, sl.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
