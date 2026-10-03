@@ -8,7 +8,7 @@
 // stored is that module's business.
 import { orderedItems } from "../../data/sessionItemOrder.js";
 import { textOfTag } from "../../data/sessionModelConversion.js";
-import { programDate } from "../../data/trainingRecords.js";
+import { programDate, programNameIn } from "../../data/trainingRecords.js";
 import {
   formatCompactDuration,
   formatMetricValue,
@@ -182,7 +182,7 @@ export function renderHistoryItems({
       <div class="history-card-header">
         <div class="history-header-meta">
           <h4>${escapeHTML(clientName)}</h4>
-          <p>${escapeHTML(program.routineName)}${planned ? "" : ` • ${durationText}`}</p>
+          <p>${escapeHTML(programNameIn(program.routineName, t))}${planned ? "" : ` • ${durationText}`}</p>
         </div>
         <div class="history-date">${planned ? t("planned_program") || "Planned Program" : formatDateStr(programDate(program))}</div>
       </div>

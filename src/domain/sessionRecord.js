@@ -86,6 +86,30 @@ export function upsertSessionRecord(sessions, sessionRecord) {
 // caller that writes back onto "the session behind the clipboard" — stamping it done,
 // re-timing it, deleting it — has to agree on that set, and three of them had grown their own copy
 // of the same two-clause check.
+/**
+ * When a finished training happened, as its record says: when the trainer tapped Start, unless that
+ * was on another calendar day than the slot — a session logged the morning after, with its schedule
+ * kept. Then the slot's own start, or the client's history puts it on another day than the board.
+ */
+export function performedAtFor(startTime, slotStartDate) {
+  const started = new Date(startTime);
+  if (!slotStartDate) return started.toISOString();
+  const slot = new Date(slotStartDate);
+  return sessionCalendarDate({ startDate: slot }) === sessionCalendarDate({ startDate: started })
+    ? started.toISOString()
+    : slot.toISOString();
+}
+
+/**
+ * Whether two overlapping sessions are run on one clipboard. A session already held is not run
+ * again: merged with one still to come, it took that session's clients, and a training done in the
+ * new session was written under the held one, with no attendance for the new one. So a session not
+ * yet held merges only with others not yet held, and a held one is opened with held ones only.
+ */
+export function runsInOneClipboard(session, other) {
+  return (session?.status === "done") === (other?.status === "done");
+}
+
 export function sessionBelongsToSlot(session, sourceSession) {
   if (!session || !sourceSession) return false;
   if (session.id === sourceSession.id) return true;

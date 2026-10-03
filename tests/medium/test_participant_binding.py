@@ -60,6 +60,32 @@ def _bind(page):
     page.wait_for_timeout(200)
 
 
+KEPT_PLANS = """async (id) => {
+  const store = await import(new URL('controllers/activeSessionStore.js', document.baseURI).href);
+  return store.getAppDeps().state.clientPrograms
+    .filter((p) => p.clientId === id && p.status === 'planned' && !p.sessionId)
+    .map((p) => p.exercises.map((item) => item.name));
+}"""
+
+
+def test_a_member_s_own_plan_is_kept_when_everyone_goes_on_one(page, local_server):
+    """John's Wall Sit vanished when everyone went on Jane's plan. A program is never
+    deleted, so it waits among the unscheduled plans; a plan equal to Jane's has nothing to keep."""
+    _mount(page, local_server)
+    assert page.evaluate(KEPT_PLANS, JOHN) == []
+    page.evaluate(
+        """async (id) => {
+          const ctrl = await import(new URL('controllers/activeSessionController.js', document.baseURI).href);
+          const john = ctrl.getActiveSession().clientRoutines[id];
+          john.exercises = [{ ...john.exercises[0], id: 'w1', name: 'Wall Sit' }];
+        }""",
+        JOHN,
+    )
+    _bind(page)
+
+    assert page.evaluate(KEPT_PLANS, JOHN) == [["Wall Sit"]]
+
+
 def test_participants_start_on_their_own_plans(page, local_server):
     _mount(page, local_server)
 

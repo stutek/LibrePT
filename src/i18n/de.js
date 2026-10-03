@@ -356,6 +356,8 @@ export const de = {
     "— dieselbe Muskelgruppe, damit das Trainingsvolumen weiter gezählt wird",
   adjust_apply: "Übernehmen und erledigen",
   adjust_swap_choose: "Tippe auf eine Ersatzübung, um fortzufahren.",
+  adjust_no_routine:
+    "Dieses Training wurde nicht aus einer Routine erstellt, daher wird eine Änderung hier nirgends gespeichert. Trage das neue Ziel in den nächsten Plan des Kunden ein.",
   // The encrypted-file reader a CLIENT opens (modules/common/encryptedFileReader.js).
   // The Routine Template dialog and its rows (routineFormsController.js, plansView.js).
   routine_name_placeholder: "z. B. Oberkörper A",
@@ -1302,6 +1304,7 @@ export const de = {
   export_doc_plan_changes: "## Programmänderungen ({count})",
   export_doc_feedback: "Rückmeldung",
   export_doc_bodyweight: "Körpergewicht",
+  export_doc_skipped: "übersprungen",
   export_doc_reps: "Wdh.",
   export_doc_withheld_title: "## Was zurückgehalten wurde",
   export_doc_withheld_body:

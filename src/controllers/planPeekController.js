@@ -25,6 +25,7 @@
 // Opening a neighbour leaves the session on the clipboard, started or not: everything in it is
 // already in its programs (sessionPrograms.js), and coming back to it opens it as it was left.
 
+import { localDateString } from "../data/calendarDay.js";
 import { libraryExercises } from "../data/exerciseLibrary.js";
 import { feedbackFromNotes, notesForProgram } from "../data/trainingRecords.js";
 import { clientSessionNeighbours, clientSessionToday } from "../domain/clientSessionNeighbours.js";
@@ -117,8 +118,9 @@ function buildCreateCard(clientName, t) {
   return card;
 }
 
+// The local calendar day; the first ten characters of an instant are the day in UTC.
 function isoDay(date) {
-  return date ? String(date).slice(0, 10) : "";
+  return date ? localDateString(date) : "";
 }
 
 // Which movement the trainer is standing at, as a comparison key — read from the SESSION, never from

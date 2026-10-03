@@ -24,7 +24,7 @@ import { localDateString } from "./calendarDay.js";
 import { consentSignedDate, isConsentActive, isConsentWithdrawn } from "./clientConsent.js";
 import { clientDisambiguator } from "./clientErasure.js";
 import { historyFromSessionModel } from "./sessionModelConversion.js";
-import { allExerciseNotes, allPrograms } from "./trainingRecords.js";
+import { allExerciseNotes, allPrograms, programNameIn } from "./trainingRecords.js";
 
 export const EXPORT_FORMAT_VERSION = "1";
 
@@ -145,8 +145,16 @@ function wordsFor(lang) {
   };
 }
 
-function renderSets(sets, w) {
-  return (sets || [])
+// The sets the client did. A set marked not done was the prescription, and listed it read as work
+// performed: an exercise the client page calls skipped came out as three sets. A set with
+// no mark at all is from an older record, which kept performed sets only.
+function renderSets(exercise, w) {
+  const sets = exercise.sets || [];
+  const done = sets.filter((set) => set.completed !== false);
+  if (exercise.completed === false || (sets.length > 0 && done.length === 0)) {
+    return `  ${w("export_doc_skipped")}`;
+  }
+  return done
     .map((set, index) => {
       const load = set.weight ? `${set.weight}kg` : w("export_doc_bodyweight");
       const note = set.note ? ` — ${set.note}` : "";
@@ -223,11 +231,12 @@ function planChangeLines(planUpdates, tagText, tagNote) {
 function trainingLines(history, w, tagText) {
   const lines = [];
   for (const record of history.filter((entry) => !entry.isPlanning)) {
-    const title = record.routineName || w("export_doc_session");
+    // A name the app gave the plan is in the document's language, not the one it was made in.
+    const title = programNameIn(record.routineName, (key) => w(key)) || w("export_doc_session");
     lines.push(`### ${record.date ? localDateString(record.date) : ""} — ${title}`);
     for (const exercise of record.exercises || []) {
       lines.push(`- **${exercise.name || exercise.type || "item"}**`);
-      const sets = renderSets(exercise.sets, w);
+      const sets = renderSets(exercise, w);
       if (sets) lines.push(sets);
     }
     for (const item of record.feedback || []) {
@@ -235,7 +244,7 @@ function trainingLines(history, w, tagText) {
       // identifier ("Too Hard - Reduce Load"), and printing it put two English lines in the middle of
       // a Slovenian document the client had asked for.
       const tag = tagText(item.tag) || w("export_doc_session");
-      lines.push(`- ${w("export_doc_feedback")} (${tag}): ${item.note || ""}`);
+      lines.push(`- ${w("export_doc_feedback")} (${tag})${item.note ? `: ${item.note}` : ""}`);
     }
     lines.push("");
   }

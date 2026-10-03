@@ -100,24 +100,42 @@ test("a plan's row carries the day it was written for", () => {
   assert.equal(undated.label, "Morning series · Ana");
 });
 
-test("pending feedback is grouped by client, counted per client", () => {
+test("pending feedback is grouped by client and by the session it was given in", () => {
   const state = withTrainings({
     notes: [
       { id: "u1", clientId: "c1", resolved: false },
       { id: "u2", clientId: "c1", resolved: false },
       { id: "u3", clientId: "c2", resolved: false },
       { id: "u4", clientId: "c3", resolved: true },
+      { id: "u5", clientId: "c1", resolved: false },
     ],
-    sessions: [{ id: "s1", title: "Group S&C", participants: ["c1"] }],
+    sessions: [
+      { id: "s1", title: "Group S&C", participants: ["c1"] },
+      { id: "s2", title: "Second group", participants: ["c1"] },
+    ],
   });
+  // Ana's first two signals were given in the first group, her third in the second.
+  for (const [noteId, programId, sessionId] of [
+    ["u1", "p1", "s1"],
+    ["u2", "p1", "s1"],
+    ["u5", "p2", "s2"],
+  ]) {
+    state.exerciseNotes.find((note) => note.id === noteId).programId = programId;
+    if (!state.clientPrograms?.some((program) => program.id === programId)) {
+      state.clientPrograms = [
+        ...(state.clientPrograms || []),
+        { id: programId, clientId: "c1", sessionId, status: "done", exercises: [] },
+      ];
+    }
+  }
 
   const item = buildPendingSessionsItem(state, t);
 
-  assert.equal(item.description.includes("2"), true, "two CLIENTS, not three signals");
+  assert.equal(item.description.includes("2"), true, "two CLIENTS, not four signals");
   assert.deepEqual(
     item.actions.map((action) => action.label),
-    ["Ana — Group S&C (2)", "Bo (1)"],
-    "a client with a known session gets the friendlier label; the other falls back to a name",
+    ["Ana — Group S&C (2)", "Bo (1)", "Ana — Second group (1)"],
+    "each signal is listed under the session it was given in; one given outside a session names the client",
   );
   assert.equal(
     item.actions.every((action) => action.view === "/adjustments"),

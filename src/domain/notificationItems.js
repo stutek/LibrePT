@@ -20,7 +20,13 @@
 import { crashIssueUrl } from "../data/crashReport.js";
 import { planDemoRemoval } from "../data/demoDataRemoval.js";
 import { escapedTestRecords } from "../data/seedProvenance.js";
-import { draftPrograms, pendingNotes, programDate } from "../data/trainingRecords.js";
+import {
+  draftPrograms,
+  pendingNotes,
+  programById,
+  programDate,
+  programNameIn,
+} from "../data/trainingRecords.js";
 import { resolveLang } from "../i18n/index.js";
 import { countedText } from "../i18n/plural.js";
 import { walkthroughDataPresent } from "./walkthroughReadiness.js";
@@ -98,7 +104,7 @@ export function buildUnscheduledPlansItem(state, t) {
     // yesterday for anyone east of UTC late in the evening.
     actions: plans.map((plan) => ({
       label: [
-        plan.title || fallbackTitle,
+        programNameIn(plan.title, t) || fallbackTitle,
         clientNameOf(state, plan.clientId),
         planCalendarDate(plan),
       ]
@@ -110,24 +116,26 @@ export function buildUnscheduledPlansItem(state, t) {
 }
 
 // The pending exercise notes already ARE the Pending Plan Adjustments feature's durable store
-// (`resolved: false` = awaiting the trainer's review). This re-presents that same data grouped by
-// CLIENT — cross-referenced to state.sessions for a friendlier label where one exists — so it
-// surfaces here too, not only in the dedicated Adjustments view every action links to.
+// (`review: "pending"` = awaiting the trainer's review). This re-presents that same data grouped by
+// CLIENT and by the session each note was given in, so it surfaces here too, not only in the
+// dedicated Adjustments view every action links to. The session is the one the note's program ran
+// in: read from the client's first session on the board, a signal given in "Druga
+// skupina" was listed under "Dolga skupina". A note given outside a session names the client only.
 export function buildPendingSessionsItem(state, t) {
   const unresolved = pendingNotes(state);
   if (unresolved.length === 0) return null;
 
-  const byClient = new Map();
+  const sessionsById = new Map((state.sessions || []).map((session) => [session.id, session]));
+  const groups = new Map();
   for (const note of unresolved) {
-    if (!byClient.has(note.clientId)) byClient.set(note.clientId, []);
-    byClient.get(note.clientId).push(note);
+    const sessionId = note.programId ? programById(state, note.programId)?.sessionId : undefined;
+    const key = `${note.clientId}|${sessionId || ""}`;
+    if (!groups.has(key)) {
+      groups.set(key, { clientId: note.clientId, session: sessionsById.get(sessionId), notes: [] });
+    }
+    groups.get(key).notes.push(note);
   }
-
-  const sessions = state.sessions || [];
-  const labelFor = (clientId, clientName) => {
-    const session = sessions.find((entry) => (entry.participants || []).includes(clientId));
-    return session ? `${clientName} — ${session.title}` : clientName;
-  };
+  const clientCount = new Set(unresolved.map((note) => note.clientId)).size;
 
   return {
     id: "synthetic-pending-sessions",
@@ -138,10 +146,10 @@ export function buildPendingSessionsItem(state, t) {
       t,
       resolveLang(state.lang),
       "notif_pending_sessions_desc",
-      byClient.size,
+      clientCount,
     ),
-    actions: [...byClient.entries()].map(([clientId, notes]) => ({
-      label: `${labelFor(clientId, clientNameOf(state, clientId))} (${notes.length})`,
+    actions: [...groups.values()].map(({ clientId, session, notes }) => ({
+      label: `${[clientNameOf(state, clientId), session?.title].filter(Boolean).join(" — ")} (${notes.length})`,
       view: "/adjustments",
     })),
   };

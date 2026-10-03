@@ -515,6 +515,9 @@ function commitRealSession(
   );
   const written = state.sessions.find((session) => session.id === sessionId);
   if (written) unscheduleRemovedClients(state, sessionId, written.participants);
+  if (written) {
+    deps.planRoutinesChosenInForm?.(sessionId, clientRoutines, t("custom_empty_plan"));
+  }
   deps.saveToLocalStorage?.();
   deps.rerenderSessions?.();
 

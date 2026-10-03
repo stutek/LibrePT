@@ -52,6 +52,7 @@ import {
   saveSessionAsRoutine,
   setupRoutineForms as setupRoutineFormsController,
 } from "./controllers/routineFormsController.js";
+import { planRoutinesChosenInForm } from "./controllers/sessionPrograms.js";
 import { resweepErasedClients } from "./data/clientErasure.js";
 import { ISSUE_TRACKER_URL } from "./data/crashReport.js";
 import { driveSyncStatus, onSyncCountsChanged, primeAheadCache } from "./data/driveSyncService.js";
@@ -467,6 +468,8 @@ async function init() {
     getState,
     t,
     getActiveSession,
+    // The list alone: the drawer draws itself when it opens.
+    renderPendingPlanAdjustments: () => renderAdjustmentsList(),
     startWorkoutSession: (cr, bm) => startWorkoutSession(cr, bm),
     launchClipboardDirectly: (arg) => launchClipboardDirectly(arg),
     openSessionFromHistory: (log) => openSessionFromHistory(log),
@@ -559,6 +562,7 @@ async function init() {
     openSessionInviteDialog,
     openNewClient,
     getActiveSession: () => getActiveSession(),
+    planRoutinesChosenInForm,
   });
   setupActiveSession();
 
@@ -814,7 +818,7 @@ function showErrorView(attemptedPath) {
   showErrorViewController(attemptedPath, { switchView, setHeaderState });
 }
 
-function renderPendingPlanAdjustments() {
+function renderAdjustmentsList() {
   const container = document.getElementById("dashboard-adjustments-list");
   const countBadge = document.getElementById("badge-adjustments-count");
   renderPendingPlanAdjustmentsComponent(container, countBadge, {
@@ -824,6 +828,10 @@ function renderPendingPlanAdjustments() {
     navigateToPath,
     urlFor,
   });
+}
+
+function renderPendingPlanAdjustments() {
+  renderAdjustmentsList();
   // The drawer's "awaiting review" item is built from the same unresolved signals, and every path
   // that changes them calls this function. Without it the drawer kept saying a signal was waiting
   // after it was resolved, until the page was reloaded.

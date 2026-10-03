@@ -192,6 +192,7 @@ export function renderApplyAdjustmentDialog() {
           <option value="swap" data-i18n="adjust_action_swap">Swap Exercise (Regression/Progression)</option>
           <option value="dismiss" data-i18n="adjust_action_dismiss">Dismiss Alert Only (No Changes)</option>
         </select>
+        <p id="adjust-no-routine" class="form-hint hidden" data-i18n="adjust_no_routine">This session was not run from a routine, so a change here is saved nowhere. Write the new target into the client's next plan.</p>
       </div>
 
       <!-- PANEL: Modify load & reps -->
@@ -322,6 +323,9 @@ export function openAdjustmentWizardComponent(updateId, ctx) {
 
   document.getElementById("adjust-routine-id").value = routine ? routine.id : "";
   document.getElementById("adjust-exercise-id").value = exerciseId;
+  // A change is written into the routine. With none, it went nowhere while the signal cleared as if
+  // it had been applied; the dialog says so before the trainer taps Apply.
+  document.getElementById("adjust-no-routine").classList.toggle("hidden", Boolean(routine));
 
   // Default panel action setup
   document.getElementById("adjust-action-type").value = "modify";

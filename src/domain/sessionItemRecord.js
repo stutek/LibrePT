@@ -65,10 +65,12 @@ function resolvePrescribedSets(it) {
 }
 
 function buildExerciseSnapshotItem(it, logs, isPlanning) {
+  // A plan holds what is prescribed: a set logged done in the session it was made from is not done
+  // in the plan.
   const loggedSets = logs.map((l) => ({
     reps: l.reps,
     weight: l.weight,
-    completed: !!l.completed,
+    completed: !isPlanning && !!l.completed,
     note: l.note || "",
   }));
   const anyCompleted = loggedSets.some((s) => s.completed);

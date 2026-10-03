@@ -352,6 +352,8 @@ export const sl = {
   adjust_replacement_hint: "— ista mišična skupina ohrani sledenje obsegu",
   adjust_apply: "Uveljavi in razreši",
   adjust_swap_choose: "Tapni nadomestno vajo, da nadaljuješ.",
+  adjust_no_routine:
+    "Ta trening ni bil narejen iz rutine, zato se sprememba tukaj ne shrani nikamor. Nov cilj vpiši v naslednji načrt stranke.",
   // The encrypted-file reader a CLIENT opens (modules/common/encryptedFileReader.js).
   // The Routine Template dialog and its rows (routineFormsController.js, plansView.js).
   routine_name_placeholder: "npr. Zgornji del telesa A",
@@ -1248,6 +1250,7 @@ export const sl = {
   export_doc_plan_changes: "## Spremembe programa ({count})",
   export_doc_feedback: "Povratna informacija",
   export_doc_bodyweight: "lastna teža",
+  export_doc_skipped: "preskočeno",
   export_doc_reps: "ponovitev",
   export_doc_withheld_title: "## Kaj je izpuščeno",
   export_doc_withheld_body:

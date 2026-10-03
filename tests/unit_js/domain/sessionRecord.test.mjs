@@ -3,7 +3,7 @@
 // filling in a real form in a real browser, so the rules below were only ever verified by clicking.
 //
 // The two that would cost a trainer real data if they broke:
-//   • An upsert MERGES. A stored session carries fields this form never edits — `completed` and
+//   • An upsert MERGES. A stored session carries fields this form never edits — `status` and
 //     `duration`, stamped when a session is finished — and a wholesale replace would drop them,
 //     silently un-completing a session by editing its title.
 //   • Invites go only to NEWLY assigned participants. Re-saving an unchanged session must not
@@ -19,6 +19,8 @@ import {
   computeSessionDayBucket,
   computeTimeLabel,
   newlyAssignedParticipantIds,
+  performedAtFor,
+  runsInOneClipboard,
   sessionBelongsToSlot,
   sessionDayOf,
   upsertSessionRecord,
@@ -106,7 +108,7 @@ test("an upsert merges, so editing a title cannot un-complete a session", () => 
     {
       id: "s1",
       title: "Old name",
-      completed: true,
+      status: "done",
       duration: 3600,
       participants: ["c1"],
     },
@@ -121,8 +123,42 @@ test("an upsert merges, so editing a title cannot un-complete a session", () => 
   assert.equal(sessions.length, 1);
   assert.equal(sessions[0].title, "New name");
   assert.deepEqual(sessions[0].participants, ["c1", "c2"]);
-  assert.equal(sessions[0].completed, true, "a field this form never edits must survive the edit");
+  assert.equal(sessions[0].status, "done", "a field this form never edits must survive the edit");
   assert.equal(sessions[0].duration, 3600);
+});
+
+test("a new session starts scheduled", () => {
+  const sessions = [];
+  upsertSessionRecord(sessions, { id: "s1", title: "First", participants: [] });
+  assert.equal(sessions[0].status, "scheduled");
+});
+
+// Yesterday's session, logged today with the schedule kept, was dated today in the client's
+// history while the board kept it on yesterday.
+test("a training started on another day than its slot is dated at the slot", () => {
+  const slot = new Date(2026, 9, 2, 19, 0).toISOString();
+  const nextMorning = new Date(2026, 9, 3, 6, 39).getTime();
+  assert.equal(performedAtFor(nextMorning, slot), slot);
+  const sameEvening = new Date(2026, 9, 2, 19, 12).getTime();
+  assert.equal(performedAtFor(sameEvening, slot), new Date(sameEvening).toISOString());
+  assert.equal(
+    performedAtFor(nextMorning, null),
+    new Date(nextMorning).toISOString(),
+    "a plan for no session has no slot to keep",
+  );
+});
+
+// A session started while one already held overlaps it took the held one's clients, and
+// the training a client did in the new one was written under the held one.
+test("a session not yet held is run together only with sessions not yet held", () => {
+  const held = { id: "held", status: "done" };
+  const next = { id: "next", status: "scheduled" };
+  const derived = { id: "rule", fromSeries: true, status: "scheduled" };
+  assert.equal(runsInOneClipboard(next, held), false);
+  assert.equal(runsInOneClipboard(held, next), false);
+  assert.equal(runsInOneClipboard(next, derived), true);
+  assert.equal(runsInOneClipboard(held, { id: "held-too", status: "done" }), true);
+  assert.equal(runsInOneClipboard(next, { id: "older-shape" }), true, "no status is not held");
 });
 
 test("an upsert of an unknown id appends rather than replacing something else", () => {

@@ -3,10 +3,11 @@
 // sections of the continuous timeline. It owns the markup of its `<section id="view-clients">` shell.
 
 import { libraryExercises } from "../../data/exerciseLibrary.js";
+import { openProgramsOfSessions } from "../../data/trainingRecords.js";
 import { assignLanes } from "../../domain/overlapLanes.js";
 import { filterSessions, hasAnyFilter } from "../../domain/sessionFilters.js";
 import { buildClientStateFromRoutine } from "../../domain/sessionPlanFactory.js";
-import { sessionCalendarDate } from "../../domain/sessionRecord.js";
+import { runsInOneClipboard, sessionCalendarDate } from "../../domain/sessionRecord.js";
 import {
   occurrenceAsSession,
   sessionsWithSeries,
@@ -179,19 +180,28 @@ export function launchClipboardDirectly(
   const session = sessions.find((s) => s.id === sessionId);
   if (!session) return;
 
-  const overlappingSessions = getOverlappingSessions(session, sessions);
+  const overlappingSessions = getOverlappingSessions(session, sessions).filter((other) =>
+    runsInOneClipboard(session, other),
+  );
 
   const clientRoutinesMap = new Map();
   // Which booked session each client belongs to, kept on the clipboard's `sourceSession` so it
   // survives the active-session cache and a reload. The title bar and the participant tabs pair
   // their colour dots from it. A client booked into two overlapping sessions belongs to the first.
   const clientSessions = {};
+  const stored = openProgramsOfSessions(
+    state,
+    overlappingSessions.map((os) => os.id),
+  );
   for (const os of overlappingSessions) {
     for (const pId of os.participants) {
       // As stored, even when no routine has that id: "empty_plan" is the trainer's choice of an
       // empty plan, and buildClientStateFromRoutine makes one of it. Substituting the library's
-      // first routine put a programme nobody chose on the clipboard.
-      const routineId = os.routineId || "";
+      // first routine put a programme nobody chose on the clipboard. A client whose plan in this
+      // session is stored keeps that plan's routine: the row holds one routine for everybody, and
+      // the form writes a client's own choice into their plan.
+      const own = stored.find((program) => program.sessionId === os.id && program.clientId === pId);
+      const routineId = own ? own.routineId || "" : os.routineId || "";
       if (!clientRoutinesMap.has(pId)) {
         clientRoutinesMap.set(pId, routineId);
         clientSessions[pId] = os.id;

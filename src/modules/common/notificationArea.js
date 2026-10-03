@@ -382,6 +382,9 @@ export function toggleNotificationArea(forceExpand = null) {
   const nextState = forceExpand !== null ? forceExpand : !isCurrentlyExpanded;
 
   if (nextState) {
+    // Drawn from what is stored each time it opens: drawn only where a change was announced, it
+    // went on listing a plan thrown away or a client taken off a session until a reload.
+    if (!isCurrentlyExpanded) renderNotificationArea();
     area.classList.add("is-expanded");
     if (toggleBtn) toggleBtn.setAttribute("aria-expanded", "true");
   } else {

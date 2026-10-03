@@ -49,16 +49,21 @@ export function updateOverlaySessionTimer() {
   if (!el) return;
 
   const { t } = getAppDeps();
+  // "left" says the number counts down to the scheduled end. A session with no end counts the time
+  // since Start, and one past its end counts up: then the word would say the opposite.
+  const caption = wrap?.querySelector(".session-timer-caption");
 
   if (activeSession.sourceSession?.isPlanning) {
     el.textContent = t("planning") || "Planning";
     wrap?.classList.remove("overtime");
+    caption?.classList.add("hidden");
     return;
   }
 
-  const { seconds, isOvertime } = computeActiveSessionCountdown(activeSession);
+  const { seconds, isCountdown, isOvertime } = computeActiveSessionCountdown(activeSession);
   el.textContent = formatDurationHourMin(seconds);
   wrap?.classList.toggle("overtime", isOvertime);
+  caption?.classList.toggle("hidden", !isCountdown || isOvertime);
 }
 
 // Start a timer for the ACTIVE client (rest or exercise), labelled with their name so it's clear in

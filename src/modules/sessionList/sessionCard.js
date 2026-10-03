@@ -7,7 +7,11 @@
 //         saveToLocalStorage, rerenderSessions }
 
 import { localDateString } from "../../data/calendarDay.js";
-import { performedPrograms, programDate } from "../../data/trainingRecords.js";
+import {
+  openProgramsOfSessions,
+  performedPrograms,
+  programDate,
+} from "../../data/trainingRecords.js";
 import { computeActiveSessionCountdown } from "../../domain/sessionClock.js";
 import { sessionDayOf } from "../../domain/sessionRecord.js";
 import { parseTimeRange } from "../../domain/timeRange.js";
@@ -119,6 +123,9 @@ export function isRunningOn(activeSession, sessionId) {
 // session; one converted from an older build where no session fitted is matched by client and day.
 function sessionHasPlan(b, routineName, state) {
   if (routineName) return true;
+  // A plan written on the clipboard for a session not yet run is stored with the session.
+  const hasExercise = (program) => (program.exercises || []).some((i) => i.type === "exercise");
+  if (openProgramsOfSessions(state, [b.id]).some(hasExercise)) return true;
   if (!isHeld(b) || !b.startDate) return false;
   const day = localDateString(b.startDate);
   const ranHere = (program) =>
@@ -177,6 +184,7 @@ function computeCardTiming(b, isLaunched, activeSession, isLive, range) {
   let timerLive = false; // driven by the launched clipboard timer
   let timerEndMs = null; // scheduled end/start (epoch) for the clock-based countdown, whichever applies
   let timerOvertimeAware = false;
+  let timerCountsDown = false; // the live number is the time left to the scheduled end
   if (isLaunched && activeSession) {
     timerLive = true;
     // Same countdown/count-up decision the clipboard's own timers make (sessionClock.js), so a
@@ -184,6 +192,7 @@ function computeCardTiming(b, isLaunched, activeSession, isLive, range) {
     const countdown = computeActiveSessionCountdown(activeSession);
     timerText = formatDurationHourMin(countdown.seconds);
     timerIsOvertime = countdown.isOvertime;
+    timerCountsDown = countdown.isCountdown && !countdown.isOvertime;
   } else if (isUpcoming) {
     timerEndMs = startMs;
     timerOvertimeAware = true;
@@ -202,6 +211,7 @@ function computeCardTiming(b, isLaunched, activeSession, isLive, range) {
     timerLive,
     timerEndMs,
     timerOvertimeAware,
+    timerCountsDown,
   };
 }
 
@@ -411,7 +421,13 @@ export function renderSessionCard(b, colContainer, deps) {
 
   // Green left bracket spills into a full-width bottom bar with the Active-session tag + countdown;
   // the bar turns a warning colour when the session has run past its end (overtime, live-only).
-  const timerSpan = buildTimerSpan(timing, b, escapeHTML);
+  // "left" after the number while it counts down to the scheduled end: bare, it read as
+  // the time the session has run.
+  const timerSpan =
+    buildTimerSpan(timing, b, escapeHTML) +
+    (timing.timerCountsDown
+      ? ` <span class="session-timer-caption">${escapeHTML(t("session_time_left"))}</span>`
+      : "");
 
   const status = buildSessionCardStatusBarHTML({
     isLive,

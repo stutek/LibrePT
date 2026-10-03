@@ -337,6 +337,8 @@ export const en = {
   adjust_replacement_hint: "— same muscle group keeps volume tracking intact",
   adjust_apply: "Apply & Resolve",
   adjust_swap_choose: "Tap a replacement exercise to continue.",
+  adjust_no_routine:
+    "This session was not run from a routine, so a change here is saved nowhere. Write the new target into the client's next plan.",
   // The encrypted-file reader a CLIENT opens (modules/common/encryptedFileReader.js).
   // The Routine Template dialog and its rows (routineFormsController.js, plansView.js).
   routine_name_placeholder: "e.g. Upper Body A",
@@ -1320,6 +1322,7 @@ export const en = {
   export_doc_plan_changes: "## Programme changes ({count})",
   export_doc_feedback: "Feedback",
   export_doc_bodyweight: "bodyweight",
+  export_doc_skipped: "skipped",
   export_doc_reps: "reps",
   export_doc_withheld_title: "## What was withheld",
   export_doc_withheld_body:

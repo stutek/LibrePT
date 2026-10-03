@@ -297,7 +297,10 @@ export function setupClientForms({
   const nameInput = $id("client-name");
   // The client the form is writing to, with the name as typed. A new client is already in the
   // directory from its first character, so its own record is told apart from a namesake by id.
-  const formClient = () => ({ id: live.current()?.id || $id("client-form-id").value, name: nameInput.value });
+  const formClient = () => ({
+    id: live.current()?.id || $id("client-form-id").value,
+    name: nameInput.value,
+  });
   // Save with a name that is already in the directory and no alias: ask before keeping it. Two cards
   // that read the same cannot be told apart later, on the schedule or in a data export. The question
   // runs before the live form's own submit handler (capture phase) and stops it; the answer "yes"

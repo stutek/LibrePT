@@ -24,9 +24,12 @@
 // Pure: state in, `{ previous, next }` (or today's entry) out, each entry's `record` a program as
 // data/trainingRecords.js reads it. What to do with the result stays with the controller.
 
+import { localDateString } from "../data/calendarDay.js";
 import { allPrograms, programDate } from "../data/trainingRecords.js";
 
-const dayOf = (date) => String(date || "").slice(0, 10);
+// The local calendar day. The first ten characters of an instant are the day in UTC, which put a
+// session after midnight on the day before.
+const dayOf = (date) => (date ? localDateString(date) : "");
 
 // Among candidates on the same day, history before a scheduled row, then id ascending — a STABLE rule,
 // so the answer does not flip between renders of the same state.
@@ -105,17 +108,38 @@ export function clientSessionNeighbours(state, clientId, anchor) {
  * The client's session TODAY, or null — what the clipboard's Today control returns to after the
  * trainer has pulled their way to another plan. Derived from the same programs and
  * schedule as the neighbours, so there is no second record of "the session launched today" to keep
- * in step: a finished day answers with its performed program, an unfinished one with its scheduled
- * row.
- *
- * `nowMs` is an epoch; its day is taken from the ISO string, the same UTC reading `dayOf` gives every
- * stored `date`/`startDate`, so the two can be compared.
+ * in step. The work in hand comes first: the session the client is training in now, then a session
+ * of today not yet held, then a finished one by its performed program. With one finished and
+ * another running, Today led to the finished one.
  */
 export function clientSessionToday(state, clientId, nowMs) {
-  const today = dayOf(new Date(nowMs).toISOString());
-  const { finished, scheduled } = datedCandidates(state, clientId);
+  const today = dayOf(nowMs);
+  const todays = (state?.sessions || []).filter(
+    (session) =>
+      Array.isArray(session.participants) &&
+      session.participants.includes(clientId) &&
+      dayOf(session.startDate) === today,
+  );
+  const running = new Set(
+    allPrograms(state || {})
+      .filter((program) => program.clientId === clientId && program.status === "live")
+      .map((program) => program.sessionId),
+  );
+  const asEntry = (session) => ({
+    kind: "session",
+    id: session.id,
+    date: session.startDate,
+    session,
+  });
+  const live = todays.find((session) => running.has(session.id));
+  if (live) return asEntry(live);
+  const toCome = todays
+    .filter((session) => session.status !== "done" && session.status !== "cancelled")
+    .sort((a, b) => String(a.startDate).localeCompare(String(b.startDate)))[0];
+  if (toCome) return asEntry(toCome);
+  const { finished } = datedCandidates(state, clientId);
   let found = null;
-  for (const entry of [...finished, ...scheduled]) {
+  for (const entry of finished) {
     if (entry.day === today && (!found || earlier(entry, found))) found = entry;
   }
   return strip(found);

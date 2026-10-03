@@ -66,7 +66,7 @@ import {
   openCatalogPicker,
   wireAddExerciseAndCatalogDialogs,
 } from "./sessionPlanEditing.js";
-import { saveActiveSession, savePlanEdit } from "./sessionPrograms.js";
+import { keepPlanBeforeReplacing, saveActiveSession, savePlanEdit } from "./sessionPrograms.js";
 import {
   getExerciseSignalColor,
   hasExerciseNote,
@@ -305,6 +305,12 @@ function wireSessionMenuAndActions(t) {
         activeSession.bindings,
       );
     } else {
+      const shown = activeSession.clientRoutines?.[activeSession.activeClientId]?.exercises;
+      for (const clientId of participants) {
+        if (clientId !== activeSession.activeClientId) {
+          keepPlanBeforeReplacing(activeSession, clientId, shown);
+        }
+      }
       activeSession.clientRoutines = groupedClientRoutines(activeSession.clientRoutines, {
         sourceId: activeSession.activeClientId,
         memberIds: participants,
@@ -374,6 +380,7 @@ function wireSessionMenuAndActions(t) {
     const target = activeSession?.clientRoutines?.[clientId];
     if (!source || !target) return;
 
+    keepPlanBeforeReplacing(activeSession, clientId, source.exercises);
     target.exercises = copyPlanForParticipant(source.exercises, { newId: newRecordId });
     // Their own logs are dropped with the plan they belonged to: the old ones name items that no
     // longer exist, and leaving them would attach this person's history to nothing.

@@ -89,6 +89,26 @@ def test_copying_hands_over_the_session_being_run(page, local_server):
     assert johns_plan == ["Back Squat", "Bench Press"]
 
 
+def test_the_plan_a_copy_replaces_is_kept_as_an_unscheduled_plan(page, local_server):
+    """John's own plan vanished without a question. A program is never deleted, so what
+    the copy replaces waits among the unscheduled plans."""
+    _mount(page, local_server)
+    _open_copy_list(page)
+    page.click("[data-copy-to='%s']" % JOHN)
+    page.wait_for_timeout(200)
+
+    kept = page.evaluate(
+        """async (id) => {
+          const store = await import(new URL('controllers/activeSessionStore.js', document.baseURI).href);
+          return store.getAppDeps().state.clientPrograms
+            .filter((p) => p.clientId === id && p.status === 'planned' && !p.sessionId)
+            .map((p) => p.exercises.map((item) => item.name));
+        }""",
+        JOHN,
+    )
+    assert kept == [["Treadmill Run"]]
+
+
 def test_the_copy_is_his_own_from_that_moment(page, local_server):
     """The difference from binding them, and the reason both controls exist: editing one plan
     afterwards must not touch the other."""

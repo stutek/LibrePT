@@ -75,3 +75,29 @@ test("build program snapshot keeps rests and skips", () => {
   // exerciseRecordsOf must filter out rest items
   assert.equal(result.exerciseCount, 2);
 });
+
+// Deleting a started session keeps each participant's plan, "without the sets logged in
+// it", as the question before the delete says; the plan came back with them still ticked.
+test("a plan made from a session holds what was prescribed, never a set marked done", () => {
+  const cs = {
+    exercises: [{ id: "a", name: "Row", metric: "reps", setsTargetCount: 2, repsTarget: 8 }],
+    logs: {
+      a: [
+        { reps: 8, weight: 40, completed: true },
+        { reps: 6, weight: 40, completed: true },
+      ],
+    },
+  };
+  const [plan] = m.buildProgramSnapshot(cs, { isPlanning: true });
+  assert.equal(plan.completed, false);
+  assert.deepEqual(
+    plan.sets.map((set) => set.completed),
+    [false, false],
+  );
+  const [performed] = m.buildProgramSnapshot(cs);
+  assert.deepEqual(
+    performed.sets.map((set) => set.completed),
+    [true, true],
+    "a session being run keeps what was logged",
+  );
+});

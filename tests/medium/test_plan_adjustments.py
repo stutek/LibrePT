@@ -13,6 +13,7 @@
 import json
 
 import pytest
+from playwright.sync_api import expect
 
 from tests.medium._harness import load_with_stub, view_stub
 
@@ -173,6 +174,24 @@ def test_a_signal_from_a_session_without_a_routine(page, local_server):
     assert page.locator("#adjust-weight").input_value() == "42.5"
     assert page.locator("#adjust-reps").input_value() == "10"
     assert page.locator("#adjust-sets").input_value() == "3"
+
+
+def test_a_target_with_nowhere_to_go_is_said_before_it_is_applied(page, local_server):
+    """The dialog took a target weight for a session with no routine, wrote it nowhere and cleared
+    the signal as if it had. It says so now; a signal whose routine holds the exercise does not."""
+    load_with_stub(page, local_server, NO_ROUTINE_STUB)
+    page.wait_for_selector("#view-adjustments.active")
+    _cards(page).first.locator(".btn-resolve-alert").click()
+
+    expect(page.locator("#adjust-no-routine")).to_be_visible()
+
+
+def test_a_target_with_a_routine_to_go_to_says_nothing_extra(page, local_server):
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#view-adjustments.active")
+    _cards(page).first.locator(".btn-resolve-alert").click()
+
+    expect(page.locator("#adjust-no-routine")).to_be_hidden()
 
 
 def test_an_old_record_claiming_a_recording_draws_none(page, local_server):

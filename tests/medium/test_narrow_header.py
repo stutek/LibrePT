@@ -62,7 +62,9 @@ def test_the_app_name_and_the_menu_button_fit_at_320(page, local_server, level):
         }"""
     )
     assert not name["cut"], "the app name is cut with an ellipsis"
-    assert name["menuRight"] <= NARROW["width"], f"menu button leaves the screen: {name}"
+    assert name["menuRight"] <= NARROW["width"], (
+        f"menu button leaves the screen: {name}"
+    )
     assert name["pageWidth"] <= NARROW["width"], f"the page scrolls sideways: {name}"
 
 

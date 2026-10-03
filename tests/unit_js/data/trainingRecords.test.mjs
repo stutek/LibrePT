@@ -22,6 +22,7 @@ import {
   performedPrograms,
   programById,
   programDate,
+  programNameIn,
   recordTrainings,
   removePendingNotes,
   resolveNote,
@@ -469,6 +470,16 @@ test("a note's tag reads as the one line the feedback form stores, remark after 
   assert.equal(noteTagLine(null), "");
 });
 
+// A plan nobody named carries the name the app gave it, in the language it was made in, so
+// an English data export said "Prazen načrt, brez rutine".
+test("a name the app gave a plan reads in the reader's language; a trainer's own name is kept", () => {
+  const english = (key) => ({ custom_empty_plan: "Empty plan, no routine" })[key] ?? key;
+  assert.equal(programNameIn("Prazen načrt, brez rutine", english), "Empty plan, no routine");
+  assert.equal(programNameIn("Načrtovan program", english), "planned_program");
+  assert.equal(programNameIn("Moč za Ano", english), "Moč za Ano");
+  assert.equal(programNameIn("", english), "");
+});
+
 test("a note stores the tag's id, never its English words", () => {
   const state = {};
   recordTrainings(state, [
@@ -520,6 +531,14 @@ test("a program saved for a seeded session carries the seed stamp, notes include
   saveSessionPrograms(state, [entry("p1", "ana", { testData: "test", feedback: [note] })]);
   assert.equal(programById(state, "p1").testData, "test");
   assert.equal(noteById(state, "n1").testData, "test");
+});
+
+test("a plan taken off its session keeps the session's name, so the feed says which one", () => {
+  // It read "Planned programme · Aleksandra" beside a plan that did carry a name.
+  const state = { sessions: [{ id: "s1", title: "Druga skupina", participants: ["ana"] }] };
+  saveSessionPrograms(state, [entry("p1", "ana", { sessionId: "s1" })]);
+  unschedulePrograms(state, ["p1"]);
+  assert.equal(programById(state, "p1").title, "Druga skupina");
 });
 
 test("a client taken off a booked session keeps their plan, unscheduled, and what they performed", () => {

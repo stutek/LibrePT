@@ -19,6 +19,7 @@ import {
   notesForProgram,
   programById,
   programDate,
+  programNameIn,
   recordTrainings,
   unschedulePrograms,
 } from "../data/trainingRecords.js";
@@ -28,7 +29,7 @@ import {
   buildClientStateFromImportedItems,
   buildClientStateFromRoutine,
 } from "../domain/sessionPlanFactory.js";
-import { sessionBelongsToSlot } from "../domain/sessionRecord.js";
+import { performedAtFor, sessionBelongsToSlot } from "../domain/sessionRecord.js";
 import { sessionsAfterRemoving } from "../domain/sessionSeries.js";
 import { countedText } from "../i18n/plural.js";
 import { renderClientsList } from "../modules/clients/clientsView.js";
@@ -116,7 +117,7 @@ function sessionOfProgram(program, state, t) {
       ? {
           id: `plan-${program.id}`,
           isPlanning: true,
-          titles: [program.title || t("planned_program") || "Planned Program"],
+          titles: [programNameIn(program.title, t) || t("planned_program") || "Planned Program"],
           timeLabel: t("date_unknown") || "Date Unknown",
           location: "",
         }
@@ -544,7 +545,11 @@ export async function finishWorkoutSession() {
   // The questions above wait for an answer; the session may have been closed meanwhile.
   if (getActiveSession() !== activeSession) return;
 
-  const sessionDateISO = new Date(activeSession.startTime).toISOString();
+  const slot = activeSession.sourceSession;
+  const sessionDateISO = performedAtFor(
+    activeSession.startTime,
+    slot && !slot.isPlanning ? slot.startDate : null,
+  );
   const sessionDuration = activeSession.duration;
 
   stampSourceSessionsCompleted(activeSession, state, sessionDuration);

@@ -108,9 +108,7 @@ test("a group of client ids from the first cut of schema 6 becomes a group of th
 test("a note from the first cut of schema 6 is read into its current fields on the way in", () => {
   const state = toDomainState({
     sessions: [],
-    exerciseNotes: [
-      { id: "n1", clientId: "ana", tag: "Too Hard - Reduce Load", resolved: false },
-    ],
+    exerciseNotes: [{ id: "n1", clientId: "ana", tag: "Too Hard - Reduce Load", resolved: false }],
   });
   assert.deepEqual(state.exerciseNotes, [
     { id: "n1", clientId: "ana", tag: "too_hard", review: "pending" },

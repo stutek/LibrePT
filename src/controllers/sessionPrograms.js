@@ -11,6 +11,7 @@
 // Every function here takes the session it works on, never only the one in the slot, so that a
 // clipboard holding several sessions at once adds to this file instead of rewriting it.
 
+import { libraryExercises } from "../data/exerciseLibrary.js";
 import { newRecordId } from "../data/recordId.js";
 import { COMMON_RECORD_FIELDS } from "../data/recordSchemas.js";
 import { assignPositions, orderedItems } from "../data/sessionItemOrder.js";
@@ -20,11 +21,17 @@ import {
   groupsOfSessions,
   notesForProgram,
   openProgramsOfSessions,
+  recordTrainings,
   saveSessionPrograms,
 } from "../data/trainingRecords.js";
 import { withoutBinding } from "../domain/participantBinding.js";
+import { buildSessionHistoryRecord } from "../domain/sessionHistoryRecord.js";
 import { buildProgramSnapshot, isRestRecord } from "../domain/sessionItemRecord.js";
-import { buildClientStateFromHistoryLog, ensureRestItems } from "../domain/sessionPlanFactory.js";
+import {
+  buildClientStateFromHistoryLog,
+  buildClientStateFromRoutine,
+  ensureRestItems,
+} from "../domain/sessionPlanFactory.js";
 import { getActiveSession, getAppDeps } from "./activeSessionStore.js";
 
 /** The booked session rows a clipboard stands for. None for a plan written for no session. */
@@ -130,6 +137,77 @@ export function savePlanEdit(clientId = getActiveSession()?.activeClientId) {
   if (!session) return;
   if (clientId) session.bindings = withoutBinding(session.bindings, clientId);
   saveSession(session);
+}
+
+/**
+ * Keep a participant's plan as an unscheduled one before the clipboard puts another plan in its
+ * place ("Copy this plan to…", "Everyone on this plan"). A program is never deleted (Simon,
+ * 2026-10-03); the copy used to replace it with nothing kept. A plan with no exercise, or with the
+ * same exercises as its replacement, has nothing worth keeping.
+ */
+export function keepPlanBeforeReplacing(session, clientId, replacement) {
+  const { state } = getAppDeps();
+  const clientState = session?.clientRoutines?.[clientId];
+  if (!state || !clientState) return;
+  const names = (items) =>
+    orderedItems(items || [])
+      .filter((item) => !isRestRecord(item))
+      .map((item) => item.name)
+      .join("\n");
+  const held = names(clientState.exercises);
+  if (!held || held === names(replacement)) return;
+  const plan = buildSessionHistoryRecord({
+    client: (state.clients || []).find((client) => client.id === clientId) || { id: clientId },
+    clientState,
+    dateISO: new Date().toISOString(),
+    duration: 0,
+    isPlanning: true,
+    title: session.sourceSession?.titles?.[0] || "",
+  });
+  if (plan) recordTrainings(state, [plan]);
+}
+
+/**
+ * Bring a session's stored plans in line with the routines its form names, one per client. The
+ * session row keeps one routine, its first client's, so a client added with a routine of their own
+ * got the session's routine when the clipboard opened from the card. A client whose
+ * chosen routine differs from their stored plan's gets a plan from it, under the same id; one with
+ * no plan yet, whose routine is the session's, is left to the clipboard, which builds it. A plan
+ * already running is the work in hand and is not touched.
+ */
+export function planRoutinesChosenInForm(sessionId, clientRoutines, emptyPlanName) {
+  const { state } = getAppDeps();
+  const session = (state?.sessions || []).find((row) => row.id === sessionId);
+  if (!session) return;
+  const stored = openProgramsOfSessions(state, [sessionId]);
+  const entries = [];
+  for (const { clientId, routineId = "" } of clientRoutines || []) {
+    const program = stored.find((row) => row.clientId === clientId);
+    if (program?.status === "live") continue;
+    if (program && (program.routineId || "") === routineId) continue;
+    if (!program && routineId === (session.routineId || "")) continue;
+    const clientState = buildClientStateFromRoutine({
+      routineId,
+      routines: state.routines,
+      exercises: libraryExercises(state),
+      emptyPlanName,
+    });
+    ensureRestItems(clientState);
+    assignPositions(clientState.exercises);
+    entries.push({
+      ...seedStampOf(state, sessionId),
+      id: program?.id || newRecordId(),
+      clientId,
+      status: "planned",
+      sessionId,
+      createdAt: new Date().toISOString(),
+      routineId,
+      routineName: clientState.routineName,
+      exercises: buildProgramSnapshot(clientState),
+      feedback: program ? feedbackFromNotes(notesForProgram(state, program.id)) : [],
+    });
+  }
+  if (entries.length > 0) saveSessionPrograms(state, entries);
 }
 
 /** A plan the trainer threw away: its programs are kept as discarded, which no list shows. */

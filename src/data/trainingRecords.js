@@ -12,6 +12,7 @@
 //
 // Injected dependencies: none — every function takes the `state` it reads or writes.
 
+import { TRANSLATIONS } from "../i18n/index.js";
 import { libraryExercises } from "./exerciseLibrary.js";
 import {
   feedbackForHistory,
@@ -48,6 +49,20 @@ export function allPrograms(state) {
 /** Every exercise note, in no particular order. */
 export function allExerciseNotes(state) {
   return state?.exerciseNotes || [];
+}
+
+// The names the app gives a plan nobody named. They are stored as text, in the language the plan was
+// made in, so they are recognised in every language and shown in the reader's.
+const GENERATED_PLAN_NAMES = ["custom_empty_plan", "planned_program"];
+
+/** A program's or plan's name in the language of `t`: a name the app gave it is translated, a name
+ *  the trainer wrote is kept as written. */
+export function programNameIn(name, t) {
+  if (!name) return name || "";
+  const key = GENERATED_PLAN_NAMES.find((candidate) =>
+    Object.values(TRANSLATIONS).some((words) => words[candidate] === name),
+  );
+  return key ? t(key) : name;
 }
 
 /** When a program happened, or for a draft when it was written: the instant it is sorted by. */
@@ -273,10 +288,17 @@ function hasExercises(program) {
  */
 export function unschedulePrograms(state, ids) {
   const moved = new Set(ids);
+  const titleOf = (sessionId) =>
+    (state.sessions || []).find((session) => session.id === sessionId)?.title;
   state.clientPrograms = programs(state).map((program) => {
     if (!moved.has(program.id)) return program;
-    const { sessionId: _sessionId, startedAt: _startedAt, ...rest } = program;
-    return { ...rest, status: hasExercises(program) ? "planned" : "discarded" };
+    const { sessionId, startedAt: _startedAt, ...rest } = program;
+    // The session's name goes with it, so the feed's "unscheduled plans" says which plan this was.
+    return defined({
+      ...rest,
+      title: rest.title || titleOf(sessionId),
+      status: hasExercises(program) ? "planned" : "discarded",
+    });
   });
 }
 

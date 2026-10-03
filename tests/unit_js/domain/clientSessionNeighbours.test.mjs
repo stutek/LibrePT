@@ -221,9 +221,45 @@ test("today: the client's scheduled session on today's date", () => {
 test("today: a day already finished answers with its history record, not the scheduled row", () => {
   const state = {
     history: [history({ id: "h9", date: "2026-09-14T19:05:00.000Z" })],
-    sessions: [session({ id: "s1", startDate: "2026-09-14T18:00:00.000Z" })],
+    sessions: [session({ id: "s1", startDate: "2026-09-14T18:00:00.000Z", status: "done" })],
   };
   assert.equal(clientSessionToday(state, "ana", NOW).id, "h9");
+});
+
+// With a session finished today and another running, Today led to the finished one.
+test("today: the session the client is training in now comes before one finished today", () => {
+  const state = {
+    history: [history({ id: "h9", date: "2026-09-14T07:05:00.000Z" })],
+    sessions: [
+      session({ id: "sMorning", startDate: "2026-09-14T07:00:00.000Z", status: "done" }),
+      session({ id: "sNoon", startDate: "2026-09-14T11:30:00.000Z" }),
+      session({ id: "sEvening", startDate: "2026-09-14T18:00:00.000Z" }),
+    ],
+    clientPrograms: [
+      {
+        id: "pNoon",
+        clientId: "ana",
+        sessionId: "sNoon",
+        status: "live",
+        startedAt: "2026-09-14T11:31:00.000Z",
+        exercises: [],
+      },
+    ],
+  };
+  const today = clientSessionToday(state, "ana", NOW);
+  assert.equal(today.kind, "session");
+  assert.equal(today.id, "sNoon");
+});
+
+test("today: a session still to come today comes before one finished today", () => {
+  const state = {
+    history: [history({ id: "h9", date: "2026-09-14T07:05:00.000Z" })],
+    sessions: [
+      session({ id: "sMorning", startDate: "2026-09-14T07:00:00.000Z", status: "done" }),
+      session({ id: "sEvening", startDate: "2026-09-14T18:00:00.000Z" }),
+    ],
+  };
+  assert.equal(clientSessionToday(state, "ana", NOW).id, "sEvening");
 });
 
 test("today: null when the client has nothing today, and another client's session never counts", () => {

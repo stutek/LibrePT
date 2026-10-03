@@ -121,6 +121,37 @@ test("the readable rendering answers the question the client actually asked", ()
   assert.match(markdown, /supervisory authority/);
 });
 
+// An exercise the client page calls skipped was listed with three sets performed, and a
+// signal without a remark ended in a colon.
+test("an exercise not done reads as skipped, and only sets done are listed", () => {
+  const state = gymState();
+  state.history[0].exercises = [
+    {
+      name: "Back Squat",
+      completed: false,
+      sets: [
+        { reps: 10, weight: 0, completed: false },
+        { reps: 10, weight: 0, completed: false },
+      ],
+    },
+    {
+      name: "Bench Press",
+      completed: true,
+      sets: [
+        { reps: 5, weight: 40, completed: true },
+        { reps: 5, weight: 40, completed: false },
+      ],
+    },
+  ];
+  state.history[0].feedback = [{ id: "f1", tag: "Too Hard - Reduce Load", note: "" }];
+  const markdown = renderClientExportMarkdown(buildClientExport(state, "c-jane"));
+
+  assert.match(markdown, /\*\*Back Squat\*\*\n {2}skipped/);
+  assert.doesNotMatch(markdown, /10 reps @ bodyweight/);
+  assert.equal((markdown.match(/5 reps @ 40kg/g) || []).length, 1, "the set not done is listed");
+  assert.match(markdown, /\(Too Hard - Reduce Load\)\n/, "a signal with no remark ends without a colon");
+});
+
 test("the document is written in the client's language", () => {
   // The one document written FOR the client was English from the first line to the last, although
   // the client's consent form records the language they read.

@@ -156,8 +156,15 @@ export function buildRouteTable() {
     }),
   );
 
+  // Drawn from the stored signals each time it is entered: drawn only when a signal changed through
+  // one path, it said "nothing waiting" right after a session that left one.
   const adjustments = registry.register(
-    new ViewRoute({ name: "adjustments", pattern: "/adjustments", viewId: "adjustments" }),
+    new ViewRoute({
+      name: "adjustments",
+      pattern: "/adjustments",
+      viewId: "adjustments",
+      render: (ctx) => ctx.deps.renderPendingPlanAdjustments?.(),
+    }),
   );
   const routines = registry.register(
     new ViewRoute({ name: "routines", pattern: "/routines", viewId: "routines" }),
