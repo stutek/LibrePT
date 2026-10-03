@@ -4586,6 +4586,16 @@ agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pa
 
 **Predlog:** program in prisotnost naj se zapišeta pod trening, ki ga je trener začel in zaključil, zaključeni trening pa naj podloge ne sme sestaviti — opaženo `2026-10-03 04:40:13.151` na različici `e51fea88`, 390 × 844, sl. Prejšnji popravek §80.168 pokriva dva sočasna aktivna treninga; tu je tretji, že zaključen, prvi v skupini prekrivanja.
 
+### 80.174 [ ] P2 — Obnova stare kopije: obvestilo o pretvorbi je v angleščini sredi slovenskega okna in ne pove, kaj se bo zgodilo s podatki
+
+**Scenarij in koraki:** objavljena aplikacija `933dbc0`: skupinski trening »Stara skupina« (Hana Kolar, Igor Rem) z »Pretežko« in »Prelahko«, zaključen; trening »Stari jutri« za Igorja → ☰ → »Upravljanje podatkov« → »Izvozi JSON« → »Zapisal sem si ga, shrani«. Nato `e51fea88` na prazni aplikaciji (`?lang=sl`): ☰ → »Upravljanje podatkov« → »Izberi JSON datoteko« → geslo → »Odpri datoteko«.
+
+**Opaženo:** v rdečem okvirju pod naslovom okna piše, z ikono pred besedilom: »Store each client's training as a program of their own; 1 training record(s) became client programs; 2 plan update(s) became exercise notes — s tem se podatki datoteke posodobijo in se ne bodo več odprli v starejših različicah LibrePT«. Pod njim sta gumba »Obdrži, kar imam« in »Zamenjaj«. Vprašanja ni; besedilo ne pove, kaj ta gumba storita s kopijo.
+
+**Težava in vpliv:** slovenski trener dobi angleški stavek z izrazi »client programs« in »exercise notes«, ki jih aplikacija nikjer ne uporablja. Dve zaporedni sporočili (angleško in slovensko) se spajata v en stavek s pomišljajem. Trener ne ve, ali bo po »Zamenjaj« vse, kar je bilo v kopiji, na telefonu, in kaj pomeni »Obdrži, kar imam« za kopijo.
+
+**Predlog:** celotno obvestilo naj bo v jeziku aplikacije, v trenerjevih besedah (koliko treningov in signalov se prenese), z vprašanjem nad gumbi — opaženo `2026-10-03 04:48:09.770` na različici `e51fea88`, 390 × 844, sl.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
