@@ -4578,7 +4578,7 @@ agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pa
 
 **Predlog:** seznam naj se ob odprtju prebere iz shranjenih zapisov, ne iz stanja, nastalega pred zaključkom ali izbrisom — opaženo `2026-10-03 04:31:35.520` na različici `e51fea88`, 390 × 844, sl.
 
-### 80.173 [ ] P1 — Trening, ki se prekriva z že zaključenim, se zaključi pod imenom zaključenega: prisotnost in signal pristaneta drugje
+### 80.173 [ ] P1 — Stranka, ki je že v prekrivajočem se zaključenem treningu, ima novi trening zapisan pod zaključenim: prisotnost in signal pristaneta drugje
 
 **Scenarij in koraki:** prazna aplikacija, stranke Ana Kranjc, Bojan Pirc, Cvetka Mlakar. Trening »Skupina Moč« (vsi trije, 04:30–05:30) začet in zaključen. Nato »Dvojček B« (Ana, Bojan, 04:40–05:40) in »Dvojček A« (Cvetka, 04:45–05:45), za oba »Vseeno razporedi«; oba začeta in zaključena. Nato »Trojček C« (Ana, 04:50–05:20) in »Trojček D« (Bojan, 04:50–05:20), vsak z »Vseeno razporedi«. »Trojček C« → »Začni trening« → ⋮ »Možnosti treninga« → »Uredi načrt« → »Dodaj iz kataloga« → Dumbbell Bench Press → Esc → »Pretežko« → »Zaključi vadbo« → »Zaključi zdaj« → »Zaključi zdaj«.
 
