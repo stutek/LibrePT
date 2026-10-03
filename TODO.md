@@ -4822,6 +4822,16 @@ agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pa
 
 **Predlog:** ob številki naj piše »do konca« (ali »še 00h 56m«) — opaženo `2026-10-03 07:00:19.750` na različici `e51fea88`, 320 × 680, sl.
 
+### 80.197 [ ] P3 — Po izvozu datoteke z varnostno kopijo glava še piše »NI VARNOSTNE KOPIJE«
+
+**Scenarij in koraki:** 320 × 680, podatki brez kopije; glava piše »OGROŽENO — NAREDI KOPIJO« → ☰ → »Upravljanje podatkov« → »Izvozi JSON« (datoteka je prenesena) → zapri okno → osveži.
+
+**Opaženo:** oznaka v glavi se spremeni v »NI VARNOSTNE KOPIJE«. Okno »Središče za sinhronizacijo in varnostne kopije« piše »25 sprememb na tej napravi še ni v Google Drive«.
+
+**Težava in vpliv:** trener je pravkar naredil kopijo (naslov razdelka v oknu je »Izvozi varnostno kopijo«) in v glavi še vedno piše, da je ni. Ne pove, da piše o Google Drive in ne o datoteki, ki jo je prenesel.
+
+**Predlog:** oznaka naj pove, katera kopija manjka (»Ni kopije v Google Drive«) ali naj izvoz datoteke šteje kot kopija — opaženo `2026-10-03 07:01:44.110` na različici `e51fea88`, 320 × 680, sl.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
