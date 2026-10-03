@@ -4660,6 +4660,16 @@ agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pa
 
 **Predlog:** ime načrta brez rutine naj se piše v jeziku izpisa, ne v jeziku, v katerem je bil trening ustvarjen — opaženo `2026-10-03 05:34:07.600` na različici `e51fea88`, 390 × 844, en in de.
 
+### 80.181 [ ] P3 — Izbris terminov pravi, da bodo povratne informacije izgubljene, signal »Prelahko« pa ostane na seznamu za pregled
+
+**Scenarij in koraki:** trening »Jutranja dvojica« za jutri (Dana Vidmar, Emil Zorc), Emilu Dumbbell Bench Press in »Prelahko« → ⋮ »Možnosti treninga« → »Izbriši trening«.
+
+**Opaženo:** okno piše »Izbriši ta trening? Odstranjen bo z urnika, zabeležen napredek in povratne informacije pa bodo izgubljeni — program vsakega udeleženca se ohrani med nenačrtovanimi programi.« Po potrditvi je v predalu »Emil Zorc (1)«, na strani »Čakajoče na pregled« pa vrstica »Emil Zorc · Prelahko – povečaj težo · Dumbbell Bench Press«. V bazi je zaznamek `too_easy` s `review: pending`. Signal torej ni izgubljen.
+
+**Težava in vpliv:** besedilo okna trdi nasprotno od izida. Trener, ki izbriše termin in prebere opozorilo, pričakuje, da signal izgine, in ga potem najde med neodpravljenimi.
+
+**Predlog:** besedilo naj loči, kaj se izgubi (serije) in kaj ostane (signal in načrt) — opaženo `2026-10-03 05:37:14.069` na različici `e51fea88`, 390 × 844, sl.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
