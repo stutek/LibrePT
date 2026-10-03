@@ -4772,6 +4772,16 @@ agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pa
 
 **Predlog:** ob »Ohrani urnik« naj bo datum vadbe dan termina — opaženo `2026-10-03 06:40:36.456` na različici `e51fea88`, 390 × 844, sl.
 
+### 80.192 [ ] P3 — Angleška podloga piše »No Exercises Injected«, slovenska »Ni vstavljenih vaj«
+
+**Scenarij in koraki:** `?lang=en` → kartica treninga brez vaj (»Včeraj dva«, Sara Lah) → podloga.
+
+**Opaženo:** prazno stanje piše »No Exercises Injected« in pod njim »No exercises yet. Tap the three dots (⋮) at the top right and choose Edit plan.« Na strani stranke stoji naslov »Logged Session History« z veliko začetnico vsake besede, drugi naslovi pa so v navadnem pisanju (»Copy for AI, without names«, »Export data (GDPR)«).
+
+**Težava in vpliv:** »Injected« je tehnični izraz za programsko dodajanje in ga bralec, ki ni v stroki, ne razume kot »dodane vaje«. Besedilo ne ujema s sosednjim stavkom, ki pove, kaj storiti.
+
+**Predlog:** »No exercises added« (ali »No exercises yet«), naslov »Logged session history« — opaženo `2026-10-03 06:41:58.932` na različici `e51fea88`, 390 × 844, en.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
