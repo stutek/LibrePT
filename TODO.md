@@ -4720,6 +4720,16 @@ agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pa
 
 **Predlog:** ko ima ciljna stranka že vaje, naj ukaz vpraša »Zamenjam Cvetkin načrt?« in navede vaje, ki bi se izgubile, ali pa naj stari načrt ostane med nenačrtovanimi — opaženo `2026-10-03 05:51:45.566` na različici `e51fea88`, 390 × 844, sl.
 
+### 80.187 [ ] P3 — Po izbrisu treninga, ki teče, ostane nenačrtovan načrt z vsemi tremi serijami še vedno zaznamovanimi kot opravljene
+
+**Scenarij in koraki:** trening »Tekoči« (Lea Test, 06:00–07:00) → »Začni trening« → ⋮ »Uredi načrt« → »Dodaj iz kataloga« → Barbell Row → »Prelahko« → ⋮ »Možnosti treninga« → »Izbriši trening« → okno »Teh zabeleženih serij ni mogoče obnoviti. Lea Test: 3 serije« → drsnik »Povleci do konca, da izbrišeš ta trening«.
+
+**Opaženo:** okno obljubi: »program vsakega udeleženca se ohrani med nenačrtovanimi programi«. Po izbrisu predal piše »Tekoči · Lea Test · 2026-10-03«, načrt vsebuje Barbell Row, 3 serije × 10. V bazi (`schema6`) ima ta program status `planned`, in vse tri serije imajo `completed: true`. Pogled urejanja ne kaže, da so serije opravljene.
+
+**Težava in vpliv:** okno pravi, da so zabeležene serije izgubljene, načrt pa naj bi ostal. Zapis jih ima še vedno. Dokler načrt ni mogoče dodeliti terminu (§80.182), trener posledice ne vidi; ko bo mogoče, bo načrt nosil opravljene serije prejšnjega, izbrisanega treninga.
+
+**Predlog:** ob izbrisu naj se serije vrnejo na neopravljene, kot pove besedilo okna — opaženo `2026-10-03 05:57:45.522` na različici `e51fea88`, 390 × 844, sl.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
