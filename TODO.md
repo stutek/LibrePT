@@ -4782,6 +4782,16 @@ agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pa
 
 **Predlog:** »No exercises added« (ali »No exercises yet«), naslov »Logged session history« — opaženo `2026-10-03 06:41:58.932` na različici `e51fea88`, 390 × 844, en.
 
+### 80.193 [ ] P3 — V oknu »Zabeleži povratne informacije« Esc zavrže izbrano oznako in vpisano opombo — čaka na Simona
+
+**Scenarij in koraki:** trening »Petletna« (Sara Lah) → ⋮ »Uredi načrt« → Plank → »Opombe« → izberem »Dober napredek«, v polje »Opombe po meri« vpišem »Napisano pred Esc« → Esc → ponovno »Opombe«.
+
+**Opaženo:** okno je zaprto, v bazi ni zaznamka. Ob ponovnem odprtju je polje prazno in izbrana je prva možnost »Samo opomba, brez ocene«.
+
+**Težava in vpliv:** trener, ki mu med vpisom zmanjka časa ali pritisne Esc, izgubi besedilo. Pri obrazcih velja pravilo, da zavrže samo »Prekliči«; ta okna je §80.133 že opisal kot odprto vprašanje (okno ne piše sproti kot obrazec). Enako vprašanje velja tudi za to okno.
+
+**Predlog:** odločitev Simona: ali ima okno z oznako in opombo isto pravilo kot obrazci — opaženo `2026-10-03 06:44:24.588` na različici `e51fea88`, 390 × 844, sl.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
