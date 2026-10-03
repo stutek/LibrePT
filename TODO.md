@@ -1345,8 +1345,10 @@ rule above would now pin the image, but the evidence points elsewhere: the `Unab
 line is also in PASSING runs (the 2026-09-30 log), so it does not separate the two. What does is
 load — all three failures came after a Stage 3 that averaged 12.7 to 13.7 of 16 cores, the passes
 after 7.9 to 12.2. Not proven either, because the container is started with `--rm` and ZAP's own log
-goes with it. **In progress:** keep ZAP's log when the scan fails (a writable scratch directory for
-`/zap/wrk`, which also removes the yaml line), so the next failure names its cause.
+goes with it. **Done 2026-10-03 (`396f711b`):** a failed scan now prints the last 40 lines of ZAP's
+own log, from a fresh writable copy of `deploy/zap` mounted as `/zap/wrk`. Reading the image showed
+the yaml line was harmless (`zap-baseline.py` writes its files to `$HOME` and only copies the yaml
+to `/zap/wrk`). **Re-check condition:** the next failure; its log tail names the cause.
 
 ### 38.21 [ ] OPEN — the demo's card copy, waiting on the maintainer
 
