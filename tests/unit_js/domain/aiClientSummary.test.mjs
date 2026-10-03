@@ -63,3 +63,24 @@ test("the copy carries the client's ID and what they did, set by set", () => {
 test("only this client's performed sessions count, never a planning draft", () => {
   assert.match(aiClientSummary(client, history), /Logged sessions: 1/);
 });
+
+test("recent sessions are the ten newest, newest first, whatever order they are stored in", () => {
+  // Storage order is the order of writing, and a restored backup or a migration writes old
+  // sessions last. Taking the first ten listed the oldest once a client had more than ten.
+  const days = Array.from({ length: 12 }, (_, i) => `2026-09-${String(i + 1).padStart(2, "0")}`);
+  const stored = [...days].reverse().map((day, i) => ({
+    id: `s${i}`,
+    clientId: client.id,
+    status: "done",
+    performedAt: `${day}T08:00:00.000Z`,
+    exercises: [],
+  }));
+  const shown = [...aiClientSummary(client, stored).matchAll(/Session on (\S+)/g)].map((m) => m[1]);
+  assert.deepEqual(shown, [...days].reverse().slice(0, 10));
+  assert.deepEqual(
+    [...aiClientSummary(client, [...stored].reverse()).matchAll(/Session on (\S+)/g)].map(
+      (m) => m[1],
+    ),
+    shown,
+  );
+});

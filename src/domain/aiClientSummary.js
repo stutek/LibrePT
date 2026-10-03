@@ -28,7 +28,10 @@ export function aiClientSummary(client, programs) {
   const sessions = (programs || []).filter(
     (program) => program.clientId === client.id && program.status === "done",
   );
-  const recent = sessions
+  // Newest first, by when it was performed: storage order is the order of writing, and a restored
+  // backup writes old sessions last.
+  const recent = [...sessions]
+    .sort((a, b) => String(b.performedAt || "").localeCompare(String(a.performedAt || "")))
     .slice(0, RECENT_SESSIONS)
     .map((program) => {
       const lines = exerciseRecordsOf(program.exercises || []).map(exerciseLine);
