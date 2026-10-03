@@ -4656,7 +4656,7 @@ agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pa
 
 **Opaženo:** besedilo datoteke je v angleščini (»Your training data«, »Feedback (Too hard – reduce the load)«), pod »Logged training (3)« pa so naslovi »### 2026-10-03 — Prazen načrt, brez rutine«. V nemški datoteki: »### 2026-10-03 — Prazen načrt, brez rutine« pod »Erfasstes Training (3)«. Oznake signalov so pravilno v jeziku datoteke.
 
-**Težava in vpliv:** stranka, ki dobi datoteko po členu 15 v angleščini ali nemščini, vidi slovenske besede brez razlage. Isti niz stoji tudi na strani stranke pod »Zgodovina zabeleženih vadb«.
+**Težava in vpliv:** stranka, ki dobi datoteko po členu 15 v angleščini ali nemščini, vidi slovenske besede brez razlage. Isti niz stoji tudi na strani stranke pod »Zgodovina zabeleženih vadb«. Isto v predalu obvestil: program Cvetke Novak, ki je ostal po odstranitvi z obrazca termina »Vrnitev«, piše v angleščini »Načrtovan program · Cvetka Novak · 2026-10-03« in v nemščini enako, medtem ko sta programa Aleksandre in Bojana v istem seznamu prevedena (»Planned Program«, »Geplantes Programm«).
 
 **Predlog:** ime načrta brez rutine naj se piše v jeziku izpisa, ne v jeziku, v katerem je bil trening ustvarjen — opaženo `2026-10-03 05:34:07.600` na različici `e51fea88`, 390 × 844, en in de.
 
