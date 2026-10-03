@@ -132,7 +132,10 @@ export function renderActiveSessionOverlayShell() {
           <button id="btn-start-session" class="btn primary-btn btn-glyph" data-i18n-label="btn_start_workout_session" aria-label="Start Session"><i class="fa-solid fa-circle-play"></i></button>
           <div id="overlay-session-timer" class="hidden">
             <i class="fa-solid fa-clock text-primary" id="overlay-session-duration-icon"></i>
-            <span id="overlay-session-duration">00:00</span>
+            <span class="session-timer-text">
+              <span id="overlay-session-duration">00:00</span>
+              <span class="session-timer-caption" data-i18n="session_time_left">left</span>
+            </span>
           </div>
         </div>
         <!-- Shown only in edit mode (see renderActiveGroupBoard): finishing the plan edit lives on

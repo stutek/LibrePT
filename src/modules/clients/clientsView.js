@@ -153,7 +153,7 @@ export function renderClientDetailViewShell() {
 
         <div id="client-detail-actions" class="quick-workout-action">
           <button id="btn-plan-client-program" class="btn primary-btn">
-            <i class="fa-solid fa-calendar-plus"></i> <span data-i18n="btn_plan_program">Plan Program</span>
+            <i class="fa-solid fa-calendar-plus"></i> <span data-i18n="btn_plan_program">Plan programme</span>
           </button>
           <a id="btn-send-consent-email" class="btn secondary-btn">
             <i class="fa-solid fa-envelope"></i> <span id="btn-send-consent-email-text"></span>

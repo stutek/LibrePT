@@ -20,6 +20,19 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
+}
+/* A name or a goal with no space in it breaks inside its card instead of widening the card (and with
+   it every other card in the grid). */
+.client-card {
+  min-width: 0;
+}
+.client-name-meta {
+  min-width: 0;
+}
+.client-name-meta h3,
+.client-name-meta p {
+  overflow-wrap: anywhere;
 }
 .avatar {
   width: 42px;

@@ -360,6 +360,51 @@ def test_four_typed_digits_are_the_time_they_spell(page, local_server):
     assert page.input_value("#setup-start-time") == "17:30"
 
 
+def test_pm_is_the_afternoon_and_a_time_that_does_not_exist_is_refused(
+    page, local_server
+):
+    """ "9:00 PM" was saved as 09:00 and "25:00" as 23:00, each without a word. PM now means the
+    afternoon; a time written out with a colon that is not one is refused, the text stays, the note
+    says so and the form cannot be sent with it."""
+    load_with_stub(
+        page, local_server, setup_stub(SCHEDULED_SESSION, target_session="'s-edit'")
+    )
+    field = page.locator("#setup-start-time")
+    note = page.locator(".stepped-field:has(#setup-start-time) .stepped-field-note")
+
+    field.click()
+    field.press_sequentially("9:00 PM")
+    page.locator("#setup-location").click()
+    assert field.input_value() == "21:00"
+
+    field.click()
+    field.press_sequentially("25:00")
+    page.locator("#setup-location").click()
+    assert field.input_value() == "25:00"
+    expect(note).to_contain_text("25:00 is not a time")
+    assert field.evaluate("el => el.validity.valid") is False
+
+    field.click()
+    field.press_sequentially("1830")
+    assert field.input_value() == "18:30"
+    assert field.evaluate("el => el.validity.valid") is True
+
+
+def test_an_iso_day_that_does_not_exist_is_refused(page, local_server):
+    load_with_stub(
+        page, local_server, setup_stub(SCHEDULED_SESSION, target_session="'s-edit'")
+    )
+    field = page.locator("#setup-session-date")
+    note = page.locator(".stepped-field:has(#setup-session-date) .stepped-field-note")
+
+    field.click()
+    field.press_sequentially("2026-02-31")
+    page.locator("#setup-location").click()
+    assert field.input_value() == "2026-02-31"
+    expect(note).to_contain_text("2026-02-31 is not a date")
+    assert field.evaluate("el => el.validity.valid") is False
+
+
 def test_the_end_field_s_marks_are_the_four_session_lengths(page, local_server):
     """Counted from the START, not from the clock: half an hour, an hour, ninety minutes, two hours.
     One tap is then a whole booked slot, which is what booking a session usually is."""

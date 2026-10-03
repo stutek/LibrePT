@@ -69,7 +69,37 @@ export function clockFromDigits(digits) {
   return pair(clampHour(leadingHour), clampMinute(parseInt(d.slice(2, 4), 10)));
 }
 
+// A time written with a separator or with AM/PM: "9:00 PM", "9.30", "25:00". Read against what it
+// SAYS, not as loose digits, because a trainer who typed a colon meant those hours and minutes.
+const AM_PM_ENTRY = /^(\d{1,2})(?:\s*[:.]\s*(\d{2}))?\s*([ap])\.?\s*m?\.?$/i;
+const SEPARATED_ENTRY = /^(\d{1,2})\s*[:.]\s*(\d{2})$/;
+
+/** A time written with a colon, a dot or AM/PM, as "HH:MM". Returns "" when the entry is not written
+ * that way (the digit rules in `clockFromDigits` apply), and null when it is but is not a real time:
+ * "25:00", "12:75", "13:00 PM". PM is the afternoon: "9:00 PM" is 21:00. */
+export function clockFromEntry(raw) {
+  const text = String(raw || "").trim();
+  const pad = (n) => String(n).padStart(2, "0");
+  const meridiem = AM_PM_ENTRY.exec(text);
+  if (meridiem) {
+    const hour = parseInt(meridiem[1], 10);
+    const minute = meridiem[2] === undefined ? 0 : parseInt(meridiem[2], 10);
+    if (hour < 1 || hour > 12 || minute > 59) return null;
+    const afternoon = meridiem[3].toLowerCase() === "p";
+    return `${pad((hour % 12) + (afternoon ? 12 : 0))}:${pad(minute)}`;
+  }
+  const separated = SEPARATED_ENTRY.exec(text);
+  if (separated) {
+    const hour = parseInt(separated[1], 10);
+    const minute = parseInt(separated[2], 10);
+    return hour > 23 || minute > 59 ? null : `${pad(hour)}:${pad(minute)}`;
+  }
+  return "";
+}
+
 export function normalizeClockEntry(raw) {
+  const entry = clockFromEntry(raw);
+  if (entry !== "") return entry === null ? "" : entry;
   return clockFromDigits(
     String(raw || "")
       .replace(/\D/g, "")
@@ -98,8 +128,9 @@ class TimeField extends SteppedField {
     this.anchorInput?.addEventListener("input", () => this.renderMarks());
   }
 
+  // Eight, so that "12:30 PM" can be pasted whole; the settled value is always five.
   get maxLength() {
-    return 5;
+    return 8;
   }
 
   get kindClass() {
@@ -127,8 +158,26 @@ class TimeField extends SteppedField {
   // it is a time. Typing into a field already holding "17:30" starts over, because the focus handler
   // selected it.
   liveValue(raw) {
+    this.input.setCustomValidity("");
+    // Letters mean AM/PM is still arriving: settling "12:30" now would drop what comes after it.
+    if (/[a-z]/i.test(String(raw || ""))) return null;
+    if (clockFromEntry(raw) !== "") return null;
     const digits = String(raw || "").replace(/\D/g, "");
     return digits.length === 4 ? clockFromDigits(digits) : null;
+  }
+
+  // A time that is written out but is not one is refused, not moved: the text stays in the field,
+  // the note says what is wrong, and the form cannot be sent with it.
+  settle() {
+    const raw = this.input.value;
+    this.input.setCustomValidity("");
+    if (clockFromEntry(raw) === null) {
+      const message = this.label("time_field_invalid").replace("{typed}", raw.trim());
+      this.input.setCustomValidity(message);
+      this.showNote(message);
+      return;
+    }
+    super.settle();
   }
 
   stepped(value, direction) {

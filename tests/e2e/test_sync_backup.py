@@ -256,3 +256,39 @@ def test_the_backup_dialog_states_the_header_number_in_words(page, local_server)
     text = page.locator("#sync-hub-changes").inner_text()
     assert "3 changes on this device are not yet in Google Drive" in text, text
     assert "not connected" in text, text
+
+
+ADD_TWENTY_FIVE_CLIENTS = """
+async () => {
+    const stateStore = await import(new URL('data/stateStore.js', document.baseURI).href);
+    const state = stateStore.getState();
+    for (let i = 0; i < 25; i += 1) {
+        state.clients.push({ id: `warn-${i}`, name: `Warn ${i}`, goals: '', alias: '' });
+    }
+    stateStore.saveToLocalStorage();
+}
+"""
+
+
+def test_the_header_warning_goes_away_after_a_file_export_and_after_a_reload(
+    page, local_server
+):
+    """The warning asks whether the data is anywhere durable, and a downloaded file is. The trainer
+    who has just downloaded the file must not read "not backed up" in the header, before or after a
+    reload."""
+    page.goto(local_server + "clients")
+    page.wait_for_selector("#view-client-directory.active")
+    page.evaluate(ADD_TWENTY_FIVE_CLIENTS)
+    page.wait_for_selector("#unbacked-badge:not(.hidden)")
+
+    page.locator("#backup-btn").click()
+    page.locator("#btn-export-db").click()
+    page.wait_for_selector("#dialog-backup-password[open]")
+    with page.expect_download():
+        page.locator("#btn-backup-pw-confirm").click()
+    page.wait_for_selector("#unbacked-badge.hidden", state="attached")
+
+    page.reload()
+    page.wait_for_selector("#app-header")
+    page.wait_for_timeout(1500)
+    assert page.locator("#unbacked-badge").is_hidden()

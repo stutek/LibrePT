@@ -280,6 +280,31 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav {
     letter-spacing: 0.4px;
   }
 }
+/* The narrowest phones (320 px): the wordmark stays whole and the build markers drop to a second row
+   when the backup warning is showing, instead of the warning pushing the logo and the menu button out
+   of the bar. Measured in tests/medium/test_narrow_header.py. */
+@media (max-width: 360px) {
+  .logo-area {
+    flex-shrink: 0;
+    gap: 4px;
+  }
+  .logo-area h1 {
+    font-size: 16px;
+  }
+  .header-container {
+    flex-wrap: wrap;
+    row-gap: 2px;
+  }
+  .header-build-stack:has(.unbacked-badge:not(.hidden)) {
+    order: 3;
+    flex: 1 0 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px 6px;
+    padding-bottom: 4px;
+  }
+}
 .logo-area h1 {
   font-family: var(--font-header);
   font-size: 26px;

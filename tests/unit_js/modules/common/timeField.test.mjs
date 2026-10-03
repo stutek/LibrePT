@@ -7,7 +7,11 @@
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { clockFromDigits, normalizeClockEntry } from "../../../../src/modules/common/timeField.js";
+import {
+  clockFromDigits,
+  clockFromEntry,
+  normalizeClockEntry,
+} from "../../../../src/modules/common/timeField.js";
 
 test("four digits are the time they spell", () => {
   assert.equal(clockFromDigits("1730"), "17:30");
@@ -42,4 +46,29 @@ test("a value already in shape survives being read again", () => {
   // moved "17:30" would move every seeded session and every restored draft with it.
   assert.equal(normalizeClockEntry("17:30"), "17:30");
   assert.equal(normalizeClockEntry("07:05"), "07:05");
+});
+
+test("PM is read as the afternoon, AM as the morning, noon and midnight as they are", () => {
+  assert.equal(clockFromEntry("9:00 PM"), "21:00");
+  assert.equal(clockFromEntry("9:30 am"), "09:30");
+  assert.equal(clockFromEntry("12:15 PM"), "12:15");
+  assert.equal(clockFromEntry("12:15 AM"), "00:15");
+  assert.equal(clockFromEntry("9 pm"), "21:00");
+  assert.equal(clockFromEntry("9:00pm"), "21:00");
+  assert.equal(normalizeClockEntry("9:00 PM"), "21:00");
+});
+
+test("a time with a separator that is not a time is refused, never moved", () => {
+  assert.equal(clockFromEntry("25:00"), null);
+  assert.equal(clockFromEntry("12:75"), null);
+  assert.equal(clockFromEntry("13:00 PM"), null);
+  assert.equal(clockFromEntry("0:30 AM"), null);
+  assert.equal(normalizeClockEntry("25:00"), "");
+});
+
+test("an entry the digit rules read is left to them", () => {
+  assert.equal(clockFromEntry("930"), "");
+  assert.equal(clockFromEntry("17:30"), "17:30");
+  assert.equal(clockFromEntry("9.30"), "09:30");
+  assert.equal(normalizeClockEntry("9.30"), "09:30");
 });

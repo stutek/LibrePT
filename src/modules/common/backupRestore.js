@@ -42,7 +42,7 @@ import {
   readSuppressionList,
   writeSuppressionList,
 } from "../../data/erasureSuppression.js";
-import { bringsDataForward, describeMigration, migrateState } from "../../data/schemaMigrations.js";
+import { bringsDataForward, migrateState } from "../../data/schemaMigrations.js";
 import { recordBackupTaken } from "../../data/stateStore.js";
 import { SANDBOX, activeWorkspace } from "../../data/workspace.js";
 import { countedText } from "../../i18n/plural.js";
@@ -139,12 +139,11 @@ function showReplaceConfirmation(replacing, migrationSummary) {
   if (forward && forwardText) {
     forward.hidden = !movingForward;
     if (movingForward) {
-      // The steps in the trainer's own words, then the consequence. `describeMigration` already
-      // produces the per-step notes the import banner shows.
-      forwardText.textContent = `${describeMigration(migrationSummary).join("; ")} — ${
+      // One sentence in the trainer's language. The migration steps' own notes are English text for
+      // the console and are not shown here.
+      forwardText.textContent =
         deps.t("restore_brings_forward") ||
-        "this brings the file's data forward, and it will no longer open in older builds of LibrePT."
-      }`;
+        "This file comes from an older version of LibrePT. Restoring converts its data to the new format, and the data will no longer open in older versions of LibrePT.";
     }
   }
   // The replace half is only about THIS device, so it hides when there is nothing here to lose.
@@ -334,9 +333,10 @@ export function renderBackupDialog() {
         <p id="restore-confirm-forward" hidden><i class="fa-solid fa-arrow-up-right-dots"></i>
           <span id="restore-confirm-forward-text"></span>
         </p>
+        <p id="restore-confirm-question"><strong data-i18n="restore_question">Replace the data on this device with the data in the file?</strong></p>
         <div class="restore-confirm-actions">
-          <button type="button" class="btn-secondary" id="btn-restore-cancel" data-i18n="restore_keep">Keep what I have</button>
-          <button type="button" class="btn-danger" id="btn-restore-confirm" data-i18n="restore_replace">Replace it</button>
+          <button type="button" class="btn secondary-btn" id="btn-restore-cancel" data-i18n="restore_keep">Keep what I have</button>
+          <button type="button" class="btn danger-btn" id="btn-restore-confirm" data-i18n="restore_replace">Replace it</button>
         </div>
       </div>
 

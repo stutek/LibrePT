@@ -95,6 +95,9 @@ const STARTS_WITH_YEAR = /^\d{4}(?!\d)\s*[./-]|^\d{5,}/;
  * wrong for a day and month that were typed apart on purpose. */
 export function dateFromDotted(raw, reference) {
   const text = String(raw || "").trim();
+  // An ISO day written out with dashes: a real one is left to the digit rules, one that does not
+  // exist ("2026-02-31") is refused like "31.2.2026".
+  if (ISO_DATE.test(text)) return isoToDate(text) ? "" : null;
   if (!HAS_SEPARATOR.test(text) || STARTS_WITH_YEAR.test(text)) return "";
   const parsed = DOTTED_DATE.exec(text);
   if (!parsed) return null;

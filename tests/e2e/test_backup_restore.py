@@ -358,7 +358,12 @@ def test_an_old_backup_asks_before_bringing_the_file_forward(page, local_server)
 
     assert page.locator("#restore-confirm:not([hidden])").count() == 1
     assert page.locator("#restore-confirm-forward:not([hidden])").count() == 1
-    assert "older builds" in page.locator("#restore-confirm-forward-text").inner_text()
+    forward_text = page.locator("#restore-confirm-forward-text").inner_text()
+    assert "older versions" in forward_text
+    # The notice is a sentence in the app's language, not the migration step's English log note.
+    assert "client programs" not in forward_text
+    # The two buttons answer a question that is on screen above them.
+    assert page.locator("#restore-confirm-question").is_visible()
 
     page.click("#btn-restore-cancel")
     page.wait_for_timeout(400)

@@ -116,3 +116,11 @@ test("entries without separators, and ISO days, keep the digit rules", () => {
   assert.equal(dateFromDotted("2026-09-12", ON_SCREEN), "");
   assert.equal(normalizeDateEntry("2026-09-12", ON_SCREEN), "2026-09-12");
 });
+
+test("an ISO day with dashes that does not exist is refused, like a dotted one", () => {
+  // "2026-02-31" was written out on purpose, part by part; moving it to the 28th would invite a
+  // client for a day nobody chose.
+  assert.equal(dateFromDotted("2026-02-31", ON_SCREEN), null);
+  assert.equal(dateFromDotted("2026-13-01", ON_SCREEN), null);
+  assert.equal(dateFromDotted("2026-02-28", ON_SCREEN), "");
+});

@@ -11,6 +11,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   buildSessionMeta,
+  clientNameMatches,
   escapeHTML,
   formatDateStr,
   formatDurationHourMin,
@@ -254,4 +255,17 @@ test("a span under two days is hours and minutes, a longer one is days and hours
   assert.equal(formatDurationHourMin(870 * 3600 + 60), "36d 06h");
   assert.equal(formatDurationHourMin(197 * 3600 + 60), "08d 05h");
   assert.equal(formatDurationHourMin(-197 * 3600), "-08d 05h");
+});
+
+test("a search does not tell č from c, š from s, ž from z, ć from c or đ from d", () => {
+  const marija = { name: "Marija Vrhovnik-Zupančič Šinkovec", alias: "" };
+  assert.equal(clientNameMatches(marija, "zupancic"), true);
+  assert.equal(clientNameMatches(marija, "ZUPANČIČ".toLowerCase()), true);
+  assert.equal(clientNameMatches(marija, "sinkovec"), true);
+  assert.equal(clientNameMatches({ name: "Žiga Novak" }, "ziga"), true);
+  assert.equal(clientNameMatches({ name: "Ana Petrović" }, "petrovic"), true);
+  assert.equal(clientNameMatches({ name: "Đorđe Kos" }, "dorde"), true);
+  assert.equal(clientNameMatches({ name: "Dorde Kos" }, "đorđe"), true);
+  assert.equal(clientNameMatches({ name: "Ana", alias: "jutranja šola" }, "sola"), true);
+  assert.equal(clientNameMatches(marija, "kos"), false);
 });

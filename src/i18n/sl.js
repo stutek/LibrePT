@@ -108,7 +108,7 @@ export const sl = {
   confirm_cancel:
     "Izbriši ta trening? Zabeležen napredek in povratne informacije bodo trajno izgubljeni.",
   confirm_delete_session:
-    "Izbriši ta trening? Odstranjen bo z urnika, zabeležen napredek in povratne informacije pa bodo izgubljeni — program vsakega udeleženca se ohrani med nenačrtovanimi programi.",
+    "Izbriši ta trening? Odstranjen bo z urnika, zabeležene serije bodo izgubljene. Signali, ki čakajo na pregled, ostanejo, program vsakega udeleženca pa se ohrani med nenačrtovanimi programi.",
   delete_one_evening:
     "To je en večer ponavljajočega se treninga. Izbriše se samo ta večer, ostali ostanejo.",
   delete_session_named: "{title}, {date} {time}",
@@ -139,6 +139,7 @@ export const sl = {
   time_field_later: "Pet minut pozneje",
   time_field_earlier: "Pet minut prej",
   time_field_set: "Nastavi {time}",
+  time_field_invalid: "{typed} ni ura. Napiši jo kot 17:30.",
   date_field_later: "Dan pozneje",
   date_field_earlier: "Dan prej",
   date_field_set: "Nastavi {date}",
@@ -186,7 +187,8 @@ export const sl = {
   btn_export_catalog_json: "Izvozi knjižnico (JSON)",
   btn_export_catalog_csv: "Izvozi vaje (CSV)",
   restore_brings_forward:
-    "s tem se podatki datoteke posodobijo in se ne bodo več odprli v starejših različicah LibrePT",
+    "Datoteka je iz starejše različice LibrePT. Pri obnovi se njeni podatki pretvorijo v novo obliko in se ne bodo več odprli v starejših različicah LibrePT.",
+  restore_question: "Podatke na tej napravi zamenjam s podatki iz datoteke?",
   restore_preview_only_lost: "teh datoteka ne vsebuje in se ne morejo vrniti",
   backup_import_title: "Uvozi varnostno kopijo",
   backup_import_desc:
@@ -1210,6 +1212,8 @@ export const sl = {
   plan_peek_back_to_today: "Nazaj na današnji trening",
   date_unknown: "Neznan datum",
   planning: "Načrtovanje",
+  // Said after a time that counts down to the end of the planned slot ("00h 56m left").
+  session_time_left: "do konca",
   btn_plan_program: "Načrtuj program",
   unbacked_due: "NI VARNOSTNE KOPIJE",
   unbacked_urgent: "OGROŽENO — NAREDI KOPIJO",
@@ -1295,6 +1299,9 @@ export const sl = {
     "To ime imajo še {count} stranke ({others}). Dodaj vzdevek, da jih bo mogoče razlikovati.",
   name_collision_hint_other:
     "To ime ima še {count} strank ({others}). Dodaj vzdevek, da jih bo mogoče razlikovati.",
+  client_namesake_question:
+    "„{name}“ je že v imeniku strank. Če je to druga oseba, dodaj vzdevek, da ju boš ločil. Shranim brez vzdevka?",
+  client_namesake_confirm: "Shrani brez vzdevka",
   // The client detail view (modules/clients/clientsView.js).
   view_grabber_home: "Nazaj na začetek",
   view_grabber_clipboard: "Odpri podlogo treninga",

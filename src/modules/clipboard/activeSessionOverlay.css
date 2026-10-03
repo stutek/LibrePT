@@ -225,6 +225,28 @@ body:has(#active-session-overlay:not(.hidden)) .clipboard-body {
   align-items: center;
   gap: 6px;
 }
+/* The number counts down to the end of the planned slot; the word under it says so. */
+.session-timer-text {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.1;
+}
+/* The narrowest phones (320 px): the name of the session comes before the words on the controls. The
+   "Today" button keeps its glyph and its spoken label, and the countdown loses the clock glyph that
+   the word "left" now makes redundant. Measured in tests/medium/test_narrow_header.py. */
+@media (max-width: 360px) {
+  #btn-plan-today > span,
+  #overlay-session-duration-icon {
+    display: none;
+  }
+}
+.session-timer-block .session-timer-caption {
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
 /* Session ran past its scheduled end without being closed: warn in amber (matches the dashboard
    card's own overtime bar, sessionsView.css) so it reads as a warning at a glance, not just a
    number that quietly went negative. */

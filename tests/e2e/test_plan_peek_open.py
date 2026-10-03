@@ -126,7 +126,7 @@ def test_with_no_next_plan_the_gesture_opens_the_clients_planning_form(
     _pull_then_up(page, RIGHT_START, -200)
     page.wait_for_selector("#view-workout-setup.active")
     assert page.locator("#active-session-overlay").is_hidden()
-    assert _text(page, "#workout-setup-view-title") == "Plan Upcoming Program"
+    assert _text(page, "#workout-setup-view-title") == "Plan upcoming programme"
     chosen = page.locator("#setup-participants-assignment-list .participant-setup-row")
     assert chosen.evaluate_all("rows => rows.map((row) => row.dataset.clientId)") == [
         client_id

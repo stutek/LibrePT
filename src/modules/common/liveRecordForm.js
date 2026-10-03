@@ -23,7 +23,7 @@
 import { beginRecordEdit, endRecordEdit, recordBeforeEdit } from "../../data/openRecordEdits.js";
 
 /**
- * Wires `dialog` and its `form` to one collection. Returns `{ openNew, openExisting }`; each is called
+ * Wires `dialog` and its `form` to one collection. Returns `{ openNew, openExisting, current }`; each is called
  * AFTER the opener has filled the form, because filling a field from code fires no event and must not
  * count as typing. `openNew(onFinished)` may take a callback, called once when the dialog is left
  * with the finished record, or with null when nothing was kept.
@@ -129,6 +129,8 @@ export function keepRecordLive({
   });
 
   return {
+    /** The record the dialog is writing to now: null until the first change of a new one. */
+    current: () => record,
     openNew(finished = null) {
       finish();
       record = null;

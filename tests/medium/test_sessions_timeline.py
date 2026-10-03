@@ -149,7 +149,7 @@ def test_a_session_without_a_routine_says_which_thing_is_missing(page, local_ser
     card = page.locator(".session-card", has_text="Morning Conditioning").first
     card.wait_for()
     text = card.inner_text()
-    assert text.count("Program Not Defined") == 1, text
+    assert text.count("Programme not defined") == 1, text
     assert "Undefined" not in text, text
 
 
@@ -174,7 +174,7 @@ initSessionTimeline({"""
 
 
 def test_no_program_warning_only_when_the_session_had_no_exercises(page, local_server):
-    """A finished session run from three hand-added exercises said "Program Not Defined": the
+    """A finished session run from three hand-added exercises said "Programme not defined": the
     warning looked only at the routine. It now also looks at the record of what was done."""
     stub = SESSIONS_STUB.replace(
         "renderClientsViewShell();\ninitSessionTimeline({", SEED_PLANLESS_SESSIONS, 1
@@ -186,5 +186,5 @@ def test_no_program_warning_only_when_the_session_had_no_exercises(page, local_s
     built = page.locator('.session-card[data-session-id="s00f2e3d"]')
     empty = page.locator('.session-card[data-session-id="s07f2e3d"]')
     assert built.count() == 1 and empty.count() == 1
-    assert "Program Not Defined" not in built.inner_text()
-    assert "Program Not Defined" in empty.inner_text()
+    assert "Programme not defined" not in built.inner_text()
+    assert "Programme not defined" in empty.inner_text()

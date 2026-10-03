@@ -251,3 +251,23 @@ def test_the_search_finds_a_client_by_the_alias_on_their_card(page, local_server
     page.locator("#search-clients").fill("morn")
     expect(_cards(page)).to_have_count(1)
     expect(_cards(page).first).to_contain_text("Jane Doe")
+
+
+def test_a_name_without_spaces_does_not_widen_the_cards(page, local_server):
+    """A 300-character name with no space made every card 2468 px wide and pushed the other clients'
+    names off the screen. The long word breaks inside its card, and the field refuses a name that
+    long to begin with."""
+    page.set_viewport_size({"width": 390, "height": 844})
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#clients-list .client-card")
+
+    page.click("#btn-add-client")
+    assert int(page.locator("#client-name").get_attribute("maxlength")) <= 100
+    page.locator("#client-name").fill("Dolgoimenski" * 25)
+    page.click("#dialog-client button[type='submit']")
+
+    edges = page.evaluate(
+        "() => [...document.querySelectorAll('#clients-list .client-card, #clients-list h3')]"
+        ".map((el) => el.getBoundingClientRect().right)"
+    )
+    assert edges and max(edges) <= 390, edges

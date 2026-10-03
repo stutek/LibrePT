@@ -181,8 +181,20 @@ function shortClientName(client, others) {
 // Whether a search finds this client by the name the trainer sees — the name or the alias, because
 // the alias is printed beside the name everywhere and is the word that tells two namesakes apart.
 // `needle` is already trimmed and lower-cased.
+// Compared without accents and case: č/c, š/s, ž/z, ć/c and đ/d are one letter to a search, because most
+// phone keyboards need a long press for the accented one and trainers type names without it. Đ has no
+// decomposition in Unicode, so it is mapped by hand.
+export function foldForSearch(text) {
+  return String(text || "")
+    .normalize("NFD")
+    .replace(/\p{M}+/gu, "")
+    .replace(/[đĐ]/g, "d")
+    .toLowerCase();
+}
+
 export function clientNameMatches(client, needle) {
-  return [client?.name, client?.alias].some((part) => part?.toLowerCase().includes(needle));
+  const folded = foldForSearch(needle);
+  return [client?.name, client?.alias].some((part) => foldForSearch(part).includes(folded));
 }
 
 // The alias rides along with the name EVERYWHERE the name is rendered, which is the whole point

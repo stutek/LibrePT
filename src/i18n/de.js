@@ -108,7 +108,7 @@ export const de = {
   confirm_cancel:
     "Dieses Training löschen? Der aufgezeichnete Fortschritt und die Rückmeldungen werden endgültig gelöscht.",
   confirm_delete_session:
-    "Dieses Training löschen? Es wird aus dem Terminplan entfernt, und der aufgezeichnete Fortschritt und die Rückmeldungen werden gelöscht — der Plan jedes Teilnehmers bleibt unter „Pläne ohne Termin“ erhalten.",
+    "Dieses Training löschen? Es wird aus dem Terminplan entfernt, und die aufgezeichneten Sätze werden gelöscht. Signale, die auf Prüfung warten, bleiben erhalten, und der Plan jedes Teilnehmers bleibt unter „Pläne ohne Termin“ erhalten.",
   delete_one_evening:
     "Das ist ein Abend eines wiederkehrenden Termins. Nur dieser Abend wird gelöscht, die anderen bleiben.",
   delete_session_named: "{title}, {date} {time}",
@@ -139,6 +139,7 @@ export const de = {
   time_field_later: "Fünf Minuten später",
   time_field_earlier: "Fünf Minuten früher",
   time_field_set: "{time} einstellen",
+  time_field_invalid: "{typed} ist keine Uhrzeit. Schreibe sie als 17:30.",
   date_field_later: "Einen Tag später",
   date_field_earlier: "Einen Tag früher",
   date_field_set: "{date} einstellen",
@@ -189,7 +190,8 @@ export const de = {
   btn_export_catalog_json: "Bibliothek exportieren (JSON)",
   btn_export_catalog_csv: "Übungen exportieren (CSV)",
   restore_brings_forward:
-    "die Daten der Datei werden auf das neue Format gebracht und lassen sich danach in älteren Versionen von LibrePT nicht mehr öffnen",
+    "Diese Datei stammt aus einer älteren Version von LibrePT. Beim Zurückspielen werden ihre Daten in das neue Format umgewandelt und lassen sich danach in älteren Versionen von LibrePT nicht mehr öffnen.",
+  restore_question: "Die Daten auf diesem Gerät durch die Daten aus der Datei ersetzen?",
   restore_preview_only_lost: "diese sind nicht in der Datei und können nicht zurückkommen",
   backup_import_title: "Datensicherung importieren",
   backup_import_desc:
@@ -1263,6 +1265,8 @@ export const de = {
   plan_peek_back_to_today: "Zurück zum heutigen Training",
   date_unknown: "Datum unbekannt",
   planning: "Planung",
+  // Said after a time that counts down to the end of the planned slot ("00h 56m left").
+  session_time_left: "verbleibend",
   btn_plan_program: "Programm planen",
   unbacked_due: "NICHT GESICHERT",
   unbacked_urgent: "GEFÄHRDET — JETZT SICHERN",
@@ -1352,6 +1356,9 @@ export const de = {
     "Weitere Kunden mit diesem Namen: {count} ({others}). Füge einen Spitznamen hinzu, um sie zu unterscheiden.",
   name_collision_hint_other:
     "Weitere Kunden mit diesem Namen: {count} ({others}). Füge einen Spitznamen hinzu, um sie zu unterscheiden.",
+  client_namesake_question:
+    "„{name}“ steht schon in deiner Kundenliste. Wenn das eine andere Person ist, trage einen Zusatz ein, damit du sie unterscheiden kannst. Ohne Zusatz speichern?",
+  client_namesake_confirm: "Ohne Zusatz speichern",
   // The client detail view (modules/clients/clientsView.js).
   view_grabber_home: "Zur Startseite",
   view_grabber_clipboard: "Klemmbrett des Trainings öffnen",

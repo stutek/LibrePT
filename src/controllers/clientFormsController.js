@@ -26,6 +26,7 @@ import {
   openIntakeInviteDialog,
 } from "../modules/clients/intakeInviteDialog.js";
 import { openSignupReview } from "../modules/clients/signupReviewDialog.js";
+import { askInApp } from "../modules/common/appQuestion.js";
 import { $id, closeModal, openModal, renderMarkupOnce } from "../modules/common/dom.js";
 import { keepRecordLive } from "../modules/common/liveRecordForm.js";
 import { getInitials } from "../modules/common/utils.js";
@@ -45,12 +46,12 @@ export function renderClientDialog() {
 
       <div class="form-group">
         <label for="client-name" data-i18n="client_full_name">Full Name *</label>
-        <input type="text" id="client-name" required placeholder="e.g. Jane Doe" data-i18n-placeholder="client_name_placeholder" class="form-control">
+        <input type="text" id="client-name" required maxlength="80" placeholder="e.g. Jane Doe" data-i18n-placeholder="client_name_placeholder" class="form-control">
       </div>
 
       <div class="form-group">
         <label for="client-alias" data-i18n="client_alias">Alias (only if two clients share a name)</label>
-        <input type="text" id="client-alias" placeholder="e.g. morning, Novak, the runner" data-i18n-placeholder="client_alias_placeholder" class="form-control">
+        <input type="text" id="client-alias" maxlength="40" placeholder="e.g. morning, Novak, the runner" data-i18n-placeholder="client_alias_placeholder" class="form-control">
         <p class="form-hint" id="client-name-collision" hidden></p>
       </div>
 
@@ -96,10 +97,12 @@ ${consentSectionMarkup()}
 // surface downstream (the erasure confirmation, the export picker) risks acting on the wrong
 // person. The alias is the trainer's own answer to that, so the form asks for one at the exact
 // moment the collision appears rather than leaving them to discover it during an erasure.
+const namesakesOf = (state, client) => (client?.name ? clientsSharingName(state, client) : []);
+
 function renderNameCollisionHint(state, client, t) {
   const hint = $id("client-name-collision");
   if (!hint) return;
-  const namesakes = client?.name ? clientsSharingName(state, client) : [];
+  const namesakes = namesakesOf(state, client);
   hint.hidden = namesakes.length === 0;
   if (namesakes.length === 0) return;
   const others = namesakes
@@ -292,15 +295,43 @@ export function setupClientForms({
   // Live, not only on save: the moment a trainer types a name that already exists, the alias field
   // above is the thing they should be filling in — telling them afterwards means going back.
   const nameInput = $id("client-name");
+  // The client the form is writing to, with the name as typed. A new client is already in the
+  // directory from its first character, so its own record is told apart from a namesake by id.
+  const formClient = () => ({ id: live.current()?.id || $id("client-form-id").value, name: nameInput.value });
+  // Save with a name that is already in the directory and no alias: ask before keeping it. Two cards
+  // that read the same cannot be told apart later, on the schedule or in a data export. The question
+  // runs before the live form's own submit handler (capture phase) and stops it; the answer "yes"
+  // submits the form again with the question already answered.
+  let namesakeAnswered = false;
+  form.addEventListener(
+    "submit",
+    (event) => {
+      if (namesakeAnswered) {
+        namesakeAnswered = false;
+        return;
+      }
+      const client = formClient();
+      if ($id("client-alias").value.trim() || namesakesOf(getState(), client).length === 0) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      askInApp({
+        t,
+        message: t("client_namesake_question").replace("{name}", client.name.trim()),
+        confirmKey: "client_namesake_confirm",
+      }).then((otherPerson) => {
+        if (!otherPerson) {
+          $id("client-alias").focus();
+          return;
+        }
+        namesakeAnswered = true;
+        form.requestSubmit();
+      });
+    },
+    true,
+  );
   if (nameInput) {
     nameInput.addEventListener("input", () => {
-      const editingId = $id("client-form-id").value;
-      const editing = getState().clients.find((c) => c.id === editingId) || null;
-      renderNameCollisionHint(
-        getState(),
-        { ...(editing || {}), id: editingId, name: nameInput.value },
-        t,
-      );
+      renderNameCollisionHint(getState(), formClient(), t);
     });
   }
 

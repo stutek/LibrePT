@@ -36,7 +36,7 @@ export const en = {
   routine_plans: "Routine Plans & History",
   btn_edit_profile: "Edit Profile",
   btn_add_plan: "Add Plan Adjustment",
-  client_history_header: "Logged Session History",
+  client_history_header: "Logged session history",
   no_history_yet: "No history logged yet.",
   routines_title: "Routines",
   placeholder_search_routines: "Search routines...",
@@ -92,7 +92,7 @@ export const en = {
   confirm_cancel:
     "Delete this session? Its logged progress and feedback will be permanently discarded.",
   confirm_delete_session:
-    "Delete this session? It comes off the schedule and its logged progress and feedback are discarded — each participant's plan is kept under Unscheduled plans.",
+    "Delete this session? It comes off the schedule and its logged sets are discarded. Signals waiting for review stay, and each participant's plan is kept under Unscheduled plans.",
   delete_one_evening:
     "This is one evening of a repeating session. Only this evening is deleted; the others stay.",
   delete_session_named: "{title}, {date} {time}",
@@ -123,6 +123,7 @@ export const en = {
   time_field_later: "Five minutes later",
   time_field_earlier: "Five minutes earlier",
   time_field_set: "Set {time}",
+  time_field_invalid: "{typed} is not a time. Write it as 17:30.",
   date_field_later: "One day later",
   date_field_earlier: "One day earlier",
   date_field_set: "Set {date}",
@@ -172,7 +173,8 @@ export const en = {
   btn_export_catalog_json: "Export the library (JSON)",
   btn_export_catalog_csv: "Export exercises (CSV)",
   restore_brings_forward:
-    "this brings the file's data forward, and it will no longer open in older builds of LibrePT",
+    "This file comes from an older version of LibrePT. Restoring converts its data to the new format, and the data will no longer open in older versions of LibrePT.",
+  restore_question: "Replace the data on this device with the data in the file?",
   restore_preview_only_lost: "these are not in the file and cannot come back",
   backup_import_title: "Import Data Backup",
   backup_import_desc:
@@ -253,7 +255,7 @@ export const en = {
   error_desc: "This link doesn't point to a session, client or view in LibrePT.",
   btn_error_home: "Back to dashboard",
   btn_resolve: "Resolve",
-  no_exercises_injected: "No Exercises Injected",
+  no_exercises_injected: "No exercises added",
   no_exercises_desc:
     "No exercises yet. Tap the three dots (⋮) at the top right and choose Edit plan.",
   edit: "Edit",
@@ -316,7 +318,7 @@ export const en = {
   exercise_name_placeholder: "e.g. Bulgarian Split Squat",
   instructions_placeholder: "Form cues...",
   // The Apply Program Adjustment dialog (modules/plans/planAdjustments.js).
-  adjust_title: "Apply Program Adjustment",
+  adjust_title: "Apply programme adjustment",
   adjust_exercise: "Exercise:",
   adjust_target_level: "Target Level",
   adjust_target_band: "Target Band",
@@ -503,7 +505,7 @@ export const en = {
   no_sessions_for_filters:
     "No sessions match these filters. Tap ✕ to the right of the filters to see the whole board.",
   no_sessions_scheduled: "No sessions scheduled.",
-  program_not_defined: "Program Not Defined",
+  program_not_defined: "Programme not defined",
   no_members_assigned: "No Participants",
   session_completed: "Completed",
   // The badge on the past card in the clipboard deck, read as "Last time: 2026-07-20".
@@ -1268,8 +1270,8 @@ export const en = {
   client_phone: "Phone Number",
   not_specified: "Not specified",
   custom_empty_plan: "Empty plan, no routine",
-  plan_program_title: "Plan Upcoming Program",
-  planned_program: "Planned Program",
+  plan_program_title: "Plan upcoming programme",
+  planned_program: "Planned programme",
   // The sideways deck of a client's plans on the clipboard.
   plan_peek_previous: "Previous plan",
   plan_peek_next: "Next plan",
@@ -1281,7 +1283,9 @@ export const en = {
   plan_peek_back_to_today: "Back to today's session",
   date_unknown: "Date Unknown",
   planning: "Planning",
-  btn_plan_program: "Plan Program",
+  // Said after a time that counts down to the end of the planned slot ("00h 56m left").
+  session_time_left: "left",
+  btn_plan_program: "Plan programme",
   unbacked_due: "NOT BACKED UP",
   unbacked_urgent: "AT RISK — BACK UP",
   offline_badge: "Offline",
@@ -1367,6 +1371,9 @@ export const en = {
     "{count} other clients have this name ({others}). Add an alias so you can tell them apart.",
   name_collision_hint_other:
     "{count} other clients have this name ({others}). Add an alias so you can tell them apart.",
+  client_namesake_question:
+    "“{name}” is already in your client directory. If this is another person, add an alias so you can tell them apart. Save without an alias?",
+  client_namesake_confirm: "Save without alias",
   // The client detail view (modules/clients/clientsView.js).
   view_grabber_home: "Return to home",
   view_grabber_clipboard: "Open session clipboard",
