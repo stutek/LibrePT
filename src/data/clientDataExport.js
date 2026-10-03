@@ -44,6 +44,9 @@ function sessionsAttendedBy(state, clientId) {
       // Whether it happened. The list is a record the client reads as attendance, so a Thursday the
       // trainer has booked and a Thursday they trained cannot look the same on it.
       completed: session.status === "done",
+      // A session called off is neither held nor still to come; read as "planned" it told the
+      // client to expect a training that will not take place.
+      cancelled: session.status === "cancelled",
     }));
 }
 
@@ -207,7 +210,13 @@ function sessionLines(sessions, w) {
       const when = session.startDate ? localDateString(session.startDate) : session.day || "—";
       const group =
         session.groupSize > 1 ? ` · ${w("export_doc_group", { count: session.groupSize })}` : "";
-      const state = w(session.completed ? "export_doc_session_held" : "export_doc_session_planned");
+      const state = w(
+        session.completed
+          ? "export_doc_session_held"
+          : session.cancelled
+            ? "export_doc_session_cancelled"
+            : "export_doc_session_planned",
+      );
       return `- ${when} ${session.time || ""} ${session.title || ""}${group} · ${state}`
         .replace(/\s+·/g, " ·")
         .trimEnd();
@@ -266,7 +275,8 @@ function withheldLines(redactedFields, w) {
 // than printing a placeholder in brackets where a legal role is named.
 function preparedLine(payload, w) {
   const { controller } = payload;
-  const date = payload.exportedAt.substring(0, 10);
+  // The local day the file was made; the instant's first ten characters are the day in UTC.
+  const date = localDateString(payload.exportedAt);
   if (!controller?.name) return w("export_doc_prepared_unnamed", { date });
   const contact = controller.contact ? ` (${controller.contact})` : "";
   return w("export_doc_prepared", { date, controller: `${controller.name}${contact}` });

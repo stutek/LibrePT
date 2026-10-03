@@ -1,5 +1,5 @@
 # tests/e2e/test_record_dialog_routes.py
-# The record editors (routine create/edit, exercise create, the adjustment wizard) are routes, so a
+# The record editors (routine create/edit, exercise create) are routes, so a
 # link opens the record in context, Back backs out, and a reload reopens the form instead of dropping
 # the trainer on a list. Each opens over ITS OWN list view — a dialog is never the whole screen.
 #
@@ -99,19 +99,3 @@ def test_new_exercise_is_its_own_route(page, local_server):
     page.go_back()
     page.wait_for_selector("#dialog-exercise", state="hidden")
     assert _path(page).endswith("/exercises")
-
-
-def test_adjustment_wizard_is_addressable(page, local_server):
-    page.goto(local_server + "adjustments")
-    page.wait_for_selector("#view-adjustments.active")
-    page.wait_for_timeout(300)
-    page.locator(".btn-resolve-alert").first.click()
-    page.wait_for_selector("#dialog-apply-adjustment[open]")
-
-    path = _path(page)
-    assert "/adjustments/" in path, f"the wizard is not addressable: {path}"
-
-    page.reload()
-    page.wait_for_selector("#dialog-apply-adjustment[open]")
-    assert _path(page) == path
-    page.wait_for_selector("#view-adjustments.active")

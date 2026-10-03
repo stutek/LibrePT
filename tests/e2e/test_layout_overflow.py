@@ -73,7 +73,6 @@ RECORD_DETAIL_ROUTES = [
     "client.detail",
     "client.edit",
     "routine.edit",
-    "adjustment.apply",
 ]
 LIVE_SESSION_ROUTES = [
     "session.focus",
@@ -165,13 +164,6 @@ def _walk_record_details(page, base, findings):
         routine_card.click()
         _settle(page)
         _sweep(page, findings, "routine.edit")
-
-    _nav(page, base + "/adjustments")
-    adjustment_card = page.locator(".adjustment-card").first
-    if adjustment_card.count():
-        adjustment_card.locator("button").first.click()
-        _settle(page)
-        _sweep(page, findings, "adjustment.apply")
 
 
 def _walk_client_editor(page, base, findings):

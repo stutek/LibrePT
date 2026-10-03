@@ -335,29 +335,6 @@ export const de = {
   metric_label: "Messgröße",
   exercise_name_placeholder: "z. B. Bulgarian Split Squat",
   instructions_placeholder: "Hinweise zur Technik...",
-  // The Apply Program Adjustment dialog (modules/plans/planAdjustments.js).
-  adjust_title: "Programmänderung übernehmen",
-  adjust_exercise: "Übung:",
-  adjust_target_level: "Zielstufe",
-  adjust_target_band: "Zielband",
-  adjust_target_bw: "Zusatzgewicht (kg)",
-  adjust_client: "Kunde:",
-  adjust_feedback: "Rückmeldung:",
-  adjust_details: "Details:",
-  adjust_action_label: "Änderung",
-  adjust_action_modify: "Ziellast und Wiederholungen ändern",
-  adjust_action_swap: "Übung tauschen (leichter oder schwerer)",
-  adjust_action_dismiss: "Nur den Hinweis schließen (keine Änderung)",
-  adjust_target_weight: "Zielgewicht (kg)",
-  adjust_target_reps: "Ziel-Wiederholungen",
-  adjust_target_sets: "Anzahl Ziel-Sätze",
-  adjust_replacement: "Ersatzübung",
-  adjust_replacement_hint:
-    "— dieselbe Muskelgruppe, damit das Trainingsvolumen weiter gezählt wird",
-  adjust_apply: "Übernehmen und erledigen",
-  adjust_swap_choose: "Tippe auf eine Ersatzübung, um fortzufahren.",
-  adjust_no_routine:
-    "Dieses Training wurde nicht aus einer Routine erstellt, daher wird eine Änderung hier nirgends gespeichert. Trage das neue Ziel in den nächsten Plan des Kunden ein.",
   // The encrypted-file reader a CLIENT opens (modules/common/encryptedFileReader.js).
   // The Routine Template dialog and its rows (routineFormsController.js, plansView.js).
   routine_name_placeholder: "z. B. Oberkörper A",
@@ -1301,6 +1278,7 @@ export const de = {
   export_doc_session: "Termin",
   export_doc_session_held: "stattgefunden",
   export_doc_session_planned: "geplant",
+  export_doc_session_cancelled: "abgesagt",
   export_doc_plan_changes: "## Programmänderungen ({count})",
   export_doc_feedback: "Rückmeldung",
   export_doc_bodyweight: "Körpergewicht",

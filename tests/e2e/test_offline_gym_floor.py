@@ -21,18 +21,11 @@ def _install_then_go_offline(page, local_server):
 
 
 def _notes_on_review(page):
-    """The note behind every card on the review screen. A card shows the client, the tag and the
-    exercise; the note is in the dialog the card opens."""
+    """The note on every card of the review screen: a card shows the client, the tag, the exercise
+    and what the trainer typed with it."""
     cards = page.locator("#dashboard-adjustments-list .adjustment-card")
     cards.first.wait_for()
-    notes = []
-    for i in range(cards.count()):
-        cards.nth(i).locator(".btn-resolve-alert").click()
-        page.wait_for_selector("#dialog-apply-adjustment[open]")
-        notes.append(page.locator("#adjust-details").inner_text())
-        page.keyboard.press("Escape")
-        page.wait_for_selector("#dialog-apply-adjustment", state="hidden")
-    return notes
+    return [cards.nth(i).inner_text() for i in range(cards.count())]
 
 
 def test_the_app_opens_with_no_network(page, local_server):

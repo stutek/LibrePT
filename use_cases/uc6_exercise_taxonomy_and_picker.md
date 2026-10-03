@@ -253,4 +253,4 @@ Adopts an open standard for interchangeable exports.
 ## 8. Related Use Cases
 
 - **[UC1 — Gym-Floor Clipboard](uc1_gym_floor_clipboard.md)**: Scenario B's live swap happens inside the clipboard; the inline editor authors reps/load with the same polymorphic controls.
-- **[UC2 — Asynchronous Plan Adjustments](uc2_async_plan_adjustments.md)**: the desk-side adjustment wizard reuses the picker to swap a flagged movement.
+- **[UC2 — Asynchronous Plan Adjustments](uc2_async_plan_adjustments.md)**: a flagged movement is swapped in the routine editor the review card's pencil opens, with this picker.

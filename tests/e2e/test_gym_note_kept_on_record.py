@@ -152,10 +152,5 @@ def test_a_note_not_kept_waits_on_the_review_screen(page, local_server):
     assert card.count() == 1
     assert name in card.inner_text()
     assert "Joint pain or discomfort" in card.inner_text()
-
-    card.locator(".btn-resolve-alert").click()
-    page.wait_for_selector("#dialog-apply-adjustment[open]")
-    assert (
-        "left knee clicks on the last rep"
-        in page.locator("#adjust-details").inner_text()
-    )
+    # The note typed on the floor is on the card itself.
+    assert "left knee clicks on the last rep" in card.inner_text()

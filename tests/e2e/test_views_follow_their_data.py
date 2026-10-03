@@ -18,11 +18,12 @@ def test_resolving_the_last_signal_empties_the_drawer_at_once(page, local_server
 
     cards = page.locator("#dashboard-adjustments-list .adjustment-card")
     while cards.count() > 0:
+        before = cards.count()
         cards.first.locator(".btn-resolve-alert").click()
-        page.wait_for_selector("#dialog-apply-adjustment", state="visible")
-        page.locator("#adjust-action-type").select_option("dismiss")
-        page.locator("#dialog-apply-adjustment button[type='submit']").click()
-        page.wait_for_selector("#dialog-apply-adjustment", state="hidden")
+        page.wait_for_function(
+            "(n) => document.querySelectorAll('#dashboard-adjustments-list .adjustment-card').length < n",
+            arg=before,
+        )
 
     assert page.locator(PENDING).count() == 0, (
         "the drawer still says a signal is waiting"

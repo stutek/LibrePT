@@ -202,17 +202,6 @@ export function buildRouteTable() {
       open: (ctx) => ctx.deps.openExerciseCreateDialog?.(),
     }),
   );
-  // Keyed on the update being resolved, not on the client it belongs to.
-  registry.register(
-    new DialogRoute({
-      name: "adjustment.apply",
-      parent: adjustments,
-      segment: "/:updateId",
-      dialogId: "dialog-apply-adjustment",
-      open: (ctx) => ctx.deps.openAdjustmentWizard?.(ctx.params.updateId),
-    }),
-  );
-
   // Dialogs reachable from anywhere (the ☰ menu, the build stamp). Each is a state a reload should
   // restore and a link should be able to open, and routing them is what makes Back close them.
   for (const [name, segment, dialogId, open] of [

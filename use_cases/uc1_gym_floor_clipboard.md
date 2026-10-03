@@ -193,8 +193,8 @@ graph LR
    - **Sub-Second Tab Switch**: Tapping a participant's name (`[ Jane ]`, `[ John ]`) swaps the active view in under 50ms.
    - **Primary Focus Card with Foreshadowing**: The screen centers the participant's current active exercise (e.g., *Barbell Back Squat — Target: 80kg × 8 reps*) while displaying a compact **"Up Next" foreshadowing card** below it so the PT can proactively prepare equipment for the next movement.
    - **One-Tap Progression & Safety Signals**: Instead of typing notes on a phone keyboard, the PT has one-tap signal buttons on the exercise card:
-     - **Too Easy**: Client completed the set cleanly; increase target load for their next session.
-     - **Too Hard**: Client struggled or failed reps; reduce target load for their next session.
+     - **Too Easy**: Client completed the set cleanly; a note for the trainer that the load can go up next time.
+     - **Too Hard**: Client struggled or failed reps; a note for the trainer that the load should come down. The app never changes a load itself: the trainer sets it when building the next plan.
      - **Add Note** opens the feedback dialog, where the tag **Joint pain or discomfort** flags pain on this exercise.
    - **Typed feedback notes, no voice**: the feedback dialog takes a tag and a short typed note, attached to the active client and exercise. **The app never records audio** — ruled 2026-09-27 for privacy: a microphone in a gym records everyone near it. A mock recorder that once stood here wrote a sentence nobody had said into the client's record, so it was removed, not finished.
    - **Reversible Plan Pivot & Session Wipe**: If a client arrives with acute fatigue or equipment is unavailable, the PT taps `[ 🔄 Pivot / Wipe Plan ]`. This wipes the planned routine and immediately injects pre-configured **Generic Placeholder Cards** (`[ Mobility & Core Flow ]`, `[ Machine Circuit/Giant Set ]`, `[ Freestyle Block ]`) to maintain effort tracking without typing. This action is fully undoable (`[ ↩ Undo Pivot ]`) and preserved in the audit log for later desk review.

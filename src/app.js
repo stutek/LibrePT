@@ -83,6 +83,7 @@ import {
   switchWorkspace,
 } from "./data/stateStore.js";
 import { claimThisTab, onTabDeactivated } from "./data/tabOwnership.js";
+import { resolveNote } from "./data/trainingRecords.js";
 import { SANDBOX, isSandbox } from "./data/workspace.js";
 import { DEMO_NOTICE_TYPE } from "./domain/notificationItems.js";
 import { repsPresetsDatalistHTML, setLoadWords } from "./domain/repsAndLoad.js";
@@ -160,9 +161,7 @@ import {
 import { isIntakeLocation, resolveIntakeLang } from "./modules/intake/intakeRoute.js";
 import { browserSignupPlatform, storySignupPlatform } from "./modules/intake/signupDelivery.js";
 import {
-  openAdjustmentWizardComponent,
   renderAdjustmentsViewShell,
-  renderApplyAdjustmentDialog,
   renderPendingPlanAdjustmentsComponent,
 } from "./modules/plans/planAdjustments.js";
 import {
@@ -510,7 +509,6 @@ async function init() {
       const routine = getState().routines.find((item) => item.id === routineId);
       if (routine) editRoutineLive(routine);
     },
-    openAdjustmentWizard,
     openClientEditor,
   });
 
@@ -522,12 +520,6 @@ async function init() {
   // existing first, and runShellRenders() computes a valid order via topological sort.
   registerShellRender("clients-view", renderClientsViewShell);
   registerShellRender("adjustments-view", renderAdjustmentsViewShell);
-  // dialog-apply-adjustment must exist before its route is ever entered: DialogRoute.enter() looks
-  // the element up before calling this route's open() callback (which used to be the only thing
-  // creating it), so a lazily-rendered dialog was always missing on the very navigation meant to
-  // open it. Declared as depending on "adjustments-view" (the surface it's launched from) so a
-  // future reorder can't silently separate them again.
-  registerShellRender("apply-adjustment-dialog", renderApplyAdjustmentDialog, ["adjustments-view"]);
   registerShellRender("client-directory-view", renderClientDirectoryViewShell);
   registerShellRender("client-detail-view", renderClientDetailViewShell);
   registerShellRender("routines-view", renderRoutinesViewShell);
@@ -827,6 +819,11 @@ function renderAdjustmentsList() {
     escapeHTML,
     navigateToPath,
     urlFor,
+    onResolve: (noteId) => {
+      resolveNote(getState(), noteId);
+      saveState();
+      renderPendingPlanAdjustments();
+    },
   });
 }
 
@@ -836,17 +833,6 @@ function renderPendingPlanAdjustments() {
   // that changes them calls this function. Without it the drawer kept saying a signal was waiting
   // after it was resolved, until the page was reloaded.
   renderNotificationArea();
-}
-
-function openAdjustmentWizard(updateId) {
-  openAdjustmentWizardComponent(updateId, {
-    state: getState(),
-    t,
-    escapeHTML,
-    saveToLocalStorage: saveState,
-    renderRoutinesList,
-    renderPendingPlanAdjustments,
-  });
 }
 
 function renderClientsList(filterQuery = "") {

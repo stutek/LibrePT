@@ -1,30 +1,21 @@
 // src/modules/plans/planAdjustments.js
-// Logic for displaying the pending plan adjustments widget on the dashboard,
-// as well as launching and submitting the interactive Apply Plan Adjustment Dialog wizard.
+// The Pending Review list: one card per signal the next plan waits for, with what the trainer
+// noted, the exercise and the client.
 //
 // An adjustment is an exercise note the next plan waits for (data/trainingRecords.js pendingNotes).
 // Its tag and remark are shown as one line, `noteTagLine`, the form the feedback form has always
 // stored and these screens have always shown.
+//
+// **The app sets no training targets** (ruled 2026-10-03, Simon): a card shows the signal and is
+// resolved; it changes no plan. An "Apply Program Adjustment" dialog used to propose a load from the
+// last session and write it, or a swapped exercise, into the routine — and wrote nothing at all for a
+// session built without one. The trainer is the expert and sets an exercise's parameters when
+// building the plan; the pencil opens the routine that holds the exercise for that.
 import { libraryExercises } from "../../data/exerciseLibrary.js";
-import {
-  allPrograms,
-  noteById,
-  noteTagLine,
-  pendingNotes,
-  resolveNote,
-} from "../../data/trainingRecords.js";
-import { performedTarget, suggestedTarget } from "../../domain/adjustmentSuggestion.js";
+import { noteTagLine, pendingNotes } from "../../data/trainingRecords.js";
 import { feedbackTagText, readFeedbackTag } from "../../domain/feedbackTags.js";
-import { DECIMAL_PATTERN, loadUnitForEquipment, parseDecimal } from "../../domain/repsAndLoad.js";
 import { renderMarkupOnce } from "../common/dom.js";
-import { mountExercisePicker, pickerLabels } from "../exercises/exercisePicker.js";
 
-/**
- * Renders the pending plan adjustments alert cards.
- * @param {HTMLElement} container - The list container element.
- * @param {HTMLElement} countBadge - The notification badge showing adjustment count.
- * @param {Object} ctx - Context holding state, translation, and navigation helpers.
- */
 export function renderAdjustmentsViewShell() {
   renderMarkupOnce(
     "main-content",
@@ -37,7 +28,7 @@ export function renderAdjustmentsViewShell() {
         <span class="badge adjustment-count-badge" id="badge-adjustments-count">0</span>
       </div>
       <div id="dashboard-adjustments-list" class="stack-list mb-6">
-        <!-- Injected via JS - cards with feedback tags to update programs -->
+        <!-- Injected via JS - one card per signal waiting for review -->
       </div>
     </section>
 `,
@@ -61,7 +52,7 @@ function clientNameOf(state, clientId) {
 }
 
 function buildAdjustmentCard(u, ctx) {
-  const { state, t, escapeHTML, navigateToPath, urlFor } = ctx;
+  const { state, t, escapeHTML, navigateToPath, urlFor, onResolve } = ctx;
 
   const card = document.createElement("div");
   card.className = "adjustment-card card glassmorphic";
@@ -70,6 +61,10 @@ function buildAdjustmentCard(u, ctx) {
   info.className = "adjustment-card-info";
   const tagLine = noteTagLine(u);
   const badgeClass = resolveAdjustmentBadgeClass(tagLine);
+  // What the trainer typed with the signal, on the card itself: it was shown only in the dialog
+  // that resolving opened, which is gone.
+  const { known, note } = readFeedbackTag(tagLine);
+  const remark = known ? note : "";
   info.innerHTML = `
       <div class="adjustment-card-row">
         <strong class="adjustment-client-name">${escapeHTML(clientNameOf(state, u.clientId))}</strong>
@@ -78,6 +73,7 @@ function buildAdjustmentCard(u, ctx) {
       <div class="adjustment-exercise-line">
         ${t("exercise_of")}: <span class="font-semibold adjustment-exercise-name">${escapeHTML(u.exerciseName)}</span>
       </div>
+      ${remark ? `<p class="adjustment-remark">${escapeHTML(remark)}</p>` : ""}
     `;
 
   // Icon-only actions (matching the clipboard's own compact .icon-btn edit control) — a card
@@ -106,17 +102,15 @@ function buildAdjustmentCard(u, ctx) {
     actions.appendChild(editBtn);
   }
 
+  // One tap: the trainer has read the signal and dealt with it in the plan, or decided it needs
+  // nothing. The note stays stored, marked resolved.
   const resolveBtn = document.createElement("button");
   resolveBtn.type = "button";
   resolveBtn.className = "icon-btn btn-resolve-alert";
   resolveBtn.title = t("btn_resolve");
   resolveBtn.setAttribute("aria-label", t("btn_resolve"));
   resolveBtn.innerHTML = `<i class="fa-solid fa-check"></i>`;
-  // The wizard is a route (`/adjustments/{updateId}`), so Back backs out of it and a link opens
-  // the one alert being resolved.
-  resolveBtn.addEventListener("click", () => {
-    navigateToPath(urlFor("adjustment.apply", { updateId: u.id }));
-  });
+  resolveBtn.addEventListener("click", () => onResolve?.(u.id));
 
   actions.appendChild(resolveBtn);
 
@@ -126,8 +120,14 @@ function buildAdjustmentCard(u, ctx) {
   return card;
 }
 
+/**
+ * Renders the Pending Review cards.
+ * @param {HTMLElement} container - The list container element.
+ * @param {HTMLElement} countBadge - The badge showing how many signals wait.
+ * @param {Object} ctx - state, t, escapeHTML, navigateToPath, urlFor, and `onResolve(noteId)`.
+ */
 export function renderPendingPlanAdjustmentsComponent(container, countBadge, ctx) {
-  const { state, t, escapeHTML, navigateToPath, urlFor } = ctx;
+  const { state, t } = ctx;
 
   if (!container) return;
   container.innerHTML = "";
@@ -147,274 +147,4 @@ export function renderPendingPlanAdjustmentsComponent(container, countBadge, ctx
   for (const u of unresolved) {
     container.appendChild(buildAdjustmentCard(u, ctx));
   }
-}
-
-/**
- * Opens and initializes the Apply Plan Adjustment interactive dialog form.
- * @param {string} updateId - The adjustment update model's unique ID.
- * @param {Object} ctx - Context holding state, translation, and UI refresh callbacks.
- */
-export function renderApplyAdjustmentDialog() {
-  renderMarkupOnce(
-    "dialogs-root",
-    (root) => root.querySelector("#dialog-apply-adjustment"),
-    `
-<dialog id="dialog-apply-adjustment" class="dialog-modal card glassmorphic">
-    <div class="modal-header">
-      <h3 data-i18n="adjust_title">Apply Program Adjustment</h3>
-      <button class="modal-close-btn" data-i18n-label="modal_close" aria-label="Close adjustment modal"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-    <form id="form-apply-adjustment" method="dialog" class="modal-form">
-      <input type="hidden" id="adjust-update-id">
-      <input type="hidden" id="adjust-client-id">
-      <input type="hidden" id="adjust-routine-id">
-      <input type="hidden" id="adjust-exercise-id">
-      
-      <div class="form-group adjust-summary-panel">
-        <div class="adjust-summary-row">
-          <strong class="adjust-summary-label" data-i18n="adjust_client">Client:</strong> <span id="adjust-client-name" class="font-semibold text-emerald"></span>
-        </div>
-        <div class="adjust-summary-row">
-          <strong class="adjust-summary-label" data-i18n="adjust_exercise">Exercise:</strong> <span id="adjust-exercise-name" class="font-semibold"></span>
-        </div>
-        <div class="adjust-summary-row">
-          <strong class="adjust-summary-label" data-i18n="adjust_feedback">Feedback:</strong> <span id="adjust-feedback-tag" class="font-semibold text-primary"></span>
-        </div>
-        <div class="adjust-summary-row-last">
-          <strong class="adjust-summary-label" data-i18n="adjust_details">Details:</strong> <span id="adjust-details" class="italic text-color"></span>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label for="adjust-action-type" data-i18n="adjust_action_label">Adjustment Action</label>
-        <select id="adjust-action-type" class="form-control adjust-action-type-select">
-          <option value="modify" data-i18n="adjust_action_modify">Modify Target Load & Reps</option>
-          <option value="swap" data-i18n="adjust_action_swap">Swap Exercise (Regression/Progression)</option>
-          <option value="dismiss" data-i18n="adjust_action_dismiss">Dismiss Alert Only (No Changes)</option>
-        </select>
-        <p id="adjust-no-routine" class="form-hint hidden" data-i18n="adjust_no_routine">This session was not run from a routine, so a change here is saved nowhere. Write the new target into the client's next plan.</p>
-      </div>
-
-      <!-- PANEL: Modify load & reps -->
-      <div id="adjust-panel-modify" class="adjust-action-panel">
-        <div class="adjust-modify-grid">
-          <div class="form-group">
-            <label for="adjust-weight" id="adjust-weight-label" data-i18n="adjust_target_weight">Target Weight (kg)</label>
-            <input type="text" inputmode="decimal" pattern="${DECIMAL_PATTERN}" id="adjust-weight" class="form-control">
-          </div>
-          <div class="form-group">
-            <label for="adjust-reps" data-i18n="adjust_target_reps">Target Reps</label>
-            <input type="text" id="adjust-reps" class="form-control">
-          </div>
-        </div>
-        <div class="form-group">
-          <label for="adjust-sets" data-i18n="adjust_target_sets">Target Sets Count</label>
-          <input type="number" id="adjust-sets" class="form-control">
-        </div>
-      </div>
-
-      <!-- PANEL: Swap exercise -->
-      <div id="adjust-panel-swap" class="adjust-action-panel hidden">
-        <div class="form-group">
-          <label><span data-i18n="adjust_replacement">Replacement Exercise</span> <span class="swap-hint text-muted" data-i18n="adjust_replacement_hint">— same muscle group keeps volume tracking intact</span></label>
-          <input type="hidden" id="adjust-exercise-swap">
-          <div id="adjust-swap-picker" class="exercise-picker"></div>
-          <p id="adjust-swap-needed" class="text-muted" data-i18n="adjust_swap_choose">Tap a replacement exercise to continue.</p>
-        </div>
-      </div>
-
-      <div class="modal-actions adjust-modal-actions">
-        <button type="button" class="btn secondary-btn modal-cancel" data-i18n="btn_cancel">Cancel</button>
-        <button type="submit" class="btn primary-btn" data-i18n="adjust_apply">Apply & Resolve</button>
-      </div>
-    </form>
-  </dialog>
-`,
-  );
-}
-
-// The "Target ..." caption of the weight field, by the exercise's load unit.
-const TARGET_LABEL_KEY = {
-  kg: "adjust_target_weight",
-  level: "adjust_target_level",
-  band: "adjust_target_band",
-  bw: "adjust_target_bw",
-};
-
-// Find target exercise & routine database links.
-function resolveAdjustmentTargets(state, update) {
-  const exercise = libraryExercises(state).find((e) => e.name === update.exerciseName);
-  const exerciseId = exercise ? exercise.id : "";
-  const routine = state.routines.find((r) => r.exercises.some((ex) => ex.id === exerciseId));
-  const exMapping = routine ? routine.exercises.find((ex) => ex.id === exerciseId) : null;
-  return { exercise, exerciseId, routine, exMapping };
-}
-
-// Pre-fill the target the trainer can still override (domain/adjustmentSuggestion.js decides it).
-function prefillAdjustmentFields(exMapping, update, state) {
-  const target = suggestedTarget({
-    routineEntry: exMapping,
-    performed: performedTarget(allPrograms(state), update),
-    tagId: readFeedbackTag(noteTagLine(update)).known?.id,
-  });
-  document.getElementById("adjust-weight").value = target.weight;
-  const repsField = document.getElementById("adjust-reps");
-  repsField.value = target.reps;
-  // Reps may be "max", "20s" or "8-12", which a number keyboard cannot type. Only a plain number
-  // gets one; any other value keeps the full keyboard.
-  if (/^\d+$/.test(String(target.reps))) repsField.setAttribute("inputmode", "numeric");
-  else repsField.removeAttribute("inputmode");
-  document.getElementById("adjust-sets").value = target.sets;
-}
-
-// Cancel / close buttons (close-btn sits outside the form, so clone it to avoid stacking
-// listeners across repeat opens; the in-form cancel button is refreshed separately via the form
-// clone in openAdjustmentWizardComponent).
-function wireDialogCloseButtons(dialog) {
-  for (const btn of dialog.querySelectorAll(".modal-cancel, .modal-close-btn")) {
-    btn.replaceWith(btn.cloneNode(true));
-  }
-  for (const btn of dialog.querySelectorAll(".modal-cancel, .modal-close-btn")) {
-    btn.addEventListener("click", () => dialog.close());
-  }
-}
-
-export function openAdjustmentWizardComponent(updateId, ctx) {
-  renderApplyAdjustmentDialog();
-  const {
-    state,
-    t,
-    escapeHTML,
-    saveToLocalStorage,
-    renderRoutinesList,
-    renderPendingPlanAdjustments,
-  } = ctx;
-
-  // Only a note the next plan waits for, resolved or not, is an adjustment; a note that only records
-  // what happened in a session has nothing to apply.
-  const update = noteById(state, updateId);
-  if (!update || update.review === "none") return;
-
-  const dialog = document.getElementById("dialog-apply-adjustment");
-  if (!dialog) return;
-
-  // Set inputs
-  document.getElementById("adjust-update-id").value = updateId;
-  document.getElementById("adjust-client-id").value = update.clientId;
-
-  // Set text labels
-  document.getElementById("adjust-client-name").textContent =
-    clientNameOf(state, update.clientId) ?? "";
-  // The tag in the trainer's language, and the note they typed after it, if any.
-  const tagLine = noteTagLine(update);
-  const { known, note } = readFeedbackTag(tagLine);
-  document.getElementById("adjust-feedback-tag").textContent = feedbackTagText(tagLine, t);
-  document.getElementById("adjust-details").textContent = known
-    ? note || t("no_details_specified")
-    : tagLine;
-
-  const { exercise, exerciseId, routine, exMapping } = resolveAdjustmentTargets(state, update);
-
-  document.getElementById("adjust-exercise-name").textContent = update.exerciseName;
-  // The target is in the unit the exercise is programmed in: a level machine is not asked for kg.
-  const weightLabel = document.getElementById("adjust-weight-label");
-  weightLabel.removeAttribute("data-i18n");
-  weightLabel.textContent = t(TARGET_LABEL_KEY[loadUnitForEquipment(exercise?.equipment)]);
-
-  document.getElementById("adjust-routine-id").value = routine ? routine.id : "";
-  document.getElementById("adjust-exercise-id").value = exerciseId;
-  // A change is written into the routine. With none, it went nowhere while the signal cleared as if
-  // it had been applied; the dialog says so before the trainer taps Apply.
-  document.getElementById("adjust-no-routine").classList.toggle("hidden", Boolean(routine));
-
-  // Default panel action setup
-  document.getElementById("adjust-action-type").value = "modify";
-  document.getElementById("adjust-panel-modify").classList.remove("hidden");
-  document.getElementById("adjust-panel-swap").classList.add("hidden");
-
-  prefillAdjustmentFields(exMapping, update, state);
-
-  // Reset all stale listeners in one shot by cloning the form, THEN wire every interactive
-  // element against the fresh DOM. (The action select, cancel button, and swap picker all live
-  // inside the form, so any listener attached before this clone would be silently dropped.)
-  const form = document.getElementById("form-apply-adjustment");
-  form.replaceWith(form.cloneNode(true));
-  const newForm = document.getElementById("form-apply-adjustment");
-
-  // Action select toggles which panel is shown.
-  const actionTypeSelect = document.getElementById("adjust-action-type");
-  // Nothing is chosen for the trainer: a swap needs a tapped replacement before Apply works.
-  const swapSelect = document.getElementById("adjust-exercise-swap");
-  const applyButton = newForm.querySelector("button[type=submit]");
-  const needed = document.getElementById("adjust-swap-needed");
-  const syncApply = () => {
-    const missing = actionTypeSelect.value === "swap" && !swapSelect.value;
-    applyButton.disabled = missing;
-    needed.classList.toggle("hidden", !missing);
-  };
-  actionTypeSelect.addEventListener("change", () => {
-    syncApply();
-    const action = actionTypeSelect.value;
-    if (action === "modify") {
-      document.getElementById("adjust-panel-modify").classList.remove("hidden");
-      document.getElementById("adjust-panel-swap").classList.add("hidden");
-    } else if (action === "swap") {
-      document.getElementById("adjust-panel-modify").classList.add("hidden");
-      document.getElementById("adjust-panel-swap").classList.remove("hidden");
-    } else {
-      document.getElementById("adjust-panel-modify").classList.add("hidden");
-      document.getElementById("adjust-panel-swap").classList.add("hidden");
-    }
-  });
-
-  wireDialogCloseButtons(dialog);
-
-  // Swap picker — pre-filtered to the same muscle group so the replacement inherits the correct
-  // volume bucket. The chosen id lands in the hidden #adjust-exercise-swap.
-  swapSelect.value = "";
-  mountExercisePicker(document.getElementById("adjust-swap-picker"), {
-    state,
-    excludeId: exerciseId,
-    defaultCategory: exercise ? exercise.category : "All",
-    keepSelection: true,
-    ...pickerLabels(t),
-    onSelect: (ex) => {
-      swapSelect.value = ex ? ex.id : "";
-      syncApply();
-    },
-  });
-  syncApply();
-
-  newForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const action = actionTypeSelect.value;
-    const rId = document.getElementById("adjust-routine-id").value;
-    const exId = document.getElementById("adjust-exercise-id").value;
-
-    const targetRoutine = state.routines.find((r) => r.id === rId);
-
-    if (action === "modify" && targetRoutine) {
-      const targetEx = targetRoutine.exercises.find((ex) => ex.id === exId);
-      if (targetEx) {
-        targetEx.weight = parseDecimal(document.getElementById("adjust-weight").value) || 0;
-        targetEx.reps = document.getElementById("adjust-reps").value;
-        targetEx.sets = parseInt(document.getElementById("adjust-sets").value) || 3;
-      }
-    } else if (action === "swap" && targetRoutine) {
-      const idx = targetRoutine.exercises.findIndex((ex) => ex.id === exId);
-      if (idx !== -1) {
-        const swapExId = swapSelect.value;
-        targetRoutine.exercises[idx].id = swapExId;
-      }
-    }
-
-    resolveNote(state, updateId);
-
-    saveToLocalStorage();
-    renderPendingPlanAdjustments();
-    renderRoutinesList();
-    dialog.close();
-  });
-
-  dialog.showModal();
 }

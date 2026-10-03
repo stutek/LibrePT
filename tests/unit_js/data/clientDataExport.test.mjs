@@ -64,6 +64,17 @@ function gymState() {
   };
 }
 
+test("a cancelled session reads as cancelled, never as planned", () => {
+  const state = gymState();
+  state.sessions = [
+    { id: "s-off", participants: ["c-jane"], title: "Called off", status: "cancelled" },
+    { id: "s-next", participants: ["c-jane"], title: "Still to come", status: "scheduled" },
+  ];
+  const markdown = renderClientExportMarkdown(buildClientExport(state, "c-jane"));
+  assert.match(markdown, /Called off · cancelled/);
+  assert.match(markdown, /Still to come · planned/);
+});
+
 test("the export contains only the requesting client's records", () => {
   const payload = buildClientExport(gymState(), "c-jane");
   const serialized = JSON.stringify(payload);

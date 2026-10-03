@@ -144,15 +144,11 @@ def test_interactive_dashboard_flow(page, local_server):
     )
     assert page.locator("#dashboard-adjustments-list .fa-circle-play").count() == 0
 
-    # Click Resolve Alert button to trigger the adjustment wizard modal
+    # Resolve: one tap, no dialog — the app sets no targets, so resolving changes no plan.
+    cards = page.locator("#dashboard-adjustments-list .adjustment-card")
+    before = cards.count()
     page.locator(".btn-resolve-alert").first.click()
-    page.wait_for_selector("#dialog-apply-adjustment", state="visible")
-    assert page.locator("#dialog-apply-adjustment").is_visible()
-
-    # Modify parameters and submit
-    page.locator("#adjust-action-type").select_option("modify")
-    page.locator("#adjust-weight").fill("62.5")
-    page.locator("#dialog-apply-adjustment button[type='submit']").click()
-
-    # Verify wizard modal closes
-    page.wait_for_selector("#dialog-apply-adjustment", state="hidden")
+    page.wait_for_function(
+        "(n) => document.querySelectorAll('#dashboard-adjustments-list .adjustment-card').length < n",
+        arg=before,
+    )

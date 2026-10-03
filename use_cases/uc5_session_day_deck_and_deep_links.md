@@ -166,7 +166,6 @@ Record editors are routes too, each opening over its own list view:
 | `/routines/{routineId}` | the routine builder loaded with that template |
 | `/exercises/new` | the create-movement form |
 | `/clients/{clientId}/edit` | the client's edit form, over that client's page. Adding a client has no route: the session form opens it and takes the new client back onto the session |
-| `/adjustments/{updateId}` | the adjustment wizard on that alert |
 | `/session/{id}/client/{cid}/edit/catalog` | the plan editor with the **taxonomy picker** open (add from catalog) |
 | `/session/{id}/client/{cid}/edit/catalog/slot/{slotId}` | the picker open to **swap that row's** movement |
 

@@ -156,35 +156,10 @@
   gap: 4px;
   flex: 0 0 auto;
 }
-
-/* --- Apply Plan Adjustment dialog --- */
-.adjust-summary-panel {
-  background: rgba(0, 0, 0, 0.15);
-  padding: 12px;
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
-  margin-bottom: 16px;
-}
-.adjust-summary-row {
+/* What the trainer typed with the signal. */
+.adjustment-remark {
   font-size: 13px;
-  margin-bottom: 6px;
-}
-.adjust-summary-row-last {
-  font-size: 13px;
-}
-.adjust-summary-label {
-  color: var(--text-muted);
-}
-.adjust-action-type-select {
-  margin-bottom: 12px;
-}
-.adjust-modify-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-/* Chained to beat .modal-actions' own margin-top (10px, this dialog wants 20px). */
-.modal-actions.adjust-modal-actions {
-  margin-top: 20px;
+  font-style: italic;
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
 }
