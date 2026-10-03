@@ -4762,6 +4762,16 @@ agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pa
 
 **Predlog:** rutina, izbrana za novo dodano stranko, naj se uporabi tudi v obrazcu že shranjenega termina — opaženo `2026-10-03 06:29:14.533` na različici `e51fea88`, 390 × 844, sl.
 
+### 80.191 [ ] P2 — Trening, zapisan za včeraj in zaključen danes z »Ohrani urnik«, je v zgodovini stranke datiran z današnjim dnem
+
+**Scenarij in koraki:** »Ustvari trening« → ime »Včeraj dva«, polje »Datum« 2026-10-02, 19:00–20:00, stranka Sara Lah → »Odpri v beležki« → »Končano« → »Začni trening« → okno »Trening se je začel izven urnika« (»začeto … prepozno«) → »Ohrani urnik« → ⋮ »Uredi načrt« → Walking Lunges → »Prelahko« → »Zaključi vadbo« → »Zaključi zdaj«.
+
+**Opaženo:** kartica na seznamu piše »19:00 - 20:00 Včeraj dva … Zaključeno«, termin 2026-10-02. Stran stranke pod »Zgodovina zabeleženih vadb« pokaže vadbo z datumom »2026-10-03« (danes). V bazi ima program `performedAt` 2026-10-03T04:39, termin pa `startDate` 2026-10-02T17:00.
+
+**Težava in vpliv:** trener, ki pozno vpiše včerajšnji trening in izbere, naj ostane na urniku, dobi v kartoteki stranke današnji datum. Izvoz podatkov stranke ju vodi pod različnima dnevoma: pod »Treningi« piše »2026-10-02 19:00 - 20:00 Včeraj dva · opravljen«, pod »Zapisani treningi« pa »2026-10-03 — Prazen načrt, brez rutine« z Walking Lunges.
+
+**Predlog:** ob »Ohrani urnik« naj bo datum vadbe dan termina — opaženo `2026-10-03 06:40:36.456` na različici `e51fea88`, 390 × 844, sl.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
