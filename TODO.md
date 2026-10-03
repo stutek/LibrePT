@@ -4670,6 +4670,16 @@ agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pa
 
 **Predlog:** besedilo naj loči, kaj se izgubi (serije) in kaj ostane (signal in načrt) — opaženo `2026-10-03 05:37:14.069` na različici `e51fea88`, 390 × 844, sl.
 
+### 80.182 [ ] P2 — Stranka, odstranjena in spet dodana na isti termin, pride z praznim načrtom; prejšnji načrt obstane med nenačrtovanimi in ga ni mogoče vrniti
+
+**Scenarij in koraki:** trening »Vrnitev« za jutri 16:00 (Aleksandra Vrhovnik, Cvetka Vidmar-Zupan), vsaka z Barbell Bench Press → kartica »Vrnitev« → »Uredi« → ✕ »Odstrani s tega treninga: Cvetka Vidmar-Zupan« → »Shrani« → spet »Uredi« → polje »Poišči stranko po imenu...« → »Cvetka« → »Shrani« → odpri trening → zavihek »Cvetka«.
+
+**Opaženo:** zavihek »Cvetka« piše »Ni vstavljenih vaj«. V predalu piše »2 programa sta pripravljena, a še nista dodeljena treningu« in vrstica »Načrtovan program · Cvetka Vidmar-Zupan · 2026-10-03«. Ko odprem ta načrt (»Nenačrtovano · Cvetka Vidmar-Zupan«), vsebuje Bench Press, meni ⋮ pa ponudi le »Vsi na ta načrt« in »Izbriši plan«, v glavi pa »Končano z urejanjem načrta«. Dodelitve terminu ni.
+
+**Težava in vpliv:** trener, ki se je zmotil pri odstranitvi stranke, mora načrt vpisati znova. Prvi načrt obstane pod nenačrtovanimi in ga lahko le izbriše ali ureja. Isto velja za načrt, ki ostane po zaključku treninga, kjer stranka ni vpisala nič: »Naslednji načrt« na podlogi novega treninga ga pokaže (Aleksandra, Overhead Press, »Nova ura« in »Trojček C«), v načrt treninga pa se ne prenese.
+
+**Predlog:** ob ponovni dodelitvi naj aplikacija ponudi obstoječi nenačrtovani načrt te stranke, ali pa naj ima nenačrtovan načrt ukaz za dodelitev terminu — opaženo `2026-10-03 05:40:22.407` na različici `e51fea88`, 390 × 844, sl. Ali naj se nenačrtovani programi dodeljujejo terminom, je odločitev Simona: **čaka na Simona**.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
