@@ -861,11 +861,10 @@ needs no GitHub account (2026-08-22, [docs/BUG_REPORTING.md](docs/BUG_REPORTING.
       ([GOOGLE_CLOUD_SETUP.md](docs/GOOGLE_CLOUD_SETUP.md)): up to 100 users, with Google's
       unverified-app warning, until Google verifies it (§1.5). Google Calendar is no longer claimed
       (README, §68.3).
-- [ ] **[docs/PREVIEW.md](docs/PREVIEW.md) describes an older app** (found 2026-10-02 22:00): it says
-      the data lives in `localStorage` with a ~5 MB cap and that nothing syncs. The data is in
-      IndexedDB, and Drive sync exists within the limit above. The landing page links this page as
-      the honest account of the risks, so a trainer reads false facts there. Blocks any outreach
-      that links the landing page.
+- [x] **[docs/PREVIEW.md](docs/PREVIEW.md) described an older app** (found 2026-10-02 22:00, fixed
+      2026-10-03 03:45 in `f43171e1`): it said `localStorage`, a ~5 MB cap and no sync. It now says
+      IndexedDB, the browser's own limit, and Drive sync with its unverified-app limit, and names the
+      backup controls by their labels.
 
 ### 23.6 [ ] Campaign plan — kept private, not in this repo
 
@@ -5733,10 +5732,10 @@ Until the push the trainers' app stays on 5; pushing publishes 6 as it is on tha
 backup format 8, and a build that knows only 4 to 6 refuses it, as it refuses any newer file. Local
 stores 4 and 5 are unaffected. Blocks nothing; the trainer has to be told when the version ships.
 
-**[ ] Found while porting (Claude helper, 2026-10-02), left as they were:** the client's data export
-never prints the trainer's remark under "Programme changes" (it prints a field nothing writes); the
-AI-safe summary's "Recent sessions" takes the first ten records in storage order, so with more than
-ten it lists the oldest.
+**[x] Found while porting (Claude helper, 2026-10-02), fixed 2026-10-03 03:45:** the client's data
+export never printed the trainer's remark under "Programme changes" (`b7ff30fe`); the AI-safe
+summary's "Recent sessions" took the first ten records in storage order, so with more than ten it
+listed the oldest (`39edadad`).
 
 **[~] After the implementation (Simon, 2026-10-02):** start agy for at least four hours of
 exploratory testing by `.agents/skills/exploratory-test/SKILL.md`, against the dev server, because
