@@ -4710,6 +4710,16 @@ agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pa
 
 **Predlog:** iskanje naj ne razlikuje č od c, š od s, ž od z (pri imenih in priimkih) — opaženo `2026-10-03 05:48:25.206` na različici `e51fea88`, 390 × 844, sl.
 
+### 80.186 [ ] P2 — »Kopiraj ta načrt drugi stranki« prepiše že vpisan načrt druge stranke brez vprašanja
+
+**Scenarij in koraki:** trening »Kopija načrta« za jutri 20:00 (Aleksandra Vrhovnik, Cvetka Novak). Pri Aleksandri Barbell Row, pri Cvetki Barbell Overhead Press → zavihek »Aleksandra« → ⋮ »Možnosti treninga« → »Kopiraj ta načrt drugi stranki na tem treningu« → »Cvetka Novak«.
+
+**Opaženo:** okna ali vprašanja ni. Cvetkin načrt ima po ukazu samo Barbell Row. V bazi ni nobenega programa Cvetke z Overhead Press, tudi ne med nenačrtovanimi.
+
+**Težava in vpliv:** vaje, ki jih je trener vpisal za Cvetko, izginejo ob dotiku, ki je bil mišljen kot dodajanje načrta. Pri praznem načrtu je ukaz koristen; pri vpisanem je izguba dela. Isto velja verjetno za »Vsi na ta načrt« (ni preizkušeno).
+
+**Predlog:** ko ima ciljna stranka že vaje, naj ukaz vpraša »Zamenjam Cvetkin načrt?« in navede vaje, ki bi se izgubile, ali pa naj stari načrt ostane med nenačrtovanimi — opaženo `2026-10-03 05:51:45.566` na različici `e51fea88`, 390 × 844, sl.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
