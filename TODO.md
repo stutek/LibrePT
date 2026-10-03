@@ -4752,6 +4752,16 @@ agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pa
 
 **Predlog:** oznaka naj se pokaže le pri treningu, katerega nobena stranka nima vaj. §80.114 je pri nezačetem treningu pustil odprto, ker načrt ni bil shranjen pri treningu; zdaj je shranjen — opaženo `2026-10-03 06:26:26.447` na različici `e51fea88`, 390 × 844, sl.
 
+### 80.190 [ ] P2 — Rutina, izbrana za stranko, ki jo dodam v obrazec že shranjenega termina, se ne uporabi: načrt je prazen
+
+**Scenarij in koraki:** rutina »Rutina Plank« (ena vaja, Plank) iz »Vaje in rutine« → »Rutine« → »Ustvari rutino«. Trening »Meja 23:30« za jutri (Zora Test) → kartica → »Uredi« → polje »Poišči stranko po imenu...« → »Eva Test« (nova stranka) → pri Evi v spustnem seznamu »Izberi rutino« izberem »Rutina Plank« → »Shrani« → odprem trening → zavihek »Eva«.
+
+**Opaženo:** zavihek »Eva« piše »Ni vstavljenih vaj«. V bazi je Evin program `planned` brez vaj. Isto pri stranki »Mia Test« na terminu »Vsi na načrt« (izbirnik nastavljen z `select` in z dotikom). Pri novem terminu »Z rutino« (»Ustvari trening«, stranka Eva Test, isti izbirnik, »Rutina Plank«) pa se zavihek »Eva« odpre z vajo »Plank«, »S3 × 0:10 × BW« in »Počitek 60s«.
+
+**Težava in vpliv:** isti izbirnik deluje pri novem terminu in ne pri urejanju. Trener, ki doda stranko k že shranjenemu terminu in izbere rutino, dobi prazen načrt brez opozorila. Vaje mora vpisati sam.
+
+**Predlog:** rutina, izbrana za novo dodano stranko, naj se uporabi tudi v obrazcu že shranjenega termina — opaženo `2026-10-03 06:29:14.533` na različici `e51fea88`, 390 × 844, sl.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
