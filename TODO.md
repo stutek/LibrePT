@@ -4742,6 +4742,16 @@ agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pa
 
 **Predlog:** če sprememba nima kam, naj okno pove »Ta trening nima rutine, sprememba ni shranjena« (ali naj ponudi ustvariti rutino) — opaženo `2026-10-03 06:09:58.548` na različici `e51fea88`, 390 × 844, sl.
 
+### 80.189 [ ] P3 — Kartica nezačetega treninga z vpisanim načrtom še vedno piše rdeče »Program ni določen«
+
+**Scenarij in koraki:** trening »Vsi na načrt« za jutri 15:00 (Zora Test, Jan Test) → »Odpri v beležki« → pri vsaki stranki vaja iz kataloga (Zora Barbell Row in Wall Sit, Jan Barbell Row) → »Zapri trening in se vrni na začetek« → seznam treningov.
+
+**Opaženo:** kartica pokaže »2/2 mest zasedenih« in rdečo oznako z opozorilnim znakom »Program ni določen«. V bazi (`schema6`) imata obe stranki program `planned` z `sessionId` tega treninga in z vajami. Enako pri vseh drugih nezačetih treningih z načrtom iz tega zapisa (»Vrnitev«, »Kopija načrta«, »Tri«).
+
+**Težava in vpliv:** oznaka pravi, da načrta ni, trener pa ga je pravkar vpisal. Rdeče opozorilo lahko trenerja napelje, da načrt vpiše še enkrat.
+
+**Predlog:** oznaka naj se pokaže le pri treningu, katerega nobena stranka nima vaj. §80.114 je pri nezačetem treningu pustil odprto, ker načrt ni bil shranjen pri treningu; zdaj je shranjen — opaženo `2026-10-03 06:26:26.447` na različici `e51fea88`, 390 × 844, sl.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
