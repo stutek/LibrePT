@@ -4618,6 +4618,16 @@ agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pa
 
 **Predlog:** ime naj ostane celo ali se skrije, ikona pa ostane; odrezano besedilo ni dobra oblika — opaženo `2026-10-03 05:18:10.876` na različici `e51fea88`, 320 × 680, sl.
 
+### 80.177 [ ] P3 — Obvestila ne imenujejo treninga: »Načrtovan program« brez imena in »Dolga skupina (2)« za signal iz drugega treninga
+
+**Scenarij in koraki:** 320 × 680. Trening »Dolga skupina« (Aleksandra Vrhovnik, Bojan Kosmatinec, Cvetka Vidmar-Zupan): vsak dobi Barbell Back Squat, Aleksandra »Prelahko«, Bojan »Pretežko« → »Zaključi vadbo«. Nato »Druga skupina« (Aleksandra, Bojan): pri obeh Barbell Overhead Press, pri Bojanu »Pretežko«, pri Aleksandri nič → »Zaključi vadbo« → »Zaključi zdaj« → »Zaključi zdaj« → predal obvestil.
+
+**Opaženo:** »Nenačrtovani programi« kaže »Načrtovan program · Aleksandra Vrhovnik · 2026-10-03«. Aleksandrin Overhead Press je ostal kot načrt brez termina, vendar vrstica ne pove, iz katerega treninga je. Isto pri Galu Ovnu, ki je bil odstranjen iz obrazca termina »Večerni par«. Program, ki je ostal po izbrisu termina, nosi ime treninga (»Jutranja dvojica · Emil Zorc · 2026-10-03«). V »Treningi, ki čakajo na pregled« piše »Bojan Kosmatinec — Dolga skupina (2)«: dva signala, drugi je iz »Druga skupina«.
+
+**Težava in vpliv:** trener ima dva načrta ali dva signala iste stranke in iz vrstice ne ve, kateri trening je kateri. Datum »2026-10-03« je datum nastanka načrta, ne datum odpovedanega ali zaključenega termina.
+
+**Predlog:** vrstica naj ima ime treninga, iz katerega je načrt ali signal nastal, in pri več signalih naj loči treninge — opaženo `2026-10-03 05:24:02.278` na različici `e51fea88`, 320 × 680, sl.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
