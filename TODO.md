@@ -4592,6 +4592,8 @@ agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pa
 
 **Najkrajši postopek (e51fea88, 320 × 680):** »Dolga skupina« (Aleksandra, Bojan, Cvetka, 05:30–06:30) začet in zaključen. »Živi trening« (samo Bojan, 05:30–06:30, »Vseeno razporedi«) → »Začni trening«. Podloga ima naslov »Dolga skupina / Živi trening« in tri zavihke: Aleksandra, Bojan, Cvetka, vse tri z imenom »Dolga skupina«. Bojan, ki je v »Živi trening«, nosi pod zavihkom ime zaključenega treninga.
 
+**Pogoj, preverjen v čistem profilu 2026-10-03 (e51fea88, 390 × 844, 2026-10-03 07:07:57.730):** napaka nastane, kadar je stranka novega treninga že tudi v zaključenem treningu, s katerim se prekriva. Ana Alfa v »Prvi« (19:00–20:00, zaključen, Plank). »Drugi« (Bor Beta, 19:30–20:30, druga stranka): podloga se odpre z naslovom »Prvi / Drugi« in zavihkoma Ana, Bor, a Borov program in prisotnost sta pravilno pod »Drugi« (ATT Drugi, Bor Beta). »Tretji« (Ana Alfa, 19:15–20:15, ista stranka): Anin Wall Sit z »Prelahko« se po zaključku zapiše pod »Prvi« (`PROG Ana Alfa done Prvi ['Wall Sit']`), `sessionAttendance` za »Tretji« ne obstaja, »Tretji« je »done«.
+
 ### 80.174 [ ] P2 — Obnova stare kopije: obvestilo o pretvorbi je v angleščini sredi slovenskega okna in ne pove, kaj se bo zgodilo s podatki
 
 **Scenarij in koraki:** objavljena aplikacija `933dbc0`: skupinski trening »Stara skupina« (Hana Kolar, Igor Rem) z »Pretežko« in »Prelahko«, zaključen; trening »Stari jutri« za Igorja → ☰ → »Upravljanje podatkov« → »Izvozi JSON« → »Zapisal sem si ga, shrani«. Nato `e51fea88` na prazni aplikaciji (`?lang=sl`): ☰ → »Upravljanje podatkov« → »Izberi JSON datoteko« → geslo → »Odpri datoteko«.
