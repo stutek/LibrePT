@@ -10005,6 +10005,18 @@ tem izrisu, še ni pogledano na telefonu.
 tekočim treningom pa preverja vsak prehod pregleda prelivanja. Če se prelivanje vrne, ga ta test
 pokaže.
 
+### 80.194 [x] P2 — Po začetku drugega treninga kartica prvega, ki še teče, piše »Se začne čez« — popravljeno 2026-10-03
+
+**Scenarij in koraki:** trening »Prvi tekoči« (Sara Lah, 16:00–17:00) → kartica → »Začni trening« → »Ohrani urnik« → ✕ »Zapri trening in se vrni na začetek«: kartica piše »Aktiven trening«. Nato trening »Drugi tekoči« (Ula Test, 18:00–19:00, brez prekrivanja) → kartica → »Začni trening« → »Ohrani urnik« → ✕. Nato kartica »Prvi tekoči«.
+
+**Opaženo:** kartica »Prvi tekoči« piše zdaj »Se začne čez 09h 11m«, kartica »Drugi tekoči« »Aktiven trening«. Ko odprem »Prvi tekoči«, so ponujeni »Zaključi vadbo« in zavihek »Sara«, »Začni trening« ni ponujen: trening torej še teče. V bazi ima Sara program `live` v »Prvi tekoči«. Vprašanja ali opozorila ob začetku drugega ni bilo. Ista sprememba se je zgodila pri »Alfa« in »Beta« (12:00 in 14:00): po začetku »Beta« je kartica »Alfa« kazala »Se začne čez«, zaključek »Alfa« s kartice je uspel in zapisal program.
+
+**Težava in vpliv:** trener po začetku drugega treninga na seznamu ne vidi, da prvi še teče. Kartica kaže prihodnost, trening pa ima odprt program in lahko ostane nezaključen.
+
+**Predlog:** kartica naj ostane »Aktiven trening«, dokler trening ni zaključen; če sme teči samo en trening hkrati, naj aplikacija ob začetku drugega vpraša, ali prvega zaključi — opaženo `2026-10-03 06:49:25.697` na različici `e51fea88`, 390 × 844, sl. Ali sme teči več treningov hkrati, je odločitev Simona.
+
+**Popravljeno 2026-10-03 12:46** (`fcb1b5c3`). Po odločitvi v §95 sme hkrati teči več treningov, zato aplikacija ob začetku drugega ne vpraša ničesar. Kartica je o tem, ali trening teče, spraševala le podlogo, ki drži en trening; zdaj bere žive programe svojega treninga. Trening, ki teče in ni na podlogi, kaže svojo uro po istem pravilu kot podloga: odšteva do konca termina ali šteje od začetka. Testa `test_a_started_session_still_reads_active_after_another_is_started` in `test_a_running_session_off_the_clipboard_shows_its_own_clock`.
+
 ## 99.1 [x] Padli test ni bil okolje, ampak iskanje niza v naključnem id-ju — popravljeno 2026-10-01
 
 Po potisku 212 commitov je 2026-10-01 padel tek »Build, Verify and Deploy«, opravilo »Stage 1 ·

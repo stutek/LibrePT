@@ -4666,15 +4666,9 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80192-x-p3--ang
 
 **Predlog:** odločitev Simona: ali ima okno z oznako in opombo isto pravilo kot obrazci — opaženo `2026-10-03 06:44:24.588` na različici `e51fea88`, 390 × 844, sl.
 
-### 80.194 [ ] P2 — Po začetku drugega treninga kartica prvega, ki še teče, piše »Se začne čez«
+### 80.194 [x] P2 — Po začetku drugega treninga kartica prvega, ki še teče, piše »Se začne čez« — popravljeno 2026-10-03
 
-**Scenarij in koraki:** trening »Prvi tekoči« (Sara Lah, 16:00–17:00) → kartica → »Začni trening« → »Ohrani urnik« → ✕ »Zapri trening in se vrni na začetek«: kartica piše »Aktiven trening«. Nato trening »Drugi tekoči« (Ula Test, 18:00–19:00, brez prekrivanja) → kartica → »Začni trening« → »Ohrani urnik« → ✕. Nato kartica »Prvi tekoči«.
-
-**Opaženo:** kartica »Prvi tekoči« piše zdaj »Se začne čez 09h 11m«, kartica »Drugi tekoči« »Aktiven trening«. Ko odprem »Prvi tekoči«, so ponujeni »Zaključi vadbo« in zavihek »Sara«, »Začni trening« ni ponujen: trening torej še teče. V bazi ima Sara program `live` v »Prvi tekoči«. Vprašanja ali opozorila ob začetku drugega ni bilo. Ista sprememba se je zgodila pri »Alfa« in »Beta« (12:00 in 14:00): po začetku »Beta« je kartica »Alfa« kazala »Se začne čez«, zaključek »Alfa« s kartice je uspel in zapisal program.
-
-**Težava in vpliv:** trener po začetku drugega treninga na seznamu ne vidi, da prvi še teče. Kartica kaže prihodnost, trening pa ima odprt program in lahko ostane nezaključen.
-
-**Predlog:** kartica naj ostane »Aktiven trening«, dokler trening ni zaključen; če sme teči samo en trening hkrati, naj aplikacija ob začetku drugega vpraša, ali prvega zaključi — opaženo `2026-10-03 06:49:25.697` na različici `e51fea88`, 390 × 844, sl. Ali sme teči več treningov hkrati, je odločitev Simona.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80194-x-p2--po-začetku-drugega-treninga-kartica-prvega-ki-še-teče-piše-se-začne-čez--popravljeno-2026-10-03).
 
 ### 80.195 [x] P3 — Pri 320 pikah oznaka »OGROŽENO — NAREDI KOPIJO« prekrije logotip in potisne gumb menija čez rob zaslona
 
