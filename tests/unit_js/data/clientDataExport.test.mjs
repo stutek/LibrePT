@@ -15,6 +15,7 @@ import {
   renderClientExportMarkdown,
 } from "../../../src/data/clientDataExport.js";
 import { toDomainState } from "../../../src/data/schemaShapes.js";
+import { readFeedbackTag } from "../../../src/domain/feedbackTags.js";
 
 // The fixtures are written in the old `history` / `planUpdates` shape; they reach the export the way
 // an older store reaches memory, through the conversion.
@@ -212,5 +213,34 @@ test("the plan changes the dialog counts are in the document", () => {
   assert.match(markdown, /Programme changes \(1\)/);
   assert.match(markdown, /2026-03-04 · Bench Press · Pretežko/);
   // The stored English identifier never reaches the reader when the words for it are given.
+  assert.doesNotMatch(markdown, /Too Hard - Reduce Load/);
+});
+
+test("a plan change carries the trainer's remark", () => {
+  // The remark is stored after the tag, as the feedback form writes it. The document read a
+  // separate field that nothing writes, so the remark never reached the client.
+  const state = gymState();
+  state.planUpdates = [
+    {
+      id: "p1",
+      clientId: "c-jane",
+      clientName: "Jane Doe",
+      date: "2026-03-04T10:00:00.000Z",
+      exerciseName: "Bench Press",
+      tag: "Too Hard - Reduce Load - Left shoulder pinched at the bottom",
+      resolved: true,
+    },
+  ];
+
+  const markdown = renderClientExportMarkdown(buildClientExport(state, "c-jane"), {
+    tagText: (tag) => (tag.startsWith("Too Hard - Reduce Load") ? "Pretežko" : tag),
+    // As both callers in modules/ pass it.
+    tagNote: (tag) => readFeedbackTag(tag).note,
+  });
+
+  assert.match(
+    markdown,
+    /2026-03-04 · Bench Press · Pretežko · Left shoulder pinched at the bottom/,
+  );
   assert.doesNotMatch(markdown, /Too Hard - Reduce Load/);
 });

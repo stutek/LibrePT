@@ -206,13 +206,13 @@ function sessionLines(sessions, w) {
 
 // The programme changes the trainer made off the back of this client's own feedback. They were
 // counted in the dialog's summary and then left out of the file, so the document promised a section
-// it did not have.
-function planChangeLines(planUpdates, w, tagText) {
+// it did not have. The trainer's remark is stored after the tag, as the feedback form writes it.
+function planChangeLines(planUpdates, tagText, tagNote) {
   return (planUpdates || [])
     .map((update) => {
       const when = (update.date || "").substring(0, 10);
       const tag = tagText(update.tag);
-      const parts = [when, update.exerciseName, tag, update.note].filter(Boolean);
+      const parts = [when, update.exerciseName, tag, tagNote(update.tag)].filter(Boolean);
       return `- ${parts.join(" · ")}`;
     })
     .filter((line) => line !== "- ");
@@ -268,9 +268,13 @@ function preparedLine(payload, w) {
  * `tagText` turns a stored feedback tag into the words for it. It is INJECTED because the mapping is
  * the domain's (domain/feedbackTags.js) and this module is a layer below it; without it the document
  * printed the stored English identifier — "Too Hard - Reduce Load" — in the middle of a Slovenian
- * document a client had asked for. Both callers live in modules/ and pass it.
+ * document a client had asked for. Both callers live in modules/ and pass it. `tagNote` reads the
+ * trainer's remark a plan change stores after its tag, injected for the same reason.
  */
-export function renderClientExportMarkdown(payload, { tagText = (tag) => tag || "" } = {}) {
+export function renderClientExportMarkdown(
+  payload,
+  { tagText = (tag) => tag || "", tagNote = () => "" } = {},
+) {
   if (!payload) return "";
   const w = wordsFor(payload.lang);
   const { subject, counts } = payload;
@@ -292,7 +296,7 @@ export function renderClientExportMarkdown(payload, { tagText = (tag) => tag || 
       ? [
           w("export_doc_plan_changes", { count: counts.planUpdates }),
           "",
-          ...planChangeLines(payload.planUpdates, w, tagText),
+          ...planChangeLines(payload.planUpdates, tagText, tagNote),
           "",
         ]
       : []),
