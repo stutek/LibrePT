@@ -4776,7 +4776,7 @@ agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pa
 
 **Scenarij in koraki:** `?lang=en` → kartica treninga brez vaj (»Včeraj dva«, Sara Lah) → podloga.
 
-**Opaženo:** prazno stanje piše »No Exercises Injected« in pod njim »No exercises yet. Tap the three dots (⋮) at the top right and choose Edit plan.« Na strani stranke stoji naslov »Logged Session History« z veliko začetnico vsake besede, drugi naslovi pa so v navadnem pisanju (»Copy for AI, without names«, »Export data (GDPR)«).
+**Opaženo:** prazno stanje piše »No Exercises Injected« in pod njim »No exercises yet. Tap the three dots (⋮) at the top right and choose Edit plan.« Na strani stranke stoji naslov »Logged Session History« z veliko začetnico vsake besede, drugi naslovi pa so v navadnem pisanju (»Copy for AI, without names«, »Export data (GDPR)«). Na seznamu in v obrazcu stojita v istem zaslonu »Program Not Defined« in »Each one can be given their own programme« (dve črkovanji), v predalu »Planned Program · Sara Lah« in »Sessions awaiting review«.
 
 **Težava in vpliv:** »Injected« je tehnični izraz za programsko dodajanje in ga bralec, ki ni v stroki, ne razume kot »dodane vaje«. Besedilo ne ujema s sosednjim stavkom, ki pove, kaj storiti.
 
