@@ -126,7 +126,9 @@ WHAT_IS_STORED = """async (programId) => {
 }"""
 
 
-def test_a_participant_with_only_a_too_hard_signal_keeps_the_training(page, local_server):
+def test_a_participant_with_only_a_too_hard_signal_keeps_the_training(
+    page, local_server
+):
     """On a clipboard holding two sessions, one client logs sets and a client of the other session
     only gets Too Hard, which deliberately ticks no set. Finishing kept the first client's training
     and deleted the second's program as a session where nothing was performed, with no attendance
@@ -139,7 +141,9 @@ def test_a_participant_with_only_a_too_hard_signal_keeps_the_training(page, loca
     _too_easy_on_the_first_card(page)
 
     # A client of the other session on the merged clipboard.
-    page.locator(".client-tab-participant", has_text="Return-to-Play Rehab").first.click()
+    page.locator(
+        ".client-tab-participant", has_text="Return-to-Play Rehab"
+    ).first.click()
     page.wait_for_timeout(300)
     page.locator(".exercise-deck-card").first.click(force=True)
     page.wait_for_selector(".exercise-deck-card .deck-action-hard")
@@ -218,4 +222,7 @@ def test_finishing_a_group_on_one_members_tab_keeps_every_member(page, local_ser
 
     for program_id in (first, second):
         stored = page.evaluate(WHAT_IS_STORED, program_id)
-        assert stored == {"status": "done", "attended": 1, "notes": 1}, (program_id, stored)
+        assert stored == {"status": "done", "attended": 1, "notes": 1}, (
+            program_id,
+            stored,
+        )

@@ -62,16 +62,23 @@ test("a client with a signal but no set ticked is recorded, with the signal", ()
   const record = buildSessionHistoryRecord({
     ...base,
     clientState: planWith(false),
-    feedback: [{ id: "f1", clientId: "c1", exerciseName: "Bench Press", tag: "Too Hard - Reduce Load" }],
+    feedback: [
+      { id: "f1", clientId: "c1", exerciseName: "Bench Press", tag: "Too Hard - Reduce Load" },
+    ],
   });
   assert.notEqual(record, null);
-  assert.deepEqual(record.feedback.map((entry) => entry.id), ["f1"]);
+  assert.deepEqual(
+    record.feedback.map((entry) => entry.id),
+    ["f1"],
+  );
 
   // Another participant's signal does not make this client's empty session worth a record.
   const other = buildSessionHistoryRecord({
     ...base,
     clientState: planWith(false),
-    feedback: [{ id: "f2", clientId: "c2", exerciseName: "Bench Press", tag: "Too Hard - Reduce Load" }],
+    feedback: [
+      { id: "f2", clientId: "c2", exerciseName: "Bench Press", tag: "Too Hard - Reduce Load" },
+    ],
   });
   assert.equal(other, null);
 });
