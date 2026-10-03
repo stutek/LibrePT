@@ -9,7 +9,14 @@
 //
 // It lives in data/, the lowest layer, so every layer can import it.
 
-/** The local calendar day of `date` (a Date, or anything `new Date` reads), as `YYYY-MM-DD`. */
+/** The local calendar day of an ISO instant (`2026-10-02T23:30:00.000Z`), or "" when it is empty or
+ * not a time. Cutting the first ten characters out of the instant gives the UTC day instead. */
+export function localDayOfInstant(instant) {
+  if (typeof instant !== "string" || instant === "") return "";
+  return Number.isNaN(new Date(instant).getTime()) ? "" : localDateString(instant);
+}
+
+/** The local calendar day of `date' (a Date, or anything `new Date` reads), as `YYYY-MM-DD`. */
 export function localDateString(date = new Date()) {
   const d = new Date(date);
   const month = String(d.getMonth() + 1).padStart(2, "0");

@@ -6,6 +6,7 @@ import {
   isConsentActive,
   isConsentWithdrawn,
 } from "../../data/clientConsent.js";
+import { localDayOfInstant } from "../../data/calendarDay.js";
 import { isErased } from "../../data/clientErasure.js";
 import { readTrainerIdentity } from "../../data/trainerIdentity.js";
 import { allExerciseNotes, allPrograms, performedPrograms } from "../../data/trainingRecords.js";
@@ -270,7 +271,7 @@ export function showClientDetails({
     if (isErased(client)) {
       erasedBanner.textContent = t("profile_erased_banner").replace(
         "{date}",
-        (client.erasure.erasedAt || "").substring(0, 10),
+        localDayOfInstant(client.erasure.erasedAt),
       );
     }
   }

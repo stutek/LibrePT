@@ -7,6 +7,8 @@
 // implementation of that erases the very evidence Art. 7(1) asks for. Every test here is about
 // keeping both true at once.
 
+process.env.TZ = "Europe/Ljubljana";
+
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
@@ -88,4 +90,11 @@ test("the signed date falls back to the write timestamp for older records", () =
   );
   assert.equal(consentSignedDate(GIVEN), "2026-05-04", "an explicit date always wins");
   assert.equal(consentSignedDate(null), "");
+});
+
+test("a record with only a write time is dated by the local day, not the UTC day", () => {
+  assert.equal(
+    consentSignedDate({ cloudSync: true, timestamp: "2026-10-02T23:30:00.000Z" }),
+    "2026-10-03",
+  );
 });

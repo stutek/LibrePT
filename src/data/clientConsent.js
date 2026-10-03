@@ -26,6 +26,8 @@
 //
 // Injected dependencies: none — pure functions over a plain object.
 
+import { localDayOfInstant } from "./calendarDay.js";
+
 /** True when consent was given and has not been withdrawn — the only state in which this client's
  * data may be processed. */
 export function isConsentActive(consent) {
@@ -47,7 +49,7 @@ export function hasNoConsentRecord(consent) {
  * before the date field existed — the closest thing those records have to a consent date. */
 export function consentSignedDate(consent) {
   if (!consent) return "";
-  return consent.consentDate || (consent.timestamp || "").split("T")[0] || "";
+  return consent.consentDate || localDayOfInstant(consent.timestamp);
 }
 
 /** Records a withdrawal, preserving everything that evidences the consent it ends.
