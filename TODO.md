@@ -4556,6 +4556,8 @@ je odprl stran (`explore.py goto` ima zapisano zgodovino zastajanja). Naslednji 
 agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pathname` ter ali je
 `#active-session-overlay` viden.
 
+**Ni ponovljeno (Claude, 2026-10-03, `e51fea88`, Playwright, 390 × 844 in 320 × 680).** Pet poti do nenačrtovanega programa: izbris booked termina z podloge (Dana Vidmar in Emil Zorc), odstranitev stranke v obrazcu termina (Gal Oven), zaključek treninga brez vpisa (Aleksandra Vrhovnik), izbris treninga, ki teče (Lea Test), ponovna dodelitev (Cvetka Novak). V vseh petih piše vrstica v predalu »Nenačrtovani programi« (po osvežitvi), dotik odpre `/session/<id programa>/client/<id stranke>/edit` in `#active-session-overlay` je viden z naslovom »Nenačrtovano · <stranka>« in vajami. Izbrisani program z `discarded` se po osvežitvi ne pokaže več. Dokaz, da je pot pravilna; kaj je agy storil drugače, ostane neznano.
+
 ### 80.171 [ ] P2 — Izvoz podatkov stranke navede tri opravljene serije za vajo, ki jo stran stranke pravi »PRESKOČENO«
 
 **Scenarij in koraki:** skupinski trening »Skupina Moč« (Ana Kranjc, Bojan Pirc, Cvetka Mlakar), pri Ani vaja Barbell Back Squat, »Pretežko« → »Zaključi vadbo« → »Zaključi zdaj« → ☰ → »Imenik strank« → »Ana Kranjc« → »Izvozi podatke (GDPR)« → »Berljiva kopija«.
