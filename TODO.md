@@ -4802,6 +4802,16 @@ agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pa
 
 **Predlog:** kartica naj ostane »Aktiven trening«, dokler trening ni zaključen; če sme teči samo en trening hkrati, naj aplikacija ob začetku drugega vpraša, ali prvega zaključi — opaženo `2026-10-03 06:49:25.697` na različici `e51fea88`, 390 × 844, sl. Ali sme teči več treningov hkrati, je odločitev Simona.
 
+### 80.195 [ ] P3 — Pri 320 pikah oznaka »OGROŽENO — NAREDI KOPIJO« prekrije logotip in potisne gumb menija čez rob zaslona
+
+**Scenarij in koraki:** 320 × 680. Podatki, ki jih ni v varnostni kopiji (nekaj treningov in strank, tu 10 sprememb brez kopije) → katera koli stran, na primer trening »Šest« s šestimi strankami.
+
+**Opaženo:** v glavi se pokaže rdeča oznaka »OGROŽENO — NAREDI KOPIJO«, široka 213 pik od x = 10. Logotip (x = 10, širina 0) je pod njo. Gumb ☰ leži med x = 292 in 332, zaslon je širok 320, `scrollWidth` strani je 334. Gumb menija je odrezan za 12 pik. Pri 390 × 844 oznaka leži med x = 58 in 271 in gumbi ostanejo na zaslonu (vizualna ugotovitev na posnetku, mere so iz DOM).
+
+**Težava in vpliv:** trener, ki še nima kopije, na ozkem telefonu vidi oznako čez logotip in gumb menija na robu. Gumb se še da pritisniti, pot do menija pa je ožja kot pri drugih trenerjih.
+
+**Predlog:** oznaka naj se skrajša (»OGROŽENO«) ali prestavi v drugo vrstico — opaženo `2026-10-03 06:58:06.451` na različici `e51fea88`, 320 × 680, sl.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
