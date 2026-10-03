@@ -4832,6 +4832,16 @@ agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pa
 
 **Predlog:** oznaka naj pove, katera kopija manjka (»Ni kopije v Google Drive«) ali naj izvoz datoteke šteje kot kopija — opaženo `2026-10-03 07:01:44.110` na različici `e51fea88`, 320 × 680, sl.
 
+### 80.198 [ ] P3 — Druga stranka z istim imenom se shrani brez opozorila, obe vrstici sta enaki
+
+**Scenarij in koraki:** imenik s stranko »Hana Kolar« → ☰ → »Imenik strank« → »Dodaj stranko« → »Ime in priimek« »Hana Kolar« → »Shrani«. Nato »Ustvari trening« → polje »Poišči stranko po imenu...« → »Hana«.
+
+**Opaženo:** druga »Hana Kolar« se shrani brez vprašanja. Imenik ima dve enaki kartici »HK Hana Kolar«. Iskanje pri terminu pokaže dve enaki vrstici »Hana Kolar«. Polje »Vzdevek (samo če si dve stranki delita ime)« je neobvezno in obrazec ne opozori, da ime že obstaja.
+
+**Težava in vpliv:** trener pri dodajanju k terminu ne ve, katera Hana je prava (ista imena, brez vzdevka), in lahko doda napačno osebo, vključno z njenimi signali in zapisi.
+
+**Predlog:** ob shranjevanju stranke z že obstoječim imenom naj obrazec zahteva vzdevek (ali naj vpraša »Hana Kolar že obstaja. Je to druga oseba?«) — opaženo `2026-10-03 07:04:31.617` na različici `e51fea88`, 320 × 680, sl.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
