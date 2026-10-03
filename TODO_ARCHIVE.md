@@ -9943,6 +9943,28 @@ iz obstoječega profila z vpisano opombo. Opaženo na objavljeni `6c8b556`, sl,
 
 **Popravljeno 2026-10-03 09:20:04.054 v 0549174d:** trening, začet na drug dan kot njegov termin (z »Ohrani urnik«), je v zgodovini stranke datiran z dnem termina.
 
+### 80.175 [ ] P2 — »Počisti podatke« po lastnem terminu ne odstrani nič: »Odstrani« tiho odpove, vzorčni podatki ostanejo med trenerjevimi
+
+**Scenarij in koraki:** `?lang=sl&init=demo_data_load` → »Se strinjam« → ime, priimek, telefon, e-pošta → »Shrani in nadaljuj« (vzorčni podatki so naloženi, značka piše »PRIKAZ«) → »Ustvari trening« → ime »Elin trening«, kraj »Dom«, nova stranka »Ela Test«, »jutri« 22:00–23:00 → »Shrani« → »Končano« → predal obvestil → »Počisti podatke in zapusti predstavitveni način« → »Odstrani«.
+
+**Opaženo:** okno »Počisti vzorčne podatke« našteje 8 strank, 5 rutin, 7 zapisov treningov, 9 zaznamkov, 20 terminov in 4 obvestila. Po »Odstrani« okno ostane odprto, v njem se pojavi vrstica »Ta izbira bi pustila zapise, ki kažejo na stvari, ki ne obstajajo več.« in nič se ne odstrani: v bazi ostane 9 strank (Ela Test in 8 vzorčnih), vseh 20 terminov. Značka je že pred tem iz »PRIKAZ« postala »PREDOGLED«, torej aplikacija ne kaže več, da gre za vzorčne podatke. Primerjava: brez lastnega termina (samo stranka »Ela Test« iz »Dodaj stranko«) isti postopek odstrani vseh 8 vzorčnih strank in ohrani Elo; če ne vpišem ničesar, odstrani vse.
+
+**Težava in vpliv:** trener, ki je najprej preizkušal z vzorčnimi podatki, nato vpisal prvi pravi termin in šele nato želi počistiti, ne more. Vrstica ne pove, kateri zapis blokira, in ne ponudi izhoda. Vzorčne stranke (Jane Doe, John Smith …) ostanejo na seznamu skupaj z njegovimi, obvestilo »V tvojih podatkih so testni zapisi: 53 zapisov, ki jih je ustvaril testni zagon« pa še naprej piše o njih.
+
+**Predlog:** čiščenje naj odstrani vzorčne zapise in ohrani trenerjeve tudi, kadar je v bazi trenerjev termin; če česa ne more, naj imenuje zapis (kateri termin kaže na kaj) in pove, kaj trener stori — opaženo `2026-10-03 05:15:21.745` na različici `e51fea88`, 390 × 844, sl.
+
+**Ni ponovljeno (Claude, 2026-10-03 09:20:04.054, na `8ba1f064`).** V Node, na demo podatkih s
+trenerjevo stranko, terminom (brez rutine in z demo rutino) in načrtom, `brokenDependenciesAfter`
+ne najde ničesar: načrtovanje in preverjanje uporabljata isti seznam odvisnosti
+(`data/recordDependencies.js`). Ponovitev v brskalniku se je ustavila pri gumbu »Dodaj … kot novo
+stranko«, ki je bil po oknu s pogoji zunaj vidnega dela strani. Manjka zapis, ki ga trenerjev
+postopek naredi in ga poskus ni: naslednji korak je ponoviti testerjeve korake do »Odstrani« in v
+oknu izpisati, kateri zapis `brokenDependenciesAfter` vrne.
+
+**Vzrok (Claude, 2026-10-03 11:54:37.568).** Obrazec termina shrani izbiro »Prazen načrt, brez rutine« kot `routineId: "empty_plan"`, ki ne imenuje nobene rutine. `data/recordDependencies.js` ga je prebral kot rutino, zato je `brokenDependenciesAfter` vrnil »rutina `empty_plan` manjka« in `removeDemoData` je zavrnil brez odstranitve. Ponovljeno v brskalniku s koraki zgoraj (stranka »Ela Test« dodana v obrazcu, 22:00–23:00, Shrani). Brez rutine v terminu (stranka dodana drugače) se to ne zgodi. Popravek: `EMPTY_PLAN_ID` ni odvisnost.
+
+**Popravljeno 2026-10-03 11:54:37.568 v dd5bdff6:** »Odstrani« v oknu »Počisti vzorčne podatke« odstrani vzorčne zapise tudi po terminu z izbiro »Prazen načrt, brez rutine«; trenerjevi zapisi ostanejo.
+
 ### 80.188 [x] P2 — »Uveljavi in razreši« s ciljnim bremenom 20 kg pri treningu brez rutine nič ne zapiše, signal pa izgine
 
 **Scenarij in koraki:** trening »Za breme« brez rutine (Nina Bor, Barbell Row) → kartica vaje → »Pretežko« → predal obvestil → »Treningi, ki čakajo na pregled« → ✓ »Razreši« → »Vrsta spremembe« ostane »Spremeni ciljno breme in ponovitve«, »Ciljna teža (kg)« 20 → »Uveljavi in razreši«.

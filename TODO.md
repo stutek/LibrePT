@@ -4574,23 +4574,9 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80173-x-p1--str
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80174-x-p2--obnova-stare-kopije-obvestilo-o-pretvorbi-je-v-angleščini-sredi-slovenskega-okna-in-ne-pove-kaj-se-bo-zgodilo-s-podatki).
 
-### 80.175 [ ] P2 — »Počisti podatke« po lastnem terminu ne odstrani nič: »Odstrani« tiho odpove, vzorčni podatki ostanejo med trenerjevimi
+### 80.175 [x] P2 — »Počisti podatke« po lastnem terminu ne odstrani nič: »Odstrani« tiho odpove, vzorčni podatki ostanejo med trenerjevimi
 
-**Scenarij in koraki:** `?lang=sl&init=demo_data_load` → »Se strinjam« → ime, priimek, telefon, e-pošta → »Shrani in nadaljuj« (vzorčni podatki so naloženi, značka piše »PRIKAZ«) → »Ustvari trening« → ime »Elin trening«, kraj »Dom«, nova stranka »Ela Test«, »jutri« 22:00–23:00 → »Shrani« → »Končano« → predal obvestil → »Počisti podatke in zapusti predstavitveni način« → »Odstrani«.
-
-**Opaženo:** okno »Počisti vzorčne podatke« našteje 8 strank, 5 rutin, 7 zapisov treningov, 9 zaznamkov, 20 terminov in 4 obvestila. Po »Odstrani« okno ostane odprto, v njem se pojavi vrstica »Ta izbira bi pustila zapise, ki kažejo na stvari, ki ne obstajajo več.« in nič se ne odstrani: v bazi ostane 9 strank (Ela Test in 8 vzorčnih), vseh 20 terminov. Značka je že pred tem iz »PRIKAZ« postala »PREDOGLED«, torej aplikacija ne kaže več, da gre za vzorčne podatke. Primerjava: brez lastnega termina (samo stranka »Ela Test« iz »Dodaj stranko«) isti postopek odstrani vseh 8 vzorčnih strank in ohrani Elo; če ne vpišem ničesar, odstrani vse.
-
-**Težava in vpliv:** trener, ki je najprej preizkušal z vzorčnimi podatki, nato vpisal prvi pravi termin in šele nato želi počistiti, ne more. Vrstica ne pove, kateri zapis blokira, in ne ponudi izhoda. Vzorčne stranke (Jane Doe, John Smith …) ostanejo na seznamu skupaj z njegovimi, obvestilo »V tvojih podatkih so testni zapisi: 53 zapisov, ki jih je ustvaril testni zagon« pa še naprej piše o njih.
-
-**Predlog:** čiščenje naj odstrani vzorčne zapise in ohrani trenerjeve tudi, kadar je v bazi trenerjev termin; če česa ne more, naj imenuje zapis (kateri termin kaže na kaj) in pove, kaj trener stori — opaženo `2026-10-03 05:15:21.745` na različici `e51fea88`, 390 × 844, sl.
-
-**Ni ponovljeno (Claude, 2026-10-03 09:20:04.054, na `8ba1f064`).** V Node, na demo podatkih s
-trenerjevo stranko, terminom (brez rutine in z demo rutino) in načrtom, `brokenDependenciesAfter`
-ne najde ničesar: načrtovanje in preverjanje uporabljata isti seznam odvisnosti
-(`data/recordDependencies.js`). Ponovitev v brskalniku se je ustavila pri gumbu »Dodaj … kot novo
-stranko«, ki je bil po oknu s pogoji zunaj vidnega dela strani. Manjka zapis, ki ga trenerjev
-postopek naredi in ga poskus ni: naslednji korak je ponoviti testerjeve korake do »Odstrani« in v
-oknu izpisati, kateri zapis `brokenDependenciesAfter` vrne.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80175-x-p2--počisti-podatke-po-lastnem-terminu-ne-odstrani-nič-odstrani-tiho-odpove-vzorčni-podatki-ostanejo-med-trenerjevimi).
 
 ### 80.176 [x] P3 — Pri 320 pikah glava pokaže »Libr…« namesto »LibrePT«
 
@@ -4660,6 +4646,8 @@ pri 390 pikah, v sl, de in na treh napravah, našel: ikona `#notification-summar
 81 pik. Ob zagonu aplikacije se to ne zgodi, ob drugem izrisu predala pa (na primer po razrešitvi
 signala). Pot `/adjustments` predala ne izriše več; predal se izriše ob odprtju. Kaj trener vidi ob
 tem izrisu, še ni pogledano na telefonu.
+
+**Ni ponovljeno (Claude, 2026-10-03 11:54:37.568, na `dd5bdff6`).** Test `test_the_drawer_drawn_again_during_a_running_session_does_not_overflow` v `tests/e2e/test_layout_overflow.py` po zagonu treninga (kartica ob 10:00 – 12:00) drugič izriše predal in pregleda prelivanje pri 390 pikah v sl, de in en: nič. Enako brez najdb: tretji izris, dolg naslov in števec (»12 neprebranih / 12 vseh«) ter predal odprt in zaprt. Prelivanje je bilo opaženo ob izrisu predala na poti `/adjustments`, ki jo zdaj odstranjuje drugo delo; ko te poti ni več, lahko to točko zapre test, ki že teče v vsakem prehodu. Naključje: pregled prelivanja je v sl in de preskočil živi trening, ker je kartico iskal po angleškem naslovu; zdaj jo najde po uri (`899fd749`) in vseh sedem prehodov je zelenih.
 
 ### 80.189 [x] P3 — Kartica nezačetega treninga z vpisanim načrtom še vedno piše rdeče »Program ni določen«
 
