@@ -4576,6 +4576,16 @@ agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pa
 
 **Predlog:** seznam naj se ob odprtju prebere iz shranjenih zapisov, ne iz stanja, nastalega pred zaključkom ali izbrisom — opaženo `2026-10-03 04:31:35.520` na različici `e51fea88`, 390 × 844, sl.
 
+### 80.173 [ ] P1 — Trening, ki se prekriva z že zaključenim, se zaključi pod imenom zaključenega: prisotnost in signal pristaneta drugje
+
+**Scenarij in koraki:** prazna aplikacija, stranke Ana Kranjc, Bojan Pirc, Cvetka Mlakar. Trening »Skupina Moč« (vsi trije, 04:30–05:30) začet in zaključen. Nato »Dvojček B« (Ana, Bojan, 04:40–05:40) in »Dvojček A« (Cvetka, 04:45–05:45), za oba »Vseeno razporedi«; oba začeta in zaključena. Nato »Trojček C« (Ana, 04:50–05:20) in »Trojček D« (Bojan, 04:50–05:20), vsak z »Vseeno razporedi«. »Trojček C« → »Začni trening« → ⋮ »Možnosti treninga« → »Uredi načrt« → »Dodaj iz kataloga« → Dumbbell Bench Press → Esc → »Pretežko« → »Zaključi vadbo« → »Zaključi zdaj« → »Zaključi zdaj«.
+
+**Opaženo:** podloga ob začetku naslavlja pet treningov hkrati: »Skupina Moč«, »Dvojček B«, »Dvojček A«, »Trojček C«, »Trojček D«, med njimi tri že zaključene; pod Ano, Bojanom in Cvetko piše pri vseh »Skupina Moč«. Po zaključku piše stran stranke Ana Kranjc pod »Zgodovina zabeleženih vadb« dve vadbi, Barbell Back Squat in Dumbbell Bench Press. Predal piše »Ana Kranjc — Skupina Moč (2)«; signal iz »Trojček C« nosi torej ime »Skupina Moč«. V bazi (`schema6`) ima Anin zapis z Dumbbell Bench Press `sessionId` zaključenega »Skupina Moč«; `sessionAttendance` ima po koncu le vrstici za »Skupina Moč« (Ana, Bojan), za »Trojček C«, »Trojček D«, »Dvojček B« in »Dvojček A« nobene, čeprav so vsi »Zaključeno«. Pred zaključkom so imeli živi programi vseh treh strank že `sessionId` zaključenega »Skupina Moč«, medtem ko sta bila »Dvojček B« in »Dvojček A« po bazi še `scheduled`.
+
+**Težava in vpliv:** Anina vadba pri »Trojček C« se šteje kot druga vadba pri »Skupina Moč«, »Trojček C« pa nima nobene prisotnosti. Paket ur, plačilo ali seznam prisotnih za »Trojček C« zato ne drži. Signal »Pretežko« nosi napačno ime treninga, tako da trener ne najde, kje je nastal.
+
+**Predlog:** program in prisotnost naj se zapišeta pod trening, ki ga je trener začel in zaključil, zaključeni trening pa naj podloge ne sme sestaviti — opaženo `2026-10-03 04:40:13.151` na različici `e51fea88`, 390 × 844, sl. Prejšnji popravek §80.168 pokriva dva sočasna aktivna treninga; tu je tretji, že zaključen, prvi v skupini prekrivanja.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
