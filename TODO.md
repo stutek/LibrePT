@@ -4636,7 +4636,7 @@ agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pa
 
 **Opaženo:** v glavi podloge stojita zeleni gumb »Danes« (oznaka »Nazaj na današnji trening«) in števec »04h 31m«. Ime treninga in vrstica »Danes · 09:00 - 10:00 · Park« dobita po 18 pik širine (`.clipboard-title-name`: potrebnih 61, na voljo 18; `.clipboard-title-when`: 147 proti 18). Na zaslonu piše »N…« in »D…«. Gumb »Danes« je izmerjen na 98 pik.
 
-**Težava in vpliv:** ko trener vodi dva treninga isti dan in odpre drugega, ne vidi, kateri trening je odprt, ne njegovega imena ne ure. Pri 390 pikah ni preizkušeno.
+**Težava in vpliv:** ko trener vodi dva treninga isti dan in odpre drugega, ne vidi, kateri trening je odprt, ne njegovega imena ne ure. Pri 390 × 844 se ime vidi v celoti (61 od 61 pik), vrstica »Danes · 09:00 - 10:00 · Park« pa je skrajšana (147 pik potrebnih, 88 na voljo).
 
 **Predlog:** ime treninga naj ima prednost pred gumbom »Danes« (gumb naj se skrči na ikono ali pade v drugo vrstico) — opaženo `2026-10-03 05:28:41.190` na različici `e51fea88`, 320 × 680, sl.
 
@@ -4644,7 +4644,7 @@ agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pa
 
 **Scenarij in koraki:** 320 × 680, isti dan trije treningi: »Dolga skupina« (Aleksandra, Bojan, Cvetka, 05:30–06:30) zaključen; »Živi trening« (Bojan, 05:30–06:30) začet in teče; »Nova ura« (Aleksandra, 09:00–10:00) začet in teče. Na podlogi »Nova ura« → zeleni gumb »Danes« (oznaka »Nazaj na današnji trening«).
 
-**Opaženo:** odpre se stran »Zaključen trening«, »2026-10-03 · 05:18«, Aleksandra, Barbell Back Squat, vrstica »Zaključeno«, to je »Dolga skupina« od 05:30. Oba treninga, ki tečeta, ostaneta na kartici »Aktiven trening«.
+**Opaženo:** odpre se stran »Zaključen trening«, »2026-10-03 · 05:18«, Aleksandra, Barbell Back Squat, vrstica »Zaključeno«, to je »Dolga skupina« od 05:30. Oba treninga, ki tečeta, ostaneta na kartici »Aktiven trening«. Enako pri 390 × 844 po obnovi kopije in z istimi tremi treningi.
 
 **Težava in vpliv:** gumb obljublja pot do današnjega treninga. Trener ob dveh vzporednih treningih pristane v zaključenem, tretjem. Tistega, ki teče, mora poiskati na seznamu.
 
