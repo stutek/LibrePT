@@ -4650,6 +4650,16 @@ agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pa
 
 **Predlog:** gumb naj odpre trening, ki teče; če jih teče več, naj ponudi izbiro — opaženo `2026-10-03 05:29:06.278` na različici `e51fea88`, 320 × 680, sl.
 
+### 80.180 [ ] P3 — Izvoz podatkov stranke v angleščini in nemščini nosi slovensko ime načrta »Prazen načrt, brez rutine«
+
+**Scenarij in koraki:** slovenska aplikacija, trening brez rutine z vajo (Barbell Row) za stranko Bojan Kosmatinec, zaključen. `?lang=en` (nato `?lang=de`) → ☰ → »Client directory« → »Bojan Kosmatinec« → »Export data (GDPR)« → »Readable copy«.
+
+**Opaženo:** besedilo datoteke je v angleščini (»Your training data«, »Feedback (Too hard – reduce the load)«), pod »Logged training (3)« pa so naslovi »### 2026-10-03 — Prazen načrt, brez rutine«. V nemški datoteki: »### 2026-10-03 — Prazen načrt, brez rutine« pod »Erfasstes Training (3)«. Oznake signalov so pravilno v jeziku datoteke.
+
+**Težava in vpliv:** stranka, ki dobi datoteko po členu 15 v angleščini ali nemščini, vidi slovenske besede brez razlage. Isti niz stoji tudi na strani stranke pod »Zgodovina zabeleženih vadb«.
+
+**Predlog:** ime načrta brez rutine naj se piše v jeziku izpisa, ne v jeziku, v katerem je bil trening ustvarjen — opaženo `2026-10-03 05:34:07.600` na različici `e51fea88`, 390 × 844, en in de.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
