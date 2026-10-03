@@ -6033,8 +6033,11 @@ the published app has the new schema only after a push.
 **Ran 38 minutes, not four hours** (2026-10-02 21:47 to 22:25, gemini-3.8-flash-high, frozen copy
 of `403715f9`): six scenarios, three P1 findings (§80.168, §80.169 fixed in `82617180`; §80.170 does
 not reproduce), three clean (GDPR export, backup restored twice, a schema-5 backup restored twice).
-It stopped on Gemini's quota (HTTP 429, reset about 02:04). **Three hours and twenty minutes are
-still owed.**
+It stopped on Gemini's quota (HTTP 429, reset about 02:04).
+**Second run, ordered by Simon 2026-10-03 (agy unavailable):** a Claude Sonnet subagent, frozen copy
+of `e51fea88` on port 8097, 04:22:11 to 07:18:55 — 2 h 57 min, 23 minutes short of the three hours
+and twenty owed. 86 scenarios, mode 1 only: §80.171–§80.198 new (one P1, §80.173), evidence added to
+§80.170, about 49 clean, 3 blocked. Ledger: "Krog 2026-10-03" in the scenarios file.
 
 ### 95.3 [ ] Every entity stored today, read out of the schema rather than recalled
 
