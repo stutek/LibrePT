@@ -4608,6 +4608,16 @@ agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pa
 
 **Predlog:** čiščenje naj odstrani vzorčne zapise in ohrani trenerjeve tudi, kadar je v bazi trenerjev termin; če česa ne more, naj imenuje zapis (kateri termin kaže na kaj) in pove, kaj trener stori — opaženo `2026-10-03 05:15:21.745` na različici `e51fea88`, 390 × 844, sl.
 
+### 80.176 [ ] P3 — Pri 320 pikah glava pokaže »Libr…« namesto »LibrePT«
+
+**Scenarij in koraki:** prazna aplikacija pri 320 × 680, ime »Dolga skupina« → katera koli stran (seznam treningov, podloga, nastavitev treninga).
+
+**Opaženo:** v glavi stoji ime aplikacije odrezano s tremi pikami: »Libr…«. Besedilo `h1` v `#logo-area` je široko 93 pik, prostora ima 78; `text-overflow` je `ellipsis`. Poleg stojijo značka »PREDOGLED«, ikona sinhronizacije »↑7 ↓?« in gumb menija. Pri 390 pikah piše »LibrePT« v celoti.
+
+**Težava in vpliv:** ime aplikacije je odrezano na vsaki strani na ozkem telefonu. Pomena ne izgubi (ikona ostane), je pa videti kot napaka.
+
+**Predlog:** ime naj ostane celo ali se skrije, ikona pa ostane; odrezano besedilo ni dobra oblika — opaženo `2026-10-03 05:18:10.876` na različici `e51fea88`, 320 × 680, sl.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
