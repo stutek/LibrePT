@@ -4596,15 +4596,7 @@ agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pa
 
 ### 80.174 [x] P2 — Obnova stare kopije: obvestilo o pretvorbi je v angleščini sredi slovenskega okna in ne pove, kaj se bo zgodilo s podatki
 
-**Scenarij in koraki:** objavljena aplikacija `933dbc0`: skupinski trening »Stara skupina« (Hana Kolar, Igor Rem) z »Pretežko« in »Prelahko«, zaključen; trening »Stari jutri« za Igorja → ☰ → »Upravljanje podatkov« → »Izvozi JSON« → »Zapisal sem si ga, shrani«. Nato `e51fea88` na prazni aplikaciji (`?lang=sl`): ☰ → »Upravljanje podatkov« → »Izberi JSON datoteko« → geslo → »Odpri datoteko«.
-
-**Opaženo:** v rdečem okvirju pod naslovom okna piše, z ikono pred besedilom: »Store each client's training as a program of their own; 1 training record(s) became client programs; 2 plan update(s) became exercise notes — s tem se podatki datoteke posodobijo in se ne bodo več odprli v starejših različicah LibrePT«. Pod njim sta gumba »Obdrži, kar imam« in »Zamenjaj«. Vprašanja ni; besedilo ne pove, kaj ta gumba storita s kopijo. Na posnetku zaslona (vizualna ugotovitev) sta gumba svetlosiva z brskalnikovim videzom, ne v slogu drugih gumbov v oknu; »Zamenjaj«, ki zamenja vse podatke na telefonu, ni označen kot nevaren (v oknu za izbris je gumb rdeč). Pri 320 × 680 sta gumba 137 in 91 pik široka, 44 visoka, drug pod drugim.
-
-**Težava in vpliv:** slovenski trener dobi angleški stavek z izrazi »client programs« in »exercise notes«, ki jih aplikacija nikjer ne uporablja. Dve zaporedni sporočili (angleško in slovensko) se spajata v en stavek s pomišljajem. Trener ne ve, ali bo po »Zamenjaj« vse, kar je bilo v kopiji, na telefonu, in kaj pomeni »Obdrži, kar imam« za kopijo.
-
-**Predlog:** celotno obvestilo naj bo v jeziku aplikacije, v trenerjevih besedah (koliko treningov in signalov se prenese), z vprašanjem nad gumbi — opaženo `2026-10-03 04:48:09.770` na različici `e51fea88`, 390 × 844, sl.
-
-**Popravljeno 2026-10-03 08:55:45.222 v e64b9b8:** obvestilo ob obnovi stare kopije je en slovenski stavek z vprašanjem nad gumboma, gumba imata videz drugih gumbov (»Zamenjaj« je rdeč).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80174-x-p2--obnova-stare-kopije-obvestilo-o-pretvorbi-je-v-angleščini-sredi-slovenskega-okna-in-ne-pove-kaj-se-bo-zgodilo-s-podatki).
 
 ### 80.175 [ ] P2 — »Počisti podatke« po lastnem terminu ne odstrani nič: »Odstrani« tiho odpove, vzorčni podatki ostanejo med trenerjevimi
 
@@ -4618,15 +4610,7 @@ agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pa
 
 ### 80.176 [x] P3 — Pri 320 pikah glava pokaže »Libr…« namesto »LibrePT«
 
-**Scenarij in koraki:** prazna aplikacija pri 320 × 680, ime »Dolga skupina« → katera koli stran (seznam treningov, podloga, nastavitev treninga).
-
-**Opaženo:** v glavi stoji ime aplikacije odrezano s tremi pikami: »Libr…«. Besedilo `h1` v `#logo-area` je široko 93 pik, prostora ima 78; `text-overflow` je `ellipsis`. Poleg stojijo značka »PREDOGLED«, ikona sinhronizacije »↑7 ↓?« in gumb menija. Pri 390 pikah piše »LibrePT« v celoti.
-
-**Težava in vpliv:** ime aplikacije je odrezano na vsaki strani na ozkem telefonu. Pomena ne izgubi (ikona ostane), je pa videti kot napaka.
-
-**Predlog:** ime naj ostane celo ali se skrije, ikona pa ostane; odrezano besedilo ni dobra oblika — opaženo `2026-10-03 05:18:10.876` na različici `e51fea88`, 320 × 680, sl.
-
-**Popravljeno 2026-10-03 08:55:45.222 v e64b9b8:** pri 320 pikah piše v glavi »LibrePT« v celoti (pisava 16 pik).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80176-x-p3--pri-320-pikah-glava-pokaže-libr-namesto-librept).
 
 ### 80.177 [ ] P3 — Obvestila ne imenujejo treninga: »Načrtovan program« brez imena in »Dolga skupina (2)« za signal iz drugega treninga
 
@@ -4640,15 +4624,7 @@ agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pa
 
 ### 80.178 [x] P2 — Pri 320 pikah je ime odprtega treninga široko 18 pik: v glavi podloge piše »N…«
 
-**Scenarij in koraki:** 320 × 680. Trening »Živi trening« je začet (Bojan Kosmatinec). Nov trening »Nova ura« (Aleksandra Vrhovnik, 09:00–10:00) → kartica »Nova ura« → »Začni trening« → okno »Trening se je začel izven urnika« → »Ohrani urnik«.
-
-**Opaženo:** v glavi podloge stojita zeleni gumb »Danes« (oznaka »Nazaj na današnji trening«) in števec »04h 31m«. Ime treninga in vrstica »Danes · 09:00 - 10:00 · Park« dobita po 18 pik širine (`.clipboard-title-name`: potrebnih 61, na voljo 18; `.clipboard-title-when`: 147 proti 18). Na zaslonu piše »N…« in »D…«. Gumb »Danes« je izmerjen na 98 pik.
-
-**Težava in vpliv:** ko trener vodi dva treninga isti dan in odpre drugega, ne vidi, kateri trening je odprt, ne njegovega imena ne ure. Pri 390 × 844 se ime vidi v celoti (61 od 61 pik), vrstica »Danes · 09:00 - 10:00 · Park« pa je skrajšana (147 pik potrebnih, 88 na voljo). Isto pri 320 × 680 za še nezačet trening »Šest« (šest strank, jutri 13:00): v glavi »Šest« in »Jutri · 13:0…«, ker gumb »Danes« in gumb za začetek zasedeta desno stran.
-
-**Predlog:** ime treninga naj ima prednost pred gumbom »Danes« (gumb naj se skrči na ikono ali pade v drugo vrstico) — opaženo `2026-10-03 05:28:41.190` na različici `e51fea88`, 320 × 680, sl.
-
-**Popravljeno 2026-10-03 08:55:45.222 v e64b9b8:** pri 320 pikah gumb »Danes« pokaže samo ikono in števec nima ure, zato ime treninga dobi prostor (merjeno: ime v celoti).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80178-x-p2--pri-320-pikah-je-ime-odprtega-treninga-široko-18-pik-v-glavi-podloge-piše-n).
 
 ### 80.179 [ ] P2 — »Nazaj na današnji trening« odpre zaključen trening, ne tistega, ki teče
 
@@ -4672,15 +4648,7 @@ agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pa
 
 ### 80.181 [x] P3 — Izbris terminov pravi, da bodo povratne informacije izgubljene, signal »Prelahko« pa ostane na seznamu za pregled
 
-**Scenarij in koraki:** trening »Jutranja dvojica« za jutri (Dana Vidmar, Emil Zorc), Emilu Dumbbell Bench Press in »Prelahko« → ⋮ »Možnosti treninga« → »Izbriši trening«.
-
-**Opaženo:** okno piše »Izbriši ta trening? Odstranjen bo z urnika, zabeležen napredek in povratne informacije pa bodo izgubljeni — program vsakega udeleženca se ohrani med nenačrtovanimi programi.« Po potrditvi je v predalu »Emil Zorc (1)«, na strani »Čakajoče na pregled« pa vrstica »Emil Zorc · Prelahko – povečaj težo · Dumbbell Bench Press«. V bazi je zaznamek `too_easy` s `review: pending`. Signal torej ni izgubljen.
-
-**Težava in vpliv:** besedilo okna trdi nasprotno od izida. Trener, ki izbriše termin in prebere opozorilo, pričakuje, da signal izgine, in ga potem najde med neodpravljenimi.
-
-**Predlog:** besedilo naj loči, kaj se izgubi (serije) in kaj ostane (signal in načrt) — opaženo `2026-10-03 05:37:14.069` na različici `e51fea88`, 390 × 844, sl.
-
-**Popravljeno 2026-10-03 08:55:45.222 v e64b9b8:** okno pravi, da se izgubijo zabeležene serije, signali, ki čakajo na pregled, in program vsakega udeleženca pa ostanejo.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80181-x-p3--izbris-terminov-pravi-da-bodo-povratne-informacije-izgubljene-signal-prelahko-pa-ostane-na-seznamu-za-pregled).
 
 ### 80.182 [ ] P2 — Stranka, odstranjena in spet dodana na isti termin, pride z praznim načrtom; prejšnji načrt obstane med nenačrtovanimi in ga ni mogoče vrniti
 
@@ -4694,39 +4662,15 @@ agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pa
 
 ### 80.183 [x] P2 — V polje ure »9:00 PM« se zapiše kot 09:00, »25:00« kot 23:00, datum »2026-02-31« kot 2026-02-28, brez opozorila
 
-**Scenarij in koraki:** ☰ → »Termini treningov« → »Ustvari trening« (ali `/session/new`) → dotik polja »Začetni čas«, vpis, dotik drugega polja; enako polje »Datum«.
-
-**Opaženo:** vpis »9:00 PM« da v polju »09:00« (PM se izgubi), »25:00« da »23:00«, »9.30« da »09:30«, »21:15« ostane. Datum: »6.10.2026« da »2026-10-06«, »2026-02-31« da »2026-02-28«. Datum »31.2.2026« pa polje zavrne z oblačkom »31.2.2026 ni datum. Napiši ga kot 6.10.2026 ali 2026-10-06.« (to je prav).
-
-**Težava in vpliv:** trener s telefonom v ameriških nastavitvah ali iz navade vpiše »9:00 PM« in dobi trening ob 9 zjutraj, opozorila pa ni. Isto »25:00« in »31. februar«: sprejmeta se kot druga vrednost. Datum »31.2.2026« aplikacija zavrne, ure in »2026-02-31« pa ne.
-
-**Predlog:** »PM« naj se razume kot popoldne ali zavrne z oblačkom kot »31.2.2026«; »25:00« in »2026-02-31« naj se zavrneta z oblačkom — opaženo `2026-10-03 05:43:05.003` na različici `e51fea88`, 390 × 844, sl.
-
-**Popravljeno 2026-10-03 08:55:45.222 v e64b9b8:** »9:00 PM« postane 21:00; »25:00« in »2026-02-31« polje zavrne z istim oblačkom kot »31.2.2026«. PM je popoldne.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80183-x-p2--v-polje-ure-900-pm-se-zapiše-kot-0900-2500-kot-2300-datum-2026-02-31-kot-2026-02-28-brez-opozorila).
 
 ### 80.184 [x] P3 — Ime stranke brez presledka in dolgo 300 znakov raztegne vse kartice v imeniku na 2468 pik; imena drugih strank odidejo z zaslona
 
-**Scenarij in koraki:** ☰ → »Imenik strank« → »Dodaj stranko« → »Ime in priimek«: 300 znakov brez presledka (»Dolgoimenski« 25-krat) → »Shrani«.
-
-**Opaženo:** polje sprejme vseh 300 znakov brez opozorila. V imeniku je vsaka od petih kartic široka 2468 pik (zaslon 390). Ime »Aleksandra Vrhovnik« stoji na x = 1150, onkraj roba; na zaslonu so vidne prazne kartice. Vodoravnega drsenja ni (`scrollWidth` strani je 390). Ime z 45 znaki in presledki (»Marija Alexandra Vrhovnik-Zupančič Kosmatinec«) se prelomi v dve vrstici in kartice ostanejo široke 358 pik. Po preimenovanju v »Kratko Ime« se vse vrne.
-
-**Težava in vpliv:** en zapis, vpisan po pomoti ali prilepljen, naredi imenik neberljiv, trener pa ne vidi, kateri zapis je kriv.
-
-**Predlog:** polje naj ima zgornjo mejo dolžine, kartica pa naj dolgo besedo prelomi ali odreže — opaženo `2026-10-03 05:44:54.576` na različici `e51fea88`, 390 × 844, sl.
-
-**Popravljeno 2026-10-03 08:55:45.222 v e64b9b8:** polje za ime sprejme 80 znakov, dolga beseda se v kartici prelomi in ne razširi imenika.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80184-x-p3--ime-stranke-brez-presledka-in-dolgo-300-znakov-raztegne-vse-kartice-v-imeniku-na-2468-pik-imena-drugih-strank-odidejo-z-zaslona).
 
 ### 80.185 [x] P2 — Iskanje stranke ne najde »Zupančič« ob vpisu »zupancic«; polje za termin ponudi dodajanje nove stranke
 
-**Scenarij in koraki:** stranka »Marija Alexandra Vrhovnik-Zupančič Kosmatinec« v imeniku. ☰ → »Imenik strank« → polje »Išči stranke...« → »zupancic«. Nato »Ustvari trening« → polje »Poišči stranko po imenu...« → »zupancic«.
-
-**Opaženo:** imenik ne pokaže nobene kartice za »zupancic« (za »ZUPANČIČ« jo pokaže, za »cvet« pokaže »Cvetka Novak«, za »KOSMATINEC« pokaže Bojana in Marijo). Polje v obrazcu termina piše »Stranke s tem imenom ni« in ponudi gumb »Dodaj »zupancic« kot novo stranko«. Z vpisom »zupančič« pokaže Marijo.
-
-**Težava in vpliv:** večina slovenskih telefonskih tipkovnic zahteva dolg pritisk za č, š, ž; trenerji pišejo priimke brez njih. Iskanje zgreši, trener pa dobi ponudbo nove stranke z isto osebo pod drugim zapisom.
-
-**Predlog:** iskanje naj ne razlikuje č od c, š od s, ž od z (pri imenih in priimkih) — opaženo `2026-10-03 05:48:25.206` na različici `e51fea88`, 390 × 844, sl.
-
-**Popravljeno 2026-10-03 08:55:45.222 v e64b9b8:** iskanje v imeniku in v obrazcu termina ne loči č/c, š/s, ž/z, ć/c, đ/d.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80185-x-p2--iskanje-stranke-ne-najde-zupančič-ob-vpisu-zupancic-polje-za-termin-ponudi-dodajanje-nove-stranke).
 
 ### 80.186 [ ] P2 — »Kopiraj ta načrt drugi stranki« prepiše že vpisan načrt druge stranke brez vprašanja
 
@@ -4790,15 +4734,7 @@ agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pa
 
 ### 80.192 [x] P3 — Angleška podloga piše »No Exercises Injected«, slovenska »Ni vstavljenih vaj«
 
-**Scenarij in koraki:** `?lang=en` → kartica treninga brez vaj (»Včeraj dva«, Sara Lah) → podloga.
-
-**Opaženo:** prazno stanje piše »No Exercises Injected« in pod njim »No exercises yet. Tap the three dots (⋮) at the top right and choose Edit plan.« Na strani stranke stoji naslov »Logged Session History« z veliko začetnico vsake besede, drugi naslovi pa so v navadnem pisanju (»Copy for AI, without names«, »Export data (GDPR)«). Na seznamu in v obrazcu stojita v istem zaslonu »Program Not Defined« in »Each one can be given their own programme« (dve črkovanji), v predalu »Planned Program · Sara Lah« in »Sessions awaiting review«.
-
-**Težava in vpliv:** »Injected« je tehnični izraz za programsko dodajanje in ga bralec, ki ni v stroki, ne razume kot »dodane vaje«. Besedilo ne ujema s sosednjim stavkom, ki pove, kaj storiti.
-
-**Predlog:** »No exercises added« (ali »No exercises yet«), naslov »Logged session history« — opaženo `2026-10-03 06:41:58.932` na različici `e51fea88`, 390 × 844, en.
-
-**Popravljeno 2026-10-03 08:55:45.222 v e64b9b8:** angleščina piše »No exercises added«, »Logged session history« in povsod »programme«.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80192-x-p3--angleška-podloga-piše-no-exercises-injected-slovenska-ni-vstavljenih-vaj).
 
 ### 80.193 [ ] P3 — V oknu »Zabeleži povratne informacije« Esc zavrže izbrano oznako in vpisano opombo — čaka na Simona
 
@@ -4822,51 +4758,19 @@ agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pa
 
 ### 80.195 [x] P3 — Pri 320 pikah oznaka »OGROŽENO — NAREDI KOPIJO« prekrije logotip in potisne gumb menija čez rob zaslona
 
-**Scenarij in koraki:** 320 × 680. Podatki, ki jih ni v varnostni kopiji (nekaj treningov in strank, tu 10 sprememb brez kopije) → katera koli stran, na primer trening »Šest« s šestimi strankami.
-
-**Opaženo:** v glavi se pokaže rdeča oznaka »OGROŽENO — NAREDI KOPIJO«, široka 213 pik od x = 10. Logotip (x = 10, širina 0) je pod njo. Gumb ☰ leži med x = 292 in 332, zaslon je širok 320, `scrollWidth` strani je 334. Gumb menija je odrezan za 12 pik. Pri 390 × 844 oznaka leži med x = 58 in 271 in gumbi ostanejo na zaslonu (vizualna ugotovitev na posnetku, mere so iz DOM).
-
-**Težava in vpliv:** trener, ki še nima kopije, na ozkem telefonu vidi oznako čez logotip in gumb menija na robu. Gumb se še da pritisniti, pot do menija pa je ožja kot pri drugih trenerjih.
-
-**Predlog:** oznaka naj se skrajša (»OGROŽENO«) ali prestavi v drugo vrstico — opaženo `2026-10-03 06:58:06.451` na različici `e51fea88`, 320 × 680, sl.
-
-**Popravljeno 2026-10-03 08:55:45.222 v e64b9b8:** pri 320 pikah opozorilo o kopiji stoji v drugi vrstici glave; logotip in gumb ☰ sta na zaslonu.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80195-x-p3--pri-320-pikah-oznaka-ogroženo--naredi-kopijo-prekrije-logotip-in-potisne-gumb-menija-čez-rob-zaslona).
 
 ### 80.196 [x] P3 — Števec v glavi podloge in ob »Aktiven trening« šteje navzdol, ob njem pa je samo ura brez besede
 
-**Scenarij in koraki:** 320 × 680. Trening »Odštevanje« (Ajda Ban, planiran od 06:57 do 07:57) → kartica → »Začni trening« ob 06:59 → glava podloge.
-
-**Opaženo:** ob 06:59:00 piše ob ikoni ure »00h 58m«, ob 07:00:08 »00h 56m«. Kartica na seznamu piše »Aktiven trening 00h 56m«. Element nima `aria-label` ali `title` (`#overlay-session-duration`). Okno ob »Zaključi vadbo« pri drugih treningih piše »Do konca tega treninga je še približno 01h 04m« z isto številko kot v glavi.
-
-**Težava in vpliv:** številka ob »Aktiven trening« se bere kot trajanje ali pretečeni čas. Trener, ki je začel pred dvema minutama, vidi skoraj uro in ne ve, da je to čas do konca načrtovanega termina.
-
-**Predlog:** ob številki naj piše »do konca« (ali »še 00h 56m«) — opaženo `2026-10-03 07:00:19.750` na različici `e51fea88`, 320 × 680, sl.
-
-**Popravljeno 2026-10-03 08:55:45.222 v e64b9b8:** števec v glavi podloge ima pod številko besedo »do konca« (ključ `session_time_left`); kartica »Aktiven trening« še čaka na sessionCard.js.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80196-x-p3--števec-v-glavi-podloge-in-ob-aktiven-trening-šteje-navzdol-ob-njem-pa-je-samo-ura-brez-besede).
 
 ### 80.197 [x] P3 — Po izvozu datoteke z varnostno kopijo glava še piše »NI VARNOSTNE KOPIJE«
 
-**Scenarij in koraki:** 320 × 680, podatki brez kopije; glava piše »OGROŽENO — NAREDI KOPIJO« → ☰ → »Upravljanje podatkov« → »Izvozi JSON« (datoteka je prenesena) → zapri okno → osveži.
-
-**Opaženo:** oznaka v glavi se spremeni v »NI VARNOSTNE KOPIJE«. Okno »Središče za sinhronizacijo in varnostne kopije« piše »25 sprememb na tej napravi še ni v Google Drive«.
-
-**Težava in vpliv:** trener je pravkar naredil kopijo (naslov razdelka v oknu je »Izvozi varnostno kopijo«) in v glavi še vedno piše, da je ni. Ne pove, da piše o Google Drive in ne o datoteki, ki jo je prenesel.
-
-**Predlog:** oznaka naj pove, katera kopija manjka (»Ni kopije v Google Drive«) ali naj izvoz datoteke šteje kot kopija — opaženo `2026-10-03 07:01:44.110` na različici `e51fea88`, 320 × 680, sl.
-
-**Ni napaka v kodi 2026-10-03 08:55:45.222 v e64b9b8:** oznaka meri, ali so podatki kje trajno (datoteka šteje kot kopija; `backupHealth.js`). Preizkus `test_the_header_warning_goes_away_after_a_file_export_and_after_a_reload` pokaže, da oznaka po izvozu in po osvežitvi izgine. Opaženega stanja nisem mogel ponoviti; če se ponovi, zapiši korake z izvozom in stanje zapisa `backupHistory`.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80197-x-p3--po-izvozu-datoteke-z-varnostno-kopijo-glava-še-piše-ni-varnostne-kopije).
 
 ### 80.198 [x] P3 — Druga stranka z istim imenom se shrani brez opozorila, obe vrstici sta enaki
 
-**Scenarij in koraki:** imenik s stranko »Hana Kolar« → ☰ → »Imenik strank« → »Dodaj stranko« → »Ime in priimek« »Hana Kolar« → »Shrani«. Nato »Ustvari trening« → polje »Poišči stranko po imenu...« → »Hana«.
-
-**Opaženo:** druga »Hana Kolar« se shrani brez vprašanja. Imenik ima dve enaki kartici »HK Hana Kolar«. Iskanje pri terminu pokaže dve enaki vrstici »Hana Kolar«. Polje »Vzdevek (samo če si dve stranki delita ime)« je neobvezno in obrazec ne opozori, da ime že obstaja.
-
-**Težava in vpliv:** trener pri dodajanju k terminu ne ve, katera Hana je prava (ista imena, brez vzdevka), in lahko doda napačno osebo, vključno z njenimi signali in zapisi.
-
-**Predlog:** ob shranjevanju stranke z že obstoječim imenom naj obrazec zahteva vzdevek (ali naj vpraša »Hana Kolar že obstaja. Je to druga oseba?«) — opaženo `2026-10-03 07:04:31.617` na različici `e51fea88`, 320 × 680, sl.
-
-**Popravljeno 2026-10-03 08:55:45.222 v e64b9b8:** pri shranjevanju stranke z obstoječim imenom brez vzdevka aplikacija vpraša, ali shrani brez vzdevka; opozorilo o istem imenu ne šteje več stranke same.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80198-x-p3--druga-stranka-z-istim-imenom-se-shrani-brez-opozorila-obe-vrstici-sta-enaki).
 
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
