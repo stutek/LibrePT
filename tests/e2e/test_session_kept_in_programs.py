@@ -170,6 +170,43 @@ def test_a_participant_with_only_a_too_hard_signal_keeps_the_training(
     assert stored == {"status": "done", "attended": 1, "notes": 1}, stored
 
 
+CARD_A = '.session-card[data-session-id="s01f2e3d"]'  # Group Strength & Conditioning, now-1h to now+1h
+CARD_B = '.session-card[data-session-id="s02f2e3d"]'  # 1:1 Personal Training, now+1h to now+2h
+
+
+def _start_and_close(page, card):
+    page.locator(card).click()
+    page.wait_for_selector("#active-session-overlay:not(.hidden)")
+    page.click("#btn-start-session")
+    page.wait_for_selector("#dialog-session-start-time[open]")
+    page.click("#btn-session-start-time-keep")
+    page.wait_for_selector("#dialog-session-start-time[open]", state="detached")
+    page.locator("#active-session-overlay .view-grabber").click()
+    page.wait_for_selector("#active-session-overlay", state="hidden")
+
+
+def test_a_started_session_still_reads_active_after_another_is_started(
+    page, local_server
+):
+    """Several sessions may run at once. Session A was started and closed, then session B: A's card
+    said "Starts in" because the card asked only the clipboard, which by then held B, and A's
+    programs were still live. A's card also must not show B's clock."""
+    page.goto(local_server)
+    page.wait_for_selector("#view-clients.active")
+    _start_and_close(page, CARD_A)
+    _start_and_close(page, CARD_B)
+    page.wait_for_timeout(1500)  # both clocks have ticked at least once
+
+    for card in (CARD_A, CARD_B):
+        shown = page.locator(f"{card} .session-live-bar").inner_text().strip()
+        assert shown.startswith("Active session"), (card, shown)
+    # A ends an hour from now, B two hours from now: each card counts down to its own end.
+    a_left = page.locator(f"{CARD_A} .session-live-timer").inner_text().strip()
+    b_left = page.locator(f"{CARD_B} .session-live-timer").inner_text().strip()
+    assert a_left in ("00h 59m", "01h 00m"), a_left
+    assert b_left in ("01h 59m", "02h 00m"), b_left
+
+
 PROGRAM_OF_ACTIVE_CLIENT = """async () => {
     const live = await import(new URL('controllers/activeSessionStore.js', document.baseURI).href);
     const session = live.getActiveSession();

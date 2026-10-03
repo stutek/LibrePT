@@ -188,3 +188,46 @@ def test_no_program_warning_only_when_the_session_had_no_exercises(page, local_s
     assert built.count() == 1 and empty.count() == 1
     assert "Programme not defined" not in built.inner_text()
     assert "Programme not defined" in empty.inner_text()
+
+
+SEED_LIVE_OFF_THE_CLIPBOARD = """
+// Two sessions running, neither on the clipboard (this stub has none). The group, now-1h to now+1h,
+// was started 50 minutes ago and has an hour left. "Strength & Longevity Focus", now-2h to now-1h,
+// was started 30 minutes ago, after its slot ended, so there is nothing left to count down to.
+const late = state.sessions.find((s) => s.id === 's07f2e3d');
+delete late.status;
+const startedAgo = (min) => new Date(Date.now() - min * 60000).toISOString();
+state.clientPrograms.push(
+  { id: 'p-group', clientId: 'c1a9f0e2', sessionId: 's01f2e3d', status: 'live', startedAt: startedAgo(50), exercises: [] },
+  { id: 'p-late', clientId: 'c8b28799', sessionId: 's07f2e3d', status: 'live', startedAt: startedAgo(30), exercises: [] },
+);
+renderClientsViewShell();
+initSessionTimeline({"""
+
+
+def test_a_running_session_off_the_clipboard_shows_its_own_clock(page, local_server):
+    """Several sessions may run at once and the clipboard holds one. A card read "running" only from
+    the clipboard, so a running session not on it said "Starts in" or "Overdue". Each card now reads
+    its own live programs: time left to its end, or, started after its end, time since its start."""
+    stub = SESSIONS_STUB.replace(
+        "renderClientsViewShell();\ninitSessionTimeline({",
+        SEED_LIVE_OFF_THE_CLIPBOARD,
+        1,
+    )
+    assert stub != SESSIONS_STUB
+    load_with_stub(page, local_server, stub)
+    page.wait_for_selector(".sessions-day-group")
+    page.wait_for_timeout(1200)  # the card ticker has run at least once
+
+    group = page.locator('.session-card[data-session-id="s01f2e3d"] .session-live-bar')
+    late = page.locator('.session-card[data-session-id="s07f2e3d"] .session-live-bar')
+    assert group.inner_text().split("\n")[0].strip() == "Active session", (
+        group.inner_text()
+    )
+    assert late.inner_text().split("\n")[0].strip() == "Active session", (
+        late.inner_text()
+    )
+    assert group.locator(".session-live-timer").inner_text() in ("00h 59m", "01h 00m")
+    assert "left" in group.inner_text()
+    assert late.locator(".session-live-timer").inner_text() in ("00h 30m", "00h 31m")
+    assert "left" not in late.inner_text()

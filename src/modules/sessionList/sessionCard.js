@@ -8,6 +8,7 @@
 
 import { localDateString } from "../../data/calendarDay.js";
 import {
+  livePrograms,
   openProgramsOfSessions,
   performedPrograms,
   programDate,
@@ -19,10 +20,11 @@ import { formatDurationHM, formatDurationHourMin, parseDurationHM } from "../com
 import { getSessionDayDate } from "./sessionTimeline.js";
 
 // A single interval ticks every clock-driven status line that isn't the launched clipboard's own
-// timer (which ticks via sessionBar): an in-progress-by-clock session counting down to its
-// scheduled end, or an upcoming session counting down to its scheduled start. Each such element
-// carries data-end (epoch ms of the target moment); the ticker updates the text and, for the
-// countdown-to-end case only (data-overtime-aware="1"), flips the "overtime" warning past zero.
+// timer (which ticks via sessionBar): a session running off the clipboard, counting down to its
+// scheduled end or up from its start, or an upcoming session counting down to its scheduled start.
+// Such an element carries data-end (epoch ms of the target moment) or data-since (epoch ms of the
+// start); the ticker updates the text and, where data-overtime-aware="1", flips the "overtime"
+// warning past zero.
 // The day is crowded with sessions — a card shows its essentials (time, title, status bar) and
 // opens on a tap of its own chevron to reveal participants/programme/warnings.
 //
@@ -30,11 +32,18 @@ let cardTicker = null;
 function ensureCardTicker() {
   if (cardTicker) return;
   cardTicker = setInterval(() => {
+    for (const el of document.querySelectorAll(".session-live-timer[data-since]")) {
+      el.textContent = formatDurationHourMin(
+        Math.floor((Date.now() - parseInt(el.dataset.since, 10)) / 1000),
+      );
+    }
     for (const el of document.querySelectorAll(".session-live-timer[data-end]")) {
       const remSec = Math.round((parseInt(el.dataset.end, 10) - Date.now()) / 1000);
       // Same unsigned rule as the initial paint, or the value would sprout a minus sign the moment
-      // a card ticked past its scheduled start while the trainer was looking at it.
-      el.textContent = formatDurationHourMin(el.dataset.overtimeAware ? Math.abs(remSec) : remSec);
+      // a card ticked past its scheduled start while the trainer was looking at it. A running
+      // session's countdown keeps its sign, as the clipboard's own does.
+      const unsigned = el.dataset.overtimeAware && !el.dataset.signed;
+      el.textContent = formatDurationHourMin(unsigned ? Math.abs(remSec) : remSec);
       if (el.dataset.overtimeAware) {
         const over = remSec < 0;
         el.classList.toggle("overtime", over);
@@ -94,12 +103,40 @@ function wireElapsedEdit(valueEl, b, deps) {
   });
 }
 
-// A card is marked "Active session" only once the trainer has explicitly started it (matched by
-// the launched clipboard's source session id(s) AND activeSession.started) — reaching the
-// scheduled time by wall-clock alone is NOT enough. Every applicable card is marked, so
-// overlapping sessions all show as ongoing.
-function computeIsLaunched(b, activeSession) {
-  return !isHeld(b) && isRunningOn(activeSession, b.id);
+// A card is marked "Active session" only once the trainer has explicitly started it — reaching the
+// scheduled time by wall-clock alone is NOT enough. Started means a live program in the session,
+// not the session on the clipboard: several sessions may run at once and the clipboard holds one,
+// so asking only the clipboard showed the first of two running sessions as "Starts in" once the
+// second was started. Every applicable card is marked, so overlapping sessions all show as ongoing.
+function computeIsLaunched(b, activeSession, state) {
+  if (isHeld(b)) return false;
+  return isRunningOn(activeSession, b.id) || liveProgramsOf(state, b.id).length > 0;
+}
+
+// Whether the card's session is running, and whether it is the one on the clipboard, whose own
+// timer the card then shows.
+function launchStateOf(b, activeSession, state) {
+  const isLaunched = computeIsLaunched(b, activeSession, state);
+  return { isLaunched, onClipboard: isLaunched && isRunningOn(activeSession, b.id) };
+}
+
+function liveProgramsOf(state, sessionId) {
+  return livePrograms(state).filter((program) => program.sessionId === sessionId);
+}
+
+// The clock of a session running off the clipboard, in the shape that
+// computeActiveSessionCountdown reads: started when its first live program was, due to end when
+// its slot does.
+function clockOffClipboard(b, state, scheduledStartMs, range) {
+  const starts = liveProgramsOf(state, b.id)
+    .map((program) => Date.parse(program.startedAt))
+    .filter(Number.isFinite);
+  const endMs =
+    scheduledStartMs != null && range ? scheduledStartMs + (range.end - range.start) * 60000 : null;
+  return {
+    startTime: starts.length ? Math.min(...starts) : null,
+    sourceSession: { endDate: endMs },
+  };
 }
 
 /** Whether the session was held: finished on the clipboard. */
@@ -153,9 +190,10 @@ function buildReadinessWarningsHTML(hasPlan, clientCount, t) {
 }
 
 // Every clock-driven field a card can show: a past session's recorded/derived elapsed time, an
-// upcoming session's scheduled-start countdown, or the launched clipboard's own live timer —
+// upcoming session's scheduled-start countdown, the launched clipboard's own live timer, or the
+// clock of a session running while another is on the clipboard —
 // mutually exclusive, mirrored in buildSessionCardStatusBarHTML below.
-function computeCardTiming(b, isLaunched, activeSession, isLive, range) {
+function computeCardTiming({ b, onClipboard, activeSession, isLive, range, state }) {
   const pastElapsedSeconds = isHeld(b)
     ? typeof b.duration === "number"
       ? b.duration
@@ -172,11 +210,12 @@ function computeCardTiming(b, isLaunched, activeSession, isLive, range) {
   // Not gated on being in the future: starting a session is a clipboard-title-bar action, not a
   // card action, so the card still has something to say once the scheduled start passes — but it
   // says OVERDUE rather than counting down through zero into negative hours.
-  const scheduledStartMs = b.startDate ? new Date(b.startDate).getTime() : null;
-  const startMs =
-    !isHeld(b) && !isLive && (scheduledStartMs != null || range)
-      ? (scheduledStartMs ?? getSessionDayDate(b.day).getTime() + range.start * 60000)
+  const scheduledStartMs = b.startDate
+    ? new Date(b.startDate).getTime()
+    : range
+      ? getSessionDayDate(b.day).getTime() + range.start * 60000
       : null;
+  const startMs = !isHeld(b) && !isLive ? scheduledStartMs : null;
   const isUpcoming = startMs != null;
 
   let timerText = "";
@@ -184,8 +223,10 @@ function computeCardTiming(b, isLaunched, activeSession, isLive, range) {
   let timerLive = false; // driven by the launched clipboard timer
   let timerEndMs = null; // scheduled end/start (epoch) for the clock-based countdown, whichever applies
   let timerOvertimeAware = false;
+  let timerSigned = false; // a live countdown past its end keeps the minus sign, as the clipboard's does
+  let timerSinceMs = null; // a live session's start (epoch), for a clock that counts up
   let timerCountsDown = false; // the live number is the time left to the scheduled end
-  if (isLaunched && activeSession) {
+  if (onClipboard && activeSession) {
     timerLive = true;
     // Same countdown/count-up decision the clipboard's own timers make (sessionClock.js), so a
     // card and the clipboard it launches never show two different readings of one session.
@@ -193,6 +234,21 @@ function computeCardTiming(b, isLaunched, activeSession, isLive, range) {
     timerText = formatDurationHourMin(countdown.seconds);
     timerIsOvertime = countdown.isOvertime;
     timerCountsDown = countdown.isCountdown && !countdown.isOvertime;
+  } else if (isLive) {
+    // Running, but another session is on the clipboard. The clipboard's timer ticks only its own
+    // session, so this card reads its own clock by the same rule and the card ticker keeps it going.
+    const clock = clockOffClipboard(b, state, scheduledStartMs, range);
+    const countdown = computeActiveSessionCountdown(clock);
+    timerText = formatDurationHourMin(countdown.seconds);
+    timerIsOvertime = countdown.isOvertime;
+    timerCountsDown = countdown.isCountdown && !countdown.isOvertime;
+    if (countdown.isCountdown) {
+      timerEndMs = clock.sourceSession.endDate;
+      timerOvertimeAware = true;
+      timerSigned = true;
+    } else {
+      timerSinceMs = clock.startTime;
+    }
   } else if (isUpcoming) {
     timerEndMs = startMs;
     timerOvertimeAware = true;
@@ -211,18 +267,30 @@ function computeCardTiming(b, isLaunched, activeSession, isLive, range) {
     timerLive,
     timerEndMs,
     timerOvertimeAware,
+    timerSigned,
+    timerSinceMs,
     timerCountsDown,
   };
 }
 
 function buildTimerSpan(timing, b, escapeHTML) {
-  const { timerText, timerLive, timerIsOvertime, timerEndMs, timerOvertimeAware } = timing;
+  const {
+    timerText,
+    timerLive,
+    timerIsOvertime,
+    timerEndMs,
+    timerOvertimeAware,
+    timerSigned,
+    timerSinceMs,
+  } = timing;
   const timerCls = `${timerLive ? "session-card-timer " : ""}session-live-timer${timerIsOvertime ? " overtime" : ""}`;
   const timerAttrs = timerLive
     ? ` id="session-card-timer-${escapeHTML(b.id)}"`
     : timerEndMs != null
-      ? ` data-end="${timerEndMs}"${timerOvertimeAware ? ' data-overtime-aware="1"' : ""}`
-      : "";
+      ? ` data-end="${timerEndMs}"${timerOvertimeAware ? ' data-overtime-aware="1"' : ""}${timerSigned ? ' data-signed="1"' : ""}`
+      : timerSinceMs != null
+        ? ` data-since="${timerSinceMs}"`
+        : "";
   return timerText ? `<span${timerAttrs} class="${timerCls}">${escapeHTML(timerText)}</span>` : "";
 }
 
@@ -352,7 +420,7 @@ export function renderSessionCard(b, colContainer, deps) {
   const temporal = sessionDayTemporal(sessionDayOf(b));
   card.className = `session-card card glassmorphic${temporal !== "today" ? ` session-${temporal}` : ""}`;
   const activeSession = deps.getActiveSession ? deps.getActiveSession() : null;
-  const isLaunched = computeIsLaunched(b, activeSession);
+  const { isLaunched, onClipboard } = launchStateOf(b, activeSession, state);
   const range = parseTimeRange(b.time);
   // Reaching the scheduled start by wall-clock is NOT the same as the trainer having actually
   // started the session — beginWorkoutSession() requires an explicit tap from the clipboard title
@@ -393,7 +461,7 @@ export function renderSessionCard(b, colContainer, deps) {
   // onto a line of its own, and the foot already reports how long the session ran.
   if (isHeld(b)) card.classList.add("session-completed");
 
-  const timing = computeCardTiming(b, isLaunched, activeSession, isLive, range);
+  const timing = computeCardTiming({ b, onClipboard, activeSession, isLive, range, state });
   const { pastElapsedSeconds, isUpcoming, timerIsOvertime } = timing;
 
   info.innerHTML = buildSessionCardInfoHTML({
@@ -441,7 +509,7 @@ export function renderSessionCard(b, colContainer, deps) {
     formatDurationHM,
   });
   if (status.stack) card.classList.add("session-status-stack");
-  if (timing.timerEndMs != null) ensureCardTicker();
+  if (timing.timerEndMs != null || timing.timerSinceMs != null) ensureCardTicker();
 
   // No launch/completed button: the whole card is the tap target, and completion already shows
   // in the status bar — the button just duplicated that and ate horizontal space. Starting the session is
