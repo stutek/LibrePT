@@ -4566,6 +4566,16 @@ agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pa
 
 **Predlog:** izvoz naj za serije, ki niso bile opravljene, napiše »preskočeno« kot stran stranke, vrstice s povratno informacijo brez opombe pa ne konča z dvopičjem — opaženo `2026-10-03 04:28:03.817` na različici `e51fea88`, 390 × 844, sl.
 
+### 80.172 [ ] P2 — »Čakajoče na pregled« iz obvestila pokaže prazen ali nepopoln seznam, po osvežitvi pa so vsi signali tam
+
+**Scenarij in koraki:** prazna aplikacija → trening »Skupina Moč« (Ana Kranjc, Bojan Pirc, Cvetka Mlakar), pri Ani »Pretežko«, pri Bojanu »Prelahko« → »Zaključi vadbo« → »Zaključi zdaj« → ☰ ostane zaprt, odpri predal z obvestili → »Treningi, ki čakajo na pregled« → »Bojan Pirc — Skupina Moč (1)«. Drugič: nov trening »Jutranja dvojica« za jutri (Dana Vidmar, Emil Zorc), pri Emilu »Prelahko« → na podlogi »Možnosti treninga« → »Izbriši trening« → »Izbriši trening« → obvestilo »Emil Zorc (1)«.
+
+**Opaženo:** prvič stran »Čakajoče na pregled« piše »Nič ne čaka na pregled. Vsi signali s tal so usklajeni!«, predal pa piše »2 stranki imata nerešene povratne signale iz treninga.« Drugič seznam kaže Bojana in Ano, Emila pa ne, predal piše »3 stranke imajo nerešene povratne signale«. Po ponovnem nalaganju strani (`goto` na isti naslov) seznam kaže vse: Bojana, Ano in Emila. Ko sem stran odprl iz predala na sveže naloženi aplikaciji, je bil seznam poln.
+
+**Težava in vpliv:** trener po treningu pritisne na obvestilo, vidi »vse usklajeno« in sklene, da signalov ni. Prelahko in Pretežko sta navodili za naslednji trening; spregledan signal pomeni isto težo kot prejšnjič.
+
+**Predlog:** seznam naj se ob odprtju prebere iz shranjenih zapisov, ne iz stanja, nastalega pred zaključkom ali izbrisom — opaženo `2026-10-03 04:31:35.520` na različici `e51fea88`, 390 × 844, sl.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
