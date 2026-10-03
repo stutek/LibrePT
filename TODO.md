@@ -4598,6 +4598,16 @@ agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pa
 
 **Predlog:** celotno obvestilo naj bo v jeziku aplikacije, v trenerjevih besedah (koliko treningov in signalov se prenese), z vprašanjem nad gumbi — opaženo `2026-10-03 04:48:09.770` na različici `e51fea88`, 390 × 844, sl.
 
+### 80.175 [ ] P2 — »Počisti podatke« po lastnem terminu ne odstrani nič: »Odstrani« tiho odpove, vzorčni podatki ostanejo med trenerjevimi
+
+**Scenarij in koraki:** `?lang=sl&init=demo_data_load` → »Se strinjam« → ime, priimek, telefon, e-pošta → »Shrani in nadaljuj« (vzorčni podatki so naloženi, značka piše »PRIKAZ«) → »Ustvari trening« → ime »Elin trening«, kraj »Dom«, nova stranka »Ela Test«, »jutri« 22:00–23:00 → »Shrani« → »Končano« → predal obvestil → »Počisti podatke in zapusti predstavitveni način« → »Odstrani«.
+
+**Opaženo:** okno »Počisti vzorčne podatke« našteje 8 strank, 5 rutin, 7 zapisov treningov, 9 zaznamkov, 20 terminov in 4 obvestila. Po »Odstrani« okno ostane odprto, v njem se pojavi vrstica »Ta izbira bi pustila zapise, ki kažejo na stvari, ki ne obstajajo več.« in nič se ne odstrani: v bazi ostane 9 strank (Ela Test in 8 vzorčnih), vseh 20 terminov. Značka je že pred tem iz »PRIKAZ« postala »PREDOGLED«, torej aplikacija ne kaže več, da gre za vzorčne podatke. Primerjava: brez lastnega termina (samo stranka »Ela Test« iz »Dodaj stranko«) isti postopek odstrani vseh 8 vzorčnih strank in ohrani Elo; če ne vpišem ničesar, odstrani vse.
+
+**Težava in vpliv:** trener, ki je najprej preizkušal z vzorčnimi podatki, nato vpisal prvi pravi termin in šele nato želi počistiti, ne more. Vrstica ne pove, kateri zapis blokira, in ne ponudi izhoda. Vzorčne stranke (Jane Doe, John Smith …) ostanejo na seznamu skupaj z njegovimi, obvestilo »V tvojih podatkih so testni zapisi: 53 zapisov, ki jih je ustvaril testni zagon« pa še naprej piše o njih.
+
+**Predlog:** čiščenje naj odstrani vzorčne zapise in ohrani trenerjeve tudi, kadar je v bazi trenerjev termin; če česa ne more, naj imenuje zapis (kateri termin kaže na kaj) in pove, kaj trener stori — opaženo `2026-10-03 05:15:21.745` na različici `e51fea88`, 390 × 844, sl.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
