@@ -4586,6 +4586,8 @@ agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pa
 
 **Predlog:** program in prisotnost naj se zapišeta pod trening, ki ga je trener začel in zaključil, zaključeni trening pa naj podloge ne sme sestaviti — opaženo `2026-10-03 04:40:13.151` na različici `e51fea88`, 390 × 844, sl. Prejšnji popravek §80.168 pokriva dva sočasna aktivna treninga; tu je tretji, že zaključen, prvi v skupini prekrivanja.
 
+**Dokaz 2026-10-03 (e51fea88):** trening »Trojka« (Lan Habjan, Maja Ferk, Nik Zore, 05:05–06:05) se prekriva z že zaključenim »Moč solo« (04:40–05:40, ena anonimizirana stranka). Ob začetku ima podloga tri zavihke. Po osvežitvi strani ima štiri: prvi je »— Client« z imenom treninga »Moč solo«, izbran, brez vaj; ostali trije nosijo pod imenom še »Trojka«. Zaključeni trening torej pride v podlogo šele po osvežitvi.
+
 ### 80.174 [ ] P2 — Obnova stare kopije: obvestilo o pretvorbi je v angleščini sredi slovenskega okna in ne pove, kaj se bo zgodilo s podatki
 
 **Scenarij in koraki:** objavljena aplikacija `933dbc0`: skupinski trening »Stara skupina« (Hana Kolar, Igor Rem) z »Pretežko« in »Prelahko«, zaključen; trening »Stari jutri« za Igorja → ☰ → »Upravljanje podatkov« → »Izvozi JSON« → »Zapisal sem si ga, shrani«. Nato `e51fea88` na prazni aplikaciji (`?lang=sl`): ☰ → »Upravljanje podatkov« → »Izberi JSON datoteko« → geslo → »Odpri datoteko«.
