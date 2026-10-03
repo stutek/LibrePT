@@ -4556,6 +4556,16 @@ je odprl stran (`explore.py goto` ima zapisano zgodovino zastajanja). Naslednji 
 agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pathname` ter ali je
 `#active-session-overlay` viden.
 
+### 80.171 [ ] P2 — Izvoz podatkov stranke navede tri opravljene serije za vajo, ki jo stran stranke pravi »PRESKOČENO«
+
+**Scenarij in koraki:** skupinski trening »Skupina Moč« (Ana Kranjc, Bojan Pirc, Cvetka Mlakar), pri Ani vaja Barbell Back Squat, »Pretežko« → »Zaključi vadbo« → »Zaključi zdaj« → ☰ → »Imenik strank« → »Ana Kranjc« → »Izvozi podatke (GDPR)« → »Berljiva kopija«.
+
+**Opaženo:** stran stranke pod »ZGODOVINA ZABELEŽENIH VADB« piše »Barbell Back Squat PRESKOČENO«. Berljiva kopija pod »Zapisani treningi« piše za isto vajo »1. 10 ponovitev @ lastna teža«, »2. …«, »3. …«, nato vrstico »Povratna informacija (Pretežko – zmanjšaj težo): « z dvopičjem in praznim koncem.
+
+**Težava in vpliv:** datoteka, ki jo stranka dobi po členu 15, trdi, da je naredila tri serije po deset ponovitev, čeprav nobena ni bila zaznamovana, trener pa isto vajo vidi kot preskočeno. Vaja s ponovitvami in težo 0 se v izvozu bere kot vaja z lastno težo.
+
+**Predlog:** izvoz naj za serije, ki niso bile opravljene, napiše »preskočeno« kot stran stranke, vrstice s povratno informacijo brez opombe pa ne konča z dvopičjem — opaženo `2026-10-03 04:28:03.817` na različici `e51fea88`, 390 × 844, sl.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
