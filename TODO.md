@@ -4680,6 +4680,16 @@ agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pa
 
 **Predlog:** ob ponovni dodelitvi naj aplikacija ponudi obstoječi nenačrtovani načrt te stranke, ali pa naj ima nenačrtovan načrt ukaz za dodelitev terminu — opaženo `2026-10-03 05:40:22.407` na različici `e51fea88`, 390 × 844, sl. Ali naj se nenačrtovani programi dodeljujejo terminom, je odločitev Simona: **čaka na Simona**.
 
+### 80.183 [ ] P2 — V polje ure »9:00 PM« se zapiše kot 09:00, »25:00« kot 23:00, datum »2026-02-31« kot 2026-02-28, brez opozorila
+
+**Scenarij in koraki:** ☰ → »Termini treningov« → »Ustvari trening« (ali `/session/new`) → dotik polja »Začetni čas«, vpis, dotik drugega polja; enako polje »Datum«.
+
+**Opaženo:** vpis »9:00 PM« da v polju »09:00« (PM se izgubi), »25:00« da »23:00«, »9.30« da »09:30«, »21:15« ostane. Datum: »6.10.2026« da »2026-10-06«, »2026-02-31« da »2026-02-28«. Datum »31.2.2026« pa polje zavrne z oblačkom »31.2.2026 ni datum. Napiši ga kot 6.10.2026 ali 2026-10-06.« (to je prav).
+
+**Težava in vpliv:** trener s telefonom v ameriških nastavitvah ali iz navade vpiše »9:00 PM« in dobi trening ob 9 zjutraj, opozorila pa ni. Isto »25:00« in »31. februar«: sprejmeta se kot druga vrednost. Datum »31.2.2026« aplikacija zavrne, ure in »2026-02-31« pa ne.
+
+**Predlog:** »PM« naj se razume kot popoldne ali zavrne z oblačkom kot »31.2.2026«; »25:00« in »2026-02-31« naj se zavrneta z oblačkom — opaženo `2026-10-03 05:43:05.003` na različici `e51fea88`, 390 × 844, sl.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
