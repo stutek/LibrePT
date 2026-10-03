@@ -4812,6 +4812,16 @@ agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pa
 
 **Predlog:** oznaka naj se skrajša (»OGROŽENO«) ali prestavi v drugo vrstico — opaženo `2026-10-03 06:58:06.451` na različici `e51fea88`, 320 × 680, sl.
 
+### 80.196 [ ] P3 — Števec v glavi podloge in ob »Aktiven trening« šteje navzdol, ob njem pa je samo ura brez besede
+
+**Scenarij in koraki:** 320 × 680. Trening »Odštevanje« (Ajda Ban, planiran od 06:57 do 07:57) → kartica → »Začni trening« ob 06:59 → glava podloge.
+
+**Opaženo:** ob 06:59:00 piše ob ikoni ure »00h 58m«, ob 07:00:08 »00h 56m«. Kartica na seznamu piše »Aktiven trening 00h 56m«. Element nima `aria-label` ali `title` (`#overlay-session-duration`). Okno ob »Zaključi vadbo« pri drugih treningih piše »Do konca tega treninga je še približno 01h 04m« z isto številko kot v glavi.
+
+**Težava in vpliv:** številka ob »Aktiven trening« se bere kot trajanje ali pretečeni čas. Trener, ki je začel pred dvema minutama, vidi skoraj uro in ne ve, da je to čas do konca načrtovanega termina.
+
+**Predlog:** ob številki naj piše »do konca« (ali »še 00h 56m«) — opaženo `2026-10-03 07:00:19.750` na različici `e51fea88`, 320 × 680, sl.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
