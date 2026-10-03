@@ -20,18 +20,18 @@
 <li><strong>Not professional advice.</strong> LibrePT is a tool for a qualified trainer's own workflow; it is not medical, legal, or professional advice.</li>
 </ul>
 <h2>⚠️ How you can lose data</h2>
-<p>Your data lives <strong>only in this browser</strong>, on this device (<code>localStorage</code>). That has real consequences in a preview build:</p>
+<p>Your records live <strong>in this browser, on this device</strong>. They are stored in IndexedDB, a database built into the browser. Only the language, the theme and the accepted terms are kept in <code>localStorage</code>. That has real consequences in a preview build:</p>
 <ul>
-<li><strong>A new build can wipe or migrate your data.</strong> Preview builds change how data is stored. An update may reset the database, or migrate it imperfectly, and there is <strong>no server-side backup</strong> to fall back on.</li>
-<li><strong>Clearing browser data deletes everything.</strong> Clearing site data / history, &quot;reset the app&quot;, private-window sessions, or browser storage limits can erase your records permanently.</li>
-<li><strong>No cloud sync yet.</strong> Data does <strong>not</strong> sync anywhere. There is no copy but the one on this device — lose the device or the browser profile, lose the data.</li>
-<li><strong>Storage is capped.</strong> The browser limits local storage (~5 MB). A large history can hit that ceiling and cause saves to fail.</li>
+<li><strong>A new build can change or lose your data.</strong> Preview builds change how data is stored. An update converts your data to the new format, and a conversion can go wrong. LibrePT has <strong>no server of its own</strong>, so it holds no backup for you.</li>
+<li><strong>Clearing browser data deletes everything.</strong> Clearing site data or history, wiping the app's data, a private window, or low storage space on the device can erase your records permanently. A browser may also delete the data of a site you have not used for a long time.</li>
+<li><strong>Google Drive sync is limited.</strong> You can copy your data to your own Google Drive with <strong>Connect Google Drive</strong> in the <strong>Sync &amp; Backup Center</strong>. Google has not verified LibrePT yet. It shows an &quot;unverified app&quot; warning when you connect, and <strong>at most 100 people</strong> can connect. If you cannot connect, or you do not, the only copy is the one on this device. If you lose the device or the browser profile, you lose the data.</li>
+<li><strong>Storage has a limit.</strong> Each browser decides how much a site may store. The limit depends on the browser and on the free space on the device. When it is full, saves fail.</li>
 </ul>
 <h2>How to protect yourself</h2>
 <ol>
 <li><strong>Don't put real, irreplaceable client data in a preview build.</strong> Use demo/sample data, or data you can afford to lose.</li>
-<li><strong>Export your data regularly.</strong> Use <strong>Sync &amp; Backup → Export</strong> to download a JSON copy, and keep it somewhere safe. This is your only backup.</li>
-<li><strong>Re-import after an update</strong> if a build resets your data (<strong>Sync &amp; Backup → Import</strong>).</li>
+<li><strong>Export your data regularly.</strong> Open the <strong>Sync &amp; Backup Center</strong> with the cloud button at the top right of the screen, then tap <strong>Export JSON</strong> to download a JSON file. Keep it somewhere safe. Use it as your backup, together with Google Drive sync if you connect it.</li>
+<li><strong>Import the file again after an update</strong> if your data is gone. In the <strong>Sync &amp; Backup Center</strong>, under <strong>Import Data Backup</strong>, tap <strong>Select JSON File</strong>. An import replaces everything on this device with what is in the file.</li>
 <li><strong>Handle client personal data lawfully.</strong> If you do enter real client information, you are the Data Controller — see <a href="./privacy.html">PRIVACY.md</a> and the <a href="./consent-form-en.html">client consent template</a>.</li>
 </ol>
 <hr />

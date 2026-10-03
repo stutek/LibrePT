@@ -27,18 +27,18 @@ Please read this before you put any data you care about into it.
 
 ## ⚠️ How you can lose data
 
-Your data lives **only in this browser**, on this device (`localStorage`). That has real consequences in a preview build:
+Your records live **in this browser, on this device**. They are stored in IndexedDB, a database built into the browser. Only the language, the theme and the accepted terms are kept in `localStorage`. That has real consequences in a preview build:
 
-- **A new build can wipe or migrate your data.** Preview builds change how data is stored. An update may reset the database, or migrate it imperfectly, and there is **no server-side backup** to fall back on.
-- **Clearing browser data deletes everything.** Clearing site data / history, "reset the app", private-window sessions, or browser storage limits can erase your records permanently.
-- **No cloud sync yet.** Data does **not** sync anywhere. There is no copy but the one on this device — lose the device or the browser profile, lose the data.
-- **Storage is capped.** The browser limits local storage (~5 MB). A large history can hit that ceiling and cause saves to fail.
+- **A new build can change or lose your data.** Preview builds change how data is stored. An update converts your data to the new format, and a conversion can go wrong. LibrePT has **no server of its own**, so it holds no backup for you.
+- **Clearing browser data deletes everything.** Clearing site data or history, wiping the app's data, a private window, or low storage space on the device can erase your records permanently. A browser may also delete the data of a site you have not used for a long time.
+- **Google Drive sync is limited.** You can copy your data to your own Google Drive with **Connect Google Drive** in the **Sync & Backup Center**. Google has not verified LibrePT yet. It shows an "unverified app" warning when you connect, and **at most 100 people** can connect. If you cannot connect, or you do not, the only copy is the one on this device. If you lose the device or the browser profile, you lose the data.
+- **Storage has a limit.** Each browser decides how much a site may store. The limit depends on the browser and on the free space on the device. When it is full, saves fail.
 
 ## How to protect yourself
 
 1. **Don't put real, irreplaceable client data in a preview build.** Use demo/sample data, or data you can afford to lose.
-2. **Export your data regularly.** Use **Sync & Backup → Export** to download a JSON copy, and keep it somewhere safe. This is your only backup.
-3. **Re-import after an update** if a build resets your data (**Sync & Backup → Import**).
+2. **Export your data regularly.** Open the **Sync & Backup Center** with the cloud button at the top right of the screen, then tap **Export JSON** to download a JSON file. Keep it somewhere safe. Use it as your backup, together with Google Drive sync if you connect it.
+3. **Import the file again after an update** if your data is gone. In the **Sync & Backup Center**, under **Import Data Backup**, tap **Select JSON File**. An import replaces everything on this device with what is in the file.
 4. **Handle client personal data lawfully.** If you do enter real client information, you are the Data Controller — see [PRIVACY.md](../PRIVACY.md) and the [client consent template](templates/en/Client_Consent_Form.md).
 
 ---
