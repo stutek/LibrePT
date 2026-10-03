@@ -4700,6 +4700,16 @@ agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pa
 
 **Predlog:** polje naj ima zgornjo mejo dolžine, kartica pa naj dolgo besedo prelomi ali odreže — opaženo `2026-10-03 05:44:54.576` na različici `e51fea88`, 390 × 844, sl.
 
+### 80.185 [ ] P2 — Iskanje stranke ne najde »Zupančič« ob vpisu »zupancic«; polje za termin ponudi dodajanje nove stranke
+
+**Scenarij in koraki:** stranka »Marija Alexandra Vrhovnik-Zupančič Kosmatinec« v imeniku. ☰ → »Imenik strank« → polje »Išči stranke...« → »zupancic«. Nato »Ustvari trening« → polje »Poišči stranko po imenu...« → »zupancic«.
+
+**Opaženo:** imenik ne pokaže nobene kartice za »zupancic« (za »ZUPANČIČ« jo pokaže, za »cvet« pokaže »Cvetka Novak«, za »KOSMATINEC« pokaže Bojana in Marijo). Polje v obrazcu termina piše »Stranke s tem imenom ni« in ponudi gumb »Dodaj »zupancic« kot novo stranko«. Z vpisom »zupančič« pokaže Marijo.
+
+**Težava in vpliv:** večina slovenskih telefonskih tipkovnic zahteva dolg pritisk za č, š, ž; trenerji pišejo priimke brez njih. Iskanje zgreši, trener pa dobi ponudbo nove stranke z isto osebo pod drugim zapisom.
+
+**Predlog:** iskanje naj ne razlikuje č od c, š od s, ž od z (pri imenih in priimkih) — opaženo `2026-10-03 05:48:25.206` na različici `e51fea88`, 390 × 844, sl.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
