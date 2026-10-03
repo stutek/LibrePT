@@ -4792,6 +4792,16 @@ agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pa
 
 **Predlog:** odločitev Simona: ali ima okno z oznako in opombo isto pravilo kot obrazci — opaženo `2026-10-03 06:44:24.588` na različici `e51fea88`, 390 × 844, sl.
 
+### 80.194 [ ] P2 — Po začetku drugega treninga kartica prvega, ki še teče, piše »Se začne čez«
+
+**Scenarij in koraki:** trening »Prvi tekoči« (Sara Lah, 16:00–17:00) → kartica → »Začni trening« → »Ohrani urnik« → ✕ »Zapri trening in se vrni na začetek«: kartica piše »Aktiven trening«. Nato trening »Drugi tekoči« (Ula Test, 18:00–19:00, brez prekrivanja) → kartica → »Začni trening« → »Ohrani urnik« → ✕. Nato kartica »Prvi tekoči«.
+
+**Opaženo:** kartica »Prvi tekoči« piše zdaj »Se začne čez 09h 11m«, kartica »Drugi tekoči« »Aktiven trening«. Ko odprem »Prvi tekoči«, so ponujeni »Zaključi vadbo« in zavihek »Sara«, »Začni trening« ni ponujen: trening torej še teče. V bazi ima Sara program `live` v »Prvi tekoči«. Vprašanja ali opozorila ob začetku drugega ni bilo. Ista sprememba se je zgodila pri »Alfa« in »Beta« (12:00 in 14:00): po začetku »Beta« je kartica »Alfa« kazala »Se začne čez«, zaključek »Alfa« s kartice je uspel in zapisal program.
+
+**Težava in vpliv:** trener po začetku drugega treninga na seznamu ne vidi, da prvi še teče. Kartica kaže prihodnost, trening pa ima odprt program in lahko ostane nezaključen.
+
+**Predlog:** kartica naj ostane »Aktiven trening«, dokler trening ni zaključen; če sme teči samo en trening hkrati, naj aplikacija ob začetku drugega vpraša, ali prvega zaključi — opaženo `2026-10-03 06:49:25.697` na različici `e51fea88`, 390 × 844, sl. Ali sme teči več treningov hkrati, je odločitev Simona.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
