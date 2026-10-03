@@ -6058,20 +6058,17 @@ every way in. Shipped in `e51fea88`.
   2026-10-02 says a cancelled slot is marked `cancelled`. Its programs are unscheduled first, so
   nothing points at the missing row. Keep the row as `cancelled` instead?
 
-**Found in the deeper review, not fixed in this change:**
-- A date taken as the first ten characters of an instant is the day in UTC, so after midnight local
-  time it is the day before: `controllers/planPeekController.js` (the peek's day),
-  `domain/clientSessionNeighbours.js` (`dayOf`), `modules/clients/clientsView.js` (erasure date),
-  `modules/clients/clientConsentSection.js` and `data/clientConsent.js` (consent date),
-  `data/clientDataExport.js` (`exportedAt`). Fixed in this change for the export's sessions, plan
-  changes and trainings and for the AI summary.
-- The client's data export calls a cancelled session "planned" (`export_doc_session_planned`); the
-  status now says cancelled.
-- A session still carries its time three ways (`startDate`, the `time` text, the `day` bucket) and
+**Found in the deeper review** (checked against the code 2026-10-03 12:27:48.602):
+- [x] A date taken as the first ten characters of an instant was the day in UTC, so after midnight
+  local time it was the day before. Fixed everywhere listed: the peek and its neighbours
+  (`0549174d`), erasure and consent dates (`38aa8c24`), the export's `exportedAt` (`d8d83ecb`).
+- [x] The client's data export called a cancelled session "planned"; it says cancelled
+  (`export_doc_session_cancelled`).
+- [x] `data/backupFile.js`'s header spoke of P; it says PREVIEW and schema 6 (`29ccbbda`).
+- [ ] A session still carries its time three ways (`startDate`, the `time` text, the `day` bucket) and
   the legacy `titles`. Dropping them now would touch every reader of `day` and `time`; left.
-- `data/backupFile.js`'s header still speaks of P and of `SCHEMA_P` as schema 4 plus `startDate`.
-- `data/recordReferences.js` is a cycle check only; no write checks that a reference exists
-  (`data/recordDependencies.js` is consulted by demo removal alone).
+- [ ] `data/recordReferences.js` is a cycle check only; no write checks that a reference exists
+  (`data/recordDependencies.js` is consulted by demo removal alone). Design work, not a fix.
 
 ## 96. [ ] Predstaviti Simonu najdbe in meritve raziskovalnega testiranja 2026-09-30
 
