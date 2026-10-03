@@ -9987,6 +9987,24 @@ parametre vaje, ko sestavlja načrt. **Popravljeno 2026-10-03 11:45:06.071 v `d8
 »Uveljavi spremembo programa« ni več. »Razreši« signal razreši z enim dotikom in ne spremeni
 nobenega načrta; opomba s tal je na kartici, svinčnik do rutine ostane.
 
+### 80.199 [x] P3 — Povzetek predala obvestil se ob ponovnem izrisu, ko trening teče, prelije čez svoj okvir
+
+**Najdeno med popravljanjem (Claude, 2026-10-03 09:20:04.054, na `0549174d`).** Ko je pot
+`/adjustments` ob vstopu izrisala tudi predal, je pregled prelivanja (`tests/e2e/test_layout_overflow.py`)
+pri 390 pikah, v sl, de in na treh napravah, našel: ikona `#notification-summary-icon` se prelije čez
+`div.notification-summary-title-wrap` za 15 pik, `div.notification-summary-badges` čez
+`div.notification-summary-header` za 34 pik, `#clipboard-bar-meta` čez `span.session-bar-main` za
+81 pik. Ob zagonu aplikacije se to ne zgodi, ob drugem izrisu predala pa (na primer po razrešitvi
+signala). Pot `/adjustments` predala ne izriše več; predal se izriše ob odprtju. Kaj trener vidi ob
+tem izrisu, še ni pogledano na telefonu.
+
+**Ni ponovljeno (Claude, 2026-10-03 11:54:37.568, na `dd5bdff6`).** Test `test_the_drawer_drawn_again_during_a_running_session_does_not_overflow` v `tests/e2e/test_layout_overflow.py` po zagonu treninga (kartica ob 10:00 – 12:00) drugič izriše predal in pregleda prelivanje pri 390 pikah v sl, de in en: nič. Enako brez najdb: tretji izris, dolg naslov in števec (»12 neprebranih / 12 vseh«) ter predal odprt in zaprt. Prelivanje je bilo opaženo ob izrisu predala na poti `/adjustments`, ki jo zdaj odstranjuje drugo delo; ko te poti ni več, lahko to točko zapre test, ki že teče v vsakem prehodu. Naključje: pregled prelivanja je v sl in de preskočil živi trening, ker je kartico iskal po angleškem naslovu; zdaj jo najde po uri (`899fd749`) in vseh sedem prehodov je zelenih.
+
+**Zaprto 2026-10-03 11:55:09.711 kot neponovljivo:** pot `/adjustments` ne izriše več predala
+(`0549174d`), okno za pregled in njegova pot sta odstranjena (`d8d83ecb`), ponovni izris predala med
+tekočim treningom pa preverja vsak prehod pregleda prelivanja. Če se prelivanje vrne, ga ta test
+pokaže.
+
 ## 99.1 [x] Padli test ni bil okolje, ampak iskanje niza v naključnem id-ju — popravljeno 2026-10-01
 
 Po potisku 212 commitov je 2026-10-01 padel tek »Build, Verify and Deploy«, opravilo »Stage 1 ·
