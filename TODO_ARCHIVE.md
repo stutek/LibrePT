@@ -9943,6 +9943,28 @@ iz obstoječega profila z vpisano opombo. Opaženo na objavljeni `6c8b556`, sl,
 
 **Popravljeno 2026-10-03 09:20:04.054 v 0549174d:** trening, začet na drug dan kot njegov termin (z »Ohrani urnik«), je v zgodovini stranke datiran z dnem termina.
 
+### 80.188 [x] P2 — »Uveljavi in razreši« s ciljnim bremenom 20 kg pri treningu brez rutine nič ne zapiše, signal pa izgine
+
+**Scenarij in koraki:** trening »Za breme« brez rutine (Nina Bor, Barbell Row) → kartica vaje → »Pretežko« → predal obvestil → »Treningi, ki čakajo na pregled« → ✓ »Razreši« → »Vrsta spremembe« ostane »Spremeni ciljno breme in ponovitve«, »Ciljna teža (kg)« 20 → »Uveljavi in razreši«.
+
+**Opaženo:** obrazec ima ob pošiljanju 20, 10, 3 (teža, ponovitve, serije). Signal postane `resolved` in izgine s seznama. V bazi (`schema6`) ima načrt »Za breme« po ukazu za vse tri serije `weight: 0`. Nobena vrednost 20 ni shranjena nikjer. Ponovljeno še enkrat z drugim signalom (Nina Bor, Barbell Row, »Prelahko«, brez programa): enako.
+
+**Težava in vpliv:** trener ob razrešitvi vnese ciljno breme in pričakuje, da ga bo naslednji načrt vseboval. Pri treningu brez rutine ga ne vsebuje, aplikacija pa ne pove, da ni imela kam zapisati. Signal izgine s seznama, kot da bi bila sprememba uveljavljena.
+
+**Predlog:** če sprememba nima kam, naj okno pove »Ta trening nima rutine, sprememba ni shranjena« (ali naj ponudi ustvariti rutino) — opaženo `2026-10-03 06:09:58.548` na različici `e51fea88`, 390 × 844, sl.
+
+**Delno popravljeno 2026-10-03 09:20:04.054 v `0549174d`:** okno pri signalu brez rutine pove »Ta
+trening ni bil narejen iz rutine, zato se sprememba tukaj ne shrani nikamor. Nov cilj vpiši v
+naslednji načrt stranke.« **Čaka na Simona:** kam naj se tak cilj zapiše. Možnosti: (a) v
+naslednji načrt stranke s to vajo — kateri je »naslednji«, mora aplikacija izbrati (najbližji
+termin ali nerazporejen načrt); (b) okno ne ponudi spremembe bremena, le zaprtje opozorila.
+Priporočilo: (a), ker okno cilj že predlaga iz zadnje vadbe (42,5 kg za 40 kg).
+
+**Odločil Simon 2026-10-03:** aplikacija ciljev ne določa; trener, ki je strokovnjak, vnese
+parametre vaje, ko sestavlja načrt. **Popravljeno 2026-10-03 11:45:06.071 v `d8d83ecb`:** okna
+»Uveljavi spremembo programa« ni več. »Razreši« signal razreši z enim dotikom in ne spremeni
+nobenega načrta; opomba s tal je na kartici, svinčnik do rutine ostane.
+
 ## 99.1 [x] Padli test ni bil okolje, ampak iskanje niza v naključnem id-ju — popravljeno 2026-10-01
 
 Po potisku 212 commitov je 2026-10-01 padel tek »Build, Verify and Deploy«, opravilo »Stage 1 ·
