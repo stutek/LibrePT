@@ -196,7 +196,9 @@ def _walk_live_session(page, base, findings):
     # (src/data/sessions.js pairs "Group Strength & Conditioning" with "Return-to-Play Rehab" on
     # purpose). The first card is a finished session with a short name, and opening it is why
     # this walk never saw that name run under the ▶ and ⋮ buttons.
-    session_card = page.locator(".session-card", has_text="Group Strength").first
+    # Found by its time slot, not its title: the title is translated, and a title search found no
+    # card in sl and de, so the live-session part of those two walks silently did nothing.
+    session_card = page.locator(".session-card", has_text="10:00 - 12:00").first
     if not session_card.count():
         return
     session_card.click()
@@ -284,6 +286,31 @@ def test_no_component_overflows_in_german(page, local_server):
     _walk_the_app(page, local_server, findings, query="?lang=de")
 
     assert not findings, f"German at {profile['width']}px\n{_report(findings)}"
+
+
+def test_the_drawer_drawn_again_during_a_running_session_does_not_overflow(page, local_server):
+    """The message drawer is drawn when the app boots and again whenever a signal changes. The
+    boot draw happens before any session runs, so the walk above never saw the second draw: with a
+    session running, the drawer's summary row sits beside the session bar, and the second draw
+    once pushed its icon, its count pill and the bar's meta text out of their boxes."""
+    page.set_viewport_size({"width": 390, "height": 844})
+    for query in ("?lang=sl", "?lang=de", "?lang=en"):
+        page.goto(local_server + query)
+        page.wait_for_selector("#view-clients.active")
+        _settle(page)
+        base = _base(page)
+        _nav(page, base + "/")
+        page.locator(".session-card", has_text="10:00 - 12:00").first.click()
+        page.wait_for_selector("#active-session-overlay:not(.hidden)", timeout=15000)
+        _settle(page)
+        page.evaluate(
+            "() => import(new URL('modules/common/notificationArea.js', document.baseURI).href)"
+            ".then((m) => m.renderNotificationArea())"
+        )
+        _settle(page)
+        findings = []
+        _sweep(page, findings, f"drawer drawn again ({query})")
+        assert not findings, _report(findings)
 
 
 def test_the_walk_still_covers_every_route():
