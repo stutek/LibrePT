@@ -2047,6 +2047,48 @@ def _ensure_zap_target_up():
     return None
 
 
+# deploy/zap/ is the authoritative scan configuration and is never mounted: the container gets a
+# fresh copy of it in ZAP_WORK_DIR, which it may write to. zap-baseline.py writes its generated
+# Automation Framework plan (zap.yaml) there, and the wrapper in run_owasp_zap_scan copies ZAP's own
+# log there before `--rm` deletes the container. With a read-only mount neither survived, so a scan
+# that exited 3 after 11 s left only "Failed to access summary file" and no cause.
+ZAP_CONF_DIR = os.path.join("deploy", "zap")
+ZAP_WORK_DIR = os.path.join(REPORT_DIR, "zap-wrk")
+# Where ZAP writes its log inside zaproxy/zap-stable: `${sys:zap.user.log}/zap.log`
+# (org/zaproxy/zap/resources/log4j2-home.properties in the image's zap jar), the ZAP home directory.
+# Read from the image 2026-10-03: a ZAP started in it lists zap.log in /home/zap/.ZAP/.
+_ZAP_LOG_IN_CONTAINER = "/home/zap/.ZAP/zap.log"
+ZAP_LOG_TAIL_LINES = 40
+
+
+def prepare_zap_workdir(conf_dir=ZAP_CONF_DIR, work_dir=ZAP_WORK_DIR):
+    """Replace work_dir with a fresh copy of conf_dir that the ZAP container can write to.
+
+    Returns its absolute path. Fresh per run, so a zap.log in it is always this run's log.
+    World-writable because the container runs as its own user `zap` (uid 1000), which is not the
+    host user on a GitHub runner (uid 1001); the directory sits inside the project tree, whose own
+    permissions keep other users out.
+    """
+    if os.path.exists(work_dir):
+        shutil.rmtree(work_dir)
+    shutil.copytree(conf_dir, work_dir)
+    os.chmod(work_dir, 0o777)
+    return os.path.abspath(work_dir)
+
+
+def _zap_log_report(work_dir):
+    """Lines naming ZAP's own log and its last ZAP_LOG_TAIL_LINES lines, or saying it is missing."""
+    log_path = os.path.join(work_dir, "zap.log")
+    if not os.path.isfile(log_path):
+        return [
+            f"  ZAP wrote no log ({log_path} is missing): ZAP did not start, or was killed before "
+            "the log could be copied out. zap-baseline.py discards ZAP's stderr."
+        ]
+    with open(log_path, encoding="utf-8", errors="replace") as handle:
+        tail = handle.read().strip().splitlines()[-ZAP_LOG_TAIL_LINES:]
+    return [f"  ZAP's own log, last {len(tail)} lines ({log_path}):", *tail]
+
+
 def run_owasp_zap_scan():
     """Runs the OWASP ZAP baseline scan against the live app and FAILS the build on any finding.
 
@@ -2081,7 +2123,7 @@ def run_owasp_zap_scan():
         sys.exit(1)
 
     print("    - Launching OWASP ZAP container baseline scan (host network)...")
-    conf_dir = os.path.join(os.path.abspath("deploy"), "zap")
+    work_dir = prepare_zap_workdir()
     container_name = "librept-zap-baseline"
     # ZAP baseline typically finishes in 3-4 minutes against an app this size; 20 minutes is a
     # generous ceiling, not a target. Bounded because an unbounded subprocess.run() turned a
@@ -2106,13 +2148,19 @@ def run_owasp_zap_scan():
                 "--network",
                 "host",
                 "-v",
-                f"{conf_dir}:/zap/wrk:ro",
+                f"{work_dir}:/zap/wrk:rw",
                 # ZAP loads add-ons from its home plugin dir; mounting the vendored set there is
                 # what makes `-silent` below safe (see _ZAP_ADDONS).
                 "-v",
                 f"{addons_dir}:/home/zap/.ZAP/plugin",
                 "zaproxy/zap-stable",
-                "zap-baseline.py",
+                # zap-baseline.py with the arguments after "zap-baseline" below ("$@"), then ZAP's
+                # log copied to /zap/wrk, then zap-baseline.py's own exit code.
+                "sh",
+                "-c",
+                'zap-baseline.py "$@"; status=$?; '
+                f"cp {_ZAP_LOG_IN_CONTAINER} /zap/wrk/ 2>/dev/null; exit $status",
+                "zap-baseline",
                 "-t",
                 ZAP_TARGET,
                 "-c",
@@ -2129,7 +2177,23 @@ def run_owasp_zap_scan():
     except subprocess.TimeoutExpired as e:
         # `docker run --rm` without -d is attached; killing the client process alone can leave the
         # container running server-side, so stop it explicitly rather than trust SIGTERM to propagate.
+        # The wrapper never reaches its copy of ZAP's log on a hang, so take it before the stop
+        # (`--rm` deletes the container with the log in it).
+        try:
+            subprocess.run(
+                [
+                    docker_bin,
+                    "cp",
+                    f"{container_name}:{_ZAP_LOG_IN_CONTAINER}",
+                    work_dir,
+                ],
+                capture_output=True,
+                timeout=60,
+            )
+        except subprocess.TimeoutExpired:
+            pass  # the stop below matters more than the log; _zap_log_report says it is missing
         subprocess.run([docker_bin, "stop", container_name], capture_output=True)
+        print("\n".join(_zap_log_report(work_dir)))
         print(
             f"  ✗ OWASP ZAP scan did not finish within {timeout_seconds}s — killed. "
             f"Partial output: {getattr(e, 'log_path', REPORT_DIR)}. "
@@ -2144,8 +2208,10 @@ def run_owasp_zap_scan():
         )
         return
 
-    # Non-zero: surface the report tail so the offending alerts are visible, then fail.
+    # Non-zero: surface the report tail so the offending alerts are visible, and ZAP's own log,
+    # which holds the cause when the scan errored (exit 3) rather than found something, then fail.
     print("\n".join(output.strip().splitlines()[-40:]))
+    print("\n".join(_zap_log_report(work_dir)))
     print(f"  ✗ OWASP ZAP scan failed (exit {returncode}). Full log: {path}")
     sys.exit(1)
 
