@@ -5849,7 +5849,8 @@ is why.
 
 Asked by Simon 2026-10-03 03:32:01.582; reviewed by Claude, recorded 2026-10-03 03:34:44.498. After
 the push every change below costs schema 7, backup format 9 and another stop of Drive sync between
-old and new builds, so each one is decided now or accepted as it is. **All wait for Simon.**
+old and new builds, so each one is decided now or accepted as it is. The proposals as first
+written; what was done and what still waits is in the second round below.
 
 1. **One fact, two places.** A finished session is `sessions.completed` + `sessions.duration` AND
    `clientPrograms.status: "done"` + `duration`; Finish writes both (`controllers/sessionLifecycle.js`
@@ -5887,6 +5888,46 @@ old and new builds, so each one is decided now or accepted as it is. **All wait 
 not derived; a program stored whole with its sets nested suits IndexedDB; the attendance id
 `at-<session>-<client>` keeps one row per client per session. `circuitTitle` and `circuitSeries`
 repeated on each member of a circuit stay for now: moving them touches 129 uses of `circuitId`.
+
+**Second round, ordered by Simon 2026-10-03 ("popravi in izvedi še temeljitejši pregled"; "programi
+se ne smejo brisati"), recorded 2026-10-03 04:14:10.407.** Items 2, 3, 4, 5 and 8 are done as
+proposed; item 7 for the group (`programIds` in both reference maps; `programItemId` points inside a
+program and stays unchecked). Item 1 is done only in part, see question A. Programs are never
+deleted: finishing, deleting a session and taking a client off it unschedule them; a plan thrown
+away, or one with no exercise, becomes `discarded`, kept and listed nowhere (Claude's choice on the
+recommendation; Simon may reverse it). Deleting a started session still discards its logged sets,
+as the slide-to-delete question says. Older shapes, the first cut of 6 included, are converted on
+every way in. Shipped in `e51fea88`.
+
+**[ ] Waits for Simon:**
+- **A. Does a session keep its own "done"?** Done now: one `status` (scheduled, cancelled, done)
+  instead of two flags, so a session can no longer be both. Still two places for one fact: the
+  session's `done` + `duration` and its programs' `done` + `duration`; a group finished on one tab
+  can still show them apart. Deriving the session's done from its programs (`status` then only
+  scheduled or cancelled) removes that, and costs: an old session whose record found no single
+  session in the conversion (two candidates on one day) shows as never held, and so does a session
+  finished with nothing logged. Claude's recommendation: keep the session's own `done`.
+- **B. No-show (item 6).** Finish no longer deletes the program of a participant who logged nothing;
+  it waits unscheduled. No attendance is written: nothing logged is not proof of absence. Open:
+  where the trainer says "did not come", and whether a no-show uses up a package session by default.
+- **C. Deleting a one-off session removes its row** (`sessionsAfterRemoving`), while the ruling of
+  2026-10-02 says a cancelled slot is marked `cancelled`. Its programs are unscheduled first, so
+  nothing points at the missing row. Keep the row as `cancelled` instead?
+
+**Found in the deeper review, not fixed in this change:**
+- A date taken as the first ten characters of an instant is the day in UTC, so after midnight local
+  time it is the day before: `controllers/planPeekController.js` (the peek's day),
+  `domain/clientSessionNeighbours.js` (`dayOf`), `modules/clients/clientsView.js` (erasure date),
+  `modules/clients/clientConsentSection.js` and `data/clientConsent.js` (consent date),
+  `data/clientDataExport.js` (`exportedAt`). Fixed in this change for the export's sessions, plan
+  changes and trainings and for the AI summary.
+- The client's data export calls a cancelled session "planned" (`export_doc_session_planned`); the
+  status now says cancelled.
+- A session still carries its time three ways (`startDate`, the `time` text, the `day` bucket) and
+  the legacy `titles`. Dropping them now would touch every reader of `day` and `time`; left.
+- `data/backupFile.js`'s header still speaks of P and of `SCHEMA_P` as schema 4 plus `startDate`.
+- `data/recordReferences.js` is a cycle check only; no write checks that a reference exists
+  (`data/recordDependencies.js` is consulted by demo removal alone).
 
 ## 96. [ ] Predstaviti Simonu najdbe in meritve raziskovalnega testiranja 2026-09-30
 
