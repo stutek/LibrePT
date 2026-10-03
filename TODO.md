@@ -4630,6 +4630,16 @@ agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pa
 
 **Predlog:** vrstica naj ima ime treninga, iz katerega je načrt ali signal nastal, in pri več signalih naj loči treninge — opaženo `2026-10-03 05:24:02.278` na različici `e51fea88`, 320 × 680, sl.
 
+### 80.178 [ ] P2 — Pri 320 pikah je ime odprtega treninga široko 18 pik: v glavi podloge piše »N…«
+
+**Scenarij in koraki:** 320 × 680. Trening »Živi trening« je začet (Bojan Kosmatinec). Nov trening »Nova ura« (Aleksandra Vrhovnik, 09:00–10:00) → kartica »Nova ura« → »Začni trening« → okno »Trening se je začel izven urnika« → »Ohrani urnik«.
+
+**Opaženo:** v glavi podloge stojita zeleni gumb »Danes« (oznaka »Nazaj na današnji trening«) in števec »04h 31m«. Ime treninga in vrstica »Danes · 09:00 - 10:00 · Park« dobita po 18 pik širine (`.clipboard-title-name`: potrebnih 61, na voljo 18; `.clipboard-title-when`: 147 proti 18). Na zaslonu piše »N…« in »D…«. Gumb »Danes« je izmerjen na 98 pik.
+
+**Težava in vpliv:** ko trener vodi dva treninga isti dan in odpre drugega, ne vidi, kateri trening je odprt, ne njegovega imena ne ure. Pri 390 pikah ni preizkušeno.
+
+**Predlog:** ime treninga naj ima prednost pred gumbom »Danes« (gumb naj se skrči na ikono ali pade v drugo vrstico) — opaženo `2026-10-03 05:28:41.190` na različici `e51fea88`, 320 × 680, sl.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
