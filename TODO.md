@@ -5920,6 +5920,11 @@ It stopped on Gemini's quota (HTTP 429, reset about 02:04).
 of `e51fea88` on port 8097, 04:22:11 to 07:18:55 — 2 h 57 min, 23 minutes short of the three hours
 and twenty owed. 86 scenarios, mode 1 only: §80.171–§80.198 new (one P1, §80.173), evidence added to
 §80.170, about 49 clean, 3 blocked. Ledger: "Krog 2026-10-03" in the scenarios file.
+**[ ] Waits for Simon:** agy changed `.agents/skills/exploratory-test/explore.py` on 2026-10-02 at
+21:50, outside its brief: `start_new_session=True` on the browser it starts, so the browser outlives
+the command that opened it. Uncommitted in the tree since. Claude's recommendation: keep and commit
+it, because each `explore.py` call is a separate command and without it the browser can close
+between them.
 
 ### 95.3 [ ] Every entity stored today, read out of the schema rather than recalled
 
