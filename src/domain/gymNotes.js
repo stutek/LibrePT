@@ -24,13 +24,13 @@ const nameKey = (name) => (name || "").trim().toLowerCase();
 /** This client's unanswered gym notes, the ones about movements in `planExerciseNames` first.
  *
  * `notes` are exercise notes as data/trainingRecords.js reads them; an unanswered one is a note the
- * next plan waits for (`resolved: false`). Returns them as given plus `inThisPlan`, so a caller can
+ * next plan waits for (`review: "pending"`). Returns them as given plus `inThisPlan`, so a caller can
  * mark them without re-deriving the match — the panel says WHY an entry is at the top, or the
  * ordering reads as arbitrary. */
 export function gymNotesForPlan({ notes, clientId, planExerciseNames } = {}) {
   const planned = new Set((planExerciseNames || []).map(nameKey));
   return (notes || [])
-    .filter((note) => note.clientId === clientId && note.resolved === false)
+    .filter((note) => note.clientId === clientId && note.review === "pending")
     .map((note) => ({ ...note, inThisPlan: planned.has(nameKey(note.exerciseName)) }))
     .sort((a, b) => {
       if (a.inThisPlan !== b.inThisPlan) return a.inThisPlan ? -1 : 1;

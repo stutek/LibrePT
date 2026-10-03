@@ -12,7 +12,7 @@ import {
   removeVersionScoped,
   writeVersionScoped,
 } from "../../data/storageNamespace.js";
-import { dropPlansOfRemovedClients } from "../../data/trainingRecords.js";
+import { allPrograms, unscheduleRemovedClients } from "../../data/trainingRecords.js";
 import { clientNameWords, clientNamesIn } from "../../domain/clientNameWords.js";
 import {
   BUSY_ELSEWHERE,
@@ -267,8 +267,10 @@ async function confirmScheduleConflictIfNeeded(t) {
   return askInApp({ t, message: t("schedule_conflict_confirm"), confirmKey: "dialog_save_anyway" });
 }
 
-// Confirms removing a participant who already has recorded feedback data on this session — returns
-// false only if the trainer explicitly cancels the confirm dialog (submit should then abort).
+// Confirms removing a participant who already trained in this session: it was held, or their program
+// in it is running. Returns false only if the trainer explicitly cancels the confirm dialog (submit
+// should then abort). It used to read `status: "completed"`, `loggedHistory` and `hasFeedback`,
+// which nothing writes, so it never asked.
 async function confirmParticipantRemovalIfNeeded(sessionId, deps, clientRoutines) {
   if (!sessionId) return true;
   const state = deps.getState();
@@ -278,11 +280,18 @@ async function confirmParticipantRemovalIfNeeded(sessionId, deps, clientRoutines
   const removedParticipants = existingSession.participants.filter(
     (pid) => !selectedClientIds.includes(pid),
   );
+  const trainedHere = new Set(
+    allPrograms(state)
+      .filter(
+        (program) =>
+          program.sessionId === sessionId &&
+          (program.status === "live" || program.status === "done"),
+      )
+      .map((program) => program.clientId),
+  );
   const hasFeedbackRisk =
     removedParticipants.length > 0 &&
-    (existingSession.status === "completed" ||
-      existingSession.loggedHistory ||
-      existingSession.hasFeedback);
+    (existingSession.status === "done" || removedParticipants.some((id) => trainedHere.has(id)));
   if (!hasFeedbackRisk) return true;
   const { t } = deps;
   const message = t("confirm_remove_participant_with_feedback");
@@ -505,7 +514,7 @@ function commitRealSession(
     claimFirstEvening(buildSessionRecord({ ...identity, startTime, clientRoutines }), series),
   );
   const written = state.sessions.find((session) => session.id === sessionId);
-  if (written) dropPlansOfRemovedClients(state, sessionId, written.participants);
+  if (written) unscheduleRemovedClients(state, sessionId, written.participants);
   deps.saveToLocalStorage?.();
   deps.rerenderSessions?.();
 
@@ -1213,7 +1222,7 @@ function renderRepeatSection(targetSession, t) {
 function renderSlotLock(targetSession, t) {
   const locked = Boolean(
     targetSession &&
-      (targetSession.completed || isRunningOn(deps.getActiveSession?.(), targetSession.id)),
+      (targetSession.status === "done" || isRunningOn(deps.getActiveSession?.(), targetSession.id)),
   );
   const note = document.getElementById("setup-slot-locked-note");
   if (note) {

@@ -11,6 +11,7 @@
 //
 // Pure: a client record and the programs (data/trainingRecords.js) in, a string out.
 
+import { localDateString } from "../data/calendarDay.js";
 import { exerciseRecordsOf, isSkippedRecord } from "./sessionItemRecord.js";
 
 const RECENT_SESSIONS = 10;
@@ -35,7 +36,8 @@ export function aiClientSummary(client, programs) {
     .slice(0, RECENT_SESSIONS)
     .map((program) => {
       const lines = exerciseRecordsOf(program.exercises || []).map(exerciseLine);
-      const day = String(program.performedAt || "").slice(0, 10);
+      // The local calendar day: the instant's first ten characters are the day in UTC.
+      const day = program.performedAt ? localDateString(program.performedAt) : "";
       return [`### Session on ${day}`, ...lines].join("\n");
     })
     .join("\n\n");

@@ -43,7 +43,7 @@ function sessionsAttendedBy(state, clientId) {
       groupSize: (session.participants || []).length,
       // Whether it happened. The list is a record the client reads as attendance, so a Thursday the
       // trainer has booked and a Thursday they trained cannot look the same on it.
-      completed: Boolean(session.completed),
+      completed: session.status === "done",
     }));
 }
 
@@ -194,7 +194,9 @@ function sessionLines(sessions, w) {
       String(left.startDate || "").localeCompare(String(right.startDate || "")),
     )
     .map((session) => {
-      const when = session.startDate ? session.startDate.substring(0, 10) : session.day || "—";
+      // The local calendar day: the first ten characters of the instant are the day in UTC, which
+      // put a session at half past midnight on the day before.
+      const when = session.startDate ? localDateString(session.startDate) : session.day || "—";
       const group =
         session.groupSize > 1 ? ` · ${w("export_doc_group", { count: session.groupSize })}` : "";
       const state = w(session.completed ? "export_doc_session_held" : "export_doc_session_planned");
@@ -210,7 +212,7 @@ function sessionLines(sessions, w) {
 function planChangeLines(planUpdates, tagText, tagNote) {
   return (planUpdates || [])
     .map((update) => {
-      const when = (update.date || "").substring(0, 10);
+      const when = update.date ? localDateString(update.date) : "";
       const tag = tagText(update.tag);
       const parts = [when, update.exerciseName, tag, tagNote(update.tag)].filter(Boolean);
       return `- ${parts.join(" · ")}`;
@@ -222,7 +224,7 @@ function trainingLines(history, w, tagText) {
   const lines = [];
   for (const record of history.filter((entry) => !entry.isPlanning)) {
     const title = record.routineName || w("export_doc_session");
-    lines.push(`### ${(record.date || "").substring(0, 10)} — ${title}`);
+    lines.push(`### ${record.date ? localDateString(record.date) : ""} — ${title}`);
     for (const exercise of record.exercises || []) {
       lines.push(`- **${exercise.name || exercise.type || "item"}**`);
       const sets = renderSets(exercise.sets, w);

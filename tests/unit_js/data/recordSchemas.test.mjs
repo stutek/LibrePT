@@ -333,7 +333,7 @@ test("the records of one group training validate clean in the new session model"
       // Unscheduled: Cene's plan waits for a new date.
       { id: "p3", clientId: "cene", status: "planned", exercises: [squat] },
     ],
-    groupSharedPrograms: [{ id: "g1", sessionId: "s1", clientIds: ["ana", "bojan"] }],
+    groupSharedPrograms: [{ id: "grp-p1", programIds: ["p1", "p2"] }],
     sessionAttendance: [
       {
         id: "a1",
@@ -352,7 +352,8 @@ test("the records of one group training validate clean in the new session model"
         clientId: "ana",
         programId: "p1",
         programItemId: "i1",
-        tag: "Too Easy - Increase Load",
+        tag: "too_easy",
+        review: "pending",
       },
       {
         id: "n2",
@@ -360,6 +361,7 @@ test("the records of one group training validate clean in the new session model"
         programId: "p1",
         programItemId: "i1",
         text: "Knees in on rep 4.",
+        review: "none",
       },
     ],
     clientNotes: [
@@ -380,6 +382,24 @@ test("the records of one group training validate clean in the new session model"
       );
     }
   }
+});
+
+test("a status outside its words is refused, so a misspelt one cannot hide a training", () => {
+  const program = { id: "p1", clientId: "ana", status: "Done", exercises: [] };
+  assert.deepEqual(m.fieldIssues(program, m.SCHEMA_6.clientPrograms), [
+    '`status` is "Done", expected one of planned, live, done, discarded',
+  ]);
+  const session = { id: "s1", participants: [], startDate: "2026-10-03T08:00:00.000Z" };
+  assert.deepEqual(m.fieldIssues({ ...session, status: "completed" }, m.SCHEMA_6.sessions), [
+    '`status` is "completed", expected one of scheduled, cancelled, done',
+  ]);
+  assert.deepEqual(m.fieldIssues({ ...session, status: "done" }, m.SCHEMA_6.sessions), []);
+  const note = { id: "n1", clientId: "ana", review: "none" };
+  assert.notDeepEqual(
+    m.fieldIssues({ ...note, tag: "Too Easy - Increase Load" }, m.SCHEMA_6.exerciseNotes),
+    [],
+    "a note stores the tag's id, never its English text",
+  );
 });
 
 test("a program item without its own id is refused, because a note could not point at it", () => {

@@ -10,8 +10,8 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { gymNotesForPlan, notesWithGymNote } from "../../../src/domain/gymNotes.js";
 
-// Exercise notes as data/trainingRecords.js reads them: `resolved` false is one the next plan waits
-// for, true one the trainer already acted on.
+// Exercise notes as data/trainingRecords.js reads them: `review: "pending"` is one the next plan
+// waits for, "resolved" one the trainer already acted on.
 const UPDATES = [
   {
     id: "u1",
@@ -19,7 +19,7 @@ const UPDATES = [
     exerciseName: "Barbell Back Squat",
     tag: "Too Hard - Reduce Load",
     createdAt: "2026-08-01T10:00:00.000Z",
-    resolved: false,
+    review: "pending",
   },
   {
     id: "u2",
@@ -28,7 +28,7 @@ const UPDATES = [
     tag: "Form Break - Watch Position",
     text: "hips rise first",
     createdAt: "2026-08-10T10:00:00.000Z",
-    resolved: false,
+    review: "pending",
   },
   {
     id: "u3",
@@ -36,7 +36,7 @@ const UPDATES = [
     exerciseName: "Barbell Bench Press",
     tag: "Too Easy - Increase Load",
     createdAt: "2026-08-12T10:00:00.000Z",
-    resolved: true,
+    review: "resolved",
   },
   {
     id: "u4",
@@ -44,7 +44,7 @@ const UPDATES = [
     exerciseName: "Deadlift",
     tag: "Too Easy - Increase Load",
     createdAt: "2026-08-11T10:00:00.000Z",
-    resolved: false,
+    review: "pending",
   },
 ];
 

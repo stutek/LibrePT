@@ -11,7 +11,9 @@ import { test } from "node:test";
 import {
   historyFromSessionModel,
   matchingSession,
+  noteInCurrentShape,
   sessionModelFromHistory,
+  tagFromText,
 } from "../../../src/data/sessionModelConversion.js";
 
 const SQUAT = { id: "ex-squat", name: "Back Squat" };
@@ -46,7 +48,7 @@ function groupEvening(extra = {}) {
     startDate: "2026-09-10T16:00:00.000Z",
     participants: ["ana", "bojan", "cene"],
     routineId: "r-legs",
-    completed: true,
+    status: "done",
     ...extra,
   };
 }
@@ -86,8 +88,8 @@ test("a group training finds its one session, and each client gets a program and
 test("a session that was not finished, or was cancelled, or on another day, is not matched", () => {
   const record = performed("h-ana", "ana");
   for (const session of [
-    groupEvening({ completed: false }),
-    groupEvening({ cancelled: true }),
+    groupEvening({ status: "scheduled" }),
+    groupEvening({ status: "cancelled" }),
     groupEvening({ startDate: "2026-09-11T16:00:00.000Z" }),
     groupEvening({ participants: ["bojan"] }),
   ]) {
@@ -174,11 +176,51 @@ test("a feedback item and its plan update are one note, linked to the exercise i
       exerciseId: "ex-squat",
       exerciseName: "Back Squat",
       createdAt: "2026-09-10T16:30:00.000Z",
-      tag: "Too Easy - Increase Load",
+      tag: "too_easy",
       text: "flew",
-      resolved: true,
+      review: "resolved",
     },
   ]);
+});
+
+test("a tag is stored by its id, with the remark an older build ran into it kept apart", () => {
+  assert.deepEqual(tagFromText("Too Easy - Increase Load"), { tag: "too_easy", text: undefined });
+  assert.deepEqual(tagFromText("Too Hard - Reduce Load - left knee"), {
+    tag: "too_hard",
+    text: "left knee",
+  });
+  assert.deepEqual(tagFromText("Joint Pain / Discomfort", "wrist"), {
+    tag: "joint_pain",
+    text: "wrist",
+  });
+});
+
+test("a tag no build knows any more becomes a plain note that keeps its words", () => {
+  // The demo's former "Form Break - Depth Alert": nothing the trainer saw may be lost.
+  assert.deepEqual(tagFromText("Form Break - Depth Alert", "knees in"), {
+    tag: "note",
+    text: "Form Break - Depth Alert - knees in",
+  });
+});
+
+test("a note from the first cut of schema 6 is read into the current fields", () => {
+  const first = {
+    id: "n1",
+    clientId: "ana",
+    tag: "Too Easy - Increase Load",
+    text: "flew",
+    resolved: false,
+  };
+  assert.deepEqual(noteInCurrentShape(first), {
+    id: "n1",
+    clientId: "ana",
+    tag: "too_easy",
+    text: "flew",
+    review: "pending",
+  });
+  assert.equal(noteInCurrentShape({ id: "n2", clientId: "ana", tag: "Note" }).review, "none");
+  const current = { id: "n3", clientId: "ana", tag: "too_hard", review: "resolved" };
+  assert.equal(noteInCurrentShape(current), current, "a current note comes back as it is");
 });
 
 test("a plan update written outside a session is a note the next plan acts on", () => {
@@ -195,7 +237,7 @@ test("a plan update written outside a session is a note the next plan acts on", 
     ],
     exercises: [PLANK],
   });
-  assert.equal(exerciseNotes[0].resolved, false);
+  assert.equal(exerciseNotes[0].review, "pending");
   assert.equal(exerciseNotes[0].exerciseId, "ex-plank");
   assert.equal(exerciseNotes[0].programId, undefined);
 });
@@ -226,12 +268,26 @@ test("converting the same data twice gives the same records", () => {
   assert.deepEqual(sessionModelFromHistory(input), sessionModelFromHistory(input));
 });
 
+// The old shape is what the client's data export is written in (clientDataExport.js), so a known
+// tag must come back as the text it went in as.
 test("back to the old shape, nothing an older build shows is lost or changed", () => {
   const history = [
     performed("h-ana", "ana", {
       feedback: [
-        { id: "n1", clientId: "ana", exerciseName: "Back Squat", tag: "Too Easy", note: "" },
-        { id: "n2", clientId: "ana", exerciseName: "Back Squat", tag: "Pain", note: "left knee" },
+        {
+          id: "n1",
+          clientId: "ana",
+          exerciseName: "Back Squat",
+          tag: "Too Easy - Increase Load",
+          note: "",
+        },
+        {
+          id: "n2",
+          clientId: "ana",
+          exerciseName: "Back Squat",
+          tag: "Too Hard - Reduce Load",
+          note: "left knee",
+        },
       ],
     }),
     performed("h-draft", "bojan", {
@@ -248,7 +304,7 @@ test("back to the old shape, nothing an older build shows is lost or changed", (
       clientName: "ana",
       date: "2026-09-10T16:30:00.000Z",
       exerciseName: "Back Squat",
-      tag: "Too Easy",
+      tag: "Too Easy - Increase Load",
       resolved: false,
     },
     {
@@ -257,7 +313,7 @@ test("back to the old shape, nothing an older build shows is lost or changed", (
       clientName: "ana",
       date: "2026-09-10T16:31:00.000Z",
       exerciseName: "Back Squat",
-      tag: "Pain - left knee",
+      tag: "Too Hard - Reduce Load - left knee",
       resolved: true,
     },
     {
@@ -266,7 +322,7 @@ test("back to the old shape, nothing an older build shows is lost or changed", (
       clientName: "cene",
       date: "2026-09-01T10:00:00.000Z",
       exerciseName: "Plank",
-      tag: "Pain - wrist",
+      tag: "Joint Pain / Discomfort - wrist",
       resolved: false,
     },
   ];
@@ -316,7 +372,9 @@ test("a demo training stays marked as demo data, so removing the demo data still
 
 test("a feedback item written without an id is kept, under the same id every time", () => {
   const record = performed("h-ana", "ana", {
-    feedback: [{ clientId: "ana", exerciseName: "Back Squat", tag: "Pain", note: "knee" }],
+    feedback: [
+      { clientId: "ana", exerciseName: "Back Squat", tag: "Too Hard - Reduce Load", note: "knee" },
+    ],
   });
   const first = sessionModelFromHistory({ history: [record] }).exerciseNotes;
   const second = sessionModelFromHistory({ history: [record] }).exerciseNotes;

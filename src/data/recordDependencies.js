@@ -52,8 +52,8 @@ const DEPENDENCIES = {
     dependencies({ clients: ids(record.clientId), sessions: ids(record.sessionId) }),
   sessionAttendance: (record) =>
     dependencies({ clients: ids(record.clientId), sessions: ids(record.sessionId) }),
-  groupSharedPrograms: (record) =>
-    dependencies({ clients: ids(record.clientIds), sessions: ids(record.sessionId) }),
+  // A group is its programs; who and where are on them.
+  groupSharedPrograms: (record) => dependencies({ clientPrograms: ids(record.programIds) }),
   sessions: (record) =>
     dependencies({ clients: ids(record.participants), routines: ids(record.routineId) }),
   circuits: holdsExercises,

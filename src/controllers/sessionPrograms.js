@@ -15,7 +15,7 @@ import { newRecordId } from "../data/recordId.js";
 import { COMMON_RECORD_FIELDS } from "../data/recordSchemas.js";
 import { assignPositions, orderedItems } from "../data/sessionItemOrder.js";
 import {
-  discardSessionPrograms,
+  discardPrograms,
   feedbackFromNotes,
   groupsOfSessions,
   notesForProgram,
@@ -132,15 +132,11 @@ export function savePlanEdit(clientId = getActiveSession()?.activeClientId) {
   saveSession(session);
 }
 
-/** A session given up before it finished: its programs go, with the notes no next plan waits for. */
+/** A plan the trainer threw away: its programs are kept as discarded, which no list shows. */
 export function discardSession(session) {
   const { state } = getAppDeps();
   if (!state || !session) return;
-  discardSessionPrograms(
-    state,
-    Object.values(session.programIds || {}),
-    slotIdsOf(session)[0] ?? null,
-  );
+  discardPrograms(state, Object.values(session.programIds || {}));
 }
 
 /**

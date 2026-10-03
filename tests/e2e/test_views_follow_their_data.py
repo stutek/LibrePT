@@ -61,7 +61,7 @@ def test_a_signal_logged_in_a_session_is_in_the_drawer_when_the_session_ends(
         """async () => {
           const store = await import(new URL('data/stateStore.js', document.baseURI).href);
           for (const note of store.getState().exerciseNotes || []) {
-            if (typeof note.resolved === 'boolean') note.resolved = true;
+            if (note.review === 'pending') note.review = 'resolved';
           }
           store.saveToLocalStorage();
           const queue = await import(new URL('data/writeQueue.js', document.baseURI).href);

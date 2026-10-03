@@ -39,7 +39,7 @@ def _a_scheduled_session(page):
         """async () => {
           const store = await import(new URL('data/stateStore.js', document.baseURI).href);
           const session = (store.getState().sessions || []).find(
-            (row) => (row.participants || []).length > 0 && !row.completed,
+            (row) => (row.participants || []).length > 0 && row.status !== 'done',
           );
           return session ? { id: session.id, clientId: session.participants[0] } : null;
         }"""

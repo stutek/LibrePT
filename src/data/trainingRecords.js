@@ -13,7 +13,12 @@
 // Injected dependencies: none — every function takes the `state` it reads or writes.
 
 import { libraryExercises } from "./exerciseLibrary.js";
-import { sessionModelFromHistory } from "./sessionModelConversion.js";
+import {
+  feedbackForHistory,
+  groupIdFor,
+  sessionModelFromHistory,
+  textOfTag,
+} from "./sessionModelConversion.js";
 
 function programs(state) {
   if (!Array.isArray(state.clientPrograms)) state.clientPrograms = [];
@@ -70,7 +75,8 @@ export function programById(state, id) {
 export function openProgramsOfSessions(state, sessionIds) {
   const ids = new Set(sessionIds.filter(Boolean));
   return allPrograms(state).filter(
-    (program) => ids.has(program.sessionId) && program.status !== "done",
+    (program) =>
+      ids.has(program.sessionId) && (program.status === "planned" || program.status === "live"),
   );
 }
 
@@ -84,9 +90,14 @@ export function livePrograms(state) {
 /** Which clients share one program in the sessions named: one list of client ids per group. */
 export function groupsOfSessions(state, sessionIds) {
   const ids = new Set(sessionIds.filter(Boolean));
+  const clientOf = new Map(
+    allPrograms(state)
+      .filter((program) => ids.has(program.sessionId))
+      .map((program) => [program.id, program.clientId]),
+  );
   return (state?.groupSharedPrograms || [])
-    .filter((group) => ids.has(group.sessionId))
-    .map((group) => [...group.clientIds]);
+    .filter((group) => group.programIds.some((id) => clientOf.has(id)))
+    .map((group) => group.programIds.map((id) => clientOf.get(id)).filter(Boolean));
 }
 
 /** The notes written on one program's exercises, in the order they were written. */
@@ -98,7 +109,7 @@ export function notesForProgram(state, programId) {
  *  taken in, which is the order the Pending Review screen lists them. */
 export function pendingNotes(state) {
   return allExerciseNotes(state)
-    .filter((note) => note.resolved === false)
+    .filter((note) => note.review === "pending")
     .sort((a, b) => String(a.createdAt || "").localeCompare(String(b.createdAt || "")));
 }
 
@@ -109,21 +120,17 @@ export function noteById(state, id) {
 /**
  * A note's tag as one line, with the trainer's remark after it: the form the feedback form has
  * always stored and every screen has shown, so a reader of the tag (feedbackTags.js) still finds the
- * known tag first and the remark after its separator.
+ * known tag first and the remark after its separator. The tag is its English text, as that reader
+ * expects, never the id the note stores.
  */
 export function noteTagLine(note) {
-  return note?.text ? `${note.tag} - ${note.text}` : note?.tag || "";
+  const tag = textOfTag(note?.tag);
+  return note?.text ? `${tag} - ${note.text}` : tag;
 }
 
 /** Notes in the shape a live session keeps its feedback in, for a program reopened on the clipboard. */
 export function feedbackFromNotes(noteList) {
-  return (noteList || []).map((note) => ({
-    id: note.id,
-    clientId: note.clientId,
-    exerciseName: note.exerciseName,
-    tag: note.tag,
-    note: note.text || "",
-  }));
+  return (noteList || []).map(feedbackForHistory);
 }
 
 // --- Writes. What the clipboard hands in goes through the old shape and the one conversion. ---
@@ -149,18 +156,18 @@ function upsertNotes(state, incoming) {
 // held copy's tag and remark stay. A copy filed in a finished program brings the program, the item
 // and the remark apart from the tag, and leaves whether a plan waits for it as it was.
 function merged(held, note) {
-  if (typeof note.resolved === "boolean") {
+  if (note.review !== "none") {
     return defined({
       ...note,
       ...held,
-      resolved: note.resolved,
+      review: note.review,
       createdAt: note.createdAt ?? held.createdAt,
     });
   }
   return defined({
     ...held,
     ...note,
-    resolved: held.resolved,
+    review: held.review,
     createdAt: held.createdAt ?? note.createdAt,
   });
 }
@@ -215,8 +222,9 @@ export function recordTrainings(state, records, { sessionIds = [] } = {}) {
  * `status` is "planned" while the session is staged or is a plan with no session, "live" once the
  * trainer tapped Start. `feedback` is what the session holds on this client; it becomes the notes
  * filed on the program. A seed stamp on the entry (`testData`, `seededDemo`) is carried onto the
- * program and its notes, as the conversion carries it from any record. `groups` are the clients sharing one program in session `sessionId`, as
- * lists of client ids; they replace the groups that session had.
+ * program and its notes, as the conversion carries it from any record. `groups` are the clients
+ * sharing one program, as lists of client ids among these entries; they replace every group a
+ * program of these entries was in. They are written when `sessionId` is named or groups are given.
  */
 export function saveSessionPrograms(
   state,
@@ -240,25 +248,52 @@ export function saveSessionPrograms(
       notesFiledOn(model, program.id),
     );
   });
-  if (sessionId) {
+  if (sessionId || shared.length > 0) {
+    const programOf = new Map(entries.map((entry) => [entry.clientId, entry.id]));
+    const ours = new Set(programOf.values());
+    const formed = shared
+      .map((clientIds) => clientIds.map((clientId) => programOf.get(clientId)).filter(Boolean))
+      .filter((programIds) => programIds.length > 1)
+      .map((programIds) => ({ id: groupIdFor(programIds), programIds }));
     state.groupSharedPrograms = groups(state)
-      .filter((group) => group.sessionId !== sessionId)
-      .concat(
-        shared.map((clientIds, index) => ({
-          id: `${sessionId}-group-${index}`,
-          sessionId,
-          clientIds: [...clientIds],
-        })),
-      );
+      .filter((group) => !group.programIds.some((id) => ours.has(id)))
+      .concat(formed);
   }
 }
 
-/** A session discarded before it finished: its programs go (removePrograms), and so do its groups. */
-/** A client taken off a booked session takes their plan for it along. A program already running or
- *  done is a record of work and stays. */
-export function dropPlansOfRemovedClients(state, sessionId, participants) {
+function hasExercises(program) {
+  return (program.exercises || []).some((item) => item?.type !== "rest");
+}
+
+/**
+ * Take programs off their session. **A program is never deleted** (Simon, 2026-10-03): it is the
+ * trainer's work, and nothing the app removed could be brought back. It waits as an unscheduled plan,
+ * as a cancelled client's plan does (ruled 2026-10-02). One with no exercise in it is discarded
+ * instead: as a plan it would only add one nobody wrote to the feed's count.
+ */
+export function unschedulePrograms(state, ids) {
+  const moved = new Set(ids);
+  state.clientPrograms = programs(state).map((program) => {
+    if (!moved.has(program.id)) return program;
+    const { sessionId: _sessionId, startedAt: _startedAt, ...rest } = program;
+    return { ...rest, status: hasExercises(program) ? "planned" : "discarded" };
+  });
+}
+
+/** Programs the trainer threw away. Kept, with status "discarded", which no list shows; their notes
+ *  and groups stay with them. */
+export function discardPrograms(state, ids) {
+  const gone = new Set(ids);
+  state.clientPrograms = programs(state).map((program) =>
+    gone.has(program.id) ? { ...program, status: "discarded" } : program,
+  );
+}
+
+/** A client taken off a booked session: their plan for it waits unscheduled. A program already
+ *  running or done is a record of work in that session and stays on it. */
+export function unscheduleRemovedClients(state, sessionId, participants) {
   const kept = new Set(participants || []);
-  const gone = allPrograms(state)
+  const moved = allPrograms(state)
     .filter(
       (program) =>
         program.sessionId === sessionId &&
@@ -266,14 +301,7 @@ export function dropPlansOfRemovedClients(state, sessionId, participants) {
         !kept.has(program.clientId),
     )
     .map((program) => program.id);
-  if (gone.length > 0) removePrograms(state, gone);
-}
-
-export function discardSessionPrograms(state, programIds, sessionId = null) {
-  removePrograms(state, programIds);
-  if (sessionId) {
-    state.groupSharedPrograms = groups(state).filter((group) => group.sessionId !== sessionId);
-  }
+  if (moved.length > 0) unschedulePrograms(state, moved);
 }
 
 function notesFiledOn(model, programId) {
@@ -294,21 +322,8 @@ function storeProgram(state, program, filed) {
   const kept = new Set(filed.map((note) => note.id));
   const takenBack = (note) => note.programId === program.id && !kept.has(note.id);
   state.exerciseNotes = notes(state)
-    .filter((note) => !takenBack(note) || typeof note.resolved === "boolean")
+    .filter((note) => !takenBack(note) || note.review !== "none")
     .map((note) => (takenBack(note) ? unfiled(note) : note));
-}
-
-/** Remove programs by id. A note filed on one that the next plan still waits for stays, unfiled; the
- *  others go with the program. Attendance stays: the client still came. */
-export function removePrograms(state, ids) {
-  const gone = new Set(ids);
-  state.clientPrograms = programs(state).filter((program) => !gone.has(program.id));
-  state.exerciseNotes = notes(state)
-    .filter((note) => !gone.has(note.programId) || typeof note.resolved === "boolean")
-    .map((note) => (gone.has(note.programId) ? unfiled(note) : note));
-  state.sessionAttendance = attendance(state).map((row) =>
-    gone.has(row.programId) ? unfiled(row) : row,
-  );
 }
 
 /** A note the next plan waits for, in the shape the plan-update builders make. */
@@ -318,7 +333,7 @@ export function addPendingNote(state, update) {
 
 export function resolveNote(state, id) {
   const note = notes(state).find((entry) => entry.id === id);
-  if (note) note.resolved = true;
+  if (note) note.review = "resolved";
 }
 
 /** Remove notes the next plan waits for. One already filed in a finished program stays there, as a
@@ -327,9 +342,5 @@ export function removePendingNotes(state, ids) {
   const gone = new Set(ids);
   state.exerciseNotes = notes(state)
     .filter((note) => !gone.has(note.id) || note.programId)
-    .map((note) => {
-      if (!gone.has(note.id)) return note;
-      const { resolved: _resolved, ...kept } = note;
-      return kept;
-    });
+    .map((note) => (gone.has(note.id) ? { ...note, review: "none" } : note));
 }

@@ -83,7 +83,7 @@ export const DEFAULT_SESSIONS = (() => {
       participants: ["c4d6c3b5", "c6f4a597"],
       routineId: "r10d5e6f",
       maxCapacity: 4,
-      completed: true,
+      status: "done",
     },
     {
       id: DEMO_GROUP_SESSION_ID,
@@ -102,7 +102,7 @@ export const DEFAULT_SESSIONS = (() => {
       participants: ["c8b28799"],
       routineId: "r14d5e6f",
       maxCapacity: 1,
-      completed: true,
+      status: "done",
     },
     // Deliberately OVERLAPS "Group Strength & Conditioning" above, in the same slot and venue: a
     // trainer running a group while one client works a separate rehab plan alongside it. That is
@@ -210,7 +210,7 @@ export const DEFAULT_SESSIONS = (() => {
       maxCapacity: 1,
       day: "tomorrow",
     },
-    // Every seeded session whose slot is behind us is marked `completed`, these two included
+    // Every seeded session whose slot is behind us is marked `status: "done"`, these two included
     // (reported 2026-09-11). An unfinished past session is not a neutral record: the board reads it
     // as a session still waiting to be run and puts a red "Overdue 25h" on it. That is a true thing
     // to say about a trainer's own forgotten evening and a false one to say about a sandbox built
@@ -225,7 +225,7 @@ export const DEFAULT_SESSIONS = (() => {
       routineId: "r10d5e6f",
       maxCapacity: 2,
       day: "yesterday",
-      completed: true,
+      status: "done",
     },
     {
       id: "s13f2e3d",
@@ -237,7 +237,7 @@ export const DEFAULT_SESSIONS = (() => {
       routineId: "r11d5e6f",
       maxCapacity: 3,
       day: "yesterday",
-      completed: true,
+      status: "done",
     },
     {
       id: "s14f2e3d",
@@ -249,7 +249,7 @@ export const DEFAULT_SESSIONS = (() => {
       routineId: "r14d5e6f",
       maxCapacity: 1,
       day: "yesterday",
-      completed: true,
+      status: "done",
     },
     {
       id: "s15f2e3d",
@@ -281,5 +281,6 @@ export const DEFAULT_SESSIONS = (() => {
     // everything that asks what a seeded session is — the provenance stamp, a backup, a restore —
     // reads this one export.
     ...DEFAULT_SERIES_PAST_SESSIONS,
-  ];
+    // Every session carries a status (schema 6); one not marked "done" above is still to come.
+  ].map((session) => ({ status: "scheduled", ...session }));
 })();

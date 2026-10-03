@@ -110,7 +110,7 @@ def test_a_cancelled_evening_stays_gone(page, local_server):
               from: '2000-01-01',
               to: '2100-01-01',
             })
-            .filter((s) => s.occurrenceDate === state.sessions.find((row) => row.cancelled).occurrenceDate);
+            .filter((s) => s.occurrenceDate === state.sessions.find((row) => row.status === 'cancelled').occurrenceDate);
         }"""
     )
 

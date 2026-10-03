@@ -556,7 +556,9 @@ SESSION_WITH_FEEDBACK = """[
     location: 'Studio A',
     participants: ['c1', 'c2'],
     routineId: 'r1',
-    hasFeedback: true,
+    // Held: the people on it trained. (It used to say `hasFeedback: true`, a field nothing in the
+    // app writes, so the question was reached only in this test.)
+    status: 'done',
   },
 ]"""
 

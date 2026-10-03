@@ -101,7 +101,7 @@ export const DEFAULT_SERIES_PAST_SESSIONS = (() => {
         participants: [...PARTICIPANTS],
         routineId: ROUTINE_ID,
         maxCapacity: MAX_CAPACITY,
-        completed: true,
+        status: "done",
       });
     }
     cursor.setDate(cursor.getDate() + 1);

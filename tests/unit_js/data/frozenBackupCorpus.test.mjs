@@ -274,8 +274,8 @@ test("a schema 5 backup becomes the session model with nothing lost", () => {
   const notes = Object.fromEntries(r.state.exerciseNotes.map((note) => [note.id, note]));
   assert.equal(r.state.exerciseNotes.length, 2);
   assert.equal(notes.n5easy.programId, "h5ana");
-  assert.equal(notes.n5easy.resolved, false);
-  assert.equal(notes.u5wrist.resolved, true);
+  assert.equal(notes.n5easy.review, "pending");
+  assert.equal(notes.u5wrist.review, "resolved");
 
   assert.equal(r.state.circuits[0].name, "Leg finisher");
   assert.equal(r.state.exercises.find((e) => e.id === "x5sled").source, "Studio Gibanje");

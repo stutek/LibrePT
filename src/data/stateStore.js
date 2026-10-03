@@ -89,9 +89,8 @@ export function emptyState() {
     exercises: [],
     routines: [],
     // The session model (recordSchemas.js, SCHEMA_6): each client's own program, whether they came,
-    // which clients shared one program, and the notes on an exercise or about the person. Read and
-    // written through data/trainingRecords.js; schemas 4 and 5 get `history` and `planUpdates` built
-    // from them at every save (schemaShapes.js).
+    // which programs started as one, and the notes on an exercise or about the person. Read and
+    // written through data/trainingRecords.js.
     clientPrograms: [],
     sessionAttendance: [],
     groupSharedPrograms: [],
@@ -141,13 +140,14 @@ export function seedMockData({ origin = DEMO_ORIGIN } = {}) {
   state.sessionSeries = seeded(DEFAULT_SESSION_SERIES);
   state.notifications = seeded(DEFAULT_MESSAGES);
   // The demo's trainings are written in the old shape, so they read like any older data: converted
-  // once, after the sessions they were run in are in place to be found.
+  // once, after the sessions they were run in are in place to be found. A seed session with no
+  // status is one still to come, and comes back "scheduled".
   const trainings = toDomainState({
     ...state,
     history: seeded(DEFAULT_HISTORY),
     planUpdates: seeded(DEFAULT_PLAN_UPDATES),
   });
-  for (const key of ["clientPrograms", "sessionAttendance", "exerciseNotes"]) {
+  for (const key of ["sessions", "clientPrograms", "sessionAttendance", "exerciseNotes"]) {
     state[key] = trainings[key];
   }
   // `lang` is deliberately UNTOUCHED. It used to be defaulted to "en" here, which made seeding the

@@ -20,7 +20,7 @@ import {
   programById,
   programDate,
   recordTrainings,
-  removePrograms,
+  unschedulePrograms,
 } from "../data/trainingRecords.js";
 import { loggedSetsPerParticipant } from "../domain/loggedSets.js";
 import { buildSessionHistoryRecord } from "../domain/sessionHistoryRecord.js";
@@ -138,6 +138,8 @@ function sessionOfProgram(program, state, t) {
 export function openSessionFromHistory(program, { navigate = true } = {}) {
   const { state, t, navigateToPath } = getAppDeps();
   if (!state || !t) return;
+  // A plan the trainer threw away is kept, never shown again, an old link to it included.
+  if (program?.status === "discarded") return;
   if (openAsItsSession(program, navigate)) return;
   const slotWasHeld = leaveSlot();
   enterSlot(sessionOfProgram(program, state, t), slotWasHeld);
@@ -303,9 +305,9 @@ export function beginWorkoutSession() {
   });
 }
 
-/** The trainer gives the session up: its programs go, so a discarded plan does not come back in the
- *  feed's "unscheduled plans" and a deleted session leaves no plan behind on the board. The notes a
- *  next plan waits for stay. Then the clipboard closes. */
+/** The trainer throws the plan away: its programs are kept as discarded, so it does not come back in
+ *  the feed's "unscheduled plans", and nothing the trainer wrote is deleted. Then the clipboard
+ *  closes. */
 export function cancelWorkoutSession() {
   const activeSession = getActiveSession();
   const { saveToLocalStorage } = getAppDeps();
@@ -317,7 +319,8 @@ export function cancelWorkoutSession() {
 }
 
 // The clipboard empties and the trainer is back on the board. The session's programs are left as
-// they are: finishing has already made them done, and cancelling has already removed them.
+// they are: finishing has already made them done, deleting the session unscheduled them, and
+// throwing a plan away discarded it.
 function closeWorkoutSession() {
   const activeSession = getActiveSession();
   const { navigateToPath, focusSessionsColumn } = getAppDeps();
@@ -340,11 +343,11 @@ function closeWorkoutSession() {
 // "Delete Session" and the confirm said "delete this session", but the card was still on the
 // dashboard afterwards).
 //
-// The programming does not die with the slot. Each participant's plan is kept as an UNSCHEDULED
-// draft, because the trainer authored it once and a session deleted for having slipped its slot is
-// exactly the one that gets re-run on another day; the feed's "unscheduled plans" item is then the
-// route back to it. Logged sets and feedback ARE discarded, which is what the confirm says — a
-// session worth deleting is a session that did not happen.
+// The programming does not die with the slot, and no program is deleted. Each participant's program
+// keeps its id and waits as an UNSCHEDULED plan, because the trainer authored it once and a session
+// deleted for having slipped its slot is exactly the one that gets re-run on another day; the feed's
+// "unscheduled plans" item is then the route back to it. Logged sets and feedback ARE discarded,
+// which is what the confirm says — a session worth deleting is a session that did not happen.
 /** The session's title, ISO date and 24-hour time, in one line: what the question is about. */
 function sessionNameLine(t, sourceSession) {
   const titles = (sourceSession?.titles || []).filter(Boolean).join(", ");
@@ -413,13 +416,20 @@ export function deleteScheduledSession() {
       isPlanning: true,
       title,
     });
-    // Recorded rather than saved as the client's draft: this is a NEW unscheduled plan, and a client
-    // already holding one must keep it (saveDraft's draftId is what keeps the two apart from here
-    // on). An empty plan is not rescued — there is nothing in it to re-run, and it would only
-    // inflate the feed's outstanding-work count with a draft the trainer never wrote.
-    if (plan?.exercises?.length) plans.push(plan);
+    // The program's own id: the plan REPLACES the program it was, as what was prescribed, without
+    // the sets logged against it. A client already holding another unscheduled plan keeps that one
+    // beside it.
+    if (plan?.exercises?.length) {
+      plans.push({ ...plan, id: programIdFor(activeSession, participantId) });
+    }
   }
   recordTrainings(state, plans);
+  // Off the slot. A program with nothing in it is kept as discarded instead: it would only inflate
+  // the feed's outstanding-work count with a plan the trainer never wrote.
+  unschedulePrograms(
+    state,
+    activeSession.participants.map((pId) => activeSession.programIds?.[pId]).filter(Boolean),
+  );
 
   // Deleting an evening of a REPEATING session cannot mean removing the row: the rule would produce
   // that evening again on the next render, and the trainer would watch a session they just deleted
@@ -433,7 +443,8 @@ export function deleteScheduledSession() {
   );
   if (saveToLocalStorage) saveToLocalStorage();
 
-  cancelWorkoutSession();
+  // Closed, not cancelled: cancelling throws the plan away, and these programs were just kept.
+  closeWorkoutSession();
 
   appDeps.renderSessions?.();
   renderNotificationArea();
@@ -480,15 +491,17 @@ function stampSourceSessionsCompleted(activeSession, state, sessionDuration) {
   const sessions = Array.isArray(state.sessions) ? state.sessions : [];
   for (const session of sessions) {
     if (!sessionBelongsToSlot(session, ss)) continue;
-    session.completed = true;
+    session.status = "done";
     session.duration = sessionDuration;
   }
 }
 
 // Every participant who performed something gets their program finished: the live program becomes
 // the done one, under the same id, with skipped work kept alongside it. A planning template stays
-// planned. A participant who did nothing has no training to keep, so their program goes — the
-// record's own shape and that judgement both live in domain/sessionHistoryRecord.js.
+// planned. A participant who did nothing has no training to keep, so their program waits
+// unscheduled, as a cancelled client's does: it is never deleted. No attendance is written for them:
+// nothing logged does not prove they were absent. The record's own shape and that judgement both
+// live in domain/sessionHistoryRecord.js.
 function finishProgramsOfParticipants(activeSession, state, sessionDateISO, sessionDuration) {
   const records = activeSession.participants.map((pId) => {
     const record = buildSessionHistoryRecord({
@@ -506,7 +519,10 @@ function finishProgramsOfParticipants(activeSession, state, sessionDateISO, sess
   // client was on and the client is recorded as having attended. A planning clipboard has no slot.
   recordTrainings(state, records, { sessionIds: slotIdsOf(activeSession) });
   const unperformed = activeSession.participants.filter((_, index) => !records[index]);
-  removePrograms(state, unperformed.map((pId) => activeSession.programIds?.[pId]).filter(Boolean));
+  unschedulePrograms(
+    state,
+    unperformed.map((pId) => activeSession.programIds?.[pId]).filter(Boolean),
+  );
 }
 
 export async function finishWorkoutSession() {

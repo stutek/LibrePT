@@ -17,6 +17,9 @@
 // A field descriptor is `{ required, type }` — `type` one of "string" | "number" | "boolean" |
 // "array" | "object", and an array field may add `items` (a nested field-shape, applied to every
 // element — used by `history.exercises`, whose entries are sessionItemRecord.js's typed items).
+// A field whose every reader compares it with a fixed word adds `values`, the words it may hold:
+// a status written "Done" instead of "done" would otherwise drop a training from every list that
+// asks for "done", with no error anywhere.
 // Deliberately not JSON-Schema-scale: the only two questions the staging guard and the projection
 // tests need answered are "does this field exist in this schema" and "would writing the wrong
 // JS type here be an outright error", not full validation — logging fields, tags and notes are
@@ -282,22 +285,66 @@ export const SCHEMA_5 = {
 // a second copy of the notes inside it. A session (`sessions`) stays the booked slot; what each
 // client does in it is a program of their own.
 //
-// The one numbered schema that does not only ADD: `history` and `planUpdates` are not here. What
-// they held is, in the collections below, and every read of an older store or file converts it
-// (schemaShapes.js), so reading this shape loses nothing an install holds. Schemas 4 and 5 are
-// written from it on every save for as long as they stay live.
+// The one numbered schema that does not only ADD: `history` and `planUpdates` are not here, and a
+// session's `completed` and `cancelled` became its `status`. What they held is, in the fields and
+// collections below, and every read of an older store or file converts it (schemaShapes.js), so
+// reading this shape loses nothing an install holds.
 const { history: _history, planUpdates: _planUpdates, ...SCHEMA_5_WITHOUT_TRAININGS } = SCHEMA_5;
+
+// The words a status field may hold, one list per field. Readers compare with these exact words.
+export const PROGRAM_STATUSES = ["planned", "live", "done", "discarded"];
+export const SESSION_STATUSES = ["scheduled", "cancelled", "done"];
+export const ATTENDANCE_STATUSES = ["attended", "noShow", "cancelled", "sick", "forceMajeure"];
+export const NOTE_REVIEWS = ["none", "pending", "resolved"];
+export const INVITE_STATUSES = ["sent", "answered"];
+
+// The feedback tags, by the id a note stores, with the English text an older build stored instead.
+// The text is how a record from `history`, `planUpdates` or the clipboard is read into a note
+// (sessionModelConversion.js), and how a note is written back for the clipboard and the client's
+// data export, which still speak the text. The words a trainer reads come from the dictionary
+// (domain/feedbackTags.js).
+export const FEEDBACK_TAG_TEXTS = {
+  note: "Note",
+  too_easy: "Too Easy - Increase Load",
+  too_hard: "Too Hard - Reduce Load",
+  form_break: "Form Break - Watch Position",
+  joint_pain: "Joint Pain / Discomfort",
+  progression: "Completed reps easily",
+};
+
+// A session of schema 6: one `status` instead of the two flags `completed` and `cancelled`, which
+// allowed a session that was both. Which programs ran in it is on the programs; the session says
+// only whether it was held, cancelled or is still to come. `startDate` is required: migration step
+// 2 → 3 gave one to every older session, and every writer sets it.
+const {
+  completed: _completed,
+  cancelled: _cancelled,
+  ...SESSION_5_WITHOUT_FLAGS
+} = SCHEMA_5.sessions;
 
 export const SCHEMA_6 = {
   ...SCHEMA_5_WITHOUT_TRAININGS,
+
+  sessions: {
+    ...SESSION_5_WITHOUT_FLAGS,
+    startDate: { required: true, type: "string" },
+    status: { required: true, type: "string", values: SESSION_STATUSES },
+  },
+
+  invites: {
+    ...SCHEMA_5.invites,
+    status: { required: true, type: "string", values: INVITE_STATUSES },
+  },
 
   // ONE CLIENT'S PROGRAM. Every client has their own copy, also inside a group, because each one's
   // performed sets differ; a shared program is a `groupSharedPrograms` row, never one shared record.
   // A program belongs to zero or one session: none while it waits unscheduled, which is where a
   // client's cancellation moves it. One session holds many.
   //
-  // `status` is "planned", "live" or "done". "Unscheduled" is not a status: it is a planned program
-  // with no `sessionId`. `createdAt` is when it was written, `startedAt` when the trainer tapped
+  // `status` is "planned", "live", "done" or "discarded". "Unscheduled" is not a status: it is a
+  // planned program with no `sessionId`. A program is never deleted (Simon, 2026-10-03): one the
+  // trainer throws away is "discarded", kept in the database, the backup and the client's data
+  // export, and shown in no list. `createdAt` is when it was written, `startedAt` when the trainer tapped
   // Start (the running clock counts from it) and `performedAt` when it became done, all ISO-8601 UTC
   // instants; a program converted from `history` may have no session, so it carries its own dates. It also keeps that record's id, so restoring the same old backup twice
   // overwrites rather than duplicates (data/sessionModelConversion.js).
@@ -305,7 +352,7 @@ export const SCHEMA_6 = {
     id: { required: true, type: "string" },
     clientId: { required: true, type: "string" },
     sessionId: { required: false, type: "string" },
-    status: { required: true, type: "string" },
+    status: { required: true, type: "string", values: PROGRAM_STATUSES },
     createdAt: { required: false, type: "string" },
     startedAt: { required: false, type: "string" },
     performedAt: { required: false, type: "string" },
@@ -316,35 +363,39 @@ export const SCHEMA_6 = {
     exercises: { required: true, type: "array", items: PROGRAM_ITEM_SHAPE },
   },
 
-  // WHICH CLIENTS STARTED FROM ONE PROGRAM inside one session, as a circuit groups exercises. Each
-  // member still has their own `clientPrograms` row, their own tab and their own logged sets; this
-  // is only the grouping (ruled 2026-10-02, Simon; domain/participantBinding.js).
+  // WHICH PROGRAMS STARTED AS ONE, as a circuit groups exercises. Each member still has their own
+  // `clientPrograms` row, their own tab and their own logged sets; this is only the grouping (ruled
+  // 2026-10-02, Simon; domain/participantBinding.js). It names the programs, not the clients and a
+  // session: who and where are on the programs, so they cannot disagree with them, and a plan with no
+  // session can hold a group too. The id is made from the members (trainingRecords.js), never from a
+  // place in a list: Drive sync merges by id, and an id taken from a position passes to another group
+  // when one before it is removed.
   groupSharedPrograms: {
     id: { required: true, type: "string" },
-    sessionId: { required: true, type: "string" },
-    clientIds: { required: true, type: "array" },
+    programIds: { required: true, type: "array" },
   },
 
   // ONE CLIENT AT ONE SESSION: whether they came, and whether it uses up a session of their package.
-  // `status` is "attended", "noShow", "cancelled", "sick" or "forceMajeure". `consumesQuota` is
-  // stored, not derived from the status, because the trainer decides when a cancellation counts.
+  // `consumesQuota` is stored, not derived from the status, because the trainer decides when a
+  // cancellation counts.
   sessionAttendance: {
     id: { required: true, type: "string" },
     sessionId: { required: true, type: "string" },
     clientId: { required: true, type: "string" },
     programId: { required: false, type: "string" },
-    status: { required: true, type: "string" },
+    status: { required: true, type: "string", values: ATTENDANCE_STATUSES },
     consumesQuota: { required: true, type: "boolean" },
   },
 
   // WHAT THE TRAINER NOTES ABOUT ONE EXERCISE OF ONE CLIENT'S PROGRAM: a quick signal tapped on the
-  // clipboard ("Too Easy - Increase Load", in `tag`), a written remark, or both. It replaces the
-  // `feedback` array inside a history record and the `planUpdates` collection, which filed the same
-  // note twice under one id. Linked by id, never by exercise name, which changes when an exercise is
-  // renamed; `exerciseName` keeps the name as it was, as a program item does, because a note written
-  // outside a session has no program item to point at. A note that should change the next plan
-  // carries `resolved` (true or false); a note without it only records what happened. No voice-note
-  // field: the coming schema carries none (Simon, 2026-09-27).
+  // clipboard (`tag`, an id of FEEDBACK_TAG_TEXTS), a written remark (`text`), or both. It replaces
+  // the `feedback` array inside a history record and the `planUpdates` collection, which filed the
+  // same note twice under one id. Linked by id, never by exercise name, which changes when an
+  // exercise is renamed; `exerciseName` keeps the name as it was, as a program item does, because a
+  // note written outside a session has no program item to point at. `review` says what the next plan
+  // does with it: "none" — it only records what happened; "pending" — it waits on the Pending Review
+  // screen; "resolved" — the trainer dealt with it there. No voice-note field: the coming schema
+  // carries none (Simon, 2026-09-27).
   exerciseNotes: {
     id: { required: true, type: "string" },
     clientId: { required: true, type: "string" },
@@ -353,9 +404,9 @@ export const SCHEMA_6 = {
     exerciseId: { required: false, type: "string" },
     exerciseName: { required: false, type: "string" },
     createdAt: { required: false, type: "string" }, // ISO-8601 UTC instant, never a local date
-    tag: { required: false, type: "string" },
+    tag: { required: false, type: "string", values: Object.keys(FEEDBACK_TAG_TEXTS) },
     text: { required: false, type: "string" },
-    resolved: { required: false, type: "boolean" },
+    review: { required: true, type: "string", values: NOTE_REVIEWS },
   },
 };
 
@@ -366,10 +417,6 @@ export const SCHEMA_6 = {
 // the NEWEST numbered shape, so reading it never narrows what an install holds.
 export const SCHEMA_PREVIEW = {
   ...SCHEMA_6,
-  sessions: {
-    ...SCHEMA_6.sessions,
-    startDate: { required: true, type: "string" },
-  },
 
   // WHAT THE TRAINER NOTES ABOUT THE CLIENT AS A PERSON, one dated record each, meant to replace the
   // single free-text `clients.notes`, which every edit overwrites. Waits here until a screen writes
@@ -531,6 +578,10 @@ export function fieldIssues(record, shape) {
     const actual = typeOf(record[field]);
     if (actual !== spec.type) {
       issues.push(`\`${field}\` is ${actual}, expected ${spec.type}`);
+      continue;
+    }
+    if (spec.values && !spec.values.includes(record[field])) {
+      issues.push(`\`${field}\` is "${record[field]}", expected one of ${spec.values.join(", ")}`);
       continue;
     }
     if (spec.type === "array" && spec.items) {

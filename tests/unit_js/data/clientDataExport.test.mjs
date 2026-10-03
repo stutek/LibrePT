@@ -48,7 +48,7 @@ function gymState() {
         date: "2026-02-01T09:00:00.000Z",
         routineName: "Upper A",
         exercises: [{ name: "Bench Press", sets: [{ reps: 5, weight: 40, note: "RPE 8" }] }],
-        feedback: [{ id: "f1", tag: "Too Easy", note: "flew through it" }],
+        feedback: [{ id: "f1", tag: "Too Easy - Increase Load", note: "flew through it" }],
       },
       { id: "h2", clientId: "c-marko", clientName: "Marko Novak", exercises: [] },
     ],
@@ -114,7 +114,7 @@ test("the readable rendering answers the question the client actually asked", ()
 
   assert.match(markdown, /# Your training data — Jane Doe/);
   assert.match(markdown, /5 reps @ 40kg — RPE 8/);
-  assert.match(markdown, /\(Too Easy\): flew through it/);
+  assert.match(markdown, /\(Too Easy - Increase Load\): flew through it/);
   assert.match(markdown, /Consent recorded: signed 2026-01-05/);
   // Art. 15(1) wants the rights restated, not just the data dumped.
   assert.match(markdown, /Art\. 17/);

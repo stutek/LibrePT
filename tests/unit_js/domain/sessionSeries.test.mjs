@@ -104,7 +104,7 @@ test("a cancelled occurrence leaves the evening empty and the series alive", () 
     id: "s-cancelled",
     seriesId: "ser1",
     occurrenceDate: "2026-08-25",
-    cancelled: true,
+    status: "cancelled",
   };
 
   const shown = sessionsWithSeries([cancelled], [SERIES], { from: "2026-08-24", to: "2026-08-28" });
@@ -216,7 +216,7 @@ test("deleting an evening of a repeating session keeps it as cancelled", () => {
   const after = sessionsAfterRemoving([occurrence], ["s1"]);
 
   assert.equal(after.length, 1);
-  assert.equal(after[0].cancelled, true);
+  assert.equal(after[0].status, "cancelled");
   assert.deepEqual(
     sessionsWithSeries(after, [SERIES], { from: "2026-08-24", to: "2026-08-26" }),
     [],

@@ -570,15 +570,21 @@ is enough to reconstruct the block without storing a cursor into a session that 
 
 ### The session model — schema 6 (ruled 2026-10-02)
 
-It replaces `history` and `planUpdates`, and a session in progress is stored in it too (§7). A **session** stays the booked slot, and is
-marked `cancelled` when the trainer cancels it. What each client does in it is a **program** of their
-own (`clientPrograms`, status planned, live or done), linked to zero or one session: a client's
-cancellation moves their program off the session, to unscheduled or to another date. Clients who
-share one program are a **group** (`groupSharedPrograms`), and each member still has their own copy.
+It replaces `history` and `planUpdates`, and a session in progress is stored in it too (§7). A **session** stays the booked slot, with one
+`status`: `scheduled`, `cancelled` when the trainer cancels it, or `done` once it was held — never
+the two flags `completed` and `cancelled` of older shapes, which allowed a session that was both.
+What each client does in it is a **program** of their own (`clientPrograms`, status planned, live,
+done or discarded), linked to zero or one session: a client's cancellation moves their program off
+the session, to unscheduled or to another date. **A program is never deleted** (ruled 2026-10-03):
+taken off its session it waits unscheduled, and one the trainer throws away is `discarded`, kept
+and shown in no list. Programs that started as one are a **group** (`groupSharedPrograms`, by
+program id), and each member still has their own copy.
 **Attendance** (`sessionAttendance`) says whether a client came and whether the session uses up one
-of their package. A note about an exercise of a program is an **exercise note** (`exerciseNotes`); a
-note about the person is a **client note** (`clientNotes`, still only in PREVIEW: no screen writes
-it yet). Nothing writes `history` or `planUpdates` any more (schemas 4 and 5 are retired); everything
+of their package. A note about an exercise of a program is an **exercise note** (`exerciseNotes`:
+the tag by its id, `review` none, pending or resolved); a note about the person is a **client note**
+(`clientNotes`, still only in PREVIEW: no screen writes it yet). Every status field lists the words it
+may hold (`values` in [recordSchemas.js](../src/data/recordSchemas.js)), and the validator refuses
+any other. Nothing writes `history` or `planUpdates` any more (schemas 4 and 5 are retired); everything
 read from an older store, backup or sync file is converted on the way in
 ([schemaShapes.js](../src/data/schemaShapes.js)). Feature code reads and
 writes trainings only through [trainingRecords.js](../src/data/trainingRecords.js).
@@ -593,7 +599,7 @@ session. Ids are carried, so the same old backup restored twice overwrites inste
 erDiagram
     SESSION ||--o{ CLIENT_PROGRAM : "holds (zero or one session per program)"
     CLIENT ||--o{ CLIENT_PROGRAM : "has its own copy"
-    SESSION ||--o{ GROUP_SHARED_PROGRAM : "groups clients"
+    CLIENT_PROGRAM }o--o{ GROUP_SHARED_PROGRAM : "started as one"
     SESSION ||--o{ SESSION_ATTENDANCE : "records"
     CLIENT ||--o{ SESSION_ATTENDANCE : "attended or not"
     CLIENT_PROGRAM ||--o{ EXERCISE_NOTE : "noted on one item"
@@ -878,7 +884,7 @@ session in progress is stored nowhere else than in its programs** (§3, "The ses
 for no session, `live` from the moment the trainer taps Start (`startedAt`), and `done` when they
 complete it — the same row, under the same id, never a second one. The session's notes are
 `exerciseNotes` filed on those programs, and participants who started from one plan are a
-`groupSharedPrograms` row for the session: each member keeps their own plan, tab, sets and notes,
+`groupSharedPrograms` row naming their programs: each member keeps their own plan, tab, sets and notes,
 and changing one member's plan takes them out of the group
 ([participantBinding.js](../src/domain/participantBinding.js)). Several sessions may hold live programs at once; the
 clipboard shows one of them.

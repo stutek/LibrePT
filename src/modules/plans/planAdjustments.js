@@ -292,7 +292,7 @@ export function openAdjustmentWizardComponent(updateId, ctx) {
   // Only a note the next plan waits for, resolved or not, is an adjustment; a note that only records
   // what happened in a session has nothing to apply.
   const update = noteById(state, updateId);
-  if (typeof update?.resolved !== "boolean") return;
+  if (!update || update.review === "none") return;
 
   const dialog = document.getElementById("dialog-apply-adjustment");
   if (!dialog) return;

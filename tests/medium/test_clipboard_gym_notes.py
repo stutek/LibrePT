@@ -31,9 +31,9 @@ PLAN = [exercise_item("exA", "Barbell Row"), exercise_item("exB", "Overhead Pres
 SEEDED_NOTES = """
 state.exerciseNotes.push(
   { id: 'n1', clientId: '%s', exerciseName: 'Barbell Row',
-    tag: 'Too Hard - Reduce Load', createdAt: '2026-08-01T10:00:00.000Z', resolved: false },
+    tag: 'too_hard', createdAt: '2026-08-01T10:00:00.000Z', review: 'pending' },
   { id: 'n2', clientId: '%s', exerciseName: 'Deadlift',
-    tag: 'Form Break - Watch Position', createdAt: '2026-08-12T10:00:00.000Z', resolved: false },
+    tag: 'form_break', createdAt: '2026-08-12T10:00:00.000Z', review: 'pending' },
 );
 renderActiveGroupBoard();
 """ % (CLIENT_ID, CLIENT_ID)
@@ -91,7 +91,7 @@ def test_a_note_the_trainer_already_dealt_with_does_not_come_back(page, local_se
         """
 state.exerciseNotes.push(
   { id: 'done', clientId: '%s', exerciseName: 'Barbell Row',
-    tag: 'Too Easy - Increase Load', createdAt: '2026-08-01T10:00:00.000Z', resolved: true },
+    tag: 'too_easy', createdAt: '2026-08-01T10:00:00.000Z', review: 'resolved' },
 );
 renderActiveGroupBoard();
 """

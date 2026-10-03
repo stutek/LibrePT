@@ -9,7 +9,11 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import * as proj from "../../../src/data/recordProjections.js";
 import * as schemas from "../../../src/data/recordSchemas.js";
-import { CONVERTED_COLLECTIONS, toDomainState } from "../../../src/data/schemaShapes.js";
+import {
+  CONVERTED_COLLECTIONS,
+  CONVERTED_FIELDS,
+  toDomainState,
+} from "../../../src/data/schemaShapes.js";
 import * as rec from "../../../src/domain/sessionItemRecord.js";
 
 // Real object literals the app's write path actually builds — mirrors recordSchemas.test.mjs's
@@ -69,8 +73,9 @@ test("schema evolution is additive never drops a field", () => {
   // Expand-first: a field lands in every live schema before the UI that writes it
   // ever ships, so a live schema's declared field set may only grow release over release, never
   // shrink — a field disappearing would silently break every OLDER build still writing it.
-  // The one exception is a collection the conversion carries into newer ones (schema 6's
-  // `history` and `planUpdates`): not dropped, but converted wherever it arrives.
+  // The exceptions are what the conversion carries into newer shapes wherever it arrives (schema
+  // 6's `history` and `planUpdates`, and a session's `completed` and `cancelled`, now its
+  // `status`): not dropped, converted.
   const older = schemas.SCHEMA_4;
   const newer = schemas.SCHEMA_PREVIEW;
   const dropped = [];
@@ -82,6 +87,7 @@ test("schema evolution is additive never drops a field", () => {
       continue;
     }
     for (const field of schemas.fieldNamesOf(older[collection])) {
+      if (CONVERTED_FIELDS[collection]?.includes(field)) continue;
       if (!(field in newerShape)) dropped.push(`${collection}.${field}`);
     }
   }

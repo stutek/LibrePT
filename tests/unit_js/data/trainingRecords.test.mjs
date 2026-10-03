@@ -9,9 +9,8 @@ import {
   addPendingNote,
   allExerciseNotes,
   allPrograms,
-  discardSessionPrograms,
+  discardPrograms,
   draftPrograms,
-  dropPlansOfRemovedClients,
   feedbackFromNotes,
   groupsOfSessions,
   livePrograms,
@@ -25,9 +24,10 @@ import {
   programDate,
   recordTrainings,
   removePendingNotes,
-  removePrograms,
   resolveNote,
   saveSessionPrograms,
+  unschedulePrograms,
+  unscheduleRemovedClients,
 } from "../../../src/data/trainingRecords.js";
 
 function finished(id, clientId, date, extra = {}) {
@@ -148,7 +148,13 @@ test("a draft never overwrites another client's draft or a performed program", (
 
 test("a saved draft keeps the notes the session holds on it", () => {
   const state = {};
-  const note = { id: "n1", clientId: "ana", exerciseName: "Plank", tag: "Pain", note: "wrist" };
+  const note = {
+    id: "n1",
+    clientId: "ana",
+    exerciseName: "Plank",
+    tag: "Joint Pain / Discomfort",
+    note: "wrist",
+  };
   saveSessionPrograms(state, [entry("d1", "ana", { feedback: [note] })]);
   saveSessionPrograms(state, [entry("d1", "ana", { feedback: [note] })]);
   assert.deepEqual(
@@ -176,13 +182,19 @@ test("saving a live session twice keeps one program per participant", () => {
 
 test("a live program reads back with its session, its start and its notes", () => {
   const state = {};
-  const signal = { id: "n1", clientId: "ana", exerciseName: "Plank", tag: "Too Easy", note: "" };
+  const signal = {
+    id: "n1",
+    clientId: "ana",
+    exerciseName: "Plank",
+    tag: "Too Easy - Increase Load",
+    note: "",
+  };
   addPendingNote(state, {
     id: "n1",
     clientId: "ana",
     date: "2026-09-20T18:10:00.000Z",
     exerciseName: "Plank",
-    tag: "Too Easy",
+    tag: "Too Easy - Increase Load",
     resolved: false,
   });
   saveSessionPrograms(state, [
@@ -211,21 +223,33 @@ test("a live program reads back with its session, its start and its notes", () =
 
 test("a note taken back goes, and a note a next plan waits for stays unfiled", () => {
   const state = {};
-  const pain = { id: "n1", clientId: "ana", exerciseName: "Plank", tag: "Pain", note: "" };
-  const easy = { id: "n2", clientId: "ana", exerciseName: "Plank", tag: "Too Easy", note: "" };
+  const pain = {
+    id: "n1",
+    clientId: "ana",
+    exerciseName: "Plank",
+    tag: "Joint Pain / Discomfort",
+    note: "",
+  };
+  const easy = {
+    id: "n2",
+    clientId: "ana",
+    exerciseName: "Plank",
+    tag: "Too Easy - Increase Load",
+    note: "",
+  };
   addPendingNote(state, {
     id: "n2",
     clientId: "ana",
     date: "2026-09-20T18:10:00.000Z",
     exerciseName: "Plank",
-    tag: "Too Easy",
+    tag: "Too Easy - Increase Load",
     resolved: false,
   });
   saveSessionPrograms(state, [entry("p1", "ana", { feedback: [pain, easy] })]);
   saveSessionPrograms(state, [entry("p1", "ana", { feedback: [] })]);
   assert.deepEqual(notesForProgram(state, "p1"), []);
   assert.equal(noteById(state, "n1"), null);
-  assert.equal(noteById(state, "n2").resolved, false);
+  assert.equal(noteById(state, "n2").review, "pending");
   assert.equal(noteById(state, "n2").programId, undefined);
 });
 
@@ -283,7 +307,38 @@ test("two sessions' programs are kept side by side, each with its own groups", (
   assert.equal(state.groupSharedPrograms.length, 1);
 });
 
-test("discarding a session removes its programs and groups, and leaves the other session", () => {
+test("a group names its programs, and its id comes from them, never from its place in a list", () => {
+  // Drive sync merges by id: an id from a position passed to the next group when one was removed.
+  const state = {};
+  const inS1 = { status: "live", sessionId: "s1", startedAt: "2026-09-20T18:00:00.000Z" };
+  const four = [
+    entry("a1", "ana", inS1),
+    entry("b1", "bojan", inS1),
+    entry("c1", "cene", inS1),
+    entry("d1", "dora", inS1),
+  ];
+  saveSessionPrograms(state, four, {
+    sessionId: "s1",
+    groups: [
+      ["ana", "bojan"],
+      ["cene", "dora"],
+    ],
+  });
+  const second = state.groupSharedPrograms.find((group) => group.programIds.includes("c1"));
+  assert.deepEqual(second.programIds, ["c1", "d1"]);
+  saveSessionPrograms(state, four, { sessionId: "s1", groups: [["cene", "dora"]] });
+  assert.deepEqual(state.groupSharedPrograms, [second], "the group left keeps its id");
+});
+
+test("a plan for no session keeps its group", () => {
+  const state = {};
+  saveSessionPrograms(state, [entry("d1", "ana"), entry("d2", "bojan")], {
+    groups: [["ana", "bojan"]],
+  });
+  assert.deepEqual(state.groupSharedPrograms[0].programIds, ["d1", "d2"]);
+});
+
+test("a plan thrown away is kept as discarded, listed nowhere, and the other session stays", () => {
   const state = {};
   const inS1 = { status: "live", sessionId: "s1", startedAt: "2026-09-20T18:00:00.000Z" };
   saveSessionPrograms(state, [entry("a1", "ana", inS1), entry("b1", "bojan", inS1)], {
@@ -291,23 +346,38 @@ test("discarding a session removes its programs and groups, and leaves the other
     groups: [["ana", "bojan"]],
   });
   saveSessionPrograms(state, [entry("c2", "cene", { sessionId: "s2" })], { sessionId: "s2" });
-  discardSessionPrograms(state, ["a1", "b1"], "s1");
+  discardPrograms(state, ["a1", "b1"]);
+  assert.deepEqual(
+    ["a1", "b1"].map((id) => programById(state, id)?.status),
+    ["discarded", "discarded"],
+  );
   assert.deepEqual(openProgramsOfSessions(state, ["s1"]), []);
-  assert.deepEqual(groupsOfSessions(state, ["s1"]), []);
+  assert.deepEqual(livePrograms(state), []);
+  assert.deepEqual(draftPrograms(state), []);
   assert.deepEqual(
     openProgramsOfSessions(state, ["s2"]).map((program) => program.id),
     ["c2"],
   );
 });
 
-test("removed programs are gone, and the others stay", () => {
+test("a program taken off its session waits as a plan; an empty one is discarded; none is deleted", () => {
   const state = {};
-  recordTrainings(state, [draft("d1", "ana"), draft("d2", "bojan")]);
-  removePrograms(state, ["d1"]);
+  const live = { status: "live", sessionId: "s1", startedAt: "2026-09-20T18:00:00.000Z" };
+  saveSessionPrograms(state, [
+    entry("p1", "ana", live),
+    entry("p2", "bojan", { ...live, exercises: [] }),
+  ]);
+  unschedulePrograms(state, ["p1", "p2"]);
+  assert.equal(allPrograms(state).length, 2);
+  const plan = programById(state, "p1");
+  assert.equal(plan.status, "planned");
+  assert.equal(plan.sessionId, undefined);
+  assert.equal(plan.startedAt, undefined);
   assert.deepEqual(
     draftPrograms(state).map((program) => program.id),
-    ["d2"],
+    ["p1"],
   );
+  assert.equal(programById(state, "p2").status, "discarded");
 });
 
 test("a pending note is listed until it is resolved, and is gone once removed", () => {
@@ -317,7 +387,7 @@ test("a pending note is listed until it is resolved, and is gone once removed", 
     clientId: "ana",
     date: "2026-09-01T10:00:00.000Z",
     exerciseName: "Plank",
-    tag: "Too Easy",
+    tag: "Too Easy - Increase Load",
     resolved: false,
   };
   addPendingNote(state, update);
@@ -328,7 +398,7 @@ test("a pending note is listed until it is resolved, and is gone once removed", 
 
   resolveNote(state, "n1");
   assert.deepEqual(pendingNotes(state), []);
-  assert.equal(noteById(state, "n1").resolved, true);
+  assert.equal(noteById(state, "n1").review, "resolved");
 
   removePendingNotes(state, ["n1"]);
   assert.equal(noteById(state, "n1"), null);
@@ -339,7 +409,15 @@ test("pending notes come in the order they were taken, wherever each one is file
   const state = {};
   recordTrainings(state, [
     finished("h1", "ana", "2026-09-12T10:00:00.000Z", {
-      feedback: [{ id: "late", clientId: "ana", exerciseName: "Plank", tag: "Pain", note: "" }],
+      feedback: [
+        {
+          id: "late",
+          clientId: "ana",
+          exerciseName: "Plank",
+          tag: "Joint Pain / Discomfort",
+          note: "",
+        },
+      ],
     }),
   ]);
   for (const [id, date] of [
@@ -351,7 +429,7 @@ test("pending notes come in the order they were taken, wherever each one is file
       clientId: "ana",
       date,
       exerciseName: "Plank",
-      tag: "Pain",
+      tag: "Joint Pain / Discomfort",
       resolved: false,
     });
   }
@@ -365,7 +443,15 @@ test("a note filed in a finished program is found with that program", () => {
   const state = {};
   recordTrainings(state, [
     finished("h1", "ana", "2026-09-01T10:00:00.000Z", {
-      feedback: [{ id: "n1", clientId: "ana", exerciseName: "Plank", tag: "Pain", note: "wrist" }],
+      feedback: [
+        {
+          id: "n1",
+          clientId: "ana",
+          exerciseName: "Plank",
+          tag: "Joint Pain / Discomfort",
+          note: "wrist",
+        },
+      ],
     }),
   ]);
   const [note] = notesForProgram(state, "h1");
@@ -376,46 +462,84 @@ test("a note filed in a finished program is found with that program", () => {
 
 test("a note's tag reads as the one line the feedback form stores, remark after the tag", () => {
   assert.equal(
-    noteTagLine({ tag: "Too Hard - Reduce Load", text: "stopped at four" }),
+    noteTagLine({ tag: "too_hard", text: "stopped at four" }),
     "Too Hard - Reduce Load - stopped at four",
   );
-  assert.equal(noteTagLine({ tag: "Too Easy - Increase Load" }), "Too Easy - Increase Load");
+  assert.equal(noteTagLine({ tag: "too_easy" }), "Too Easy - Increase Load");
   assert.equal(noteTagLine(null), "");
+});
+
+test("a note stores the tag's id, never its English words", () => {
+  const state = {};
+  recordTrainings(state, [
+    finished("h1", "ana", "2026-09-01T10:00:00.000Z", {
+      feedback: [
+        { id: "n1", clientId: "ana", exerciseName: "Plank", tag: "Too Easy - Increase Load" },
+      ],
+    }),
+  ]);
+  assert.equal(noteById(state, "n1").tag, "too_easy");
 });
 
 test("a program's notes come back as the feedback a live session keeps", () => {
   const state = {};
   recordTrainings(state, [
     finished("h1", "ana", "2026-09-01T10:00:00.000Z", {
-      feedback: [{ id: "n1", clientId: "ana", exerciseName: "Plank", tag: "Pain", note: "wrist" }],
+      feedback: [
+        {
+          id: "n1",
+          clientId: "ana",
+          exerciseName: "Plank",
+          tag: "Joint Pain / Discomfort",
+          note: "wrist",
+        },
+      ],
     }),
   ]);
   assert.deepEqual(feedbackFromNotes(notesForProgram(state, "h1")), [
-    { id: "n1", clientId: "ana", exerciseName: "Plank", tag: "Pain", note: "wrist" },
+    {
+      id: "n1",
+      clientId: "ana",
+      exerciseName: "Plank",
+      tag: "Joint Pain / Discomfort",
+      note: "wrist",
+    },
   ]);
 });
 
 test("a program saved for a seeded session carries the seed stamp, notes included", () => {
   // Removing the sample data finds a program by this stamp, as it finds every other seeded record.
   const state = {};
-  const note = { id: "n1", clientId: "ana", exerciseName: "Plank", tag: "Pain", note: "" };
+  const note = {
+    id: "n1",
+    clientId: "ana",
+    exerciseName: "Plank",
+    tag: "Joint Pain / Discomfort",
+    note: "",
+  };
   saveSessionPrograms(state, [entry("p1", "ana", { testData: "test", feedback: [note] })]);
   assert.equal(programById(state, "p1").testData, "test");
   assert.equal(noteById(state, "n1").testData, "test");
 });
 
-test("a client taken off a booked session loses their plan for it, and nothing they performed", () => {
+test("a client taken off a booked session keeps their plan, unscheduled, and what they performed", () => {
+  const plank = [{ id: "i1", type: "exercise", name: "Plank" }];
   const state = {
     clientPrograms: [
-      { id: "p-ana", clientId: "ana", sessionId: "s1", status: "planned", exercises: [] },
-      { id: "p-bor", clientId: "bor", sessionId: "s1", status: "planned", exercises: [] },
-      { id: "p-cene", clientId: "cene", sessionId: "s1", status: "live", exercises: [] },
-      { id: "p-other", clientId: "bor", sessionId: "s2", status: "planned", exercises: [] },
+      { id: "p-ana", clientId: "ana", sessionId: "s1", status: "planned", exercises: plank },
+      { id: "p-bor", clientId: "bor", sessionId: "s1", status: "planned", exercises: plank },
+      { id: "p-cene", clientId: "cene", sessionId: "s1", status: "live", exercises: plank },
+      { id: "p-other", clientId: "bor", sessionId: "s2", status: "planned", exercises: plank },
     ],
   };
-  dropPlansOfRemovedClients(state, "s1", ["ana"]);
+  unscheduleRemovedClients(state, "s1", ["ana"]);
   assert.deepEqual(
-    state.clientPrograms.map((program) => program.id),
-    ["p-ana", "p-cene", "p-other"],
+    state.clientPrograms.map((program) => [program.id, program.status, program.sessionId]),
+    [
+      ["p-ana", "planned", "s1"],
+      ["p-bor", "planned", undefined],
+      ["p-cene", "live", "s1"],
+      ["p-other", "planned", "s2"],
+    ],
   );
 });

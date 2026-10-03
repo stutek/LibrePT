@@ -121,6 +121,7 @@ export function seriesOccurrences(series, { from, to } = {}) {
         seriesId: series.id,
         occurrenceDate,
         fromSeries: true,
+        status: "scheduled",
         title: series.title,
         time: series.time,
         startDate: startDateTime.toISOString(),
@@ -169,7 +170,7 @@ export function sessionsWithSeries(sessions, seriesList, window = {}) {
   const generated = (seriesList || [])
     .flatMap((series) => seriesOccurrences(series, window))
     .filter((occurrence) => !spokenFor.has(occurrence.id));
-  return [...(sessions || []).filter((session) => !session.cancelled), ...generated];
+  return [...(sessions || []).filter((session) => session.status !== "cancelled"), ...generated];
 }
 
 /** The stored session a derived evening BECOMES the moment a trainer does something with it.
@@ -231,7 +232,7 @@ export function sessionsAfterRemoving(sessions, removedIds) {
   return (sessions || []).flatMap((session) => {
     if (!ids.has(session.id)) return [session];
     if (!session.seriesId) return [];
-    return [{ ...session, cancelled: true }];
+    return [{ ...session, status: "cancelled" }];
   });
 }
 

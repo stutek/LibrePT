@@ -20,7 +20,7 @@
 // Injected dependencies: none.
 
 import { localDateString } from "./calendarDay.js";
-import { COMMON_RECORD_FIELDS } from "./recordSchemas.js";
+import { COMMON_RECORD_FIELDS, FEEDBACK_TAG_TEXTS } from "./recordSchemas.js";
 
 const ATTENDANCE_ID_PREFIX = "at-";
 
@@ -63,13 +63,13 @@ function routineFits(session, record, routines) {
   return performed.length > 0 && shared * 2 > performed.length;
 }
 
+// `sessions` are in the current shape (schemaShapes.js converts them first): held is `status: "done"`.
 export function matchingSession(record, sessions, routines = []) {
   if (record.isPlanning || !record.date) return null;
   const day = localDateString(new Date(record.date));
   const candidates = sessions.filter(
     (session) =>
-      session.completed === true &&
-      session.cancelled !== true &&
+      session.status === "done" &&
       Array.isArray(session.participants) &&
       session.participants.includes(record.clientId) &&
       sessionDay(session) === day,
@@ -117,6 +117,61 @@ function programFromRecord(record, session, exercises) {
   });
 }
 
+const TAG_SEPARATOR = " - ";
+const TAG_ENTRIES = Object.entries(FEEDBACK_TAG_TEXTS);
+
+/**
+ * A tag as an older build or the clipboard writes it — English text, sometimes with the trainer's
+ * remark run in after " - " — as the tag id a note stores and the remark apart. The known texts
+ * contain " - " themselves, so a whole known text is matched first, never a split. A text no tag
+ * has (a record from a build whose tags differed) becomes a plain note that keeps the text, so
+ * nothing the trainer saw is lost.
+ */
+export function tagFromText(stored, remark = "") {
+  const text = typeof stored === "string" ? stored : "";
+  if (FEEDBACK_TAG_TEXTS[text]) return { tag: text, text: remark || undefined };
+  const known = TAG_ENTRIES.find(
+    ([, english]) => text === english || text.startsWith(english + TAG_SEPARATOR),
+  );
+  if (!known) {
+    if (!text) return { tag: undefined, text: remark || undefined };
+    return { tag: "note", text: [text, remark].filter(Boolean).join(TAG_SEPARATOR) };
+  }
+  const runIn = text.slice(known[1].length + TAG_SEPARATOR.length);
+  return { tag: known[0], text: [runIn, remark].filter(Boolean).join(TAG_SEPARATOR) || undefined };
+}
+
+/** The id of the group these programs form: made from its members, so the same group has the same
+ *  id on every device and after every save, and no other group can take it. */
+export function groupIdFor(programIds) {
+  return `grp-${[...programIds].sort()[0]}`;
+}
+
+/** The English text an older build and the clipboard read for a tag id; any other value as it is. */
+export function textOfTag(tag) {
+  return FEEDBACK_TAG_TEXTS[tag] ?? tag ?? "";
+}
+
+/**
+ * A note as the current shape holds it. A note written before `review` and tag ids existed (by the
+ * first cut of schema 6, never published) carries `resolved` and the English text; both are read
+ * into the current fields. A note already current comes back equal.
+ */
+export function noteInCurrentShape(note) {
+  if (!note) return note;
+  const current = typeof note.review === "string" && (!note.tag || FEEDBACK_TAG_TEXTS[note.tag]);
+  if (current) return note;
+  const { resolved, ...rest } = note;
+  const { tag, text } = tagFromText(note.tag, note.text);
+  return defined({
+    ...rest,
+    tag,
+    text,
+    review:
+      note.review ?? (resolved === true ? "resolved" : resolved === false ? "pending" : "none"),
+  });
+}
+
 // A feedback item the app wrote carries the id its plan update shares. One without (a very old or
 // hand-edited record) gets an id made from its record and its place, so a second conversion gives
 // the same note rather than losing it or making another.
@@ -135,9 +190,13 @@ function noteFromFeedback(item, record, program, id) {
     exerciseId: programItem?.exerciseId,
     exerciseName: item.exerciseName,
     createdAt: record.date,
-    tag: item.tag,
-    text: item.note || undefined,
+    ...tagFromText(item.tag, item.note),
+    review: "none",
   });
+}
+
+function reviewOf(update) {
+  return update.resolved === true ? "resolved" : "pending";
 }
 
 // A plan update is the note the trainer still has to act on. Where the same note sits in a history
@@ -146,7 +205,7 @@ function withPlanUpdate(note, update) {
   return defined({
     ...note,
     createdAt: update.date || note.createdAt,
-    resolved: update.resolved === true,
+    review: reviewOf(update),
   });
 }
 
@@ -158,8 +217,8 @@ function noteFromPlanUpdate(update, exercises) {
     exerciseId: exercises.find((exercise) => exercise.name === update.exerciseName)?.id,
     exerciseName: update.exerciseName,
     createdAt: update.date,
-    tag: update.tag,
-    resolved: update.resolved === true,
+    ...tagFromText(update.tag),
+    review: reviewOf(update),
   });
 }
 
@@ -220,18 +279,20 @@ function itemForHistory(item) {
   return rest;
 }
 
-function feedbackForHistory(note) {
+/** A note in the shape a history record and the clipboard keep feedback in: the tag as its English
+ *  text, the remark apart. */
+export function feedbackForHistory(note) {
   return {
     id: note.id,
     clientId: note.clientId,
     exerciseName: note.exerciseName,
-    tag: note.tag,
+    tag: textOfTag(note.tag),
     note: note.text || "",
   };
 }
 
 function recordFromProgram(program, notesByProgram, clientsById) {
-  const planned = program.status === "planned";
+  const planned = program.status !== "done";
   return defined({
     ...provenance(program),
     id: program.id,
@@ -258,16 +319,17 @@ function planUpdateFromNote(note, clientsById) {
     clientName: clientsById.get(note.clientId)?.name,
     date: note.createdAt,
     exerciseName: note.exerciseName,
-    tag: note.text ? `${note.tag} - ${note.text}` : note.tag,
-    resolved: note.resolved,
+    tag: note.text ? `${textOfTag(note.tag)}${TAG_SEPARATOR}${note.text}` : textOfTag(note.tag),
+    resolved: note.review === "resolved",
   });
 }
 
 // What the old `history` held: a finished training, and a plan written for no session. A session
 // in progress, or a booked one being planned, lived in an older build's own cache, never in
-// `history`; written there, every session ever opened would read as an unscheduled plan.
+// `history`; written there, every session ever opened would read as an unscheduled plan. A plan
+// the trainer threw away is still data held about the client, so it is written as a plan.
 function inOldHistory(program) {
-  if (program.status === "done") return true;
+  if (program.status === "done" || program.status === "discarded") return true;
   return program.status === "planned" && !program.sessionId;
 }
 
@@ -291,7 +353,7 @@ export function historyFromSessionModel({
       .filter(inOldHistory)
       .map((program) => recordFromProgram(program, notesByProgram, clientsById)),
     planUpdates: exerciseNotes
-      .filter((note) => typeof note.resolved === "boolean")
+      .filter((note) => note.review !== "none")
       .map((note) => planUpdateFromNote(note, clientsById)),
   };
 }

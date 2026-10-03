@@ -7,6 +7,7 @@
 // It draws programs and their exercise notes as data/trainingRecords.js reads them; where they are
 // stored is that module's business.
 import { orderedItems } from "../../data/sessionItemOrder.js";
+import { textOfTag } from "../../data/sessionModelConversion.js";
 import { programDate } from "../../data/trainingRecords.js";
 import {
   formatCompactDuration,
@@ -38,11 +39,13 @@ function buildFeedbackIconsHTML(notes, ex, t) {
   let html = "";
   for (const note of notes.filter((entry) => entry.exerciseName === ex.name)) {
     const tooltipBody = note.text ? escapeHTML(note.text) : t("no_details_specified");
+    // The note stores the tag's id; these readers take its English text.
+    const tagText = textOfTag(note.tag);
     html += `
           <span class="history-feedback-icon">
-            <i class="${resolveFeedbackIconClass(note.tag)}"></i>
+            <i class="${resolveFeedbackIconClass(tagText)}"></i>
             <span class="tooltip-content">
-              <div class="tooltip-title">${escapeHTML(feedbackTagText(note.tag, t))}</div>
+              <div class="tooltip-title">${escapeHTML(feedbackTagText(tagText, t))}</div>
               <div class="tooltip-body">${tooltipBody}</div>
             </span>
           </span>

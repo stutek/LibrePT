@@ -5,7 +5,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { toDomainState } from "../../../src/data/schemaShapes.js";
+import { sessionInCurrentShape, toDomainState } from "../../../src/data/schemaShapes.js";
 
 const record = {
   id: "h1",
@@ -46,4 +46,73 @@ test("a record already in the new shape wins over a conversion with the same id"
   const newer = { id: "h1", clientId: "ana", status: "done", title: "Edited later", exercises: [] };
   const state = toDomainState({ history: [record], clientPrograms: [newer], sessions: [] });
   assert.deepEqual(state.clientPrograms, [newer]);
+});
+
+test("a session's two flags become its one status, and a held session is still found as held", () => {
+  const at = { participants: ["ana"], startDate: "2026-09-01T09:30:00.000Z" };
+  const state = toDomainState({
+    sessions: [
+      { id: "s-held", ...at, completed: true },
+      { id: "s-off", ...at, cancelled: true },
+      // Run, then taken off the board: cancelled is what the board must go on saying.
+      { id: "s-both", ...at, completed: true, cancelled: true },
+      { id: "s-next", ...at },
+    ],
+    history: [record],
+  });
+  assert.deepEqual(
+    state.sessions.map((session) => [session.id, session.status]),
+    [
+      ["s-held", "done"],
+      ["s-off", "cancelled"],
+      ["s-both", "cancelled"],
+      ["s-next", "scheduled"],
+    ],
+  );
+  assert.equal(
+    state.sessions.some((session) => "completed" in session || "cancelled" in session),
+    false,
+    "the old flags are gone",
+  );
+  // The old record is linked to the one session that was held that day.
+  assert.equal(state.clientPrograms[0].sessionId, "s-held");
+});
+
+test("a session already carrying a status comes back as it is", () => {
+  const session = { id: "s1", participants: [], status: "done" };
+  assert.equal(sessionInCurrentShape(session), session);
+});
+
+test("a group of client ids from the first cut of schema 6 becomes a group of their programs", () => {
+  const program = (id, clientId, sessionId) => ({
+    id,
+    clientId,
+    sessionId,
+    status: "planned",
+    exercises: [],
+  });
+  const state = toDomainState({
+    sessions: [],
+    clientPrograms: [program("p-ana", "ana", "s1"), program("p-bor", "bor", "s1")],
+    groupSharedPrograms: [
+      { id: "s1-group-0", sessionId: "s1", clientIds: ["ana", "bor"] },
+      // Only one member still has a program in the session: no group is left.
+      { id: "s1-group-1", sessionId: "s1", clientIds: ["ana", "cene"] },
+    ],
+  });
+  assert.deepEqual(state.groupSharedPrograms, [
+    { id: "grp-p-ana", programIds: ["p-ana", "p-bor"] },
+  ]);
+});
+
+test("a note from the first cut of schema 6 is read into its current fields on the way in", () => {
+  const state = toDomainState({
+    sessions: [],
+    exerciseNotes: [
+      { id: "n1", clientId: "ana", tag: "Too Hard - Reduce Load", resolved: false },
+    ],
+  });
+  assert.deepEqual(state.exerciseNotes, [
+    { id: "n1", clientId: "ana", tag: "too_hard", review: "pending" },
+  ]);
 });

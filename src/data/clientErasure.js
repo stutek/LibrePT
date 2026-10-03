@@ -369,7 +369,7 @@ export const SWEPT_COLLECTIONS = [
 export const ERASURE_SKIPS = {
   invites: "two ids and the facts about the message; no name, no prose",
   sessionAttendance: "ids, a status and a yes or no; no name, no prose",
-  groupSharedPrograms: "a session id and client ids; an erased client stays as an opaque id",
+  groupSharedPrograms: "program ids only; no client, no name, no prose",
   notifications: "app messages from translation keys; no client",
   exercises: "the trainer's catalogue; `source` names who shared it, not a client",
   routines: "templates with no date and no participants",

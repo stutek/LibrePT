@@ -4,7 +4,6 @@
 // Split 2026-08-01 out of the old formsController.js, which bundled Client, Routine, and Exercise
 // forms in one file despite the three sharing nothing but boilerplate.
 
-import { localDateString } from "../data/calendarDay.js";
 import { libraryExercises } from "../data/exerciseLibrary.js";
 import { newRecordId } from "../data/recordId.js";
 import { parseLoad, parseReps } from "../domain/repsAndLoad.js";
@@ -35,17 +34,12 @@ export function openRoutineCreateDialog() {
   openRoutineCreateForm();
 }
 
-// The session is found by what the performed program holds for certain: the client and the day. Two
-// such sessions on one day are ambiguous, and then no title is used.
+// The session the performed program ran in, by the id the program holds. A program with none (one
+// converted from an older build where no session fitted) gives no title. It used to be found by
+// day, comparing `startDate`, an ISO instant, with a calendar date, so it never found one.
 function titleOfSessionBehind(log, state) {
-  const day = localDateString(log.performedAt);
-  const matches = (state.sessions || []).filter(
-    (session) =>
-      session.completed &&
-      session.startDate === day &&
-      session.participants?.includes(log.clientId),
-  );
-  return matches.length === 1 ? matches[0].title || "" : "";
+  if (!log.sessionId) return "";
+  return (state.sessions || []).find((session) => session.id === log.sessionId)?.title || "";
 }
 
 /** "Save as routine" on a performed session: stores the routine built from it, says how many

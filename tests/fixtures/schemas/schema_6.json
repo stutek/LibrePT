@@ -155,7 +155,7 @@
       "type": "array"
     },
     "startDate": {
-      "required": false,
+      "required": true,
       "type": "string"
     },
     "seriesId": {
@@ -166,17 +166,18 @@
       "required": false,
       "type": "string"
     },
-    "cancelled": {
-      "required": false,
-      "type": "boolean"
-    },
-    "completed": {
-      "required": false,
-      "type": "boolean"
-    },
     "duration": {
       "required": false,
       "type": "number"
+    },
+    "status": {
+      "required": true,
+      "type": "string",
+      "values": [
+        "scheduled",
+        "cancelled",
+        "done"
+      ]
     }
   },
   "notifications": {
@@ -228,7 +229,11 @@
     },
     "status": {
       "required": true,
-      "type": "string"
+      "type": "string",
+      "values": [
+        "sent",
+        "answered"
+      ]
     },
     "answer": {
       "required": false,
@@ -322,7 +327,13 @@
     },
     "status": {
       "required": true,
-      "type": "string"
+      "type": "string",
+      "values": [
+        "planned",
+        "live",
+        "done",
+        "discarded"
+      ]
     },
     "createdAt": {
       "required": false,
@@ -420,11 +431,7 @@
       "required": true,
       "type": "string"
     },
-    "sessionId": {
-      "required": true,
-      "type": "string"
-    },
-    "clientIds": {
+    "programIds": {
       "required": true,
       "type": "array"
     }
@@ -448,7 +455,14 @@
     },
     "status": {
       "required": true,
-      "type": "string"
+      "type": "string",
+      "values": [
+        "attended",
+        "noShow",
+        "cancelled",
+        "sick",
+        "forceMajeure"
+      ]
     },
     "consumesQuota": {
       "required": true,
@@ -486,15 +500,28 @@
     },
     "tag": {
       "required": false,
-      "type": "string"
+      "type": "string",
+      "values": [
+        "note",
+        "too_easy",
+        "too_hard",
+        "form_break",
+        "joint_pain",
+        "progression"
+      ]
     },
     "text": {
       "required": false,
       "type": "string"
     },
-    "resolved": {
-      "required": false,
-      "type": "boolean"
+    "review": {
+      "required": true,
+      "type": "string",
+      "values": [
+        "none",
+        "pending",
+        "resolved"
+      ]
     }
   }
 }

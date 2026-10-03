@@ -63,7 +63,7 @@ test("nothing on a fresh board is overdue by more than its own day", () => {
   const A_DAY = 24 * 3600 * 1000;
 
   const stale = boardRows()
-    .filter((session) => !session.completed)
+    .filter((session) => session.status !== "done")
     .filter((session) => now - new Date(session.startDate).getTime() > A_DAY)
     .map((session) => ({
       id: session.id,
@@ -84,7 +84,7 @@ test("the repeating session's past evenings are stored, so the rule stops produc
   assert.ok(spokenFor.length > 0, "a series that started a week back has evenings behind it");
   for (const session of spokenFor) {
     assert.ok(session.occurrenceDate, `${session.id} names no evening of the series`);
-    assert.equal(session.completed, true, `${session.id} is a past evening and is not finished`);
+    assert.equal(session.status, "done", `${session.id} is a past evening and is not finished`);
     assert.equal(session.time, series.time, `${session.id} is not in the series' own slot`);
   }
   const derived = boardRows().filter((row) => row.fromSeries);

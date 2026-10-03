@@ -150,7 +150,7 @@ def started_session(**extra):
 
 
 def test_a_started_session_keeps_its_day_and_says_why(page, local_server):
-    state = base_state(sessions=[started_session(completed=True)])
+    state = base_state(sessions=[started_session(status="done")])
     load_with_stub(page, local_server, form_stub(state))
     open_form(page, None, None, "s-run")
 

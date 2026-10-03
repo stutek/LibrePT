@@ -61,8 +61,9 @@ export function sessionCalendarDate(session) {
 }
 
 // Merge over an existing row rather than replacing it: a stored session carries fields this form
-// never edits (`completed`, `duration`, stamped by finishing a session), and a wholesale replace
-// would silently drop them.
+// never edits (`status` and `duration`, stamped by finishing a session), and a wholesale replace
+// would silently drop them. A new row starts "scheduled"; the form never sets a status, so editing
+// a held session leaves it held.
 //
 // The number of places is one of them: the form has no field for it and counts the participants.
 // Saving a drop-in slot for three with its first client turned it into a slot for one, so the next
@@ -76,13 +77,13 @@ export function upsertSessionRecord(sessions, sessionRecord) {
     sessions[existingIndex] = { ...existing, ...sessionRecord, maxCapacity };
     return;
   }
-  sessions.push(sessionRecord);
+  sessions.push({ status: "scheduled", ...sessionRecord });
 }
 
 // The inverse of the meta factories below: which stored rows is this live clipboard running?
 // A slot can be more than one row — the day timeline merges sessions sharing a time and place into
 // a single card, and the meta then carries `ids` for all of them (`id` names the first). Every
-// caller that writes back onto "the session behind the clipboard" — stamping it completed,
+// caller that writes back onto "the session behind the clipboard" — stamping it done,
 // re-timing it, deleting it — has to agree on that set, and three of them had grown their own copy
 // of the same two-clause check.
 export function sessionBelongsToSlot(session, sourceSession) {

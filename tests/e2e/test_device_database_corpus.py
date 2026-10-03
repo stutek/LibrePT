@@ -59,7 +59,9 @@ LOADED = """async () => {
         clients: (state.clients || []).length,
         series: (state.sessionSeries || []).map((rule) => rule.id),
         invites: (state.invites || []).map((invite) => invite.id),
-        cancelled: (state.sessions || []).filter((row) => row.cancelled).map((row) => row.id),
+        cancelled: (state.sessions || [])
+          .filter((row) => row.status === 'cancelled')
+          .map((row) => row.id),
     };
 }"""
 

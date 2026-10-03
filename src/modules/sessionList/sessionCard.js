@@ -95,7 +95,12 @@ function wireElapsedEdit(valueEl, b, deps) {
 // scheduled time by wall-clock alone is NOT enough. Every applicable card is marked, so
 // overlapping sessions all show as ongoing.
 function computeIsLaunched(b, activeSession) {
-  return !b.completed && isRunningOn(activeSession, b.id);
+  return !isHeld(b) && isRunningOn(activeSession, b.id);
+}
+
+/** Whether the session was held: finished on the clipboard. */
+function isHeld(b) {
+  return b.status === "done";
 }
 
 /** True when the started clipboard already holds this session. A tap on such a card must return to
@@ -110,16 +115,20 @@ export function isRunningOn(activeSession, sessionId) {
 }
 
 // A session has a plan when it names a routine, or when a finished one was run from exercises the
-// trainer added by hand: those live only in its participants' performed programs for that day.
+// trainer added by hand: those live only in its participants' performed programs. A program names its
+// session; one converted from an older build where no session fitted is matched by client and day.
 function sessionHasPlan(b, routineName, state) {
   if (routineName) return true;
-  if (!b.completed || !b.startDate) return false;
+  if (!isHeld(b) || !b.startDate) return false;
   const day = localDateString(b.startDate);
+  const ranHere = (program) =>
+    program.sessionId === b.id ||
+    (!program.sessionId &&
+      b.participants.includes(program.clientId) &&
+      localDateString(programDate(program)) === day);
   return performedPrograms(state).some(
     (program) =>
-      b.participants.includes(program.clientId) &&
-      localDateString(programDate(program)) === day &&
-      (program.exercises || []).some((item) => item.type === "exercise"),
+      ranHere(program) && (program.exercises || []).some((item) => item.type === "exercise"),
   );
 }
 
@@ -140,7 +149,7 @@ function buildReadinessWarningsHTML(hasPlan, clientCount, t) {
 // upcoming session's scheduled-start countdown, or the launched clipboard's own live timer —
 // mutually exclusive, mirrored in buildSessionCardStatusBarHTML below.
 function computeCardTiming(b, isLaunched, activeSession, isLive, range) {
-  const pastElapsedSeconds = b.completed
+  const pastElapsedSeconds = isHeld(b)
     ? typeof b.duration === "number"
       ? b.duration
       : range
@@ -158,7 +167,7 @@ function computeCardTiming(b, isLaunched, activeSession, isLive, range) {
   // says OVERDUE rather than counting down through zero into negative hours.
   const scheduledStartMs = b.startDate ? new Date(b.startDate).getTime() : null;
   const startMs =
-    !b.completed && !isLive && (scheduledStartMs != null || range)
+    !isHeld(b) && !isLive && (scheduledStartMs != null || range)
       ? (scheduledStartMs ?? getSessionDayDate(b.day).getTime() + range.start * 60000)
       : null;
   const isUpcoming = startMs != null;
@@ -372,7 +381,7 @@ export function renderSessionCard(b, colContainer, deps) {
   // A finished session is de-emphasised rather than shown as launchable. The badge that used to say
   // so moved into the status bar at the foot: in the heading row it pushed the edit button
   // onto a line of its own, and the foot already reports how long the session ran.
-  if (b.completed) card.classList.add("session-completed");
+  if (isHeld(b)) card.classList.add("session-completed");
 
   const timing = computeCardTiming(b, isLaunched, activeSession, isLive, range);
   const { pastElapsedSeconds, isUpcoming, timerIsOvertime } = timing;
@@ -410,7 +419,7 @@ export function renderSessionCard(b, colContainer, deps) {
     isUpcoming,
     timerIsOvertime,
     timerSpan,
-    isCompleted: Boolean(b.completed),
+    isCompleted: isHeld(b),
     t,
     escapeHTML,
     formatDurationHM,

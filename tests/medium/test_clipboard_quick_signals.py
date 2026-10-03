@@ -63,7 +63,7 @@ def test_second_tap_undoes_the_first(page, local_server):
         """(args) => {
             const { getActiveSession, hasQuickSignal, logQuickSignal, state } = window.__signals;
             const { clientId, name, tag } = args;
-            const planUpdates = () => state.exerciseNotes.filter((n) => n.resolved === false && n.exerciseName === name).length;
+            const planUpdates = () => state.exerciseNotes.filter((n) => n.review === 'pending' && n.exerciseName === name).length;
 
             const before = hasQuickSignal(clientId, name, tag);
             logQuickSignal(tag);
@@ -126,7 +126,7 @@ def test_tapping_the_opposite_signal_swaps_it(page, local_server):
             const snapshot = () => ({
                 easyActive: hasQuickSignal(clientId, name, easy),
                 hardActive: hasQuickSignal(clientId, name, hard),
-                planUpdateCount: state.exerciseNotes.filter((n) => n.resolved === false && n.exerciseName === name).length,
+                planUpdateCount: state.exerciseNotes.filter((n) => n.review === 'pending' && n.exerciseName === name).length,
             });
 
             // Mistype: tap Easy, then correct by tapping Hard — one motion, no untap in between.

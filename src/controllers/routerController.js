@@ -401,7 +401,8 @@ export function showSessionView(sessionId, clientId, focusRef = null, opts = {})
   }
 
   const program = state ? programById(state, sessionId) : null;
-  if (program && routerDeps?.openSessionFromHistory) {
+  // A plan the trainer threw away is kept but never shown: its address is a page that is not found.
+  if (program && program.status !== "discarded" && routerDeps?.openSessionFromHistory) {
     routerDeps.openSessionFromHistory(program);
     reenterIfBecameActive(currentActive, clientId, focusRef, opts);
     return;

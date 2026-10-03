@@ -24,7 +24,7 @@ export const REFERENCES = {
   // programs, and none of those points back.
   clientPrograms: { clientId: "clients", sessionId: "sessions" },
   sessionAttendance: { sessionId: "sessions", clientId: "clients", programId: "clientPrograms" },
-  groupSharedPrograms: { sessionId: "sessions" },
+  groupSharedPrograms: { programIds: "clientPrograms" },
   exerciseNotes: { clientId: "clients", programId: "clientPrograms" },
   clientNotes: { clientId: "clients" },
 };
