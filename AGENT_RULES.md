@@ -97,7 +97,8 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
   2026-09-28 an index built, then left while other checks ran, committed twenty lines of another
   session's defect report under an unrelated message. The reading is only worth what it is worth at
   the instant of the commit.
-  **Never push.** **A request that arrives mid-turn is its own commit**,
+  **Never push** — except a cloud session (claude.ai/code), which pushes only its own branch and
+  opens a pull request; only the maintainer merges to `main`. **A request that arrives mid-turn is its own commit**,
   not an addition to the one in progress: several asks landing while a gate run is in flight are
   split apart when it ends, never bulked because they happened in one turn. Where one verified tree
   yields several commits, say that the gate ran once, on the whole tree.
