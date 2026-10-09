@@ -6301,3 +6301,21 @@ Nič ne prepreči, da naslednji test spet zapiše uro iz lokalnega časa. **Pred
 testih določiti en časovni pas (`timezone_id` v `browser_context_args`), ki ni ne UTC ne Ljubljana,
 da test, vezan na enega od njiju, pade že lokalno. **Cena:** `frozen_today()` računa z lokalnim
 časom Pythona in se mora preklopiti na isti pas; teste, ki to napako že imajo, pokaže prvi tek.
+
+## 104. [ ] Demo »gym floor« je na obremenjenem stroju povlekel prazno stran
+
+**Najdeno 2026-10-09.** `test_the_demo_waits_until_the_first_launch_is_answered` je padal lokalno
+pod obremenitvijo, v enem teku od štirih; na GitHubu ni padel. Korak `open-previous-session`
+(povleci kartico vstran in navzgor) je kartico izmeril, preden jo je seznam pomaknil na zaslon:
+okvir je dvakrat zapored stal pod robom okna, pritisk je šel tja in ga je dobilo telo strani. Prejšnja
+seja se ni odprla. Popravljeno 2026-10-09: `placeThePress` v `src/modules/demo/demoTourPlayer.js`
+pritisne šele, ko brskalnikov zadetek na tej točki vrne kartico, sicer jo znova pomakne na zaslon,
+največ štirikrat; test `tests/unit_js/modules/demo/demoTourDrag.test.mjs`. Pod obremenitvijo nato
+20 tekov od 20 brez padca.
+
+### 104.1 [ ] Preverjanje »med držanjem« prehaja tudi brez poteze
+
+V padlem teku je `expectHeld` (`#plan-peek-under-past .plan-sheet-row` viden) prešel, čeprav ni nič
+odmaknilo plana: plast pod njim je vedno izrisana, in `probe` ne vpraša, ali jo kaj prekriva. Napaka
+je zato dobila napačno ime (manjkal je gumb Danes, ne pogled). **Predlog:** pogoj vezati na stanje,
+ki ga postavi samo vlečenje, na primer razred `is-held` na `#active-session-blanket`.
