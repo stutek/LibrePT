@@ -363,10 +363,16 @@ self.swCacheManifest = (() => {
   // while it sat there would have thrown their file away.
   const KEPT_CACHES = ["librept-shared-inbox"];
 
+  // stutek.github.io also serves LibrePTNotes, whose caches share this CacheStorage; only caches with
+  // LibrePT's own prefixes are ours to delete. Same list in src/controllers/appLifecycleController.js
+  // (a classic worker script and an ES module cannot share an import): change one, change both.
+  const OWN_CACHE_PREFIXES = ["librept-", "openpt-"];
+
   async function deleteObsoleteCaches() {
     const keys = await caches.keys();
     await Promise.all(
       keys
+        .filter((key) => OWN_CACHE_PREFIXES.some((prefix) => key.startsWith(prefix)))
         .filter((key) => key !== CACHE_NAME && !KEPT_CACHES.includes(key))
         .map((key) => caches.delete(key)),
     );

@@ -55,19 +55,37 @@ export function lockPortraitOrientation() {
   orientation.addEventListener("change", apply);
 }
 
-// Discard the failed/stale worker and every cache, then reload from a clean slate so the next install
+// stutek.github.io also serves LibrePTNotes, so only LibrePT's own caches are ours to delete. Same
+// list in src/sw/cacheManifest.js (a classic worker script and an ES module cannot share an import):
+// change one, change both.
+const OWN_CACHE_PREFIXES = ["librept-", "openpt-"];
+
+// Discard the failed/stale worker controlling this page and LibrePT's own caches. Takes the browser
+// objects as arguments so a test can pass an origin that also holds another app's worker and cache.
+export async function clearOwnWorkerAndCaches({ serviceWorker, caches: cacheStorage }) {
+  if (serviceWorker) {
+    const registration = await serviceWorker.getRegistration();
+    await registration?.unregister();
+  }
+  if (cacheStorage) {
+    const keys = await cacheStorage.keys();
+    await Promise.all(
+      keys
+        .filter((key) => OWN_CACHE_PREFIXES.some((prefix) => key.startsWith(prefix)))
+        .map((key) => cacheStorage.delete(key)),
+    );
+  }
+}
+
+// Clear the failed/stale worker and caches, then reload from a clean slate so the next install
 // re-downloads and re-verifies from scratch. A plain reload was not enough: the old worker keeps
 // controlling and the HTTP cache keeps serving the same stale bytes, so the mismatch just recurs.
 async function clearCachesAndReload() {
   try {
-    if ("serviceWorker" in navigator) {
-      const regs = await navigator.serviceWorker.getRegistrations();
-      await Promise.all(regs.map((r) => r.unregister()));
-    }
-    if ("caches" in self) {
-      const keys = await caches.keys();
-      await Promise.all(keys.map((k) => caches.delete(k)));
-    }
+    await clearOwnWorkerAndCaches({
+      serviceWorker: "serviceWorker" in navigator ? navigator.serviceWorker : null,
+      caches: "caches" in self ? caches : null,
+    });
   } catch (err) {
     console.warn("Integrity retry cleanup failed:", err);
   }
