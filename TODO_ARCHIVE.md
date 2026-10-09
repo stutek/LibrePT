@@ -10017,6 +10017,41 @@ pokaže.
 
 **Popravljeno 2026-10-03 12:46** (`fcb1b5c3`). Po odločitvi v §95 sme hkrati teči več treningov, zato aplikacija ob začetku drugega ne vpraša ničesar. Kartica je o tem, ali trening teče, spraševala le podlogo, ki drži en trening; zdaj bere žive programe svojega treninga. Trening, ki teče in ni na podlogi, kaže svojo uro po istem pravilu kot podloga: odšteva do konca termina ali šteje od začetka. Testa `test_a_started_session_still_reads_active_after_another_is_started` in `test_a_running_session_off_the_clipboard_shows_its_own_clock`.
 
+### 80.170 [x] P1 — Obvestilo o nenačrtovanih programih odpre neveljaven URL z ID-jem programa namesto termina in ostane na seznamu — ni ponovljivo, zaprto 2026-10-09
+
+**Scenarij in koraki:** ustvari prihodnji termin za stranko (npr. Sonja Zupan) in ji dodaj načrt vadbe z vajo (npr. Lat Pulldown) → izbriši ta termin preko pogovornega okna »Uredi termin« → »Izbriši termin« → v predalu za obvestila se pojavi razdelek »Nenačrtovani programi« z vsebino »1 program je pripravljen, a še ni dodeljen treningu« in gumbom »Jutrišnji načrt · Sonja Zupan · 2026-10-02« → tapni na ta gumb.
+
+**Opaženo:** brskalnik se premakne na naslov `/LibrePT/session/<programId>/client/<clientId>/edit?lang=sl`, kjer je prvi ID pravzaprav identifikator programa (`clientPrograms.id`), ne pa obstoječ termin (`sessionId` je po izbrisu termina `null`). Ker termin s tem ID-jem ne obstaja, usmerjevalnik ne more odpreti pogleda za urejanje načrta (`view-workout-setup`). Uporabnik tiho ostane na seznamu terminov (`view-clients`) z neveljavnim URL-jem v naslovni vrstici, brez napake ali obvestila. Nenačrtovani načrt je za trenerja popolnoma nedosegljiv in ga preko obvestila ni mogoče pregledati, urediti ali dodeliti novemu terminu.
+
+**Težava in vpliv:** ob izbrisu termina aplikacija načrt pravilno ohrani kot osnutek/nenačrtovan program v `clientPrograms` (status `planned`), vendar pa povezava v predalu obvestil ID programa napačno podtakne v pot `/session/:sessionId/client/:clientId/edit`. Trener do shranjenega osnutka ne more več dostopati, funkcija nenačrtovanih programov pa vodi v slepo ulico.
+
+**Predlog:** povezava ali klik na nenačrtovani program mora odpreti urejevalnik načrta za osnutek (npr. namensko pot za osnutek ali ustvarjanje novega termina z vnaprej naloženim osnutkom), namesto da poskuša navigirati na neobstoječ `sessionId` — opaženo na različici `403715f9`, 390 × 844, sl, 2026-10-02.
+
+**Ni ponovljeno (Claude, 2026-10-02 22:36:20.340, na `6ca7b361`, brskalnik Playwright, ne agyjev).**
+Naslov `/session/<id programa>/client/<id stranke>` je nameren: podloga za načrt brez termina ima
+za id kar id programa (`openSessionFromHistory` v `controllers/sessionLifecycle.js`), ob
+ponovnem nalaganju pa ga `openById` poišče med programi. V štirih različicah se je podloga vsakič
+odprla v urejanju: (1) program brez termina, vpisan neposredno; (2) izbris demo termina
+»Jutranja kondicija« z `deleteScheduledSession`, kar pokliče potrjen »Izbriši termin«, nato gumb
+v obvestilih; (3) isto, ko drug trening teče; (4) isto, nato ponovno nalaganje strani na tem
+naslovu. Ostane odprto. Manjka, kar je pri agyju drugače: trening, ki ga je ustvaril sam, in kako
+je odprl stran (`explore.py goto` ima zapisano zgodovino zastajanja). Naslednji korak: ponoviti
+agyjeve korake v brskalniku do zadnjega dotika in zapisati vrednost `location.pathname` ter ali je
+`#active-session-overlay` viden.
+
+**Ni ponovljeno (Claude, 2026-10-03, `e51fea88`, Playwright, 390 × 844 in 320 × 680).** Pet poti do nenačrtovanega programa: izbris booked termina z podloge (Dana Vidmar in Emil Zorc), odstranitev stranke v obrazcu termina (Gal Oven), zaključek treninga brez vpisa (Aleksandra Vrhovnik), izbris treninga, ki teče (Lea Test), ponovna dodelitev (Cvetka Novak). V vseh petih piše vrstica v predalu »Nenačrtovani programi« (po osvežitvi), dotik odpre `/session/<id programa>/client/<id stranke>/edit` in `#active-session-overlay` je viden z naslovom »Nenačrtovano · <stranka>« in vajami. Izbrisani program z `discarded` se po osvežitvi ne pokaže več. Dokaz, da je pot pravilna; kaj je agy storil drugače, ostane neznano.
+
+**Ni ponovljeno — potrjeno z avtomatiziranim raziskovalnim preizkusom (Antigravity, 2026-10-03 20:07:58, `67f57f65`, Playwright Chromium 390 × 844, sl).**
+Izvedenih 5 poglobljenih scenarijev natančno po opisanih korakih s stranko Sonja Zupan in vajo Lat Pulldown ter robnimi primeri:
+1. *Scenarij 1 (osnovni tok Sonja Zupan):* prihodnji termin z Lat Pulldown ustvarjen in izbrisan; predal prikaže »Trening · Sonja Zupan · 2026-10-03« z `data-action-resume="<programId>"`. Tap na gumb navigira na `location.pathname = "/LibrePT/session/<programId>/client/<clientId>/edit"`. `#active-session-overlay` se uspešno odpre (razredi `active-session-overlay editing-plan`, ni `.hidden`, viden na zaslonu). Prikazano je »Trening / Nenačrtovano · Sonja Zupan« z vajami in možnostmi urejanja. V konzoli 0 napak.
+2. *Scenarij 2 (reload po izbrisu):* po osvežitvi strani predal ohrani gumb nenačrtovanega programa; tap nanj znova uspešno odpre `#active-session-overlay` na istem URL-ju brez napak.
+3. *Scenarij 3 (sočasno tekoč drug trening):* medtem ko teče trening za Marka, tap na Sonjin nenačrtovani program v predalu nemoteno odpre podlogo z njenim nenačrtovanim načrtom v načinu urejanja, URL se pravilno usmeri.
+4. *Scenarij 4 (več nenačrtovanih programov - skupinski termin):* izbris skupinskega termina za Ano in Bora ohrani 2 ločena nenačrtovana programa v predalu; oba se dasta posamično odpreti v podlogi z ustreznim ID-jem in vsebino.
+5. *Scenarij 5 (urejanje, shranjevanje in dodelitev):* nenačrtovani program je mogoče polno urejati (dodajati vaje) in shraniti z »Končano z urejanjem načrta« (`#btn-done-edit`), kar ga preklopi iz `editing-plan` v standardni prikaz podloge brez napak. Meni ponuja »Uredi načrt«, »Vsi na ta načrt« in »Izbriši trening«. Povezava z §80.182: nenačrtovanega programa ni mogoče neposredno dodeliti novemu terminu ali vrniti na urnik (novi termin za isto stranko privzeto ponudi prazen načrt).
+*Zaključek:* §80.170 se ne ponovi. Usmerjevalnik in `openSessionFromHistory` delujeta točno po zasnovi. Ugotovitev iz 2026-10-02 je bila verjetno posledica zastoja/desinhronizacije takratnega gonilnika `explore.py` ali neupoštevanja odprtega modalnega okna.
+
+**Zaprto 2026-10-09 11:12** (Claude): ni ponovljeno v štirih različicah na `6ca7b361` in v petih scenarijih na `67f57f65` (agy, zapis zgoraj). Naslov s programom je nameren; `openById` program najde tudi po ponovnem nalaganju.
+
 ## 99.1 [x] Padli test ni bil okolje, ampak iskanje niza v naključnem id-ju — popravljeno 2026-10-01
 
 Po potisku 212 commitov je 2026-10-01 padel tek »Build, Verify and Deploy«, opravilo »Stage 1 ·
