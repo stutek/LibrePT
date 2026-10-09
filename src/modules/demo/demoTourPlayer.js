@@ -151,6 +151,41 @@ function sendPointer(doc, type, x, y) {
   );
 }
 
+/** Whether a press at (x, y) reaches `target`: what the browser finds at that point is the control
+ * or something inside it. A point outside the window finds nothing. */
+function pressReaches(doc, target, { x, y }) {
+  const hit = doc.elementFromPoint(x, y);
+  return Boolean(hit) && (hit === target || target.contains(hit));
+}
+
+/** Where a drag presses: the centre of the control, and only once a press there reaches it.
+ *
+ * A tap is checked against the hand after it travels (`handIsOver`); a drag needs more, because its
+ * press starts a gesture the app reads from the element it lands on. Two readings of a box that
+ * agree do not prove the control is where it will stay: on a busy machine the deck had not yet
+ * scrolled the card into view, its box stood still below the window for two readings, and the whole
+ * gesture went to the page body (found 2026-10-09, one run in four under load). So the press point
+ * is tested with the browser's own hit test, the control is scrolled into view again when the test
+ * fails, and the hand travels there before the point is tested once more. Returns null when no
+ * attempt reaches the control, so the step fails by saying so rather than dragging empty page.
+ */
+async function placeThePress(target, { doc, hand, wait, pace }) {
+  for (let attempt = 0; attempt <= HAND_RETRIES; attempt += 1) {
+    await waitForBoxToSettle(target, wait);
+    const point = centreOf(target);
+    if (!pressReaches(doc, target, point)) {
+      target.scrollIntoView({ block: "center", inline: "nearest", behavior: "auto" });
+      continue;
+    }
+    if (!hand) return point;
+    moveDemoHand(hand, point.x, point.y);
+    await wait(pace.travelMs);
+    // The control can move while the hand travels; the press goes where the hand is.
+    if (pressReaches(doc, target, point)) return point;
+  }
+  return null;
+}
+
 /** The demonstration of a DRAG: a press that travels and then lifts, rather than a press that ends
  * where it began.
  *
@@ -163,12 +198,9 @@ function sendPointer(doc, type, x, y) {
  * so what the viewer watches and what the app is told are the same thing at every instant. That is
  * also what the demo's own test asserts about taps, and a drag has no reason to be held to less.
  */
-async function performDrag(step, target, { doc, hand, wait, pace }) {
-  const start = centreOf(target);
+async function performDrag(step, start, { doc, hand, wait, pace }) {
   let { x, y } = start;
   if (hand) {
-    moveDemoHand(hand, x, y);
-    await wait(pace.travelMs);
     pressDemoHand(hand);
     await wait(pace.tapLeadMs);
   }
@@ -209,8 +241,11 @@ async function performDrag(step, target, { doc, hand, wait, pace }) {
  * control whose state says "already done", so its expectation is the only judge.
  */
 async function dragStep(step, target, { doc, hand, wait, pace }) {
-  await waitForBoxToSettle(target, wait);
-  const held = await performDrag(step, target, { doc, hand, wait, pace });
+  const start = await placeThePress(target, { doc, hand, wait, pace });
+  if (!start) {
+    return { id: step.id, ok: false, reason: `a press on ${step.target} lands on something else` };
+  }
+  const held = await performDrag(step, start, { doc, hand, wait, pace });
   if (!held.ok) return { id: step.id, ok: false, reason: `while held: ${held.reason}` };
   const outcome = await waitForOutcome(step, doc, wait, pace.outcomeBudgetMs);
   await wait(step.settleMs ?? pace.stepPauseMs);
