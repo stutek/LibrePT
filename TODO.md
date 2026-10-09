@@ -176,6 +176,15 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#310-x-decided-d
 writes: export and import through the share sheet, with no account anywhere. Whether that is enough
 for a trainer with two devices is unknown. Next step: ask a trainer who uses two devices.
 
+### 3.14 [ ] Drive sync does not check which app wrote the file it reads
+
+Found 2026-10-09 11:26:00.782 (Claude, while `35c43dfe` made file restore refuse a LibrePTNotes
+backup). `data/driveSyncService.js` decrypts the sync file and merges it without the `app` check
+that restore now makes (`refusesForeignApp` in `data/backupFile.js`). Low risk: LibrePT reads only
+its own `librept_sync.json` in its Drive app folder. A guard needs one decision first: what the
+trainer sees when a sync file is refused, and that the file is kept rather than overwritten (as the
+existing `locked: true` answer does). Blocks nothing.
+
 ## 4. UI / UX
 
 ### 3.11 [x] Sync surface — the icon vocabulary and tap-to-sync — SHIPPED 2026-08-12
