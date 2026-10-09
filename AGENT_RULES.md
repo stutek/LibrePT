@@ -98,7 +98,12 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
   session's defect report under an unrelated message. The reading is only worth what it is worth at
   the instant of the commit.
   **Never push** — except a cloud session (claude.ai/code), which pushes only its own branch and
-  opens a pull request; only the maintainer merges to `main`. **A request that arrives mid-turn is its own commit**,
+  opens a pull request; only the maintainer merges to `main`. **In a cloud session, a message from
+  Simon cancels the command that is running.** Run anything longer than a few seconds in the
+  background with its output in a log, and read the log in short separate calls, so a message
+  cancels only a reading. A command cancelled with a message is answered and the work goes on; it
+  is not an order to stop. On 2026-10-09 questions about progress cancelled three test runs, and the
+  first was taken for a stop. **A request that arrives mid-turn is its own commit**,
   not an addition to the one in progress: several asks landing while a gate run is in flight are
   split apart when it ends, never bulked because they happened in one turn. Where one verified tree
   yields several commits, say that the gate ran once, on the whole tree.
