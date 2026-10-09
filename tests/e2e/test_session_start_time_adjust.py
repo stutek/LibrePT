@@ -24,6 +24,9 @@
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
 import re
+
+from playwright.sync_api import expect
+
 from tests.conftest import answer_app_questions
 
 HOUR_MIN = re.compile(r"^-?\d{2}h \d{2}m$")
@@ -152,11 +155,14 @@ def test_deleting_an_off_schedule_session_keeps_its_plans_unscheduled(
 
     answer_app_questions(page)
     page.click("#btn-session-start-time-delete")
-    page.wait_for_selector("#view-clients.active")
 
-    assert page.locator(".session-card", has_text=CARD_TITLE).count() == 0, (
-        "a deleted session must leave the dashboard, not just close its clipboard"
-    )
+    # Waited for on the card itself. The board view stays active under an open clipboard, so a wait
+    # for `#view-clients.active` passed before the delete had run, and the count after it lost that
+    # race once on GitHub (2026-10-09).
+    expect(
+        page.locator(".session-card", has_text=CARD_TITLE),
+        "a deleted session must leave the dashboard, not just close its clipboard",
+    ).to_have_count(0)
     planned_after = _unscheduled_plan_count(page)
     assert planned_after > planned_before, (
         "the participants' plans must survive the session as unscheduled ones"

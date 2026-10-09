@@ -244,6 +244,11 @@ suite race ahead of the app:
   and the guide advancing, so the wait returned mid-transition and the next click landed on a button
   that was disabled again by the time it arrived. Decide which outcome to expect BEFORE the action —
   here, from the step number — and wait for exactly that one.
+- **A wait for a state that is already true waits for nothing.** `#view-clients.active` stays true
+  under an open clipboard, so a test that deleted a session from the clipboard, waited for it, and
+  then counted the cards raced the delete; it lost once on GitHub (2026-10-09). Wait for what the
+  action changes — there, `expect(card).to_have_count(0)` — never for a state the screen may already
+  be in before the action.
 
 **The frozen programme corpus** lives in [tests/fixtures/programs/](fixtures/programs/) — real pasted
 shapes an assistant or a spreadsheet actually produces, which
