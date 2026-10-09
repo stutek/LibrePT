@@ -6052,6 +6052,14 @@ every way in. Shipped in `e51fea88`.
   **Deleting a one-off session removes its row** (`sessionsAfterRemoving`), while the ruling of
   2026-10-02 says a cancelled slot is marked `cancelled`. Its programs are unscheduled first, so
   nothing points at the missing row. Keep the row as `cancelled` instead?
+- **A and C done 2026-10-09 11:41:23.032 in `0a55c01d`.** Beyond the rulings, approved by Simon:
+  a fourth status `deleted` for a deleted evening of a repeating session (hidden; it must keep its
+  row or the rule makes it again). The menu says "Odpovej trening", not "Prekliči termin", because
+  the dialog's dismiss button already says "Prekliči". **[ ] Left open by that change:**
+  a cancelled session cannot be deleted or un-cancelled afterwards; the programme import dialog
+  lists cancelled and deleted sessions; stepping to a client's previous or next session passes
+  through cancelled ones; the dialog that offers to move the schedule at Start offers delete but
+  not cancel.
 
 **Found in the deeper review** (checked against the code 2026-10-03 12:27:48.602):
 - [x] A date taken as the first ten characters of an instant was the day in UTC, so after midnight
