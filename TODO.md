@@ -6210,6 +6210,15 @@ Razlog je v [TODO_ARCHIVE.md](TODO_ARCHIVE.md), razdelek 99.3. Popravek: `337ae2
 Orodij ob veščinah (`explore.py`, `watch.py`) ruff ne vidi. **Čaka na Simona:** ali `.agents/`
 dodamo med cilje; dodatek lahko najprej pokaže napake v `explore.py`.
 
+### 99.4 [ ] Seja v oblaku (claude.ai/code) dnevnikov ne prebere, tudi s prijavo
+
+**Najdeno 2026-10-09.** `gh` v seji v oblaku našteje teke, opravila in pripise, dnevnik pa ne.
+GitHub dnevnik pošlje s preusmeritvijo na drug strežnik
+(`results-receiver.actions.githubusercontent.com`, `*.blob.core.windows.net`), in posrednik seje
+povezavo tja zavrne s 403. Prijava tega ne spremeni. Imena padlih testov je moral Simon prepisati
+iz brskalnika. **Predlog:** delotok ob padcu zapiše povzetek iz `.build-reports/` v pripis opravila
+(`::error::`), ker pripise `gh api …/check-runs/<id>/annotations` prebere.
+
 ## 100. [ ] `build commit` zavrne commit, ko HEAD premakne datoteka, ki je gate ne bere
 
 **Najdeno 2026-10-01 (librept-06).** `build commit` (`build/snapshot.py`, `stale_reasons`) sprejme
@@ -6274,3 +6283,21 @@ zapisanega razloga. **Čaka na Simona:** ali to hoče, ker vsako novo opozorilo 
   izhodno kodo 3; dnevnik ima le »Failed to access summary file /home/zap/zap_out.json«. Isto drevo
   je ob 23:29 prešlo z WARN-NEW: 0. Vzrok ni znan. Če se ponovi: ohraniti izpis vsebnika (`-silent`
   ga skrije) in preveriti, ali je bil cilj `ZAP_TARGET` takrat dosegljiv.
+
+## 103. [ ] Brskalnik v testih bere časovni pas stroja: lokalno Ljubljana, na GitHubu UTC
+
+**Najdeno 2026-10-09.** Objava na `0a55c01` je padla na 3. stopnji, v
+`test_the_drawer_drawn_again_during_a_running_session_does_not_overflow`. Test je kartico iskal po
+besedilu »10:00 - 12:00«. Zamrznjena ura testov je 09:00 UTC (`FROZEN_NOW` v `tests/conftest.py`),
+demo seja pa ima čas po lokalni uri brskalnika: v Ljubljani 10:00 - 12:00, na GitHubu 08:00 - 10:00.
+Test je od `899fd74` (2026-10-03) prehajal lokalno in padel ob prvem potisku. Isti korak v sprehodu
+je kartico v UTC tiho preskočil, zato seja v teku na GitHubu ni bila pregledana. Popravljeno
+2026-10-09: `tests/e2e/test_layout_overflow.py` išče `data-session-id="s01f2e3d"`, sprehod pa ob
+manjkajoči kartici pade, namesto da konča tiho. Datoteka prehaja v UTC in v Ljubljani.
+
+### 103.1 [ ] Isti časovni pas za vse teste
+
+Nič ne prepreči, da naslednji test spet zapiše uro iz lokalnega časa. **Predlog:** brskalniku v
+testih določiti en časovni pas (`timezone_id` v `browser_context_args`), ki ni ne UTC ne Ljubljana,
+da test, vezan na enega od njiju, pade že lokalno. **Cena:** `frozen_today()` računa z lokalnim
+časom Pythona in se mora preklopiti na isti pas; teste, ki to napako že imajo, pokaže prvi tek.
