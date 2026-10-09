@@ -189,13 +189,17 @@ def main(argv=None):
     args = parser.parse_args(argv)
 
     repo = owner_repo()
-    sha = args.sha or git("rev-parse", "HEAD")
+    # Resolved to the full id: GitHub matches `head_sha` exactly, so a short id found no runs at
+    # all and the watch waited on nothing (2026-10-09).
+    sha = git("rev-parse", args.sha or "HEAD")
     subject = git("log", "-1", "--format=%s", sha)
     auth = token()
     interval = max(args.interval, MIN_INTERVAL_SECONDS)
     deadline = time.monotonic() + args.max_minutes * 60
     print(f">>> {repo} {sha[:7]} — {subject}")
-    print(f"    login: {'yes, logs readable' if auth else 'no, logs not readable'}")
+    # A login is necessary for the log, not sufficient: a cloud session has one, and its proxy still
+    # refuses the server GitHub sends the log from. Whether the log was read shows in the report.
+    print(f"    login: {'yes' if auth else 'no, logs not readable'}")
 
     while True:
         running, lines, verdict = look(repo, sha, auth)
