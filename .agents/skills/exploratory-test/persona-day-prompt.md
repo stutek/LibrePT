@@ -92,6 +92,12 @@ For every session and every support task of your day, record:
 
 Stop after about 60 minutes of work or when the day is done, whichever comes first.
 
+Send each candidate finding to the orchestrator immediately: the visible steps, expected and
+observed result, app SHA and a timestamp from `date '+%F %T.%N'`. Do not wait for the final report.
+For a suspected defect, yield the browser explicitly for independent reproduction and resume
+only after the orchestrator returns it. Keep writing your report as you go. The orchestrator
+owns recording findings in TODO.md; your private report is not a substitute.
+
 ## Part 3 — report the gaps
 
 Save the report, in Slovenian, to `{report_file}`:

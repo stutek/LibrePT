@@ -1,6 +1,10 @@
 ---
 name: exploratory-test
-description: Exploratory testing of LibrePT in a headless browser, in the role of a trainer who has never seen it and reads no documentation, including the first start after a data schema update. Three modes. FORMS — judge one form at a time: which fields are too many, which are missing, where a control does not work, where a field has the wrong type or order; judged against what a context-free trainer subagent says the task needs, written before the form is seen; one subsection of the first-use trial section per form. SCENARIOS — hunt for defects no scripted test covers in the published app, one short scenario at a time, findings into the first-use trial section of TODO.md. A TRAINER'S DAY — a context-free subagent invents a whole working day (sessions, exercises, packages, billing, messages) and then tries to live it in the app; the orchestrator judges which gaps are worth automating and writes them into the trainer's-day section of TODO.md. Use when asked to explore, probe, "test as a trainer", run cycles of exploratory testing, or continue the first-use trial or the trainer's-day work. Every scenario and every day is recorded so none is repeated.
+description: >-
+  Explore LibrePT through its UI as a trainer with no prior app knowledge. Test
+  forms, short scenarios, whole working days or a simulated week, including data
+  updates. Record findings immediately in TODO.md; observe and report without
+  changing application code. Use for exploratory testing and trainer trials.
 type: Skill
 title: "Raziskovalno preizkušanje v vlogi novega trenerja"
 tags: [testing, exploratory, browser, playwright, first-use-trial, all-agents]
@@ -234,6 +238,22 @@ browser on port 9333, so two trainers at once would drive each other's pages.
    decision that is his. A number the trainer made up is an assumption and is labelled so.
 6. Add the day's row to the ledger, then commit the TODO edit alone (prose-only: run
    `agent_tools.doclinks`, not the gate).
+
+**Report as the work happens.** The trainer sends each candidate finding to the orchestrator
+immediately, with the visible steps, expected and observed result, SHA and timestamp. The
+orchestrator records it in TODO.md immediately, marking an unverified report as such, then checks
+duplicates and reproduces suspected defects before confirming them. Hand the single browser
+between trainer and orchestrator explicitly; never drive it together. Update the same TODO entry
+with the verdict. Private reports and the ledger do not replace TODO.md, and the end of a day is
+not a reason to delay a finding.
+
+**A simulated whole week, when requested.** Extend the persona prompt to seven consecutive days
+planned before opening the app, with recurring clients and tasks that depend on earlier days.
+Keep the same browser data across days; exercise rescheduling, follow-up on an earlier workout,
+and the week's final review as the invented work calls for them. Run days in order and record each
+day as it ends, including rest days and work the app cannot carry. Label simulated dates and
+estimated minutes; do not claim that seven real days elapsed. Continue after the first week when
+the requested time or token budget remains, reserving enough to save findings and close the browser.
 
 **Tag vocabulary** (a day covers several; the ledger lists them so the next day can differ):
 `individualno`, `skupina`, `krožna-vadba`, `kardio`, `rehabilitacija`, `zunaj` (park, stranka doma),
