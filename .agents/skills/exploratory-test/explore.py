@@ -8,6 +8,7 @@ leaving the page, its IndexedDB and its service worker exactly as they were.
 """
 
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -141,9 +142,15 @@ def start(width=390, height=844):
     shutil.rmtree(STATE, ignore_errors=True)
     STATE.mkdir(parents=True, exist_ok=True)
     (STATE / "viewport.json").write_text(json.dumps([width, height]))
+    # A cloud session (claude.ai/code) runs as root, and Chromium refuses to start as root with its
+    # sandbox on; it printed nothing to say so, and `start` reported only a missing debugging port
+    # (2026-10-09). Playwright passes --no-sandbox to the browsers it launches itself; this one is
+    # launched by hand, so it is passed here, and only as root.
+    sandbox = ["--no-sandbox"] if os.geteuid() == 0 else []
     subprocess.Popen(
         [
             exe,
+            *sandbox,
             "--headless=new",
             "--incognito",
             f"--remote-debugging-port={PORT}",
