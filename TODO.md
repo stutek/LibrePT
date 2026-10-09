@@ -3878,9 +3878,24 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80123-x-p2--pod
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80124-x-p2--oznaka-predogled-vodi-na-stran-ni-najdena-ko-je-aplikacija-že-naložena--popravljeno-2026-09-30).
 
-### 80.125 [x] P3 — Na slovenski strani so pomožna imena gumbov za bralnik zaslona angleška — popravljeno 2026-09-30
+### 80.125 [ ] P3 — Na slovenski strani so pomožna imena gumbov za bralnik zaslona angleška
 
-Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80125-x-p3--na-slovenski-strani-so-pomožna-imena-gumbov-za-bralnik-zaslona-angleška--popravljeno-2026-09-30).
+Prejšnja ugotovitev je v [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80125-x-p3--na-slovenski-strani-so-pomožna-imena-gumbov-za-bralnik-zaslona-angleška--popravljeno-2026-09-30).
+
+**Scenarij in koraki:** teden 15, slovenski vmesnik 390 × 844; za izmišljeno stranko Nejc Polak
+ustvari »Moč A«, 2026-10-12 16:00–16:45, nato »Začni trening« pred načrtovanim datumom.
+
+**Opaženo:** okno »Trening se je začel izven urnika« ima zapiralni gumb z dostopnim imenom
+`Close`; »Ohrani urnik«, »Prilagodi čas« in ostalo besedilo so slovenski. Podagentov dokaz
+2026-10-09 11:07:06.184058129; neodvisno potrjeno z branjem odprtega okna in njegovega DOM.
+
+**Težava in vpliv:** bralnik zaslona oziroma glasovno upravljanje dobi angleško ime sredi slovenskega
+obrazca. Prejšnje zaprtje te točke ne pokriva tega dialoga.
+
+**Predlog:** tudi zapiralni gumb tega okna naj se imenuje »Zapri«. Potrjeno
+2026-10-09 11:07:25.433044167 +0200, prikaz `dev`, shema 6, HEAD `437a7a79`; delovno drevo se
+spreminja (ob preverjanju spremembi appLifecycleController in cacheManifest). Ne trdimo, da je
+napaka ponovljena na čistem commitu.
 
 ### 80.126 [x] P3 — Pred izbiro jezika stran nima `<html lang>`, besedilo za oknom pa je angleško — popravljeno 2026-09-30
 
