@@ -3093,6 +3093,8 @@ korak dodelitve.
 shranitev v urnik ali jasno povedati, da termin ni rezerviran. Preizkus: pot iz profila se konča s
 kartico na izbranem dnevu ali z obvestilom, da termin ni rezerviran.
 
+**Preverjeno 2026-10-09 11:19 na `c918d6d6`: se ponovi** (»Načrtuj program« za Jane Doe, 20:00–20:45: na seznamu treningov ni kartice; po osvežitvi je med nenačrtovanimi »Testni trening · Jane Doe · 2026-10-09«). Še vedno čaka na Simona.
+
 ### 80.6 [ ] P1 — Zgodovina zaključenih vadb kaže načrt in vse vaje kot preskočene
 
 **Prvotno opaženo** (`0625bd6`): »Splošna zgodovina vadb« je kazala nezačet načrt z vsemi vajami
@@ -3123,6 +3125,8 @@ naredil po načrtu, ima na izbiro le »prazno vadbo«. Po »Zaključi zdaj« plo
 Načrt s tremi vajami ni nikjer več viden. Isto opiše dnevnik prvega odprtja 04.
 
 **Dokaz 2026-10-02**, objavljena `933dbc0`: »Večerna moč«, »TEST Živa Dolgoime Koren«, Dumbbell Goblet Squat, samo opomba brez ocene, zaključek po obeh opozorilih. Urnik kaže »Zaključeno / 00:02 / Program ni določen«, profil pa »Ni še zabeleženih vadb.«. Opozorilo o nezabeleženih serijah je bilo prikazano; novih izjem v konzoli pri zaključku ni bilo.
+
+**Preverjeno 2026-10-09 11:33 na `c918d6d6`: se ponovi** (tri vaje, »Prelahko« le na drugi: v zgodovini »Abmat Sit-up PRESKOČENO«, »Assault Bike PRESKOČENO«). Še vedno čaka na §94, točka 1.
 
 ### 80.7 [x] P2 — Prvi prikaz novega termina pokaže 1970-01-01 — popravljeno 2026-09-27
 
@@ -3377,36 +3381,9 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8050-x-p2--stra
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8051-x-p1--stranka-izbere-odgovor-na-vabilo-poslati-pa-ga-nima-s-čim--popravljeno-2026-09-27).
 
-### 80.52 [ ] P1 — Spremembe načrta nezačetega treninga izginejo, ko trening odpreš znova s kartice
+### 80.52 [x] P1 — Spremembe načrta nezačetega treninga izginejo, ko trening odpreš znova s kartice — ni ponovljivo, zaprto 2026-10-09
 
-**Opaženo** (dan trenerja 01, §88; ponovljeno na `main`): trener odpre jutrišnji trening s kartice, v
-⋮ »Uredi načrt« doda ali preimenuje vajo, »Končano«, se z ročico vrne na ploščo in trening spet odpre s
-kartice. Načrt je spet tak, kot ga da rutina (»Probe Movement« je spet »Face Pulls«), brez besede, tudi
-po osvežitvi. Enako izgine sklop s krogi (`0625bd6`, »SIM Ravnotežje in moč«, dva kroga, Wall Sit).
-
-**Sprememba teže** (`8b2ce80`, prej §80.91): prihodnji trening »Ponedeljkova moc«, Barbell Bench Press
-z 62.5 na 90, »Končano z urejanjem načrta«. Podloga kaže 90 kg, po osvežitvi 62.5; v `sessions` in
-`planUpdates` ni zapisa, opozorila ni. Trener, ki za mizo pripravi obremenitve za teden, tega ne izve.
-
-**Zaključek izbriše ročno sestavljen načrt** (`main` `12d0e66`, 2026-09-30): trening »Moč« za jutri brez
-rutine, tri vaje z 12, 30 in 25 kg, »Začni trening«, »Zaključi vadbo« brez zapisane vaje (§80.6). Nato
-podloga »Vaj še ni.«, stran stranke »Ni še zabeleženih vadb.«, ni niti »Shrani kot rutino«; v IndexedDB
-ni nobene od treh vaj.
-
-**Vzrok, potrjen v kodi:** načrt treninga, ki se še ni začel, živi samo v eni podlogi,
-`librept_active_session`. Tap na kartico ([sessionCard.js](src/modules/sessionList/sessionCard.js))
-pokliče `launchClipboardDirectly` ([sessionsView.js](src/modules/sessionList/sessionsView.js)) in
-`startWorkoutSession`, ki podlogo zgradi na novo iz rutine. Načrt zato izgine ob osvežitvi in ob
-odprtju katerega koli drugega treninga.
-
-**Preprost popravek ne zadošča** (preizkušeno 2026-09-29): tap, ki vrne na že odprto podlogo, ohrani
-načrt, izgubi pa udeleženca, dodanega treningu pozneje (pokvari demo korak »Pritisni Johnovo ime«).
-
-**Popravek, ki drži:** načrt vsakega udeleženca se shrani pri treningu samem. Simon je 2026-09-30
-odločil, da je trening en zapis s stanjem (§95, stanje »planned« v §95.2), zato ta točka čaka na §95.
-Preizkus: spremeniti načrt nezačetega treninga, osvežiti, odpreti s kartice in s spodnje vrstice, nato
-zaključiti — sprememba je povsod, tudi na strani stranke. Na `0625bd6` sta spodnja vrstica in kartica
-po spremembi rutine vrnili različno težo (4 kg in 6 kg).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#8052-x-p1--spremembe-načrta-nezačetega-treninga-izginejo-ko-trening-odpreš-znova-s-kartice--ni-ponovljivo-zaprto-2026-10-09).
 
 ### 80.53 [x] P2 — Načrt treninga, vpisanega za nazaj, po osvežitvi izgine — popravljeno 2026-09-29
 
@@ -3777,6 +3754,8 @@ zavrnitve shranjevanja:
 Popravljeno (`a84138b`): začetnice sledijo imenu tudi pri preimenovanju (prej »NS« po »Nova
 stranka«); posebej nastavljen znak se ne povozi.
 
+**Preverjeno 2026-10-09 11:12:30.262 na `c918d6d6`: se ponovi** (prazno ime, »Shrani«: vrstica »Nova stranka« brez sporočila). Še vedno čaka na Simona.
+
 ### 80.106 [x] P3 — Vprašanje pred zaključkom treninga šteje čas v minutah: »še približno 3812 minut« — popravljeno 2026-09-30
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80106-x-p3--vprašanje-pred-zaključkom-treninga-šteje-čas-v-minutah-še-približno-3812-minut--popravljeno-2026-09-30).
@@ -4052,6 +4031,8 @@ ko telefon izgubi, izgubi vse stranke. Iz brskalnika orodja tega ni mogoče loč
 **Preverba za Simona (ročno, na telefonu, `LibrePT.test@gmail.com` ni potreben):** v Chromu na
 Androidu in v Safariju na iPhonu izvoziti kopijo in pogledati, ali je v »Prenosi« datoteka. Če je,
 se zapis zapre kot omejitev orodja in ostane le protislovje sporočil (P3).
+
+**Preverjeno 2026-10-09 11:36:22.860 na `c918d6d6`, Chromium na računalniku: se ne ponovi** (datoteka `librept_backup_2026-10-09.json`, 63 169 bajtov, `formatVersion` 8, AES-GCM, brez imena stranke). Vrstica »Varnostne kopije s te naprave še niso šifrirane.« po šifriranem izvozu ostane, kar je napačno. Odprto ostane le ročno preverjanje na telefonu.
 
 ### 80.137 [x] P2 — Stranka z angleškim »Jezik obrazca« dobi slovensko vabilo in slovensko stran za odgovor — popravljeno 2026-09-30
 

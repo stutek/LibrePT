@@ -10052,6 +10052,39 @@ Izvedenih 5 poglobljenih scenarijev natančno po opisanih korakih s stranko Sonj
 
 **Zaprto 2026-10-09 11:12** (Claude): ni ponovljeno v štirih različicah na `6ca7b361` in v petih scenarijih na `67f57f65` (agy, zapis zgoraj). Naslov s programom je nameren; `openById` program najde tudi po ponovnem nalaganju.
 
+### 80.52 [x] P1 — Spremembe načrta nezačetega treninga izginejo, ko trening odpreš znova s kartice — ni ponovljivo, zaprto 2026-10-09
+
+**Opaženo** (dan trenerja 01, §88; ponovljeno na `main`): trener odpre jutrišnji trening s kartice, v
+⋮ »Uredi načrt« doda ali preimenuje vajo, »Končano«, se z ročico vrne na ploščo in trening spet odpre s
+kartice. Načrt je spet tak, kot ga da rutina (»Probe Movement« je spet »Face Pulls«), brez besede, tudi
+po osvežitvi. Enako izgine sklop s krogi (`0625bd6`, »SIM Ravnotežje in moč«, dva kroga, Wall Sit).
+
+**Sprememba teže** (`8b2ce80`, prej §80.91): prihodnji trening »Ponedeljkova moc«, Barbell Bench Press
+z 62.5 na 90, »Končano z urejanjem načrta«. Podloga kaže 90 kg, po osvežitvi 62.5; v `sessions` in
+`planUpdates` ni zapisa, opozorila ni. Trener, ki za mizo pripravi obremenitve za teden, tega ne izve.
+
+**Zaključek izbriše ročno sestavljen načrt** (`main` `12d0e66`, 2026-09-30): trening »Moč« za jutri brez
+rutine, tri vaje z 12, 30 in 25 kg, »Začni trening«, »Zaključi vadbo« brez zapisane vaje (§80.6). Nato
+podloga »Vaj še ni.«, stran stranke »Ni še zabeleženih vadb.«, ni niti »Shrani kot rutino«; v IndexedDB
+ni nobene od treh vaj.
+
+**Vzrok, potrjen v kodi:** načrt treninga, ki se še ni začel, živi samo v eni podlogi,
+`librept_active_session`. Tap na kartico ([sessionCard.js](src/modules/sessionList/sessionCard.js))
+pokliče `launchClipboardDirectly` ([sessionsView.js](src/modules/sessionList/sessionsView.js)) in
+`startWorkoutSession`, ki podlogo zgradi na novo iz rutine. Načrt zato izgine ob osvežitvi in ob
+odprtju katerega koli drugega treninga.
+
+**Preprost popravek ne zadošča** (preizkušeno 2026-09-29): tap, ki vrne na že odprto podlogo, ohrani
+načrt, izgubi pa udeleženca, dodanega treningu pozneje (pokvari demo korak »Pritisni Johnovo ime«).
+
+**Popravek, ki drži:** načrt vsakega udeleženca se shrani pri treningu samem. Simon je 2026-09-30
+odločil, da je trening en zapis s stanjem (§95, stanje »planned« v §95.2), zato ta točka čaka na §95.
+Preizkus: spremeniti načrt nezačetega treninga, osvežiti, odpreti s kartice in s spodnje vrstice, nato
+zaključiti — sprememba je povsod, tudi na strani stranke. Na `0625bd6` sta spodnja vrstica in kartica
+po spremembi rutine vrnili različno težo (4 kg in 6 kg).
+
+**Zaprto 2026-10-09 11:25:20** (Claude, na `c918d6d6`): dodana vaja in spremenjena teža (62,5 → 90 kg) ostaneta po ponovnem odprtju s kartice, po odprtju drugega treninga in po osvežitvi. Model iz §95 (trening je zapis s stanjem, načrt se shrani v programih) je to rešil.
+
 ## 99.1 [x] Padli test ni bil okolje, ampak iskanje niza v naključnem id-ju — popravljeno 2026-10-01
 
 Po potisku 212 commitov je 2026-10-01 padel tek »Build, Verify and Deploy«, opravilo »Stage 1 ·
