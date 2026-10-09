@@ -3022,6 +3022,10 @@ aplikacija. Postopek je veščina `exploratory-test` (`.agents/skills/explorator
 službi, tri stalne stranke z izmenskim delom, devet načrtovanih vadb. Podagent pred prvim ogledom
 aplikacije sestavi teden; opažanja zapisujemo tukaj sproti, sumljive napake neodvisno ponovimo.
 Telefon 390 × 844, slovenščina, lokalna aplikacija; začetni `main` `9ac45868`.
+**Omejitev — 2026-10-09 11:05:53.765898769 +0200:** Simon opozarja, da se aplikacija med preizkusom
+spreminja. Ob preverjanju je HEAD `c918d6d6`, delovno drevo pa vsebuje še neshranjene spremembe
+aplikacije. Ob najdbi beležimo trenutno stanje; če se med koraki spremeni, ponovimo po osvežitvi.
+Sam SHA pri spremenjenem delovnem drevesu ne določa v celoti preizkušene različice.
 
 Vsaka točka pove, na kateri različici je bila opažena: objavljena `0625bd6` ali `8b2ce80`, ali `main`
 s SHA. Ugotovitev z objavljene različice se pred popravkom preveri na `main`. Pod točko stoji verdikt:
