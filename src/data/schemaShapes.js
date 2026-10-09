@@ -34,13 +34,16 @@ function mergedById(existing, added) {
   return [...byId.values()];
 }
 
-/** A session with one `status` instead of the flags `completed` and `cancelled`. A session that
- *  carried both was cancelled: the trainer took it off the board after it had run. */
+/** A session with one `status` instead of the flags `completed` and `cancelled`. Every older build
+ *  set `cancelled` in one place only: deleting an evening of a repeating session, whose row stays so
+ *  the rule does not produce the evening again. So it is "deleted", which the board does not show,
+ *  as it did not show it before; "cancelled" now means a session kept on the board. A session that
+ *  carried both flags was deleted after it had run. */
 export function sessionInCurrentShape(session) {
   if (!session || typeof session.status === "string") return session;
   const { completed, cancelled, ...rest } = session;
   let status = "scheduled";
-  if (cancelled === true) status = "cancelled";
+  if (cancelled === true) status = "deleted";
   else if (completed === true) status = "done";
   return { ...rest, status };
 }

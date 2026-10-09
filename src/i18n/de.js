@@ -120,6 +120,12 @@ export const de = {
   delete_sets_two: "{count} Sätze",
   delete_sets_few: "{count} Sätze",
   delete_sets_other: "{count} Sätze",
+  btn_cancel_session: "Training absagen",
+  confirm_cancel_session:
+    "Dieses Training absagen? Es bleibt im Terminplan, als abgesagt markiert, und lässt sich nicht starten. Die aufgezeichneten Sätze werden gelöscht. Signale, die auf Prüfung warten, bleiben erhalten, und der Plan jedes Teilnehmers bleibt unter „Pläne ohne Termin“ erhalten.",
+  cancel_one_evening:
+    "Das ist ein Abend eines wiederkehrenden Termins. Nur dieser Abend wird abgesagt, die anderen bleiben.",
+  cancel_slide_label: "Zum Absagen dieses Trainings bis ans Ende schieben",
   confirm_delete_plan:
     "Alle Übungen aus diesem Plan löschen? Danach kannst du ihn neu aufbauen oder die Bearbeitung beenden.",
   warning_banner_title: "Sicherheitshinweis zum Kunden",
@@ -509,6 +515,7 @@ export const de = {
   program_not_defined: "Kein Programm festgelegt",
   no_members_assigned: "Keine Teilnehmer",
   session_completed: "Abgeschlossen",
+  session_cancelled: "Abgesagt",
   // The badge on the past card in the clipboard deck, read as "Zuletzt: 2026-07-20".
   last_time: "Zuletzt",
   // The title bar of a finished session reopened from the deck or from History, when the record

@@ -53,11 +53,13 @@ import {
 } from "./sessionFocusUrl.js";
 import {
   beginWorkoutSession,
+  cancelScheduledSession,
+  cancelSessionQuestion,
   cancelWorkoutSession,
   deleteScheduledSession,
-  deleteSessionNeedsSlide,
   deleteSessionQuestion,
   finishWorkoutSession,
+  sessionEndNeedsSlide,
 } from "./sessionLifecycle.js";
 import {
   clearActivePlan,
@@ -228,9 +230,9 @@ function wireSessionExpandBar(navigateToPath) {
   }
 }
 
-// The title bar's ⋯ overflow menu, its Edit-plan trigger, and the Start/Complete/Delete actions
-// that hang off it — all of a single overlay-chrome piece, wired together because closeSessionMenu
-// is shared between the menu's own outside-tap dismissal and the Delete action inside it.
+// The title bar's ⋯ overflow menu, its Edit-plan trigger, and the Start, Complete, Cancel and
+// Delete actions that hang off it — all of a single overlay-chrome piece, wired together because
+// closeSessionMenu is shared between the menu's own outside-tap dismissal and the actions inside it.
 function wireSessionMenuAndActions(t) {
   const sessionMenuBtn = document.getElementById("btn-session-menu");
   const sessionMenu = document.getElementById("session-menu");
@@ -430,12 +432,28 @@ function wireSessionMenuAndActions(t) {
     // discarding the clipboard; a real session's delete has to remove the row behind it too.
     const isPlanning = getActiveSession()?.sourceSession?.isPlanning;
     const message = isPlanning ? t("confirm_cancel") : deleteSessionQuestion(t);
-    const slide = !isPlanning && deleteSessionNeedsSlide();
+    const slide = !isPlanning && sessionEndNeedsSlide();
     if (!(await askInApp({ t, message, confirmKey: "btn_delete_session", danger: true, slide }))) {
       return;
     }
     if (isPlanning) cancelWorkoutSession();
     else deleteScheduledSession();
+  });
+
+  // Cancel, beside Delete: the session stays on the board, marked cancelled. Offered only for a
+  // booked session outside the editor (activeSessionBoard.js hides it otherwise), so there is
+  // always a row to keep.
+  document.getElementById("btn-cancel-session")?.addEventListener("click", async () => {
+    closeSessionMenu();
+    const asked = await askInApp({
+      t,
+      message: cancelSessionQuestion(t),
+      confirmKey: "btn_cancel_session",
+      danger: true,
+      slide: sessionEndNeedsSlide(),
+      slideKey: "cancel_slide_label",
+    });
+    if (asked) cancelScheduledSession();
   });
 
   document

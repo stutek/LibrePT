@@ -176,8 +176,13 @@
       "values": [
         "scheduled",
         "cancelled",
-        "done"
+        "done",
+        "deleted"
       ]
+    },
+    "finishedAt": {
+      "required": false,
+      "type": "string"
     }
   },
   "notifications": {

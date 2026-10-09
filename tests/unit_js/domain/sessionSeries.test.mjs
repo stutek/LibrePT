@@ -15,6 +15,7 @@ import {
   occurrenceKey,
   seriesOccurrences,
   seriesWithEdit,
+  sessionsAfterCancelling,
   sessionsAfterRemoving,
   sessionsWithSeries,
   storedOccurrenceFor,
@@ -99,7 +100,7 @@ test("an occurrence a trainer has touched replaces the one the series would draw
   assert.equal(shown.filter((s) => s.occurrenceDate === "2026-08-25").length, 1);
 });
 
-test("a cancelled occurrence leaves the evening empty and the series alive", () => {
+test("a cancelled occurrence is shown as itself, and the rule does not add that evening again", () => {
   const cancelled = {
     id: "s-cancelled",
     seriesId: "ser1",
@@ -109,7 +110,32 @@ test("a cancelled occurrence leaves the evening empty and the series alive", () 
 
   const shown = sessionsWithSeries([cancelled], [SERIES], { from: "2026-08-24", to: "2026-08-28" });
 
+  assert.deepEqual(datesOf(shown).sort(), ["2026-08-25", "2026-08-27"]);
+  assert.equal(shown.find((s) => s.occurrenceDate === "2026-08-25").id, "s-cancelled");
+});
+
+test("a deleted occurrence leaves the evening empty and the series alive", () => {
+  const deleted = {
+    id: "s-deleted",
+    seriesId: "ser1",
+    occurrenceDate: "2026-08-25",
+    status: "deleted",
+  };
+
+  const shown = sessionsWithSeries([deleted], [SERIES], { from: "2026-08-24", to: "2026-08-28" });
+
   assert.deepEqual(datesOf(shown), ["2026-08-27"]);
+});
+
+test("a cancelled one-off stays on the board", () => {
+  const oneOff = { id: "s1", title: "Assessment", status: "cancelled" };
+
+  const shown = sessionsWithSeries([oneOff], [], { from: "2026-08-24", to: "2026-08-28" });
+
+  assert.deepEqual(
+    shown.map((s) => s.id),
+    ["s1"],
+  );
 });
 
 test("one-off sessions are kept exactly as they are", () => {
@@ -208,19 +234,39 @@ test("deleting a one-off evening removes it", () => {
   assert.deepEqual(sessionsAfterRemoving([oneOff], ["s1"]), []);
 });
 
-test("deleting an evening of a repeating session keeps it as cancelled", () => {
+test("deleting an evening of a repeating session keeps its row, marked deleted", () => {
   // Removing the row outright would be undone by the next render: the rule still says every
-  // Tuesday, so the evening would come straight back.
+  // Tuesday, so the evening would come straight back. Marked "deleted", not "cancelled": a
+  // cancelled evening stays on the board, and the trainer chose to take this one off it.
   const occurrence = { id: "s1", seriesId: "ser1", occurrenceDate: "2026-08-25" };
 
   const after = sessionsAfterRemoving([occurrence], ["s1"]);
 
   assert.equal(after.length, 1);
-  assert.equal(after[0].status, "cancelled");
+  assert.equal(after[0].status, "deleted");
   assert.deepEqual(
     sessionsWithSeries(after, [SERIES], { from: "2026-08-24", to: "2026-08-26" }),
     [],
   );
+});
+
+test("cancelling keeps every row, one-off and repeating, marked cancelled", () => {
+  const oneOff = { id: "s1", title: "Assessment", status: "scheduled" };
+  const occurrence = { id: "s2", seriesId: "ser1", occurrenceDate: "2026-08-25" };
+  const untouched = { id: "s3", title: "Other", status: "scheduled" };
+
+  const after = sessionsAfterCancelling([oneOff, occurrence, untouched], ["s1", "s2"]);
+
+  assert.deepEqual(
+    after.map((s) => [s.id, s.status]),
+    [
+      ["s1", "cancelled"],
+      ["s2", "cancelled"],
+      ["s3", "scheduled"],
+    ],
+  );
+  assert.equal(after[0].title, "Assessment", "the row keeps what it said");
+  assert.equal(oneOff.status, "scheduled", "the stored list is not changed in place");
 });
 
 test("editing the whole series changes what the rule describes, not which days it falls on", () => {

@@ -103,6 +103,27 @@ def test_finishing_a_session_stamps_completed_and_duration_on_the_session(
             await queue.flushWrites();
         }"""
     )
+    # The row also says WHEN Finish was tapped: an ISO-8601 instant in UTC. The wall clock is frozen
+    # for this test (tests/conftest.py), so it is exactly now.
+    finished = page.evaluate(
+        """async () => {
+            const store = await import(new URL('data/stateStore.js', document.baseURI).href);
+            const stamped = store.getState().sessions.filter((s) => s.finishedAt);
+            return {
+                stamped: stamped.map((s) => [s.title, s.status, s.finishedAt]),
+                now: new Date().toISOString(),
+            };
+        }"""
+    )
+    # The seed runs "Return-to-Play Rehab" in the same clipboard (it overlaps), so it is finished
+    # with the same tap. No other row carries the field: nothing invents it for older sessions.
+    titles = {title for title, _status, _at in finished["stamped"]}
+    assert "Group Strength & Conditioning" in titles, finished
+    assert all(
+        status == "done" and at == finished["now"]
+        for _title, status, at in finished["stamped"]
+    ), finished
+
     page.goto(local_server)
     page.wait_for_selector("#view-clients.active")
     card = page.locator(".session-card", has_text="Group Strength & Conditioning").first

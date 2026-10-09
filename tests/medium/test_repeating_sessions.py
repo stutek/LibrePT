@@ -91,15 +91,15 @@ def test_acting_on_one_evening_makes_it_a_real_session(page, local_server):
     assert stored[0]["seriesId"] == "ser-test"
 
 
-def test_a_cancelled_evening_stays_gone(page, local_server):
+def test_a_deleted_evening_stays_gone(page, local_server):
     """Removing an evening of a repeating session cannot mean deleting the row — the rule would
     produce it again on the next render, and the trainer would watch a session they just deleted
-    come back. It is kept as cancelled instead, and the board leaves the evening empty."""
+    come back. It is kept marked deleted instead, and the board leaves the evening empty."""
     _mount(page, local_server)
     page.locator(".session-card", has_text="Repeating Strength").first.click()
     page.wait_for_timeout(300)
 
-    cancelled = page.evaluate(
+    shown = page.evaluate(
         """async () => {
           const series = await import(new URL('domain/sessionSeries.js', document.baseURI).href);
           const state = window.__state;
@@ -110,8 +110,8 @@ def test_a_cancelled_evening_stays_gone(page, local_server):
               from: '2000-01-01',
               to: '2100-01-01',
             })
-            .filter((s) => s.occurrenceDate === state.sessions.find((row) => row.status === 'cancelled').occurrenceDate);
+            .filter((s) => s.occurrenceDate === state.sessions.find((row) => row.status === 'deleted').occurrenceDate);
         }"""
     )
 
-    assert cancelled == [], cancelled
+    assert shown == [], shown

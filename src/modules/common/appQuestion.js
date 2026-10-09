@@ -130,14 +130,22 @@ function show({ message, confirmLabel, cancelLabel, danger, slideLabel }) {
 }
 
 /** Ask a yes/no question. Resolves true only when the confirm button is pressed, or, with `slide`,
- *  when the slider is moved to its end (the button is then not offered). */
-export function askInApp({ t, message, confirmKey, danger = false, slide = false }) {
+ *  when the slider is moved to its end (the button is then not offered). `slideKey` names the
+ *  slider's words, which say what moving it to the end does. */
+export function askInApp({
+  t,
+  message,
+  confirmKey,
+  danger = false,
+  slide = false,
+  slideKey = "delete_slide_label",
+}) {
   return show({
     message,
     confirmLabel: t(confirmKey),
     cancelLabel: t("btn_cancel"),
     danger,
-    slideLabel: slide ? t("delete_slide_label") : "",
+    slideLabel: slide ? t(slideKey) : "",
   });
 }
 

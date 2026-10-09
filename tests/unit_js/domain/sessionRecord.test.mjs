@@ -18,6 +18,7 @@ import {
   clipboardDependsOnRemoved,
   computeSessionDayBucket,
   computeTimeLabel,
+  finishSlotSessions,
   newlyAssignedParticipantIds,
   performedAtFor,
   runsInOneClipboard,
@@ -159,6 +160,50 @@ test("a session not yet held is run together only with sessions not yet held", (
   assert.equal(runsInOneClipboard(next, derived), true);
   assert.equal(runsInOneClipboard(held, { id: "held-too", status: "done" }), true);
   assert.equal(runsInOneClipboard(next, { id: "older-shape" }), true, "no status is not held");
+});
+
+// A cancelled session stays on the board and keeps its participants. Merged into the clipboard of a
+// session beside it, it would put those people on a training they were taken off.
+test("a cancelled session is run together with no session that will be held", () => {
+  const cancelled = { id: "off", status: "cancelled" };
+  assert.equal(runsInOneClipboard({ id: "next", status: "scheduled" }, cancelled), false);
+  assert.equal(runsInOneClipboard(cancelled, { id: "next", status: "scheduled" }), false);
+  assert.equal(runsInOneClipboard({ id: "held", status: "done" }, cancelled), false);
+});
+
+test("finishing stamps every row of the slot done, with its duration and the instant of Finish", () => {
+  const sessions = [
+    { id: "s1", status: "scheduled" },
+    { id: "s2", status: "scheduled" },
+    { id: "s3", status: "scheduled" },
+  ];
+
+  finishSlotSessions(
+    sessions,
+    { id: "s1", ids: ["s1", "s2"] },
+    {
+      duration: 3600,
+      finishedAt: "2026-10-09T17:05:00.000Z",
+    },
+  );
+
+  assert.deepEqual(sessions[0], {
+    id: "s1",
+    status: "done",
+    duration: 3600,
+    finishedAt: "2026-10-09T17:05:00.000Z",
+  });
+  assert.equal(sessions[1].finishedAt, "2026-10-09T17:05:00.000Z");
+  assert.deepEqual(sessions[2], { id: "s3", status: "scheduled" }, "another slot is not touched");
+});
+
+test("a planning clipboard has no slot, so finishing it stamps no session", () => {
+  const sessions = [{ id: "s1", status: "scheduled" }];
+
+  finishSlotSessions(sessions, { id: "s1", isPlanning: true }, { duration: 60, finishedAt: "x" });
+  finishSlotSessions(sessions, null, { duration: 60, finishedAt: "x" });
+
+  assert.deepEqual(sessions, [{ id: "s1", status: "scheduled" }]);
 });
 
 test("an upsert of an unknown id appends rather than replacing something else", () => {

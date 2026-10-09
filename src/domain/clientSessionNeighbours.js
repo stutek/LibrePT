@@ -134,7 +134,7 @@ export function clientSessionToday(state, clientId, nowMs) {
   const live = todays.find((session) => running.has(session.id));
   if (live) return asEntry(live);
   const toCome = todays
-    .filter((session) => session.status !== "done" && session.status !== "cancelled")
+    .filter((session) => !["done", "cancelled", "deleted"].includes(session.status))
     .sort((a, b) => String(a.startDate).localeCompare(String(b.startDate)))[0];
   if (toCome) return asEntry(toCome);
   const { finished } = datedCandidates(state, clientId);

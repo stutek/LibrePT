@@ -161,6 +161,125 @@ def test_a_tap_at_the_far_end_of_the_slider_deletes_nothing(page, local_server):
     assert page.evaluate(COUNT_SESSIONS_TITLED, CARD_TITLE) == before
 
 
+# --- Cancelling keeps the session on the board, marked cancelled (ruled by Simon 2026-10-09) -------
+
+ROWS_TITLED = """async (title) => {
+    const store = await import(new URL('data/stateStore.js', document.baseURI).href);
+    const state = store.getState();
+    return state.sessions.filter((s) => s.title === title).map((s) => ({
+        id: s.id,
+        status: s.status,
+        programsOnIt: state.clientPrograms.filter((p) => p.sessionId === s.id).length,
+    }));
+}"""
+
+
+def _tap_cancel(page):
+    page.click("#btn-session-menu")
+    page.click("#btn-cancel-session")
+
+
+def _ask_to_cancel(page):
+    _tap_cancel(page)
+    page.wait_for_selector("#dialog-app-question[open]")
+
+
+def test_cancelling_keeps_the_session_on_the_board_marked_cancelled(page, local_server):
+    _open_delete_dialog(page, local_server)
+    session_id = page.evaluate(
+        """async () => {
+            const live = await import(new URL('controllers/activeSessionStore.js', document.baseURI).href);
+            return live.getActiveSession().sourceSession.id;
+        }"""
+    )
+    before = page.evaluate(COUNT_SESSIONS_TITLED, CARD_TITLE)
+    _ask_to_cancel(page)
+
+    text = page.inner_text("#app-question-text")
+    assert CARD_TITLE in text, "the question names the session"
+    assert re.search(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}", text), text
+    assert "stays on the schedule" in text, text
+    assert (
+        page.inner_text("#app-question-confirm").strip() == "Mark session as cancelled"
+    )
+    assert page.locator("#app-question-slider").is_visible() is False
+    page.click("#app-question-confirm")
+    page.wait_for_selector("#active-session-overlay", state="hidden")
+
+    assert page.evaluate(COUNT_SESSIONS_TITLED, CARD_TITLE) == before, "the row stays"
+    row = next(
+        r for r in page.evaluate(ROWS_TITLED, CARD_TITLE) if r["id"] == session_id
+    )
+    assert row == {"id": session_id, "status": "cancelled", "programsOnIt": 0}, row
+
+    card = page.locator(f'.session-card[data-session-id="{session_id}"]')
+    card.wait_for()
+    assert "Cancelled" in card.inner_text()
+
+    # Tapping it opens nothing: no clipboard for a session that will not take place.
+    card.click()
+    page.wait_for_timeout(300)
+    assert page.locator("#active-session-overlay").is_visible() is False
+
+
+def test_a_link_to_a_cancelled_session_opens_no_clipboard(page, local_server):
+    _open_delete_dialog(page, local_server)
+    session_id = page.evaluate(
+        """async () => {
+            const live = await import(new URL('controllers/activeSessionStore.js', document.baseURI).href);
+            return live.getActiveSession().sourceSession.id;
+        }"""
+    )
+    answer_app_questions(page)
+    _tap_cancel(page)
+    page.wait_for_selector("#active-session-overlay", state="hidden")
+    page.evaluate(
+        """async () => {
+            const queue = await import(new URL('data/writeQueue.js', document.baseURI).href);
+            await queue.flushWrites();
+        }"""
+    )
+
+    page.goto(f"{local_server}session/{session_id}")
+    page.wait_for_timeout(500)
+    assert page.locator("#active-session-overlay").is_visible() is False
+    assert page.locator("#view-clients.active").count() == 1, (
+        "the board is shown instead"
+    )
+
+
+def test_a_started_session_is_cancelled_only_by_sliding(page, local_server):
+    _open_delete_dialog(page, local_server)
+    page.click("#btn-start-session")
+    page.wait_for_selector("#dialog-session-start-time[open], #btn-finish-session")
+    page.keyboard.press("Escape")
+    _ask_to_cancel(page)
+
+    assert page.locator("#app-question-confirm").is_visible() is False
+    assert page.locator("#app-question-slider").is_visible() is True
+    assert (
+        page.locator("label[for=app-question-slider]").inner_text().strip()
+        == "Slide to the end to mark this session as cancelled"
+    )
+
+
+def test_cancelling_an_evening_of_a_series_says_only_that_evening_is_cancelled(
+    page, local_server
+):
+    page.goto(local_server)
+    page.wait_for_selector(".session-card")
+    evening = page.evaluate(A_SERIES_EVENING)
+    assert evening
+
+    page.goto(f"{local_server}session/{evening}")
+    page.wait_for_selector("#active-session-overlay:not(.hidden)")
+    answer_app_questions(page, accept=False)
+    _tap_cancel(page)
+    page.wait_for_function("() => (window.__appQuestionMessages || []).length > 0")
+
+    assert "Only this evening is cancelled" in app_question_messages(page)[0]
+
+
 def test_a_started_session_can_be_deleted_from_the_keyboard_with_the_end_key(
     page, local_server
 ):

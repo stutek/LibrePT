@@ -104,6 +104,12 @@ export const en = {
   delete_sets_two: "{count} sets",
   delete_sets_few: "{count} sets",
   delete_sets_other: "{count} sets",
+  btn_cancel_session: "Mark session as cancelled",
+  confirm_cancel_session:
+    "Mark this session as cancelled? It stays on the schedule, marked Cancelled, and it cannot be started. Its logged sets are discarded. Signals waiting for review stay, and each participant's plan is kept under Unscheduled plans.",
+  cancel_one_evening:
+    "This is one evening of a repeating session. Only this evening is cancelled; the others stay.",
+  cancel_slide_label: "Slide to the end to mark this session as cancelled",
   confirm_delete_plan:
     "Delete every exercise from this plan? You can rebuild it from scratch or exit editing.",
   warning_banner_title: "Client Safety Advisory",
@@ -488,6 +494,7 @@ export const en = {
   program_not_defined: "Programme not defined",
   no_members_assigned: "No Participants",
   session_completed: "Completed",
+  session_cancelled: "Cancelled",
   // The badge on the past card in the clipboard deck, read as "Last time: 2026-07-20".
   last_time: "Last time",
   // The title bar of a finished session reopened from the deck or from History, when the record

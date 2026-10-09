@@ -15,6 +15,7 @@ import re
 import pytest
 
 from tests.medium._harness import SESSIONS_STUB, load_with_stub
+from tests.medium._overflow import assert_component_fits
 
 pytestmark = pytest.mark.clean_start
 
@@ -231,3 +232,109 @@ def test_a_running_session_off_the_clipboard_shows_its_own_clock(page, local_ser
     assert "left" in group.inner_text()
     assert late.locator(".session-live-timer").inner_text() in ("00h 30m", "00h 31m")
     assert "left" not in late.inner_text()
+
+
+# ---- A cancelled session stays on the board, weaker (ruled by Simon 2026-10-09) ---------------------
+# Tomorrow at 07:00, with no routine and nobody in it: an ordinary card with those would warn twice
+# and count down to its start. A cancelled one says only that it is cancelled.
+SEED_CANCELLED = """
+const tomorrowAtSeven = new Date();
+tomorrowAtSeven.setDate(tomorrowAtSeven.getDate() + 1);
+tomorrowAtSeven.setHours(7, 0, 0, 0);
+state.sessions.push({
+  id: 'sCalledOff', title: 'Called off', time: '07:00 - 08:00', day: 'tomorrow',
+  startDate: tomorrowAtSeven.toISOString(), participants: [], routineId: '', maxCapacity: 4,
+  status: 'cancelled',
+});
+import { THEMES, applyTheme } from './modules/common/theme.js';
+window.__themes = THEMES;
+window.__wearTheme = (key) => applyTheme(key, { persist: false });
+// What a token resolves to, in the same notation getComputedStyle reports a colour in.
+window.__tokenColour = (token) => {
+  const probe = document.createElement('span');
+  probe.style.color = `var(${token})`;
+  document.body.appendChild(probe);
+  const colour = getComputedStyle(probe).color;
+  probe.remove();
+  return colour;
+};
+renderClientsViewShell();
+initSessionTimeline({"""
+
+CANCELLED_CARD = '.session-card[data-session-id="sCalledOff"]'
+
+
+def _mount_cancelled(page, local_server, language="en"):
+    stub = SESSIONS_STUB.replace(
+        "renderClientsViewShell();\ninitSessionTimeline({", SEED_CANCELLED, 1
+    )
+    assert stub != SESSIONS_STUB
+    if language != "en":
+        page.add_init_script(f"globalThis.stubLanguage = '{language}'")
+    load_with_stub(page, local_server, stub)
+    page.wait_for_selector(CANCELLED_CARD)
+    return page.locator(CANCELLED_CARD)
+
+
+def test_a_cancelled_session_says_so_in_words_and_offers_nothing_to_do(
+    page, local_server
+):
+    card = _mount_cancelled(page, local_server)
+
+    bar = card.locator(".session-live-bar")
+    assert bar.count() == 1
+    assert bar.inner_text().strip() == "Cancelled", (
+        "the meaning is in a word, not only in colour"
+    )
+    text = card.inner_text()
+    assert "Starts in" not in text and "Overdue" not in text, text
+    assert "Programme not defined" not in text, (
+        "a session that will not run needs no programme"
+    )
+    assert card.locator(".session-warning-pill").count() == 0
+    assert card.locator(".btn-edit-session").count() == 0, (
+        "a cancelled session is not edited"
+    )
+    assert "Called off" in text and "07:00 - 08:00" in text, (
+        "it still says which session it was"
+    )
+
+
+def test_a_cancelled_session_says_so_in_slovenian(page, local_server):
+    card = _mount_cancelled(page, local_server, language="sl")
+    assert card.locator(".session-live-bar").inner_text().strip() == "Odpovedano"
+
+
+def test_a_cancelled_card_reads_weaker_in_every_theme(page, local_server):
+    """Muted text and a border in the theme's warning colour — both read from the theme, so every
+    palette restyles it — and the word, which no theme can take away."""
+    card = _mount_cancelled(page, local_server)
+    wrong = []
+    themes = page.evaluate("() => window.__themes")
+    assert len(themes) >= 5
+    for theme in themes:
+        page.evaluate("(theme) => window.__wearTheme(theme)", theme)
+        seen = card.evaluate(
+            """(el) => ({
+                edge: getComputedStyle(el).borderLeftColor,
+                title: getComputedStyle(el.querySelector('.session-card-title')).color,
+                word: getComputedStyle(el.querySelector('.session-live-bar')).color,
+                wordShown: el.querySelector('.session-live-bar').offsetHeight > 0,
+            })"""
+        )
+        warning = page.evaluate("() => window.__tokenColour('--warning')")
+        muted = page.evaluate("() => window.__tokenColour('--text-muted')")
+        if seen["edge"] != warning:
+            wrong.append(f"{theme}: edge {seen['edge']}, warning is {warning}")
+        if seen["title"] != muted or seen["word"] != muted:
+            wrong.append(
+                f"{theme}: text {seen['title']} / {seen['word']}, muted is {muted}"
+            )
+        if not seen["wordShown"]:
+            wrong.append(f"{theme}: the word Cancelled is not shown")
+    assert not wrong, "; ".join(wrong)
+
+
+def test_a_cancelled_card_fits_a_phone(page, local_server):
+    _mount_cancelled(page, local_server)
+    assert_component_fits(page, CANCELLED_CARD)

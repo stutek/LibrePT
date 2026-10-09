@@ -391,14 +391,34 @@ test("a status outside its words is refused, so a misspelt one cannot hide a tra
   ]);
   const session = { id: "s1", participants: [], startDate: "2026-10-03T08:00:00.000Z" };
   assert.deepEqual(m.fieldIssues({ ...session, status: "completed" }, m.SCHEMA_6.sessions), [
-    '`status` is "completed", expected one of scheduled, cancelled, done',
+    '`status` is "completed", expected one of scheduled, cancelled, done, deleted',
   ]);
   assert.deepEqual(m.fieldIssues({ ...session, status: "done" }, m.SCHEMA_6.sessions), []);
+  assert.deepEqual(m.fieldIssues({ ...session, status: "deleted" }, m.SCHEMA_6.sessions), []);
   const note = { id: "n1", clientId: "ana", review: "none" };
   assert.notDeepEqual(
     m.fieldIssues({ ...note, tag: "Too Easy - Increase Load" }, m.SCHEMA_6.exerciseNotes),
     [],
     "a note stores the tag's id, never its English text",
+  );
+});
+
+test("a finished session may say when Finish was tapped, and an older one may not say it", () => {
+  const session = {
+    id: "s1",
+    participants: [],
+    startDate: "2026-10-03T08:00:00.000Z",
+    status: "done",
+  };
+  assert.deepEqual(m.fieldIssues(session, m.SCHEMA_6.sessions), []);
+  assert.deepEqual(
+    m.fieldIssues({ ...session, finishedAt: "2026-10-03T09:02:11.000Z" }, m.SCHEMA_6.sessions),
+    [],
+  );
+  assert.notDeepEqual(
+    m.fieldIssues({ ...session, finishedAt: 1759482131000 }, m.SCHEMA_6.sessions),
+    [],
+    "an instant is stored as ISO text, never as a number",
   );
 });
 

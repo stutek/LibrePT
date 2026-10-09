@@ -53,8 +53,11 @@ test("a session's two flags become its one status, and a held session is still f
   const state = toDomainState({
     sessions: [
       { id: "s-held", ...at, completed: true },
+      // Every older build set `cancelled` in one place only: when the trainer DELETED an evening of
+      // a repeating session, whose row has to stay so the rule does not bring the evening back. It
+      // is that deleted evening, still off the board — not a cancelled session, which is shown.
       { id: "s-off", ...at, cancelled: true },
-      // Run, then taken off the board: cancelled is what the board must go on saying.
+      // Run, then taken off the board: still off the board.
       { id: "s-both", ...at, completed: true, cancelled: true },
       { id: "s-next", ...at },
     ],
@@ -64,8 +67,8 @@ test("a session's two flags become its one status, and a held session is still f
     state.sessions.map((session) => [session.id, session.status]),
     [
       ["s-held", "done"],
-      ["s-off", "cancelled"],
-      ["s-both", "cancelled"],
+      ["s-off", "deleted"],
+      ["s-both", "deleted"],
       ["s-next", "scheduled"],
     ],
   );
@@ -73,6 +76,11 @@ test("a session's two flags become its one status, and a held session is still f
     state.sessions.some((session) => "completed" in session || "cancelled" in session),
     false,
     "the old flags are gone",
+  );
+  assert.equal(
+    state.sessions.some((session) => "finishedAt" in session),
+    false,
+    "an older session never said when Finish was tapped, and the conversion does not invent it",
   );
   // The old record is linked to the one session that was held that day.
   assert.equal(state.clientPrograms[0].sessionId, "s-held");

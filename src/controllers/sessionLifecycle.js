@@ -29,8 +29,12 @@ import {
   buildClientStateFromImportedItems,
   buildClientStateFromRoutine,
 } from "../domain/sessionPlanFactory.js";
-import { performedAtFor, sessionBelongsToSlot } from "../domain/sessionRecord.js";
-import { sessionsAfterRemoving } from "../domain/sessionSeries.js";
+import {
+  finishSlotSessions,
+  performedAtFor,
+  sessionBelongsToSlot,
+} from "../domain/sessionRecord.js";
+import { sessionsAfterCancelling, sessionsAfterRemoving } from "../domain/sessionSeries.js";
 import { countedText } from "../i18n/plural.js";
 import { renderClientsList } from "../modules/clients/clientsView.js";
 import { renderActiveSessionBoard } from "../modules/clipboard/activeSessionBoard.js";
@@ -339,16 +343,18 @@ function closeWorkoutSession() {
   if (focusSessionsColumn) focusSessionsColumn("today", "smooth");
 }
 
-// "This one never happened" — the slot comes off the board for good, unlike cancelWorkoutSession
-// above, which only drops the LIVE clipboard and leaves the scheduled row behind (the ⋯ menu said
-// "Delete Session" and the confirm said "delete this session", but the card was still on the
-// dashboard afterwards).
+// Two ways to take a booked session off the schedule, both in the clipboard's ⋯ menu, unlike
+// cancelWorkoutSession above, which only throws away a plan that has no booked slot.
+//   DELETE — "this one never happened": the row goes. An evening of a repeating session keeps a row
+//   marked deleted, which the board does not show (domain/sessionSeries.js).
+//   CANCEL — the row stays, marked cancelled, and the board shows it weaker.
 //
 // The programming does not die with the slot, and no program is deleted. Each participant's program
 // keeps its id and waits as an UNSCHEDULED plan, because the trainer authored it once and a session
-// deleted for having slipped its slot is exactly the one that gets re-run on another day; the feed's
-// "unscheduled plans" item is then the route back to it. Logged sets and feedback ARE discarded,
-// which is what the confirm says — a session worth deleting is a session that did not happen.
+// taken off for having slipped its slot is exactly the one that gets re-run on another day; the
+// feed's "unscheduled plans" item is then the route back to it. Logged sets and feedback ARE
+// discarded, which is what both questions say: a session taken off did not happen.
+
 /** The session's title, ISO date and 24-hour time, in one line: what the question is about. */
 function sessionNameLine(t, sourceSession) {
   const titles = (sourceSession?.titles || []).filter(Boolean).join(", ");
@@ -374,35 +380,54 @@ function loggedSetsLine(t, activeSession) {
     : t("delete_sets_none");
 }
 
-/** The question asked before deleting the session on the clipboard. It names the session. An
- *  evening of a repeating session is deleted alone, and the question says so: without it a trainer
- *  could fear that every evening of the series had gone. A started session also says which logged
- *  sets cannot come back. */
-export function deleteSessionQuestion(t) {
+/** The question asked before the session on the clipboard is deleted or cancelled. It names the
+ *  session. An evening of a repeating session is taken off alone, and the question says so: without
+ *  it a trainer could fear that every evening of the series had gone. A started session also says
+ *  which logged sets cannot come back. `question` and `oneEvening` are the dictionary keys of the
+ *  question and of the line about the one evening. */
+function slotQuestion(t, { question, oneEvening }) {
   const { state } = getAppDeps();
   const activeSession = getActiveSession();
   const sourceSession = activeSession?.sourceSession;
   const oneOfASeries = (state?.sessions || []).some(
     (session) => session.seriesId && sessionBelongsToSlot(session, sourceSession),
   );
-  const question = t("confirm_delete_session");
   const lines = [sessionNameLine(t, sourceSession)];
-  lines.push(oneOfASeries ? `${t("delete_one_evening")} ${question}` : question);
+  lines.push(oneOfASeries ? `${t(oneEvening)} ${t(question)}` : t(question));
   if (activeSession?.started) lines.push(loggedSetsLine(t, activeSession));
   return lines.filter(Boolean).join("\n");
 }
 
-/** A started session is deleted by sliding, not by a tap: a phone in a pocket cannot slide. */
-export function deleteSessionNeedsSlide() {
+export function deleteSessionQuestion(t) {
+  return slotQuestion(t, { question: "confirm_delete_session", oneEvening: "delete_one_evening" });
+}
+
+export function cancelSessionQuestion(t) {
+  return slotQuestion(t, { question: "confirm_cancel_session", oneEvening: "cancel_one_evening" });
+}
+
+/** A started session is deleted or cancelled by sliding, not by a tap: a phone in a pocket cannot
+ *  slide. */
+export function sessionEndNeedsSlide() {
   return Boolean(getActiveSession()?.started);
 }
 
 export function deleteScheduledSession() {
+  takeSlotOffSchedule(sessionsAfterRemoving);
+}
+
+export function cancelScheduledSession() {
+  takeSlotOffSchedule(sessionsAfterCancelling);
+}
+
+// `rowsAfter(sessions, ids)` says what becomes of the slot's rows: removed (an evening of a series
+// kept marked deleted), or kept marked cancelled.
+function takeSlotOffSchedule(rowsAfter) {
   const activeSession = getActiveSession();
   const appDeps = getAppDeps();
   const { state, saveToLocalStorage } = appDeps;
   const sourceSession = activeSession?.sourceSession;
-  // A planning draft has no slot to remove, and deleting one is already cancelWorkoutSession's job.
+  // A planning draft has no slot to take off, and throwing one away is cancelWorkoutSession's job.
   if (!state || !sourceSession || sourceSession.isPlanning) return;
   const title = sourceSession.titles?.[0] || "";
   const nowISO = new Date().toISOString();
@@ -432,11 +457,10 @@ export function deleteScheduledSession() {
     activeSession.participants.map((pId) => activeSession.programIds?.[pId]).filter(Boolean),
   );
 
-  // Deleting an evening of a REPEATING session cannot mean removing the row: the rule would produce
-  // that evening again on the next render, and the trainer would watch a session they just deleted
-  // come back. It is kept as cancelled, which is the only way to say "not this
-  // Tuesday" to a rule that says "every Tuesday". A one-off is deleted, as it always was.
-  state.sessions = sessionsAfterRemoving(
+  // What becomes of the rows is `rowsAfter`'s answer. Deleting an evening of a REPEATING session
+  // cannot mean removing the row: the rule would produce that evening again on the next render, and
+  // the trainer would watch a session they just deleted come back (domain/sessionSeries.js).
+  state.sessions = rowsAfter(
     state.sessions || [],
     (state.sessions || [])
       .filter((session) => sessionBelongsToSlot(session, sourceSession))
@@ -481,20 +505,6 @@ function countCompletedSets(activeSession) {
     }
   }
   return completedSets;
-}
-
-// Stamp completion + elapsed time onto the session(s) this live session launched from, so the
-// dashboard's past-session status line (2.3) has something to show — previously finishing a
-// session never touched state.sessions at all, only the client's programs.
-function stampSourceSessionsCompleted(activeSession, state, sessionDuration) {
-  const ss = activeSession.sourceSession;
-  if (!ss || ss.isPlanning) return;
-  const sessions = Array.isArray(state.sessions) ? state.sessions : [];
-  for (const session of sessions) {
-    if (!sessionBelongsToSlot(session, ss)) continue;
-    session.status = "done";
-    session.duration = sessionDuration;
-  }
 }
 
 // Every participant who performed something gets their program finished: the live program becomes
@@ -552,7 +562,12 @@ export async function finishWorkoutSession() {
   );
   const sessionDuration = activeSession.duration;
 
-  stampSourceSessionsCompleted(activeSession, state, sessionDuration);
+  // The booked rows say they were held, how long, and when Finish was tapped, so the board's
+  // status line of a past session has something to show.
+  finishSlotSessions(state.sessions, slot, {
+    duration: sessionDuration,
+    finishedAt: new Date().toISOString(),
+  });
   finishProgramsOfParticipants(activeSession, state, sessionDateISO, sessionDuration);
 
   if (saveToLocalStorage) saveToLocalStorage();

@@ -45,8 +45,9 @@ function sessionsAttendedBy(state, clientId) {
       // trainer has booked and a Thursday they trained cannot look the same on it.
       completed: session.status === "done",
       // A session called off is neither held nor still to come; read as "planned" it told the
-      // client to expect a training that will not take place.
-      cancelled: session.status === "cancelled",
+      // client to expect a training that will not take place. A deleted evening of a repeating
+      // session is one too: older builds stored it as cancelled, and this file said so.
+      cancelled: session.status === "cancelled" || session.status === "deleted",
     }));
 }
 

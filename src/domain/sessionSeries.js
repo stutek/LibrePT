@@ -8,7 +8,7 @@
 // is ONE thing the trainer set up: writing it out as fifty session rows would make every later edit
 // a fifty-row migration, and moving one evening indistinguishable from re-timing the lot. So the
 // evenings are DERIVED from the rule, and only an evening something happened to — moved, cancelled,
-// run, its plan edited — becomes a record of its own.
+// deleted, run, its plan edited — becomes a record of its own.
 //
 // **An occurrence is addressed by the series and its ORIGINAL date**, never the date it was moved
 // to. That is what makes a second invitation a change to the same evening rather than a new one
@@ -160,8 +160,9 @@ export function storedOccurrenceFor(sessions, key) {
  * series still owes, minus the ones a stored session already speaks for.
  *
  * A stored session WINS over the rule it came from — that is what an exception is. A cancelled one
- * wins by leaving the evening empty, which is why cancelling is a record rather than a deletion:
- * the series would simply produce the evening again.
+ * is shown as itself, marked cancelled. A deleted one wins by leaving the evening empty, which is
+ * why deleting an evening is a record rather than a deletion: the series would simply produce the
+ * evening again.
  */
 export function sessionsWithSeries(sessions, seriesList, window = {}) {
   const spokenFor = new Set(
@@ -170,7 +171,7 @@ export function sessionsWithSeries(sessions, seriesList, window = {}) {
   const generated = (seriesList || [])
     .flatMap((series) => seriesOccurrences(series, window))
     .filter((occurrence) => !spokenFor.has(occurrence.id));
-  return [...(sessions || []).filter((session) => session.status !== "cancelled"), ...generated];
+  return [...(sessions || []).filter((session) => session.status !== "deleted"), ...generated];
 }
 
 /** The stored session a derived evening BECOMES the moment a trainer does something with it.
@@ -224,16 +225,26 @@ export function occurrenceCalendarFields(series, session) {
  *
  * A one-off is deleted: the row was the only thing saying that evening existed. An evening of a
  * repeating session cannot be, because the rule would simply produce it again on the next render —
- * so it is kept as a cancelled record, which is the only way to say "not this Tuesday" to a rule
- * that says "every Tuesday".
+ * so it is kept as a "deleted" record, which is the only way to say "not this Tuesday" to a rule
+ * that says "every Tuesday". The board does not show it.
  */
 export function sessionsAfterRemoving(sessions, removedIds) {
   const ids = new Set(removedIds);
   return (sessions || []).flatMap((session) => {
     if (!ids.has(session.id)) return [session];
     if (!session.seriesId) return [];
-    return [{ ...session, status: "cancelled" }];
+    return [{ ...session, status: "deleted" }];
   });
+}
+
+/** The sessions after the trainer cancelled some of them. Every row stays, one-off or repeating,
+ * marked cancelled: the board goes on showing it, weaker, so the trainer can see the evening did
+ * not take place. A repeating evening's row also stops the rule producing that evening again. */
+export function sessionsAfterCancelling(sessions, cancelledIds) {
+  const ids = new Set(cancelledIds);
+  return (sessions || []).map((session) =>
+    ids.has(session.id) ? { ...session, status: "cancelled" } : session,
+  );
 }
 
 /** The series after a trainer edited one of its evenings and asked for it to apply to all of them.

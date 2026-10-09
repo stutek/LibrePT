@@ -170,3 +170,39 @@ def test_the_temporal_colours_are_readable_as_text_in_every_theme(src_dir):
         f"a temporal colour is read as text, so it needs {TEXT_CONTRAST}:1:\n  "
         + "\n  ".join(too_low)
     )
+
+
+# A line or edge that carries meaning needs 3:1 against what it sits on (WCAG 2.1, 1.4.11).
+EDGE_CONTRAST = 3.0
+
+
+def test_the_warning_edge_is_visible_on_the_card_in_every_theme(src_dir):
+    """`--warning` draws the left edge of a cancelled session's card and of an overdue one.
+
+    The word on a cancelled card ("Cancelled") carries the meaning for a reader who cannot tell
+    the colours apart, so the edge is not read as text; it still has to be seen as an edge, on the
+    card it borders.
+    """
+    themes = _theme_files(src_dir)
+    assert themes, (
+        "no theme stylesheets found — the check would pass by measuring nothing"
+    )
+
+    too_low = []
+    for path in themes:
+        surfaces, problem = _surfaces(path)
+        assert not problem, problem
+        _field, card = surfaces
+        value = _tokens(path).get("--warning", "")
+        assert HEX.match(value), (
+            f"{path.name}: --warning is not a plain hex ({value!r}) — a theme that stops "
+            "declaring it as one drops silently out of this sweep"
+        )
+        ratio = _contrast(_channels(value), card)
+        if ratio < EDGE_CONTRAST:
+            too_low.append(f"{path.name} --warning {value} on the card: {ratio:.2f}:1")
+
+    assert not too_low, (
+        f"the warning edge needs {EDGE_CONTRAST}:1 against the card:\n  "
+        + "\n  ".join(too_low)
+    )

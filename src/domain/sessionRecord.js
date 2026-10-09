@@ -104,10 +104,27 @@ export function performedAtFor(startTime, slotStartDate) {
  * Whether two overlapping sessions are run on one clipboard. A session already held is not run
  * again: merged with one still to come, it took that session's clients, and a training done in the
  * new session was written under the held one, with no attendance for the new one. So a session not
- * yet held merges only with others not yet held, and a held one is opened with held ones only.
+ * yet held merges only with others not yet held, and a held one is opened with held ones only. A
+ * cancelled session is on the board with its participants still listed; merged into a session
+ * beside it, it would put those people on a training they were taken off.
  */
 export function runsInOneClipboard(session, other) {
-  return (session?.status === "done") === (other?.status === "done");
+  const kind = (row) => (row?.status === "done" || row?.status === "cancelled" ? row.status : "");
+  return kind(session) === kind(other);
+}
+
+/** Stamps the booked rows a finished clipboard ran: each was held, ran `duration` seconds, and was
+ *  finished at `finishedAt`, the instant the trainer tapped Finish (ISO-8601, UTC). A planning
+ *  clipboard has no booked row. Changes the rows in place, as every writer of `state.sessions`
+ *  saves them afterwards. */
+export function finishSlotSessions(sessions, sourceSession, { duration, finishedAt }) {
+  if (!sourceSession || sourceSession.isPlanning) return;
+  for (const session of sessions || []) {
+    if (!sessionBelongsToSlot(session, sourceSession)) continue;
+    session.status = "done";
+    session.duration = duration;
+    session.finishedAt = finishedAt;
+  }
 }
 
 export function sessionBelongsToSlot(session, sourceSession) {

@@ -16,7 +16,7 @@
 }
 /* Pointer feedback — was two mouseenter/mouseleave listeners setting the same two properties
    inline; a plain :hover replaces them with no behaviour left for JS to own. */
-.session-card:hover {
+.session-card:not(.session-cancelled):hover {
   background: rgba(255, 255, 255, 0.05);
   transform: translateY(-1px);
 }
@@ -28,6 +28,25 @@
    every card's text at full strength. */
 .session-card.session-completed {
   border-left-color: var(--success);
+}
+/* A cancelled session stays on the board but reads weaker: its text in the theme's muted colour, its
+   edge in the theme's warning colour, and the word "Cancelled" in its bar, so the meaning does not
+   rest on colour alone. Both colours are tokens, so every theme restyles it. A tap opens nothing
+   (sessionsView.js), so the card does not look tappable: no pointer, no hover lift. */
+.session-card.session-cancelled {
+  border-left-color: var(--warning);
+  color: var(--text-muted);
+  cursor: default;
+}
+.session-card.session-cancelled .session-card-time-badge {
+  background: transparent;
+  color: inherit;
+  border-color: currentColor;
+}
+.session-live-bar.cancelled {
+  background: transparent;
+  color: var(--text-muted);
+  border-top: 1px dashed var(--warning);
 } /* The session in progress is emphasised with an accent-tinted fill + accent ring — the same
    "selected/active" language as a chosen participant tab, so it clearly stands out. */
 .session-live {

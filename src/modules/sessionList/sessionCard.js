@@ -144,6 +144,27 @@ function isHeld(b) {
   return b.status === "done";
 }
 
+/** Whether the trainer cancelled the session. It stays on the board, weaker, and offers nothing to
+ *  do: no countdown, no warning about a plan it will not need, no edit, and a tap opens nothing
+ *  (launchClipboardDirectly in sessionsView.js). */
+function isCancelled(b) {
+  return b.status === "cancelled";
+}
+
+/** Whether the session will not run any more: held, or cancelled. Nothing is counted down to. */
+function isSettled(b) {
+  return isHeld(b) || isCancelled(b);
+}
+
+// A finished session is de-emphasised rather than shown as launchable. The badge that used to say
+// so moved into the status bar at the foot: in the heading row it pushed the edit button onto a
+// line of its own, and the foot already reports how long the session ran. A cancelled one reads
+// weaker still (sessionsView.css).
+function markSettledCard(card, b) {
+  card.classList.toggle("session-completed", isHeld(b));
+  card.classList.toggle("session-cancelled", isCancelled(b));
+}
+
 /** True when the started clipboard already holds this session. A tap on such a card must return to
  * that clipboard: building it again from the routine replaced a running session, its clock and
  * every logged set with an unstarted copy. The card's "Active session" mark reads the same rule. */
@@ -215,7 +236,7 @@ function computeCardTiming({ b, onClipboard, activeSession, isLive, range, state
     : range
       ? getSessionDayDate(b.day).getTime() + range.start * 60000
       : null;
-  const startMs = !isHeld(b) && !isLive ? scheduledStartMs : null;
+  const startMs = !isSettled(b) && !isLive ? scheduledStartMs : null;
   const isUpcoming = startMs != null;
 
   let timerText = "";
@@ -319,6 +340,7 @@ function buildSessionCardInfoHTML({
   anyInjury,
   routineName,
   warningHTML,
+  editable,
 }) {
   // The programme, only when it says something the title has not. Compared trimmed and
   // case-insensitively: "Strength & Longevity Focus" and "strength & longevity focus " are the same
@@ -340,13 +362,17 @@ function buildSessionCardInfoHTML({
     ? `<i class="fa-solid fa-triangle-exclamation session-card-injury-icon" title="${escapeHTML(t("injury_label"))}"></i>`
     : "";
 
+  const editHTML = editable
+    ? `<button class="btn-edit-session icon-btn text-muted session-card-edit-btn" title="${escapeHTML(t("edit") || "Edit")}" aria-label="${escapeHTML(t("edit") || "Edit")}">
+        <i class="fa-solid fa-pen-to-square"></i>
+      </button>`
+    : "";
+
   return `
     <div class="session-card-header-row">
       <span class="badge badge-primary session-card-time-badge">${escapeHTML(b.time)}</span>
       <strong class="session-card-title">${escapeHTML(b.title)}</strong>
-      <button class="btn-edit-session icon-btn text-muted session-card-edit-btn" title="${escapeHTML(t("edit") || "Edit")}" aria-label="${escapeHTML(t("edit") || "Edit")}">
-        <i class="fa-solid fa-pen-to-square"></i>
-      </button>
+      ${editHTML}
     </div>
     <div class="session-card-meta-row">
       <span><i class="fa-solid fa-users session-card-icon"></i><span class="session-card-capacity">${clientCount}/${b.maxCapacity} ${escapeHTML(t("spots_filled"))}</span>${injuryHTML}</span>
@@ -366,10 +392,21 @@ function buildSessionCardStatusBarHTML({
   timerIsOvertime,
   timerSpan,
   isCompleted,
+  isCancelled,
   t,
   escapeHTML,
   formatDurationHM,
 }) {
+  // A cancelled session's bar holds the word alone: there is no time to count to or from.
+  if (isCancelled) {
+    return {
+      stack: true,
+      html: `
+    <div class="session-live-bar cancelled">
+      <span class="session-live-tag"><i class="fa-solid fa-calendar-xmark"></i> ${escapeHTML(t("session_cancelled"))}</span>
+    </div>`,
+    };
+  }
   // `stack` (session-status-stack) applies to the two non-live bars only — the live bar's own
   // layout rules already cover that structural stacking.
   if (isLive) {
@@ -450,16 +487,12 @@ export function renderSessionCard(b, colContainer, deps) {
   const routine = state.routines.find((r) => r.id === b.routineId);
   const routineName = routine ? routine.name : "";
 
-  const warningHTML = buildReadinessWarningsHTML(
-    sessionHasPlan(b, routineName, state),
-    clients.length,
-    t,
-  );
+  const cancelled = isCancelled(b);
+  const warningHTML = cancelled
+    ? ""
+    : buildReadinessWarningsHTML(sessionHasPlan(b, routineName, state), clients.length, t);
 
-  // A finished session is de-emphasised rather than shown as launchable. The badge that used to say
-  // so moved into the status bar at the foot: in the heading row it pushed the edit button
-  // onto a line of its own, and the foot already reports how long the session ran.
-  if (isHeld(b)) card.classList.add("session-completed");
+  markSettledCard(card, b);
 
   const timing = computeCardTiming({ b, onClipboard, activeSession, isLive, range, state });
   const { pastElapsedSeconds, isUpcoming, timerIsOvertime } = timing;
@@ -472,6 +505,7 @@ export function renderSessionCard(b, colContainer, deps) {
     anyInjury,
     routineName,
     warningHTML,
+    editable: !cancelled,
   });
 
   const editBtn = info.querySelector(".btn-edit-session");
@@ -504,6 +538,7 @@ export function renderSessionCard(b, colContainer, deps) {
     timerIsOvertime,
     timerSpan,
     isCompleted: isHeld(b),
+    isCancelled: cancelled,
     t,
     escapeHTML,
     formatDurationHM,

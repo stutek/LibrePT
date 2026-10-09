@@ -571,8 +571,14 @@ is enough to reconstruct the block without storing a cursor into a session that 
 ### The session model — schema 6 (ruled 2026-10-02)
 
 It replaces `history` and `planUpdates`, and a session in progress is stored in it too (§7). A **session** stays the booked slot, with one
-`status`: `scheduled`, `cancelled` when the trainer cancels it, or `done` once it was held — never
-the two flags `completed` and `cancelled` of older shapes, which allowed a session that was both.
+`status`: `scheduled`, `cancelled` when the trainer cancels it (the row stays and the board shows it
+weaker), `done` once it was held, or `deleted` for an evening of a repeating session the trainer
+deleted (its row only stops the rule producing that evening again, and the board does not show it;
+a deleted one-off has no row) — never the two flags `completed` and `cancelled` of older shapes,
+which allowed a session that was both. Every older build set `cancelled` only when an evening of a
+series was deleted, so the conversion reads it as `deleted`. A finished session also carries
+`finishedAt`, the instant the trainer tapped Finish (ISO-8601, UTC); a session finished before the
+field existed has none, and no conversion invents one.
 What each client does in it is a **program** of their own (`clientPrograms`, status planned, live,
 done or discarded), linked to zero or one session: a client's cancellation moves their program off
 the session, to unscheduled or to another date. **A program is never deleted** (ruled 2026-10-03):
@@ -894,7 +900,8 @@ Every change to the clipboard writes the programs (`saveActiveSession()`). Openi
 them back: a session opened again after the trainer looked at another one, or after a reload, comes
 back with what was logged in it. At start, the session the address names is opened from its
 programs; at any other address, the live session started last, so the clipboard bar shows it.
-Cancelling or deleting a session removes its programs; leaving it does not.
+Cancelling or deleting a session moves its programs off it, to wait unscheduled without the sets
+logged in them; leaving it does not.
 
 It is built in three places, all in [sessionLifecycle.js](../src/controllers/sessionLifecycle.js) —
 `startWorkoutSession` (a booked session, a plan for no session, an imported programme; from the

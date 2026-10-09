@@ -237,6 +237,7 @@ function syncTitleBarEditChrome() {
 
   syncBindingLabel(t);
   syncCopyPlanVisibility();
+  syncCancelVisibility(editing);
 
   // In edit mode the ⋯ menu's destructive action targets the PLAN (clear its exercises), not the
   // whole session — relabel it so the trainer knows which one they're deleting. Preserve the icon.
@@ -249,6 +250,15 @@ function syncTitleBarEditChrome() {
   delBtn.innerHTML = "";
   if (icon) delBtn.appendChild(icon);
   delBtn.appendChild(document.createTextNode(` ${label}`));
+}
+
+// Cancelling keeps a booked session on the board, marked cancelled, so it needs a booked session: a
+// plan written for no session, or a finished training opened again, has none. In the editor the
+// menu's destructive action is about the plan, and cancelling the whole session is not offered.
+function syncCancelVisibility(editing) {
+  const slot = deps.getActiveSession()?.sourceSession;
+  const offered = !editing && Boolean(slot) && !slot.isPlanning;
+  document.getElementById("btn-cancel-session")?.classList.toggle("hidden", !offered);
 }
 
 // Copying a plan goes to another client of this session. With none, the row could only answer

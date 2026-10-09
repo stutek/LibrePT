@@ -262,6 +262,17 @@ test("today: a session still to come today comes before one finished today", () 
   assert.equal(clientSessionToday(state, "ana", NOW).id, "sEvening");
 });
 
+test("today: a session cancelled or deleted today is not one still to come", () => {
+  const state = {
+    sessions: [
+      session({ id: "sOff", startDate: "2026-09-14T17:00:00.000Z", status: "cancelled" }),
+      session({ id: "sGone", startDate: "2026-09-14T17:30:00.000Z", status: "deleted" }),
+      session({ id: "sEvening", startDate: "2026-09-14T18:00:00.000Z" }),
+    ],
+  };
+  assert.equal(clientSessionToday(state, "ana", NOW).id, "sEvening");
+});
+
 test("today: null when the client has nothing today, and another client's session never counts", () => {
   const state = {
     history: [history({ id: "hDraft", date: "2026-09-14", isPlanning: true })],

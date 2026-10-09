@@ -144,6 +144,42 @@ def test_menu_destructive_label_swaps_between_session_and_plan(page, local_serve
     assert "Plan" in label, label
 
 
+def test_cancel_is_offered_for_a_booked_session_outside_the_editor_only(
+    page, local_server
+):
+    """Cancelling keeps the booked row on the board, marked cancelled. A clipboard with no booked
+    session has no row to keep, and in the editor the menu's destructive action is about the plan."""
+    booked = {
+        "id": "s1",
+        "titles": ["Upper Body"],
+        "startDate": "2026-10-09T16:00:00.000Z",
+    }
+    load_with_stub(
+        page,
+        local_server,
+        clipboard_stub(active_session_fixture(sourceSession=booked)),
+    )
+    page.wait_for_selector("#active-session-overlay:not(.hidden)")
+    page.click("#btn-session-menu")
+    assert _visible(page, "#btn-cancel-session")
+    assert (
+        page.text_content("#btn-cancel-session").strip() == "Mark session as cancelled"
+    )
+    page.click(
+        "#btn-session-menu"
+    )  # closed again, as open_plan_editor expects to find it
+
+    _enter_edit_mode(page)
+    assert not _visible(page, "#btn-cancel-session")
+
+
+def test_cancel_is_not_offered_without_a_booked_session(page, local_server):
+    _mount_clipboard(page, local_server)
+    page.click("#btn-session-menu")
+    assert _visible(page, "#btn-delete-session")
+    assert not _visible(page, "#btn-cancel-session")
+
+
 def test_delete_plan_clears_exercises_but_keeps_the_session(page, local_server):
     _mount_clipboard(page, local_server)
     _enter_edit_mode(page)

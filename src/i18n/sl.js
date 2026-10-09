@@ -120,6 +120,12 @@ export const sl = {
   delete_sets_two: "{count} seriji",
   delete_sets_few: "{count} serije",
   delete_sets_other: "{count} serij",
+  btn_cancel_session: "Odpovej trening",
+  confirm_cancel_session:
+    "Odpovej ta trening? Ostane na urniku, označen kot odpovedan, in ga ni mogoče začeti. Zabeležene serije bodo izgubljene. Signali, ki čakajo na pregled, ostanejo, program vsakega udeleženca pa se ohrani med nenačrtovanimi programi.",
+  cancel_one_evening:
+    "To je en večer ponavljajočega se treninga. Odpove se samo ta večer, ostali ostanejo.",
+  cancel_slide_label: "Povleci do konca, da odpoveš ta trening",
   confirm_delete_plan:
     "Izbrišem vse vaje iz tega plana? Lahko ga sestaviš znova ali zapustiš urejanje.",
   warning_banner_title: "Varnostno opozorilo za stranko",
@@ -496,6 +502,7 @@ export const sl = {
   program_not_defined: "Program ni določen",
   no_members_assigned: "Ni udeležencev",
   session_completed: "Zaključeno",
+  session_cancelled: "Odpovedano",
   last_time: "Zadnjič",
   finished_session: "Zaključen trening",
   session_changed_resend:

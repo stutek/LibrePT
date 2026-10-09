@@ -178,7 +178,9 @@ export function launchClipboardDirectly(
   // keeps a repeating group and a one-off rehab session in the same clipboard.
   const sessions = visibleSessions(state);
   const session = sessions.find((s) => s.id === sessionId);
-  if (!session) return;
+  // A cancelled session opens nothing, from a tap or from a link: a clipboard would offer Start for
+  // a session that will not take place, and its programs already wait unscheduled.
+  if (!session || session.status === "cancelled") return;
 
   const overlappingSessions = getOverlappingSessions(session, sessions).filter((other) =>
     runsInOneClipboard(session, other),

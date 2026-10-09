@@ -59,8 +59,11 @@ LOADED = """async () => {
         clients: (state.clients || []).length,
         series: (state.sessionSeries || []).map((rule) => rule.id),
         invites: (state.invites || []).map((invite) => invite.id),
-        cancelled: (state.sessions || [])
-          .filter((row) => row.status === 'cancelled')
+        // An evening of a repeating session the trainer deleted: older builds stored it with
+        // `cancelled: true`, which is read as "deleted" (src/data/schemaShapes.js) and stays off
+        // the board.
+        deletedEvenings: (state.sessions || [])
+          .filter((row) => row.status === 'deleted')
           .map((row) => row.id),
     };
 }"""
@@ -91,18 +94,20 @@ def test_every_device_snapshot_is_booted_here():
     assert {path.name for path in DEVICES.glob("*.json")} == booted
 
 
-def test_a_p_era_install_keeps_its_repeating_sessions_invitations_and_cancelled_evenings(
+def test_a_p_era_install_keeps_its_repeating_sessions_invitations_and_deleted_evenings(
     page, local_server
 ):
     """An install from before schema 4 became live holds `sessionSeries` and `invites` in
     its P store alone. Whatever schema the app reads, the trainer's rules of repeating sessions,
-    the invitations they sent and the evenings they cancelled must all still be there."""
+    the invitations they sent and the evenings they deleted must all still be there."""
     loaded = _boot_snapshot(page, local_server, "p_era_install.json")
 
     assert loaded["clients"] == 8
     assert loaded["series"] == ["ser01f2e3"], "the repeating-session rule was lost"
     assert loaded["invites"] == ["snapInvite01"], "the sent invitation was lost"
-    assert "snapCancelled01" in loaded["cancelled"], "the cancelled evening came back"
+    assert "snapCancelled01" in loaded["deletedEvenings"], (
+        "the deleted evening came back"
+    )
 
 
 def test_a_p_era_install_read_at_schema_4_keeps_them_too(page, local_server):
@@ -117,7 +122,7 @@ def test_a_p_era_install_read_at_schema_4_keeps_them_too(page, local_server):
     assert loaded["invites"] == ["snapInvite01"], (
         "the sent invitation did not reach schema 4"
     )
-    assert "snapCancelled01" in loaded["cancelled"]
+    assert "snapCancelled01" in loaded["deletedEvenings"]
 
 
 # Every collection the app holds in memory, counted — what a trainer would see, collection by collection.

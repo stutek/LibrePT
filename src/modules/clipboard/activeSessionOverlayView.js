@@ -178,6 +178,11 @@ export function renderActiveSessionOverlayShell() {
               <i class="fa-solid fa-copy"></i> <span data-i18n="copy_plan_to">Copy this plan to another client in this session</span>
             </button>
             <div id="copy-plan-targets" class="session-menu-sub hidden" role="menu"></div>
+            <!-- Cancel keeps the session on the board, marked cancelled; Delete below removes it.
+                 Shown only for a booked session outside the editor (activeSessionBoard.js). -->
+            <button id="btn-cancel-session" class="session-menu-item session-menu-item-danger" role="menuitem">
+              <i class="fa-solid fa-calendar-xmark"></i> <span data-i18n="btn_cancel_session">Mark session as cancelled</span>
+            </button>
             <button id="btn-delete-session" class="session-menu-item session-menu-item-danger" role="menuitem">
               <i class="fa-solid fa-trash-can"></i> Delete Session
             </button>

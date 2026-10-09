@@ -75,6 +75,18 @@ test("a cancelled session reads as cancelled, never as planned", () => {
   assert.match(markdown, /Still to come · planned/);
 });
 
+// An evening of a repeating session that the trainer deleted keeps its row, so the rule does not
+// produce it again. Older builds wrote that row as cancelled, and the client's file said so; it
+// still does, rather than calling an evening that never took place "planned".
+test("a deleted evening of a repeating session reads as cancelled", () => {
+  const state = gymState();
+  state.sessions = [
+    { id: "s-gone", participants: ["c-jane"], title: "Taken off", status: "deleted" },
+  ];
+  const markdown = renderClientExportMarkdown(buildClientExport(state, "c-jane"));
+  assert.match(markdown, /Taken off · cancelled/);
+});
+
 test("the export contains only the requesting client's records", () => {
   const payload = buildClientExport(gymState(), "c-jane");
   const serialized = JSON.stringify(payload);

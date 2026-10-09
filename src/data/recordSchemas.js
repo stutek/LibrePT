@@ -293,7 +293,11 @@ const { history: _history, planUpdates: _planUpdates, ...SCHEMA_5_WITHOUT_TRAINI
 
 // The words a status field may hold, one list per field. Readers compare with these exact words.
 export const PROGRAM_STATUSES = ["planned", "live", "done", "discarded"];
-export const SESSION_STATUSES = ["scheduled", "cancelled", "done"];
+// A session is "cancelled" when the trainer cancels it: the row stays on the board, shown weaker.
+// "deleted" is only an evening of a repeating session the trainer deleted: its row has to stay, or
+// the rule would produce that evening again, and the board does not show it. A deleted one-off has
+// no row at all.
+export const SESSION_STATUSES = ["scheduled", "cancelled", "done", "deleted"];
 export const ATTENDANCE_STATUSES = ["attended", "noShow", "cancelled", "sick", "forceMajeure"];
 export const NOTE_REVIEWS = ["none", "pending", "resolved"];
 export const INVITE_STATUSES = ["sent", "answered"];
@@ -314,7 +318,7 @@ export const FEEDBACK_TAG_TEXTS = {
 
 // A session of schema 6: one `status` instead of the two flags `completed` and `cancelled`, which
 // allowed a session that was both. Which programs ran in it is on the programs; the session says
-// only whether it was held, cancelled or is still to come. `startDate` is required: migration step
+// only whether it was held, cancelled, deleted from its series or is still to come. `startDate` is required: migration step
 // 2 → 3 gave one to every older session, and every writer sets it.
 const {
   completed: _completed,
@@ -329,6 +333,9 @@ export const SCHEMA_6 = {
     ...SESSION_5_WITHOUT_FLAGS,
     startDate: { required: true, type: "string" },
     status: { required: true, type: "string", values: SESSION_STATUSES },
+    // The instant the trainer tapped Finish, ISO-8601 in UTC. A session finished before this field
+    // existed has none, and no conversion invents one.
+    finishedAt: { required: false, type: "string" },
   },
 
   invites: {
