@@ -62,6 +62,28 @@ is already fixed on `main`, and where in `src/` it lives, is the implementer's c
 tester never opens the source, not even after the observation. The SHA is what lets the implementer
 make that check in a minute.
 
+## In a cloud session (claude.ai/code)
+
+A cloud session cannot reach `stutek.github.io`, and Playwright cannot download its browser there:
+the session's proxy answers 403 to both. Run this first, once per session; it is safe to run again:
+
+```bash
+python3 .agents/skills/exploratory-test/cloud_setup.py
+```
+
+It makes `.venv`, links the Chromium the machine image carries under the name Playwright asks for,
+and starts two local servers. It prints both addresses:
+
+- **The published build, for mode 1**: a copy of the commit the last successful deploy published,
+  frozen there until the script runs again. Use its address wherever mode 1 says
+  `https://stutek.github.io/LibrePT/`.
+- **`main`, for mode 2**: the dev server.
+
+Two things differ from the real published app. The header shows `dev` instead of the commit, so
+write the commit the script printed into every finding. And the Chromium is older than the one
+Playwright ships; the script prints both versions. A finding that could depend on the browser
+version names it.
+
 ## Scenarios across an update of the data schema
 
 Since 2026-10-02 the app has ONE numbered schema, 6 (schemas 4 and 5 were retired), and one app
