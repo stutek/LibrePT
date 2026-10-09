@@ -185,6 +185,17 @@ export function backupWorkspace(parsed) {
 }
 
 /**
+ * Whether `parsed` declares that it belongs to another app. LibrePTNotes is served from the same
+ * origin and writes the same encrypted envelope, so its backup opens here with the same password.
+ * Its payload says `app: "libreptnotes"`. LibrePT's own payload has never carried an `app` field,
+ * so an absent field (null or undefined) is a LibrePT file; any other value than "librept" is not.
+ */
+export function refusesForeignApp(parsed) {
+  const declared = parsed?.app;
+  return declared !== undefined && declared !== null && declared !== "librept";
+}
+
+/**
  * Whether restoring `parsed` into workspace `target` must be refused.
  *
  * One rule, one direction: **nothing that was written in the sandbox may enter the trainer's own

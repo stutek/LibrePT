@@ -221,3 +221,15 @@ test("invitations and repeating-session rules are in the file, so a restore keep
   );
   assert.deepEqual(backup.summarizeReplacement(state).notCarried, []);
 });
+
+test("LibrePT writes no app field, and a file naming another app is refused", () => {
+  // LibrePTNotes shares the origin and the encrypted envelope; with the same password its backup
+  // decrypts here. Its payload says `app: "libreptnotes"`. LibrePT's own payload never had the
+  // field, so absence must stay accepted: every file written so far lacks it.
+  assert.equal("app" in backup.buildBackupPayload(database()), false);
+  assert.equal(backup.refusesForeignApp({ clients: [], exercises: [] }), false);
+  assert.equal(backup.refusesForeignApp({ app: "librept", clients: [], exercises: [] }), false);
+  assert.equal(backup.refusesForeignApp({ app: "libreptnotes", clients: [], exercises: [] }), true);
+  assert.equal(backup.refusesForeignApp({ app: "", clients: [], exercises: [] }), true);
+  assert.equal(backup.refusesForeignApp({ app: null, clients: [], exercises: [] }), false);
+});

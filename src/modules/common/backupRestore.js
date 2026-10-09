@@ -30,6 +30,7 @@ import { AES_GCM_CONTAINER, decryptBackup, encryptBackup } from "../../data/back
 import {
   ENCRYPTED_BACKUP_FORMAT,
   buildBackupPayload,
+  refusesForeignApp,
   refusesRestoreInto,
   resolveBackupFormat,
   summarizeReplacement,
@@ -574,6 +575,10 @@ export function setupBackupRestore() {
           // Locked, and the trainer gave up or typed the wrong password. `readImportedFile` has
           // already said which; the database is untouched.
           if (!importedData) return;
+
+          // Another app's file (LibrePTNotes shares the envelope and the password) is not a LibrePT
+          // backup. Refused before anything is read from it, with the sentence for a bad file.
+          if (refusesForeignApp(importedData)) throw new ImportRefusal("restore_invalid_file");
 
           // Simple verification schema
           if (
