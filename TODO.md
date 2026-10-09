@@ -6043,7 +6043,9 @@ as the slide-to-delete question says. Older shapes, the first cut of 6 included,
 every way in. Shipped in `e51fea88`.
 
 **[ ] Waits for Simon:**
-- **A. Does a session keep its own "done"?** Done now: one `status` (scheduled, cancelled, done)
+- **A. Ruled by Simon 2026-10-09 11:02:23.119: yes, and with the moment it finished.** A session
+  keeps its own `done` and gains `finishedAt`, the instant Finish was tapped. Was asked:
+  **Does a session keep its own "done"?** Done now: one `status` (scheduled, cancelled, done)
   instead of two flags, so a session can no longer be both. Still two places for one fact: the
   session's `done` + `duration` and its programs' `done` + `duration`; a group finished on one tab
   can still show them apart. Deriving the session's done from its programs (`status` then only
@@ -6053,7 +6055,12 @@ every way in. Shipped in `e51fea88`.
 - **B. No-show (item 6).** Finish no longer deletes the program of a participant who logged nothing;
   it waits unscheduled. No attendance is written: nothing logged is not proof of absence. Open:
   where the trainer says "did not come", and whether a no-show uses up a package session by default.
-- **C. Deleting a one-off session removes its row** (`sessionsAfterRemoving`), while the ruling of
+- **C. Ruled by Simon 2026-10-09 11:02:23.119: a cancelled session is kept, shown weaker, and the
+  trainer chooses.** The clipboard offers both **cancel** (the row stays with status `cancelled`,
+  its programs go unscheduled) and **delete** (the row goes, as now). A cancelled card reads weaker
+  in every theme (muted text, a border in the theme's warning colour, and the word for cancelled,
+  so the meaning is not in colour alone); Claude chooses the exact styling. Was asked:
+  **Deleting a one-off session removes its row** (`sessionsAfterRemoving`), while the ruling of
   2026-10-02 says a cancelled slot is marked `cancelled`. Its programs are unscheduled first, so
   nothing points at the missing row. Keep the row as `cancelled` instead?
 
