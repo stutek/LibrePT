@@ -3018,6 +3018,11 @@ dokumentacije. Izmišljene stranke, podatki in treningi; po vsakem scenariju tuk
 opaženo, težavo, vpliv na trenerjevo delo in predlog. Nove scenarije izbirati po tem, kar pokaže
 aplikacija. Postopek je veščina `exploratory-test` (`.agents/skills/exploratory-test/`).
 
+**V teku — 2026-10-09 10:58:03.805857302 +0200:** simulirani sedemdnevni teden trenerja ob drugi
+službi, tri stalne stranke z izmenskim delom, devet načrtovanih vadb. Podagent pred prvim ogledom
+aplikacije sestavi teden; opažanja zapisujemo tukaj sproti, sumljive napake neodvisno ponovimo.
+Telefon 390 × 844, slovenščina, lokalna aplikacija; začetni `main` `9ac45868`.
+
 Vsaka točka pove, na kateri različici je bila opažena: objavljena `0625bd6` ali `8b2ce80`, ali `main`
 s SHA. Ugotovitev z objavljene različice se pred popravkom preveri na `main`. Pod točko stoji verdikt:
 popravljeno s commitom, čaka na Simona ali zavrnjeno z razlogom. Zaprta točka ima tu le naslov in
