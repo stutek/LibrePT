@@ -48,6 +48,13 @@ DELIBERATELY_NOT_WALKED = {
     "session.focus.closed": "same overlay markup as session.focus, with no card open",
 }
 
+# The MERGED clipboard's card: the demo seed's "Group Strength & Conditioning", which overlaps
+# "Return-to-Play Rehab" on purpose (src/data/sessions.js), so opening it shows the longest title the
+# seed has. Found by its id. Its title is translated, and its time is the frozen clock read in the
+# browser's local timezone: "10:00 - 12:00" in Ljubljana but "08:00 - 10:00" on a UTC runner, where
+# finding it by that text failed the drawer test and made the walk skip the live session.
+MERGED_SESSION_CARD = '.session-card[data-session-id="s01f2e3d"]'
+
 
 # The walk itself, declared as data so the coverage check below reads the same list the browser
 # does rather than re-deriving it from the source of this file.
@@ -184,16 +191,12 @@ def _walk_live_session(page, base, findings):
     reads at arm's length mid-set. Opening a session upgrades the URL to carry both ids, which is
     where the editor/catalog/setup URLs below come from."""
     _nav(page, base + "/")
-    # The MERGED clipboard, whose name joins two sessions and is the longest title the seed has
-    # (src/data/sessions.js pairs "Group Strength & Conditioning" with "Return-to-Play Rehab" on
-    # purpose). The first card is a finished session with a short name, and opening it is why
-    # this walk never saw that name run under the ▶ and ⋮ buttons.
-    # Found by its time slot, not its title: the title is translated, and a title search found no
-    # card in sl and de, so the live-session part of those two walks silently did nothing.
-    session_card = page.locator(".session-card", has_text="10:00 - 12:00").first
-    if not session_card.count():
-        return
-    session_card.click()
+    # The merged clipboard, not the first card: the first card is a finished session with a short
+    # name, and opening it is why this walk never saw the long name run under the ▶ and ⋮ buttons.
+    # A missing card fails the walk. It used to return quietly, and twice that left the live session
+    # unswept without a word: in sl and de when the card was found by its title, and on the UTC
+    # runner when it was found by its time.
+    page.locator(MERGED_SESSION_CARD).click()
     page.wait_for_selector("#active-session-overlay:not(.hidden)", timeout=15000)
     _settle(page)
     _sweep(page, findings, "session.focus (live overlay)")
@@ -294,7 +297,7 @@ def test_the_drawer_drawn_again_during_a_running_session_does_not_overflow(
         _settle(page)
         base = _base(page)
         _nav(page, base + "/")
-        page.locator(".session-card", has_text="10:00 - 12:00").first.click()
+        page.locator(MERGED_SESSION_CARD).click()
         page.wait_for_selector("#active-session-overlay:not(.hidden)", timeout=15000)
         _settle(page)
         page.evaluate(
