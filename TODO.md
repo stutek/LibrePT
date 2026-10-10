@@ -6319,3 +6319,35 @@ V padlem teku je `expectHeld` (`#plan-peek-under-past .plan-sheet-row` viden) pr
 odmaknilo plana: plast pod njim je vedno izrisana, in `probe` ne vpraša, ali jo kaj prekriva. Napaka
 je zato dobila napačno ime (manjkal je gumb Danes, ne pogled). **Predlog:** pogoj vezati na stanje,
 ki ga postavi samo vlečenje, na primer razred `is-held` na `#active-session-blanket`.
+
+## 105. [ ] Ideja: domače naloge med treningi
+
+**Zapisal Simon 2026-10-10.** Trener stranki naroči vaje, ki jih ta naredi sama med dvema
+treningoma, in na naslednjem treningu vidi, kaj je naredila.
+
+**Kar že vemo.** §86.4 ima vrstico »Domača naloga med vadbama«: aplikacija danes ne dela nič, ocena
+vrednosti je bila »majhna, dokler ni meritev«. Dva dneva trenerja sta jo potrebovala: na dnevu 01 je
+trener nalogo dal brez možnosti potrditve, na dnevu 03 jo je vpisal v isto polje kot zdravstvene
+opombe (§88.7). Nalogo vpiše trener sam, zato pravilo »aplikacija ne postavlja ciljev vadbe« ostane
+nedotaknjeno.
+
+**Čaka na Simona — tri odločitve, preden se to načrtuje:**
+
+1. **Kako naloga pride do stranke.** Aplikacija je trenerjeva in deluje brez strežnika. Možnosti:
+   sporočilo ali povezava, ki jo trener pošlje (kot vabilo na trening), ali natisnjen list.
+2. **Ali stranka sporoči, kaj je naredila**, in kako: odgovor na sporočilo, ki ga trener prepiše,
+   ali nekaj, kar stranka odpre sama. Drugo potrebuje stran za stranko.
+3. **Ali spada v brezplačno aplikacijo ali v ProPT** (§90), če potrebuje strežnik.
+
+## 106. [~] Sporočilo o podpori ob vsaki novi različici aplikacije
+
+**Naročil Simon 2026-10-10.** Ob vsaki novi različici aplikacije (zdaj `2026-11` v
+`src/data/appVersions.js`), ne ob vsaki objavi znotraj iste različice, se v predalu z obvestili
+pokaže sporočilo, ki ga trener lahko zapre. Za zdaj se samo zahvali prvim uporabnikom in odkrito
+pove, da bomo morda nekoč prosili za prostovoljen prispevek. Načina plačila še ni.
+
+**Odločeno ob začetku dela:** kartica v predalu z obvestili, kakršna je pozdravna, ne okno, ki bi
+prekinilo trening. Po zaprtju se ne vrne do naslednje različice. Ne pokaže se, dokler trener ni
+odgovoril na uvodna vprašanja ob prvem zagonu.
+
+**Stanje:** v delu, 2026-10-10.
