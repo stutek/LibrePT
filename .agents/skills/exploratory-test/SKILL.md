@@ -135,8 +135,10 @@ S=.agents/skills/exploratory-test/explore.py
 .venv/bin/python $S eval 'document.title'
 .venv/bin/python $S download '#btn-export-db' /tmp/…/backup.json   # a control that hands over a file
 .venv/bin/python $S upload '#import-db-file' /tmp/…/backup.json    # hand the app a file back
-.venv/bin/python $S inject "<js>"           # run JS before the page's scripts, then reload
+.venv/bin/python $S clock 2026-10-12T07:00 # the page believes it is that time, and time runs on
+.venv/bin/python $S clock off               # the real time again; `clock` alone prints the page's
 EXPLORE_TAB=0 .venv/bin/python $S text      # drive a particular tab when two are open
+EXPLORE_PORT=9361 .venv/bin/python $S start # a browser of its own, for a second agent at once
 .venv/bin/python $S shot /tmp/…/x.png       # only for a visual-only claim
 .venv/bin/python $S stop                    # at the end of the session
 ```
@@ -192,10 +194,13 @@ can import, so a single `eval` can compare every `[data-i18n]` element on screen
 Slovenian dictionary and name the ones that differ — 847 keys, one mismatch, no reading. Reach for
 that shape whenever a finding would otherwise be "I noticed a few of these".
 
-**`inject` stays for the life of the tab.** It runs before the page's scripts on EVERY later
-`goto` and reload, not once. A clock shifted by two days on 2026-10-01 left the header saying
-»Brez povezave« on a machine that was online, which reads exactly like a defect. After a scenario
-that used `inject`, `stop` and `start` again before believing anything the app shows.
+**`inject` does not work; do not use it.** Measured 2026-10-10: its script reached no page, not
+even the reload in the same command, so whatever a scenario believed it had changed with `inject`
+was never changed. For time, use `clock`: the watchdog holds the clock script for the browser's
+whole life, because a script lives only as long as the connection that added it. A page on a
+shifted clock is a page on a shifted clock: the header said »Brez povezave« on 2026-10-01 after a
+two-day shift on a machine that was online. Say in a finding that the clock was shifted, and
+`clock off` before a scenario that does not need it.
 
 **A page stuck on the English loading screen cannot be settled from here.** On 2026-10-01 pages
 stalled on »LibrePT / A lightweight, free app …« in runs, with this tool's `goto` and with a plain
@@ -232,8 +237,10 @@ app, which is exactly what the test must not measure.
 **Target: the local dev server, `http://localhost:8081/LibrePT/`,** which serves `main`. The
 published build lags `main` by whatever was fixed since the last deploy, and a day spent rediscovering
 fixed defects measures nothing. Check it answers (`curl -s -o /dev/null -w '%{http_code}'`) before a
-run; starting or stopping it is Simon's call. **One day at a time:** the browser tool holds one
-browser on port 9333, so two trainers at once would drive each other's pages.
+run; starting or stopping it is Simon's call. **Two trainers at once need two ports:** give each
+its own `EXPLORE_PORT` (9361, 9362, …), so each has its own browser, profile and watchdog. Two at
+once were tested on 2026-10-10; on a machine with few cores, watch that a `goto` does not slow
+down before adding a third.
 
 **One cycle:**
 
