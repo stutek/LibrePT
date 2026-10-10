@@ -18,6 +18,27 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-10-10 — What ten trainer weeks found
+
+### Fixed
+
+- **Moving a session keeps its plan.** A plan built in the notebook, with no routine behind it, was
+  replaced by an empty one when the session was moved to another hour or day; the card then said
+  *No program set*, with no warning.
+- **The backup window no longer says the data is in Google Drive when Drive was never connected.**
+  It said *Everything on this device is already in Google Drive* on a new phone that had never seen
+  Google; it now says Drive is not connected, so no copy is there.
+- **A repeating session follows its date.** The weekday ticked when *Repeat every week* is switched on
+  moves with the date until the trainer ticks a day themselves; changing the date afterwards used to
+  leave the series on the old weekday.
+- **Time fields say how they are read.** A time or a hold is labelled *time (min:s)* in the plan
+  editor and the routine builder, and the rest field *Rest (s)*: a bare "20" is twenty seconds, which
+  a trainer who meant twenty minutes could not tell.
+- **Client notes keep their lines.** A note written on several lines is shown on several lines in the
+  client's profile.
+
+---
+
 ## 2026-09-30 — Namesakes, and what the sandbox promises
 
 ### Added

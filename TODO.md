@@ -4202,6 +4202,9 @@ Nemški trener išče gumb, ki ga ni.
 **Predlog:** kratice in enota iz slovarja (na primer »3 × 10 × 12 kg«, kot jo že kaže rutina: »3×10 ·
 12 kg«); nemški namig z napisom gumba. Opaženo na `main` `e2daf5e`, sl in de, 390 × 844.
 
+**Dokaz 2026-10-10, tedni trenerjev (§88.19):** trije tedni od desetih so vprašali, kaj pomenita črki
+(»S3 × R12 × 60 kg«, »S4 × R8 × 70 kg«, »S3 × R10«; F-r07-18, F-r09-03, F-r10-03).
+
 ### 80.145 [x] P3 — Stran za prijavo nagovori vsako stranko v ženskem spolu: »izbereš sama« — popravljeno 2026-09-30
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80145-x-p3--stran-za-prijavo-nagovori-vsako-stranko-v-ženskem-spolu-izbereš-sama--popravljeno-2026-09-30).
@@ -4705,21 +4708,9 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80197-x-p3--po-
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80198-x-p3--druga-stranka-z-istim-imenom-se-shrani-brez-opozorila-obe-vrstici-sta-enaki).
 
-### 80.200 [ ] P2 — Polje za čas pri vaji nima enote: »20« za 20 minut se zapiše kot 0:20 — nepreverjeno
+### 80.200 [x] P2 — Polje za čas pri vaji nima enote: »20« za 20 minut se zapiše kot 0:20 — popravljeno 2026-10-10
 
-**Scenarij in koraki:** teden r06, kardio vaja v načrtu, polje »ČAS«, vpis 20 (mišljeno 20 minut).
-Teden r04: polji »čas« in »Premor« pri vaji v rutini. Teden r02: povzetek vaje.
-
-**Opaženo:** zapisano »0:20«, torej 20 sekund (F-r06-10). Polji v rutini nimata enote (F-r04-05).
-Povzetek »S3 × 20:00« ne pove, da gre za 3 × 20 minut (F-r02-15).
-
-**Težava in vpliv:** napačno trajanje v načrtu; trener ga opazi šele, ko prebere povzetek.
-
-**Predlog:** enota ob polju (min ali s), in povzetek, ki enoto izpiše — opaženo 2026-10-10 na
-različici `166d3c8` (tedni r02, r04, r06; orkestrator ni ponovil).
-
-**Tedni r07–r10:** »Sobno kolo 1×0:10« namesto 10 minut (F-r07-03, F-r07-13), »čas« brez enote pri
-vaji (F-r08-10), višina škatle 30 cm se zapiše kot »30 kg« (F-r10-05).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80200-x-p2--polje-za-čas-pri-vaji-nima-enote-20-za-20-minut-se-zapiše-kot-020--popravljeno-2026-10-10).
 
 ### 80.201 [ ] P2 — Pri urejanju načrta ostane odprta prejšnja vaja, vpis serij pa gre vanjo — nepreverjeno
 
@@ -4751,18 +4742,9 @@ otroki; opozorila ni.
 opaženo 2026-10-10 na `166d3c8` (teden r04; orkestratorjeva ponovitev se je pomešala s prekinjenim
 ukazom in ne potrdi ničesar).
 
-### 80.203 [ ] P3 — Dnevi ponovitve nimajo imena, privzeti dan pa je današnji, ne dan izbranega datuma
+### 80.203 [x] P3 — Dnevi ponovitve nimajo imena, privzeti dan pa je današnji, ne dan izbranega datuma — popravljeno 2026-10-10
 
-**Scenarij in koraki:** »Ustvari trening« → »Ponovi vsak teden«.
-
-**Opaženo:** sedem polj za dneve ima za bralnik zaslona vrednost »on« in nobenega imena (preveril
-orkestrator 2026-10-10 na `166d3c8`; F-r02-02). Privzeto je označen današnji dan v tednu, tudi kadar
-je izbran drug datum (F-r06-12, nepreverjeno).
-
-**Težava in vpliv:** serija na dan, ki ga trener ni hotel, če označbe ne pregleda.
-
-**Predlog:** vsak dan nosi svoje ime, privzeti dan je dan izbranega datuma — opaženo 2026-10-10 na
-`166d3c8`.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80203-x-p3--dnevi-ponovitve-nimajo-imena-privzeti-dan-pa-je-današnji-ne-dan-izbranega-datuma--popravljeno-2026-10-10).
 
 ### 80.204 [ ] P2 — Okna za vabila se ne zaprejo: po »Pošlji SMS« ne »Končano« ne ✕ ne Esc — nepreverjeno
 
@@ -4825,6 +4807,8 @@ rutino« (F-r01-07).
 
 **Težava in vpliv:** načrta, ki je deloval, ni mogoče ponoviti; trener ga sestavi znova.
 
+Sorodno: §80.110 (»Shrani kot rutino« pozabi težo).
+
 **Predlog:** vaja iz načrta pride v rutino tudi, če ni v knjižnici, ali se v knjižnico doda ob tem —
 opaženo 2026-10-10 na `166d3c8` (teden r01).
 
@@ -4835,14 +4819,10 @@ opaženo 2026-10-10 na `166d3c8` (teden r01).
 
 Vsaka iz enega ali dveh tednov, na `166d3c8`; ena vrstica za vsako, da se preverijo skupaj:
 
-- Gumb menija se na slovenskem zaslonu imenuje »Menu / Meni« (F-r04-02, F-r08-02; orkestrator je v
-  seznamu kontrol videl isto ime).
 - Termin, ki se je šele začel, piše »Zamuja 00h 00m« (F-r09-01).
 - Ime termina, ki vsebuje ime stranke, je zavrnjeno šele po »Odpri v beležki«, in pot naprej se
   izgubi (F-r07-06; F-r05-13 pove, da ime ne sme vsebovati imena stranke).
-- V opombah profila se prelomi vrstic ne vidijo (F-r10-09).
 - Besedilo pravi »Pritisni Končano«, gumb pa je zelena kljukica brez besede (F-r05-02).
-- Odštevanje na pasici termina pokaže »-00h 02m« (F-r04-08).
 - Meni ⋮ ostane odprt ob Esc in prekriva gumbe vaje (F-r04-13).
 - Po odstranitvi dveh postaj ostaneta v načrtu prazna vrstica »Počitek 10s« in dva premora zapored
   (F-r04-16).
@@ -4851,21 +4831,15 @@ Vsaka iz enega ali dveh tednov, na `166d3c8`; ena vrstica za vsako, da se prever
 - Opomba iz treninga se prilepi v »Opombe« stranke brez presledka (F-r01-08).
 - Teža je prikazana s piko, »27.5 kg« (F-r02-15).
 
-### 80.209 [ ] P1 — Prestavitev termina na drugo uro ali dan izbriše načrt vaj, sestavljen v beležki — nepreverjeno
+**Urejeno 2026-10-10 na veji `fix/week-defects`:** prelomi vrstic v opombah profila se vidijo
+(F-r10-09; `clientsView.css`, test `tests/medium/test_client_profile.py`). **Ni napaka:** »Menu /
+Meni« je dvojezičen namenoma, kot stikali za jezik in temo, da ga najde trener, ki je obtičal v
+napačnem jeziku (`tests/unit/test_aria_labels_translated.py`); »-00h 02m« je trening, ki teče čez
+načrtovani konec, in znak minus nosi namenoma, kot ura na podlogi (`sessionCard.js`).
 
-**Scenarij in koraki:** termin z načrtom, sestavljenim v beležki z »Uredi načrt« (ne iz rutine) →
-kartica termina → »Uredi« → druga začetna ura (F-r07-10) ali drug datum (F-r08-15) → »Shrani«.
+### 80.209 [x] P1 — Prestavitev termina na drugo uro ali dan izbriše načrt vaj, sestavljen v beležki — popravljeno 2026-10-10
 
-**Opaženo:** kartica pravi »Program ni določen«, odprt trening »Ni vstavljenih vaj«. Teden r07: okno
-»Uredi« je pri stranki kazalo »Izberi rutino / Prazen načrt, brez rutine«, in »Shrani« je načrt
-prepisal s praznim; opozorila ni bilo. Teden r08 je isto videl pri dveh strankah, četrtek in sobota.
-
-**Težava in vpliv:** trener prestavi termin in na treningu nima načrta; sestavljen načrt je izgubljen.
-
-**Predlog:** prestavitev spremeni samo čas; načrt, ki ga okno ne zna pokazati, ostane, kot je —
-opaženo 2026-10-10 na `166d3c8` (tedna r07 in r08, neodvisno). Orkestrator je ponovil le različico,
-kjer je načrt iz rutine (demo, »Hitri HIIT za trup«, 16:00 → 16:30): tam se načrt ohrani. Neponovljena
-je različica z načrtom iz beležke, ki sta jo imela oba tedna.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80209-x-p1--prestavitev-termina-na-drugo-uro-ali-dan-izbriše-načrt-vaj-sestavljen-v-beležki--popravljeno-2026-10-10).
 
 ### 80.210 [ ] P2 — Opomba z meritvijo postane opozorilo; »Razreši« jo izbriše brez vprašanja — nepreverjeno
 
@@ -4882,33 +4856,9 @@ ga je mislil kot »prebrano«. Uničujoče dejanje brez vprašanja.
 **Predlog:** opomba brez ocene ni opozorilo; »Razreši« ne briše zapisa — opaženo 2026-10-10 na
 `166d3c8` (tedni r05, r07, r08). Mesto za meritve je §78.
 
-### 80.211 [ ] P3 — Povzetek vaje »S3 × R12 × 60 kg«: črki nista razloženi, »R« ni slovenska
+### 80.212 [x] P2 — Okno za kopije šteje samo Google Drive: »vse je že v Google Drive« brez Drive, »OGROŽENO« po izvozu v datoteko — popravljeno 2026-10-10
 
-**Scenarij in koraki:** kartica vaje v načrtu in v beležki.
-
-**Opaženo:** »S3 × R12 × 60 kg«, »S4 × R8 × 70 kg«, »S3 × R10« (F-r07-18, F-r09-03, F-r10-03).
-
-**Težava in vpliv:** trener ne ve, kaj črki pomenita; »R« je angleška okrajšava (*reps*).
-
-**Predlog:** zapis, ki ga trener prebere brez razlage, na primer »3 × 12 × 60 kg« — opaženo
-2026-10-10 na `166d3c8` (trije tedni; orkestrator je zapis videl na kartici »S1 × 20 cal«).
-
-### 80.212 [ ] P2 — Okno za kopije šteje samo Google Drive: »vse je že v Google Drive« brez Drive, »OGROŽENO« po izvozu v datoteko
-
-**Scenarij in koraki:** ikona s številko in vprašajem zgoraj desno (»Središče za sinhronizacijo in
-varnostne kopije«) na napravi, ki ni nikoli povezala Google Drive; nato »Izvozi JSON« v datoteko.
-
-**Opaženo:** »Vse na tej napravi je že v Google Drive.« na praznem novem telefonu, ki Googla ni videl
-(F-s01-05, F-s02-08; orkestrator je isti stavek videl 2026-10-10 na napravi s predstavitvenimi
-podatki brez Drive). Po izvozu v datoteko ostane rdeča značka »OGROŽENO — NAREDI KOPIJO« in »27
-sprememb … ni v Google Drive«, dokler aplikacije ne osvežiš (F-s01-13, F-s02-06, F-r05-09).
-
-**Težava in vpliv:** okno trenerju reče, da so podatki varni, ko niso nikjer, in da niso varni, ko so
-v datoteki, narejeni minuto prej. Trener ne ve, ali ima kopijo.
-
-**Predlog:** okno pove, kje je zadnja kopija in kdaj je nastala, datoteka ali Drive, in nikoli ne
-trdi Drive brez Drive — opaženo 2026-10-10 na `166d3c8` (scenarija §107 in teden r05; prvi stavek
-preveril orkestrator).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80212-x-p2--okno-za-kopije-šteje-samo-google-drive-vse-je-že-v-google-drive-brez-drive-ogroženo-po-izvozu-v-datoteko--popravljeno-2026-10-10).
 
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
@@ -6605,6 +6555,15 @@ seja se ni odprla. Popravljeno 2026-10-09: `placeThePress` v `src/modules/demo/d
 pritisne šele, ko brskalnikov zadetek na tej točki vrne kartico, sicer jo znova pomakne na zaslon,
 največ štirikrat; test `tests/unit_js/modules/demo/demoTourDrag.test.mjs`. Pod obremenitvijo nato
 20 tekov od 20 brez padca.
+
+### 104.2 [ ] Isti test je po popravku enkrat spet padel v celotnem gatu — vzrok neznan
+
+**2026-10-10 21:12, gate na veji `fix/week-defects`:**
+`test_the_demo_waits_until_the_first_launch_is_answered` je spet dal `[True, False]`: drugi korak
+(`open-previous-session`) ni uspel. `placeThePress` je na veji. Sam test je pod umetno obremenitvijo
+(trije procesi `yes`) prešel 10 tekov od 10, tik pred tem pa so drugi testi istega gata prešli. Test je
+razlog skril, ker je primerjal le seznam `ok`; zdaj ga izpiše (`tests/e2e/test_first_run_deeplink.py`).
+**Naslednji padec pove, kateri korak in zakaj; šele takrat se popravlja.**
 
 ### 104.1 [ ] Preverjanje »med držanjem« prehaja tudi brez poteze
 
