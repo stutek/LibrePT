@@ -79,3 +79,6 @@ Updated by the orchestrator after every step.
   **Phase 4 done**: §80.209–§80.211, §88.19 for ten weeks, evidence lines; skill lessons. PR opened
   for `feat/week-trials`. **The run is complete.** Open: §106's build on `feat/release-thanks`
   (optional, gate red); reproducing §80.209 with a plan built in the notebook.
+- 2026-10-10 15:18 — Simon asked to test the two new scenarios (TODO §107). `download` fixed
+  (96fa7bb): backups reach a file. Runs s01 (stolen phone, from r01's week, ports 9381/9382) and s02
+  (computer and phone, from r06's week, ports 9383/9384), prompt `prompts/scenario.md`.
