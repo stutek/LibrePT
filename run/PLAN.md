@@ -41,6 +41,8 @@ Updated by the orchestrator after every step.
 
 - 2026-10-10 04:46 — tooling committed on `feat/week-trials` (09b248d): `EXPLORE_PORT`, `clock`.
   Phase 1 not started.
+- 2026-10-10 05:00 — **phase 1 done**: 10 batches, 100 weeks, every end marker present, ~85,000
+  words. Batches 06 and 10 report a few numeric slips; the ranking will see them. Phase 2 started.
 
 ## Decisions taken
 
