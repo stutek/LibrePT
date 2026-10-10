@@ -286,8 +286,9 @@ the requested time or token budget remains, reserving enough to save findings an
 
 **What ten weeks at once taught (2026-10-10).** The run's prompts, the ranking and the reports are
 in `.private/exploratory-test/weeks/2026-10-10/`; reuse its `prompts/runner.md`. Four things:
-- **The data lives only in the browser.** The encrypted backup does not reach a file in this tool
-  (an open defect in TODO.md), so a lost browser is lost data. Start it with `EXPLORE_IDLE_MINUTES=40` and keep commands coming.
+- **Keep a backup every evening.** On that day `download` could not catch a file, so every lost
+  browser was lost data. It catches the file in the page now: export each evening, and restore from
+  it with `upload` after a lost browser. Start it with `EXPLORE_IDLE_MINUTES=40` anyway.
 - **The shifted clock is not the phone's clock.** `clock` shifts the page's `Date` only; background
   workers keep the real time. Two weeks saw a repeating session miss its first day, and neither
   reproduced on the real clock. Check anything about dates and series with `clock off` before
