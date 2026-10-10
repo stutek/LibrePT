@@ -6551,3 +6551,21 @@ trener kartico zaprl), brez zahteve za združitev. Gate je trikrat padel; zadnji
 `test_demo_story.py::test_the_whole_story_can_be_walked_in_slovenian` (vodič obstane na koraku 36,
 »Pritisni trening Skupinska moč in kondicija«). Ni preverjeno, ali padec povzroči kartica ali
 obremenjen stroj. Nadaljuje se po raziskovalnem testiranju tedna.
+
+## 107. [ ] Dva primera za prihodnje raziskovalno testiranje: ukraden telefon in dve napravi
+
+**Naročil Simon 2026-10-10.** Oba sta v besednjaku oznak veščine `exploratory-test` (`ukraden-telefon`,
+`dve-napravi`), da ju izmišljeni tedni vključijo. Tedni 2026-10-10 ju še niso imeli.
+
+**Ukraden telefon.** Trenerju sredi tedna ukradejo telefon. Preizkus odgovori: kaj od tedna ostane in
+od kod (zadnja kopija v datoteki, Google Drive); koliko stane, da je na novem telefonu spet vse
+(§88.14: obnovitev je šele za uvodom, ki sprašuje, kar je v kopiji); ali trener ve geslo šifrirane
+kopije (§80.136); kaj se zgodi s podatki strank na ukradenem telefonu, med njimi z zdravstvenimi
+opombami (§97), in ali lahko trener ukradenemu telefonu odvzame dostop do Drive.
+
+**Dve napravi.** Trener zvečer na računalniku sestavi načrte za teden, zjutraj na telefonu vodi
+trening. Preizkus odgovori: kako načrti pridejo na telefon (sinhronizacija, datoteka); kaj se zgodi,
+če isti načrt uredi na obeh; ali je urejanje na širokem zaslonu sploh udobno (aplikacija je stolpec
+širine 480 pik). Orodje to zmore z dvema brskalnikoma (`EXPLORE_PORT`) in z oknom 1280 × 800 za
+računalnik. **Meja:** orodje se ne more prijaviti v Google (Google samodejne brskalnike zavrne), zato
+pot prek Drive preveri Simon ročno z `LibrePT.test@gmail.com`; orodje preveri pot prek datoteke.

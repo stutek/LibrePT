@@ -290,7 +290,8 @@ the requested time or token budget remains, reserving enough to save findings an
 `sporočila`, `meritve`, `napredek`, `načrt-za-teden`, `prvi-obisk`, `domača-naloga`, `nadomeščanje`,
 `sezona` (priprave na tekmo, zimski čas), `mladostniki`, `starejši`, `nosečnost`, `online`,
 `zaposlen-v-fitnesu`, `ekipa` (klub, moštvo), `podjetje`, `v-paru`, `otroci`, `prehrana`,
-`brez-signala` (klet, tujina), `posebne-potrebe`, `tekmovalec`.
+`brez-signala` (klet, tujina), `posebne-potrebe`, `tekmovalec`, `ukraden-telefon` (telefon izgine
+sredi tedna), `dve-napravi` (načrte trener piše na računalniku, trening vodi na telefonu).
 A new kind of work gets a new tag in the same edit that first uses it.
 
 **Cycles for a fixed time.** When Simon asks for "N hours of exploratory testing", read `date` at the
