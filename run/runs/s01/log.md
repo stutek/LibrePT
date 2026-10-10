@@ -1,0 +1,28 @@
+---
+type: log
+title: log s01
+description: log za tek s01, ukraden telefon.
+tags: [exploratory, trainer-week]
+---
+
+- ponedeljek 06:30 — [A] prvi zagon: pogoji, tema, moji podatki, začni s prazno, 4 stranke (Katja, Barbara, Lana, Rado) — opravljeno — ocena 2 — 6 / 0
+- ponedeljek 06:45 — [A] termin Katja Starc 06:45–07:45 z 4 vajami (Potisk, Počep, Veslanje, Plank) — opravljeno — ocena 2 — 7 / 0
+- ponedeljek 06:50 — [A] izvedba treninga Katja (opomba, zaključek) — delno — ocena 1 — 5 / 0 (serij ni mogoče označiti, glej F-s01-01)
+- ponedeljek 17:00 — [A] termin in vodenje treninga Barbara Gaber (4 vaje, opomba o napredku) — opravljeno — ocena 2 — 8 / 0
+- ponedeljek 20:00 — [A] zvezek (papir, izven telefona), kot zahteva aplikacija (»Zapiši to geslo nekam izven tega telefona«): geslo za varnostne kopije = barbell-tempo-deadlift-quadrant-jumprope-impulse
+- ponedeljek 20:05 — [A] varnostna kopija: oblak → »Nastavi geslo za varnostne kopije« → »Zapisal sem si ga, shrani« → »Izvozi JSON«; datoteka backups/ponedeljek-zvečer.json (9681 B, šifrirana) — opravljeno — ocena 2 — 4 / 0 (takoj datoteka, brez izbire mape: aplikacija sama ime librept_backup_2026-10-12.json)
+- torek 16:00 — [A] termin in vodenje treninga Lana Jelen (3 vaje, opomba o kolenu); reps pristanka 10 namesto 8 zaradi izteka ukaza v orodju, ne napaka aplikacije — opravljeno — ocena 2 — 7 / 0
+- torek 17:30 — [A] termin in vodenje treninga Rado Mastnak (2 vaji, sladkor 7,1 kot opomba) — opravljeno — ocena 2 — 6 / 0 (hoje na traku 12 min nisem vpisal; vrnem se, če ostane čas)
+- torek 19:00 — [A] stranki Mojca in Tadej Cvikl (dve kartoteki) + termin sreda 18:00 »Par v parku«, Mestni park, 3 vaje, »Vsi na ta načrt« — opravljeno — ocena 2 — 8 / 0
+- torek 20:00 — [A] varnostna kopija: oblak → »Izvozi JSON« (geslo je že shranjeno na telefonu, ni vprašalo znova; okno pravi »Varnostne kopije s te naprave so šifrirane.«); datoteka backups/torek-zvečer.json — opravljeno — ocena 3 — 1 / 0
+- sreda 07:30 — [A] nova stranka Ivan Pečnik, termin sobota 2026-10-17 09:00 z njim, Barbarin profil: opomba o domačih vajah za četrtek (to je vse, kar sem v sredo zjutraj vpisal; v torkovi kopiji tega ni) — opravljeno — ocena 2 — 9 / 0 (ukazi v orodju so se večkrat iztekli, ne po krivdi aplikacije)
+- sreda 12:30 — [A] telefon A ukraden iz omarice. Od tu naprej A ne dobi nobenega ukaza (tudi ne »stop«; zapre se sam po 40 minutah brez ukaza).
+  Stanje na A ob kraji (resnica za primerjavo): stranke Katja, Barbara, Lana, Rado, Mojca, Tadej, Ivan (7); 4 zaključeni treningi (pon Katja, pon Barbara, tor Lana, tor Rado; vsi brez zabeleženih serij), termin sreda 18:00 »Par v parku«, termin sobota 17. 10. 09:00 Ivan; opombe: Katja (utrujena), Barbara (boli manj), Lana (koleno zdrsne), Rado (sladkor 7,1); moji podatki Nina Krajnc; tema Dan; jezik sl. V torkovi kopiji NI: Ivan, termin Ivana, Barbarina opomba za četrtek.
+- sreda 15:00 — [B] nov telefon: zagon, ura 15:00, »Se strinjam«, tema Dan, »Nadaljuj«, 4 polja o meni, »Shrani in nadaljuj«, »Začni s prazno aplikacijo«, oblak, »Izberi JSON datoteko« torek-zvečer.json, geslo iz zvezka (prvič z napako v eni črki: »Napačno geslo ali spremenjena datoteka. Na tej napravi se ni nič spremenilo.«; datoteko sem moral izbrati znova), »Uvoz je uspel.« — opravljeno — ocena 2 — 6 / 1 (13 dotikov do podatkov; potrebno: kje je datoteka na telefonu in geslo iz zvezka)
+- sreda 15:30 — [B] pregled, kaj je prišlo: 6 strank (Katja, Barbara, Lana, Rado, Mojca, Tadej), 4 zaključeni treningi v zgodovini (vse vaje PRESKOČENO, kot na A), termin sreda 18:00 »Par v parku« z načrtom 3 vaj in »Skupaj«, 4 neprebrani povratni signali, moji podatki (vpisani znova, ne morem ločiti), tema Dan. NI: Ivan Pečnik, njegov termin v soboto, Barbarina opomba za četrtek — vse vpisano v sredo zjutraj — opravljeno — ocena 2 — 6 / 0
+- sreda 18:00 — [B] trening »Par v parku« (Mojca in Tadej) iz obnovljenega termina: Začni trening, opomba, zaključek — opravljeno — ocena 2 — 4 / 0 (načrt in oba udeleženca sta bila, kot sem ju vpisal v torek)
+- sreda 19:30 — [B] znova vpisano, kar sem na A vpisal v sredo zjutraj in je izgubljeno: Ivan Pečnik (stranka), sobota 17. 10. 09:00 Ivan, ter nova stranka Simon Žnidar in sobota 10:00 Lana (prestavitev) — opravljeno — ocena 2 — 8 / 0
+- četrtek 08:00 — [B] ura nastavljena na čet 07:30; termin Simon Žnidar 08:00 (ime »Simon« aplikacija zavrne: ime termina ne sme biti ime stranke → »Ena na ena«), nato kartica → »Uredi« → »Odpri v beležki« → ⋮ »Možnosti treninga« → »Odpovej trening« → potrditev; kartica kaže »Odpovedano« — opravljeno — ocena 2 — 6 / 0 (okno vabil v koledar se je odprlo po shranjevanju, glej §88.6; na vrhu B opozorilo »OGROŽENO — NAREDI KOPIJO«)
+- četrtek 17:00 — [B] Barbara Gaber: namesto ure domači program: termin »Domači program«, kraj Doma, načrt Mostiček 3×15 in Ptičji pes 3×10, Začni trening, opomba »Doma namesto ure, obisk se ne odšteje«, Zaključi (spet »Ni zabeleženih zaključenih serij«); raztezanja 2×30 s iz plana nisem vpisal (varčujem ukaze) — opravljeno — ocena 2 — 9 / 0 (obisk se ne odšteje: aplikacija obiskov sploh ne šteje, glej F-s01-12; opomba »Paket 10, ostalo 5« je v Barbarinem profilu, ker sem jo vpisal prej)
+- četrtek 17:30 — [B] Lano prestavim na soboto 10:00: termin sobota 17. 10. 10:00 Lana je že na B od srede 19:30 (vpisan tam kot nov termin, ker Lana v prihodnje ni imela termina, ki bi ga lahko premaknil) — opravljeno — ocena 2 — 0 / 0
+- četrtek 20:00 — [B] večerna kopija: oblak → »Izvozi JSON« (geslo že shranjeno na B, ni vprašalo), datoteka backups/cetrtek-zvecer.json (26233 B, šifrirana); pregled besedil o ukradenem telefonu je že v F-s01-08 (nič novega) — opravljeno — ocena 2 — 2 / 0 (opozorilo OGROŽENO ostane do osvežitve, F-s01-13)
