@@ -75,3 +75,7 @@ Updated by the orchestrator after every step.
   committed** (ac9054e): §80.6 and §80.54 evidence, §80.200–§80.208, §88.19, §105
   evidence. Not reproduced: F-r03-15. Next: wave 3 = r07–r10 together on ports 9367–9370, then their
   evaluation added to §88.19.
+- 2026-10-10 14:17 — **wave 3 done** (r07 18, r08 18, r09 17, r10 12; 168 findings in all).
+  **Phase 4 done**: §80.209–§80.211, §88.19 for ten weeks, evidence lines; skill lessons. PR opened
+  for `feat/week-trials`. **The run is complete.** Open: §106's build on `feat/release-thanks`
+  (optional, gate red); reproducing §80.209 with a plan built in the notebook.
