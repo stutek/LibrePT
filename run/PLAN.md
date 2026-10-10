@@ -71,3 +71,7 @@ Updated by the orchestrator after every step.
 - **Three runners at a time.** The machine has two cores, and each runner holds a browser.
 - **The app's clock is shifted** to the simulated day (`explore.py clock`), so Monday's sessions
   happen on a Monday as the app sees it.
+- 2026-10-10 12:00 — **wave 2 done** (r04 19 findings, r05 17, r06 14). **Phase 4 for r01–r06
+  committed** (ac9054e): §80.6 and §80.54 evidence, §80.200–§80.208, §88.19, §105
+  evidence. Not reproduced: F-r03-15. Next: wave 3 = r07–r10 together on ports 9367–9370, then their
+  evaluation added to §88.19.
