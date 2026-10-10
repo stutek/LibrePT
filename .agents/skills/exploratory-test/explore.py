@@ -16,15 +16,21 @@ import time
 import urllib.request
 from pathlib import Path
 
-PORT = 9333
-STATE = Path(__file__).resolve().parent / ".session"
+# EXPLORE_PORT gives a second agent a browser of its own (2026-10-10, ten trainer weeks run side by
+# side). Everything per browser follows the port: its profile, its note and its watchdog, so one
+# agent's `start` or `stop` never reaches another's browser.
+PORT = int(os.environ.get("EXPLORE_PORT") or 9333)
+STATE = Path(__file__).resolve().parent / ".session" / str(PORT)
 ENDPOINT = f"http://127.0.0.1:{PORT}"
 
 # A browser nobody drives is closed. Every command touches HEARTBEAT; a watchdog started with the
 # browser stops it once no command has come for IDLE_SECONDS. A session that ends without `stop`
 # left a headless Chromium using most of a core for hours, and the gate refused to start beside it.
 HEARTBEAT = STATE / "last-command"
-IDLE_SECONDS = 15 * 60
+# EXPLORE_IDLE_MINUTES, read by `start`: a week runner thinks for longer between commands than a
+# scenario does, and three of three lost their browser, and with it every client they had entered,
+# when the backup could not reach a file either (2026-10-10).
+IDLE_SECONDS = int(os.environ.get("EXPLORE_IDLE_MINUTES") or 15) * 60
 WATCH_EVERY_SECONDS = 30
 
 # Every console error, warning and uncaught throw the page produced lands here.
@@ -64,7 +70,7 @@ NOTE = (
     Path(__file__).resolve().parents[3]
     / ".private"
     / "AGENT_SYNC"
-    / "exploratory-browser.md"
+    / f"exploratory-browser-{PORT}.md"
 )
 
 
@@ -109,7 +115,7 @@ def claim(watchdog_pid=None):
 def _watchdog_pid():
     """The detached watchdog for THIS port, if it is still running."""
     found = subprocess.run(
-        ["pgrep", "-f", f"{Path(__file__).name} _watchdog"],
+        ["pgrep", "-f", f"{Path(__file__).name} _watchdog {PORT}$"],
         capture_output=True,
         text=True,
     )
@@ -169,10 +175,14 @@ def start(width=390, height=844):
             HEARTBEAT.touch()
             # One watchdog per browser: a watchdog from an earlier start would otherwise go on
             # watching this new browser too, one more for every restart.
-            subprocess.run(["pkill", "-f", "explore.py _watchdog"], check=False)
+            subprocess.run(
+                ["pkill", "-f", f"explore.py _watchdog {PORT}$"], check=False
+            )
             # Detached, so it outlives this command and the shell that ran it.
             watchdog = subprocess.Popen(
-                [sys.executable, str(Path(__file__).resolve()), "_watchdog"],
+                # The port is in the arguments only so `pgrep` can tell the watchdogs apart; the
+                # watchdog itself reads EXPLORE_PORT from the environment it inherits.
+                [sys.executable, str(Path(__file__).resolve()), "_watchdog", str(PORT)],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
                 start_new_session=True,
@@ -196,7 +206,24 @@ def stop():
 
 
 def watchdog():
-    """Stop the browser once no command has touched HEARTBEAT for IDLE_SECONDS; exit when it is gone."""
+    """Stop the browser once no command has touched HEARTBEAT for IDLE_SECONDS; exit when it is gone.
+
+    It also holds the clock script in place (CLOCK_SHIM). A script added to the page lives only as
+    long as the connection that added it, and every other command connects and leaves; this
+    process is the one that stays for the browser's whole life (measured 2026-10-10).
+    """
+    from playwright.sync_api import sync_playwright
+
+    with sync_playwright() as pw:
+        try:
+            browser = pw.chromium.connect_over_cdp(ENDPOINT)
+            browser.contexts[-1].add_init_script(CLOCK_SHIM)
+        except Exception:  # noqa: BLE001 — the browser still needs closing when the clock cannot be held
+            pass
+        _watch_idle()
+
+
+def _watch_idle():
     while alive():
         try:
             idle = time.time() - HEARTBEAT.stat().st_mtime
@@ -206,6 +233,103 @@ def watchdog():
             stop()
             return
         time.sleep(WATCH_EVERY_SECONDS)
+
+
+# A trainer's WEEK is lived in an afternoon, so the page has to believe it is Monday 07:00, and later
+# Monday 17:00, then Tuesday (2026-10-10). The shift is an offset added to `Date`, read from the
+# page's own sessionStorage on every load: simulated time runs at the real speed, survives a reload,
+# and a second `clock` replaces the offset instead of stacking a second shift on the first, which
+# two injected scripts would do. sessionStorage, not localStorage, so the app's own settings are
+# left alone. It dies with the tab, like the rest of the incognito profile: after `start`, set it
+# again. Workers and the service worker keep the real time; the app's pages read `Date` themselves.
+CLOCK_SHIM = """(() => {
+  window.__simClockShim = true;
+  if (window.__simClock) return;
+  const offset = Number(sessionStorage.getItem('__simClockOffset') || 0);
+  if (!offset) return;
+  const RealDate = Date;
+  class SimDate extends RealDate {
+    constructor(...args) { if (args.length === 0) super(RealDate.now() + offset); else super(...args); }
+    static now() { return RealDate.now() + offset; }
+  }
+  window.Date = SimDate;
+  window.__simClock = offset;
+})();"""
+
+
+def set_clock(pg, when):
+    if when is not None:
+        offset = 0
+        if when != "off":
+            target = pg.evaluate("(iso) => new Date(iso).getTime()", when)
+            if target != target:  # NaN: not a time the browser can read
+                sys.exit(f"not a time: {when!r} (write it as 2026-10-12T07:00)")
+            offset = int(target - time.time() * 1000)
+        if not pg.evaluate("() => window.__simClockShim === true"):
+            sys.exit(
+                "the clock is held by the watchdog, and it is not running: `stop`, then `start`"
+            )
+        pg.evaluate(
+            "(o) => o ? sessionStorage.setItem('__simClockOffset', String(o))"
+            " : sessionStorage.removeItem('__simClockOffset')",
+            offset,
+        )
+        pg.reload(wait_until="networkidle", timeout=60000)
+        pg.wait_for_timeout(1500)
+        pg.evaluate(HOOK)
+    print("page time:", pg.evaluate("() => new Date().toString()"))
+
+
+def download(pg, selector, dest):
+    """Tap a control that hands the trainer a file, and save the file at `dest`.
+
+    Playwright's download handling works only in a context Playwright created, and this browser's
+    window is Chrome's own incognito context: every download was cancelled ("Download.save_as:
+    canceled"), and Chrome refuses a DevTools grant for that context too ("Failed to find browser
+    context"). Ten week runners on 2026-10-10 could not keep one backup and took it for the app's
+    fault. So the file is caught in the page: every Blob the page makes a URL for is remembered,
+    and a click on a link with `download` hands its Blob back here instead of to the browser. What
+    is saved is exactly what the app produced.
+    """
+    pg.evaluate(CATCH_DOWNLOAD)
+    pg.locator(selector).first.click()
+    caught = None
+    for _ in range(80):  # 20 seconds
+        caught = pg.evaluate("() => window.__exploreDownload || null")
+        if caught:
+            break
+        pg.wait_for_timeout(250)
+    if not caught:
+        print(
+            "no file came within 20 s; `dialog` shows whether the app asked for something first"
+        )
+        return
+    target = Path(dest) if dest else Path("/tmp") / (caught["name"] or "download")
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(caught["text"], encoding="utf-8")
+    print("downloaded:", caught["name"], f"({target.stat().st_size} bytes) ->", target)
+
+
+CATCH_DOWNLOAD = """() => {
+  window.__exploreDownload = null;
+  if (window.__exploreCatching) return;
+  window.__exploreCatching = true;
+  const blobs = new Map();
+  const make = URL.createObjectURL.bind(URL);
+  URL.createObjectURL = (obj) => { const url = make(obj); blobs.set(url, obj); return url; };
+  const take = (a) => {
+    const blob = blobs.get(a.href);
+    if (!blob || !a.hasAttribute('download')) return false;
+    blob.text().then((text) => { window.__exploreDownload = { name: a.download, text }; });
+    return true;
+  };
+  const click = HTMLAnchorElement.prototype.click;
+  HTMLAnchorElement.prototype.click = function () { if (!take(this)) click.call(this); };
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest && e.target.closest('a[download]');
+    if (a && take(a)) e.preventDefault();
+  }, true);
+}"""
 
 
 def page(pw):
@@ -321,6 +445,10 @@ def main(argv):  # noqa: C901 — see below
         elif cmd == "select":
             pg.locator(args[0]).first.select_option(args[1])
             pg.wait_for_timeout(400)
+        elif cmd == "clock":
+            # `clock 2026-10-12T07:00` — the page believes it is that time, and the time runs on.
+            # `clock` alone prints what the page believes; `clock off` gives it the real time back.
+            return set_clock(pg, args[0] if args else None)
         elif cmd == "eval":
             print(
                 json.dumps(
@@ -353,13 +481,7 @@ def main(argv):  # noqa: C901 — see below
         elif (
             cmd == "download"
         ):  # a control that hands the trainer a file: save it and say what came
-            with pg.expect_download(timeout=20000) as info:
-                pg.locator(args[0]).first.click()
-            dl = info.value
-            dest = args[1] if len(args) > 1 else f"/tmp/{dl.suggested_filename}"
-            dl.save_as(dest)
-            print("downloaded:", dl.suggested_filename, "->", dest)
-            return
+            return download(pg, args[0], args[1] if len(args) > 1 else None)
         elif (
             cmd == "offline"
         ):  # the gym basement with no signal, which the app promises to survive

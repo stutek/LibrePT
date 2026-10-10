@@ -3128,6 +3128,19 @@ Načrt s tremi vajami ni nikjer več viden. Isto opiše dnevnik prvega odprtja 0
 
 **Preverjeno 2026-10-09 11:33 na `c918d6d6`: se ponovi** (tri vaje, »Prelahko« le na drugi: v zgodovini »Abmat Sit-up PRESKOČENO«, »Assault Bike PRESKOČENO«). Še vedno čaka na §94, točka 1.
 
+**Dokaz 2026-10-10, tedni trenerjev r01–r06 na `166d3c8` (§88.19): vseh šest trenerjev je obstalo
+tu**, vsak v prvi uri: F-r01-04, F-r02-03 in F-r02-09, F-r03-05 in F-r03-13, F-r04-07 in F-r04-12,
+F-r05-03, F-r06-04. Orkestrator je preveril: osredotočena kartica samostojne vaje (»Assault Bike«) ima
+samo »Prelahko«, »Pretežko«, »Dodaj opombo« in časomer premora. Kar sledi, so tedni šteli sproti:
+števec »Nenačrtovani programi« je v enem tednu narasel od 1 na 20 (F-r04-18; tudi F-r02-11, F-r02-13,
+F-r03-06), načrt zaključenega treninga izgine s termina (F-r01-17, F-r05-07), zaključen trening kaže
+»Ni vstavljenih vaj« (F-r05-04), v zgodovini je vse »PRESKOČENO« in opombe ni (F-r04-17, §80.167).
+Trenerji so zato »Prelahko« pritiskali samo, da se vaja zapiše (F-r03-13), kar se je pozneje
+pokazalo kot nasvet (§80.206). **Tedni r07–r10 dodajo še štiri: deset od desetih** (F-r07-01,
+F-r08-06, F-r09-07, F-r10-02). Teden r09 je opazil neskladje: »Prelahko« vajo označi kot opravljeno,
+»Pretežko« je ne (F-r09-10; enako F-s02-09 v scenariju dveh naprav: vaja s »Pretežko« in opombo je v zgodovini »PRESKOČENO«, opomba o bolečini ne pride v kartoteko). Zaključen termin ima še vedno »Začni trening« in ob
+ponovnem zagonu izgubi načrt (F-r09-06); zaključen trening kaže »Ni vstavljenih vaj« (F-r10-04).
+
 ### 80.7 [x] P2 — Prvi prikaz novega termina pokaže 1970-01-01 — popravljeno 2026-09-27
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#807-x-p2--prvi-prikaz-novega-termina-pokaže-1970-01-01--popravljeno-2026-09-27).
@@ -3397,6 +3410,11 @@ nemščini (`e2daf5e`) isto; na istem zaslonu »Alle« (vir) in »All« (mišica
 karticah mešajo »AUSDAUER« s »CONDITIONING« in »HORIZONTAL PUSH«. Enako angleške so možnosti v
 obrazcu za vajo ([exerciseFormsController.js](src/controllers/exerciseFormsController.js),
 `<option value="Chest">Chest</option>`); v knjižnici se prva možnost glasi »Vse«, v izbirniku »All«.
+
+**Dokaz 2026-10-10, tedni r01, r03, r04, r06 (§88.19):** obrazec »Ustvari vajo po meri« zahteva štiri
+angleške izbire tudi za slovensko vajo (F-r01-09, F-r03-04), med opremo ni »kettlebell« (F-r03-04),
+imena vseh 48 vaj knjižnice so angleška (F-r04-03, F-r06-01), vaj za otroke, za igrišče in za
+hrbtenico ni: tri vaje za hrbtenico so trenerko stale 20 minut (F-r03-14).
 
 **Vzrok:** [exercisePicker.js](src/modules/exercises/exercisePicker.js) da prevedene besede le vrstici
 izvora (`sources.words`); vrednosti `MUSCLE_GROUPS` in `EQUIPMENT` izpiše dobesedno.
@@ -4032,7 +4050,14 @@ ko telefon izgubi, izgubi vse stranke. Iz brskalnika orodja tega ni mogoče loč
 Androidu in v Safariju na iPhonu izvoziti kopijo in pogledati, ali je v »Prenosi« datoteka. Če je,
 se zapis zapre kot omejitev orodja in ostane le protislovje sporočil (P3).
 
-**Preverjeno 2026-10-09 11:36:22.860 na `c918d6d6`, Chromium na računalniku: se ne ponovi** (datoteka `librept_backup_2026-10-09.json`, 63 169 bajtov, `formatVersion` 8, AES-GCM, brez imena stranke). Vrstica »Varnostne kopije s te naprave še niso šifrirane.« po šifriranem izvozu ostane, kar je napačno. Odprto ostane le ročno preverjanje na telefonu.
+**Preverjeno 2026-10-09 11:36:22.860 na `c918d6d6`, Chromium na računalniku: se ne ponovi** (datoteka `librept_backup_2026-10-09.json`, 63 169 bajtov, `formatVersion` 8, AES-GCM, brez imena stranke).
+
+**Vzrok v orodju najden 2026-10-10:** okno orodja je Chromov lastni zasebni kontekst; Playwright v
+njem prenosov ne sprejema, Chrome pa dovoljenja za ta kontekst ne da. `explore.py download` zdaj
+datoteko ujame na strani, preden jo dobi brskalnik. Isti koraki na `166d3c8` dajo
+`librept_backup_2026-10-10.json`, 63 169 bajtov, `formatVersion` 8, AES-GCM. Aplikacija datoteko
+torej naredi. Deset tednov trenerjev istega dne (§88.19) je kopijo izgubilo zaradi orodja, ne zaradi
+aplikacije. Ostane Simonova preverba na telefonu. Vrstica »Varnostne kopije s te naprave še niso šifrirane.« po šifriranem izvozu ostane, kar je napačno. Odprto ostane le ročno preverjanje na telefonu.
 
 ### 80.137 [x] P2 — Stranka z angleškim »Jezik obrazca« dobi slovensko vabilo in slovensko stran za odgovor — popravljeno 2026-09-30
 
@@ -4680,6 +4705,211 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80197-x-p3--po-
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80198-x-p3--druga-stranka-z-istim-imenom-se-shrani-brez-opozorila-obe-vrstici-sta-enaki).
 
+### 80.200 [ ] P2 — Polje za čas pri vaji nima enote: »20« za 20 minut se zapiše kot 0:20 — nepreverjeno
+
+**Scenarij in koraki:** teden r06, kardio vaja v načrtu, polje »ČAS«, vpis 20 (mišljeno 20 minut).
+Teden r04: polji »čas« in »Premor« pri vaji v rutini. Teden r02: povzetek vaje.
+
+**Opaženo:** zapisano »0:20«, torej 20 sekund (F-r06-10). Polji v rutini nimata enote (F-r04-05).
+Povzetek »S3 × 20:00« ne pove, da gre za 3 × 20 minut (F-r02-15).
+
+**Težava in vpliv:** napačno trajanje v načrtu; trener ga opazi šele, ko prebere povzetek.
+
+**Predlog:** enota ob polju (min ali s), in povzetek, ki enoto izpiše — opaženo 2026-10-10 na
+različici `166d3c8` (tedni r02, r04, r06; orkestrator ni ponovil).
+
+**Tedni r07–r10:** »Sobno kolo 1×0:10« namesto 10 minut (F-r07-03, F-r07-13), »čas« brez enote pri
+vaji (F-r08-10), višina škatle 30 cm se zapiše kot »30 kg« (F-r10-05).
+
+### 80.201 [ ] P2 — Pri urejanju načrta ostane odprta prejšnja vaja, vpis serij pa gre vanjo — nepreverjeno
+
+**Scenarij in koraki:** »⋮ Možnosti treninga« → »Uredi načrt« → »Dodaj iz kataloga« → »Barbell Bench
+Press« → 4, 8, 50 → »Dodaj iz kataloga« → »Barbell Row« → vpis v polja serij, ponovitev in teže.
+
+**Opaženo:** odprta ostane vrstica prve vaje, nova je zložena; vpis prepiše prvo vajo (»Barbell
+Bench Press« dobi 4 × 6 × 70 kg, F-r06-07). Teden r02 opiše isti zaslon drugače: nova vaja se vstavi
+na vrh, prejšnja se zapre, vrstni red je obrnjen (F-r02-07); teden r01 vrstni red imenuje nejasen
+(F-r01-03).
+
+**Težava in vpliv:** napačna teža pri stranki, ki je trener ne opazi, ker so vrstice zložene; popravek
+treh vaj je stal okoli deset ukazov.
+
+**Predlog:** dodana vaja se odpre in stoji na koncu seznama, prejšnja se zapre — opaženo 2026-10-10 na
+`166d3c8` (tedni r01, r02, r06; opisa se razlikujeta, orkestrator ni ponovil).
+
+### 80.202 [ ] P2 — Termin iz serije, ki mu znova vključiš »Ponovi vsak teden«, naredi drugo serijo — nepreverjeno
+
+**Scenarij in koraki:** termin iz tedenske serije → »Uredi« → datum »jutri«, »Ponovi vsak teden«,
+izbrana »tor.« in »čet.« → »Shrani« (F-r04-06).
+
+**Opaženo:** za vsak torek od 20. 10. do 1. 12. sta na seznamu dva enaka termina ob 16:30, vsak z 11
+otroki; opozorila ni.
+
+**Težava in vpliv:** podvojeni termini; trener mora vsakega izbrisati posebej.
+
+**Predlog:** urejanje termina iz serije spremeni to serijo ali vpraša, ali naj nastane nova —
+opaženo 2026-10-10 na `166d3c8` (teden r04; orkestratorjeva ponovitev se je pomešala s prekinjenim
+ukazom in ne potrdi ničesar).
+
+### 80.203 [ ] P3 — Dnevi ponovitve nimajo imena, privzeti dan pa je današnji, ne dan izbranega datuma
+
+**Scenarij in koraki:** »Ustvari trening« → »Ponovi vsak teden«.
+
+**Opaženo:** sedem polj za dneve ima za bralnik zaslona vrednost »on« in nobenega imena (preveril
+orkestrator 2026-10-10 na `166d3c8`; F-r02-02). Privzeto je označen današnji dan v tednu, tudi kadar
+je izbran drug datum (F-r06-12, nepreverjeno).
+
+**Težava in vpliv:** serija na dan, ki ga trener ni hotel, če označbe ne pregleda.
+
+**Predlog:** vsak dan nosi svoje ime, privzeti dan je dan izbranega datuma — opaženo 2026-10-10 na
+`166d3c8`.
+
+### 80.204 [ ] P2 — Okna za vabila se ne zaprejo: po »Pošlji SMS« ne »Končano« ne ✕ ne Esc — nepreverjeno
+
+**Scenarij in koraki:** termin shranjen → »Pošlji vabila v koledar« → »Pošlji SMS« → »Končano«, ✕, Esc
+(F-r01-13). Okno »Povabi stranko« → Esc (F-r05-12).
+
+**Opaženo:** okno ostane odprto; pot nazaj je osvežitev strani. »Povabi stranko« se ne zapre z Esc in
+blokira naslednje okno.
+
+**Težava in vpliv:** trener ostane v oknu sredi dela in izgubi, kar ni shranjeno.
+
+**Predlog:** vsak izhod zapre okno — opaženo 2026-10-10 na `166d3c8` (tedna r01, r05; orkestrator je
+»Končano« brez »Pošlji SMS« zaprl normalno).
+
+### 80.205 [ ] P1? — Središče za kopije pravi, da kopija ne vsebuje vsebine »predogleda« — preveriti na objavljeni različici
+
+**Scenarij in koraki:** ikona s številko in vprašajem zgoraj desno (»Središče za sinhronizacijo in
+varnostne kopije«).
+
+**Opaženo:** »Varnostne kopije in sinhronizacija se zapišejo v zadnji stabilni obliki, zato vsebina,
+ki jo je dodal ta predogled, ni vključena. Shrani si svojo kopijo vsega, česar ne smeš izgubiti.«
+(F-r05-05, F-r06-06). Rdeča značka »OGROŽENO — NAREDI KOPIJO« prekrije napis LibrePT in ne vodi do
+kopije (F-r05-09). »Izvozi JSON« najprej zahteva geslo, nato datoteka v orodju ne pride (F-r02-04,
+F-r03-08; znano §80.136).
+
+**Težava in vpliv:** na razvojnem strežniku aplikacija bere predogled sheme, zato je opozorilo morda
+pravilno. Če ga vidi tudi trener na objavljeni različici, mu aplikacija pove, da njegovi podatki niso
+v kopiji, in mu ne ponudi poti do kopije, ki bi jih imela.
+
+**Predlog:** Simon na telefonu odpre objavljeno različico in pogleda, ali je opozorilo tam — opaženo
+2026-10-10 na `166d3c8`, razvojni strežnik.
+
+**Tedni r07–r10:** isto opozorilo sta videla še r08 in r09 (F-r08-09, F-r09-04), skupaj štirje tedni.
+Geslo za šifrirano kopijo je predlagano v angleških besedah in se pokaže pred izvozom (F-r09-05);
+polje pokaže le zadnji del dolgega gesla (F-s01-04). Opozorilo o predogledu sta videla še oba
+scenarija §107 (F-s01-03, F-s02-07), skupaj šestkrat.
+
+### 80.206 [ ] P2 — Oznaka »Prelahko – povečaj težo« trenerju svetuje smer obremenitve — čaka na Simona
+
+**Scenarij in koraki:** pri vaji »Prelahko« (teden r03, sreda, stranka z visokim tlakom); v soboto
+»Uredi načrt« pri isti stranki.
+
+**Opaženo:** pod cilji piše »V TELOVADNICI: Dumbbell Goblet Squat, Prelahko – povečaj težo«
+(F-r03-16). Besedilo je slovar sam: `feedback_tag_too_easy`. Trenerka je »Prelahko« pritisnila samo,
+da se vaja zapiše (§80.6).
+
+**Težava in vpliv:** pravilo »aplikacija ne postavlja ciljev vadbe« prepoveduje predlog obremenitve iz
+signala. Oznaka ne izračuna teže, pove pa smer, in pri stranki, ki teže ne sme dvigovati, je nasvet
+napačen.
+
+**Predlog:** oznaka pove samo, kaj je trener opazil (»Prelahko«); kaj s tem naredi, je trenerjevo.
+**Čaka na Simona**, ker zadeva pravilo izdelka — opaženo 2026-10-10 na `166d3c8`.
+
+### 80.207 [ ] P2 — »Shrani kot rutino« iz zgodovine zavrne vaje, ki jih je trener vpisal v načrt — nepreverjeno
+
+**Scenarij in koraki:** »Imenik strank« → stranka → »Zgodovina zabeleženih vadb« → »Shrani kot
+rutino« (F-r01-07).
+
+**Opaženo:** »4 vaje niso v tvoji knjižnici, zato jih ni v rutini.« Rutina je prazna.
+
+**Težava in vpliv:** načrta, ki je deloval, ni mogoče ponoviti; trener ga sestavi znova.
+
+**Predlog:** vaja iz načrta pride v rutino tudi, če ni v knjižnici, ali se v knjižnico doda ob tem —
+opaženo 2026-10-10 na `166d3c8` (teden r01).
+
+**Tedni r07–r10:** vaje, vpisane z gumbom »Vaja«, niso v knjižnici, zato iz njih ni rutine
+(F-r07-11); »Shrani kot rutino« iz treninga izgubi bremena (F-r08-14).
+
+### 80.208 [ ] P3 — Drobne napake iz tednov trenerjev 2026-10-10 — nepreverjene
+
+Vsaka iz enega ali dveh tednov, na `166d3c8`; ena vrstica za vsako, da se preverijo skupaj:
+
+- Gumb menija se na slovenskem zaslonu imenuje »Menu / Meni« (F-r04-02, F-r08-02; orkestrator je v
+  seznamu kontrol videl isto ime).
+- Termin, ki se je šele začel, piše »Zamuja 00h 00m« (F-r09-01).
+- Ime termina, ki vsebuje ime stranke, je zavrnjeno šele po »Odpri v beležki«, in pot naprej se
+  izgubi (F-r07-06; F-r05-13 pove, da ime ne sme vsebovati imena stranke).
+- V opombah profila se prelomi vrstic ne vidijo (F-r10-09).
+- Besedilo pravi »Pritisni Končano«, gumb pa je zelena kljukica brez besede (F-r05-02).
+- Odštevanje na pasici termina pokaže »-00h 02m« (F-r04-08).
+- Meni ⋮ ostane odprt ob Esc in prekriva gumbe vaje (F-r04-13).
+- Po odstranitvi dveh postaj ostaneta v načrtu prazna vrstica »Počitek 10s« in dva premora zapored
+  (F-r04-16).
+- Prazen »Zapiši opozorilo« pri vaji naredi nerešen signal (F-r02-08).
+- Ime sklopa (»Zagon«) se ne pokaže, kartica ostane »Sklop vaj« (F-r02-12).
+- Opomba iz treninga se prilepi v »Opombe« stranke brez presledka (F-r01-08).
+- Teža je prikazana s piko, »27.5 kg« (F-r02-15).
+
+### 80.209 [ ] P1 — Prestavitev termina na drugo uro ali dan izbriše načrt vaj, sestavljen v beležki — nepreverjeno
+
+**Scenarij in koraki:** termin z načrtom, sestavljenim v beležki z »Uredi načrt« (ne iz rutine) →
+kartica termina → »Uredi« → druga začetna ura (F-r07-10) ali drug datum (F-r08-15) → »Shrani«.
+
+**Opaženo:** kartica pravi »Program ni določen«, odprt trening »Ni vstavljenih vaj«. Teden r07: okno
+»Uredi« je pri stranki kazalo »Izberi rutino / Prazen načrt, brez rutine«, in »Shrani« je načrt
+prepisal s praznim; opozorila ni bilo. Teden r08 je isto videl pri dveh strankah, četrtek in sobota.
+
+**Težava in vpliv:** trener prestavi termin in na treningu nima načrta; sestavljen načrt je izgubljen.
+
+**Predlog:** prestavitev spremeni samo čas; načrt, ki ga okno ne zna pokazati, ostane, kot je —
+opaženo 2026-10-10 na `166d3c8` (tedna r07 in r08, neodvisno). Orkestrator je ponovil le različico,
+kjer je načrt iz rutine (demo, »Hitri HIIT za trup«, 16:00 → 16:30): tam se načrt ohrani. Neponovljena
+je različica z načrtom iz beležke, ki sta jo imela oba tedna.
+
+### 80.210 [ ] P2 — Opomba z meritvijo postane opozorilo; »Razreši« jo izbriše brez vprašanja — nepreverjeno
+
+**Scenarij in koraki:** pri vaji »Opombe« → »Samo opomba, brez ocene« → »Utrip med hojo 110–118« ali
+sladkor in tlak → »Zapiši opozorilo«; pozneje »Čakajoče na pregled« → kljukica »Razreši«.
+
+**Opaženo:** opomba postane »nerešen povratni signal« in obarva vaje rdeče (F-r07-04, F-r08-07).
+»Razreši« jo odstrani brez vprašanja; v kartoteki stranke je ni (F-r05-10, F-r07-07). Meritev,
+shranjena v kartoteko, ostane tudi »Čakajoče na pregled«: do nedelje 14 vrstic (F-r07-15).
+
+**Težava in vpliv:** izmerjena vrednost, ki jo trener potrebuje naslednjič, izgine z enim dotikom, ki
+ga je mislil kot »prebrano«. Uničujoče dejanje brez vprašanja.
+
+**Predlog:** opomba brez ocene ni opozorilo; »Razreši« ne briše zapisa — opaženo 2026-10-10 na
+`166d3c8` (tedni r05, r07, r08). Mesto za meritve je §78.
+
+### 80.211 [ ] P3 — Povzetek vaje »S3 × R12 × 60 kg«: črki nista razloženi, »R« ni slovenska
+
+**Scenarij in koraki:** kartica vaje v načrtu in v beležki.
+
+**Opaženo:** »S3 × R12 × 60 kg«, »S4 × R8 × 70 kg«, »S3 × R10« (F-r07-18, F-r09-03, F-r10-03).
+
+**Težava in vpliv:** trener ne ve, kaj črki pomenita; »R« je angleška okrajšava (*reps*).
+
+**Predlog:** zapis, ki ga trener prebere brez razlage, na primer »3 × 12 × 60 kg« — opaženo
+2026-10-10 na `166d3c8` (trije tedni; orkestrator je zapis videl na kartici »S1 × 20 cal«).
+
+### 80.212 [ ] P2 — Okno za kopije šteje samo Google Drive: »vse je že v Google Drive« brez Drive, »OGROŽENO« po izvozu v datoteko
+
+**Scenarij in koraki:** ikona s številko in vprašajem zgoraj desno (»Središče za sinhronizacijo in
+varnostne kopije«) na napravi, ki ni nikoli povezala Google Drive; nato »Izvozi JSON« v datoteko.
+
+**Opaženo:** »Vse na tej napravi je že v Google Drive.« na praznem novem telefonu, ki Googla ni videl
+(F-s01-05, F-s02-08; orkestrator je isti stavek videl 2026-10-10 na napravi s predstavitvenimi
+podatki brez Drive). Po izvozu v datoteko ostane rdeča značka »OGROŽENO — NAREDI KOPIJO« in »27
+sprememb … ni v Google Drive«, dokler aplikacije ne osvežiš (F-s01-13, F-s02-06, F-r05-09).
+
+**Težava in vpliv:** okno trenerju reče, da so podatki varni, ko niso nikjer, in da niso varni, ko so
+v datoteki, narejeni minuto prej. Trener ne ve, ali ima kopijo.
+
+**Predlog:** okno pove, kje je zadnja kopija in kdaj je nastala, datoteka ali Drive, in nikoli ne
+trdi Drive brez Drive — opaženo 2026-10-10 na `166d3c8` (scenarija §107 in teden r05; prvi stavek
+preveril orkestrator).
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
@@ -5150,6 +5380,10 @@ aplikacijo«). **Cena:** majhna: na prvem zaslonu »Obnovi iz varnostne kopije«
 **Presoja: čaka na Simona**, ker spremeni uvod, o katerem je odločil v §81 (podatki obvezni na vsaki
 poti); kopija te podatke že nosi.
 
+**Dokaz 2026-10-10, scenarija §107:** na novem telefonu je obnovitev spet za uvodom (F-s01-06); trenerjevi
+podatki in tema se iz kopije ne prenesejo, zato jih nov telefon vpraša znova (F-s02-07). Obnovitev
+sama je delovala: 13 dotikov, okoli 6 minut, 6 strank, termini z načrti in 4 zaključeni treningi.
+
 ### 88.15 [ ] Serija se ne da ustaviti za dopust stranke ne spremeniti od nekega dne naprej
 
 Dan 09 (2026-09-30, `main` `e2daf5e`; samostojni trener v Novem mestu, 14 strank): stranka gre za dva
@@ -5210,6 +5444,65 @@ razširitev parametrov vaje s tipom »razdalja + tempo« ter skupni tedenski se�
 **Presoja: ne izplača se za samostojno tekaško orodje**, saj tekači uporabljajo namenske aplikacije
 (Garmin Connect, Strava, TrainingPeaks). Izplača se le majhen del: možnost izbire enote »km« ali »m«
 ob času pri vajah tipa kardio ter slovenski sinonim »tek« v katalogu.
+
+### 88.19 [ ] Seštevek tednov trenerjev 2026-10-10: deset tednov, r01–r10
+
+**Kako je nastalo.** Sonnet je napisal 100 izmišljenih delovnih tednov, dva ocenjevalca sta jih
+ocenila po izvedljivosti (37 s 5), orkestrator je izbral deset za raznolikost. Vsak teden je
+podagent brez konteksta odigral od ponedeljka do nedelje na razvojnem strežniku (`166d3c8`), z uro
+aplikacije, premaknjeno na simulirani dan. Datoteke so v `.private/exploratory-test/weeks/2026-10-10/`,
+kopija na veji `trials/weeks-2026-10-10`. Vseh deset tednov je doseglo nedeljo; skupaj 168 ugotovitev.
+
+| Teden | Trener | Koliko tedna je nosila aplikacija (trenerjeva ocena) |
+| --- | --- | --- |
+| r01 | samostojna trenerka, Celje: najeta soba, park, domovi; poči cev | urnik in načrti da, obiski, paketi in plačila ne |
+| r02 | trener v hotelskem fitnesu, Bled; klet brez signala | približno tretjina |
+| r03 | krožna vadba za ženske 45+, Maribor, zunaj in v dvorani | približno tretjina |
+| r04 | gibalna vadba za otroke, Celje; plačajo starši; nadomešča kolega | približno četrtina, povprečna ocena 0,6 od 3 |
+| r05 | obiski na domu pri starejših, Pomurje, 410 km | približno četrtina |
+| r06 | večinoma spletna trenerka, stranke v treh časovnih pasovih | približno četrtina |
+| r07 | trener za stranke s sladkorno boleznijo in visokim tlakom, Kranj | približno tretjina |
+| r08 | študent, trener powerlifterja pred tekmo, Celje | približno tretjina |
+| r09 | trener s polovičnim delom ob drugi službi | približno tretjina; 80 min na teden zunaj zaradi denarja in ur |
+| r10 | studio v Velenju, direktor podjetja dolguje 480–560 € | urnik in vaje da, dolg in plačila ne |
+
+**Kar so tedni našli, po tem, koliko tednov je potrebovalo isto.** Minute so trenerjeve ocene, torej
+predpostavka. Vrzel, ki je že zapisana, dobi tu dokaz; nova je v zadnjem stolpcu presojena.
+
+| Vrzel | Tedni | Cena po trenerjih | Kje je že | Presoja |
+| --- | --- | --- | --- | --- |
+| Opravljena serija »po načrtu« | 10 od 10 | trening se shrani kot »prazna vadba« | §80.6, §94 točka 1 | **čaka na Simona** (§94); najvišja prednost tega preizkusa |
+| Paketi obiskov, plačila, računi, dolg, mesečni pregled | 10 od 10 (F-r01-01, F-r01-18, F-r02-05, F-r03-01, F-r04-10, F-r04-14, F-r05-14, F-r05-16, F-r06-03, F-r07-05, F-r08-01, F-r08-17, F-r09-02, F-r09-09, F-r09-11, F-r10-01, F-r10-07, F-r10-10) | 20–80 min na teden | §86.5 | **čaka na Simona**: brezplačna aplikacija ali ProPT (§90) |
+| Prisotnost v skupini; gost brez celega obrazca | 4 (F-r02-01, F-r02-10, F-r02-17, F-r03-07, F-r03-12, F-r04-01, F-r04-19, F-r06-09) | ~10 min po skupinski vadbi | §86.4, §88.2 | izplača se: »ni prišla« ob udeležencu je majhen poseg; pogoj za pakete |
+| Sporočila: SMS brez ure in kraja, odpoved brez obvestila, opomniki | 4 (F-r01-10, F-r01-12, F-r01-14, F-r03-02, F-r03-09, F-r03-11, F-r03-18, F-r04-11, F-r05-15) | ~10–15 min na teden | §86.5 | izplača se majhen del: ura in kraj v besedilu SMS-a (F-r01-12, F-r03-09) |
+| Vaja s časom: delo in odmor po postaji, trajanje v minutah, razdalja | 5 (F-r01-16, F-r03-03, F-r03-17, F-r04-04, F-r05-01) | ~5 min na krožno vadbo | §88.18 delno | izplača se: enota in »delo / odmor« pri vaji; skupaj z §80.200 |
+| Meritve pred vadbo (sladkor, tlak, utrip, kot v kolenu, bolečina 0–10), teža kot meritev | 8 (F-r01-11, F-r03-10, F-r05-10, F-r06-11, F-r07-05, F-r07-14, F-r08-08, F-r08-12, F-r09-15) | opomba izgine po »Razreši« (§80.210); prejšnji tlak ni na zaslonu naslednje ure (F-r07-14) | §78, §86.4 | dokaz za §78, zdaj najpogostejša vrzel za plačili |
+| Domača naloga do stranke | 4 (F-r01-15, F-r06-08, F-r06-13: ~3 h na teden za 9 spletnih strank; F-r09-14) | glej stolpec Tedni | §105 | dokaz za §105 |
+| Sporočilo stranki ob prestavitvi ali o meritvi | 3 (F-r07-16, F-r09-13, F-r10-07) | — | §86.5 | isto kot vrstica o sporočilih |
+| Cikel več tednov je vsak teden poseben termin | 1 (F-r08-18: 12 tednov, 12 terminov) | — | §88.5 | dokaz za §88.5 |
+| Dejansko trajanje treninga po koncu (60 → 40 min) | 1 (F-r07-09) | — | nikjer | izplača se preveriti skupaj s §80.6 |
+| Prosti termini v tednu | 1 (F-r07-17) | — | nikjer | ne izplača se zdaj |
+| Izvoz strank z urami in plačili v preglednico; iskanje po opombah | 2 (F-r09-16, F-r10-11) | — | nikjer | čaka na Simona, skupaj s plačili |
+| Brez povezave aplikacija tega ne pove | 1 (F-r08-11) | — | nikjer | izplača se preveriti: trener ne ve, kaj je shranjeno |
+| Seznam za tekmo (izkaznica, oprema) | 1 (F-r08-13) | — | nikjer | ne izplača se |
+| Katalog vaj: angleška imena, ni vaj za otroke, hrbtenico, igrišče, ni mrtvega dviga, sobnega kolesa, potiska bokov | 8 (tudi F-r07-02, F-r08-04, F-r08-05, F-r08-10) | 20 min za tri vaje (F-r03-14) | §80.54 | dokaz za §80.54 |
+| Termin brez stranke (spletna skupina) | 1 (F-r02-14) | — | nikjer | izplača se preveriti s Simonom, ali je to pravilo |
+| Seznam terminov ne kaže stranke ne kraja | 3 (F-r03-11, F-r05-13, F-r09-06) | — | nikjer | izplača se: kraj in imena na kartici |
+| Klic ali SMS iz kartice stranke | 1 (F-r03-02) | — | nikjer | izplača se: povezavi `tel:` in `sms:` |
+| Vprašalnik ob prvem obisku | 1 (F-r05-11) | — | nikjer | ne izplača se zdaj |
+| Delo trenerja zunaj treningov (poročilo vodji, izmene) | 1 (F-r02-06) | — | nikjer | ne izplača se (zaposlen trener, ProPT) |
+| Časovni pas stranke | 1 (F-r06-14) | — | nikjer | ne izplača se zdaj |
+| Prevoženi kilometri | 1 (F-r05-17) | — | nikjer | ne izplača se |
+| Trening nadomestnega trenerja ostane »Zamuja« | 1 (F-r04-19) | — | §88.4 | dokaz za §88.4 |
+
+**Ni prešlo v napake:** F-r03-15 in F-r10-06 (ponavljajoči termin ne ustvari današnjega, F-r10-06
+tudi ne poznejših sred) se na pravi uri ne ponovita, ne z enim ne z dvema dnevoma. Oba tedna sta
+delala na premaknjeni uri, ta pa spremeni le `Date` strani, ne pa ure delavcev v ozadju; kar primerja
+oboje, vidi različna dneva. Verjetno je to meja orodja; preveriti na telefonu z izbranim
+današnjim dnem in še enim. F-r05-06 (trije enaki
+termini) je po trenerjevih besedah lahko posledica njegovih prekinjenih ukazov. Prvih šest tednov je
+vsaj enkrat izgubilo podatke, ker kopija v orodju ne pride do datoteke (§80.136); to je meja orodja,
+ne nova napaka.
 
 ## 89. [~] Pregled 2026-09-28: isti podatek na več mestih
 
@@ -6319,3 +6612,122 @@ V padlem teku je `expectHeld` (`#plan-peek-under-past .plan-sheet-row` viden) pr
 odmaknilo plana: plast pod njim je vedno izrisana, in `probe` ne vpraša, ali jo kaj prekriva. Napaka
 je zato dobila napačno ime (manjkal je gumb Danes, ne pogled). **Predlog:** pogoj vezati na stanje,
 ki ga postavi samo vlečenje, na primer razred `is-held` na `#active-session-blanket`.
+
+## 105. [ ] Ideja: domače naloge med treningi
+
+**Zapisal Simon 2026-10-10.** Trener stranki naroči vaje, ki jih ta naredi sama med dvema
+treningoma, in na naslednjem treningu vidi, kaj je naredila.
+
+**Kar že vemo.** §86.4 ima vrstico »Domača naloga med vadbama«: aplikacija danes ne dela nič, ocena
+vrednosti je bila »majhna, dokler ni meritev«. Dva dneva trenerja sta jo potrebovala: na dnevu 01 je
+trener nalogo dal brez možnosti potrditve, na dnevu 03 jo je vpisal v isto polje kot zdravstvene
+opombe (§88.7). Nalogo vpiše trener sam, zato pravilo »aplikacija ne postavlja ciljev vadbe« ostane
+nedotaknjeno.
+
+**Dokaz 2026-10-10 (§88.19):** trije tedni od šestih so nalogo potrebovali. Načrt za doma ne pride do
+stranke ne kot besedilo ne kot video (F-r01-15, F-r06-08); spletna trenerka z 9 strankami ocenjuje,
+da ji tedenski programi, ki jih ni mogoče poslati, vzamejo okoli 3 ure na teden zunaj aplikacije
+(F-r06-13; trenerjeva ocena). Teden r09 je domačo nalogo vpisal kot izmišljen termin »Domača
+naloga«, ki je v nedeljo kazal »Zamuja 25h 01m« (F-r09-14, F-r09-17).
+
+**Čaka na Simona — tri odločitve, preden se to načrtuje:**
+
+1. **Kako naloga pride do stranke.** Aplikacija je trenerjeva in deluje brez strežnika. Možnosti:
+   sporočilo ali povezava, ki jo trener pošlje (kot vabilo na trening), ali natisnjen list.
+2. **Ali stranka sporoči, kaj je naredila**, in kako: odgovor na sporočilo, ki ga trener prepiše,
+   ali nekaj, kar stranka odpre sama. Drugo potrebuje stran za stranko.
+3. **Ali spada v brezplačno aplikacijo ali v ProPT** (§90), če potrebuje strežnik.
+
+## 106. [~] Sporočilo o podpori ob vsaki novi različici aplikacije
+
+**Naročil Simon 2026-10-10.** Ob vsaki novi različici aplikacije (zdaj `2026-11` v
+`src/data/appVersions.js`), ne ob vsaki objavi znotraj iste različice, se v predalu z obvestili
+pokaže sporočilo, ki ga trener lahko zapre. Za zdaj se samo zahvali prvim uporabnikom in odkrito
+pove, da bomo morda nekoč prosili za prostovoljen prispevek. Načina plačila še ni.
+
+**Odločeno ob začetku dela:** kartica v predalu z obvestili, kakršna je pozdravna, ne okno, ki bi
+prekinilo trening. Po zaprtju se ne vrne do naslednje različice. Ne pokaže se, dokler trener ni
+odgovoril na uvodna vprašanja ob prvem zagonu.
+
+**Stanje 2026-10-10:** Simon je želel zapis; izvedba je dovoljena, ni pa naročena. Izdelano je na veji
+`feat/release-thanks` (`205ebd1`, ključ `librept_release_thanks_closed` hrani različico, ob kateri je
+trener kartico zaprl), brez zahteve za združitev. Gate je trikrat padel; zadnjič na
+`test_demo_story.py::test_the_whole_story_can_be_walked_in_slovenian` (vodič obstane na koraku 36,
+»Pritisni trening Skupinska moč in kondicija«). Ni preverjeno, ali padec povzroči kartica ali
+obremenjen stroj. Nadaljuje se po raziskovalnem testiranju tedna.
+
+## 107. [ ] Dva primera za prihodnje raziskovalno testiranje: ukraden telefon in dve napravi
+
+**Naročil Simon 2026-10-10.** Oba sta v besednjaku oznak veščine `exploratory-test` (`ukraden-telefon`,
+`dve-napravi`), da ju izmišljeni tedni vključijo. Tedni 2026-10-10 ju še niso imeli.
+
+**Ukraden telefon.** Trenerju sredi tedna ukradejo telefon. Preizkus odgovori: kaj od tedna ostane in
+od kod (zadnja kopija v datoteki, Google Drive); koliko stane, da je na novem telefonu spet vse
+(§88.14: obnovitev je šele za uvodom, ki sprašuje, kar je v kopiji); ali trener ve geslo šifrirane
+kopije (§80.136); kaj se zgodi s podatki strank na ukradenem telefonu, med njimi z zdravstvenimi
+opombami (§97), in ali lahko trener ukradenemu telefonu odvzame dostop do Drive.
+
+**Različica ukradenega telefona: medtem je prišla nova različica aplikacije** (Simon, 2026-10-10).
+Ukradeni telefon je delal na sproščeni shemi, kopija je v njeni obliki; nov telefon odpre aplikacijo,
+ki že bere novejšo shemo. Preizkus odgovori, ali obnovitev prenese vse in kaj trener vidi. Orodje to
+posnema z izbiro sheme, ki jo naprava bere (`librept_read_schema`): telefon A na `6`, telefon B na
+`PREVIEW` (preverjeno 2026-10-10: na `166d3c8` sta živi `6` in `PREVIEW`, privzeta je `6`).
+
+**Dve napravi.** Trener zvečer na računalniku sestavi načrte za teden, zjutraj na telefonu vodi
+trening. Preizkus odgovori: kako načrti pridejo na telefon (sinhronizacija, datoteka); kaj se zgodi,
+če isti načrt uredi na obeh; ali je urejanje na širokem zaslonu sploh udobno (aplikacija je stolpec
+širine 480 pik). Orodje to zmore z dvema brskalnikoma (`EXPLORE_PORT`) in z oknom 1280 × 800 za
+računalnik. **Meja:** orodje se ne more prijaviti v Google (Google samodejne brskalnike zavrne), zato
+pot prek Drive preveri Simon ročno z `LibrePT.test@gmail.com`; orodje preveri pot prek datoteke.
+
+### 107.1 [ ] Izid prvega preizkusa obeh primerov, 2026-10-10
+
+Odigrano isti dan na `166d3c8`, vsak primer z dvema brskalnikoma, kopije prek datoteke (Drive iz
+orodja ni dosegljiv). Datoteke: `.private/exploratory-test/weeks/2026-10-10/runs/s01/` in `…/s02/`.
+
+**Ukraden telefon (s01, 13 ugotovitev).** Obnovitev iz torkove kopije na novem telefonu je delovala:
+13 dotikov, okoli 6 minut, vrnjenih 6 strank, termini z načrti, 4 zaključeni treningi in opombe.
+Izgubljeno je, kar je trener vpisal v sredo dopoldne: stranka, njen termin in opomba, 8 minut za
+ponoven vpis. Kopija brez gesla iz zvezka in brez vedenja, kje je datoteka, ne pomaga.
+**Vrzel: aplikacija o ukradenem telefonu ne reče nič**, tudi ne o zdravstvenih podatkih strank, ki
+ostanejo na njem (F-s01-08). Čaka na Simona skupaj s §97 (GDPR); izjava o zasebnosti se iz slovenske
+aplikacije odpre v angleščini (F-s01-07).
+
+**Računalnik in telefon (s02, 9 ugotovitev).** Prenos z računalnika na telefon prek šifrirane datoteke
+je deloval. **Vrzel: dveh naprav ni mogoče združiti brez Drive** (F-s02-05): uvoz datoteke zamenja vse
+na napravi. Ko je trener v ponedeljek zvečer na telefon uvozil kopijo z računalnika, sta se dva
+zaključena ponedeljkova treninga vrnila v »Zamuja« in signali stranke so izginili; popravil je s
+ponovnim uvozom telefonove kopije in prepisom dveh sprememb na roke. Opozorilo pred uvozom pravi, da
+bo izgubljeno vse na napravi, tudi kar je v datoteki enako, in ne pove, kaj se res izgubi (F-s02-04).
+Podvojenega ni bilo nič. Na računalniku 1280 × 800 je aplikacija stolpec širine 480 pik na sredini,
+zato sestavljanje načrtov ni lažje kot na telefonu (F-s02-02).
+
+**Presoja:** združevanje naprav brez Drive in širok zaslon za načrte sta odločitvi o izdelku: **čaka
+na Simona**. Izplača se takoj: opozorilo pred uvozom, ki našteje, kaj se zamenja (F-s02-04), in
+§80.212.
+
+## 108. [ ] Kaj iz tednov trenerjev avtomatizirati — predlogi, čakajo na Simona
+
+**Vprašal Simon 2026-10-10.** Teden trenerja (§88.19, §107.1) je raziskovalni preizkus: podagent brez
+konteksta živi izmišljen teden z aplikacijo. Kot celota v gate ne sodi: en teden stane okoli 200 000
+žetonov in eno do dve uri, dva teka istega tedna najdeta različno, in polovico ugotovitev mora
+orkestrator ponoviti, preden kaj pomenijo. Kar je v njem določljivo, pa se da izluščiti. Predlogi,
+po vrednosti:
+
+1. **Potrjene ugotovitve postanejo testi v gatu.** Brskalniški test (Playwright v svojih kontekstih
+   prenose sprejema) za: obnovitev iz kopije v drugem kontekstu, tudi s sheme `6` na `PREVIEW`
+   (§107); prestavitev termina z načrtom iz beležke (§80.209); stavek o Google Drive na napravi brez
+   Drive (§80.212); enoto pri polju za čas (§80.200). Napisan test ostane, ko teden odide.
+2. **`explore.py selftest`**: preden se požene več tekačev, orodje preveri samo sebe: dva brskalnika
+   hkrati, `clock`, `download`, `upload`, `offline`. Deset tednov je 2026-10-10 izgubilo podatke, ker
+   `download` ni deloval, in to so imeli za napako aplikacije.
+3. **Dnevnik ukazov po vratih**: `explore.py` vsak ukaz z uro zapiše v datoteko svojega brskalnika.
+   Orkestrator potem točno ponovi, kar je tekač naredil; ponavljanje je bilo 2026-10-10 najdražji del
+   presoje.
+4. **Navodila tekaču v veščino.** `runner.md` in `scenario.md` sta zdaj v `.private/`, ki ga drugi
+   agenti ne vidijo; v `.agents/skills/exploratory-test/` ju dobi vsak, ki naslednjič požene teden.
+5. **Skript za pripravo teka**: mape, seznam znanih napak iz TODO.md, kopija na vejo. Presoja
+   ugotovitev ostane ročna.
+
+**Ne avtomatizirati:** samega tedna z jezikovnim modelom v CI. Je drag, počasen in vsakič drugačen;
+njegova vrednost je, da najde, česar nihče ni pričakoval, in to se ne ponovi na ukaz.

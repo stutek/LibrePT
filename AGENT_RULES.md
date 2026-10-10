@@ -76,7 +76,11 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
 - **Text they hand over is a draft, not a quotation.** Fix its spelling, its terms and its
   inconsistencies rather than transcribing them, and say what you changed.
 - Answer a question; never record it as a decision, and never return with a plan for one they have
-  already made.
+  already made. **A message that opens with "record" asks for TODO entries, every item in it
+  included**, also one phrased as "add …"; build only what is asked for in so many words. On
+  2026-10-10 "Record a product idea … Also add a donation message …" was read as an order to build,
+  and three gate runs took the machine for two and a half hours while the work Simon had asked for
+  waited.
 - **Choose, do not offer a menu.** Where the options are wordings or approaches, pick the best one,
   do it, and report in a few lines what was chosen over what and why — a question costs a round trip
   they would rather spend correcting a concrete result. Ask only where proceeding either way would
