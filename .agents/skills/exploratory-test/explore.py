@@ -27,7 +27,10 @@ ENDPOINT = f"http://127.0.0.1:{PORT}"
 # browser stops it once no command has come for IDLE_SECONDS. A session that ends without `stop`
 # left a headless Chromium using most of a core for hours, and the gate refused to start beside it.
 HEARTBEAT = STATE / "last-command"
-IDLE_SECONDS = 15 * 60
+# EXPLORE_IDLE_MINUTES, read by `start`: a week runner thinks for longer between commands than a
+# scenario does, and three of three lost their browser, and with it every client they had entered,
+# when the backup could not reach a file either (2026-10-10).
+IDLE_SECONDS = int(os.environ.get("EXPLORE_IDLE_MINUTES") or 15) * 60
 WATCH_EVERY_SECONDS = 30
 
 # Every console error, warning and uncaught throw the page produced lands here.
