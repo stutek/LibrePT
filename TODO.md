@@ -4050,7 +4050,14 @@ ko telefon izgubi, izgubi vse stranke. Iz brskalnika orodja tega ni mogoče loč
 Androidu in v Safariju na iPhonu izvoziti kopijo in pogledati, ali je v »Prenosi« datoteka. Če je,
 se zapis zapre kot omejitev orodja in ostane le protislovje sporočil (P3).
 
-**Preverjeno 2026-10-09 11:36:22.860 na `c918d6d6`, Chromium na računalniku: se ne ponovi** (datoteka `librept_backup_2026-10-09.json`, 63 169 bajtov, `formatVersion` 8, AES-GCM, brez imena stranke). Vrstica »Varnostne kopije s te naprave še niso šifrirane.« po šifriranem izvozu ostane, kar je napačno. Odprto ostane le ročno preverjanje na telefonu.
+**Preverjeno 2026-10-09 11:36:22.860 na `c918d6d6`, Chromium na računalniku: se ne ponovi** (datoteka `librept_backup_2026-10-09.json`, 63 169 bajtov, `formatVersion` 8, AES-GCM, brez imena stranke).
+
+**Vzrok v orodju najden 2026-10-10:** okno orodja je Chromov lastni zasebni kontekst; Playwright v
+njem prenosov ne sprejema, Chrome pa dovoljenja za ta kontekst ne da. `explore.py download` zdaj
+datoteko ujame na strani, preden jo dobi brskalnik. Isti koraki na `166d3c8` dajo
+`librept_backup_2026-10-10.json`, 63 169 bajtov, `formatVersion` 8, AES-GCM. Aplikacija datoteko
+torej naredi. Deset tednov trenerjev istega dne (§88.19) je kopijo izgubilo zaradi orodja, ne zaradi
+aplikacije. Ostane Simonova preverba na telefonu. Vrstica »Varnostne kopije s te naprave še niso šifrirane.« po šifriranem izvozu ostane, kar je napačno. Odprto ostane le ročno preverjanje na telefonu.
 
 ### 80.137 [x] P2 — Stranka z angleškim »Jezik obrazca« dobi slovensko vabilo in slovensko stran za odgovor — popravljeno 2026-09-30
 
