@@ -163,6 +163,36 @@ def test_a_repeat_that_ends_before_it_starts_is_refused_at_the_field(
     expect(page.locator("#form-workout-setup")).to_be_visible()
 
 
+TICKED_DAYS = """() => [...document.querySelectorAll('#setup-repeat-days input[data-weekday]')]
+  .filter((box) => box.checked).map((box) => Number(box.dataset.weekday))"""
+
+
+def test_the_ticked_weekday_follows_the_date_until_the_trainer_picks_one(
+    page, local_server
+):
+    """ "Repeats" ticks the session's own weekday. A trainer who then changed the date got a weekly
+    series on the old date's weekday, because the tick stayed where it was (2026-10-10)."""
+    load_with_stub(page, local_server, setup_stub("[]"))
+    page.fill("#setup-session-date", "2026-11-10")  # a Tuesday
+    page.check("#setup-repeat")
+    assert page.evaluate(TICKED_DAYS) == [2]
+
+    page.fill("#setup-session-date", "2026-11-12")  # a Thursday
+
+    assert page.evaluate(TICKED_DAYS) == [4]
+
+
+def test_days_the_trainer_ticked_stay_when_the_date_changes(page, local_server):
+    load_with_stub(page, local_server, setup_stub("[]"))
+    page.fill("#setup-session-date", "2026-11-10")
+    page.check("#setup-repeat")
+    page.check("#setup-repeat-days input[data-weekday='4']")
+
+    page.fill("#setup-session-date", "2026-11-11")
+
+    assert page.evaluate(TICKED_DAYS) == [2, 4]
+
+
 SPY_DEPS = """startWorkoutSession: () => { window.__launched = true; },
   pushRoute: (path) => { window.__routes = [...(window.__routes || []), path]; },
   urlFor: (name, params) => `/${name}/${params?.isoDate || ''}`,"""
