@@ -67,7 +67,8 @@ def test_the_demo_waits_until_the_first_launch_is_answered(fresh, local_server):
         "() => Array.isArray(window.__demoTourResults)", timeout=60_000
     )
     results = fresh.evaluate("() => window.__demoTourResults")
-    assert [r["ok"] for r in results] == [True] * len(results)
+    # The steps' own reasons, so a failure says which step and why rather than "False != True".
+    assert [r["ok"] for r in results] == [True] * len(results), results
 
 
 def test_the_chosen_language_holds_on_the_next_visit(fresh, local_server):
