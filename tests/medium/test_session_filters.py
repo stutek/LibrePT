@@ -190,11 +190,18 @@ def test_every_control_in_the_filter_row_is_a_thumb_wide(page, local_server):
     page.wait_for_selector("#sessions-filter-bar")
     page.locator("#filter-chip-client").select_option(index=1)
 
+    # Measured once the view's scale-in has finished, and unrounded. `getBoundingClientRect`
+    # includes the transform, so mid-animation the whole row read 43 on a loaded machine
+    # (2026-10-10), and rounding would pass a control that really is 43.6 tall.
     sizes = page.evaluate(
-        """() => [...document.querySelectorAll('#sessions-filter-bar button, #sessions-filter-bar select')]
-             .filter((el) => el.offsetParent && !el.closest('#sessions-filter-calendar'))
-             .map((el) => { const r = el.getBoundingClientRect();
-                            return [el.id, Math.round(r.width), Math.round(r.height)]; })"""
+        """async () => {
+             const bar = document.getElementById('sessions-filter-bar');
+             await Promise.all(bar.closest('.app-view').getAnimations().map((a) => a.finished));
+             return [...bar.querySelectorAll('button, select')]
+               .filter((el) => el.offsetParent && !el.closest('#sessions-filter-calendar'))
+               .map((el) => { const r = el.getBoundingClientRect();
+                              return [el.id, r.width, r.height]; });
+           }"""
     )
     small = [s for s in sizes if s[1] < 44 or s[2] < 44]
     assert sizes and not small, f"controls smaller than a thumb: {small}"
