@@ -1064,6 +1064,8 @@ export const en = {
   sync_hub_ahead_other: "{count} changes on this device are not yet in Google Drive.",
   sync_hub_none: "Everything on this device is already in Google Drive.",
   sync_hub_cloud_unknown:
+  sync_hub_not_connected:
+    "Google Drive is not connected, so no copy of this data is in Google Drive.",
     "The ? in the header means the changes in Google Drive are not known: it is not connected or not reachable.",
   restore_invalid_file:
     "This file is not a LibrePT backup. Nothing on this device was changed. Choose the file that LibrePT made with “Export JSON”.",

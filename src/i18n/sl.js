@@ -997,6 +997,8 @@ export const sl = {
   sync_hub_ahead_other: "{count} sprememb na tej napravi še ni v Google Drive.",
   sync_hub_none: "Vse na tej napravi je že v Google Drive.",
   sync_hub_cloud_unknown:
+  sync_hub_not_connected:
+    "Google Drive ni povezan, zato v Google Drive ni nobene kopije teh podatkov.",
     "Vprašaj v glavi pomeni, da spremembe v Google Drive niso znane: ni povezan ali ni dosegljiv.",
   restore_invalid_file:
     "Ta datoteka ni varnostna kopija LibrePT. Na tej napravi se ni nič spremenilo. Izberi datoteko, ki jo je LibrePT naredil z »Izvozi JSON«.",
