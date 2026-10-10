@@ -3136,7 +3136,10 @@ samo »Prelahko«, »Pretežko«, »Dodaj opombo« in časomer premora. Kar sled
 F-r03-06), načrt zaključenega treninga izgine s termina (F-r01-17, F-r05-07), zaključen trening kaže
 »Ni vstavljenih vaj« (F-r05-04), v zgodovini je vse »PRESKOČENO« in opombe ni (F-r04-17, §80.167).
 Trenerji so zato »Prelahko« pritiskali samo, da se vaja zapiše (F-r03-13), kar se je pozneje
-pokazalo kot nasvet (§80.206).
+pokazalo kot nasvet (§80.206). **Tedni r07–r10 dodajo še štiri: deset od desetih** (F-r07-01,
+F-r08-06, F-r09-07, F-r10-02). Teden r09 je opazil neskladje: »Prelahko« vajo označi kot opravljeno,
+»Pretežko« je ne (F-r09-10, nepreverjeno). Zaključen termin ima še vedno »Začni trening« in ob
+ponovnem zagonu izgubi načrt (F-r09-06); zaključen trening kaže »Ni vstavljenih vaj« (F-r10-04).
 
 ### 80.7 [x] P2 — Prvi prikaz novega termina pokaže 1970-01-01 — popravljeno 2026-09-27
 
@@ -4708,6 +4711,9 @@ Povzetek »S3 × 20:00« ne pove, da gre za 3 × 20 minut (F-r02-15).
 **Predlog:** enota ob polju (min ali s), in povzetek, ki enoto izpiše — opaženo 2026-10-10 na
 različici `166d3c8` (tedni r02, r04, r06; orkestrator ni ponovil).
 
+**Tedni r07–r10:** »Sobno kolo 1×0:10« namesto 10 minut (F-r07-03, F-r07-13), »čas« brez enote pri
+vaji (F-r08-10), višina škatle 30 cm se zapiše kot »30 kg« (F-r10-05).
+
 ### 80.201 [ ] P2 — Pri urejanju načrta ostane odprta prejšnja vaja, vpis serij pa gre vanjo — nepreverjeno
 
 **Scenarij in koraki:** »⋮ Možnosti treninga« → »Uredi načrt« → »Dodaj iz kataloga« → »Barbell Bench
@@ -4782,6 +4788,9 @@ v kopiji, in mu ne ponudi poti do kopije, ki bi jih imela.
 **Predlog:** Simon na telefonu odpre objavljeno različico in pogleda, ali je opozorilo tam — opaženo
 2026-10-10 na `166d3c8`, razvojni strežnik.
 
+**Tedni r07–r10:** isto opozorilo sta videla še r08 in r09 (F-r08-09, F-r09-04), skupaj štirje tedni.
+Geslo za šifrirano kopijo je predlagano v angleških besedah in se pokaže pred izvozom (F-r09-05).
+
 ### 80.206 [ ] P2 — Oznaka »Prelahko – povečaj težo« trenerju svetuje smer obremenitve — čaka na Simona
 
 **Scenarij in koraki:** pri vaji »Prelahko« (teden r03, sreda, stranka z visokim tlakom); v soboto
@@ -4810,11 +4819,19 @@ rutino« (F-r01-07).
 **Predlog:** vaja iz načrta pride v rutino tudi, če ni v knjižnici, ali se v knjižnico doda ob tem —
 opaženo 2026-10-10 na `166d3c8` (teden r01).
 
+**Tedni r07–r10:** vaje, vpisane z gumbom »Vaja«, niso v knjižnici, zato iz njih ni rutine
+(F-r07-11); »Shrani kot rutino« iz treninga izgubi bremena (F-r08-14).
+
 ### 80.208 [ ] P3 — Drobne napake iz tednov trenerjev 2026-10-10 — nepreverjene
 
-Vsaka iz enega tedna, na `166d3c8`; ena vrstica za vsako, da se preverijo skupaj:
+Vsaka iz enega ali dveh tednov, na `166d3c8`; ena vrstica za vsako, da se preverijo skupaj:
 
-- Gumb menija se na slovenskem zaslonu imenuje »Menu / Meni« (F-r04-02).
+- Gumb menija se na slovenskem zaslonu imenuje »Menu / Meni« (F-r04-02, F-r08-02; orkestrator je v
+  seznamu kontrol videl isto ime).
+- Termin, ki se je šele začel, piše »Zamuja 00h 00m« (F-r09-01).
+- Ime termina, ki vsebuje ime stranke, je zavrnjeno šele po »Odpri v beležki«, in pot naprej se
+  izgubi (F-r07-06; F-r05-13 pove, da ime ne sme vsebovati imena stranke).
+- V opombah profila se prelomi vrstic ne vidijo (F-r10-09).
 - Besedilo pravi »Pritisni Končano«, gumb pa je zelena kljukica brez besede (F-r05-02).
 - Odštevanje na pasici termina pokaže »-00h 02m« (F-r04-08).
 - Meni ⋮ ostane odprt ob Esc in prekriva gumbe vaje (F-r04-13).
@@ -4824,6 +4841,48 @@ Vsaka iz enega tedna, na `166d3c8`; ena vrstica za vsako, da se preverijo skupaj
 - Ime sklopa (»Zagon«) se ne pokaže, kartica ostane »Sklop vaj« (F-r02-12).
 - Opomba iz treninga se prilepi v »Opombe« stranke brez presledka (F-r01-08).
 - Teža je prikazana s piko, »27.5 kg« (F-r02-15).
+
+### 80.209 [ ] P1 — Prestavitev termina na drugo uro ali dan izbriše načrt vaj, sestavljen v beležki — nepreverjeno
+
+**Scenarij in koraki:** termin z načrtom, sestavljenim v beležki z »Uredi načrt« (ne iz rutine) →
+kartica termina → »Uredi« → druga začetna ura (F-r07-10) ali drug datum (F-r08-15) → »Shrani«.
+
+**Opaženo:** kartica pravi »Program ni določen«, odprt trening »Ni vstavljenih vaj«. Teden r07: okno
+»Uredi« je pri stranki kazalo »Izberi rutino / Prazen načrt, brez rutine«, in »Shrani« je načrt
+prepisal s praznim; opozorila ni bilo. Teden r08 je isto videl pri dveh strankah, četrtek in sobota.
+
+**Težava in vpliv:** trener prestavi termin in na treningu nima načrta; sestavljen načrt je izgubljen.
+
+**Predlog:** prestavitev spremeni samo čas; načrt, ki ga okno ne zna pokazati, ostane, kot je —
+opaženo 2026-10-10 na `166d3c8` (tedna r07 in r08, neodvisno). Orkestrator je ponovil le različico,
+kjer je načrt iz rutine (demo, »Hitri HIIT za trup«, 16:00 → 16:30): tam se načrt ohrani. Neponovljena
+je različica z načrtom iz beležke, ki sta jo imela oba tedna.
+
+### 80.210 [ ] P2 — Opomba z meritvijo postane opozorilo; »Razreši« jo izbriše brez vprašanja — nepreverjeno
+
+**Scenarij in koraki:** pri vaji »Opombe« → »Samo opomba, brez ocene« → »Utrip med hojo 110–118« ali
+sladkor in tlak → »Zapiši opozorilo«; pozneje »Čakajoče na pregled« → kljukica »Razreši«.
+
+**Opaženo:** opomba postane »nerešen povratni signal« in obarva vaje rdeče (F-r07-04, F-r08-07).
+»Razreši« jo odstrani brez vprašanja; v kartoteki stranke je ni (F-r05-10, F-r07-07). Meritev,
+shranjena v kartoteko, ostane tudi »Čakajoče na pregled«: do nedelje 14 vrstic (F-r07-15).
+
+**Težava in vpliv:** izmerjena vrednost, ki jo trener potrebuje naslednjič, izgine z enim dotikom, ki
+ga je mislil kot »prebrano«. Uničujoče dejanje brez vprašanja.
+
+**Predlog:** opomba brez ocene ni opozorilo; »Razreši« ne briše zapisa — opaženo 2026-10-10 na
+`166d3c8` (tedni r05, r07, r08). Mesto za meritve je §78.
+
+### 80.211 [ ] P3 — Povzetek vaje »S3 × R12 × 60 kg«: črki nista razloženi, »R« ni slovenska
+
+**Scenarij in koraki:** kartica vaje v načrtu in v beležki.
+
+**Opaženo:** »S3 × R12 × 60 kg«, »S4 × R8 × 70 kg«, »S3 × R10« (F-r07-18, F-r09-03, F-r10-03).
+
+**Težava in vpliv:** trener ne ve, kaj črki pomenita; »R« je angleška okrajšava (*reps*).
+
+**Predlog:** zapis, ki ga trener prebere brez razlage, na primer »3 × 12 × 60 kg« — opaženo
+2026-10-10 na `166d3c8` (trije tedni; orkestrator je zapis videl na kartici »S1 × 20 cal«).
 
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
@@ -5356,13 +5415,13 @@ razširitev parametrov vaje s tipom »razdalja + tempo« ter skupni tedenski se�
 (Garmin Connect, Strava, TrainingPeaks). Izplača se le majhen del: možnost izbire enote »km« ali »m«
 ob času pri vajah tipa kardio ter slovenski sinonim »tek« v katalogu.
 
-### 88.19 [ ] Seštevek tednov trenerjev 2026-10-10: šest tednov, r01–r06
+### 88.19 [ ] Seštevek tednov trenerjev 2026-10-10: deset tednov, r01–r10
 
 **Kako je nastalo.** Sonnet je napisal 100 izmišljenih delovnih tednov, dva ocenjevalca sta jih
 ocenila po izvedljivosti (37 s 5), orkestrator je izbral deset za raznolikost. Vsak teden je
 podagent brez konteksta odigral od ponedeljka do nedelje na razvojnem strežniku (`166d3c8`), z uro
 aplikacije, premaknjeno na simulirani dan. Datoteke so v `.private/exploratory-test/weeks/2026-10-10/`,
-kopija na veji `trials/weeks-2026-10-10`. Šest tednov je končanih, štirje (r07–r10) še tečejo.
+kopija na veji `trials/weeks-2026-10-10`. Vseh deset tednov je doseglo nedeljo; skupaj 168 ugotovitev.
 
 | Teden | Trener | Koliko tedna je nosila aplikacija (trenerjeva ocena) |
 | --- | --- | --- |
@@ -5372,22 +5431,33 @@ kopija na veji `trials/weeks-2026-10-10`. Šest tednov je končanih, štirje (r0
 | r04 | gibalna vadba za otroke, Celje; plačajo starši; nadomešča kolega | približno četrtina, povprečna ocena 0,6 od 3 |
 | r05 | obiski na domu pri starejših, Pomurje, 410 km | približno četrtina |
 | r06 | večinoma spletna trenerka, stranke v treh časovnih pasovih | približno četrtina |
+| r07 | trener za stranke s sladkorno boleznijo in visokim tlakom, Kranj | približno tretjina |
+| r08 | študent, trener powerlifterja pred tekmo, Celje | približno tretjina |
+| r09 | trener s polovičnim delom ob drugi službi | približno tretjina; 80 min na teden zunaj zaradi denarja in ur |
+| r10 | studio v Velenju, direktor podjetja dolguje 480–560 € | urnik in vaje da, dolg in plačila ne |
 
 **Kar so tedni našli, po tem, koliko tednov je potrebovalo isto.** Minute so trenerjeve ocene, torej
 predpostavka. Vrzel, ki je že zapisana, dobi tu dokaz; nova je v zadnjem stolpcu presojena.
 
 | Vrzel | Tedni | Cena po trenerjih | Kje je že | Presoja |
 | --- | --- | --- | --- | --- |
-| Opravljena serija »po načrtu« | 6 od 6 | trening se shrani kot »prazna vadba« | §80.6, §94 točka 1 | **čaka na Simona** (§94); najvišja prednost tega preizkusa |
-| Paketi obiskov, plačila, računi, mesečni pregled | 6 od 6 (F-r01-01, F-r01-18, F-r02-05, F-r03-01, F-r04-10, F-r04-14, F-r05-14, F-r05-16, F-r06-03) | 20–30 min na teden | §86.5 | **čaka na Simona**: brezplačna aplikacija ali ProPT (§90) |
+| Opravljena serija »po načrtu« | 10 od 10 | trening se shrani kot »prazna vadba« | §80.6, §94 točka 1 | **čaka na Simona** (§94); najvišja prednost tega preizkusa |
+| Paketi obiskov, plačila, računi, dolg, mesečni pregled | 10 od 10 (F-r01-01, F-r01-18, F-r02-05, F-r03-01, F-r04-10, F-r04-14, F-r05-14, F-r05-16, F-r06-03, F-r07-05, F-r08-01, F-r08-17, F-r09-02, F-r09-09, F-r09-11, F-r10-01, F-r10-07, F-r10-10) | 20–80 min na teden | §86.5 | **čaka na Simona**: brezplačna aplikacija ali ProPT (§90) |
 | Prisotnost v skupini; gost brez celega obrazca | 4 (F-r02-01, F-r02-10, F-r02-17, F-r03-07, F-r03-12, F-r04-01, F-r04-19, F-r06-09) | ~10 min po skupinski vadbi | §86.4, §88.2 | izplača se: »ni prišla« ob udeležencu je majhen poseg; pogoj za pakete |
 | Sporočila: SMS brez ure in kraja, odpoved brez obvestila, opomniki | 4 (F-r01-10, F-r01-12, F-r01-14, F-r03-02, F-r03-09, F-r03-11, F-r03-18, F-r04-11, F-r05-15) | ~10–15 min na teden | §86.5 | izplača se majhen del: ura in kraj v besedilu SMS-a (F-r01-12, F-r03-09) |
 | Vaja s časom: delo in odmor po postaji, trajanje v minutah, razdalja | 5 (F-r01-16, F-r03-03, F-r03-17, F-r04-04, F-r05-01) | ~5 min na krožno vadbo | §88.18 delno | izplača se: enota in »delo / odmor« pri vaji; skupaj z §80.200 |
-| Meritve pred vadbo (sladkor, tlak, utrip), teža kot meritev | 4 (F-r01-11, F-r03-10, F-r05-10, F-r06-11) | opomba izgine po »Razreši« (F-r05-10) | §78, §86.4 | dokaz za §78; F-r05-10 kaže, da prosta opomba meritve ne nadomesti |
-| Domača naloga do stranke | 3 (F-r01-15, F-r06-08, F-r06-13: ~3 h na teden za 9 spletnih strank) | glej stolpec Tedni | §105 | dokaz za §105 |
-| Katalog vaj: angleška imena, ni vaj za otroke, hrbtenico, igrišče | 5 | 20 min za tri vaje (F-r03-14) | §80.54 | dokaz za §80.54 |
+| Meritve pred vadbo (sladkor, tlak, utrip, kot v kolenu, bolečina 0–10), teža kot meritev | 8 (F-r01-11, F-r03-10, F-r05-10, F-r06-11, F-r07-05, F-r07-14, F-r08-08, F-r08-12, F-r09-15) | opomba izgine po »Razreši« (§80.210); prejšnji tlak ni na zaslonu naslednje ure (F-r07-14) | §78, §86.4 | dokaz za §78, zdaj najpogostejša vrzel za plačili |
+| Domača naloga do stranke | 4 (F-r01-15, F-r06-08, F-r06-13: ~3 h na teden za 9 spletnih strank; F-r09-14) | glej stolpec Tedni | §105 | dokaz za §105 |
+| Sporočilo stranki ob prestavitvi ali o meritvi | 3 (F-r07-16, F-r09-13, F-r10-07) | — | §86.5 | isto kot vrstica o sporočilih |
+| Cikel več tednov je vsak teden poseben termin | 1 (F-r08-18: 12 tednov, 12 terminov) | — | §88.5 | dokaz za §88.5 |
+| Dejansko trajanje treninga po koncu (60 → 40 min) | 1 (F-r07-09) | — | nikjer | izplača se preveriti skupaj s §80.6 |
+| Prosti termini v tednu | 1 (F-r07-17) | — | nikjer | ne izplača se zdaj |
+| Izvoz strank z urami in plačili v preglednico; iskanje po opombah | 2 (F-r09-16, F-r10-11) | — | nikjer | čaka na Simona, skupaj s plačili |
+| Brez povezave aplikacija tega ne pove | 1 (F-r08-11) | — | nikjer | izplača se preveriti: trener ne ve, kaj je shranjeno |
+| Seznam za tekmo (izkaznica, oprema) | 1 (F-r08-13) | — | nikjer | ne izplača se |
+| Katalog vaj: angleška imena, ni vaj za otroke, hrbtenico, igrišče, ni mrtvega dviga, sobnega kolesa, potiska bokov | 8 (tudi F-r07-02, F-r08-04, F-r08-05, F-r08-10) | 20 min za tri vaje (F-r03-14) | §80.54 | dokaz za §80.54 |
 | Termin brez stranke (spletna skupina) | 1 (F-r02-14) | — | nikjer | izplača se preveriti s Simonom, ali je to pravilo |
-| Seznam terminov ne kaže stranke ne kraja | 2 (F-r03-11, F-r05-13) | — | nikjer | izplača se: kraj in imena na kartici |
+| Seznam terminov ne kaže stranke ne kraja | 3 (F-r03-11, F-r05-13, F-r09-06) | — | nikjer | izplača se: kraj in imena na kartici |
 | Klic ali SMS iz kartice stranke | 1 (F-r03-02) | — | nikjer | izplača se: povezavi `tel:` in `sms:` |
 | Vprašalnik ob prvem obisku | 1 (F-r05-11) | — | nikjer | ne izplača se zdaj |
 | Delo trenerja zunaj treningov (poročilo vodji, izmene) | 1 (F-r02-06) | — | nikjer | ne izplača se (zaposlen trener, ProPT) |
@@ -5395,9 +5465,12 @@ predpostavka. Vrzel, ki je že zapisana, dobi tu dokaz; nova je v zadnjem stolpc
 | Prevoženi kilometri | 1 (F-r05-17) | — | nikjer | ne izplača se |
 | Trening nadomestnega trenerja ostane »Zamuja« | 1 (F-r04-19) | — | §88.4 | dokaz za §88.4 |
 
-**Ni prešlo v napake:** F-r03-15 (ponavljajoči termin ne ustvari današnjega) se na pravi uri ne
-ponovi, ne z enim ne z dvema dnevoma; trenerka je delala na premaknjeni uri. F-r05-06 (trije enaki
-termini) je po trenerjevih besedah lahko posledica njegovih prekinjenih ukazov. Vseh šest tednov je
+**Ni prešlo v napake:** F-r03-15 in F-r10-06 (ponavljajoči termin ne ustvari današnjega, F-r10-06
+tudi ne poznejših sred) se na pravi uri ne ponovita, ne z enim ne z dvema dnevoma. Oba tedna sta
+delala na premaknjeni uri, ta pa spremeni le `Date` strani, ne pa ure delavcev v ozadju; kar primerja
+oboje, vidi različna dneva. Verjetno je to meja orodja; preveriti na telefonu z izbranim
+današnjim dnem in še enim. F-r05-06 (trije enaki
+termini) je po trenerjevih besedah lahko posledica njegovih prekinjenih ukazov. Prvih šest tednov je
 vsaj enkrat izgubilo podatke, ker kopija v orodju ne pride do datoteke (§80.136); to je meja orodja,
 ne nova napaka.
 
@@ -6524,7 +6597,8 @@ nedotaknjeno.
 **Dokaz 2026-10-10 (§88.19):** trije tedni od šestih so nalogo potrebovali. Načrt za doma ne pride do
 stranke ne kot besedilo ne kot video (F-r01-15, F-r06-08); spletna trenerka z 9 strankami ocenjuje,
 da ji tedenski programi, ki jih ni mogoče poslati, vzamejo okoli 3 ure na teden zunaj aplikacije
-(F-r06-13; trenerjeva ocena).
+(F-r06-13; trenerjeva ocena). Teden r09 je domačo nalogo vpisal kot izmišljen termin »Domača
+naloga«, ki je v nedeljo kazal »Zamuja 25h 01m« (F-r09-14, F-r09-17).
 
 **Čaka na Simona — tri odločitve, preden se to načrtuje:**
 
