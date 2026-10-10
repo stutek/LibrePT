@@ -56,7 +56,7 @@ phone-sized headless browser open between commands. **Your browser is on port {P
 S=/home/claude/librept/.agents/skills/exploratory-test/explore.py
 P=/home/claude/librept/.venv/bin/python
 cd /home/claude/librept
-EXPLORE_PORT={PORT} $P $S start                    # once; starts an EMPTY app on a fresh profile
+EXPLORE_PORT={PORT} EXPLORE_IDLE_MINUTES=40 $P $S start   # once; starts an EMPTY app on a fresh profile
 EXPLORE_PORT={PORT} $P $S goto 'http://localhost:8081/LibrePT/?lang=sl'
 EXPLORE_PORT={PORT} $P $S clock 2026-10-12T07:00    # the phone believes it is Monday 07:00
 EXPLORE_PORT={PORT} $P $S text 1500                # what the screen says
@@ -69,6 +69,7 @@ EXPLORE_PORT={PORT} $P $S select '<selector>' '<option value>'
 EXPLORE_PORT={PORT} $P $S dialog                   # what an open dialog says
 EXPLORE_PORT={PORT} $P $S download '<selector>' {DIR}/backups/<name>.json   # a control that hands over a file
 EXPLORE_PORT={PORT} $P $S upload '<selector>' {DIR}/backups/<name>.json     # give the app a file
+EXPLORE_PORT={PORT} $P $S offline on               # no signal (a basement, a hike); `offline off` gives it back
 EXPLORE_PORT={PORT} $P $S errors                   # console errors since the last goto
 EXPLORE_PORT={PORT} $P $S stop                     # at the very end only
 ```
@@ -86,14 +87,16 @@ that a value landed in the wrong place, check which field your command addressed
 bell) do not appear in `text`; `controls` shows each control's name. A step that seems to do nothing
 is sometimes the browser tool: look at `dialog` and `text` before writing that nothing happened.
 
-**Every evening, keep a copy of your data** the way the app offers it (find it on the screen), saved
-to `{DIR}/backups/day-<N>.json` with `download`, and note it in `log.md`. If the app offers no way,
-that is a finding, and resuming will mean starting the day again.
+**Your data lives only in this browser, so keep it alive.** The app's backup does not reach a file in
+this browser tool: three earlier runners tried every evening and got none (known, §80.136). Try it
+once, on Monday evening, as a trainer would; record what you saw in `log.md`, and do not try again.
+The browser closes itself after 40 minutes without a command and is gone if you were cut off, so
+never let 30 minutes pass between commands, and write long notes in short pieces.
 
-**Resuming the browser.** The browser closes itself after 15 minutes without a command, and it is
-gone if you were cut off. If a command says `no browser: run start first`: `start`, `goto`, `clock`
-to the next task's time, `goto` again, then restore your newest backup through the app's own restore,
-as a trainer with a new phone would. Write in `log.md` that you resumed and from which backup.
+**Resuming the browser.** If a command says `no browser: run start first`, your data is gone:
+`start`, `goto`, `clock` to the next task's time, `goto` again, and enter again only the clients and
+sessions the remaining tasks need. Write in `log.md` that the browser was lost, when, and what you
+entered again. That is not a finding about the app.
 
 **Already known — do not report these again; work around them:** `{DIR}/../../known.md`. For a gap on
 that list, add a line to `findings.md` only if your week gives new evidence (what it cost you).
@@ -132,7 +135,9 @@ Save `{DIR}/report.md`:
 4. **Napake** — the defects, most serious first, each with its finding number.
 5. **Dnevi, ki jih nisi dosegel**, if any.
 
-End the file with the line `<!-- konec poročila {RUN} -->`, then `stop` your browser.
+End the file with the line `<!-- konec poročila {RUN} -->`, then `stop` your browser. If the Write
+tool refuses to save `report.md` (one runner was told "Subagents should return findings as text"),
+save it with the shell instead: `cat > {DIR}/report.md <<'EOF'` … `EOF`.
 
 Your final message is only: the path of `report.md`, the number of findings, and the three-sentence
 summary.

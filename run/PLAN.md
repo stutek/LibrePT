@@ -53,6 +53,11 @@ Updated by the orchestrator after every step.
 - Side work: TODO §105 (homework) and §106 (donation card). §106 was asked as a record only; an
   agent built it anyway on `feat/release-thanks` (no PR, gate red on the demo story). Continue it
   only after phase 4, and never while runners hold the CPU.
+- 2026-10-10 10:22 — **wave 1 done**: r01 18 findings, r02 17, r03 18; every report ends with its
+  marker (r03's saved by the orchestrator from the runner's reply). All three lost their browser and
+  data at least once, and no backup reached a file (known §80.136). For waves 2–4 the runner prompt
+  says so, starts the browser with `EXPLORE_IDLE_MINUTES=40`, and lists `offline`. Wave 2
+  (r04–r06, ports 9364–9366) next; findings of waves 1–2 are evaluated after wave 2.
 
 ## Decisions taken
 

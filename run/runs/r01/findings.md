@@ -107,3 +107,73 @@ tags: [exploratory, trainer-week]
 - **Prioriteta po tvoje:** P2
 - **Čas:** 2026-10-10 06:16:00, različica 166d3c8
 
+
+### F-r01-12 — vrzel — SMS ob spremembi kraja nima ure, dneva ne kraja v besedilu: samo »Trening: Par — povezava«
+
+- **Dan in ura (simulirano):** sreda 14. 10., 07:35 (ura telefona premaknjena)
+- **Koraki:** Termin Par (sreda 18:00) → Uredi → Lokacija »Mestni park Celje« → Shrani → okno »Ta trening se je spremenil — želiš poslati nove podatke strankam, ki si jih že povabil?« → Pošlji nove podatke → okno »Pošlji vabila v koledar« → Pošlji SMS.
+- **Pričakovano:** sporočilo »Sreda 14. 10. ob 18:00 se dobimo v Mestnem parku Celje«, ki ga stranka prebere takoj.
+- **Opaženo:** povezava »Pošlji SMS« odpre sporočilo z besedilom »Trening: Par — http://…/LibrePT/?lang=sl&evt=eyJ2Ijox…« (dolga koda). Datuma, ure in kraja ni v besedilu; stranka bi morala odpreti povezavo. Okno ima naslov »Na novo dodeljenim udeležencem«, čeprav gre za spremembo kraja. Gumb »Pošlji vabilo« je neaktiven, ker Mojca nima e-pošte; vzroka okno ne pove.
+- **Cena:** vsako spremembo (reka cev, termin v parku) še vedno napišem na roke v WhatsApp: 3 stranke × 3 min = ~10 min, in stranka mora zaupati nerazumljivi povezavi.
+- **Prioriteta po tvoje:** P2
+- **Čas:** 2026-10-10 09:55:00, različica 166d3c8
+
+### F-r01-13 — napaka — Okno »Pošlji vabila v koledar«: po tapu na »Pošlji SMS« se »Končano«, ✕ in Esc ne zaprejo; pot nazaj je osvežitev strani
+
+- **Dan in ura (simulirano):** sreda 14. 10., 07:30
+- **Koraki:** Shrani termin → okno »Pošlji vabila v koledar« → Pošlji SMS → Končano (nato ✕, nato Esc).
+- **Pričakovano:** okno se zapre.
+- **Opaženo:** okno ostane odprto po vseh treh; zaprlo se je šele po ponovnem odprtju naslova aplikacije. Po tem tapi z orodjem (»Ustvari trening«, izbira stranke) niso več delovali; tapi prek skripte so. Možno, da je napaka orodja in ne aplikacije — nisem je ločila.
+- **Cena:** brez osvežitve ostanem v oknu; 5 min izgubljenih.
+- **Prioriteta po tvoje:** P2
+- **Čas:** 2026-10-10 09:56:00, različica 166d3c8
+
+### F-r01-14 — vrzel — Odpoved termina strank ne obvesti in ne razlikuje pravočasne odpovedi od pozne
+
+- **Dan in ura (simulirano):** četrtek 15. 10., 07:55
+- **Koraki:** Termin Simon Žnidar 08:00 → Možnosti treninga → Odpovej trening → okno »Odpovej ta trening? Ostane na urniku, označen kot odpovedan …« → Odpovej trening.
+- **Pričakovano:** zapis, da je Simon odpovedal pravočasno (obisk se ne odšteje), in gumb, ki mu pošlje potrdilo.
+- **Opaženo:** termin dobi oznako »Odpovedano«. Ni vprašanja, kdo je odpovedal in kdaj, ni polja za razlog, strank ne obvesti, in obiska stranki ne šteje ali odšteva (paketov aplikacija sploh ne pozna, F-r01-01).
+- **Cena:** pravila »pozna odpoved se računa« še vedno vodim v zvezku: 1–2 odpovedi na teden × 2 min, in napake pri zaračunavanju ob koncu meseca.
+- **Prioriteta po tvoje:** P2
+- **Čas:** 2026-10-10 10:10:00, različica 166d3c8
+
+### F-r01-15 — vrzel — Načrt vaj za doma (domača naloga) ne pride do stranke; video ali besedilo ne moreta biti del načrta
+
+- **Dan in ura (simulirano):** četrtek 15. 10., 16:30
+- **Koraki:** Termin Barbara 17:00 → Možnosti treninga → Uredi načrt → tri vaje (mostiček 3 × 15, ptičji pes 3 × 10, raztezanje 2 × 30 s) → Končano z urejanjem načrta → Možnosti treninga → pregled menija → zavihek »Barbara«.
+- **Pričakovano:** gumb, ki Barbari pošlje načrt (ali povezavo na video) po SMS ali WhatsAppu, da vadi doma; termin označim kot »doma«.
+- **Opaženo:** meni ima le »Uredi načrt«, »Vsi na ta načrt«, »Odpovej trening«, »Izbriši trening«. Pošiljanja načrta ni, polja za povezavo na video ni, termina »doma« ni. Termin lahko le odpovem.
+- **Cena:** video in seznam vaj pošljem ročno v WhatsApp (~5 min), načrt pa vpišem v aplikacijo dvakrat ali pa sploh ne.
+- **Prioriteta po tvoje:** P2
+- **Čas:** 2026-10-10 10:15:00, različica 166d3c8
+
+### F-r01-16 — vrzel — Trajanje vaje v minutah (hoja 10 min) ne obstaja: načrt zna le »pon.« in »drža« v sekundah
+
+- **Dan in ura (simulirano):** sobota 17. 10., 08:55
+- **Koraki:** Termin Ivan Pečnik → Možnosti treninga → Uredi načrt → Vaja → ime »Hoja po stopnicah« → serije 1, ponovitve 10 → Končano z urejanjem načrta.
+- **Pričakovano:** izbira »min« (ali »m«) za hojo 10 minut in skakanje 10 m.
+- **Opaženo:** pri neznanem imenu izbira »MERJENO V« pozna samo »pon.« in »drža«; pri znanem imenu je izbire sploh ni. Povzetek vrstice je »S1 × R10«, kar se bere kot 10 ponovitev.
+- **Cena:** hojo 10 min (Ivan), hojo na traku 12 min (Rado) in skakanje 10 m (Lana) pišem v ime vaje; ~1 min na vajo, 3 vaje na teden. Povzetek pa je zavajajoč.
+- **Prioriteta po tvoje:** P3
+- **Čas:** 2026-10-10 10:45:00, različica 166d3c8
+
+### F-r01-17 — napaka — Zaključen termin brez zapisanih serij ne pride v zgodovino stranke, načrt iz njega pa obvisi med »Nenačrtovanimi programi«
+
+- **Dan in ura (simulirano):** nedelja 18. 10., 19:00
+- **Koraki:** petek 16:00 Katja → Začni trening → Zaključi vadbo (»Res želiš zaključiti in shraniti prazno vadbo?« → Zaključi zdaj); nedelja: Meni → Imenik strank → Katja Starc.
+- **Pričakovano:** v »Zgodovini zabeleženih vadb« ena vadba 2026-10-16 s štirimi vajami.
+- **Opaženo:** »Ni še zabeleženih vadb.« Na začetnem zaslonu pa obvestilo »6 programov je pripravljenih, a še niso dodeljeni treningu«, med njimi »Ena na ena · Katja Starc · 2026-10-16« — načrt, ki sem ga naredila in izvedla. Termin na seznamu pravi »Program ni določen« in »Zaključeno«.
+- **Cena:** nedeljskega pregleda (»sem Katji zaračunala vse štiri ure?«) ne morem narediti iz zgodovine stranke; štejem zaključene termine po seznamu ročno, ~10 min na mesec na stranko, in 6 obvestil mi govori, da nekaj ni opravljeno.
+- **Prioriteta po tvoje:** P2
+- **Čas:** 2026-10-10 11:05:00, različica 166d3c8
+
+### F-r01-18 — vrzel — Mesečni pregled (ure, število obiskov, kdo je plačal) ne obstaja
+
+- **Dan in ura (simulirano):** nedelja 18. 10., 19:00
+- **Koraki:** Začetni zaslon → filter »Stranka« → Katja Starc; Imenik strank → Katja Starc; Meni (Termini treningov, Imenik strank, Vaje in rutine, Upravljanje podatkov, Nastavitve).
+- **Pričakovano:** za mesec in stranko: število ur, število obiskov, ostanek paketa, plačano / neplačano.
+- **Opaženo:** filter po stranki pokaže seznam terminov in nič več: brez vsote, brez zneska, brez meseca. V profilu stranke so Cilji, Poškodbe, Opombe, E-pošta, Telefon, GDPR in zgodovina vadb. Zgoraj piše »OGROŽENO — NAREDI KOPIJO«, a kopije ne morem narediti (F-r01-06).
+- **Cena:** obračun za mesec in sedem strank še vedno delam v zvezku: ~45 min na mesec; napake pri zneskih (38 € × 4 ure Katja, 460 € paket Cvikl).
+- **Prioriteta po tvoje:** P2
+- **Čas:** 2026-10-10 11:06:00, različica 166d3c8
