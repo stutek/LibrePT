@@ -3138,7 +3138,7 @@ F-r03-06), načrt zaključenega treninga izgine s termina (F-r01-17, F-r05-07), 
 Trenerji so zato »Prelahko« pritiskali samo, da se vaja zapiše (F-r03-13), kar se je pozneje
 pokazalo kot nasvet (§80.206). **Tedni r07–r10 dodajo še štiri: deset od desetih** (F-r07-01,
 F-r08-06, F-r09-07, F-r10-02). Teden r09 je opazil neskladje: »Prelahko« vajo označi kot opravljeno,
-»Pretežko« je ne (F-r09-10, nepreverjeno). Zaključen termin ima še vedno »Začni trening« in ob
+»Pretežko« je ne (F-r09-10; enako F-s02-09 v scenariju dveh naprav: vaja s »Pretežko« in opombo je v zgodovini »PRESKOČENO«, opomba o bolečini ne pride v kartoteko). Zaključen termin ima še vedno »Začni trening« in ob
 ponovnem zagonu izgubi načrt (F-r09-06); zaključen trening kaže »Ni vstavljenih vaj« (F-r10-04).
 
 ### 80.7 [x] P2 — Prvi prikaz novega termina pokaže 1970-01-01 — popravljeno 2026-09-27
@@ -4796,7 +4796,9 @@ v kopiji, in mu ne ponudi poti do kopije, ki bi jih imela.
 2026-10-10 na `166d3c8`, razvojni strežnik.
 
 **Tedni r07–r10:** isto opozorilo sta videla še r08 in r09 (F-r08-09, F-r09-04), skupaj štirje tedni.
-Geslo za šifrirano kopijo je predlagano v angleških besedah in se pokaže pred izvozom (F-r09-05).
+Geslo za šifrirano kopijo je predlagano v angleških besedah in se pokaže pred izvozom (F-r09-05);
+polje pokaže le zadnji del dolgega gesla (F-s01-04). Opozorilo o predogledu sta videla še oba
+scenarija §107 (F-s01-03, F-s02-07), skupaj šestkrat.
 
 ### 80.206 [ ] P2 — Oznaka »Prelahko – povečaj težo« trenerju svetuje smer obremenitve — čaka na Simona
 
@@ -4890,6 +4892,23 @@ ga je mislil kot »prebrano«. Uničujoče dejanje brez vprašanja.
 
 **Predlog:** zapis, ki ga trener prebere brez razlage, na primer »3 × 12 × 60 kg« — opaženo
 2026-10-10 na `166d3c8` (trije tedni; orkestrator je zapis videl na kartici »S1 × 20 cal«).
+
+### 80.212 [ ] P2 — Okno za kopije šteje samo Google Drive: »vse je že v Google Drive« brez Drive, »OGROŽENO« po izvozu v datoteko
+
+**Scenarij in koraki:** ikona s številko in vprašajem zgoraj desno (»Središče za sinhronizacijo in
+varnostne kopije«) na napravi, ki ni nikoli povezala Google Drive; nato »Izvozi JSON« v datoteko.
+
+**Opaženo:** »Vse na tej napravi je že v Google Drive.« na praznem novem telefonu, ki Googla ni videl
+(F-s01-05, F-s02-08; orkestrator je isti stavek videl 2026-10-10 na napravi s predstavitvenimi
+podatki brez Drive). Po izvozu v datoteko ostane rdeča značka »OGROŽENO — NAREDI KOPIJO« in »27
+sprememb … ni v Google Drive«, dokler aplikacije ne osvežiš (F-s01-13, F-s02-06, F-r05-09).
+
+**Težava in vpliv:** okno trenerju reče, da so podatki varni, ko niso nikjer, in da niso varni, ko so
+v datoteki, narejeni minuto prej. Trener ne ve, ali ima kopijo.
+
+**Predlog:** okno pove, kje je zadnja kopija in kdaj je nastala, datoteka ali Drive, in nikoli ne
+trdi Drive brez Drive — opaženo 2026-10-10 na `166d3c8` (scenarija §107 in teden r05; prvi stavek
+preveril orkestrator).
 
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
@@ -5360,6 +5379,10 @@ aplikaciji še zaupa; uvod pri tem stane okoli minute in vodi v napačno smer (�
 aplikacijo«). **Cena:** majhna: na prvem zaslonu »Obnovi iz varnostne kopije« pred uvodom.
 **Presoja: čaka na Simona**, ker spremeni uvod, o katerem je odločil v §81 (podatki obvezni na vsaki
 poti); kopija te podatke že nosi.
+
+**Dokaz 2026-10-10, scenarija §107:** na novem telefonu je obnovitev spet za uvodom (F-s01-06); trenerjevi
+podatki in tema se iz kopije ne prenesejo, zato jih nov telefon vpraša znova (F-s02-07). Obnovitev
+sama je delovala: 13 dotikov, okoli 6 minut, 6 strank, termini z načrti in 4 zaključeni treningi.
 
 ### 88.15 [ ] Serija se ne da ustaviti za dopust stranke ne spremeniti od nekega dne naprej
 
@@ -6650,3 +6673,29 @@ trening. Preizkus odgovori: kako načrti pridejo na telefon (sinhronizacija, dat
 širine 480 pik). Orodje to zmore z dvema brskalnikoma (`EXPLORE_PORT`) in z oknom 1280 × 800 za
 računalnik. **Meja:** orodje se ne more prijaviti v Google (Google samodejne brskalnike zavrne), zato
 pot prek Drive preveri Simon ročno z `LibrePT.test@gmail.com`; orodje preveri pot prek datoteke.
+
+### 107.1 [ ] Izid prvega preizkusa obeh primerov, 2026-10-10
+
+Odigrano isti dan na `166d3c8`, vsak primer z dvema brskalnikoma, kopije prek datoteke (Drive iz
+orodja ni dosegljiv). Datoteke: `.private/exploratory-test/weeks/2026-10-10/runs/s01/` in `…/s02/`.
+
+**Ukraden telefon (s01, 13 ugotovitev).** Obnovitev iz torkove kopije na novem telefonu je delovala:
+13 dotikov, okoli 6 minut, vrnjenih 6 strank, termini z načrti, 4 zaključeni treningi in opombe.
+Izgubljeno je, kar je trener vpisal v sredo dopoldne: stranka, njen termin in opomba, 8 minut za
+ponoven vpis. Kopija brez gesla iz zvezka in brez vedenja, kje je datoteka, ne pomaga.
+**Vrzel: aplikacija o ukradenem telefonu ne reče nič**, tudi ne o zdravstvenih podatkih strank, ki
+ostanejo na njem (F-s01-08). Čaka na Simona skupaj s §97 (GDPR); izjava o zasebnosti se iz slovenske
+aplikacije odpre v angleščini (F-s01-07).
+
+**Računalnik in telefon (s02, 9 ugotovitev).** Prenos z računalnika na telefon prek šifrirane datoteke
+je deloval. **Vrzel: dveh naprav ni mogoče združiti brez Drive** (F-s02-05): uvoz datoteke zamenja vse
+na napravi. Ko je trener v ponedeljek zvečer na telefon uvozil kopijo z računalnika, sta se dva
+zaključena ponedeljkova treninga vrnila v »Zamuja« in signali stranke so izginili; popravil je s
+ponovnim uvozom telefonove kopije in prepisom dveh sprememb na roke. Opozorilo pred uvozom pravi, da
+bo izgubljeno vse na napravi, tudi kar je v datoteki enako, in ne pove, kaj se res izgubi (F-s02-04).
+Podvojenega ni bilo nič. Na računalniku 1280 × 800 je aplikacija stolpec širine 480 pik na sredini,
+zato sestavljanje načrtov ni lažje kot na telefonu (F-s02-02).
+
+**Presoja:** združevanje naprav brez Drive in širok zaslon za načrte sta odločitvi o izdelku: **čaka
+na Simona**. Izplača se takoj: opozorilo pred uvozom, ki našteje, kaj se zamenja (F-s02-04), in
+§80.212.
