@@ -318,6 +318,7 @@ export const de = {
   reps_label: "Wdh.",
   // Exercise modality metric labels (see exerciseModality.js) — the primary target unit per movement.
   metric_time: "Zeit",
+  metric_format_min_sec: "Min:Sek",
   metric_hold: "Halten",
   metric_distance: "Strecke",
   metric_calories: "kcal",
@@ -349,7 +350,7 @@ export const de = {
   routine_row_sets_label: "Anzahl Sätze",
   routine_row_reps_label:
     "Hauptziel (Wiederholungen, Zeit, Strecke oder „max“ bis zum Muskelversagen — je nach Art der Übung)",
-  routine_row_rest: "Pause",
+  routine_row_rest: "Pause (s)",
   routine_row_rest_label: "Pausendauer in Sekunden",
   routine_row_load_label: "Last",
   routine_row_remove: "Übung aus der Routine entfernen",
@@ -1050,9 +1051,9 @@ export const de = {
   sync_hub_ahead_few: "{count} Änderungen auf diesem Gerät sind noch nicht in Google Drive.",
   sync_hub_ahead_other: "{count} Änderungen auf diesem Gerät sind noch nicht in Google Drive.",
   sync_hub_none: "Alles auf diesem Gerät ist schon in Google Drive.",
-  sync_hub_cloud_unknown:
   sync_hub_not_connected:
     "Google Drive ist nicht verbunden, daher ist keine Kopie dieser Daten in Google Drive.",
+  sync_hub_cloud_unknown:
     "Das ? in der Kopfzeile heißt: Die Änderungen in Google Drive sind nicht bekannt, weil es nicht verbunden oder nicht erreichbar ist.",
   restore_invalid_file:
     "Diese Datei ist keine LibrePT-Sicherung. Auf diesem Gerät wurde nichts geändert. Wähle die Datei, die LibrePT mit „JSON exportieren“ erstellt hat.",

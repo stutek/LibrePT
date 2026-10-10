@@ -5,6 +5,7 @@
 import { libraryExercises } from "../../data/exerciseLibrary.js";
 import {
   formatMetricValue,
+  metricFormatHintKey,
   metricLabelKey,
   modalityOf,
   primaryMetricOf,
@@ -228,7 +229,10 @@ export function addRoutineExerciseRow({ preset = null, state, t }) {
   // input stays in the DOM when hidden so the save handler still reads a (0) weight for it.
   const applyModality = (ex) => {
     const metric = primaryMetricOf(ex);
-    const label = metric === "reps" ? tr("reps_label", "Reps") : tr(metricLabelKey(metric), metric);
+    const base = metric === "reps" ? tr("reps_label", "Reps") : tr(metricLabelKey(metric), metric);
+    // The format the field reads, beside its name: "time (min:s)" (exerciseModality.js).
+    const hint = metricFormatHintKey(metric);
+    const label = hint ? `${base} (${tr(hint, "min:s")})` : base;
     repsInput.placeholder = label;
     row.querySelector(".routine-builder-reps-caption").textContent = label;
     if (metric === "reps") repsInput.setAttribute("list", "reps-presets");

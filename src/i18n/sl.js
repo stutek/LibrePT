@@ -315,6 +315,7 @@ export const sl = {
   reps_label: "pon.",
   // Oznake meritev modalitete vaje (glej exerciseModality.js) — osnovna ciljna enota vaje.
   metric_time: "čas",
+  metric_format_min_sec: "min:s",
   metric_hold: "drža",
   metric_distance: "razdalja",
   metric_calories: "kcal",
@@ -346,7 +347,7 @@ export const sl = {
   routine_row_sets_label: "Število serij",
   routine_row_reps_label:
     "Glavni cilj (ponovitve, čas, razdalja ali 'max' do odpovedi — odvisno od vrste vaje)",
-  routine_row_rest: "Premor",
+  routine_row_rest: "Premor (s)",
   routine_row_rest_label: "Premor v sekundah",
   routine_row_load_label: "Breme",
   routine_row_remove: "Odstrani vajo iz rutine",
@@ -996,9 +997,9 @@ export const sl = {
   sync_hub_ahead_few: "{count} spremembe na tej napravi še niso v Google Drive.",
   sync_hub_ahead_other: "{count} sprememb na tej napravi še ni v Google Drive.",
   sync_hub_none: "Vse na tej napravi je že v Google Drive.",
-  sync_hub_cloud_unknown:
   sync_hub_not_connected:
     "Google Drive ni povezan, zato v Google Drive ni nobene kopije teh podatkov.",
+  sync_hub_cloud_unknown:
     "Vprašaj v glavi pomeni, da spremembe v Google Drive niso znane: ni povezan ali ni dosegljiv.",
   restore_invalid_file:
     "Ta datoteka ni varnostna kopija LibrePT. Na tej napravi se ni nič spremenilo. Izberi datoteko, ki jo je LibrePT naredil z »Izvozi JSON«.",

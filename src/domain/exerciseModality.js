@@ -171,6 +171,14 @@ export function modalityLabelKey(modality) {
   return MODALITY_LABEL_KEYS[modality] || MODALITY_LABEL_KEYS.strength;
 }
 
+// i18n key for the format a metric's field is typed in, or null when the number is the whole
+// answer. A time is typed as minutes and seconds, and a bare "20" reads as twenty seconds: a trainer
+// who meant twenty minutes found 0:20 in the plan (trainer weeks, 2026-10-10). The caption beside the
+// field names the format, in the plan editor and the routine builder alike.
+export function metricFormatHintKey(metric) {
+  return metric === "time" || metric === "hold" ? "metric_format_min_sec" : null;
+}
+
 // i18n key for a metric's short unit label. Callers do t(metricLabelKey(metric)).
 export function metricLabelKey(metric) {
   switch (metric) {

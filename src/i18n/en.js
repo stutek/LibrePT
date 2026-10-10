@@ -300,6 +300,7 @@ export const en = {
   reps_label: "reps",
   // Exercise modality metric labels (see exerciseModality.js) — the primary target unit per movement.
   metric_time: "time",
+  metric_format_min_sec: "min:s",
   metric_hold: "hold",
   metric_distance: "distance",
   metric_calories: "cal",
@@ -331,7 +332,7 @@ export const en = {
   routine_row_sets_label: "Sets quantity",
   routine_row_reps_label:
     "Primary target (reps, time, distance, or 'max' to failure — depends on the exercise's modality)",
-  routine_row_rest: "Rest",
+  routine_row_rest: "Rest (s)",
   routine_row_rest_label: "Rest duration in seconds",
   routine_row_load_label: "Load",
   routine_row_remove: "Remove exercise from routine",
@@ -1063,9 +1064,9 @@ export const en = {
   sync_hub_ahead_few: "{count} changes on this device are not yet in Google Drive.",
   sync_hub_ahead_other: "{count} changes on this device are not yet in Google Drive.",
   sync_hub_none: "Everything on this device is already in Google Drive.",
-  sync_hub_cloud_unknown:
   sync_hub_not_connected:
     "Google Drive is not connected, so no copy of this data is in Google Drive.",
+  sync_hub_cloud_unknown:
     "The ? in the header means the changes in Google Drive are not known: it is not connected or not reachable.",
   restore_invalid_file:
     "This file is not a LibrePT backup. Nothing on this device was changed. Choose the file that LibrePT made with “Export JSON”.",

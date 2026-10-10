@@ -159,3 +159,17 @@ test("an unknown metric falls back to reps", () => {
   assert.equal(m.metricLabelKey("unknown"), "reps_label");
   assert.equal(m.formatMetricValue(12, "unknown"), "12");
 });
+
+test("a field typed as minutes and seconds says so, in every language", () => {
+  // "20" in a time field is twenty seconds; a trainer who meant twenty minutes found 0:20 in the
+  // plan (trainer weeks, 2026-10-10). The field's caption names the format it reads.
+  for (const metric of ["time", "hold"]) {
+    const key = m.metricFormatHintKey(metric);
+    assert.ok(key, `${metric} has no format hint`);
+    for (const [lang, dictionary] of Object.entries(TRANSLATIONS)) {
+      assert.ok(dictionary[key], `${lang} has no text for ${key}`);
+    }
+  }
+  assert.equal(m.metricFormatHintKey("reps"), null);
+  assert.equal(m.metricFormatHintKey("distance"), null);
+});
