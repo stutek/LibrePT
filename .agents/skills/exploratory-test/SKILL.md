@@ -284,6 +284,19 @@ day as it ends, including rest days and work the app cannot carry. Label simulat
 estimated minutes; do not claim that seven real days elapsed. Continue after the first week when
 the requested time or token budget remains, reserving enough to save findings and close the browser.
 
+**What ten weeks at once taught (2026-10-10).** The run's prompts, the ranking and the reports are
+in `.private/exploratory-test/weeks/2026-10-10/`; reuse its `prompts/runner.md`. Four things:
+- **The data lives only in the browser.** The encrypted backup does not reach a file in this tool
+  (an open defect in TODO.md), so a lost browser is lost data. Start it with `EXPLORE_IDLE_MINUTES=40` and keep commands coming.
+- **The shifted clock is not the phone's clock.** `clock` shifts the page's `Date` only; background
+  workers keep the real time. Two weeks saw a repeating session miss its first day, and neither
+  reproduced on the real clock. Check anything about dates and series with `clock off` before
+  calling it a defect.
+- **Runners on one machine share `/tmp`.** One overwrote another's helper script, and commands went
+  to the wrong browser. A runner keeps its scripts in its own run folder.
+- **A cancelled runner leaves its files.** Resume it with the same prompt; it continues after the
+  last line of its `log.md`.
+
 **Tag vocabulary** (a day covers several; the ledger lists them so the next day can differ):
 `individualno`, `skupina`, `krožna-vadba`, `kardio`, `rehabilitacija`, `zunaj` (park, stranka doma),
 `več-lokacij`, `paket`, `plačilo`, `račun`, `odpoved`, `neprihod`, `rezervacija`, `opomnik`,
