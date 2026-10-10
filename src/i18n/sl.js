@@ -1144,6 +1144,10 @@ export const sl = {
   notif_seed_demo_title: "👋 LibrePT te pozdravlja",
   notif_seed_demo_desc:
     "Tukaj še ni ničesar shranjenega. Če želiš videti, kaj aplikacija zna, pritisni poglavje v spodnjem seznamu: to je vodeni ogled, ki pelje skozi zgodbo treh novih strank, od prvega povabila do treninga v telovadnici, in se začne pri poglavju, ki ga pritisneš. Če želiš preizkušati brez vodenja, pritisni Vstopi v peskovnik — to je ločena kopija aplikacije, kjer nič, kar narediš, ne spremeni zapisov, ki jih hraniš tukaj.",
+  notif_release_thanks_title: "Hvala, da si med prvimi",
+  notif_release_thanks_desc:
+    "LibrePT je brezplačen. Hvala, da ga uporabljaš že zdaj, in hvala za vsako sporočilo o tem, kar opaziš. Morda te bomo nekoč prosili za prostovoljen denarni prispevek. Če bo tako, bomo o tem najprej pisali tukaj.",
+  notif_release_thanks_close: "Zapri to sporočilo",
   notif_demo_mode_title: "⚠️ Predstavitveni način — naloženi vzorčni podatki",
   notif_demo_mode_desc:
     "Aplikacija deluje na vzorčnih strankah, rutinah in treningih. Počisti jih, preden jo uporabiš za resnično delo: čiščenje natančno našteje, kaj odstrani, in ohrani katalog vaj, tako da vse, kar si zgradil na njem, še naprej deluje.",

@@ -702,6 +702,9 @@ async function init() {
     // chapters come from the story script, which is a quarter of a megabyte the ordinary boot must
     // not wait for.
     storyChapters,
+    // The release thanks waits for the first-run questions the welcome screen asks: the language,
+    // then the terms. An accessor, because both are answered after this boot step has run.
+    isFirstRunAnswered: () => hasChosenLanguage(getState().lang) && !needsTermsAgreement(),
   });
 
   // After bootNotificationArea: the clipboard bar mounts into the notification area's handle bar,

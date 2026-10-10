@@ -1199,6 +1199,10 @@ export const de = {
   notif_seed_demo_title: "👋 Willkommen bei LibrePT",
   notif_seed_demo_desc:
     "Hier ist noch nichts gespeichert. Um zu sehen, was die App kann, tippe unten in der Liste auf ein Kapitel: Es ist eine geführte Tour, die drei neue Kunden von der ersten Einladung bis zu einem Training im Studio begleitet, und sie beginnt bei dem Kapitel, auf das du tippst. Um selbst etwas auszuprobieren, tippe auf Sandbox öffnen — eine getrennte Kopie der App, in der nichts, was du tust, die Einträge ändert, die du hier führst.",
+  notif_release_thanks_title: "Danke, dass du zu den Ersten gehörst",
+  notif_release_thanks_desc:
+    "LibrePT ist kostenlos. Danke, dass du LibrePT schon jetzt nutzt, und danke für jede Nachricht über das, was dir auffällt. Vielleicht bitten wir dich eines Tages um eine freiwillige Spende. Falls wir das tun, schreiben wir es zuerst hier.",
+  notif_release_thanks_close: "Diese Nachricht schließen",
   notif_demo_mode_title: "⚠️ Demomodus — Beispieldaten geladen",
   notif_demo_mode_desc:
     "Diese App läuft mit Beispielkunden, -routinen und -trainings. Lösche sie, bevor du sie für echte Arbeit nutzt: Das Löschen listet genau auf, was es entfernt, und behält den Übungskatalog, damit alles, was du darauf aufgebaut hast, weiter funktioniert.",

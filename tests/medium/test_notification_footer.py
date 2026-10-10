@@ -20,10 +20,13 @@ from tests.medium._harness import load_with_stub
 pytestmark = pytest.mark.clean_start
 
 
-def stub(state_js):
+def stub(state_js, first_run_answered=False, lang="en"):
     """Mount the feed over a given database. Both feed actions that change something are RECORDED
     rather than performed — seeding writes the whole demo dataset and reloads the page, navigation
-    closes the drawer — so a test can ask which one a tap reached without the tap ending the test."""
+    closes the drawer — so a test can ask which one a tap reached without the tap ending the test.
+
+    `first_run_answered` is what app.js answers from the stored language and terms; it is off by
+    default, as on a device that has not been through the welcome screen yet."""
     return f"""
 import {{ bootNotificationArea }} from './appBoot.js';
 import {{ renderNotificationArea }} from './modules/common/notificationArea.js';
@@ -31,7 +34,7 @@ import {{ escapeHTML }} from './modules/common/utils.js';
 import {{ TRANSLATIONS }} from './i18n/index.js';
 import {{ DEFAULT_MESSAGES }} from './data/messages.js';
 
-const t = (key) => TRANSLATIONS.en[key] || key;
+const t = (key) => TRANSLATIONS.{lang}[key] || key;
 const state = {state_js};
 
 window.__navigated = [];
@@ -55,6 +58,7 @@ bootNotificationArea({{
     {{ id: 'evening', titleKey: 'story_chapter_evening' }},
   ],
   enterSandbox: () => {{ window.__sandboxEntered += 1; }},
+  isFirstRunAnswered: () => {"true" if first_run_answered else "false"},
 }});
 renderNotificationArea();
 """
@@ -326,3 +330,83 @@ def test_the_destructive_action_is_not_thumb_adjacent_to_the_one_you_want(
         # stacked at the default 8px gap is no better than side by side at 8px.
         gap = reset["y"] - (walkthrough["y"] + walkthrough["height"])
         assert gap >= 10, f"only {gap}px between them when stacked"
+
+
+# The thanks to early adopters, shown once per release (asked for 2026-10-10). A release is an app
+# version (data/appVersions.js); which device states show it is pinned in
+# tests/unit_js/domain/notificationItems.test.mjs, and these are the promises of the rendered card.
+RELEASE_THANKS = ".notification-card.release-thanks"
+# The key the closure is stored under. Read by name because it is a persisted format: a later build
+# compares its own release against the value an earlier build wrote here.
+RELEASE_THANKS_KEY = "librept_release_thanks_closed"
+THIS_RELEASE = """async () => {
+    const versions = await import(new URL('data/appVersions.js', document.baseURI).href);
+    return versions.defaultAppVersion().id;
+}"""
+DICTIONARY_WORDS = """async (lang) => {
+    const { TRANSLATIONS } = await import(new URL('i18n/index.js', document.baseURI).href);
+    const words = TRANSLATIONS[lang];
+    return [words.notif_release_thanks_title, words.notif_release_thanks_desc,
+            words.notif_release_thanks_close];
+}"""
+
+
+def reload_feed(page):
+    """A reload is what a deploy within the same version does to an open app: new files, same
+    release. The stub is served again by the route `load_with_stub` registered, and the static splash
+    comes back with the page, so it is dropped again for the same reason."""
+    page.reload()
+    page.evaluate("() => document.getElementById('app-splash')?.remove()")
+    page.wait_for_selector("#notification-area")
+    expand_feed(page)
+
+
+def test_the_release_thanks_waits_for_the_first_run_questions(page, local_server):
+    load_with_stub(page, local_server, stub(REAL_GYM))
+    page.wait_for_selector("#notification-area")
+    expand_feed(page)
+
+    assert page.locator(RELEASE_THANKS).count() == 0
+
+
+@pytest.mark.parametrize("lang", ["sl", "en", "de"])
+def test_the_release_thanks_is_worded_from_the_dictionary(page, local_server, lang):
+    load_with_stub(page, local_server, stub(REAL_GYM, first_run_answered=True, lang=lang))
+    page.wait_for_selector("#notification-area")
+    expand_feed(page)
+    title, desc, close = page.evaluate(DICTIONARY_WORDS, lang)
+
+    card = page.locator(RELEASE_THANKS)
+    assert card.count() == 1
+    assert card.locator(".notification-card-title").evaluate("el => el.textContent").strip() == title
+    assert card.locator(".notification-card-desc").evaluate("el => el.textContent") == desc
+    assert card.get_by_role("button", name=close).is_visible()
+    # No mechanics yet: nothing in the card leaves the app or pretends to take a payment.
+    assert card.locator("a[href]").count() == 0
+    assert card.locator("button").count() == 1
+
+
+def test_closing_the_release_thanks_holds_across_a_deploy_of_the_same_release(
+    page, local_server
+):
+    load_with_stub(page, local_server, stub(REAL_GYM, first_run_answered=True))
+    page.wait_for_selector("#notification-area")
+    expand_feed(page)
+
+    page.locator(RELEASE_THANKS).get_by_role("button", name="Close this message").click()
+    assert page.locator(RELEASE_THANKS).count() == 0, "the card goes when it is closed"
+    stored = page.evaluate(f"() => localStorage.getItem('{RELEASE_THANKS_KEY}')")
+    assert stored == page.evaluate(THIS_RELEASE), "the closure names the release, not the build"
+
+    reload_feed(page)
+    assert page.locator(RELEASE_THANKS).count() == 0
+
+
+def test_a_new_release_brings_the_thanks_back(page, local_server):
+    # Closed on a release before this one: the device has since moved to a newer app version.
+    page.add_init_script(f"localStorage.setItem('{RELEASE_THANKS_KEY}', '2026-10');")
+    load_with_stub(page, local_server, stub(REAL_GYM, first_run_answered=True))
+    page.wait_for_selector("#notification-area")
+    expand_feed(page)
+
+    assert page.locator(RELEASE_THANKS).count() == 1

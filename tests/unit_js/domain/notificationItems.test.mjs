@@ -20,6 +20,7 @@ import {
   buildCrashReportItem,
   buildEscapedTestDataItem,
   buildPendingSessionsItem,
+  buildReleaseThanksItem,
   buildRsvpAnswersItem,
   buildUnscheduledPlansItem,
   resolveNotificationItems,
@@ -660,5 +661,43 @@ test("a reason a record is kept is a dictionary code, worded in all three langua
       assert.ok(TRANSLATIONS[lang][reason], `${lang} words ${reason}`);
     }
     assert.doesNotMatch(TRANSLATIONS.sl[reason], /record|created|depends/i);
+  }
+});
+
+// The thanks to early adopters (asked for 2026-10-10): once per release, closed by the trainer. A
+// release is the app version a device runs when it never chose one; a deploy within that version is
+// a patch, and the closure must survive it. This function cannot get that wrong: the only fact about
+// the build it is given is the release id.
+const ANSWERED = { releaseId: "2026-11", firstRunAnswered: true };
+
+test("the release thanks is shown once the first-run questions are answered", () => {
+  const item = buildReleaseThanksItem(t, ANSWERED);
+  assert.equal(item.title, "[notif_release_thanks_title]");
+  assert.match(item.description, /^\[notif_release_thanks_desc\]/);
+  assert.equal(item.closeLabel, "[notif_release_thanks_close]");
+});
+
+test("the release thanks waits until the first-run questions are answered", () => {
+  assert.equal(buildReleaseThanksItem(t, { ...ANSWERED, firstRunAnswered: false }), null);
+});
+
+test("the release thanks is not shown beside the welcome card or in the sandbox", () => {
+  assert.equal(buildReleaseThanksItem(t, { ...ANSWERED, emptyApp: true }), null, "the welcome card's place");
+  assert.equal(buildReleaseThanksItem(t, { ...ANSWERED, sandbox: true }), null);
+});
+
+test("closing the release thanks holds for that release and for no other", () => {
+  assert.equal(buildReleaseThanksItem(t, { ...ANSWERED, closedRelease: "2026-11" }), null);
+  assert.ok(buildReleaseThanksItem(t, { ...ANSWERED, closedRelease: "2026-10" }));
+});
+
+test("the release thanks is worded in all three languages", () => {
+  const keys = [
+    "notif_release_thanks_title",
+    "notif_release_thanks_desc",
+    "notif_release_thanks_close",
+  ];
+  for (const lang of ["en", "sl", "de"]) {
+    for (const key of keys) assert.ok(TRANSLATIONS[lang][key], `${lang} words ${key}`);
   }
 });

@@ -265,6 +265,38 @@ export function buildCrashReportItem(crashes, t, repoUrl) {
   };
 }
 
+/**
+ * The thanks to early adopters, once per release (asked for 2026-10-10, Simon). It says that the app
+ * is free and that we may one day ask for a voluntary donation, and that the ask would appear here
+ * first. It carries no link, no amount and no button that donates: there is nothing to pay.
+ *
+ * A release is an app version (data/appVersions.js), not a deploy. The caller passes the id of the
+ * release and the id of the release whose thanks the trainer closed, and nothing else about the
+ * build, so a new commit within the same version cannot bring the card back.
+ *
+ * Not shown while the first-run questions (language, terms) are unanswered, and not on an empty app,
+ * where the welcome card is the only card: a trainer meets the welcome first. Not shown in the
+ * sandbox either, as the welcome card is not: the sandbox's own card says what the sandbox is, and
+ * the trainer reads this message in their own workspace.
+ *
+ * Kept out of the feed's item list on purpose: it is not news and not work, so it counts toward no
+ * unread number and "mark all as read" does not remove it. Only its own close button does.
+ */
+export function buildReleaseThanksItem(
+  t,
+  { releaseId, closedRelease = null, firstRunAnswered = false, sandbox = false, emptyApp = false },
+) {
+  if (!releaseId || !firstRunAnswered || sandbox || emptyApp) return null;
+  if (closedRelease === releaseId) return null;
+  return {
+    id: `release-thanks-${releaseId}`,
+    icon: "fa-solid fa-comment-dots",
+    title: t("notif_release_thanks_title"),
+    description: t("notif_release_thanks_desc"),
+    closeLabel: t("notif_release_thanks_close"),
+  };
+}
+
 // The two stored types that report the same kind of news — who is coming and who is not — and so
 // belong on one card rather than one each. An evening where three clients rearrange
 // used to push everything else off a phone screen.

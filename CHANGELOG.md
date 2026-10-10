@@ -18,6 +18,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-10-10 — A thank-you once per release
+
+### Added
+
+- **The notification drawer thanks early adopters once per release.** The card says that LibrePT
+  is free, thanks the trainer for using it this early, and says that if we ever ask for a voluntary
+  donation, the ask will appear here first. It has no link, no amount and no payment button.
+  *Close this message* removes it until the next app version; a deploy within the same version does
+  not show it again. It appears after the language and the terms are answered, never beside the
+  welcome card of an empty app and never in the sandbox. *Mark all as read* does not remove it, and
+  it is not counted as unread.
+
 ## 2026-09-30 — Namesakes, and what the sandbox promises
 
 ### Added

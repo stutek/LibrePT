@@ -1216,6 +1216,10 @@ export const en = {
   notif_seed_demo_title: "👋 Welcome to LibrePT",
   notif_seed_demo_desc:
     "Nothing is saved here yet. To see what the app does, tap a chapter in the list below: it is a guided tour that follows three new clients, from the first invitation to a session in the gym, and it starts at the chapter you tap. To try things for yourself, tap Enter the sandbox — a separate copy of the app, where nothing you do changes the records you keep here.",
+  notif_release_thanks_title: "Thank you for being one of the first",
+  notif_release_thanks_desc:
+    "LibrePT is free. Thank you for using it this early, and for every message about what you notice. Some day we may ask for a voluntary donation. If we do, we will write about it here first.",
+  notif_release_thanks_close: "Close this message",
   notif_demo_mode_title: "⚠️ Demo mode — sample data loaded",
   notif_demo_mode_desc:
     "This app is running on sample clients, routines and sessions. Clear them before you use it for real work: clearing lists exactly what it removes and keeps the movement catalog, so anything you have built on top of it keeps working.",
