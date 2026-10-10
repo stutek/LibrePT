@@ -682,7 +682,11 @@ test("the release thanks waits until the first-run questions are answered", () =
 });
 
 test("the release thanks is not shown beside the welcome card or in the sandbox", () => {
-  assert.equal(buildReleaseThanksItem(t, { ...ANSWERED, emptyApp: true }), null, "the welcome card's place");
+  assert.equal(
+    buildReleaseThanksItem(t, { ...ANSWERED, emptyApp: true }),
+    null,
+    "the welcome card's place",
+  );
   assert.equal(buildReleaseThanksItem(t, { ...ANSWERED, sandbox: true }), null);
 });
 

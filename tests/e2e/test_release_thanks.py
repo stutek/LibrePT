@@ -34,7 +34,9 @@ def test_a_closed_thanks_stays_closed_after_a_reload(page, local_server):
     page.goto(local_server)
     page.wait_for_selector("#view-clients.active")
     open_drawer(page)
-    page.locator(RELEASE_THANKS).get_by_role("button", name="Close this message").click()
+    page.locator(RELEASE_THANKS).get_by_role(
+        "button", name="Close this message"
+    ).click()
     page.wait_for_selector(RELEASE_THANKS, state="detached")
 
     page.reload()

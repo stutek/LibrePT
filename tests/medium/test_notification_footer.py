@@ -371,15 +371,24 @@ def test_the_release_thanks_waits_for_the_first_run_questions(page, local_server
 
 @pytest.mark.parametrize("lang", ["sl", "en", "de"])
 def test_the_release_thanks_is_worded_from_the_dictionary(page, local_server, lang):
-    load_with_stub(page, local_server, stub(REAL_GYM, first_run_answered=True, lang=lang))
+    load_with_stub(
+        page, local_server, stub(REAL_GYM, first_run_answered=True, lang=lang)
+    )
     page.wait_for_selector("#notification-area")
     expand_feed(page)
     title, desc, close = page.evaluate(DICTIONARY_WORDS, lang)
 
     card = page.locator(RELEASE_THANKS)
     assert card.count() == 1
-    assert card.locator(".notification-card-title").evaluate("el => el.textContent").strip() == title
-    assert card.locator(".notification-card-desc").evaluate("el => el.textContent") == desc
+    assert (
+        card.locator(".notification-card-title")
+        .evaluate("el => el.textContent")
+        .strip()
+        == title
+    )
+    assert (
+        card.locator(".notification-card-desc").evaluate("el => el.textContent") == desc
+    )
     assert card.get_by_role("button", name=close).is_visible()
     # No mechanics yet: nothing in the card leaves the app or pretends to take a payment.
     assert card.locator("a[href]").count() == 0
@@ -393,10 +402,14 @@ def test_closing_the_release_thanks_holds_across_a_deploy_of_the_same_release(
     page.wait_for_selector("#notification-area")
     expand_feed(page)
 
-    page.locator(RELEASE_THANKS).get_by_role("button", name="Close this message").click()
+    page.locator(RELEASE_THANKS).get_by_role(
+        "button", name="Close this message"
+    ).click()
     assert page.locator(RELEASE_THANKS).count() == 0, "the card goes when it is closed"
     stored = page.evaluate(f"() => localStorage.getItem('{RELEASE_THANKS_KEY}')")
-    assert stored == page.evaluate(THIS_RELEASE), "the closure names the release, not the build"
+    assert stored == page.evaluate(THIS_RELEASE), (
+        "the closure names the release, not the build"
+    )
 
     reload_feed(page)
     assert page.locator(RELEASE_THANKS).count() == 0
