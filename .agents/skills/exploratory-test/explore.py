@@ -280,6 +280,58 @@ def set_clock(pg, when):
     print("page time:", pg.evaluate("() => new Date().toString()"))
 
 
+def download(pg, selector, dest):
+    """Tap a control that hands the trainer a file, and save the file at `dest`.
+
+    Playwright's download handling works only in a context Playwright created, and this browser's
+    window is Chrome's own incognito context: every download was cancelled ("Download.save_as:
+    canceled"), and Chrome refuses a DevTools grant for that context too ("Failed to find browser
+    context"). Ten week runners on 2026-10-10 could not keep one backup and took it for the app's
+    fault. So the file is caught in the page: every Blob the page makes a URL for is remembered,
+    and a click on a link with `download` hands its Blob back here instead of to the browser. What
+    is saved is exactly what the app produced.
+    """
+    pg.evaluate(CATCH_DOWNLOAD)
+    pg.locator(selector).first.click()
+    caught = None
+    for _ in range(80):  # 20 seconds
+        caught = pg.evaluate("() => window.__exploreDownload || null")
+        if caught:
+            break
+        pg.wait_for_timeout(250)
+    if not caught:
+        print(
+            "no file came within 20 s; `dialog` shows whether the app asked for something first"
+        )
+        return
+    target = Path(dest) if dest else Path("/tmp") / (caught["name"] or "download")
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(caught["text"], encoding="utf-8")
+    print("downloaded:", caught["name"], f"({target.stat().st_size} bytes) ->", target)
+
+
+CATCH_DOWNLOAD = """() => {
+  window.__exploreDownload = null;
+  if (window.__exploreCatching) return;
+  window.__exploreCatching = true;
+  const blobs = new Map();
+  const make = URL.createObjectURL.bind(URL);
+  URL.createObjectURL = (obj) => { const url = make(obj); blobs.set(url, obj); return url; };
+  const take = (a) => {
+    const blob = blobs.get(a.href);
+    if (!blob || !a.hasAttribute('download')) return false;
+    blob.text().then((text) => { window.__exploreDownload = { name: a.download, text }; });
+    return true;
+  };
+  const click = HTMLAnchorElement.prototype.click;
+  HTMLAnchorElement.prototype.click = function () { if (!take(this)) click.call(this); };
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest && e.target.closest('a[download]');
+    if (a && take(a)) e.preventDefault();
+  }, true);
+}"""
+
+
 def page(pw):
     if not alive():
         sys.exit("no browser: run `start` first")
@@ -429,13 +481,7 @@ def main(argv):  # noqa: C901 — see below
         elif (
             cmd == "download"
         ):  # a control that hands the trainer a file: save it and say what came
-            with pg.expect_download(timeout=20000) as info:
-                pg.locator(args[0]).first.click()
-            dl = info.value
-            dest = args[1] if len(args) > 1 else f"/tmp/{dl.suggested_filename}"
-            dl.save_as(dest)
-            print("downloaded:", dl.suggested_filename, "->", dest)
-            return
+            return download(pg, args[0], args[1] if len(args) > 1 else None)
         elif (
             cmd == "offline"
         ):  # the gym basement with no signal, which the app promises to survive
