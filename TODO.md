@@ -6667,6 +6667,12 @@ od kod (zadnja kopija v datoteki, Google Drive); koliko stane, da je na novem te
 kopije (§80.136); kaj se zgodi s podatki strank na ukradenem telefonu, med njimi z zdravstvenimi
 opombami (§97), in ali lahko trener ukradenemu telefonu odvzame dostop do Drive.
 
+**Različica ukradenega telefona: medtem je prišla nova različica aplikacije** (Simon, 2026-10-10).
+Ukradeni telefon je delal na sproščeni shemi, kopija je v njeni obliki; nov telefon odpre aplikacijo,
+ki že bere novejšo shemo. Preizkus odgovori, ali obnovitev prenese vse in kaj trener vidi. Orodje to
+posnema z izbiro sheme, ki jo naprava bere (`librept_read_schema`): telefon A na `6`, telefon B na
+`PREVIEW` (preverjeno 2026-10-10: na `166d3c8` sta živi `6` in `PREVIEW`, privzeta je `6`).
+
 **Dve napravi.** Trener zvečer na računalniku sestavi načrte za teden, zjutraj na telefonu vodi
 trening. Preizkus odgovori: kako načrti pridejo na telefon (sinhronizacija, datoteka); kaj se zgodi,
 če isti načrt uredi na obeh; ali je urejanje na širokem zaslonu sploh udobno (aplikacija je stolpec
@@ -6699,3 +6705,29 @@ zato sestavljanje načrtov ni lažje kot na telefonu (F-s02-02).
 **Presoja:** združevanje naprav brez Drive in širok zaslon za načrte sta odločitvi o izdelku: **čaka
 na Simona**. Izplača se takoj: opozorilo pred uvozom, ki našteje, kaj se zamenja (F-s02-04), in
 §80.212.
+
+## 108. [ ] Kaj iz tednov trenerjev avtomatizirati — predlogi, čakajo na Simona
+
+**Vprašal Simon 2026-10-10.** Teden trenerja (§88.19, §107.1) je raziskovalni preizkus: podagent brez
+konteksta živi izmišljen teden z aplikacijo. Kot celota v gate ne sodi: en teden stane okoli 200 000
+žetonov in eno do dve uri, dva teka istega tedna najdeta različno, in polovico ugotovitev mora
+orkestrator ponoviti, preden kaj pomenijo. Kar je v njem določljivo, pa se da izluščiti. Predlogi,
+po vrednosti:
+
+1. **Potrjene ugotovitve postanejo testi v gatu.** Brskalniški test (Playwright v svojih kontekstih
+   prenose sprejema) za: obnovitev iz kopije v drugem kontekstu, tudi s sheme `6` na `PREVIEW`
+   (§107); prestavitev termina z načrtom iz beležke (§80.209); stavek o Google Drive na napravi brez
+   Drive (§80.212); enoto pri polju za čas (§80.200). Napisan test ostane, ko teden odide.
+2. **`explore.py selftest`**: preden se požene več tekačev, orodje preveri samo sebe: dva brskalnika
+   hkrati, `clock`, `download`, `upload`, `offline`. Deset tednov je 2026-10-10 izgubilo podatke, ker
+   `download` ni deloval, in to so imeli za napako aplikacije.
+3. **Dnevnik ukazov po vratih**: `explore.py` vsak ukaz z uro zapiše v datoteko svojega brskalnika.
+   Orkestrator potem točno ponovi, kar je tekač naredil; ponavljanje je bilo 2026-10-10 najdražji del
+   presoje.
+4. **Navodila tekaču v veščino.** `runner.md` in `scenario.md` sta zdaj v `.private/`, ki ga drugi
+   agenti ne vidijo; v `.agents/skills/exploratory-test/` ju dobi vsak, ki naslednjič požene teden.
+5. **Skript za pripravo teka**: mape, seznam znanih napak iz TODO.md, kopija na vejo. Presoja
+   ugotovitev ostane ročna.
+
+**Ne avtomatizirati:** samega tedna z jezikovnim modelom v CI. Je drag, počasen in vsakič drugačen;
+njegova vrednost je, da najde, česar nihče ni pričakoval, in to se ne ponovi na ukaz.
