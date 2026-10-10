@@ -82,3 +82,5 @@ Updated by the orchestrator after every step.
 - 2026-10-10 15:18 — Simon asked to test the two new scenarios (TODO §107). `download` fixed
   (96fa7bb): backups reach a file. Runs s01 (stolen phone, from r01's week, ports 9381/9382) and s02
   (computer and phone, from r06's week, ports 9383/9384), prompt `prompts/scenario.md`.
+- 2026-10-10 16:36 — **scenarios done**: s01 13 findings, s02 9; judged into §107.1, §80.212 and
+  evidence lines (7165e43). All browsers stopped. PR #6 carries everything.
