@@ -41,8 +41,18 @@ Updated by the orchestrator after every step.
 
 - 2026-10-10 04:46 — tooling committed on `feat/week-trials` (09b248d): `EXPLORE_PORT`, `clock`.
   Phase 1 not started.
-- 2026-10-10 05:00 — **phase 1 done**: 10 batches, 100 weeks, every end marker present, ~85,000
+- 2026-10-10 04:57 — **phase 1 done**: 10 batches, 100 weeks, every end marker present, ~85,000
   words. Batches 06 and 10 report a few numeric slips; the ranking will see them. Phase 2 started.
+- 2026-10-10 05:06 — **phase 2 done**: rank-A and rank-B, 100 rows (37 × 5, 47 × 4, 16 × 3).
+  **Phase 2b done**: `rank/selection.md`, ten weeks copied to `runs/r01..r10/week.md`.
+  `known.md` lists 35 open §80 defects and 16 open §88 gaps. Phase 3 starts with r01–r03 on ports
+  9361–9363; waves of three: r01–r03, r04–r06, r07–r09, r10.
+- 2026-10-10 05:07–06:06 — wave 1 ran until Simon's messages cancelled it: r01 to Tuesday
+  (11 findings), r02 to Wednesday (6), r03 87 log lines and no findings file. 09:27 — wave 1
+  relaunched to resume from its files.
+- Side work: TODO §105 (homework) and §106 (donation card). §106 was asked as a record only; an
+  agent built it anyway on `feat/release-thanks` (no PR, gate red on the demo story). Continue it
+  only after phase 4, and never while runners hold the CPU.
 
 ## Decisions taken
 
@@ -56,7 +66,3 @@ Updated by the orchestrator after every step.
 - **Three runners at a time.** The machine has two cores, and each runner holds a browser.
 - **The app's clock is shifted** to the simulated day (`explore.py clock`), so Monday's sessions
   happen on a Monday as the app sees it.
-- 2026-10-10 05:20 — **phase 2 done**: rank-A and rank-B, 100 rows (37 × 5, 47 × 4, 16 × 3).
-  **Phase 2b done**: `rank/selection.md`, ten weeks copied to `runs/r01..r10/week.md`.
-  `known.md` lists 35 open §80 defects and 16 open §88 gaps. Phase 3 starts with r01–r03 on ports
-  9361–9363; waves of three: r01–r03, r04–r06, r07–r09, r10.
