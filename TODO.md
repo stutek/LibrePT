@@ -6350,4 +6350,9 @@ pove, da bomo morda nekoč prosili za prostovoljen prispevek. Načina plačila �
 prekinilo trening. Po zaprtju se ne vrne do naslednje različice. Ne pokaže se, dokler trener ni
 odgovoril na uvodna vprašanja ob prvem zagonu.
 
-**Stanje:** v delu, 2026-10-10.
+**Stanje 2026-10-10:** Simon je želel zapis; izvedba je dovoljena, ni pa naročena. Izdelano je na veji
+`feat/release-thanks` (`205ebd1`, ključ `librept_release_thanks_closed` hrani različico, ob kateri je
+trener kartico zaprl), brez zahteve za združitev. Gate je trikrat padel; zadnjič na
+`test_demo_story.py::test_the_whole_story_can_be_walked_in_slovenian` (vodič obstane na koraku 36,
+»Pritisni trening Skupinska moč in kondicija«). Ni preverjeno, ali padec povzroči kartica ali
+obremenjen stroj. Nadaljuje se po raziskovalnem testiranju tedna.
