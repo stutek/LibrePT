@@ -56,3 +56,7 @@ Updated by the orchestrator after every step.
 - **Three runners at a time.** The machine has two cores, and each runner holds a browser.
 - **The app's clock is shifted** to the simulated day (`explore.py clock`), so Monday's sessions
   happen on a Monday as the app sees it.
+- 2026-10-10 05:20 — **phase 2 done**: rank-A and rank-B, 100 rows (37 × 5, 47 × 4, 16 × 3).
+  **Phase 2b done**: `rank/selection.md`, ten weeks copied to `runs/r01..r10/week.md`.
+  `known.md` lists 35 open §80 defects and 16 open §88 gaps. Phase 3 starts with r01–r03 on ports
+  9361–9363; waves of three: r01–r03, r04–r06, r07–r09, r10.
