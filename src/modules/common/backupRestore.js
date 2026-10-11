@@ -18,10 +18,7 @@
 //   getState(),
 //   setState(newState),
 //   saveToLocalStorage(),
-//   renderClientsList(),
-//   renderRoutinesList(),
-//   renderExercisesList(),
-//   populateDropdownSelectors(),
+//   renderEverything(),          // every view a restore replaces: the schedule, the lists, the badges
 //   openEncryptedFileReader(),   // the dialog's "Open an encrypted file" card
 //   t
 // }
@@ -82,6 +79,10 @@ async function applyRestoredState(restored) {
   deps.saveToLocalStorage();
   pendingRestore = null;
   confirmedRestore = false;
+  // Everything, not a list of views: a restore replaces the whole database. Four named lists were
+  // redrawn here and the schedule was not, so a new phone said "Uvoz je uspel." over an empty
+  // schedule until a reload (stolen-phone trial, 2026-10-11).
+  deps.renderEverything();
   return reErased;
 }
 
@@ -484,10 +485,6 @@ export function setupBackupRestore() {
       const box = document.getElementById("restore-confirm");
       if (box) box.hidden = true;
       renderImportSuccess(summary, reErased);
-      deps.renderClientsList();
-      deps.renderRoutinesList();
-      deps.renderExercisesList();
-      deps.populateDropdownSelectors();
     });
   }
 
@@ -622,13 +619,6 @@ export function setupBackupRestore() {
               return;
             }
             const reErased = await applyRestoredState(restored);
-
-            // Re-render
-            deps.renderClientsList();
-            deps.renderRoutinesList();
-            deps.renderExercisesList();
-            deps.populateDropdownSelectors();
-
             if (importStatus) {
               importStatus.textContent = importSuccessText(
                 summary.applied.length > 0,

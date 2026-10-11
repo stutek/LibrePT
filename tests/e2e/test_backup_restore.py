@@ -11,6 +11,7 @@ import json
 from pathlib import Path
 
 import pytest
+from playwright.sync_api import expect
 
 from tests.conftest import current_schema_version, baseline_schema_version
 
@@ -263,6 +264,19 @@ def test_a_restore_over_existing_data_asks_before_replacing(page, local_server):
         "#btn-backup-export"
     ).count() else None
     assert page.locator("#restore-confirm:not([hidden])").count() == 0
+
+
+def test_the_schedule_shows_the_restored_sessions_without_a_reload(page, local_server):
+    """A restore replaced the database and redrew only the lists, so the schedule kept the replaced
+    sessions — or, on a new phone, stayed empty under "Uvoz je uspel." until a reload. A trainer
+    who restores after a stolen phone reads that as a failed restore (trial s03, 2026-10-11)."""
+    page.goto(local_server)
+    page.wait_for_selector(".session-card")
+
+    _import(page, CURRENT_BACKUP)
+
+    assert _state(page)["sessions"] == []
+    expect(page.locator(".session-card")).to_have_count(0)
 
 
 def test_the_replace_prompt_names_what_would_be_lost(page, local_server):
