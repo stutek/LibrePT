@@ -4860,6 +4860,99 @@ ga je mislil kot »prebrano«. Uničujoče dejanje brez vprašanja.
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80212-x-p2--okno-za-kopije-šteje-samo-google-drive-vse-je-že-v-google-drive-brez-drive-ogroženo-po-izvozu-v-datoteko--popravljeno-2026-10-10).
 
+### 80.213 [ ] P2 — Navadna opomba med vadbo postane »opozorilo«, ki čaka na pregled
+
+**Scenarij in koraki:** med vadbo »Opombe« → vpis pohvale ali podatka (»Dober napredek«, »Tehtanje
+98,2 kg«, »Samo opomba, brez ocene«) → edini gumb »Zapiši opozorilo«.
+
+**Opaženo:** opomba pride med »Treningi, ki čakajo na pregled«, vajo obarva rdeče in dobi neprebrano
+obvestilo; brez kljukice »Shrani to v kartoteko stranke« se v zgodovini stranke ne pokaže (F-r15-16);
+gumba za izbris ni (F-r16-17).
+
+**Težava in vpliv:** trener ne more zapisati navadne opombe, ne da bi si ustvaril delo za pregled; pet
+tednov od šestih je zato opombe pisal drugam ali pregled razreševal po vsakem treningu.
+
+**Predlog:** ločiti »opombo« od »opozorila«: opomba se zapiše in ne čaka na nič. To spremeni okno,
+zato **čaka na Simona** — opaženo 2026-10-11 na različici `55345d2`, tedni r11, r12, r13, r15, r16
+(F-r11-06, F-r12-05, F-r13-05, F-r15-03, F-r16-17); orkestrator ni ponovil.
+
+### 80.214 [ ] P2 — Število v polju za čas se prebere kot sekunde: »15« je »0:15«
+
+**Scenarij in koraki:** urejanje načrta → vaja s časom (drža, hoja, počitek) → vpis »15« ali »10«,
+mišljeno v minutah.
+
+**Opaženo:** kartica pokaže »S3 × 0:15« ali »1×0:10«; počitek 15 minut se da vpisati le kot
+»Počitek 900s«; kolo iz kataloga pokaže »S1 × 10 W« (F-r11-02).
+
+**Težava in vpliv:** napačno trajanje vaje na kartici, ki jo trener bere med vadbo; trije tedni so
+vajo preimenovali ali čas vpisali v opombo.
+
+**Predlog:** polje pove enoto in sprejme »15 min« — opaženo 2026-10-11 na različici `55345d2`, tedni
+r12, r15, r16 (F-r12-16, F-r15-13, F-r16-09); blizu §80.208, ki je enote popravil le delno;
+orkestrator ni ponovil.
+
+### 80.215 [ ] P2 — Gumb »Shrani« ostane pod drugim elementom: pod poljem obrazca ali pod vrstico aktivnega treninga
+
+**Scenarij in koraki:** »Dodaj stranko« → izpolnjena »Opombe« ali »Cilji« → »Shrani«; ali obrazec za
+nov termin, medtem ko spodaj teče aktiven trening.
+
+**Opaženo:** tap na »Shrani« ne zadene gumba; v središču za kopije enako »Zapri« (F-r16-26). Pri
+F-r14-08 je zelena vrstica aktivnega treninga ležala čez »Shrani« novega termina.
+
+**Težava in vpliv:** trener ne more shraniti obrazca, ki ga je izpolnil.
+
+**Predlog:** preveriti s `document.elementFromPoint`, ali je to aplikacija ali orodje (skill: »intercepts
+pointer events«) — opaženo 2026-10-11 na različici `55345d2`, tedni r13, r14, r16 (F-r13-02, F-r14-08,
+F-r16-26); blizu §80.164; orkestrator ni ponovil.
+
+### 80.216 [ ] P3 — Za bolečino v trebuhu ali v mišici je edina izbira »Bolečina ali nelagodje v sklepu«
+
+**Scenarij in koraki:** med vadbo »Opombe« → izbira vrste opozorila za nosečnico z bolečino v trebuhu
+(F-r11-12) ali za mišico (F-r13-17).
+
+**Opaženo:** edina vrsta bolečine je »Bolečina ali nelagodje v sklepu«; zapis nosi ime odprte vaje,
+ne vadbe.
+
+**Težava in vpliv:** zapis o zdravju je napačen in ga kasneje bere kdo drug narobe.
+
+**Predlog:** splošna izbira »Bolečina ali nelagodje« z mestom — opaženo 2026-10-11 na različici
+`55345d2`, tedna r11 in r13; orkestrator ni ponovil.
+
+### 80.217 [ ] P2 — Zaključek vadbe se včasih ne shrani: termin ostane »Aktiven trening -08h 27m« — nepreverjeno
+
+**Scenarij in koraki:** »Zaključi vadbo« → »Zaključi zdaj«, osemkrat v tednu.
+
+**Opaženo:** v štirih od osmih poskusov je termin ostal »Aktiven trening«; seznam je pokazal
+negativen čas »Aktiven trening -08h 27m«.
+
+**Težava in vpliv:** trening ni v zgodovini, trener pa misli, da je.
+
+**Predlog:** ponoviti z `clock off`: ura je bila premaknjena, in skill pravi, da to vpliva na ozadje —
+opaženo 2026-10-11 na različici `55345d2`, teden r12 (F-r12-13, F-r12-22).
+
+### 80.218 [ ] P3 — Središče za kopije hkrati piše »še niso šifrirane« in »Izvoženo in šifrirano«
+
+**Scenarij in koraki:** središče za kopije po izvozu šifrirane kopije, ko geslo ni zapomnjeno na
+napravi.
+
+**Opaženo:** obe vrstici hkrati (F-r16-07).
+
+**Težava in vpliv:** trener ne ve, ali je kopija šifrirana.
+
+**Predlog:** vrstica o stanju pove, kaj velja za naslednji izvoz (»vprašam za geslo«) — opaženo
+2026-10-11 na različici `55345d2`, teden r16; orkestrator ni ponovil.
+
+### 80.219 [ ] P3 — Okno »Ta termin se prekriva z nečim, kar že imaš« ne pove, s čim
+
+**Scenarij in koraki:** nov termin ob času, ko je že drug termin → »Shrani«.
+
+**Opaženo:** okno ne imenuje drugega termina; »Vseeno razporedi« se ob tapu po besedilu ni odzval.
+
+**Težava in vpliv:** trener ugiba, kateri termin je v napoti.
+
+**Predlog:** okno imenuje termin, uro in stranko — opaženo 2026-10-11 na različici `55345d2`, teden r13
+(F-r13-11); orkestrator ni ponovil.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
@@ -5454,6 +5547,76 @@ termini) je po trenerjevih besedah lahko posledica njegovih prekinjenih ukazov. 
 vsaj enkrat izgubilo podatke, ker kopija v orodju ne pride do datoteke (§80.136); to je meja orodja,
 ne nova napaka.
 
+### 88.20 [ ] Seštevek tednov trenerjev 2026-10-11: šest tednov, r11–r16
+
+**Naročil Simon 2026-10-11:** še ena serija tednov, z zapisom rab, ki jih aplikacija ne podpira, in
+popravki, kjer je mogoče. Šest od 27 neodigranih tednov z oceno 5 iz serije 2026-10-10, izbranih za
+oznake, ki jih prvih deset ni imelo. Odigrani od ponedeljka 12. 10. do nedelje 18. 10. na različici
+`55345d2` (veja `fix/stolen-phone`, z zahtevami #6–#8), z uro telefona, premaknjeno na simulirani
+dan. Vsak trener je vsak večer izvozil kopijo; vse obnovitve so vrnile podatke. Datoteke:
+`.private/exploratory-test/weeks/2026-10-11/` (ni v gitu). 133 ugotovitev: 80 vrzeli, 52 napak, 1
+umaknjena. Minute in evri so trenerjeve ocene, ne meritve.
+
+| Teden | Trener | Koliko tedna je nosila aplikacija (trenerjeva ocena) |
+| --- | --- | --- |
+| r11 | trener v verižnem fitnesu, Celje; cilj prodaje, nosečnica, mladoletnik | 15 od 42 nalog nič; povprečna ocena 0,95 od 3 |
+| r12 | spletna vadba za podjetje in osebne stranke, Ljubljana | urnik in izvedba da, računi in paketi ne; 196 min z aplikacijo, 112 brez |
+| r13 | kondicija za smučarski klub; štiri dni na ledeniku v Avstriji brez signala | stranke, termini, načrti in kopija da; 177 min z aplikacijo, 247 brez |
+| r14 | priprava tekmovalk, Koper in Izola; burja | razpored da, denar, sporočila in prehrana ne; 198 min z aplikacijo, 210 brez |
+| r15 | kineziologinja, skupina z demenco v dnevnem centru | 4 od 25 nalog nič, 11 delno; 155 min z aplikacijo, 103 brez |
+| r16 | skupina ob jezeru na Bledu, drugi test 6 km | okoli polovice; 217 min z aplikacijo, 129 brez |
+
+**Prvo: opravljena serija.** Vseh šest tednov ni našlo, kako označiti opravljeno serijo, zato je vsak
+trening »prazna vadba« (F-r11-05, F-r12-09, F-r13-04, F-r14-02, F-r15-01, F-r16-06). S serijo
+2026-10-10 je to **16 tednov od 16**. Iz tega izhajajo še tri prijave: obvestilo »Nenačrtovani
+programi« našteva načrte že zaključenih treningov (F-r11-10, F-r14-04, F-r16-19), ker udeleženec brez
+zapisane serije po zaključku ohrani načrt kot nerazporejen (`sessionLifecycle.js`, tako zasnovano);
+zgodovina stranke kaže vse vaje »PRESKOČENO« ali trening manjka (F-r13-21, F-r14-10). Odločitev je
+§94 točka 1 in §80.6, **čaka na Simona**; to je najvišja prednost obeh serij.
+
+**Vrzeli, ki jih že imamo zapisane — novi dokaz.**
+
+| Vrzel | Tedni | Cena po trenerjih | Kje je |
+| --- | --- | --- | --- |
+| Paketi, plačila, računi, dolg, nedeljski pregled | 6 od 6 (F-r11-07, F-r12-07, F-r13-13, F-r14-03, F-r14-11, F-r15-02, F-r15-12, F-r16-03, F-r16-12, F-r16-25) | od ~15 min na teden (r13) do ~100 min na teden (r11) | §88.19 |
+| Sporočilo stranki: prestavitev, odpoved, opomnik; SMS brez dne, ure in kraja | 6 od 6 (F-r12-15, F-r12-23, F-r13-06, F-r13-16, F-r14-06, F-r14-13, F-r15-07, F-r16-13) | do ~90 min na teden (r13, r14) | §88.19, §86.5 |
+| Meritve kot številka z datumom in primerjavo (teža, obseg, sladkor, kot, čas testa) | 5 od 6 (F-r11-14, F-r12-08, F-r14-01, F-r15-11, F-r16-01, F-r16-21, F-r16-23) | ~5–20 min na teden; ~45 min na test (r16) | §88.19 |
+| Prisotnost v skupini; skupina je ena stranka z »1/1 mest zasedenih« | 5 od 6 (F-r11-04, F-r12-01, F-r13-20, F-r15-10, F-r16-10) | ~5–15 min na teden | §88.19, §88.2 |
+| Vaja s časom v minutah ali razdaljo v metrih; štetje krogov | 5 od 6 (F-r11-09, F-r13-01, F-r15-04; napake v §80.214) | ~1–10 min na načrt | §88.19 |
+| Termin brez stranke: sestanek, izobraževanje, pakiranje | 4 od 6 (F-r11-01, F-r12-19, F-r13-12, F-r15-20) | ekipni sestanek 60 min (r11); tveganje dvojne rezervacije (r15) | §88.19 |
+| Naslednji teden in program za več tednov | 4 od 6 (F-r11-16, F-r11-20, F-r12-14, F-r15-19, F-r16-24) | ~12–36 min na teden | §88.5 |
+| Stranka je podjetje, klub ali center | 4 od 6 (F-r11-18, F-r12-01, F-r13-23, F-r15-06) | do ~45 min na teden (r13) | §88.9 |
+| Vnos cele skupine: vsaka oseba je cel obrazec | 3 od 6 (F-r13-10, F-r15-10, F-r16-02) | ~25–36 min enkrat | §88.2, §88.17 |
+| Seznam terminov ne kaže stranke ne kraja; vsi ✎ imajo ime »Uredi« | 3 od 6 (F-r13-07, F-r14-07, F-r15-08) | r14 je prestavila napačen termin | §88.19 |
+| Zdravniško navodilo ali poškodba z datumom in fotografijo | 3 od 6 (F-r13-19, F-r16-14) | ~3–5 min | §88.16, §88.7 |
+| Sporočilo več strankam naenkrat | 3 od 6 (F-r11-13, F-r13-06, F-r16-05) | ~10 min vsak večer (r13) | §88.12 delno |
+| Tek: razdalja, tempo, tedenski kilometri | 2 od 6 (F-r12-21, F-r13-22) | ~3–10 min | §88.18 |
+| Prehrana: fotografije obrokov, načrt | 1 (F-r14-09) | ~25 min na večer | §88.8 |
+| Načrt poslati stranki | 1 (F-r11-15) | ~40 min v petek | §105 |
+
+**Rabe, ki jih aplikacija ne podpira in jih ni bilo nikjer zapisanih.**
+
+| Raba | Tedni | Presoja |
+| --- | --- | --- |
+| Opomnik ali opravilo trenerja z rokom (»pokliči starše«, »plača v torek«, »ponudba paketa«) | 5 od 6 (F-r11-18, F-r12-03, F-r13-15, F-r15-18, F-r16-22) | **čaka na Simona**: drugi najpogostejši manko; opomnik brez strežnika pride le, ko je aplikacija odprta |
+| Odpoved z razlogom, kdo je odpovedal, »ne zaračunaj« | 3 od 6 (F-r12-15, F-r14-06, F-r15-07) | **čaka na Simona**, skupaj s paketi in plačili (§88.19) |
+| Starš ali skrbnik mladoletnika: ime, telefon, soglasje, plačnik | 3 od 6 (F-r11-19, F-r13-14, F-r16-25) | **čaka na Simona**: nova osebna polja so nova shema |
+| Zapis stika s stranko ali svojcem: kdo, kdaj, kaj sem svetoval | 2 od 6 (F-r13-16, F-r15-14) | dokaz za `clientNotes`, ki čaka v predogledu sheme (datirana opomba o stranki) |
+| Opomba k terminu za vso skupino (vreme, sprememba poti) | 1 (F-r16-11) | **čaka na Simona**: majhno, a termin nima polja zanjo |
+| Prodaja zaposlenega trenerja: kandidati, poskusni obisk, prodajni cilj | 1 (F-r11-08, F-r11-11, F-r11-21) | ne izplača se (zaposlen trener; §90) |
+| Strošek najema prostora, razdeljen na prisotne | 1 (F-r16-04, F-r16-16) | ne izplača se zdaj; skupaj s plačili |
+| Starost ali datum rojstva stranke | 1 (F-r16-02) | ne izplača se: opomba zadošča, manj osebnih podatkov |
+
+**Napake.** Nove so §80.213–§80.219. Dokaz k obstoječim: §80.201 (vpis gre v prejšnjo vajo, F-r12-12,
+zdaj štirje tedni), §80.205 (opozorilo o predogledu, F-r11-22, F-r13-08, F-r15-22, zdaj deset
+pojavitev), §80.158 (bolečina ni na podlogi naslednjič, F-r14-12). **Ni prešlo v napake:** F-r16-27
+(datum dvakrat: spodaj je oznaka naslednjega dne, ki jo orodje bere kot besedilo); F-r15-06 in
+F-r15-09 (kraj z besedo iz imena stranke je zavrnjen po Simonovem pravilu 2026-09-18; »stranka«
+je tu skupina, §88.9); F-r11-17 (izginula stranka: dva tekača sta tedaj pošiljala ukaze v isti
+brskalnik); F-r16-08 (ponavljanje izključi današnji dan; kot F-r03-15 in F-r10-06 verjetno orodje).
+Napake enega tedna, ki jih orkestrator ni ponovil in jih ni posebej zapisal: F-r12-02 (hitre izbire
+časa), F-r13-24 (seznam po obnovitvi), F-r16-18 (»Skupaj« pod imeni) — ostanejo v poročilih.
+
 ## 89. [~] Pregled 2026-09-28: isti podatek na več mestih
 
 Iskano po vrednotah »en vir resnice«, »preprostost« in »napake ne more narediti«. Dobesednih
@@ -5899,6 +6062,10 @@ piše drugače.
 Že dobro: dotik na uro označi vsebino in »1800«, »9.30«, »17.45« se preberejo pravilno; konec ure se
 premakne sam; »Ponovi vsak teden« sam izbere dan; predlog pri »Pretežko« je izračunan iz načrta (12 →
 9.5 kg); iskanje strank ponudi »Dodaj »ime« kot novo stranko« in ime prenese v obrazec.
+
+**Dokaz 2026-10-11 za točko 1 (§88.20):** vseh šest tednov serije r11–r16 ni našlo, kako označiti
+opravljeno serijo; z serijo 2026-10-10 je to 16 tednov od 16. Posledica sta še obvestilo »Nenačrtovani
+programi« za zaključene treninge in zgodovina z vajami »PRESKOČENO«.
 
 ## 95. [ ] A session in progress is a record like any other
 
