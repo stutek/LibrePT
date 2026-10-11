@@ -6659,6 +6659,12 @@ trener kartico zaprl), brez zahteve za združitev. Gate je trikrat padel; zadnji
 »Pritisni trening Skupinska moč in kondicija«). Ni preverjeno, ali padec povzroči kartica ali
 obremenjen stroj. Nadaljuje se po raziskovalnem testiranju tedna.
 
+**Odločeno 2026-10-11 (Simon):** prostovoljne prispevke razvijalcev zbiramo tudi prek GitHub Sponsors.
+V repozitoriju to pomeni eno datoteko, `.github/FUNDING.yml`, ki na strani repozitorija pokaže gumb
+»Sponsor«. Doda se šele, ko GitHub odobri profil; Simon izbere, ali je to račun društva ali njegov.
+Povezava v aplikaciji pride šele za kartico ob novi različici, ki jo prej napove, kot ta kartica
+obljublja. Razlogi in davčna vprašanja so v zasebnem tržnem načrtu (§90.9).
+
 ## 107. [ ] Dva primera za prihodnje raziskovalno testiranje: ukraden telefon in dve napravi
 
 **Naročil Simon 2026-10-10.** Oba sta v besednjaku oznak veščine `exploratory-test` (`ukraden-telefon`,
