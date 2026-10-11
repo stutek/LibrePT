@@ -4759,7 +4759,14 @@ blokira naslednje okno.
 **Predlog:** vsak izhod zapre okno — opaženo 2026-10-10 na `166d3c8` (tedna r01, r05; orkestrator je
 »Končano« brez »Pošlji SMS« zaprl normalno).
 
-### 80.205 [ ] P1? — Središče za kopije pravi, da kopija ne vsebuje vsebine »predogleda« — preveriti na objavljeni različici
+### 80.205 [~] P1? — Središče za kopije pravi, da kopija ne vsebuje vsebine »predogleda« — besedilo popravljeno 2026-10-11
+
+**Popravljeno 2026-10-11 na veji `fix/week-defects-2` (`2a191cd`):** opozorilo je bilo na vsaki
+različici, ne le na razvojnem strežniku, in je bilo za trenerja napačno: kopija je zapisana v shemi,
+ki jo aplikacija bere, zato vsebuje vse, kar trener vidi. Zdaj pravi »Varnostna kopija vsebuje vse,
+kar vidiš v aplikaciji …«; test v `tests/unit_js/data/backupFormat.test.mjs` pade, če se shemi
+razideta. Isto opozorilo pod Google Drive je odstranjeno. Geslo je zdaj iz števk (§80.220). Odprto
+ostane: rdeča značka »OGROŽENO — NAREDI KOPIJO« prekrije napis LibrePT (F-r05-09, r14).
 
 **Scenarij in koraki:** ikona s številko in vprašajem zgoraj desno (»Središče za sinhronizacijo in
 varnostne kopije«).
@@ -4887,9 +4894,10 @@ mišljeno v minutah.
 **Težava in vpliv:** napačno trajanje vaje na kartici, ki jo trener bere med vadbo; trije tedni so
 vajo preimenovali ali čas vpisali v opombo.
 
-**Predlog:** polje pove enoto in sprejme »15 min« — opaženo 2026-10-11 na različici `55345d2`, tedni
-r12, r15, r16 (F-r12-16, F-r15-13, F-r16-09); blizu §80.208, ki je enote popravil le delno;
-orkestrator ni ponovil.
+**Predlog:** polje sprejme »15 min«. Oznako »čas (min:s)« je dodal popravek §80.200 (2026-10-10), ki je
+pustil golo »20« kot 20 sekund, ker drugačno branje spremeni pomen shranjenih podatkov; trije tedni
+oznake niso opazili. **Čaka na Simona** — opaženo 2026-10-11 na različici `55345d2`, tedni r12, r15,
+r16 (F-r12-16, F-r15-13, F-r16-09); orkestrator ni ponovil.
 
 ### 80.215 [ ] P2 — Gumb »Shrani« ostane pod drugim elementom: pod poljem obrazca ali pod vrstico aktivnega treninga
 
@@ -4952,6 +4960,10 @@ napravi.
 
 **Predlog:** okno imenuje termin, uro in stranko — opaženo 2026-10-11 na različici `55345d2`, teden r13
 (F-r13-11); orkestrator ni ponovil.
+
+### 80.220 [x] P2 — Geslo iz angleških besed, Začni pri zaključenem treningu, ✕ časomera 13 pik — popravljeno 2026-10-11
+
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80220-x-p2--geslo-iz-angleških-besed-začni-pri-zaključenem-treningu--časomera-13-pik--popravljeno-2026-10-11).
 
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 

@@ -10154,6 +10154,30 @@ preveril orkestrator).
 
 **Popravljeno 2026-10-10 na veji `fix/week-defects`, prvi del:** na napravi, ki ni povezala Google Drive in nima čakajočih sprememb, okno pove »Google Drive ni povezan, zato v Google Drive ni nobene kopije teh podatkov.« namesto »Vse na tej napravi je že v Google Drive.« (`driveSyncUi.js`; test v `tests/e2e/test_sync_backup.py`). **Drugi del ni napaka aplikacije:** obstoječi test `test_the_header_warning_goes_away_after_a_file_export_and_after_a_reload` dokazuje, da značka po izvozu v datoteko izgine. Trenerja sta izvažala z orodjem, ki je datoteko ujelo na strani; verjetno je značka ostala zaradi tega ali zaradi poznejše spremembe.
 
+### 80.220 [x] P2 — Geslo iz angleških besed, Začni pri zaključenem treningu, ✕ časomera 13 pik — popravljeno 2026-10-11
+
+**Scenarij in koraki:** tedni trenerjev 2026-10-11 (§88.20): prvi izvoz kopije (F-r12-11, F-r13-09,
+F-r14-05, F-r15-23); »Treningi« → zaključen torkov termin z istim imenom kot četrtkov → »Začni
+trening« (F-r14-08); med vadbo časomer premora → ✕ (F-r12-10).
+
+**Opaženo:** geslo »flywheel-jumprope-overhead-barbell-posture-zercher«, angleško na slovenskem
+zaslonu, včasih z isto besedo dvakrat, polje ga odreže; gumb »Zapisal sem si ga, shrani« je v
+moškem spolu. Zaključen termin ponudi »Začni trening«; po začetku »začeto 47h 58m prepozno«, termin
+ostane aktiven do petka. ✕ na časomeru je visok 13 pik.
+
+**Težava in vpliv:** geslo iz 24 besed ima 24^6, okoli 27,5 bita, ne »~77«, ki jih je trdil
+komentar, seznam pa je javen v izvorni kodi: ukradena kopija z zdravstvenimi podatki ne zdrži
+dolgo. Zaključen trening se da znova začeti in zgodovina se zmede. Časomera ni mogoče zapreti s
+palcem.
+
+**Popravljeno 2026-10-11 na veji `fix/week-defects-2` (`2a191cd`):** geslo je pet skupin po štiri
+števke, okoli 66 bitov, brez pristranskosti deljenja (`passphraseKey.js`; testa v
+`tests/unit_js/data/encryptedExport.test.mjs` in `tests/medium/test_client_data_rights.py`); že
+izbrana gesla delujejo naprej. Gumb pravi »Geslo imam zapisano, shrani«. Termin, katerega seje so vse
+zaključene, se odpre brez »Začni trening« (`buildSessionMeta` → `held`, `activeSessionBoard.js`;
+testa v `tests/unit_js/modules/common/utils.test.mjs` in `tests/e2e/test_session_status_line.py`).
+✕ na časomeru meri 44 × 44 (`exerciseAndRestTimer.css`; test v `tests/e2e/test_timer_stack.py`).
+
 ### 80.200 [x] P2 — Polje za čas pri vaji nima enote: »20« za 20 minut se zapiše kot 0:20 — popravljeno 2026-10-10
 
 **Scenarij in koraki:** teden r06, kardio vaja v načrtu, polje »ČAS«, vpis 20 (mišljeno 20 minut).
