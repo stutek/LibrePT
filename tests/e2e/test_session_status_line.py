@@ -131,3 +131,17 @@ def test_finishing_a_session_stamps_completed_and_duration_on_the_session(
     bar = card.locator(".session-live-bar.past")
     assert bar.count() == 1
     assert HHMM.match(bar.locator(".session-status-value").inner_text().strip())
+
+
+def test_a_finished_session_opens_without_start(page, local_server):
+    # A trainer week of 2026-10-11 (F-r14-08) opened Tuesday's finished session for Thursday's of the
+    # same name, pressed Start, and was told it had begun "47h 58m late"; the evening then stayed
+    # live until Friday. A session that already happened opens to be read, never to run again.
+    page.goto(local_server)
+    page.wait_for_selector("#view-clients.active")
+    card = page.locator(
+        ".session-card.session-completed", has_text="Early Bird Strength"
+    ).first
+    card.locator(".session-card-title").click()
+    page.wait_for_selector("#active-session-overlay:not(.hidden)")
+    assert page.locator("#btn-start-session").is_hidden()

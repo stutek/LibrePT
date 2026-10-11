@@ -1143,10 +1143,8 @@ export const de = {
   drive_sync_disconnect: "Trennen",
   drive_sync_interval_label: "Synchronisieren alle",
   drive_sync_interval_unit: "Min.",
-  drive_sync_preview_warning:
-    "Vorschauversion: Die Synchronisierung schreibt das letzte stabile Format, deshalb wird nichts gespiegelt, was diese Vorschau hinzugefügt hat.",
   backup_preview_warning:
-    "Dies ist eine Vorschauversion. Sicherungen und Synchronisierung werden im letzten stabilen Format geschrieben, deshalb ist nichts enthalten, was diese Vorschau hinzugefügt hat. Behalte eine eigene Kopie von allem, was du nicht verlieren darfst.",
+    "Dies ist eine Vorschauversion und kann noch Daten verlieren. Eine Sicherung enthält alles, was du in der App siehst. Exportiere sie deshalb regelmäßig und bewahre sie außerhalb dieses Telefons auf.",
   restore_replaces_all: "Das Zurückspielen ersetzt alles auf diesem Gerät.",
   restore_you_would_lose: "Du würdest verlieren:",
   restore_keep: "Behalten, was ich habe",
