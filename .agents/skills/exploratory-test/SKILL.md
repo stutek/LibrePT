@@ -285,7 +285,11 @@ estimated minutes; do not claim that seven real days elapsed. Continue after the
 the requested time or token budget remains, reserving enough to save findings and close the browser.
 
 **What ten weeks at once taught (2026-10-10).** The run's prompts, the ranking and the reports are
-in `.private/exploratory-test/weeks/2026-10-10/`; reuse its `prompts/runner.md`. Four things:
+in `.private/exploratory-test/weeks/2026-10-10/`. **Reuse the runner prompt of the second batch,
+`.private/exploratory-test/weeks/2026-10-11/prompts/runner.md`**: the first one still told runners
+that backups do not reach a file and did not tell them to keep their files apart, and on 2026-10-11
+two runners shared a scratch folder and drove each other's browser. A new batch does not need new
+weeks: of the 37 weeks scored 5 in `2026-10-10/rank/`, 21 are still unlived. Four things:
 - **Keep a backup every evening.** On that day `download` could not catch a file, so every lost
   browser was lost data. It catches the file in the page now: export each evening, and restore from
   it with `upload` after a lost browser. Start it with `EXPLORE_IDLE_MINUTES=40` anyway.
