@@ -91,6 +91,12 @@ test("a session already carrying a status comes back as it is", () => {
   assert.equal(sessionInCurrentShape(session), session);
 });
 
+test("a session from before sessions had participants gets an empty list, and its status", () => {
+  const state = toDomainState({ sessions: [{ id: "b1", day: "today", titles: ["Old"] }] });
+  assert.deepEqual(state.sessions[0].participants, []);
+  assert.equal(state.sessions[0].status, "scheduled");
+});
+
 test("a group of client ids from the first cut of schema 6 becomes a group of their programs", () => {
   const program = (id, clientId, sessionId) => ({
     id,

@@ -38,9 +38,17 @@ function mergedById(existing, added) {
  *  set `cancelled` in one place only: deleting an evening of a repeating session, whose row stays so
  *  the rule does not produce the evening again. So it is "deleted", which the board does not show,
  *  as it did not show it before; "cancelled" now means a session kept on the board. A session that
- *  carried both flags was deleted after it had run. */
+ *  carried both flags was deleted after it had run.
+ *
+ *  A session from schema 1 has no `participants` (tests/fixtures/backups/schema1_baseline.json); it
+ *  gets an empty list, because the schedule reads the list on every card and a restored file
+ *  without one stopped the whole schedule drawing. */
 export function sessionInCurrentShape(session) {
-  if (!session || typeof session.status === "string") return session;
+  if (!session) return session;
+  if (!Array.isArray(session.participants)) {
+    return sessionInCurrentShape({ ...session, participants: [] });
+  }
+  if (typeof session.status === "string") return session;
   const { completed, cancelled, ...rest } = session;
   let status = "scheduled";
   if (cancelled === true) status = "deleted";
@@ -69,7 +77,7 @@ function groupInCurrentShape(group, programs) {
 function needsShaping(state) {
   return (
     CONVERTED_COLLECTIONS.some((key) => Array.isArray(state[key])) ||
-    (state.sessions || []).some((session) => typeof session?.status !== "string") ||
+    (state.sessions || []).some((session) => sessionInCurrentShape(session) !== session) ||
     (state.exerciseNotes || []).some((note) => noteInCurrentShape(note) !== note) ||
     (state.groupSharedPrograms || []).some((group) => !Array.isArray(group?.programIds))
   );
