@@ -5704,6 +5704,24 @@ is open again since §89.1 kept the list hand-written (§90.4).
 **Blocks**: `PROPT_IMPLEMENTATION.md` §8 step 2 there. **Blocked on**: nothing here — decisions 3 and 4
 set the order, not the design.
 
+### 90.9 [ ] A market and financial plan for the paid tiers — a proposal, waits on Simon
+
+**Asked by Simon 2026-10-11:** how to bring the paid tiers to market efficiently and lawfully, which
+legal form owns the code and takes donations, and a financial plan. Written that night as a private
+document (its link is in the session; the private EnterprisePT project was not reachable from it).
+Research, not legal advice. Its reasoning and numbers stay in that document, as §68 keeps the paid
+tiers' reasoning out of this repository.
+
+**What it says that touches this repository:**
+
+- The free app stays complete without ProPT, and ProPT is a separate build (as §90.3).
+- ProPT's invoices are for payment by bank transfer only: an invoice paid in cash or by card must be
+  fiscally verified (ZDavPR), which ProPT does not do, so its invoice screen has to say so.
+- Whether the free app of an association may invite its users to a product of a company adds to the
+  open question of §68.2.
+
+**Waits on Simon:** the legal form, and whether ProPT is built at all.
+
 ## 91. [ ] The pipeline is slower than it needs to be — measured 2026-09-30
 
 Last green CI run (36063598211): 20 min; Stage 3 alone 12 min (e2e 675s, demo 472s). Local `build
