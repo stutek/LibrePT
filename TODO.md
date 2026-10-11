@@ -5734,9 +5734,10 @@ session); not built. What it says that touches this repository:
   `src/data/googleAuth.js` loads for Drive): the server exchanges the one-time code at Google for an
   ID token. The Drive token client gives no identity, and "Sign in with Google" would need new
   `frame-src` and `style-src` entries; the code popup needs no change to the Content-Security-Policy.
-- **Invoices and package counting stay on the phone.** Only open slots and booking requests (a name
-  and one contact, for at most 48 hours) reach the server, so "nothing leaves this phone" ends for
-  ProPT users' booking requests only, and ProPT must say so.
+- **Invoices and package counting stay on the phone.** Only open slots and booking requests reach the
+  server: a name, one contact and a keyed hash of the client's internet address. A request holds a
+  seat for 48 hours and is deleted at the latest about 5 days after it was made. So "nothing leaves
+  this phone" ends for ProPT users' booking requests only, and ProPT must say so.
 - **The client's confirmation reuses the calendar invitation** of §45.13, so the server sends no
   e-mail.
 
