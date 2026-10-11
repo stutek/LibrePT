@@ -97,10 +97,25 @@ test("encrypting without a passphrase is refused rather than defaulting to one",
   await assert.rejects(() => encryptPayload(PAYLOAD, "", webcrypto), /passphrase is required/);
 });
 
-test("the generated passphrase is readable aloud and not the same twice", () => {
+test("the generated passphrase is digits in any language, at least 64 bits, and not the same twice", () => {
   const passphrase = generatePassphrase(webcrypto);
 
-  // Readable down a bad phone line is the actual design constraint — see the module header.
-  assert.match(passphrase, /^[a-z]+(-[a-z]+){5}$/);
+  // Readable down a bad phone line in Slovenian, German or English — see the module header. Five
+  // groups of four digits are 10^20 possibilities, about 66 bits.
+  assert.match(passphrase, /^\d{4}(-\d{4}){4}$/);
+  assert.ok(20 * Math.log2(10) >= 64);
   assert.notEqual(passphrase, generatePassphrase(webcrypto));
+});
+
+test("a random draw that would favour some groups is thrown away, not folded in", () => {
+  // 2^32 is not a multiple of 10 000: the draws from 4 294 960 000 up would make the groups 0000 to
+  // 7295 slightly more likely, so they are drawn again.
+  const draws = [4_294_967_295, 1234, 4_294_960_000, 5, 99, 10_000, 42_0042];
+  const fake = {
+    getRandomValues(array) {
+      array[0] = draws.shift();
+      return array;
+    },
+  };
+  assert.equal(generatePassphrase(fake), "1234-0005-0099-0000-0042");
 });

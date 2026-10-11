@@ -379,7 +379,9 @@ export const sl = {
   backup_pw_write_it_down:
     "Zapiši to geslo nekam izven tega telefona. Varnostna kopija je za dan, ko telefona ni več, in to geslo je edina pot do nje. LibrePT ti ga ne more priklicati nazaj, Google pa tudi ne.",
   backup_pw_remember: "Zapomni si ga na tej napravi",
-  backup_pw_save: "Zapisal sem si ga, shrani",
+  // Not "Zapisal sem si ga": a past tense in Slovenian says whether a man or a woman wrote it, and
+  // the trainer week r15 of 2026-10-11 was a woman's.
+  backup_pw_save: "Geslo imam zapisano, shrani",
   backup_pw_saved: "Shranjeno. Od zdaj so varnostne kopije šifrirane.",
   backup_pw_empty: "Vpiši geslo ali pritisni Drugo geslo za pripravljeno.",
   backup_pw_failed: "Gesla ni bilo mogoče shraniti na to napravo.",
@@ -1089,10 +1091,8 @@ export const sl = {
   drive_sync_disconnect: "Prekini povezavo",
   drive_sync_interval_label: "Sinhroniziraj vsakih",
   drive_sync_interval_unit: "min",
-  drive_sync_preview_warning:
-    "Predogledna različica: sinhronizacija zapiše zadnjo stabilno obliko, zato vsebina, ki jo je dodal ta predogled, ni prenesena.",
   backup_preview_warning:
-    "To je predogledna različica. Varnostne kopije in sinhronizacija se zapišejo v zadnji stabilni obliki, zato vsebina, ki jo je dodal ta predogled, ni vključena. Shrani si svojo kopijo vsega, česar ne smeš izgubiti.",
+    "To je predogledna različica in lahko še izgubi podatke. Varnostna kopija vsebuje vse, kar vidiš v aplikaciji, zato jo izvozi redno in jo shrani izven tega telefona.",
   restore_replaces_all: "Obnovitev zamenja vse na tej napravi.",
   restore_you_would_lose: "Izgubljeno bo:",
   restore_keep: "Obdrži, kar imam",

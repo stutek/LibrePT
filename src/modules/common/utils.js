@@ -277,6 +277,9 @@ export function buildSessionMeta(sessions, day, getSessionDayDate) {
     endDate,
     location: locations.join(" / "),
     timeLabel: `${formatClockFromMinutes(startMin)} - ${formatClockFromMinutes(endMin)}`,
+    // Every session in the slot already happened: the clipboard shows it and offers no Start
+    // (activeSessionBoard.js). One session still to come is enough to start the slot.
+    held: sessions.length > 0 && sessions.every((s) => s.status === "done"),
   };
 }
 

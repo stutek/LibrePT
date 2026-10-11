@@ -8,6 +8,8 @@
 # tests/unit_js/data/clientErasure.test.mjs and friends.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
+import re
+
 import pytest
 from playwright.sync_api import expect
 
@@ -225,7 +227,7 @@ def test_export_dialog_shows_scope_notes_and_a_passphrase(page, local_server):
     expect(page.locator("#client-export-notes")).to_have_value("Anxious about maxes")
     # A generated passphrase, not an empty box a trainer would fill with their dog's name.
     passphrase = page.locator("#client-export-passphrase").input_value()
-    assert passphrase.count("-") == 5
+    assert re.fullmatch(r"\d{4}(-\d{4}){4}", passphrase), passphrase
 
     page.locator("#btn-export-new-passphrase").click()
     assert page.locator("#client-export-passphrase").input_value() != passphrase

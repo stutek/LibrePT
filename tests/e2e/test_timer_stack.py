@@ -48,6 +48,11 @@ def test_timer_is_labelled_and_one_per_client(page, local_server):
     time_txt = page.text_content("#clipboard-timer-stack .timer-card-time").strip()
     assert re.match(r"^\d+:\d\d$", time_txt), f"unexpected time format: {time_txt}"
 
+    # ✕ is the only way a card leaves, so it is a thumb's target, not the 13-pixel glyph a trainer
+    # week of 2026-10-11 measured.
+    close = page.locator("#clipboard-timer-stack .timer-close").first.bounding_box()
+    assert close["width"] >= 44 and close["height"] >= 44, f"✕ is {close}"
+
     # Starting again for the same client does not add a second timer (one per client).
     page.locator("#active-exercise-scroll-deck .circuit-break-play").first.click()
     page.wait_for_timeout(150)

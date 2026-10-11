@@ -1160,10 +1160,8 @@ export const en = {
   drive_sync_disconnect: "Disconnect",
   drive_sync_interval_label: "Sync every",
   drive_sync_interval_unit: "min",
-  drive_sync_preview_warning:
-    "Preview build: sync writes the last stable format, so anything this preview added is not mirrored.",
   backup_preview_warning:
-    "This is a preview build. Backups and sync are written in the last stable format, so anything added by this preview is not included. Keep your own copy of anything you cannot lose.",
+    "This is a preview build, and it can still lose data. A backup holds everything you see in the app, so export one regularly and keep it off this phone.",
   restore_replaces_all: "Restoring replaces everything on this device.",
   restore_you_would_lose: "You would lose:",
   restore_keep: "Keep what I have",

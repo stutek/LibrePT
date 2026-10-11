@@ -18,6 +18,28 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-10-11 — What six more trainer weeks found
+
+### Changed
+
+- **The generated backup password is five groups of four digits**, for example `4821-0730-1956-0042-8813`.
+  It was six words from a list of 24 English gym words: about 27 bits, which a stolen file does not
+  hold out against for long, and English on a Slovenian or German screen, sometimes with one word
+  twice. The digits are about 66 bits and read the same in every language. A password already
+  chosen keeps working.
+
+### Fixed
+
+- **The backup centre no longer says a backup leaves your data out.** It said that "anything added by
+  this preview is not included", and trainers read that as their own clients missing from the file. A
+  backup holds everything the app shows; the note now says so, and that a preview build can still lose
+  data. The same note under Google Drive is gone.
+- **A finished session no longer offers Start.** Tapping a session that had already happened offered
+  *Start training*; starting it reported the session as begun two days late and left it running.
+- **The ✕ on a rest timer is a thumb's target**, 44 pixels instead of 13.
+- **The Slovenian button under the password says *Geslo imam zapisano, shrani*** instead of a past
+  tense that only fits a man.
+
 ## 2026-10-10 — What ten trainer weeks found
 
 ### Fixed

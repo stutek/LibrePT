@@ -17,7 +17,7 @@ import {
   buildBackupPayload,
   resolveBackupFormat,
 } from "../../../src/data/backupFile.js";
-import { BACKUP_SCHEMA } from "../../../src/data/recordSchemas.js";
+import { BACKUP_SCHEMA, DEFAULT_READ_SCHEMA } from "../../../src/data/recordSchemas.js";
 
 test("a written backup declares the current envelope version", () => {
   const payload = buildBackupPayload({ lang: "en" });
@@ -38,6 +38,14 @@ test("the versions written today have rows saying how to open them, at today's s
   assert.equal(BACKUP_FORMATS[CURRENT_BACKUP_FORMAT].container, "json");
   assert.equal(BACKUP_FORMATS[CURRENT_BACKUP_FORMAT].schema, BACKUP_SCHEMA);
   assert.equal(BACKUP_FORMATS[ENCRYPTED_BACKUP_FORMAT].schema, BACKUP_SCHEMA);
+});
+
+test("a backup is written at the schema the app reads, so it holds everything the trainer sees", () => {
+  // The backup centre tells the trainer exactly this (backup_preview_warning). Until 2026-10-11 it
+  // said that "anything added by this preview is not included", and four of six trainer weeks
+  // believed their own data was left out of the file. If the two schemas ever part, that sentence
+  // becomes false again and must change in the same commit.
+  assert.equal(BACKUP_SCHEMA, DEFAULT_READ_SCHEMA);
 });
 
 test("an unknown envelope version is refused, not guessed at", () => {
