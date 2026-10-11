@@ -158,6 +158,17 @@ function pressReaches(doc, target, { x, y }) {
   return Boolean(hit) && (hit === target || target.contains(hit));
 }
 
+/** The element a press at (x, y) would reach, named by tag, id and classes: what covered the
+ * control when a press missed it. Under a full gate the guide's drag once missed its card with no
+ * word of what was in the way (TODO.md holds the open item). */
+function whatIsAt(doc, { x, y }) {
+  const hit = doc.elementFromPoint(x, y);
+  if (!hit) return `nothing (the point ${Math.round(x)},${Math.round(y)} is outside the window)`;
+  const id = hit.id ? `#${hit.id}` : "";
+  const classes = [...hit.classList].map((name) => `.${name}`).join("");
+  return `${hit.tagName.toLowerCase()}${id}${classes}`;
+}
+
 /** Where a drag presses: the centre of the control, and only once a press there reaches it.
  *
  * A tap is checked against the hand after it travels (`handIsOver`); a drag needs more, because its
@@ -243,7 +254,11 @@ async function performDrag(step, start, { doc, hand, wait, pace }) {
 async function dragStep(step, target, { doc, hand, wait, pace }) {
   const start = await placeThePress(target, { doc, hand, wait, pace });
   if (!start) {
-    return { id: step.id, ok: false, reason: `a press on ${step.target} lands on something else` };
+    return {
+      id: step.id,
+      ok: false,
+      reason: `a press on ${step.target} lands on ${whatIsAt(doc, centreOf(target))}`,
+    };
   }
   const held = await performDrag(step, start, { doc, hand, wait, pace });
   if (!held.ok) return { id: step.id, ok: false, reason: `while held: ${held.reason}` };
