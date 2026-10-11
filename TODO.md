@@ -6665,6 +6665,25 @@ zato sestavljanje načrtov ni lažje kot na telefonu (F-s02-02).
 na Simona**. Izplača se takoj: opozorilo pred uvozom, ki našteje, kaj se zamenja (F-s02-04), in
 §80.212.
 
+**Ukraden telefon na novejšo shemo (s03, 2026-10-11, 10 ugotovitev).** Izbrana je pot `6` →
+`PREVIEW`, ne `5` → `6`: obnovitev iz sheme 5 preveri vsak gate (`schema5_field_install.json` v
+`frozenBackupCorpus.test.mjs`), `PREVIEW` pa je shema naslednje izdaje. Orodje zamenja shemo, ki jo
+naprava bere, koda ostane ista; preizkus pove, ali podatki pridejo, ne kako je videti nova izdaja.
+Torkova šifrirana kopija (oblika 8) je na napravi s `PREVIEW` vrnila vseh 6 strank, 5 terminov, načrte,
+4 zaključene treninge in opombe; nič ni podvojeno. Datoteke: `…/runs/s03/`.
+
+- **Popravljeno** (veja `fix/stolen-phone`): po »Uvoz je uspel.« je bil urnik prazen do ponovnega
+  nalaganja (F-s03-07, P1); obnovitev je narisala štiri sezname, urnika ne. Popravek je razkril
+  drugo napako: termin iz sheme 1 nima seznama udeležencev, in urnik se ob njem ni narisal.
+- **Napaka, potrebuje le popravek:** po izvozu kopije v datoteko ostane značka »OGROŽENO — NAREDI
+  KOPIJO«, dokler trener ne naloži strani znova; zaslon ne potrdi, da je kopija narejena (F-s01-13,
+  F-s03-03, dvakrat). Vzrok še ni najden: `recordBackupTaken` sproži `primeBackupHealth`.
+- **Vrzel:** ob obnovitvi aplikacija ne pove, iz katere sheme je kopija in v katero je prenesena
+  (F-s03-08); »Ta gradnja« kaže »Shema podatkov 6« tudi na napravi, ki bere `PREVIEW`. P3.
+- **Že zapisano:** trenerjevi podatki niso del kopije (F-s03-06, kot F-s02-07); obnovitev za uvodom
+  (F-s03-05, §88.14); o ukradenem telefonu aplikacija ne reče nič (F-s03-09, čaka s §97); izjava o
+  zasebnosti v angleščini (F-s03-10, kot F-s01-07); serija le prek »Prelahko« (F-s03-01, §80.6).
+
 ## 108. [ ] Kaj iz tednov trenerjev avtomatizirati — predlogi, čakajo na Simona
 
 **Vprašal Simon 2026-10-10.** Teden trenerja (§88.19, §107.1) je raziskovalni preizkus: podagent brez
