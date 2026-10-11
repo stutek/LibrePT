@@ -6565,6 +6565,11 @@ največ štirikrat; test `tests/unit_js/modules/demo/demoTourDrag.test.mjs`. Pod
 razlog skril, ker je primerjal le seznam `ok`; zdaj ga izpiše (`tests/e2e/test_first_run_deeplink.py`).
 **Naslednji padec pove, kateri korak in zakaj; šele takrat se popravlja.**
 
+**2026-10-11 04:20, gate na veji `fix/stolen-phone`:** padel je spet, z razlogom »a press on
+`#active-exercise-scroll-deck .exercise-deck-card.circuit-card` lands on something else«: vsi
+poskusi `placeThePress` so na sredini kartice našli drug element. Razlog zdaj imenuje tudi ta element
+(`demoTourPlayer.js`, `whatIsAt`). Naslednji tek gata na isti veji je prešel.
+
 ### 104.1 [ ] Preverjanje »med držanjem« prehaja tudi brez poteze
 
 V padlem teku je `expectHeld` (`#plan-peek-under-past .plan-sheet-row` viden) prešel, čeprav ni nič
