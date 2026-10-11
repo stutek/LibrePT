@@ -5722,6 +5722,25 @@ tiers' reasoning out of this repository.
 
 **Waits on Simon:** the legal form, and whether ProPT is built at all.
 
+### 90.10 [ ] A backend for ProPT's self-booking — designed, not built, waits on Simon
+
+**Asked by Simon 2026-10-11:** a Google Cloud functions backend for ProPT, low in cost, with nothing
+to set up in any trainer's own Google account. Designed as a private document (its link is in the
+session); not built. What it says that touches this repository:
+
+- **LibrePT changes nothing.** The server's address, the sign-in button and the check of who has paid
+  live only in the ProPT build (§90.3); the free app keeps its "no server" promise.
+- **ProPT adds "Sign in with Google"** for an identity token, because the Drive token client gives
+  none. ProPT's Content-Security-Policy then needs the `frame-src`, `connect-src` and `style-src`
+  entries Google lists for it.
+- **Invoices and package counting stay on the phone.** Only open slots and booking requests (a name
+  and one contact, for at most 48 hours) reach the server, so "nothing leaves this phone" ends for
+  ProPT users' booking requests only, and ProPT must say so.
+- **The client's confirmation reuses the calendar invitation** of §45.13, so the server sends no
+  e-mail.
+
+**Waits on Simon:** whether to build it, after the trainer conversations §90.9's plan proposes.
+
 ## 91. [ ] The pipeline is slower than it needs to be — measured 2026-09-30
 
 Last green CI run (36063598211): 20 min; Stage 3 alone 12 min (e2e 675s, demo 472s). Local `build
