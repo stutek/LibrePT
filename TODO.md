@@ -5728,11 +5728,12 @@ tiers' reasoning out of this repository.
 to set up in any trainer's own Google account. Designed as a private document (its link is in the
 session); not built. What it says that touches this repository:
 
-- **LibrePT changes nothing.** The server's address, the sign-in button and the check of who has paid
-  live only in the ProPT build (§90.3); the free app keeps its "no server" promise.
-- **ProPT adds "Sign in with Google"** for an identity token, because the Drive token client gives
-  none. ProPT's Content-Security-Policy then needs the `frame-src`, `connect-src` and `style-src`
-  entries Google lists for it.
+- **LibrePT changes nothing.** The server's address, the sign-in and the check of who has paid live
+  only in the ProPT build (§90.3); the free app keeps its "no server" promise.
+- **ProPT signs in with Google's popup in its "code" form** (`initCodeClient`, from the same script
+  `src/data/googleAuth.js` loads for Drive): the server exchanges the one-time code at Google for an
+  ID token. The Drive token client gives no identity, and "Sign in with Google" would need new
+  `frame-src` and `style-src` entries; the code popup needs no change to the Content-Security-Policy.
 - **Invoices and package counting stay on the phone.** Only open slots and booking requests (a name
   and one contact, for at most 48 hours) reach the server, so "nothing leaves this phone" ends for
   ProPT users' booking requests only, and ProPT must say so.
