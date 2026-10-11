@@ -88,6 +88,9 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
 - Read a message for ALL of its items before acting on any, and name them back.
 - Report what a person would SEE, not the mechanism. Quote a new or changed rule verbatim. Say which
   numbers were measured; `git ls-files` is the honest denominator.
+- **In work longer than an hour, report progress every 30 minutes without being asked**: what is
+  done, what is next, and the clock time of the next report. On 2026-10-11 Simon had to stop a
+  review to ask whether the work was still running.
 
 ## Execution
 
