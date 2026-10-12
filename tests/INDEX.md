@@ -25,6 +25,10 @@ localises the fault better, and a test placed too low simply cannot express what
 | [tests/e2e/](e2e/) (55 files, 253 tests) | Playwright, stage 3 | the whole app | It needs the router, IndexedDB, the service worker, reload/deep-link behaviour, or a multi-step flow across views. |
 | [tests/regression/](regression/) (2 files, 5 tests) | Playwright, stage 4 | the whole app, on the RELEASED schema | It states a promise the shipped version makes — data survives a reload, a backup carries every collection, an erasure leaves no name, the demo loads. Its own suite and stage: when behaviour changes, the schema and these tests change together, so an ordinary change to a screen must not touch this directory. [test_frozen_schema.py](regression/test_frozen_schema.py) fails the day the released schema moves past the number the suite froze, which is what stops the two suites drifting apart quietly. |
 
+**Outside the five tiers: [tests/exploratory/](exploratory/INDEX.md).** Invented trainer weeks and
+two-device scenarios that an AI agent lives by hand through the screens. No runner collects them and
+no gate stage runs them; a run produces findings for TODO.md, not a pass or a fail.
+
 **Every test runs in the same environment, wherever it is run.** `tests/conftest.py`'s
 `one_environment_everywhere` clears the variables this repository's own code branches on — today that
 is `CI` alone, read by the gate's pipe guard and by the Biome and Node downloaders. A test that WANTS

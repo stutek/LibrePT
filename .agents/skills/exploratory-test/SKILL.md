@@ -284,24 +284,27 @@ day as it ends, including rest days and work the app cannot carry. Label simulat
 estimated minutes; do not claim that seven real days elapsed. Continue after the first week when
 the requested time or token budget remains, reserving enough to save findings and close the browser.
 
-**What ten weeks at once taught (2026-10-10).** The run's prompts, the ranking and the reports are
-in `.private/exploratory-test/weeks/2026-10-10/`. **Its `prompts/runner.md` is out of date: correct it by the four points below
-before reuse.** It tells runners that backups do not reach a file and does not tell them to keep
-their files apart, and on 2026-10-11 two runners shared a scratch folder and drove each other's
-browser. The corrected prompt of that second batch was lost with the cloud session that ran it. A new
-batch does not need new weeks: of the 37 weeks scored 5 in `2026-10-10/rank/`, 21 are still unlived.
-Four things:
-- **Keep a backup every evening.** On that day `download` could not catch a file, so every lost
-  browser was lost data. It catches the file in the page now: export each evening, and restore from
-  it with `upload` after a lost browser. Start it with `EXPLORE_IDLE_MINUTES=40` anyway.
-- **The shifted clock is not the phone's clock.** `clock` shifts the page's `Date` only; background
-  workers keep the real time. Two weeks saw a repeating session miss its first day, and neither
-  reproduced on the real clock. Check anything about dates and series with `clock off` before
-  calling it a defect.
-- **Runners on one machine share `/tmp`.** One overwrote another's helper script, and commands went
-  to the wrong browser. A runner keeps its scripts in its own run folder.
-- **A cancelled runner leaves its files.** Resume it with the same prompt; it continues after the
-  last line of its `log.md`.
+**A week from the catalog.** [tests/exploratory/](../../../tests/exploratory/INDEX.md) holds
+invented trainer weeks, written without looking at the app and scored for realism, and scenarios
+that run on one of them across two devices. One cycle:
+
+1. **Pick.** A week marked *še nikoli* first; a week already lived only to check again after the
+   findings its file lists are fixed. A scenario names its week.
+2. **Prepare** `.private/exploratory-test/weeks/<date>/runs/<run>/` and copy into its `week.md` ONLY
+   the week's section *Teden — to in nič drugega dobi trener*. The rest of the file says what earlier
+   runs found, which is exactly what the trainer must not read. Write `known.md` beside the runs:
+   the open defects earlier runs found, each with its workaround.
+3. **Spawn** the trainer (`Agent`, `general-purpose`, model `sonnet`) with
+   [persona-week-prompt.md](persona-week-prompt.md) filled in. For a scenario, `{SCENARIO}` is its
+   section *Scenarij* and `{PORT_B}` the second device's port; otherwise `{SCENARIO}` is empty.
+   At most three trainers at once, each on its own ports. A cancelled trainer resumes from its files
+   with the same prompt.
+4. **Judge** the findings as in step 4 of the day above, and write them to TODO.md as they arrive. A
+   finding marked *ura premaknjena* is checked with `clock off` first: the shifted clock moves the
+   page's `Date` only, and two weeks once saw a repeating session miss its first day that the real
+   clock did not reproduce.
+5. **Record the run** in the week's file, and in the scenario's if there was one: one line under
+   *Za orkestratorja* with the run, the date, the commit and the finding ids TODO.md now holds.
 
 **Tag vocabulary** (a day covers several; the ledger lists them so the next day can differ):
 `individualno`, `skupina`, `krožna-vadba`, `kardio`, `rehabilitacija`, `zunaj` (park, stranka doma),
