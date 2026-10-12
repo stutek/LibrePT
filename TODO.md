@@ -6079,6 +6079,23 @@ premakne sam; »Ponovi vsak teden« sam izbere dan; predlog pri »Pretežko« je
 opravljeno serijo; z serijo 2026-10-10 je to 16 tednov od 16. Posledica sta še obvestilo »Nenačrtovani
 programi« za zaključene treninge in zgodovina z vajami »PRESKOČENO«.
 
+**Odločil Simon 2026-10-12 za točko 1:** vaja je privzeto opravljena po načrtu; kartica vaje dobi
+gumb »Preskoči«. Simon je prej predvideval, da trener v pregledu po treningu popravi načrt, v katerega
+je bila med izvedbo vstavljena vaja, a označiti preskočeno je verjetno bolje. **Rešitev se še
+izpopolni s Simonom** — odprta vprašanja:
+
+1. **Pozaba.** Trener, ki pozabi pritisniti »Preskoči«, zapiše delo, ki ga stranka ni naredila. Ali
+   zaključek pokaže kratek povzetek (»opravljeno 5, preskočeno 1«) z možnostjo popravka?
+2. **Udeleženec, ki ga ni bilo.** Privzeto opravljeno pri skupini pomeni, da je bil vsak udeleženec
+   prisoten in da se mu obisk šteje (kasneje paketi v ProPT). Potreben je »Ni prišel« za stranko.
+3. **Trening, končan predčasno.** Ali vaje, do katerih trener ni prišel, štejejo kot opravljene ali
+   kot nedosežene?
+4. **Zapis.** »Opravljeno po načrtu« naj bo v podatkih ločeno od serije, ki jo je trener vpisal, da se
+   kasneje ve, kaj je izmerjeno in kaj privzeto.
+5. **Vaja, vstavljena med izvedbo.** Ali jo pregled po treningu ponudi za stalni načrt stranke?
+
+Pravilo »aplikacija ne postavlja ciljev vadbe« ostane: zapiše se trenerjev načrt, nič se ne izračuna.
+
 ## 95. [ ] A session in progress is a record like any other
 
 **Ruled by Simon 2026-09-30**, from one question: why would only finished sessions be written? The
