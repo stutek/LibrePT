@@ -366,9 +366,18 @@ def test_the_sandbox_marks_the_header_the_pill_and_the_frame(page, local_server)
 
     # The pill in the app bar (asked 2026-09-12). Outside the sandbox the same pill marks demo data
     # in the trainer's own workspace and keeps its blue, so this is asserted in the sandbox rather
-    # than on the class alone.
+    # than on the class alone. The pill breathes between two oranges (sandboxMarker.css), so it is
+    # read at the breath's first frame, which is the token: read a few milliseconds late on a loaded
+    # machine, it was rgb(193, 65, 12) (2026-10-10).
     pill = page.evaluate(
-        """() => getComputedStyle(document.getElementById('preview-badge')).backgroundColor"""
+        """() => {
+             const badge = document.getElementById('preview-badge');
+             for (const animation of badge.getAnimations()) {
+               animation.pause();
+               animation.currentTime = 0;
+             }
+             return getComputedStyle(badge).backgroundColor;
+           }"""
     )
     assert pill == ORANGE, f"the sandbox pill is not the sandbox orange: {pill}"
 

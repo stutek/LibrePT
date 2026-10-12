@@ -6,25 +6,40 @@
 //   - Expandable upward drawer/sheet triggered by clicking or swiping/dragging the handle or bar upwards
 //     (mimicking active-session-overlay collapse/expand behavior).
 //   - Priority-ordered notification feed: Live/Upcoming session → Welcome/Demo message → Reservations/Cancellations.
+//   - After the feed, once per release, the thanks to early adopters, closed with its own button.
 //
 // Dependencies injected via initNotificationArea({ getState, getActiveSession, t, escapeHTML,
-// navigateToPath, getSyncFailure, startWalkthrough, enterSandbox }) — `getSyncFailure` is an
+// navigateToPath, getSyncFailure, startWalkthrough, enterSandbox, isFirstRunAnswered }) — `getSyncFailure` is an
 // accessor rather than a value because a sync can fail at any moment after boot, and it keeps this
 // module unaware of Drive entirely. The two offers on an empty app are injected for the same reason
 // the seeding one before them was: the walkthrough's deep link is built in modules/splash and
 // switching workspace is app.js's own job. Reaching either through a global — `window.seedMockData`,
-// as the old one did — is an import no layering gate can see.
+// as the old one did — is an import no layering gate can see. `isFirstRunAnswered` is injected for
+// the same reason: the language and the terms are app.js's and the header's to answer, and the
+// release thanks waits for both.
 
+import { defaultAppVersion } from "../../data/appVersions.js";
 import { stateHasData } from "../../data/stateStore.js";
 import { readVersionScoped, writeVersionScoped } from "../../data/storageNamespace.js";
 import { programById } from "../../data/trainingRecords.js";
 import { isSandbox } from "../../data/workspace.js";
-import { resolveNotificationItems } from "../../domain/notificationItems.js";
+import {
+  buildReleaseThanksItem,
+  resolveNotificationItems,
+} from "../../domain/notificationItems.js";
 import { renderMarkupOnce } from "./dom.js";
 import { INIT_DEMO_DATA, getShareParams } from "./shareLink.js";
 
 // Schema-scoped: which notifications a PT has read is per-build state (see data/storageNamespace).
 const READ_NOTIFICATIONS_KEY = "librept_read_notifications";
+
+// The release whose thanks card the trainer closed: its app version id, "2026-11". Read and
+// written unscoped (storageNamespace's ORIGIN_GLOBAL_KEYS), because closing a message is a fact
+// about the person, not about one workspace's data — and a sandbox reset, which clears the
+// workspace keys, must not bring it back. It names the app VERSION and never the build: a deploy
+// within the same version is a patch, it changes the commit and keeps the version, and a value
+// holding the commit would show the card again after every patch.
+const RELEASE_THANKS_CLOSED_KEY = "librept_release_thanks_closed";
 
 let deps = null;
 const barObserver = null;
@@ -314,6 +329,61 @@ function paintFeedCounts(items, t) {
   if (markAllFooter) markAllFooter.classList.toggle("hidden", unreadCount <= 0);
 }
 
+function readClosedRelease() {
+  try {
+    return localStorage.getItem(RELEASE_THANKS_CLOSED_KEY);
+  } catch {
+    // Storage unavailable: the card shows, and closing it hides it until the next draw.
+    return null;
+  }
+}
+
+/** The thanks to early adopters (domain/notificationItems.js, buildReleaseThanksItem), drawn after
+ * everything else the feed holds, in the welcome card's look.
+ *
+ * The release is the DEFAULT app version, what a device that never chose one runs: a version
+ * offered beside it is not released yet, and a trainer who chose to stay on an older version has
+ * still been given the new release and is thanked for it once. */
+function appendReleaseThanks(container, state) {
+  const { t, escapeHTML } = deps;
+  const releaseId = defaultAppVersion()?.id;
+  const item = buildReleaseThanksItem(t, {
+    releaseId,
+    closedRelease: readClosedRelease(),
+    firstRunAnswered: deps.isFirstRunAnswered?.() === true,
+    sandbox: isSandbox(),
+    emptyApp: !stateHasData(state),
+  });
+  if (!item) return;
+
+  container.insertAdjacentHTML(
+    "beforeend",
+    `
+      <div class="notification-card welcome release-thanks" data-notification-id="${escapeHTML(item.id)}">
+        <div class="notification-card-icon">
+          <i class="${escapeHTML(item.icon)}"></i>
+        </div>
+        <div class="notification-card-content">
+          <h4 class="notification-card-title">${escapeHTML(item.title)}</h4>
+          <p class="notification-card-desc">${escapeHTML(item.description)}</p>
+          <div class="notification-actions">
+            <button type="button" class="notification-btn" data-action-close-thanks="true">${escapeHTML(item.closeLabel)}</button>
+          </div>
+        </div>
+      </div>
+    `,
+  );
+  container.querySelector("[data-action-close-thanks]")?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    try {
+      localStorage.setItem(RELEASE_THANKS_CLOSED_KEY, releaseId);
+    } catch (err) {
+      console.warn("Failed to persist the closed release thanks to localStorage:", err);
+    }
+    renderNotificationArea();
+  });
+}
+
 export function renderNotificationArea() {
   if (!deps) return;
   const { t, escapeHTML } = deps;
@@ -350,6 +420,7 @@ export function renderNotificationArea() {
     } else {
       renderFirstRunInvitation(container, t, escapeHTML, summaryEls, deps);
     }
+    appendReleaseThanks(container, state);
     syncNotificationBarState();
     return;
   }
@@ -370,6 +441,7 @@ export function renderNotificationArea() {
     .join("");
 
   wireNotificationCardActions(container, deps, t, readIds);
+  appendReleaseThanks(container, state);
   syncNotificationBarState();
 }
 
