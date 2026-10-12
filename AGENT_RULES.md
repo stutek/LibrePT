@@ -160,7 +160,8 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
   and palette parity, a new module for catalog coverage, doclinks and the service worker's precache
   list (`tests/unit/test_project_layout.py`), a new route for the overflow walk
   (`tests/e2e/test_layout_overflow.py::test_the_walk_still_covers_every_route`), a new icon for coverage and the
-  render baseline, new user-visible text for `ui_strings`, a closed `§` for `todo_hygiene`. The gate
+  render baseline, new user-visible text for `ui_strings`, a closed `§` for `todo_hygiene`, a new or
+  changed use case for `use_case_tests`, a comment that names a `§` for `todo_refs`. The gate
   PROVES a tree; it is not where facts are discovered. Five minutes spent learning a two-second fact
   is the maintainer's time, and the same five minutes blocks every other agent in the tree.
 - Zero warnings, not just zero failures; never swallow a non-zero exit code. Never silence a
