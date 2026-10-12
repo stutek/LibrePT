@@ -6,6 +6,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import {
+  absentClientIds,
   addPendingNote,
   allExerciseNotes,
   allPrograms,
@@ -14,6 +15,8 @@ import {
   feedbackFromNotes,
   groupsOfSessions,
   livePrograms,
+  markAbsent,
+  markPresent,
   noteById,
   noteTagLine,
   notesForProgram,
@@ -561,4 +564,48 @@ test("a client taken off a booked session keeps their plan, unscheduled, and wha
       ["p-other", "planned", "s2"],
     ],
   );
+});
+
+// A booked slot of two merged session rows: Ana is on s1, Bor on s2.
+function slotOfTwo() {
+  return {
+    sessions: [
+      { id: "s1", participants: ["ana"] },
+      { id: "s2", participants: ["bor"] },
+    ],
+  };
+}
+
+test("a client marked absent is recorded as not there, on the row they were booked on", () => {
+  const state = slotOfTwo();
+  markAbsent(state, ["s1", "s2"], "bor");
+  assert.deepEqual(state.sessionAttendance, [
+    { id: "at-s2-bor", sessionId: "s2", clientId: "bor", status: "noShow", consumesQuota: false },
+  ]);
+  assert.deepEqual(absentClientIds(state, ["s1", "s2"]), ["bor"]);
+  assert.deepEqual(absentClientIds(state, ["s1"]), []);
+});
+
+test("marking a client absent twice keeps one record", () => {
+  const state = slotOfTwo();
+  markAbsent(state, ["s1", "s2"], "ana");
+  markAbsent(state, ["s1", "s2"], "ana");
+  assert.equal(state.sessionAttendance.length, 1);
+});
+
+test("a client marked present again is no longer absent, and the other absent client stays", () => {
+  const state = slotOfTwo();
+  markAbsent(state, ["s1", "s2"], "ana");
+  markAbsent(state, ["s1", "s2"], "bor");
+  markPresent(state, ["s1", "s2"], "ana");
+  assert.deepEqual(absentClientIds(state, ["s1", "s2"]), ["bor"]);
+});
+
+test("finishing a session records no attendance over an absent client", () => {
+  const state = slotOfTwo();
+  markAbsent(state, ["s1", "s2"], "ana");
+  recordTrainings(state, [finished("p-ana", "ana", "2026-10-12T10:00:00.000Z")], {
+    sessionIds: ["s1", "s2"],
+  });
+  assert.deepEqual(absentClientIds(state, ["s1", "s2"]), ["ana"]);
 });

@@ -18,6 +18,12 @@ function groupMarkHTML(t) {
   return `<i class="fa-solid fa-link client-tab-group-mark" aria-hidden="true"></i><span class="sr-only">${escapeHTML(label)}</span>`;
 }
 
+// The absence mark on a tab: words under the name, not only a struck-through name, so it is read by
+// a screen reader and by a trainer who does not see the line.
+function absentMarkHTML(t) {
+  return `<span class="client-tab-absent-mark">${escapeHTML(t("absent_tab_mark"))}</span>`;
+}
+
 export function updateClientTabsFadeState() {
   const el = document.getElementById("active-session-client-tabs");
   if (!el) return;
@@ -34,6 +40,7 @@ export function updateClientTabsFadeState() {
 
 export function renderActiveUsersList(tabsContainer, activeSession, ctx) {
   const { clients, activeClientId, getInitials, getClientDisplayNameHTML, navigateToPath, t } = ctx;
+  const absentIds = ctx.absentIds || [];
   if (!tabsContainer) return;
   tabsContainer.innerHTML = "";
 
@@ -46,7 +53,8 @@ export function renderActiveUsersList(tabsContainer, activeSession, ctx) {
     const isActive = pId === activeClientId;
     const tab = document.createElement("button");
     const bound = isBound(activeSession, pId);
-    tab.className = `client-tab-btn client-tab-participant${bound ? " client-tab-bound" : ""} ${isActive ? "active" : ""}`;
+    const absent = absentIds.includes(pId);
+    tab.className = `client-tab-btn client-tab-participant${bound ? " client-tab-bound" : ""}${absent ? " client-tab-absent" : ""} ${isActive ? "active" : ""}`;
 
     // Selected tab: uses unified primary gradient with on-primary text for clear, vibrant emphasis.
     // Width-side chrome (padding/gap/avatar size) trimmed further so more tabs fit per row — a
@@ -70,7 +78,7 @@ export function renderActiveUsersList(tabsContainer, activeSession, ctx) {
       <div class="avatar client-tab-avatar ${isActive ? "active" : ""}">
         ${escapeHTML(client.avatar || getInitials(client.name))}
       </div>
-      <span class="client-tab-name">${getClientDisplayNameHTML(client, true, t("injury_mark_label"), participants)}</span>${sessionMark}${bound ? groupMarkHTML(t) : ""}
+      <span class="client-tab-text"><span class="client-tab-name">${getClientDisplayNameHTML(client, true, t("injury_mark_label"), participants)}</span>${absent ? absentMarkHTML(t) : ""}</span>${sessionMark}${bound ? groupMarkHTML(t) : ""}
     `;
 
     tab.addEventListener("click", () => {

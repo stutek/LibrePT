@@ -861,6 +861,16 @@ export const de = {
   bind_participants: "Alle auf diesen Plan",
   unbind_participants: "Jedem einen eigenen Plan geben",
   bound_group_label: "Gemeinsam",
+  mark_absent: "Heute nicht da: {name}",
+  mark_present: "Doch da: {name}",
+  btn_mark_present: "Doch da",
+  absent_tab_mark: "nicht da",
+  absent_notice_title: "{name} ist heute nicht da",
+  absent_notice_body:
+    "Für eine Person, die nicht da ist, wird nichts aufgezeichnet. Wenn du auf „{button}“ tippst, bleibt ihr Plan unter „Pläne ohne Termin“ erhalten.",
+  btn_mark_absent: "Heute nicht da",
+  confirm_mark_absent:
+    "Für {name} sind in diesem Training Sätze oder Signale aufgezeichnet. Wenn du {name} als nicht da markierst, werden sie gelöscht.",
   plan_fit_hint: "Geschätzte Übungszeit im Verhältnis zur Dauer des Trainings, ohne Pausen",
   plan_fit_over: "zu lang",
   plan_fit_tight: "knapp",

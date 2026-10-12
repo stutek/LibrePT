@@ -73,9 +73,26 @@
   background: rgba(255, 255, 255, 0.25);
   color: #fff;
 }
+/* The name, and under it the absence mark when there is one. Shrinks like the name inside it, so a
+   long name still ends in an ellipsis. */
+.client-tab-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  overflow: hidden;
+}
 .client-tab-name {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   min-width: 0;
+  max-width: 100%;
+}
+/* A client marked absent: the words for it under the name. */
+.client-tab-absent-mark {
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.1;
+  white-space: nowrap;
 } /* --- VERTICAL EXERCISE CARD STACK --- */

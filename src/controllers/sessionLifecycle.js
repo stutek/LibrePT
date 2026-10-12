@@ -60,6 +60,7 @@ import {
   mergeAppDeps,
   setActiveSession,
 } from "./activeSessionStore.js";
+import { absentParticipants } from "./sessionAbsence.js";
 import {
   clientStateFromProgram,
   discardSession,
@@ -495,7 +496,9 @@ async function confirmEarlyFinish(activeSession, t) {
 
 function countCompletedSets(activeSession) {
   let completedSets = 0;
+  const absent = absentParticipants(activeSession);
   for (const pId of activeSession.participants) {
+    if (absent.includes(pId)) continue;
     const clientState = activeSession.clientRoutines[pId];
     if (!clientState) continue;
     for (const exId in clientState.logs) {
@@ -512,9 +515,12 @@ function countCompletedSets(activeSession) {
 // planned. A participant who did nothing has no training to keep, so their program waits
 // unscheduled, as a cancelled client's does: it is never deleted. No attendance is written for them:
 // nothing logged does not prove they were absent. The record's own shape and that judgement both
-// live in domain/sessionHistoryRecord.js.
+// live in domain/sessionHistoryRecord.js. A participant the trainer marked absent is treated as one
+// who did nothing, whatever was logged for them: they keep their absence, not an attendance.
 function finishProgramsOfParticipants(activeSession, state, sessionDateISO, sessionDuration) {
+  const absent = absentParticipants(activeSession);
   const records = activeSession.participants.map((pId) => {
+    if (absent.includes(pId)) return null;
     const record = buildSessionHistoryRecord({
       client: state.clients.find((c) => c.id === pId),
       clientState: activeSession.clientRoutines[pId],
