@@ -2514,6 +2514,21 @@ project, and remove `calendar.freebusy` from the consent screen's scopes
 **[ ] Waits for the canary rotation:** the canary credential is still granted `calendar.freebusy`
 beside `drive.appdata` (§1.5.1); narrowing it means running the consent flow again.
 
+### 68.4 [ ] Memberships and bought session packages are ProPT — ruled 2026-10-12 (Simon)
+
+**Ruled 2026-10-12 (Simon), recorded 2026-10-12 21:31:05.102:** a client's monthly or yearly
+membership and a bought number of sessions, with the balance left, are ProPT. This answers §86.6's
+open question for the package. Attendance is not part of the ruling; it is already built here (§94).
+The scenarios and the counting rules, first staged here in PREVIEW and never merged, live in the
+private `~/Projects/EnterprisePT` (`TODO.md` §20).
+
+**What stays here:** the attendance row's own `consumesQuota`, which the trainer sets and this app
+already keeps (§94 point 2). Nothing else is declared here for packages.
+
+**Also said the same day:** the file overlay of §68's first bullet is a temporary answer, and a
+cleaner design is wanted. The proposal is in that project's `TODO.md` §16.5; until Simon picks one,
+§68's two bullets and §90 stand.
+
 ## 78. [ ] Measurements, and a client's progress over time
 
 **Raised 2026-09-24**, out of planning the paid tiers: Simon wants ability measurements and a picture
@@ -5229,9 +5244,7 @@ delovnega časa in približno ena delovna ura tedensko, ki jo ne zaračuna nikom
 (§68), zato tu nista predlagani. Davčno potrjevanje računov ni prevzeto nikjer in ni tehnično
 vprašanje — če ProPT izdaja račune za gotovino, brez tega ne sme.
 
-**Odprto vprašanje za Simona:** ali sta prisotnost in paket še »brezplačna aplikacija« ali sta že
-ProPT. Moja presoja: prisotnost sodi v brezplačno (brez nje je zapis o vadbi nepopoln), paket pa je
-mejni primer, ker je prvi korak k denarju. Odločitev je tvoja; napisana naj bo v §68, ne tukaj.
+**Paket je ProPT** (Simon, 2026-10-12, §68.4). Prisotnost je že v tej aplikaciji (§94).
 
 **Dokazi iz izpeljanih dni (§88):** paketi in odštevanje kartic v Excelu ali ločeni tabeli (dan 01: 5
 min na dan; dan 02; dan 04: 5–10 min na dan); plačila in račun podjetju (dan 01: 3 in 10 min; dan 06:
@@ -5387,7 +5400,7 @@ dneh od šestih, meritve v štirih, nadomeščanje v treh, prisotnost in odpoved
 
 **Izplača se, po vrstnem redu** (§80.53, §80.55, §88.1 in §88.7 so medtem narejeni):
 1. Izgubljen načrt §80.52 (popravek je §95), nato §80.54.
-2. Paket in zapis prisotnosti (§86.6, točki 2 in 1); »brezplačno ali ProPT« čaka na Simona.
+2. Zapis prisotnosti (§86.6, točka 1); paket je ProPT (§68.4).
 3. Kopija treninga na drug datum (§88.5), vpis za nazaj (§88.4), deljenje načrta kot besedilo (§88.3).
 
 **Čaka na Simona:** §88.2, §88.6, §88.9. **Ne izplača se:** §88.8, §88.10.
