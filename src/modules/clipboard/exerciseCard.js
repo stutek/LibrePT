@@ -101,7 +101,7 @@ export class ExerciseDeckCard extends DeckCard {
       .querySelector(".deck-card-compact")
       .insertAdjacentHTML(
         "beforeend",
-        `<button type="button" class="deck-card-timer" aria-label="${t("rest_timer")}" title="${t("rest_timer")}"><i class="fa-solid fa-stopwatch"></i></button>`,
+        `<button type="button" class="deck-card-timer" aria-label="${t("exercise_timer")}" title="${t("exercise_timer")}"><i class="fa-solid fa-stopwatch"></i></button>`,
       );
     card.insertAdjacentHTML(
       "beforeend",

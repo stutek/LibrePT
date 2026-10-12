@@ -311,7 +311,9 @@ export const de = {
   rounds: "Runden",
   measured_in: "Gemessen in",
   ungroup: "Zirkel auflösen",
-  rest_timer: "Pausentimer",
+  // The ⏱ on an exercise card times the work itself (a hang, the most squats in 3 minutes); a rest
+  // has its own button, start_rest (Simon, 2026-10-12).
+  exercise_timer: "Übungstimer",
   start_rest: "Pause starten",
   trainer_set_notes: "Notizen des Trainers zum Satz",
   kg: "kg",

@@ -308,7 +308,9 @@ export const sl = {
   rounds: "Krogi",
   measured_in: "Merjeno v",
   ungroup: "Razdruži sklop",
-  rest_timer: "Časomer premora",
+  // The ⏱ on an exercise card times the work itself (a hang, the most squats in 3 minutes); a rest
+  // has its own button, start_rest (Simon, 2026-10-12).
+  exercise_timer: "Časomer vaje",
   start_rest: "Začni premor",
   trainer_set_notes: "Trenerjeve opombe serije",
   kg: "kg",
