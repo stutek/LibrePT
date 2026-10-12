@@ -5970,6 +5970,24 @@ session); not built. What it says that touches this repository:
 
 **Waits on Simon:** whether to build it, after the trainer conversations §90.9's plan proposes.
 
+### 90.11 [ ] Idea: an MCP endpoint that reads and changes a trainer's data — not designed
+
+**Recorded 2026-10-12 23:37:54.906 (Simon's idea, for ProPT):** an MCP endpoint (Model Context
+Protocol, the way an AI assistant such as Claude calls outside tools) through which a trainer's
+assistant reads the trainer's data and changes it, for example "which clients have not trained for
+three weeks" or "move Tuesday's sessions to Wednesday". Nothing is designed.
+
+**Open questions, none answered:**
+- **Where the data comes from.** §90.10 keeps clients, sessions, plans and invoices on the phone and in
+  the trainer's Drive; ProPT's server holds only open slots and booking requests. An endpoint on that
+  server would need the trainer's Drive access, which ends §90.10's "nothing on the server but booking
+  requests". A browser app on a phone cannot itself serve an endpoint.
+- **What a change may do.** The app sets no training targets: an assistant that writes a plan must
+  write only what the trainer dictates, never a load, reps or sets it works out itself.
+- **Health data.** Injuries and medical notes would reach the assistant's provider; this needs the
+  trainer's and the client's consent (the consent texts are §97), and a way to leave those fields out.
+- **Who may connect, with which rights**, and how the trainer takes the access back.
+
 ## 91. [ ] The pipeline is slower than it needs to be — measured 2026-09-30
 
 Last green CI run (36063598211): 20 min; Stage 3 alone 12 min (e2e 675s, demo 472s). Local `build
