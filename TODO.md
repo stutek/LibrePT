@@ -891,11 +891,13 @@ sport-science faculty starts on Tuesday 2026-10-13, to gather beta users and fut
 users' association. Two open points it raises:
 
 - [ ] **§80.159 now sits on the campaign's path.** A student opens a `?lang=sl` link, adds the app to
-      the home screen, and on the next start gets the language chooser and then English. *Blocks:*
-      the first reopen of every student who installs the app from the link.
-- [ ] **How student contacts are collected, and the notice that goes with it.** Names and e-mail
-      addresses are personal data; the student must be told who keeps them and for what, and the
-      association that would keep them does not exist yet. *Blocks:* collecting any contact.
+      the home screen, and on the next start is asked for the language once more, over an English
+      screen. One extra tap, not a blocker; it still waits on Simon's ruling in §80.159.
+- [x] **How student contacts are collected** — decided 2026-10-12 23:01:31.441 (Claude, on Simon's
+      "make the best choices yourself"): none are written down at the stand. The flyer's strips
+      carry the e-mail address and the student writes first; a reply asks before adding anyone to
+      the meeting invitation. No list of students' data exists before the association does. The
+      flyer and the spoken script are in the private campaign file.
 
 ## 24. Single-responsibility & module-boundary reorganisation
 
