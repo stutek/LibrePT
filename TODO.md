@@ -898,6 +898,9 @@ users' association. Two open points it raises:
       carry the e-mail address and the student writes first; a reply asks before adding anyone to
       the meeting invitation. No list of students' data exists before the association does. The
       flyer and the spoken script are in the private campaign file.
+- [ ] **Three questions for Simon before the flyer is printed** (2026-10-12 23:56:55.186): whether the
+      meeting date on it is fixed, whether a phone number goes on it, and the phone check of §80.154.
+      Listed in the private campaign file, §2b. *Blocks:* printing the flyer as it is.
 
 ## 24. Single-responsibility & module-boundary reorganisation
 
