@@ -235,6 +235,9 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
   [TODO_ARCHIVE.md](TODO_ARCHIVE.md), and open subsections stay behind. Every Markdown file
   carries frontmatter, every knowledge directory an `INDEX.md`, and concepts link to each other.
   Navigate by that graph rather than grepping for a concept.
+- **Nothing about ProPT or EnterprisePT is written in this repository**: no idea, design, price,
+  ruling or plan for the paid tiers. It goes to the private `~/Projects/EnterprisePT`. What may stay
+  here is the boundary: one line saying that a capability is paid and is not built here.
 - **Read the skill before doing work it covers** — [.agents/skills/INDEX.md](.agents/skills/INDEX.md)
   lists them, and they bind every agent, not the one whose directory they happen to sit in. A skill
   kept in `.claude/` or `.gemini/` is invisible to the others: one was, and the agent that could not
