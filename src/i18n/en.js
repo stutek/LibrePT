@@ -293,7 +293,9 @@ export const en = {
   rounds: "Rounds",
   measured_in: "Measured in",
   ungroup: "Break up circuit",
-  rest_timer: "Rest Timer",
+  // The ⏱ on an exercise card times the work itself (a hang, the most squats in 3 minutes); a rest
+  // has its own button, start_rest (Simon, 2026-10-12).
+  exercise_timer: "Exercise timer",
   start_rest: "Start Rest",
   trainer_set_notes: "Trainer Set Notes",
   kg: "kg",

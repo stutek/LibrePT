@@ -94,7 +94,7 @@ THUMB_REACH = """(selector) => {
 
 
 def test_the_clipboard_s_small_controls_answer_a_thumb(page, local_server):
-    """The rest timer on a card and the menu of the session were drawn 32 and 38 pixels square, and
+    """The exercise timer on a card and the menu of the session were drawn 32 and 38 pixels square, and
     were only as big as they were drawn: the controls a trainer taps most, mid-set. They stay drawn
     that size, and a thumb-sized square around each reaches them."""
     page.set_viewport_size({"width": 390, "height": 844})
@@ -255,6 +255,21 @@ def test_bringing_a_card_into_focus_keeps_the_line_it_was_showing(page, local_se
         "the card in focus adds the Too Easy / Too Hard / Feedback row"
     )
     assert after["timerInHeadRow"], "and its timer joins the head row it already had"
+
+
+def test_the_card_timer_is_named_for_the_exercise_not_for_a_rest(page, local_server):
+    """The ⏱ on an exercise card times the exercise itself — a dead hang, the most squats in three
+    minutes (Simon, 2026-10-12). It was named »Časomer premora«, the rest timer, which is a separate
+    entry with its own button (»Začni premor«), and the trainer weeks read the card as having nothing
+    to time the work with."""
+    page.add_init_script("globalThis.stubLanguage = 'sl'")
+    load_with_stub(page, local_server, STUB)
+    page.wait_for_selector("#active-exercise-scroll-deck .exercise-deck-card")
+    _focus_card(page, "Barbell Back Squat")
+
+    timer = page.locator(".exercise-deck-card.in-focus .deck-card-timer")
+    assert timer.get_attribute("aria-label") == "Časomer vaje"
+    assert timer.get_attribute("title") == "Časomer vaje"
 
 
 def test_the_done_tag_is_in_the_language_of_the_screen(page, local_server):
