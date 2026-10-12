@@ -4993,6 +4993,23 @@ napravi.
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80220-x-p2--geslo-iz-angleških-besed-začni-pri-zaključenem-treningu--časomera-13-pik--popravljeno-2026-10-11).
 
+### 80.221 [ ] P3 — Pet ugotovitev iz tednov 2026-10-10, ki jih ni nobena točka — nepreverjeno
+
+**Zapisano 2026-10-12 23:28:39.516** ob pregledu veje `trials/weeks-2026-10-10` pred brisanjem. Od
+200 ugotovitev teh tednov jih 30 ni navedenih z oznako nikjer v TODO.md in arhivu; 25 jih je zapisanih
+pod drugo točko kot nov dokaz, teh pet pa nikjer. Ocena izvajalcev, nihče jih ni ponovil. Celotno
+besedilo je v `.private/exploratory-test/weeks/2026-10-10/runs/<tek>/findings.md`.
+- **F-r10-08:** pri vaji, ki je že odprta, gumb »Opombe« ne sprejme dotika; orodje javi, da vrstica
+  vaje (`exercise-deck-card is-active`) prestreže dotik. Mogoče je dvojni dotik izvajalca.
+- **F-s02-01:** ob prvem zagonu je »Nadaljuj« na zaslonu »Izberi temo« neodzivna, dokler trener ne
+  izbere teme, in nič ne pove, da je izbira obvezna.
+- **F-r08-03:** med dodajanjem stranke se je ime v seznamu pokazalo, preden je bila stranka shranjena;
+  po »Prekliči« je izginilo. Morda posledica prekinjenega ukaza orodja.
+- **F-s03-02:** ime termina z imenom stranke je zavrnjeno, a prvi pritisk na gumb na vidnem delu
+  zaslona ne naredi ničesar; sporočilo je višje in ne kaže na polje.
+- **F-r10-12 (vrzel):** termina ni mogoče označiti kot pogojnega (»velja, če stranka plača do
+  poldne«); trener pogoj hrani v opombah profila, kjer ga termin ne pokaže.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
@@ -5596,6 +5613,13 @@ oznake, ki jih prvih deset ni imelo. Odigrani od ponedeljka 12. 10. do nedelje 1
 dan. Vsak trener je vsak večer izvozil kopijo; vse obnovitve so vrnile podatke. Datoteke:
 `.private/exploratory-test/weeks/2026-10-11/` (ni v gitu). 133 ugotovitev: 80 vrzeli, 52 napak, 1
 umaknjena. Minute in evri so trenerjeve ocene, ne meritve.
+
+**[ ] Mapa serije je izgubljena (preverjeno 2026-10-12 23:28:39.516):** ni je na tem računalniku,
+v nobeni delovni kopiji LibrePT in na nobeni veji na GitHubu. Nastala je v oblačni seji
+`claude.ai/code/session_01F1joCCCamoJ5zCKHnuqAEX`; le Simon lahko pogleda, ali so datoteke tam še.
+Izgubljen je tudi popravljen poziv izvajalcem (`prompts/runner.md`), ki ga veščina
+`exploratory-test` priporoča za naslednjo serijo. Serija 2026-10-10 je obnovljena v
+`.private/exploratory-test/weeks/2026-10-10/` z veje `trials/weeks-2026-10-10`.
 
 | Teden | Trener | Koliko tedna je nosila aplikacija (trenerjeva ocena) |
 | --- | --- | --- |
@@ -6909,6 +6933,14 @@ trener kartico zaprl), brez zahteve za združitev. Gate je trikrat padel; zadnji
 `test_demo_story.py::test_the_whole_story_can_be_walked_in_slovenian` (vodič obstane na koraku 36,
 »Pritisni trening Skupinska moč in kondicija«). Ni preverjeno, ali padec povzroči kartica ali
 obremenjen stroj. Nadaljuje se po raziskovalnem testiranju tedna.
+
+**Združeno 2026-10-12 23:28:39.516 (Simon je naročil združiti vse odprte veje):** kartica je v `main`
+(`8de670b2`). Celoten gate na združenem drevesu je zelen v vseh petih stopnjah, tudi slovenska
+zgodba vodiča; prejšnji padci torej niso bili od kartice. **[ ] Odprta napaka, P3:** če brskalnik ne
+dovoli shranjevanja (`localStorage` vrže izjemo), gumb »Zapri to sporočilo« kartice ne skrije:
+zapis ne uspe, takoj zatem se predal izriše znova in kartica je spet tam. Komentar v
+`readClosedRelease` (`src/modules/common/notificationArea.js`) trdi, da se skrije »do naslednjega
+izrisa«, a zaprtje samo sproži izris. Popravek: zaprto različico hrani tudi v spremenljivki modula.
 
 **Odločeno 2026-10-11 (Simon):** prostovoljne prispevke razvijalcev zbiramo tudi prek GitHub Sponsors.
 V repozitoriju to pomeni eno datoteko, `.github/FUNDING.yml`, ki na strani repozitorija pokaže gumb
