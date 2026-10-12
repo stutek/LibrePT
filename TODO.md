@@ -2452,39 +2452,20 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#54-x-the-past-c
 
 ## 68. [ ] The paid tiers: what stays out of this app, and the tag that invites the upgrade
 
-Simon's tier idea, 2026-09-19, with the names and the price he set on 2026-09-24: **LibrePT**
-(everything today, free), **ProPT** (invoices with a payment QR code and self-service booking, 10 € a
-month or 60 € a year), **EnterprisePT** (a hosted service coordinating several trainers and gyms, plus
-AI when the trainer supplies their own API key). The reasoning, the prices and the open questions live
-in the separate private project `~/Projects/EnterprisePT` and in `.private/monetisation-tiers.md`;
-what is recorded here is only what touches THIS repository.
-
-**How ProPT would be built was worked out on 2026-09-24** in that project
-(`PROPT_IMPLEMENTATION.md`), and two of its findings bind THIS repository:
-
-- **Nothing of ProPT is built here, and nothing here changes shape for it.** ProPT is a file overlay
-  over a pinned checkout of this app: it may add files and register itself into existing registries
-  (`renderRegistry.js`, `eventTransports.js`), and it may not edit a file of this app. If it ever
-  must, that is a request for a seam here, discussed here — never a patch carried privately.
-- **The QR encoder needs no change.** `qrCodePath(text, encoder)` already takes the encoder as an
-  argument, so the payment codes come from an encoder ProPT vendors itself.
+The paid tiers, ProPT and EnterprisePT, are designed, priced and decided in the private
+`~/Projects/EnterprisePT` project. What is recorded here is only what this app does or does not do
+because of them. **Nothing of ProPT is built here, and nothing here changes shape for it**; a change
+this app would need for it is proposed here as a change to this app.
 
 The free app's own share of that work is §78 below: measurements and their progress over time, which
 need no server and are worth having whether or not a paid tier is ever sold.
 
-### 68.1 [ ] UPN generation stays OUT of LibrePT — ruled 2026-09-19 (Simon); the privacy half is open
+### 68.1 [ ] UPN generation stays OUT of LibrePT — ruled 2026-09-19 (Simon)
 
 A UPN payment order could be produced on the phone with the QR encoder this app already vendors. It
 still stays out, for a reason that is not technical: **a paid capability shipped inside a free,
 offline, open app cannot be enforced.** There are no accounts and no server to check a licence
 against, and a licence key checked on the device is the shape people share.
-
-**Open, and Simon named it as the thing to think about: privacy.** Moving the feature to a server
-moves the DATA to a server. A UPN order carries who is paying, to whom, how much and for what, and an
-invoice carries the client's name and address — so the tier that is easiest to enforce is also the one
-that ends LibrePT's "nothing leaves this phone" promise. Whether there is a shape that enforces
-payment without collecting the trainer's clients is the question EnterprisePT has to answer before any
-of it is built.
 
 ### 68.2 [ ] A visual tag in the app that invites the upgrade
 
@@ -2537,10 +2518,6 @@ private `~/Projects/EnterprisePT` (`TODO.md` §20).
 
 **What stays here:** the attendance row's own `consumesQuota`, which the trainer sets and this app
 already keeps (§94 point 2). Nothing else is declared here for packages.
-
-**Also said the same day:** the file overlay of §68's first bullet is a temporary answer, and a
-cleaner design is wanted. The proposal is in that project's `TODO.md` §16.5; until Simon picks one,
-§68's two bullets and §90 stand.
 
 ## 78. [ ] Measurements, and a client's progress over time
 
@@ -5720,273 +5697,10 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#895-x-seznam-zb
 Nadaljnje delitve velikih datotek (§24.5, §24.7) le, če kaj postane preizkusljivo ali skupno — §24
 je to že ugotovil. Razdelitev slovarjev po funkcijah (§14.5) ne odpravi nobene kopije.
 
-## 90. [ ] Extending this app into ProPT: the scenarios, the approaches, and the seam
+## 90. ProPT's design is not kept in this repository
 
-**Asked by Simon 2026-09-28**, in two parts: list the scenarios ProPT adds, and find the
-architectural approaches for extending this app into it. The design belongs here rather than in
-`~/Projects/EnterprisePT`, because that is what its `TODO.md` §16.3 concluded on 2026-09-25 — *"the
-seam is designed there, not here"* — and it names itself as what blocks `PROPT_IMPLEMENTATION.md` §8
-step 2, since an invoice needs somewhere to live before it needs anything else.
-
-Read at the source before writing this: that project's `README.md`, `AGENT_RULES.md`,
-`PROPT_IMPLEMENTATION.md` §2 and §9, and its `TODO.md` §15.1, §15.4 and §16. The scenarios below are
-its list, not a new one; what is added here is what each one demands of THIS repository.
-
-### 90.1 [ ] The contradiction that decides everything else
-
-Two documents there disagree, and neither says so:
-
-- `PROPT_IMPLEMENTATION.md` §2: the trainer who pays **"installs a different app from a different
-  address"**.
-- `TODO.md` §16.3 recommends the overlay because then **"the trainer has one app"**.
-
-**A different address is a different origin, and a different origin has an empty IndexedDB.** The paid
-build would start with no clients, no sessions and no history. Buying ProPT would mean carrying the
-database across by hand, and since 2026-09-28 that also means typing the backup password (§18.8).
-Nobody wrote that down, and it is the first thing a paying customer would meet.
-
-**Why the addresses cannot simply be the same.** The lock is physical: a separate build, because a
-licence check inside an MIT app can be deleted (§68.1). Physical enforcement needs the build not to be
-publicly downloadable, which needs an access-controlled host, which is a different origin. **The
-separation is forced by the lock, not chosen.** Anyone arguing for one origin has to propose a
-different lock first.
-
-**Recommended: separate origins, and the data crosses by a channel that already exists.**
-
-- **Google Drive.** `appDataFolder` is scoped to the OAuth grant rather than to the origin
-  ([driveAppData.js](src/data/driveAppData.js) says so), so a ProPT build shipping this app's own
-  client id would see the same snapshot: install, connect Drive, type the backup password, sync.
-  **Not verified at Google's documentation** — that is this repository's own comment, and it must be
-  read at the source before anything depends on it.
-- **The backup file**, for a trainer who never connected Drive: export on the old address, import on
-  the new one, one password. Already built, and now the upgrade path as well.
-
-This is the same question as §16.6. It is one decision, not two, and it decides both.
-
-### 90.2 [ ] The scenarios ProPT adds, and what each one demands here
-
-From `TODO.md` §15.1 there, in its order. The right-hand column is the new part: what each scenario
-needs from THIS app, which is what makes the approaches in §90.3 comparable at all.
-
-| Scenario | What it needs here |
-| :--- | :--- |
-| **The month-end invoice run** — every client, the sessions actually held, the price of each, one action that produces every invoice with its QR code | Reads sessions, which exist. Writes invoices — **storage this app does not have**. A screen and a menu entry. Its own QR encoder, already a parameter |
-| **Session packages and the balance left** — bought ten, used seven, three left, and **the client must see it too** | Storage. Reads sessions. A document the phone shares — no server, no client account |
-| **Who owes, and for how long** — invoices sent and unpaid, oldest first, a reminder carrying the same QR | Reads its own storage. A screen. The phone's own share, not a transport here |
-| **A cancellation that costs, and one that does not** — the trainer's rule, applied when a session is cancelled | Reads sessions, which already carry when the cancellation happened. **Needs no hook** — see §90.5 |
-| **A different price per client and per kind of session** | Storage, attached to a client |
-| **The client's monthly summary** | Reads records that exist. No new storage |
-| **The year in one file, for the accountant** | An export that carries its storage |
-| **Self-service booking, and every Google Calendar integration** (§11 and §19 there) | The whole calendar integration moves OUT of this app (§68.3). The overlay needs network and screens, and it writes this app's own sessions |
-
-**Three of them are the product**: the invoice run, packages, and who owes (§15.4 there). They are one
-loop — the work is recorded, the invoice follows from it, the money is chased from the invoice — and
-each replaces a notebook. **All three need exactly one thing this app cannot do: store a record whose
-shape it does not declare.** Everything else on the list is screens and reading.
-
-### 90.3 [ ] Four approaches, and what each costs
-
-`TODO.md` §16.3 in the other project compares three. A fourth is missing, and it changes the answer.
-
-| Approach | How it composes | What it costs |
-| :--- | :--- | :--- |
-| **1. Fork** | Copy the repository, edit freely | A merge conflict on every release of this app, for ever. Rejected there, and still rejected |
-| **2. A separate app reading an export** | Two apps, a monthly import | Fails the invoice run: a month-end screen that needs re-importing a diary is the work the trainer already does. Invoices land outside this app's backup and sync |
-| **3. This app provides an empty function for ProPT to fill** | This app adds `registerExtensions()`, which does nothing here, and `appBoot.js` calls it at start-up. The paid build replaces that one file | One function in the free app whose only purpose is elsewhere. Against value 4 — the simplest thing that does the job, no layer without a concrete problem — but it is honest and testable, because the contract is named |
-| **4. The paid build provides its own starting file** | `index.html` is the first file a browser loads, and it names the JavaScript file that starts the app. The paid build GENERATES its own `index.html` from this one, substituting that single line | **Recommended.** Nothing is added to this app for the paid product, and generating rather than copying means every later change here — a new tag, a tightened `Content-Security-Policy` — reaches the paid build on its next rebuild |
-
-**Why 4 beats 3.** A file the paid build replaces with its own copy stops receiving later changes to it,
-silently. So which files it may replace depends on how often each changes:
-
-- `index.html` changes almost never, but when it does the change is often security-relevant (the
-  `Content-Security-Policy`). The paid build **generates** its copy, substituting the one line that
-  names the starting script.
-- `app.js` / `appBoot.js` change with every feature — **never replaced**.
-- `routeTable.js` (a line per screen) and `applicationHeader.js` (one per menu entry) — **neither**:
-  this app gains a list they register into. That is its existing pattern, `registerShellRender` in
-  [renderRegistry.js](src/modules/common/renderRegistry.js), used by its own routes and menu, so it is
-  not code for a paid tier; §68's first bullet already allows the overlay to *"register itself into
-  existing registries"*.
-- `cacheManifest.js`, the offline file list, changes with every module. It stays hand-written by the
-  2026-09-29 decision (§89.1); how the overlay's files reach it is §90.4.
-- `recordSchemas.js` is never touched; the one new collection is declared here (§90.6).
-
-**Approach 3 is not forbidden.** *"No paid features, no dead code for them"* is from
-`PROPT_IMPLEMENTATION.md` §2 in the other project, written by an agent; §68 here does not contain it. The
-case for 4 is this app's value 4 (the simplest thing, no layer without a concrete problem): a
-preference, and Simon may pick 3. Whether §68's two bullets are Simon's rulings is §90.8, decision 1.
-
-**Copying the source is cheap here because there is no bundler**: `python -m build` is `copytree` of
-`src/`, a version stamp, one `<base href>` rewrite and the integrity catalog. The copy is pinned to a
-commit (a git submodule; `PROPT_IMPLEMENTATION.md` §9 says "a pinned checkout"), and on each new pin the
-paid build runs its own gate. If this app ever gains a bundler, ask again. **The cost is operational**:
-a fix here reaches a paying trainer only when the paid build is rebuilt and redeployed — a promise
-ProPT makes, written there. The MIT notice travels with the copy.
-
-**Rejected:** publishing this app as an npm package (no `package.json` or bundler here on purpose; §68:
-*"nothing here changes shape for it"*); loading modules at run time from the free site (breaks offline
-use, `script-src 'self'` in [index.html](src/index.html) and the integrity catalog, ties the paid
-product to the free site, and tells the free host which trainers pay).
-
-**Not a plugin system (Simon asked, 2026-09-28).** No loader: one `index.html` and static `import`s.
-ProPT is one product built from two source trees with the same owner — a build variant. The
-registration lists are no API: [CONTRIBUTING.md](CONTRIBUTING.md) §4 says *"Nothing here is a public
-API."* A fork that leans on internal structure re-pins and fixes itself.
-
-### 90.4 [ ] The precache list becomes generated, and that pays for itself here
-
-A ProPT file missing from [cacheManifest.js](src/sw/cacheManifest.js) is not precached, and the app
-fails in the gym basement. This section proposed generating the list with a tool the overlay also runs.
-
-**Decided otherwise for this app on 2026-09-29 (§89.1, archived):** the list stays hand-written, because
-a changed byte in `sw.js` or `sw/*.js` is what makes a phone fetch a new version, and a generated list
-would re-download every file on every release. A test compares the list with `src/` exactly, both ways
-(`d4ee523`).
-
-**Open for ProPT:** the overlay's files must reach the list without the paid build replacing
-`cacheManifest.js`, which changes with every module (§90.3). Either the list gains a registration point
-like routes and the menu, or the paid build generates its copy the way it generates `index.html`.
-
-### 90.5 [ ] Money is computed at invoice time, so no event hook is needed
-
-The cancellation rule looks like it needs a hook: *apply the rule when a session is cancelled*. **It
-does not, and building it that way would be worse.**
-
-A side effect at cancellation time writes down a decision that cannot afterwards be re-derived — change
-the rule, or fix a wrong cancellation time, and last month's charge is a number nobody can explain.
-Computing it **at invoice time**, from the session records this app already keeps, makes every charge
-re-computable from the records and auditable against the rule that was in force. The screen that shows
-*"cancelled at 07:10, less than 24 hours, this session is used up"* is then a read, not a write.
-
-**So the overlay never reacts to anything in this app.** No event bus, no hooks, no listeners for a
-paid tier. That is the single biggest reason this app stays clean under approach 4.
-
-### 90.6 [ ] Storage: one collection this app carries and never reads
-
-The invoice must ride in the backup, the Drive sync and the export, or the one record the law requires
-to be kept is the least protected record on the phone. And this app must not interpret it.
-
-**One collection, declared in a numbered schema**, with a fixed envelope and an opaque body:
-
-| Field           | Meaning                                                                          |
-| :-------------- | :------------------------------------------------------------------------------- |
-| `id`            | UUIDv7, as every record here                                                      |
-| `kind`          | namespaced, owned by the overlay — `propt.invoice`, `propt.package`               |
-| `ownerClientId` | which client it concerns, or null, so erasure and the Art. 15 export can find it  |
-| `sealedAt`      | once set, the write layer REFUSES any further change to that record               |
-| `keptUntil`     | an ISO date before which erasure must not touch it                                |
-| `payload`       | opaque JSON: stored, projected, backed up, synced and exported, never read        |
-
-**Two properties this app does not have, and both are right on their own merits:**
-
-1. **Sealed records.** ZDDV-1 article 86(3) requires that a stored invoice cannot be changed or
-   deleted. The star-write layer has no notion of a record that refuses an update.
-2. **Kept by law, and SAID so.** [clientErasure.js](src/data/clientErasure.js) irreversibly anonymises
-   every identifying field of a client; run over an invoice it would destroy a record the law requires
-   to be kept. GDPR article 17(3)(b) exempts exactly that. So erasure must skip records whose
-   `keptUntil` has not passed **and report what it kept and why** — a person asking to be forgotten
-   has to be told what remains. **That is a gap here today, with or without a paid tier.**
-
-**A decision that keeps new personal data out of the free app.** A UPN order needs the payer's street
-and city (`PROPT_IMPLEMENTATION.md` §3.1), and that project assumed this app's client record gains an
-address. **It should not.** The address belongs in the overlay's own record, reached through
-`ownerClientId`, so this app gains no category of personal data it has no use for, and neither its
-consent wording nor [PRIVACY.md](PRIVACY.md) changes for a feature it does not have.
-
-**The cost, named rather than discovered**: a collection the backup carries must be in a NUMBERED
-schema, so this is a schema bump with a real record change behind it — unlike §18.8's container change,
-which deliberately avoided one.
-
-### 90.7 [ ] What is deliberately NOT built here
-
-- **No licence check, no token, no server address.** The lock lives in the paid build alone (§68.1). A
-  check here would be both removable and dishonest.
-- **No transport seam.** Closed there 2026-09-25: an invoice leaves as a file the phone made.
-- **No sync-target seam.** [syncMerge.js](src/data/syncMerge.js) is already pure and takes no view on
-  where a snapshot came from; a hosted tier calls it with its own wire. This line exists so nobody
-  adds one.
-- **Nothing for the multi-trainer tier.** One trainer per install is a decision here
-  ([trainerIdentity.js](src/modules/common/trainerIdentity.js): *"Not a profile, and deliberately not
-  one"*). A client belonging to two trainers is a different data model, not an overlay on this one.
-
-### 90.8 [ ] What Simon decides, and what is already answered
-
-**Answered by this design, needing no ruling:** how the overlay loads (it owns the entry), how it
-appears (the registry pattern this app already uses), and whether §68 has to change (**no** under
-approach 4, which adds nothing here for a paid tier). How the overlay's files are kept for offline use
-is open again since §89.1 kept the list hand-written (§90.4).
-
-**His to decide:**
-
-1. **Whether §68's two bullets are his decisions at all.** They are introduced there as findings of
-   another project's proposal that *"bind THIS repository"* — written by an agent, not ruled by him.
-   Until that is settled, this section treats them as the best available reasoning rather than as
-   rules, and approach 3 stays open to him.
-2. **The origin fork of §16.6**, which §90.1 answers but cannot close.
-3. **Whether the collection is declared now or when the first invoice is built.** Declaring is cheap;
-   the schema bump is the cost, and it buys nothing until something writes to it.
-4. **Whether erasure's "kept by law" behaviour is built now on its own merits**, ahead of any paid
-   tier. It is a correctness gap in this app today.
-
-**Blocks**: `PROPT_IMPLEMENTATION.md` §8 step 2 there. **Blocked on**: nothing here — decisions 3 and 4
-set the order, not the design.
-
-### 90.9 [ ] A market and financial plan for the paid tiers — a proposal, waits on Simon
-
-**Asked by Simon 2026-10-11:** how to bring the paid tiers to market efficiently and lawfully, which
-legal form owns the code and takes donations, and a financial plan. Written that night as a private
-document (its link is in the session; the private EnterprisePT project was not reachable from it).
-Research, not legal advice. Its reasoning and numbers stay in that document, as §68 keeps the paid
-tiers' reasoning out of this repository.
-
-**What it says that touches this repository:**
-
-- The free app stays complete without ProPT, and ProPT is a separate build (as §90.3).
-- ProPT's invoices are for payment by bank transfer only: an invoice paid in cash or by card must be
-  fiscally verified (ZDavPR), which ProPT does not do, so its invoice screen has to say so.
-- Whether the free app of an association may invite its users to a product of a company adds to the
-  open question of §68.2.
-
-**Waits on Simon:** the legal form, and whether ProPT is built at all.
-
-### 90.10 [ ] A backend for ProPT's self-booking — designed, not built, waits on Simon
-
-**Asked by Simon 2026-10-11:** a Google Cloud functions backend for ProPT, low in cost, with nothing
-to set up in any trainer's own Google account. Designed as a private document (its link is in the
-session); not built. What it says that touches this repository:
-
-- **LibrePT changes nothing.** The server's address, the sign-in and the check of who has paid live
-  only in the ProPT build (§90.3); the free app keeps its "no server" promise.
-- **ProPT signs in with Google's popup in its "code" form** (`initCodeClient`, from the same script
-  `src/data/googleAuth.js` loads for Drive): the server exchanges the one-time code at Google for an
-  ID token. The Drive token client gives no identity, and "Sign in with Google" would need new
-  `frame-src` and `style-src` entries; the code popup needs no change to the Content-Security-Policy.
-- **Invoices and package counting stay on the phone.** Only open slots and booking requests reach the
-  server: a name, one contact and a keyed hash of the client's internet address. A request holds a
-  seat for 48 hours and is deleted at the latest about 5 days after it was made. So "nothing leaves
-  this phone" ends for ProPT users' booking requests only, and ProPT must say so.
-- **The client's confirmation reuses the calendar invitation** of §45.13, so the server sends no
-  e-mail.
-
-**Waits on Simon:** whether to build it, after the trainer conversations §90.9's plan proposes.
-
-### 90.11 [ ] Idea: an MCP endpoint that reads and changes a trainer's data — not designed
-
-**Recorded 2026-10-12 23:37:54.906 (Simon's idea, for ProPT):** an MCP endpoint (Model Context
-Protocol, the way an AI assistant such as Claude calls outside tools) through which a trainer's
-assistant reads the trainer's data and changes it, for example "which clients have not trained for
-three weeks" or "move Tuesday's sessions to Wednesday". Nothing is designed.
-
-**Open questions, none answered:**
-- **Where the data comes from.** §90.10 keeps clients, sessions, plans and invoices on the phone and in
-  the trainer's Drive; ProPT's server holds only open slots and booking requests. An endpoint on that
-  server would need the trainer's Drive access, which ends §90.10's "nothing on the server but booking
-  requests". A browser app on a phone cannot itself serve an endpoint.
-- **What a change may do.** The app sets no training targets: an assistant that writes a plan must
-  write only what the trainer dictates, never a load, reps or sets it works out itself.
-- **Health data.** Injuries and medical notes would reach the assistant's provider; this needs the
-  trainer's and the client's consent (the consent texts are §97), and a way to leave those fields out.
-- **Who may connect, with which rights**, and how the trainer takes the access back.
+It was moved whole, §90.1–§90.11, to the private `~/Projects/EnterprisePT` project, `TODO.md` §21,
+on 2026-10-12: this repository holds nothing about ProPT or EnterprisePT.
 
 ## 91. [ ] The pipeline is slower than it needs to be — measured 2026-09-30
 
