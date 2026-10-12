@@ -5167,7 +5167,9 @@ mesec) — vse ocena 0, vse v »Opombe« ali zunaj aplikacije. Minute so trenerj
 termin odstrani s plošče in program premakne med nedodeljene (»Individualna vadba · TEST Ana Novak«);
 napis gumba te posledice ne pove, evidence odpovedi ni. Pri skupini velja za cel trening; za eno
 stranko, ki ni prišla, je le »Odstrani s tega treninga: <ime>«, ki sprosti mesto in o odsotnosti ne
-pusti nič. Zapis prisotnosti po strankah je pogoj tudi za skupine.
+pusti nič. Zapis prisotnosti po strankah je pogoj tudi za skupine. **2026-10-12:** stranko, ki ni
+prišla, trener zdaj označi z »Ni na vadbi: <ime>« v meniju ⋯ beležnice (zapis `noShow`, §94 točka 2);
+zapisa pozne odpovedi in zneska še ni.
 
 Dan 11 (2026-10-01): pozna odpoved (17,50 €) in neprihod (35 €) — ocena 0. »Ni se zgodil« in »Izbriši
 trening« le izbrišeta termin, brez sledi in zneska; trener: »zamudim 17,50 do 35 EUR vsakič, ko pozabim
@@ -6088,6 +6090,13 @@ izpopolni s Simonom** — odprta vprašanja:
    zaključek pokaže kratek povzetek (»opravljeno 5, preskočeno 1«) z možnostjo popravka?
 2. **Udeleženec, ki ga ni bilo.** Privzeto opravljeno pri skupini pomeni, da je bil vsak udeleženec
    prisoten in da se mu obisk šteje (kasneje paketi v ProPT). Potreben je »Ni prišel« za stranko.
+   **[x] Izdelano 2026-10-12** (Simon: »Nekdo, ki ni prišel na vadbo, ne more imeti beleženih vaj.«):
+   meni ⋯ na beležnici ima vrstico »Ni na vadbi: <ime>«. Zapiše prisotnost `noShow` za termin, zavihek
+   stranke dobi napis »ni na vadbi«, namesto kartic je obvestilo z gumbom »Je na vadbi«. Kar je bilo
+   zanjo že zabeleženo (serije, signali), se po vprašanju izbriše. Zaključek ji ne zapiše treninga,
+   njen program ostane med nenačrtovanimi programi. `consumesQuota: false` — ali neprihod porabi
+   obisk paketa, odloči Simon, ko bodo paketi. Odprto: zgodovina stranke odsotnosti še ne prikaže;
+   po zaključenem treningu se odsotnosti ne da več označiti.
 3. **Trening, končan predčasno.** Ali vaje, do katerih trener ni prišel, štejejo kot opravljene ali
    kot nedosežene?
 4. **Zapis.** »Opravljeno po načrtu« naj bo v podatkih ločeno od serije, ki jo je trener vpisal, da se
