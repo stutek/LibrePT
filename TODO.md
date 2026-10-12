@@ -5920,6 +5920,44 @@ session); not built. What it says that touches this repository:
 
 **Waits on Simon:** whether to build it, after the trainer conversations §90.9's plan proposes.
 
+### 90.11 [~] Memberships and bought session packages — staged in PREVIEW 2026-10-12
+
+**Asked by Simon 2026-10-12:** add a client's monthly and yearly membership and a bought number of
+sessions, all in the PREVIEW schema, for ProPT, and find the real scenarios first.
+
+**Done:** twelve scenarios from Slovenian price lists, studio software help pages and the simulated
+trainer weeks ([UC10](use_cases/uc10_memberships_and_session_packages.md)); the collections
+`clientMemberships` and `sessionPackages` in `SCHEMA_PREVIEW` only
+([recordSchemas.js](src/data/recordSchemas.js)); the rules for which one a session uses and what is
+left ([membershipsAndPackages.js](src/domain/membershipsAndPackages.js)), computed from attendance
+when read, never stored; erasure takes the name out of their notes and keeps the counts.
+
+**This changes two earlier designs, by Simon's request:**
+
+- §68's first bullet ("nothing here changes shape for it") and §90.8 decision 1: the records are
+  declared in THIS app's schema, not in the overlay.
+- §90.6's `propt.package` kind: a package is an ordinary readable collection, not an opaque payload.
+  The opaque, sealed envelope stays the design for invoices, which the law requires to be kept
+  unchanged; a package is not such a record.
+
+**Not built, and why:**
+
+- **No screen.** A PREVIEW collection reaches no backup and is emptied when a preview install's
+  build changes, so anything a trainer typed would be lost. A screen comes with a schema number.
+- **No money** (price, payment, payer): that is the invoice's (§90.6).
+- **Not in the client's data export** (Art. 15): `clientDataExport.js` lists what it exports; the two
+  collections must be added when they get a number. Attendance is not in it either today.
+
+**Waits on Simon:**
+
+1. A schema number for the two collections (the PREVIEW rule in AGENT_RULES), and with it the
+   screens: on the client's page, what they have and what is left; when a package is bought, a short
+   form; on the session card, "not covered" when nothing covers a session.
+2. Whether a no-show uses up a session by default (today `consumesQuota: false`, §94 point 2), and
+   whether a late cancellation writes an attendance row at all (today it writes none).
+3. Free or ProPT: the screens that show a balance in the free app, or only in ProPT (§86.6's open
+   question).
+
 ## 91. [ ] The pipeline is slower than it needs to be — measured 2026-09-30
 
 Last green CI run (36063598211): 20 min; Stage 3 alone 12 min (e2e 675s, demo 472s). Local `build
@@ -5947,6 +5985,17 @@ Stage 3's length. The longest demo test, `test_every_tap_show_me_performs_is_dra
    that shows only while the hand travels is found by nobody. One full-motion walk costs ~2.5 min of
    worker time (~3s × 48 steps). Decide whether it runs, and where (the gate, or a scheduled workflow
    like `google-canary.yml`).
+5. **[ ] Defect, seen 2026-10-12: two demo tests fail as the first test of a worker under load, and
+   pass alone.** Gate of 15:31 (HEAD `9c6e6ff` plus the PREVIEW memberships, which change no screen):
+   `test_demo_tour.py::test_every_scripted_step_runs_and_passes` — "a press on … `.circuit-card` lands
+   on nothing (the point 640,877 is outside the window)"; `test_demo_story.py::test_the_whole_story_can_be_walked_in_slovenian`
+   — stuck at step 28, "Pritisni ⋮", the session menu not open. Both passed alone at 16:16, also
+   reading PREVIEW. The same morning `test_walking_back_every_tap_show_me_makes_is_drawn[chromium-gym]`
+   failed the same way in a parallel run and passed alone. Something in the tour waits for time
+   instead of for a state; find which wait.
+6. **[ ] Defect, found 2026-10-12: `python -m build --help` runs the whole gate** in the working tree
+   instead of printing how to use it, and takes the lock. Killed by a timeout, it left the lock behind
+   with a dead pid. An unknown argument should print the usage and exit.
 
 ## 92. [ ] The peek gesture becomes an L, the deck holds one session, and the demo shows a drag
 
