@@ -6685,27 +6685,14 @@ obljublja. Razlogi in davčna vprašanja so v zasebnem tržnem načrtu (§90.9).
 
 ## 107. [ ] Dva primera za prihodnje raziskovalno testiranje: ukraden telefon in dve napravi
 
-**Naročil Simon 2026-10-10.** Oba sta v besednjaku oznak veščine `exploratory-test` (`ukraden-telefon`,
-`dve-napravi`), da ju izmišljeni tedni vključijo. Tedni 2026-10-10 ju še niso imeli.
+**Naročil Simon 2026-10-10.** Primera, z različico ukradenega telefona, ko nov telefon že bere
+novejšo shemo, so od 2026-10-12 preizkusi v `tests/exploratory/scenarios/` (`ukraden-telefon.md`,
+`ukraden-telefon-nova-shema.md`, `dve-napravi.md`): vsak pove, na katerem tednu teče, kaj preizkus
+odgovori in kaj so našli dosedanji teki.
 
-**Ukraden telefon.** Trenerju sredi tedna ukradejo telefon. Preizkus odgovori: kaj od tedna ostane in
-od kod (zadnja kopija v datoteki, Google Drive); koliko stane, da je na novem telefonu spet vse
-(§88.14: obnovitev je šele za uvodom, ki sprašuje, kar je v kopiji); ali trener ve geslo šifrirane
-kopije (§80.136); kaj se zgodi s podatki strank na ukradenem telefonu, med njimi z zdravstvenimi
-opombami (§97), in ali lahko trener ukradenemu telefonu odvzame dostop do Drive.
-
-**Različica ukradenega telefona: medtem je prišla nova različica aplikacije** (Simon, 2026-10-10).
-Ukradeni telefon je delal na sproščeni shemi, kopija je v njeni obliki; nov telefon odpre aplikacijo,
-ki že bere novejšo shemo. Preizkus odgovori, ali obnovitev prenese vse in kaj trener vidi. Orodje to
-posnema z izbiro sheme, ki jo naprava bere (`librept_read_schema`): telefon A na `6`, telefon B na
-`PREVIEW` (preverjeno 2026-10-10: na `166d3c8` sta živi `6` in `PREVIEW`, privzeta je `6`).
-
-**Dve napravi.** Trener zvečer na računalniku sestavi načrte za teden, zjutraj na telefonu vodi
-trening. Preizkus odgovori: kako načrti pridejo na telefon (sinhronizacija, datoteka); kaj se zgodi,
-če isti načrt uredi na obeh; ali je urejanje na širokem zaslonu sploh udobno (aplikacija je stolpec
-širine 480 pik). Orodje to zmore z dvema brskalnikoma (`EXPLORE_PORT`) in z oknom 1280 × 800 za
-računalnik. **Meja:** orodje se ne more prijaviti v Google (Google samodejne brskalnike zavrne), zato
-pot prek Drive preveri Simon ročno z `LibrePT.test@gmail.com`; orodje preveri pot prek datoteke.
+**[ ] Pot prek Google Drive preizkusi Simon ročno** z `LibrePT.test@gmail.com`: orodje se v Google ne
+more prijaviti (Google samodejne brskalnike zavrne), zato preizkusi preverijo le pot prek datoteke.
+Pri ukradenem telefonu še: ali lahko trener ukradenemu telefonu odvzame dostop do Drive.
 
 ### 107.1 [ ] Izid prvega preizkusa obeh primerov, 2026-10-10
 
@@ -6777,3 +6764,15 @@ po vrednosti:
 
 **Ne avtomatizirati:** samega tedna z jezikovnim modelom v CI. Je drag, počasen in vsakič drugačen;
 njegova vrednost je, da najde, česar nihče ni pričakoval, in to se ne ponovi na ukaz.
+
+## 109. [ ] GitHub: zapreti zahtevo #9 in izbrisati združene veje — čaka na Simona
+
+**Zapisano 2026-10-12 23:57:24.789.** Veje zahtev #6–#9 in `feat/release-thanks` so v lokalnem `main`
+(združitvi `f223955f` in `8de670b2`, gate zelen v vseh petih stopnjah), ki še ni na GitHubu. Teden
+`trials/weeks-2026-10-10` je predelan v `tests/exploratory/`. Vrstni red:
+1. Simon: `git push origin main`. Zahteve #6, #7 in #8 se nato same označijo kot združene.
+2. Po Simonovi odobritvi: zahtevo #9 zapreti s komentarjem, da je v `main` prepisana različica
+   (`f223955f`), in izbrisati deset vej na GitHubu: `feat/cloud-session-explore`,
+   `fix/build-watch-short-sha`, `fix/demo-drag-press-lands-on-card`, `fix/e2e-session-card-timezone`,
+   `feat/week-trials`, `fix/week-defects`, `fix/stolen-phone`, `fix/week-defects-2`,
+   `feat/release-thanks`, `trials/weeks-2026-10-10`.
