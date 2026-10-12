@@ -168,7 +168,7 @@ export const sl = {
     "Privolitev preklicana {date} — te stranke ne moreš dodati na nov trening",
   remove_participant: "Odstrani s tega treninga:",
   select_routine_for: "Rutina za to stranko",
-  btn_launch_clipboard: "Odpri v beležki",
+  btn_launch_clipboard: "Odpri v beležnici",
   err_select_client: "Izbrati moraš vsaj eno stranko.",
   err_assign_routine: "Izberi rutino za vsako izbrano stranko.",
   add_ex_session_title: "Vstavi vajo na vadbišču",
@@ -488,7 +488,7 @@ export const sl = {
   sessions_schedule: "Treningi",
   btn_sync_calendar: "Sinhroniziraj",
   spots_filled: "mest zasedenih",
-  btn_launch_clipboard_short: "Odpri v beležki",
+  btn_launch_clipboard_short: "Odpri v beležnici",
   filter_dates: "Datumi",
   filter_client: "Stranka",
   filter_location: "Lokacija",
@@ -633,7 +633,7 @@ export const sl = {
     "Datoteka z vabilom v koledar se je pravkar prenesla — pred pošiljanjem jo priloži temu e-poštnemu sporočilu.",
   schedule_conflict_double_booked: "Takrat imaš že nekaj drugega",
   schedule_conflict_busy_elsewhere: "Tvoj koledar kaže zasedenost",
-  schedule_conflict_merged: "Poteka vzporedno — odpre se kot ena podloga",
+  schedule_conflict_merged: "Poteka vzporedno — odpre se v eni beležnici",
   schedule_conflict_confirm:
     "Ta termin se prekriva z nečim, kar že imaš. Želiš trening vseeno razporediti?",
   session_start_time_title: "Trening se je začel izven urnika",
@@ -660,7 +660,7 @@ export const sl = {
   demo_cleanup_exercises: "vzorčnih vaj",
   demo_cleanup_notifications: "vzorčnih obvestil",
   demo_cleanup_remove: "Odstrani",
-  splash_tagline: "Lahek in brezplačen pripomoček za tvojo podlogo, treninge in programe vadbe.",
+  splash_tagline: "Lahek in brezplačen pripomoček za tvojo beležnico, treninge in programe vadbe.",
   splash_dismiss: "Zapri in pojdi v aplikacijo",
   splash_loading: "Nalaganje LibrePT",
   notification_area_label: "Središče obvestil in trenutni trening",
@@ -711,12 +711,12 @@ export const sl = {
     "Zadnje dejanje ni bilo korak ogleda. Z »Nazaj v demo« nadaljuješ tam, kjer si bil, s »Ustavi demo« ga končaš.",
   walkthrough_return: "Nazaj v demo",
   walkthrough_leave: "Ustavi demo",
-  walkthrough_finished: "To je celoten krog — en trening, ena podloga, štirje dotiki.",
+  walkthrough_finished: "To je celoten krog — en trening, ena beležnica, štirje dotiki.",
   walkthrough_wrong_place:
     "Ta korak potrebuje drug zaslon — vrni se na pregled treningov in ga zaženi znova.",
   walkthrough_stuck:
     "Tega koraka ni bilo mogoče zaključiti. Zapri vodeni ogled in raziskuj naprej — tvoji podatki so nedotaknjeni.",
-  tour_step_open_session: "Odpri skupinski trening. Ena podloga pokriva vse v njem.",
+  tour_step_open_session: "Odpri skupinski trening. Ena beležnica pokriva vse v njem.",
   tour_step_focus_exercise:
     "Dotakni se kroga, da pride v fokus. Njegovi gumbi pridejo na doseg palca.",
   tour_step_signal: "Označi krog kot prelahek. En dotik ga zabeleži in pusti opombo za načrt.",
@@ -837,7 +837,7 @@ export const sl = {
   // aplikacija tika, tikanje pa je v slovenščini spolsko določeno, zato "(-la)" in ne množina.
   story_welcome_title: "LibrePT te pozdravlja",
   story_welcome_body:
-    "LibrePT je aplikacija za osebne trenerje: termini, načrti treningov in beležka med vadbo. V tem ogledu povabiš tri nove stranke, pripraviš torkov trening in ga med vadbo prilagodiš. Vse se dogaja v peskovniku, ločeni kopiji z izmišljenimi strankami. Tvojih pravih strank, terminov in vadb ne spremeni.",
+    "LibrePT je aplikacija za osebne trenerje: termini, načrti treningov in beležnica med vadbo. V tem ogledu povabiš tri nove stranke, pripraviš torkov trening in ga med vadbo prilagodiš. Vse se dogaja v peskovniku, ločeni kopiji z izmišljenimi strankami. Tvojih pravih strank, terminov in vadb ne spremeni.",
   story_step_welcome:
     "Z gumbom Pokaži mi ti vodnik pokaže dvoje: značko PESKOVNIK v zgornji vrstici in vrstico Zapusti peskovnik na vrhu menija ☰. Ponastavi podatke peskovnika je v meniju pod Nastavitve. Ko si pogledal, s Končaj zapreš kartico; naslednje poglavje izbereš v spodnjem seznamu. Kartico lahko kadar koli pospraviš z ikono ▾ v njenem zgornjem desnem kotu in aplikacijo preizkušaš brez vodenja; na vrstici, ki ostane, ogled končaš z ✕.",
   story_persona_trainer: "Tvoj telefon",
@@ -1298,7 +1298,7 @@ export const sl = {
   client_namesake_confirm: "Shrani brez vzdevka",
   // The client detail view (modules/clients/clientsView.js).
   view_grabber_home: "Nazaj na začetek",
-  view_grabber_clipboard: "Odpri podlogo treninga",
+  view_grabber_clipboard: "Odpri beležnico treninga",
   view_grabber_close_session: "Zapri trening in se vrni na začetek",
   profile_consent_label: "Privolitev GDPR za sinhronizacijo v oblak",
   profile_ai_safe_copy: "Kopija za AI brez imen",
