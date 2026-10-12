@@ -867,6 +867,16 @@ export const en = {
   bind_participants: "Everyone on this plan",
   unbind_participants: "Give everyone their own plan",
   bound_group_label: "Together",
+  mark_absent: "Not here today: {name}",
+  mark_present: "Here after all: {name}",
+  btn_mark_present: "Here after all",
+  absent_tab_mark: "not here",
+  absent_notice_title: "{name} is not here today",
+  absent_notice_body:
+    "Nothing is logged for a client who is not here. When you tap “{button}”, their plan is kept under Unscheduled plans.",
+  btn_mark_absent: "Not here today",
+  confirm_mark_absent:
+    "{name} has sets or signals logged in this training. Marking {name} as not here deletes them.",
   plan_fit_hint: "Estimated working time against the session slot, rests excluded",
   plan_fit_over: "over",
   plan_fit_tight: "tight",

@@ -45,6 +45,7 @@ import {
   mergeAppDeps,
 } from "./activeSessionStore.js";
 import { initPlanPeekController, refreshPlanPeek } from "./planPeekController.js";
+import { absentParticipants, toggleAbsence } from "./sessionAbsence.js";
 import { buildCircuitUnits, completeCircuitRound } from "./sessionCircuits.js";
 import {
   activateExerciseByScroll,
@@ -195,6 +196,10 @@ initActiveSessionBoard({
   activateExerciseByScroll,
   startRestTimer: (seconds, type, label) => startClientTimer(seconds, type, label),
   newRecordId,
+  absentParticipants: () => absentParticipants(),
+  toggleAbsence: async (clientId) => {
+    if (await toggleAbsence(clientId)) renderActiveGroupBoard();
+  },
 });
 
 // The board render itself lives in modules/clipboard/activeSessionBoard.js. Kept as a
@@ -415,6 +420,15 @@ function wireSessionMenuAndActions(t) {
   document.getElementById("btn-bind-participants")?.addEventListener("click", () => {
     closeSessionMenu();
     toggleParticipantBinding();
+  });
+
+  // The client on screen did not come, or came after all. One row that says which way it goes now,
+  // as the binding row does; activeSessionBoard.js labels it and offers it only on a booked session.
+  document.getElementById("btn-mark-absent")?.addEventListener("click", async () => {
+    closeSessionMenu();
+    const activeSession = getActiveSession();
+    if (!activeSession) return;
+    if (await toggleAbsence(activeSession.activeClientId)) renderActiveGroupBoard();
   });
 
   document.getElementById("btn-delete-session")?.addEventListener("click", async () => {

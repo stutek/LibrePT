@@ -169,6 +169,12 @@ export function renderActiveSessionOverlayShell() {
             <button id="btn-bind-participants" class="session-menu-item" role="menuitem">
               <i class="fa-solid fa-link"></i> <span data-i18n="bind_participants">Everyone on this plan</span>
             </button>
+            <!-- The client on screen did not come: nothing is logged for them, and finishing keeps
+                 their program as a plan. The same row takes the mark back. Labelled with the client's
+                 name and offered only on a booked session (activeSessionBoard.js). -->
+            <button id="btn-mark-absent" class="session-menu-item hidden" role="menuitem">
+              <i class="fa-solid fa-user-xmark"></i> <span></span>
+            </button>
             <!-- Give someone else tonight's plan — the walk-in who joins a session
                  already underway. A COPY, not a binding: it diverges the moment either plan is
                  edited, which is what a trainer wants when two people do the same session at their

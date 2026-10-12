@@ -821,6 +821,16 @@ export const sl = {
   bind_participants: "Vsi na ta načrt",
   unbind_participants: "Vsak svoj načrt",
   bound_group_label: "Skupaj",
+  mark_absent: "Ni na vadbi: {name}",
+  mark_present: "Je na vadbi: {name}",
+  btn_mark_present: "Je na vadbi",
+  absent_tab_mark: "ni na vadbi",
+  absent_notice_title: "{name} ni na vadbi",
+  absent_notice_body:
+    "Za stranko, ki je ni na vadbi, se nič ne beleži. Ko tapneš »{button}«, se njen program ohrani med nenačrtovanimi programi.",
+  btn_mark_absent: "Ni na vadbi",
+  confirm_mark_absent:
+    "{name} ima na tem treningu zabeležene serije ali signale. Če označiš, da ni na vadbi, se ti zapisi izbrišejo.",
   plan_fit_hint: "Ocenjen delovni čas glede na trajanje termina, brez premorov",
   plan_fit_over: "čez",
   plan_fit_tight: "na tesnem",

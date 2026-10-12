@@ -229,6 +229,38 @@ export function recordTrainings(state, records, { sessionIds = [] } = {}) {
 }
 
 /**
+ * Record that a client did not come to the booked slot made of `sessionIds`, on the row they were
+ * booked on. Nothing is logged for an absent client, and finishing the session leaves their program
+ * waiting as a plan. The visit uses up nothing of their package: whether a missed visit counts is the
+ * trainer's decision, and nothing in the app makes it yet.
+ */
+export function markAbsent(state, sessionIds, clientId) {
+  const session = sessionOf(state, sessionIds, clientId);
+  if (!session) return;
+  const id = `at-${session.id}-${clientId}`;
+  const row = { id, sessionId: session.id, clientId, status: "noShow", consumesQuota: false };
+  const rows = attendance(state);
+  const index = rows.findIndex((existing) => existing.id === id);
+  if (index === -1) rows.push(row);
+  else rows[index] = row;
+}
+
+/** Take back `markAbsent`: the client is at the slot after all. */
+export function markPresent(state, sessionIds, clientId) {
+  state.sessionAttendance = attendance(state).filter(
+    (row) =>
+      !(row.clientId === clientId && row.status === "noShow" && sessionIds.includes(row.sessionId)),
+  );
+}
+
+/** The clients marked absent from the booked slot made of `sessionIds`. */
+export function absentClientIds(state, sessionIds) {
+  return (state?.sessionAttendance || [])
+    .filter((row) => row.status === "noShow" && sessionIds.includes(row.sessionId))
+    .map((row) => row.clientId);
+}
+
+/**
  * Store the programs of a session that is not finished, one per participant, each under the id the
  * clipboard keeps for it, so saving again replaces what is held instead of adding a program.
  *

@@ -18,6 +18,22 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-10-12 — A client who did not come
+
+### Added
+
+- **A client can be marked as not here.** The ⋯ menu on the training screen has *Not here today: <name>*
+  for the client on screen. Their tab then says *not here*, and their exercise cards are replaced by a
+  notice with *Here after all*, which takes the mark back. Nothing can be logged for them; sets or
+  signals already logged are deleted, after a question. When the training is completed, they get no
+  training record, their plan is kept under Unscheduled plans, and the session records them as absent.
+  The mark is kept after a reload.
+
+### Changed
+
+- **The Slovenian name of the training screen is *beležnica*.** It was called *podloga* in some texts
+  and *beležka* in others, and neither told a trainer that both meant the same screen.
+
 ## 2026-10-11 — What six more trainer weeks found
 
 ### Changed
