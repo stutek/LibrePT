@@ -417,6 +417,26 @@ export const SCHEMA_6 = {
   },
 };
 
+// The words the PREVIEW memberships and packages below may hold. "individual" is a session with one
+// participant and "group" one with more: the app has no kind of session, so it is read from who came.
+export const MEMBERSHIP_PERIODS = ["month", "year"];
+export const MEMBERSHIP_PERIODS_FROM = ["calendar", "startDate"];
+export const CARRY_OVER = ["none", "nextPeriod", "always"];
+export const PACKAGE_VALID_FROM = ["purchase", "firstSession", "date"];
+export const VALIDITY_UNITS = ["day", "week", "month"];
+export const COVERED_SESSION_KINDS = ["any", "individual", "group"];
+
+// A pause of a membership or a package: a holiday, an illness. A session on a paused day is not
+// covered by it. `extendsEnd` moves the end date by the length of the pause; it is a stored choice,
+// because most studios move it and German consumer law forbids it for a contract paused for a
+// pregnancy. Both days are included.
+const PAUSE_SHAPE = {
+  startsOn: { required: true, type: "string" },
+  endsOn: { required: true, type: "string" },
+  reason: { required: false, type: "string" },
+  extendsEnd: { required: true, type: "boolean" },
+};
+
 // The PREVIEW shape: for CI and for previewing an upcoming version, never a step in the
 // migration chain. It is provisioned and written like any live schema — Simon, 2026-09-17: PREVIEW
 // uses the same mechanism as released schemas — and rebuilt from the stable schema when the build
@@ -433,6 +453,57 @@ export const SCHEMA_PREVIEW = {
     clientId: { required: true, type: "string" },
     createdAt: { required: false, type: "string" }, // ISO-8601 UTC instant, never a local date
     text: { required: true, type: "string" },
+  },
+
+  // A CLIENT'S MEMBERSHIP, by the month or by the year (Simon, 2026-10-12, for ProPT). Staged here
+  // until Simon orders a number: a screen that wrote it today would lose it, because a PREVIEW
+  // collection reaches no backup and is emptied when a preview install's build changes. Every field
+  // answers a scenario of use_cases/uc10_memberships_and_session_packages.md; which session a
+  // membership covers is computed when it is read (domain/membershipsAndPackages.js), never stored.
+  // No money: price and payment are the invoice's. Dates are calendar days, YYYY-MM-DD.
+  //
+  // `periodsFrom` "calendar" counts each period from the first of the month (or of the year);
+  // "startDate" from the day it started. No `endsOn`: it continues until the trainer ends it. No
+  // `sessionsPerPeriod` and no `sessionsPerWeek`: unlimited. `carryOver` says what happens to
+  // sessions not used in a period; absent is "none".
+  clientMemberships: {
+    id: { required: true, type: "string" },
+    clientId: { required: true, type: "string" },
+    period: { required: true, type: "string", values: MEMBERSHIP_PERIODS },
+    periodsFrom: { required: true, type: "string", values: MEMBERSHIP_PERIODS_FROM },
+    startsOn: { required: true, type: "string" },
+    endsOn: { required: false, type: "string" },
+    sessionsPerPeriod: { required: false, type: "number" },
+    sessionsPerWeek: { required: false, type: "number" },
+    carryOver: { required: false, type: "string", values: CARRY_OVER },
+    forSessions: { required: false, type: "string", values: COVERED_SESSION_KINDS },
+    pauses: { required: false, type: "array", items: PAUSE_SHAPE },
+    note: { required: false, type: "string" },
+    createdAt: { required: false, type: "string" }, // ISO-8601 UTC instant
+  },
+
+  // A NUMBER OF SESSIONS A CLIENT BOUGHT ("10 sessions, valid 2 months"), staged here for the same
+  // reason and on the same rules as `clientMemberships` above. `validFrom` says when the validity
+  // starts: on `boughtOn`, at the first session it covers, or on `startsOn`. It lasts
+  // `validForCount` `validForUnit`s; neither means it never ends. `validUntil`, when set, is the last
+  // valid day and wins: the trainer moved it. `sharedWith` names the other clients who may use it;
+  // `onePerSession` makes a session they attend together use one, as a pair package does.
+  sessionPackages: {
+    id: { required: true, type: "string" },
+    clientId: { required: true, type: "string" },
+    sessions: { required: true, type: "number" },
+    boughtOn: { required: true, type: "string" },
+    validFrom: { required: true, type: "string", values: PACKAGE_VALID_FROM },
+    startsOn: { required: false, type: "string" },
+    validForCount: { required: false, type: "number" },
+    validForUnit: { required: false, type: "string", values: VALIDITY_UNITS },
+    validUntil: { required: false, type: "string" },
+    forSessions: { required: false, type: "string", values: COVERED_SESSION_KINDS },
+    sharedWith: { required: false, type: "array" },
+    onePerSession: { required: false, type: "boolean" },
+    pauses: { required: false, type: "array", items: PAUSE_SHAPE },
+    note: { required: false, type: "string" },
+    createdAt: { required: false, type: "string" }, // ISO-8601 UTC instant
   },
 
   // A collection ONLY this shape declares, so staging is always exercised by the real schemas: a

@@ -384,6 +384,120 @@ test("the records of one group training validate clean in the new session model"
   }
 });
 
+// Memberships and bought session packages, asked for by Simon on 2026-10-12 for ProPT and staged in
+// PREVIEW only (use_cases/uc10_memberships_and_session_packages.md).
+test("memberships and session packages are staged in PREVIEW, not in a numbered schema", () => {
+  for (const collection of ["clientMemberships", "sessionPackages"]) {
+    assert.ok(m.SCHEMA_PREVIEW[collection], `${collection} is not in PREVIEW`);
+    assert.equal(m.SCHEMA_6[collection], undefined, `${collection} reached schema 6`);
+  }
+});
+
+test("the memberships and packages of the use cases validate clean", () => {
+  const records = {
+    clientMemberships: [
+      // S4 and S6: a calendar month with 8 sessions; S7: unused ones kept for the next month.
+      {
+        id: "m1",
+        clientId: "ana",
+        period: "month",
+        periodsFrom: "calendar",
+        startsOn: "2026-10-01",
+        sessionsPerPeriod: 8,
+        carryOver: "nextPeriod",
+      },
+      // S5 and S8: a year with a fixed end, paused four weeks for an injury.
+      {
+        id: "m2",
+        clientId: "tone",
+        period: "year",
+        periodsFrom: "startDate",
+        startsOn: "2026-03-12",
+        endsOn: "2027-03-11",
+        forSessions: "group",
+        pauses: [
+          { startsOn: "2026-10-05", endsOn: "2026-11-01", reason: "injury", extendsEnd: true },
+        ],
+      },
+    ],
+    sessionPackages: [
+      // S1: 8 sessions, valid 2 months from the purchase.
+      {
+        id: "k1",
+        clientId: "ana",
+        sessions: 8,
+        boughtOn: "2026-10-12",
+        validFrom: "purchase",
+        validForCount: 2,
+        validForUnit: "month",
+      },
+      // S2 and S3: from the first session, moved by hand; S9 and S10: a pair package for two.
+      {
+        id: "k2",
+        clientId: "maja",
+        sessions: 8,
+        boughtOn: "2026-10-12",
+        validFrom: "firstSession",
+        validForCount: 90,
+        validForUnit: "day",
+        validUntil: "2027-02-01",
+        sharedWith: ["rok"],
+        onePerSession: true,
+        forSessions: "individual",
+        note: "Excused miss allowed once.",
+      },
+    ],
+  };
+  for (const [collection, rows] of Object.entries(records)) {
+    for (const row of rows) {
+      assert.deepEqual(
+        m.fieldIssues(row, m.SCHEMA_PREVIEW[collection]),
+        [],
+        `${collection} ${row.id}`,
+      );
+    }
+  }
+});
+
+test("a period, a validity or a pause in words the rules do not read is refused", () => {
+  const membership = {
+    id: "m1",
+    clientId: "ana",
+    period: "month",
+    periodsFrom: "calendar",
+    startsOn: "2026-10-01",
+  };
+  assert.notDeepEqual(
+    m.fieldIssues({ ...membership, period: "monthly" }, m.SCHEMA_PREVIEW.clientMemberships),
+    [],
+  );
+  assert.notDeepEqual(
+    m.fieldIssues({ ...membership, carryOver: "yes" }, m.SCHEMA_PREVIEW.clientMemberships),
+    [],
+  );
+  // A pause must say whether it moves the end date: German consumer law forbids it for some.
+  assert.notDeepEqual(
+    m.fieldIssues(
+      { ...membership, pauses: [{ startsOn: "2026-10-05", endsOn: "2026-10-12" }] },
+      m.SCHEMA_PREVIEW.clientMemberships,
+    ),
+    [],
+  );
+  const pack = { id: "k1", clientId: "ana", sessions: 10, boughtOn: "2026-10-12" };
+  assert.notDeepEqual(
+    m.fieldIssues(
+      { ...pack, validFrom: "purchase", validForUnit: "months" },
+      m.SCHEMA_PREVIEW.sessionPackages,
+    ),
+    [],
+  );
+  assert.notDeepEqual(
+    m.fieldIssues(pack, m.SCHEMA_PREVIEW.sessionPackages),
+    [],
+    "validFrom is required",
+  );
+});
+
 test("a status outside its words is refused, so a misspelt one cannot hide a training", () => {
   const program = { id: "p1", clientId: "ana", status: "Done", exercises: [] };
   assert.deepEqual(m.fieldIssues(program, m.SCHEMA_6.clientPrograms), [

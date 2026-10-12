@@ -588,7 +588,12 @@ program id), and each member still has their own copy.
 **Attendance** (`sessionAttendance`) says whether a client came and whether the session uses up one
 of their package. A note about an exercise of a program is an **exercise note** (`exerciseNotes`:
 the tag by its id, `review` none, pending or resolved); a note about the person is a **client note**
-(`clientNotes`, still only in PREVIEW: no screen writes it yet). Every status field lists the words it
+(`clientNotes`, still only in PREVIEW: no screen writes it yet). A client's **membership** by the month
+or the year (`clientMemberships`) and a **package** of sessions they bought (`sessionPackages`) are in
+PREVIEW only too, staged for ProPT on 2026-10-12: which one a session uses is computed from the
+attendance rows when it is read ([membershipsAndPackages.js](../src/domain/membershipsAndPackages.js)),
+never stored, and neither holds a price or a payment
+([UC10](../use_cases/uc10_memberships_and_session_packages.md)). Every status field lists the words it
 may hold (`values` in [recordSchemas.js](../src/data/recordSchemas.js)), and the validator refuses
 any other. Nothing writes `history` or `planUpdates` any more (schemas 4 and 5 are retired); everything
 read from an older store, backup or sync file is converted on the way in

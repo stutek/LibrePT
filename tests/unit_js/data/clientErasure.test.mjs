@@ -325,10 +325,59 @@ test("the new session model: the work stays without the name, a note about the p
   );
 });
 
+test("an erased client's membership and package stay as counts, with the name out of their note", () => {
+  const before = {
+    ...stateWithTwoJanes(),
+    clientMemberships: [
+      {
+        id: "m1",
+        clientId: "c-jane-a",
+        period: "month",
+        periodsFrom: "calendar",
+        startsOn: "2026-10-01",
+        note: "Jane Doe pays on the 5th",
+      },
+    ],
+    sessionPackages: [
+      {
+        id: "k1",
+        clientId: "c-marko",
+        sessions: 8,
+        boughtOn: "2026-10-12",
+        validFrom: "purchase",
+        sharedWith: ["c-jane-a"],
+        note: "Pair package with Jane Doe",
+      },
+      {
+        id: "k2",
+        clientId: "c-jane-b",
+        sessions: 10,
+        boughtOn: "2026-10-12",
+        validFrom: "purchase",
+        note: "Jane Doe, second card",
+      },
+    ],
+  };
+  const { state } = eraseClientInState(before, "c-jane-a", {});
+  assert.equal(state.clientMemberships[0].note, "[c-jane-a] pays on the 5th");
+  assert.equal(state.clientMemberships[0].startsOn, "2026-10-01");
+  // Marko's package names her as the person he shares it with; his record keeps the id.
+  assert.equal(state.sessionPackages[0].note, "Pair package with [c-jane-a]");
+  assert.deepEqual(state.sessionPackages[0].sharedWith, ["c-jane-a"]);
+  // The other Jane's package is hers.
+  assert.equal(state.sessionPackages[1].note, "Jane Doe, second card");
+});
+
 test("an install without the new collections is not given empty ones", () => {
   const { clientPrograms: _programs, exerciseNotes: _notes, ...withoutThem } = stateWithTwoJanes();
   const { state } = eraseClientInState(withoutThem, "c-jane-a", {});
-  for (const key of ["clientPrograms", "exerciseNotes", "clientNotes"]) {
+  for (const key of [
+    "clientPrograms",
+    "exerciseNotes",
+    "clientNotes",
+    "clientMemberships",
+    "sessionPackages",
+  ]) {
     assert.equal(key in state, false, `${key} appeared`);
   }
 });

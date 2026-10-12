@@ -247,6 +247,17 @@ function sweptSeries(series, { clientId, name, marker, state, client, counters }
   return [{ ...kept, title: title.text }];
 }
 
+// The note of a membership or a package, without the erased client's name, on a record that is
+// theirs or is shared with them.
+function sweptNoteOf(row, { clientId, name, marker, state, client, counters }) {
+  const holders = [row.clientId, ...(Array.isArray(row.sharedWith) ? row.sharedWith : [])];
+  if (!holders.includes(clientId)) return row;
+  const note = scrubName(row.note, name, marker);
+  if (!note.hit || namesakeOnRecord(holders, state, client)) return row;
+  counters.scrubbedTextFields += 1;
+  return { ...row, note: note.text };
+}
+
 export function eraseClientInState(state, clientId, { requestedOn = "", now = new Date() } = {}) {
   const client = (state?.clients || []).find((candidate) => candidate.id === clientId);
   if (!client) return { state, summary: null };
@@ -332,6 +343,15 @@ export function eraseClientInState(state, clientId, { requestedOn = "", now = ne
     ...sweptCollection(state, "clientNotes", (rows) =>
       rows.filter((row) => row.clientId !== clientId),
     ),
+    // A membership or a package (PREVIEW) is a count of what was bought and stays, as a program does;
+    // only its note can carry the name. A package shared with the client is someone else's record
+    // naming them, so their id stays and the name in its note goes, unless a namesake is on it.
+    ...sweptCollection(state, "clientMemberships", (rows) =>
+      rows.map((row) => sweptNoteOf(row, { clientId, name, marker, state, client, counters })),
+    ),
+    ...sweptCollection(state, "sessionPackages", (rows) =>
+      rows.map((row) => sweptNoteOf(row, { clientId, name, marker, state, client, counters })),
+    ),
   };
 
   return {
@@ -361,6 +381,8 @@ export const SWEPT_COLLECTIONS = [
   "clientPrograms",
   "exerciseNotes",
   "clientNotes",
+  "clientMemberships",
+  "sessionPackages",
 ];
 
 // Every other collection a live schema declares, and why an erasure leaves it alone.
