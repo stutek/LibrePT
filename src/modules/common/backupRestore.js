@@ -18,10 +18,7 @@
 //   getState(),
 //   setState(newState),
 //   saveToLocalStorage(),
-//   renderClientsList(),
-//   renderRoutinesList(),
-//   renderExercisesList(),
-//   populateDropdownSelectors(),
+//   renderEverything(),          // every view a restore replaces: the schedule, the lists, the badges
 //   openEncryptedFileReader(),   // the dialog's "Open an encrypted file" card
 //   t
 // }
@@ -82,6 +79,10 @@ async function applyRestoredState(restored) {
   deps.saveToLocalStorage();
   pendingRestore = null;
   confirmedRestore = false;
+  // Everything, not a list of views: a restore replaces the whole database. Four named lists were
+  // redrawn here and the schedule was not, so a new phone said "Uvoz je uspel." over an empty
+  // schedule until a reload (stolen-phone trial, 2026-10-11).
+  deps.renderEverything();
   return reErased;
 }
 
@@ -341,9 +342,13 @@ export function renderBackupDialog() {
         </div>
       </div>
 
+      <!-- A backup is written at the schema the app reads (recordSchemas.js), so it holds everything
+           on screen; backupFormat.test.mjs fails if those part. Until 2026-10-11 this line said a
+           backup left out "anything added by this preview", and four of six trainer weeks read that
+           as their own data missing from the file. -->
       <p class="backup-preview-warning" id="backup-preview-warning">
         <i class="fa-solid fa-triangle-exclamation"></i>
-        <span id="backup-preview-warning-text" data-i18n="backup_preview_warning">This is a preview build. Backups and sync are written in the last stable format, so anything added by this preview is not included. Keep your own copy of anything you cannot lose.</span>
+        <span id="backup-preview-warning-text" data-i18n="backup_preview_warning">This is a preview build, and it can still lose data. A backup holds everything you see in the app, so export one regularly and keep it off this phone.</span>
       </p>
 
       <!-- What the number in the header counts, in words. Filled by driveSyncUi.js on every render. -->
@@ -356,13 +361,6 @@ export function renderBackupDialog() {
           <i class="fa-brands fa-google-drive backup-icon-large text-primary"></i>
           <h4 id="drive-sync-title" data-i18n="drive_sync_title">Cloud Backup (Google Drive)</h4>
           <p id="drive-sync-desc"></p>
-          <!-- Sync carries the SAME stable-format limitation as a downloaded backup, and needs the
-               warning more: an export is something a trainer chooses in the moment, while sync runs
-               unattended, so there is no point at which they would otherwise be told. -->
-          <p class="backup-preview-warning" id="drive-sync-preview-warning">
-            <i class="fa-solid fa-triangle-exclamation"></i>
-            <span id="drive-sync-preview-warning-text" data-i18n="drive_sync_preview_warning">Preview build: sync writes the last stable format, so anything this preview added is not mirrored.</span>
-          </p>
           <button id="btn-drive-connect" class="btn primary-btn w-full">
             <i class="fa-brands fa-google-drive"></i> <span id="btn-drive-connect-text"></span>
           </button>
@@ -484,10 +482,6 @@ export function setupBackupRestore() {
       const box = document.getElementById("restore-confirm");
       if (box) box.hidden = true;
       renderImportSuccess(summary, reErased);
-      deps.renderClientsList();
-      deps.renderRoutinesList();
-      deps.renderExercisesList();
-      deps.populateDropdownSelectors();
     });
   }
 
@@ -622,13 +616,6 @@ export function setupBackupRestore() {
               return;
             }
             const reErased = await applyRestoredState(restored);
-
-            // Re-render
-            deps.renderClientsList();
-            deps.renderRoutinesList();
-            deps.renderExercisesList();
-            deps.populateDropdownSelectors();
-
             if (importStatus) {
               importStatus.textContent = importSuccessText(
                 summary.applied.length > 0,

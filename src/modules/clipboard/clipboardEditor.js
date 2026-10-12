@@ -27,7 +27,7 @@
 
 import { newRecordId } from "../../data/recordId.js";
 import { collectCircuitsMeta, normalizeCircuits } from "../../domain/circuitGrouping.js";
-import { metricLabelKey, usesLoad } from "../../domain/exerciseModality.js";
+import { metricFormatHintKey, metricLabelKey, usesLoad } from "../../domain/exerciseModality.js";
 import { planFitsSlot } from "../../domain/planDuration.js";
 import {
   formatLoad,
@@ -136,7 +136,11 @@ function resolveExerciseFieldMeta(ex, tr) {
     unit,
     metric,
     modality,
-    primaryLabel: metric === "reps" ? tr("reps_label", "Reps") : tr(metricLabelKey(metric), metric),
+    primaryLabel: withFormatHint(
+      metric === "reps" ? tr("reps_label", "Reps") : tr(metricLabelKey(metric), metric),
+      metric,
+      tr,
+    ),
     // Points the reps combobox at the preset tier suited to this movement's pattern + load, so an
     // empty field suggests sensible values (the PT can still type any count/range/hold/"max").
     repsListId: repsPresetListId(ex.pattern, unit),
@@ -166,6 +170,12 @@ function buildLoadFieldHTML(ex, modality, unit, escapeHTML, tr) {
       ariaLabel: escapeHTML(tr("routine_row_load_label", "Load")),
     },
   )}</label>`;
+}
+
+// "time (min:s)": the field names the format it reads (exerciseModality.js, metricFormatHintKey).
+function withFormatHint(label, metric, tr) {
+  const hint = metricFormatHintKey(metric);
+  return hint ? `${label} (${tr(hint, "min:s")})` : label;
 }
 
 // The collapsed-row one-line summary: sets × reps/effort × load, the same shorthand the live deck's

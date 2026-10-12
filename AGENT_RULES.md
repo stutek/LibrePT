@@ -76,7 +76,11 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
 - **Text they hand over is a draft, not a quotation.** Fix its spelling, its terms and its
   inconsistencies rather than transcribing them, and say what you changed.
 - Answer a question; never record it as a decision, and never return with a plan for one they have
-  already made.
+  already made. **A message that opens with "record" asks for TODO entries, every item in it
+  included**, also one phrased as "add …"; build only what is asked for in so many words. On
+  2026-10-10 "Record a product idea … Also add a donation message …" was read as an order to build,
+  and three gate runs took the machine for two and a half hours while the work Simon had asked for
+  waited.
 - **Choose, do not offer a menu.** Where the options are wordings or approaches, pick the best one,
   do it, and report in a few lines what was chosen over what and why — a question costs a round trip
   they would rather spend correcting a concrete result. Ask only where proceeding either way would
@@ -84,6 +88,9 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
 - Read a message for ALL of its items before acting on any, and name them back.
 - Report what a person would SEE, not the mechanism. Quote a new or changed rule verbatim. Say which
   numbers were measured; `git ls-files` is the honest denominator.
+- **In work longer than an hour, report progress every 30 minutes without being asked**: what is
+  done, what is next, and the clock time of the next report. On 2026-10-11 Simon had to stop a
+  review to ask whether the work was still running.
 
 ## Execution
 
@@ -153,7 +160,8 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
   and palette parity, a new module for catalog coverage, doclinks and the service worker's precache
   list (`tests/unit/test_project_layout.py`), a new route for the overflow walk
   (`tests/e2e/test_layout_overflow.py::test_the_walk_still_covers_every_route`), a new icon for coverage and the
-  render baseline, new user-visible text for `ui_strings`, a closed `§` for `todo_hygiene`. The gate
+  render baseline, new user-visible text for `ui_strings`, a closed `§` for `todo_hygiene`, a new or
+  changed use case for `use_case_tests`, a comment that names a `§` for `todo_refs`. The gate
   PROVES a tree; it is not where facts are discovered. Five minutes spent learning a two-second fact
   is the maintainer's time, and the same five minutes blocks every other agent in the tree.
 - Zero warnings, not just zero failures; never swallow a non-zero exit code. Never silence a

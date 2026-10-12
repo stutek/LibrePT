@@ -204,6 +204,10 @@ function applyCardState(state) {
 function syncHubChangesText(status) {
   const t = (key) => deps?.t?.(key) || key;
   const lang = document.documentElement.lang;
+  // Nothing waiting is not the same as everything in Drive: on a device that never connected it,
+  // "Everything on this device is already in Google Drive" told two trainers their data was safe
+  // when no copy existed anywhere (2026-10-10).
+  if (status.ahead === 0 && !status.connected) return t("sync_hub_not_connected");
   const ahead =
     status.ahead === 0 ? t("sync_hub_none") : countedText(t, lang, "sync_hub_ahead", status.ahead);
   const unknown = !status.configured || !status.reachable;

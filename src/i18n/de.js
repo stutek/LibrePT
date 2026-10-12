@@ -311,13 +311,16 @@ export const de = {
   rounds: "Runden",
   measured_in: "Gemessen in",
   ungroup: "Zirkel auflösen",
-  rest_timer: "Pausentimer",
+  // The ⏱ on an exercise card times the work itself (a hang, the most squats in 3 minutes); a rest
+  // has its own button, start_rest (Simon, 2026-10-12).
+  exercise_timer: "Übungstimer",
   start_rest: "Pause starten",
   trainer_set_notes: "Notizen des Trainers zum Satz",
   kg: "kg",
   reps_label: "Wdh.",
   // Exercise modality metric labels (see exerciseModality.js) — the primary target unit per movement.
   metric_time: "Zeit",
+  metric_format_min_sec: "Min:Sek",
   metric_hold: "Halten",
   metric_distance: "Strecke",
   metric_calories: "kcal",
@@ -349,7 +352,7 @@ export const de = {
   routine_row_sets_label: "Anzahl Sätze",
   routine_row_reps_label:
     "Hauptziel (Wiederholungen, Zeit, Strecke oder „max“ bis zum Muskelversagen — je nach Art der Übung)",
-  routine_row_rest: "Pause",
+  routine_row_rest: "Pause (s)",
   routine_row_rest_label: "Pausendauer in Sekunden",
   routine_row_load_label: "Last",
   routine_row_remove: "Übung aus der Routine entfernen",
@@ -858,6 +861,16 @@ export const de = {
   bind_participants: "Alle auf diesen Plan",
   unbind_participants: "Jedem einen eigenen Plan geben",
   bound_group_label: "Gemeinsam",
+  mark_absent: "Heute nicht da: {name}",
+  mark_present: "Doch da: {name}",
+  btn_mark_present: "Doch da",
+  absent_tab_mark: "nicht da",
+  absent_notice_title: "{name} ist heute nicht da",
+  absent_notice_body:
+    "Für eine Person, die nicht da ist, wird nichts aufgezeichnet. Wenn du auf „{button}“ tippst, bleibt ihr Plan unter „Pläne ohne Termin“ erhalten.",
+  btn_mark_absent: "Heute nicht da",
+  confirm_mark_absent:
+    "Für {name} sind in diesem Training Sätze oder Signale aufgezeichnet. Wenn du {name} als nicht da markierst, werden sie gelöscht.",
   plan_fit_hint: "Geschätzte Übungszeit im Verhältnis zur Dauer des Trainings, ohne Pausen",
   plan_fit_over: "zu lang",
   plan_fit_tight: "knapp",
@@ -1050,6 +1063,8 @@ export const de = {
   sync_hub_ahead_few: "{count} Änderungen auf diesem Gerät sind noch nicht in Google Drive.",
   sync_hub_ahead_other: "{count} Änderungen auf diesem Gerät sind noch nicht in Google Drive.",
   sync_hub_none: "Alles auf diesem Gerät ist schon in Google Drive.",
+  sync_hub_not_connected:
+    "Google Drive ist nicht verbunden, daher ist keine Kopie dieser Daten in Google Drive.",
   sync_hub_cloud_unknown:
     "Das ? in der Kopfzeile heißt: Die Änderungen in Google Drive sind nicht bekannt, weil es nicht verbunden oder nicht erreichbar ist.",
   restore_invalid_file:
@@ -1140,10 +1155,8 @@ export const de = {
   drive_sync_disconnect: "Trennen",
   drive_sync_interval_label: "Synchronisieren alle",
   drive_sync_interval_unit: "Min.",
-  drive_sync_preview_warning:
-    "Vorschauversion: Die Synchronisierung schreibt das letzte stabile Format, deshalb wird nichts gespiegelt, was diese Vorschau hinzugefügt hat.",
   backup_preview_warning:
-    "Dies ist eine Vorschauversion. Sicherungen und Synchronisierung werden im letzten stabilen Format geschrieben, deshalb ist nichts enthalten, was diese Vorschau hinzugefügt hat. Behalte eine eigene Kopie von allem, was du nicht verlieren darfst.",
+    "Dies ist eine Vorschauversion und kann noch Daten verlieren. Eine Sicherung enthält alles, was du in der App siehst. Exportiere sie deshalb regelmäßig und bewahre sie außerhalb dieses Telefons auf.",
   restore_replaces_all: "Das Zurückspielen ersetzt alles auf diesem Gerät.",
   restore_you_would_lose: "Du würdest verlieren:",
   restore_keep: "Behalten, was ich habe",

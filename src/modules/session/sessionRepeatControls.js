@@ -62,19 +62,40 @@ export function setupRepeatControls({ doc = document, lang = "en" } = {}) {
   if (!toggle || !detail) return;
   buildWeekdayToggles(doc, lang);
 
+  const dateField = doc.getElementById("setup-session-date");
+  const dateWeekday = () => {
+    const dateValue = dateField?.value;
+    if (!dateValue) return null;
+    const [year, month, day] = dateValue.split("-").map(Number);
+    return new Date(year, (month || 1) - 1, day || 1).getDay();
+  };
+  // The tick the form made, until the trainer ticks or unticks a day: it is the session's own
+  // weekday, so it moves when the date does. A trainer who changed the date after saying "repeats"
+  // got a weekly series on the old date's weekday (2026-10-10).
+  let ticksAreTheForms = false;
+
   const sync = () => {
     detail.classList.toggle("hidden", !toggle.checked);
     // Ticking the box with no day chosen would arm a rule that produces nothing at all, so the
     // session's own day is filled in the moment the trainer says "repeats".
     if (toggle.checked && selectedWeekdays(doc).length === 0) {
-      const dateValue = doc.getElementById("setup-session-date")?.value;
-      if (dateValue) {
-        const [year, month, day] = dateValue.split("-").map(Number);
-        setWeekdays(doc, [new Date(year, (month || 1) - 1, day || 1).getDay()]);
+      const weekday = dateWeekday();
+      if (weekday !== null) {
+        setWeekdays(doc, [weekday]);
+        ticksAreTheForms = true;
       }
     }
   };
   toggle.addEventListener("change", sync);
+  doc.getElementById(DAYS_ID)?.addEventListener("change", () => {
+    ticksAreTheForms = false;
+  });
+  const followDate = () => {
+    const weekday = dateWeekday();
+    if (toggle.checked && ticksAreTheForms && weekday !== null) setWeekdays(doc, [weekday]);
+  };
+  dateField?.addEventListener("input", followDate);
+  dateField?.addEventListener("change", followDate);
   sync();
 }
 

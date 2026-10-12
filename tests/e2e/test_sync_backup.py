@@ -258,6 +258,22 @@ def test_the_backup_dialog_states_the_header_number_in_words(page, local_server)
     assert "not connected" in text, text
 
 
+def test_a_device_that_never_connected_drive_does_not_say_its_data_is_there(
+    page, local_server
+):
+    """On a new phone that had never seen Google, the dialog said "Everything on this device is already
+    in Google Drive." Two trainers read it as their data being safe (2026-10-10). With nothing waiting
+    and Drive never connected, the true sentence is that there is no copy in Drive at all."""
+    page.goto(local_server + "clients")
+    page.wait_for_selector("#view-client-directory.active")
+    page.locator("#backup-btn").click()
+    page.wait_for_selector("#dialog-backup[open]")
+
+    text = page.locator("#sync-hub-changes").inner_text()
+    assert "already in Google Drive" not in text, text
+    assert "not connected" in text, text
+
+
 ADD_TWENTY_FIVE_CLIENTS = """
 async () => {
     const stateStore = await import(new URL('data/stateStore.js', document.baseURI).href);

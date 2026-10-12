@@ -603,10 +603,7 @@ async function init() {
     urlFor,
     setState: (ns) => setState(ns),
     saveToLocalStorage: saveState,
-    renderClientsList,
-    renderRoutinesList,
-    renderExercisesList,
-    populateDropdownSelectors,
+    renderEverything,
     openEncryptedFileReader,
     t,
   });

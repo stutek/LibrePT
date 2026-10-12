@@ -96,6 +96,9 @@
 .info-block p {
   font-size: 14px;
   line-height: 1.5;
+  /* A note typed on three lines is read on three lines: joined, "Dolg 120 €" ran into the next
+     thing the trainer wrote (trainer weeks, 2026-10-10). */
+  white-space: pre-line;
 }
 .quick-workout-action {
   border-top: 1px solid var(--border-color);

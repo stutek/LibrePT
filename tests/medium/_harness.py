@@ -138,12 +138,7 @@ bootBackupRestore({
   urlFor,
   setState: noop,
   saveToLocalStorage: noop,
-  renderClientsList: noop,
-  renderRoutinesList: noop,
-  renderExercisesList: noop,
-  renderGlobalHistory: noop,
-  populateDropdownSelectors: noop,
-  renderSessions: noop,
+  renderEverything: noop,
   t,
 });
 // renderSyncBadge is the real one — a sync starting or failing has to repaint the header cloud,

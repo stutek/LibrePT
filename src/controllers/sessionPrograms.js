@@ -12,6 +12,7 @@
 // clipboard holding several sessions at once adds to this file instead of rewriting it.
 
 import { libraryExercises } from "../data/exerciseLibrary.js";
+import { EMPTY_PLAN_ID } from "../data/recordDependencies.js";
 import { newRecordId } from "../data/recordId.js";
 import { COMMON_RECORD_FIELDS } from "../data/recordSchemas.js";
 import { assignPositions, orderedItems } from "../data/sessionItemOrder.js";
@@ -168,6 +169,17 @@ export function keepPlanBeforeReplacing(session, clientId, replacement) {
 }
 
 /**
+ * Whether two routine ids name the same routine. "No routine" is spelled two ways: the form's
+ * "Empty plan" option is EMPTY_PLAN_ID, and a plan built in the notebook stores an empty id. Read as
+ * different, a session moved to another hour had the plan built for it replaced by an empty one,
+ * with no warning (found by two trainer weeks, 2026-10-10).
+ */
+function sameRoutine(a, b) {
+  const noRoutine = (id) => !id || id === EMPTY_PLAN_ID;
+  return noRoutine(a) ? noRoutine(b) : a === b;
+}
+
+/**
  * Bring a session's stored plans in line with the routines its form names, one per client. The
  * session row keeps one routine, its first client's, so a client added with a routine of their own
  * got the session's routine when the clipboard opened from the card. A client whose
@@ -184,8 +196,8 @@ export function planRoutinesChosenInForm(sessionId, clientRoutines, emptyPlanNam
   for (const { clientId, routineId = "" } of clientRoutines || []) {
     const program = stored.find((row) => row.clientId === clientId);
     if (program?.status === "live") continue;
-    if (program && (program.routineId || "") === routineId) continue;
-    if (!program && routineId === (session.routineId || "")) continue;
+    if (program && sameRoutine(program.routineId, routineId)) continue;
+    if (!program && sameRoutine(routineId, session.routineId)) continue;
     const clientState = buildClientStateFromRoutine({
       routineId,
       routines: state.routines,

@@ -191,6 +191,14 @@ def test_the_filter_calendar_survives_the_boards_own_rerender(page, local_server
     )
 
 
+FILTER_ROW_TOP = """async () => {
+    const chips = document.getElementById('filter-chip-dates');
+    if (!chips) return null;
+    await Promise.all(chips.closest('.app-view').getAnimations().map((a) => a.finished));
+    return chips.getBoundingClientRect().y;
+}"""
+
+
 def test_the_filter_row_stays_on_screen_while_the_board_scrolls(page, local_server):
     """The filters live in the sticky header with the title (asked 2026-09-11).
 
@@ -200,18 +208,21 @@ def test_the_filter_row_stays_on_screen_while_the_board_scrolls(page, local_serv
     page.goto(f"{local_server}?init=demo_data_load&lang=en")
     page.wait_for_selector(".session-card")
 
-    chips = page.locator("#filter-chip-dates")
-    top_before = chips.bounding_box()["y"]
+    # Read once the view's scale-in has finished: the box includes the transform, so mid-animation
+    # the row read 45 px lower than where it settles, under a full gate (2026-10-10).
+    top_before = page.evaluate(FILTER_ROW_TOP)
 
     page.evaluate(
         "() => { document.getElementById('main-content').scrollTop += 1200; }"
     )
     page.wait_for_timeout(400)
 
-    after = chips.bounding_box()
-    assert after is not None, "the filter row left the layout when the board scrolled"
-    assert abs(after["y"] - top_before) < 4, (
-        f"the filter row scrolled with the list (y {top_before} → {after['y']}) instead of sticking"
+    top_after = page.evaluate(FILTER_ROW_TOP)
+    assert top_after is not None, (
+        "the filter row left the layout when the board scrolled"
+    )
+    assert abs(top_after - top_before) < 4, (
+        f"the filter row scrolled with the list (y {top_before} → {top_after}) instead of sticking"
     )
 
 

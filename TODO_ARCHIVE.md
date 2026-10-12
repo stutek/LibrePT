@@ -10116,3 +10116,97 @@ nastavljenega žetona samo za branje; prvi poskus je res padel.
 sistemsko shrambo gesel. Datoteka z žetonom je zbrisana, `watch.py` bere samo še `GH_TOKEN`,
 `GITHUB_TOKEN` in `gh auth token` (`337ae23d`), `GH_TOKEN_FILE` ni več potrebna. Kje je prijava in
 katere pravice ima, še vedno ni zapisano v tem repozitoriju, ker je javen.
+
+### 80.209 [x] P1 — Prestavitev termina na drugo uro ali dan izbriše načrt vaj, sestavljen v beležki — popravljeno 2026-10-10
+
+**Scenarij in koraki:** termin z načrtom, sestavljenim v beležki z »Uredi načrt« (ne iz rutine) →
+kartica termina → »Uredi« → druga začetna ura (F-r07-10) ali drug datum (F-r08-15) → »Shrani«.
+
+**Opaženo:** kartica pravi »Program ni določen«, odprt trening »Ni vstavljenih vaj«. Teden r07: okno
+»Uredi« je pri stranki kazalo »Izberi rutino / Prazen načrt, brez rutine«, in »Shrani« je načrt
+prepisal s praznim; opozorila ni bilo. Teden r08 je isto videl pri dveh strankah, četrtek in sobota.
+
+**Težava in vpliv:** trener prestavi termin in na treningu nima načrta; sestavljen načrt je izgubljen.
+
+**Predlog:** prestavitev spremeni samo čas; načrt, ki ga okno ne zna pokazati, ostane, kot je —
+opaženo 2026-10-10 na `166d3c8` (tedna r07 in r08, neodvisno). Orkestrator je ponovil le različico,
+kjer je načrt iz rutine (demo, »Hitri HIIT za trup«, 16:00 → 16:30): tam se načrt ohrani. Neponovljena
+je različica z načrtom iz beležke, ki sta jo imela oba tedna.
+
+**Popravljeno 2026-10-10 na veji `fix/week-defects`:** »ni rutine« se piše na dva načina, kot `empty_plan` v obrazcu in kot prazen niz pri načrtu iz beležke; `planRoutinesChosenInForm` ju zdaj bere kot isto, zato prestavitev načrta ne zamenja. Test `tests/e2e/test_moved_session_keeps_plan.py` pred popravkom pade z »the moved session lost its plan«. Prazen načrt, izbran namesto načrta iz rutine, je še vedno sprememba in velja.
+
+### 80.212 [x] P2 — Okno za kopije šteje samo Google Drive: »vse je že v Google Drive« brez Drive, »OGROŽENO« po izvozu v datoteko — popravljeno 2026-10-10
+
+**Scenarij in koraki:** ikona s številko in vprašajem zgoraj desno (»Središče za sinhronizacijo in
+varnostne kopije«) na napravi, ki ni nikoli povezala Google Drive; nato »Izvozi JSON« v datoteko.
+
+**Opaženo:** »Vse na tej napravi je že v Google Drive.« na praznem novem telefonu, ki Googla ni videl
+(F-s01-05, F-s02-08; orkestrator je isti stavek videl 2026-10-10 na napravi s predstavitvenimi
+podatki brez Drive). Po izvozu v datoteko ostane rdeča značka »OGROŽENO — NAREDI KOPIJO« in »27
+sprememb … ni v Google Drive«, dokler aplikacije ne osvežiš (F-s01-13, F-s02-06, F-r05-09).
+
+**Težava in vpliv:** okno trenerju reče, da so podatki varni, ko niso nikjer, in da niso varni, ko so
+v datoteki, narejeni minuto prej. Trener ne ve, ali ima kopijo.
+
+**Predlog:** okno pove, kje je zadnja kopija in kdaj je nastala, datoteka ali Drive, in nikoli ne
+trdi Drive brez Drive — opaženo 2026-10-10 na `166d3c8` (scenarija §107 in teden r05; prvi stavek
+preveril orkestrator).
+
+**Popravljeno 2026-10-10 na veji `fix/week-defects`, prvi del:** na napravi, ki ni povezala Google Drive in nima čakajočih sprememb, okno pove »Google Drive ni povezan, zato v Google Drive ni nobene kopije teh podatkov.« namesto »Vse na tej napravi je že v Google Drive.« (`driveSyncUi.js`; test v `tests/e2e/test_sync_backup.py`). **Drugi del ni napaka aplikacije:** obstoječi test `test_the_header_warning_goes_away_after_a_file_export_and_after_a_reload` dokazuje, da značka po izvozu v datoteko izgine. Trenerja sta izvažala z orodjem, ki je datoteko ujelo na strani; verjetno je značka ostala zaradi tega ali zaradi poznejše spremembe.
+
+### 80.220 [x] P2 — Geslo iz angleških besed, Začni pri zaključenem treningu, ✕ časomera 13 pik — popravljeno 2026-10-11
+
+**Scenarij in koraki:** tedni trenerjev 2026-10-11 (§88.20): prvi izvoz kopije (F-r12-11, F-r13-09,
+F-r14-05, F-r15-23); »Treningi« → zaključen torkov termin z istim imenom kot četrtkov → »Začni
+trening« (F-r14-08); med vadbo časomer premora → ✕ (F-r12-10).
+
+**Opaženo:** geslo »flywheel-jumprope-overhead-barbell-posture-zercher«, angleško na slovenskem
+zaslonu, včasih z isto besedo dvakrat, polje ga odreže; gumb »Zapisal sem si ga, shrani« je v
+moškem spolu. Zaključen termin ponudi »Začni trening«; po začetku »začeto 47h 58m prepozno«, termin
+ostane aktiven do petka. ✕ na časomeru je visok 13 pik.
+
+**Težava in vpliv:** geslo iz 24 besed ima 24^6, okoli 27,5 bita, ne »~77«, ki jih je trdil
+komentar, seznam pa je javen v izvorni kodi: ukradena kopija z zdravstvenimi podatki ne zdrži
+dolgo. Zaključen trening se da znova začeti in zgodovina se zmede. Časomera ni mogoče zapreti s
+palcem.
+
+**Popravljeno 2026-10-11 na veji `fix/week-defects-2` (`2a191cd`):** geslo je pet skupin po štiri
+števke, okoli 66 bitov, brez pristranskosti deljenja (`passphraseKey.js`; testa v
+`tests/unit_js/data/encryptedExport.test.mjs` in `tests/medium/test_client_data_rights.py`); že
+izbrana gesla delujejo naprej. Gumb pravi »Geslo imam zapisano, shrani«. Termin, katerega seje so vse
+zaključene, se odpre brez »Začni trening« (`buildSessionMeta` → `held`, `activeSessionBoard.js`;
+testa v `tests/unit_js/modules/common/utils.test.mjs` in `tests/e2e/test_session_status_line.py`).
+✕ na časomeru meri 44 × 44 (`exerciseAndRestTimer.css`; test v `tests/e2e/test_timer_stack.py`).
+
+### 80.200 [x] P2 — Polje za čas pri vaji nima enote: »20« za 20 minut se zapiše kot 0:20 — popravljeno 2026-10-10
+
+**Scenarij in koraki:** teden r06, kardio vaja v načrtu, polje »ČAS«, vpis 20 (mišljeno 20 minut).
+Teden r04: polji »čas« in »Premor« pri vaji v rutini. Teden r02: povzetek vaje.
+
+**Opaženo:** zapisano »0:20«, torej 20 sekund (F-r06-10). Polji v rutini nimata enote (F-r04-05).
+Povzetek »S3 × 20:00« ne pove, da gre za 3 × 20 minut (F-r02-15).
+
+**Težava in vpliv:** napačno trajanje v načrtu; trener ga opazi šele, ko prebere povzetek.
+
+**Predlog:** enota ob polju (min ali s), in povzetek, ki enoto izpiše — opaženo 2026-10-10 na
+različici `166d3c8` (tedni r02, r04, r06; orkestrator ni ponovil).
+
+**Tedni r07–r10:** »Sobno kolo 1×0:10« namesto 10 minut (F-r07-03, F-r07-13), »čas« brez enote pri
+vaji (F-r08-10), višina škatle 30 cm se zapiše kot »30 kg« (F-r10-05).
+
+**Popravljeno 2026-10-10 na veji `fix/week-defects`:** polje za čas in za držo ima ob imenu obliko, ki jo bere: »čas (min:s)«, v urejevalniku načrta in v rutini; premor v rutini se glasi »Premor (s)«. Golo »20« še vedno pomeni 20 sekund: drugačno branje bi spremenilo pomen shranjenih podatkov, to pa je Simonova odločitev. Test v `tests/unit_js/domain/exerciseModality.test.mjs`.
+
+### 80.203 [x] P3 — Dnevi ponovitve nimajo imena, privzeti dan pa je današnji, ne dan izbranega datuma — popravljeno 2026-10-10
+
+**Scenarij in koraki:** »Ustvari trening« → »Ponovi vsak teden«.
+
+**Opaženo:** sedem polj za dneve ima za bralnik zaslona vrednost »on« in nobenega imena (preveril
+orkestrator 2026-10-10 na `166d3c8`; F-r02-02). Privzeto je označen današnji dan v tednu, tudi kadar
+je izbran drug datum (F-r06-12, nepreverjeno).
+
+**Težava in vpliv:** serija na dan, ki ga trener ni hotel, če označbe ne pregleda.
+
+**Predlog:** vsak dan nosi svoje ime, privzeti dan je dan izbranega datuma — opaženo 2026-10-10 na
+`166d3c8`.
+
+**Popravljeno 2026-10-10 na veji `fix/week-defects`:** dan, ki ga obrazec obkljuka sam, sledi datumu, dokler trener ne obkljuka dneva sam (`sessionRepeatControls.js`; testa v `tests/medium/test_edit_session_schedule.py`). **Imena polj niso napaka:** vsako polje je v oznaki z imenom dneva, iz katere ga bralnik zaslona prebere; »on« je vrednost polja, ki jo je izpisalo orodje.

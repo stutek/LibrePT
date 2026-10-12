@@ -85,40 +85,31 @@ export async function deriveAesKey(
  * A passphrase a trainer can read down a phone line, a client can type without a typo, and a trainer
  * can copy onto paper for the day their phone is gone.
  *
- * Six words from a small, deliberately unambiguous alphabet-free list beat a random character string
- * here: the failure mode is not brute force (600k PBKDF2 rounds over ~77 bits of entropy is far past
- * what an email interceptor or a stolen backup file would spend), it is the trainer picking
- * "gym2024" because the generated one was unreadable over a bad connection or too long to write down.
+ * **Five groups of four digits**, about 66 bits. The failure mode is not brute force (600k PBKDF2
+ * rounds over 66 bits is far past what an email interceptor or a stolen backup file would spend), it
+ * is the trainer picking "gym2024" because the generated one was unreadable or too long to write down.
+ *
+ * **Why digits and not words.** Until 2026-10-11 this was six words from a list of 24 English gym
+ * terms. That is 24^6, about 27.5 bits, not the 77 the comment here claimed, and the list is public in
+ * this file. Four trainer weeks of 2026-10-11 also met it as English inside a Slovenian screen and
+ * saw the same word twice. Digits are read the same way in every language the app speaks, and a
+ * larger word list would have to be one per language.
+ *
+ * **Every group is equally likely.** 2^32 is not a multiple of 10 000, so a draw from the remainder
+ * at the top is drawn again rather than folded in, which would make some groups more likely.
  */
-const PASSPHRASE_WORDS = [
-  "anchor",
-  "barbell",
-  "cadence",
-  "deadlift",
-  "elbow",
-  "flywheel",
-  "gravity",
-  "hinge",
-  "impulse",
-  "jumprope",
-  "kettle",
-  "lever",
-  "mobility",
-  "nordic",
-  "overhead",
-  "posture",
-  "quadrant",
-  "rowing",
-  "sprint",
-  "tempo",
-  "unrack",
-  "vertical",
-  "warmup",
-  "zercher",
-];
+const PASSPHRASE_GROUPS = 5;
+const GROUP_DIGITS = 4;
+const GROUP_RANGE = 10 ** GROUP_DIGITS;
+const UNBIASED_LIMIT = Math.floor(2 ** 32 / GROUP_RANGE) * GROUP_RANGE;
 
-export function generatePassphrase(cryptoImpl = globalThis.crypto, wordCount = 6) {
-  const picks = new Uint32Array(wordCount);
-  cryptoImpl.getRandomValues(picks);
-  return Array.from(picks, (value) => PASSPHRASE_WORDS[value % PASSPHRASE_WORDS.length]).join("-");
+export function generatePassphrase(cryptoImpl = globalThis.crypto, groupCount = PASSPHRASE_GROUPS) {
+  const groups = [];
+  const draw = new Uint32Array(1);
+  while (groups.length < groupCount) {
+    cryptoImpl.getRandomValues(draw);
+    if (draw[0] >= UNBIASED_LIMIT) continue;
+    groups.push(String(draw[0] % GROUP_RANGE).padStart(GROUP_DIGITS, "0"));
+  }
+  return groups.join("-");
 }

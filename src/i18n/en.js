@@ -293,13 +293,16 @@ export const en = {
   rounds: "Rounds",
   measured_in: "Measured in",
   ungroup: "Break up circuit",
-  rest_timer: "Rest Timer",
+  // The ⏱ on an exercise card times the work itself (a hang, the most squats in 3 minutes); a rest
+  // has its own button, start_rest (Simon, 2026-10-12).
+  exercise_timer: "Exercise timer",
   start_rest: "Start Rest",
   trainer_set_notes: "Trainer Set Notes",
   kg: "kg",
   reps_label: "reps",
   // Exercise modality metric labels (see exerciseModality.js) — the primary target unit per movement.
   metric_time: "time",
+  metric_format_min_sec: "min:s",
   metric_hold: "hold",
   metric_distance: "distance",
   metric_calories: "cal",
@@ -331,7 +334,7 @@ export const en = {
   routine_row_sets_label: "Sets quantity",
   routine_row_reps_label:
     "Primary target (reps, time, distance, or 'max' to failure — depends on the exercise's modality)",
-  routine_row_rest: "Rest",
+  routine_row_rest: "Rest (s)",
   routine_row_rest_label: "Rest duration in seconds",
   routine_row_load_label: "Load",
   routine_row_remove: "Remove exercise from routine",
@@ -864,6 +867,16 @@ export const en = {
   bind_participants: "Everyone on this plan",
   unbind_participants: "Give everyone their own plan",
   bound_group_label: "Together",
+  mark_absent: "Not here today: {name}",
+  mark_present: "Here after all: {name}",
+  btn_mark_present: "Here after all",
+  absent_tab_mark: "not here",
+  absent_notice_title: "{name} is not here today",
+  absent_notice_body:
+    "Nothing is logged for a client who is not here. When you tap “{button}”, their plan is kept under Unscheduled plans.",
+  btn_mark_absent: "Not here today",
+  confirm_mark_absent:
+    "{name} has sets or signals logged in this training. Marking {name} as not here deletes them.",
   plan_fit_hint: "Estimated working time against the session slot, rests excluded",
   plan_fit_over: "over",
   plan_fit_tight: "tight",
@@ -1063,6 +1076,8 @@ export const en = {
   sync_hub_ahead_few: "{count} changes on this device are not yet in Google Drive.",
   sync_hub_ahead_other: "{count} changes on this device are not yet in Google Drive.",
   sync_hub_none: "Everything on this device is already in Google Drive.",
+  sync_hub_not_connected:
+    "Google Drive is not connected, so no copy of this data is in Google Drive.",
   sync_hub_cloud_unknown:
     "The ? in the header means the changes in Google Drive are not known: it is not connected or not reachable.",
   restore_invalid_file:
@@ -1157,10 +1172,8 @@ export const en = {
   drive_sync_disconnect: "Disconnect",
   drive_sync_interval_label: "Sync every",
   drive_sync_interval_unit: "min",
-  drive_sync_preview_warning:
-    "Preview build: sync writes the last stable format, so anything this preview added is not mirrored.",
   backup_preview_warning:
-    "This is a preview build. Backups and sync are written in the last stable format, so anything added by this preview is not included. Keep your own copy of anything you cannot lose.",
+    "This is a preview build, and it can still lose data. A backup holds everything you see in the app, so export one regularly and keep it off this phone.",
   restore_replaces_all: "Restoring replaces everything on this device.",
   restore_you_would_lose: "You would lose:",
   restore_keep: "Keep what I have",

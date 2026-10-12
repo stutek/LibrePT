@@ -25,6 +25,8 @@
 //   completeCircuitRound, focusExerciseByIndex, activateExerciseByScroll, startRestTimer
 //                           — deck card callbacks
 //   newRecordId()
+//   absentParticipants(), toggleAbsence(clientId)
+//                           — who of the session did not come, and marking it (sessionAbsence.js)
 
 import { libraryExercises } from "../../data/exerciseLibrary.js";
 import { noteTagLine, pendingNotes } from "../../data/trainingRecords.js";
@@ -34,7 +36,12 @@ import { bindingFor } from "../../domain/participantBinding.js";
 import { sessionDayOf } from "../../domain/sessionRecord.js";
 import { renderActiveUsersList } from "../common/activeUsersList.js";
 import { openFeedbackModal } from "../common/feedbackModal.js";
-import { escapeHTML, getClientDisplayNameHTML, getInitials } from "../common/utils.js";
+import {
+  clientDisplayName,
+  escapeHTML,
+  getClientDisplayNameHTML,
+  getInitials,
+} from "../common/utils.js";
 import { renderClipboardEditor } from "./clipboardEditor.js";
 import { isClipboardEditMode, markEditorRow, takePendingCallout } from "./editModeState.js";
 import { renderExerciseDeck } from "./exerciseDeckOfCards.js";
@@ -60,6 +67,7 @@ function renderClientTabsBar(activeClientId) {
     getClientDisplayNameHTML,
     navigateToPath,
     t: deps.getAppDeps().t,
+    absentIds: deps.absentParticipants(),
   });
 }
 
@@ -238,6 +246,7 @@ function syncTitleBarEditChrome() {
   syncBindingLabel(t);
   syncCopyPlanVisibility();
   syncCancelVisibility(editing);
+  syncAbsenceItem(t, editing);
 
   // In edit mode the ⋯ menu's destructive action targets the PLAN (clear its exercises), not the
   // whole session — relabel it so the trainer knows which one they're deleting. Preserve the icon.
@@ -259,6 +268,27 @@ function syncCancelVisibility(editing) {
   const slot = deps.getActiveSession()?.sourceSession;
   const offered = !editing && Boolean(slot) && !slot.isPlanning;
   document.getElementById("btn-cancel-session")?.classList.toggle("hidden", !offered);
+}
+
+// Absence is from a booked session, so it is offered only on one that has not been held: a plan
+// written for no session has nothing to be absent from, and a held session's programs are already
+// finished. The row names the client on screen and the way it goes now.
+function absenceCanChange(session) {
+  const slot = session?.sourceSession;
+  return Boolean(slot) && !slot.isPlanning && !slot.held && !session.finishedRecord;
+}
+
+function syncAbsenceItem(t, editing) {
+  const item = document.getElementById("btn-mark-absent");
+  const session = deps.getActiveSession();
+  if (!item || !session) return;
+  item.classList.toggle("hidden", editing || !absenceCanChange(session));
+  const clientId = session.activeClientId;
+  const name = clientDisplayName(
+    deps.getAppDeps().state.clients.find((client) => client.id === clientId),
+  );
+  const key = deps.absentParticipants().includes(clientId) ? "mark_present" : "mark_absent";
+  item.querySelector("span").textContent = t(key).replace("{name}", name);
 }
 
 // Copying a plan goes to another client of this session. With none, the row could only answer
@@ -438,7 +468,31 @@ function renderLiveDeck(deckContainer, activeClientId, activeClientState) {
   });
 }
 
-function renderDeckOrEditor(activeClientId, activeClientState) {
+// In place of the deck of a client marked absent: nothing can be logged for someone who did not
+// come (Simon, 2026-10-12), so their cards are not shown, and the way back is on the same screen.
+// Their plan can still be edited, for the next time.
+function renderAbsentNotice(deckContainer, activeClientId) {
+  const { state, t } = deps.getAppDeps();
+  const client = state.clients.find((c) => c.id === activeClientId);
+  const notice = document.createElement("div");
+  notice.className = "clipboard-absent-notice";
+  const title = document.createElement("h4");
+  title.textContent = t("absent_notice_title").replace("{name}", clientDisplayName(client));
+  const body = document.createElement("p");
+  body.textContent = t("absent_notice_body").replace("{button}", t("btn_complete"));
+  notice.append(title, body);
+  if (absenceCanChange(deps.getActiveSession())) {
+    const back = document.createElement("button");
+    back.type = "button";
+    back.className = "btn secondary-btn";
+    back.textContent = t("btn_mark_present");
+    back.addEventListener("click", () => deps.toggleAbsence(activeClientId));
+    notice.append(back);
+  }
+  deckContainer.replaceChildren(notice);
+}
+
+function renderDeckOrEditor(activeClientId, activeClientState, absent) {
   // Detach any previous editor's document listeners before this render replaces the deck DOM.
   if (editorCleanup) {
     editorCleanup();
@@ -453,18 +507,24 @@ function renderDeckOrEditor(activeClientId, activeClientState) {
     editorCleanup = renderPlanEditor(deckContainer, activeClientId, activeClientState, callout);
     return;
   }
+  if (absent) {
+    renderAbsentNotice(deckContainer, activeClientId);
+    return;
+  }
   renderLiveDeck(deckContainer, activeClientId, activeClientState);
 }
 
 // The one card under the deck, which says the active client has no plan at all. It was built as a
 // historical-review panel and is nothing else now: the function that filled it with a past
 // session's detail is long gone, and the deck holds one session's plan and nothing else.
-function renderClipboardLoggerContainer(activeClientState) {
+function renderClipboardLoggerContainer(activeClientState, absent) {
   const { t } = deps.getAppDeps();
   const container = document.getElementById("clipboard-logger-container");
   if (!container) return;
 
-  if (!activeClientState || activeClientState.exercises.length === 0) {
+  // An absent client's notice already fills the deck; "no exercises" under it would be a second
+  // message about a plan nobody is doing today.
+  if (!absent && (!activeClientState || activeClientState.exercises.length === 0)) {
     container.classList.remove("hidden");
     container.innerHTML = `
       <div class="clipboard-empty-state">
@@ -505,13 +565,16 @@ export function renderActiveSessionBoard() {
 
   const started = !!activeSession.started;
   // A reopened finished session is a record being read, not a workout waiting to begin: Start would
-  // offer to run a session that already happened.
+  // offer to run a session that already happened. That holds for a finished program reopened from
+  // history and for a finished session tapped on the board (`held`, buildSessionMeta).
   const canStartSession =
     !isClipboardEditMode() &&
     deps.currentPlanMode() !== "planning" &&
-    !activeSession.finishedRecord;
+    !activeSession.finishedRecord &&
+    !activeSession.sourceSession?.held;
   syncStartCompleteVisibility(canStartSession, started);
 
-  renderDeckOrEditor(activeClientId, activeClientState);
-  renderClipboardLoggerContainer(activeClientState);
+  const absent = deps.absentParticipants().includes(activeClientId);
+  renderDeckOrEditor(activeClientId, activeClientState, absent);
+  renderClipboardLoggerContainer(activeClientState, absent && !isClipboardEditMode());
 }

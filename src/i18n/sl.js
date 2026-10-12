@@ -168,7 +168,7 @@ export const sl = {
     "Privolitev preklicana {date} — te stranke ne moreš dodati na nov trening",
   remove_participant: "Odstrani s tega treninga:",
   select_routine_for: "Rutina za to stranko",
-  btn_launch_clipboard: "Odpri v beležki",
+  btn_launch_clipboard: "Odpri v beležnici",
   err_select_client: "Izbrati moraš vsaj eno stranko.",
   err_assign_routine: "Izberi rutino za vsako izbrano stranko.",
   add_ex_session_title: "Vstavi vajo na vadbišču",
@@ -308,13 +308,16 @@ export const sl = {
   rounds: "Krogi",
   measured_in: "Merjeno v",
   ungroup: "Razdruži sklop",
-  rest_timer: "Časomer premora",
+  // The ⏱ on an exercise card times the work itself (a hang, the most squats in 3 minutes); a rest
+  // has its own button, start_rest (Simon, 2026-10-12).
+  exercise_timer: "Časomer vaje",
   start_rest: "Začni premor",
   trainer_set_notes: "Trenerjeve opombe serije",
   kg: "kg",
   reps_label: "pon.",
   // Oznake meritev modalitete vaje (glej exerciseModality.js) — osnovna ciljna enota vaje.
   metric_time: "čas",
+  metric_format_min_sec: "min:s",
   metric_hold: "drža",
   metric_distance: "razdalja",
   metric_calories: "kcal",
@@ -346,7 +349,7 @@ export const sl = {
   routine_row_sets_label: "Število serij",
   routine_row_reps_label:
     "Glavni cilj (ponovitve, čas, razdalja ali 'max' do odpovedi — odvisno od vrste vaje)",
-  routine_row_rest: "Premor",
+  routine_row_rest: "Premor (s)",
   routine_row_rest_label: "Premor v sekundah",
   routine_row_load_label: "Breme",
   routine_row_remove: "Odstrani vajo iz rutine",
@@ -378,7 +381,9 @@ export const sl = {
   backup_pw_write_it_down:
     "Zapiši to geslo nekam izven tega telefona. Varnostna kopija je za dan, ko telefona ni več, in to geslo je edina pot do nje. LibrePT ti ga ne more priklicati nazaj, Google pa tudi ne.",
   backup_pw_remember: "Zapomni si ga na tej napravi",
-  backup_pw_save: "Zapisal sem si ga, shrani",
+  // Not "Zapisal sem si ga": a past tense in Slovenian says whether a man or a woman wrote it, and
+  // the trainer week r15 of 2026-10-11 was a woman's.
+  backup_pw_save: "Geslo imam zapisano, shrani",
   backup_pw_saved: "Shranjeno. Od zdaj so varnostne kopije šifrirane.",
   backup_pw_empty: "Vpiši geslo ali pritisni Drugo geslo za pripravljeno.",
   backup_pw_failed: "Gesla ni bilo mogoče shraniti na to napravo.",
@@ -483,7 +488,7 @@ export const sl = {
   sessions_schedule: "Treningi",
   btn_sync_calendar: "Sinhroniziraj",
   spots_filled: "mest zasedenih",
-  btn_launch_clipboard_short: "Odpri v beležki",
+  btn_launch_clipboard_short: "Odpri v beležnici",
   filter_dates: "Datumi",
   filter_client: "Stranka",
   filter_location: "Lokacija",
@@ -628,7 +633,7 @@ export const sl = {
     "Datoteka z vabilom v koledar se je pravkar prenesla — pred pošiljanjem jo priloži temu e-poštnemu sporočilu.",
   schedule_conflict_double_booked: "Takrat imaš že nekaj drugega",
   schedule_conflict_busy_elsewhere: "Tvoj koledar kaže zasedenost",
-  schedule_conflict_merged: "Poteka vzporedno — odpre se kot ena podloga",
+  schedule_conflict_merged: "Poteka vzporedno — odpre se v eni beležnici",
   schedule_conflict_confirm:
     "Ta termin se prekriva z nečim, kar že imaš. Želiš trening vseeno razporediti?",
   session_start_time_title: "Trening se je začel izven urnika",
@@ -655,7 +660,7 @@ export const sl = {
   demo_cleanup_exercises: "vzorčnih vaj",
   demo_cleanup_notifications: "vzorčnih obvestil",
   demo_cleanup_remove: "Odstrani",
-  splash_tagline: "Lahek in brezplačen pripomoček za tvojo podlogo, treninge in programe vadbe.",
+  splash_tagline: "Lahek in brezplačen pripomoček za tvojo beležnico, treninge in programe vadbe.",
   splash_dismiss: "Zapri in pojdi v aplikacijo",
   splash_loading: "Nalaganje LibrePT",
   notification_area_label: "Središče obvestil in trenutni trening",
@@ -706,12 +711,12 @@ export const sl = {
     "Zadnje dejanje ni bilo korak ogleda. Z »Nazaj v demo« nadaljuješ tam, kjer si bil, s »Ustavi demo« ga končaš.",
   walkthrough_return: "Nazaj v demo",
   walkthrough_leave: "Ustavi demo",
-  walkthrough_finished: "To je celoten krog — en trening, ena podloga, štirje dotiki.",
+  walkthrough_finished: "To je celoten krog — en trening, ena beležnica, štirje dotiki.",
   walkthrough_wrong_place:
     "Ta korak potrebuje drug zaslon — vrni se na pregled treningov in ga zaženi znova.",
   walkthrough_stuck:
     "Tega koraka ni bilo mogoče zaključiti. Zapri vodeni ogled in raziskuj naprej — tvoji podatki so nedotaknjeni.",
-  tour_step_open_session: "Odpri skupinski trening. Ena podloga pokriva vse v njem.",
+  tour_step_open_session: "Odpri skupinski trening. Ena beležnica pokriva vse v njem.",
   tour_step_focus_exercise:
     "Dotakni se kroga, da pride v fokus. Njegovi gumbi pridejo na doseg palca.",
   tour_step_signal: "Označi krog kot prelahek. En dotik ga zabeleži in pusti opombo za načrt.",
@@ -816,6 +821,16 @@ export const sl = {
   bind_participants: "Vsi na ta načrt",
   unbind_participants: "Vsak svoj načrt",
   bound_group_label: "Skupaj",
+  mark_absent: "Ni na vadbi: {name}",
+  mark_present: "Je na vadbi: {name}",
+  btn_mark_present: "Je na vadbi",
+  absent_tab_mark: "ni na vadbi",
+  absent_notice_title: "{name} ni na vadbi",
+  absent_notice_body:
+    "Za stranko, ki je ni na vadbi, se nič ne beleži. Ko tapneš »{button}«, se njen program ohrani med nenačrtovanimi programi.",
+  btn_mark_absent: "Ni na vadbi",
+  confirm_mark_absent:
+    "{name} ima na tem treningu zabeležene serije ali signale. Če označiš, da ni na vadbi, se ti zapisi izbrišejo.",
   plan_fit_hint: "Ocenjen delovni čas glede na trajanje termina, brez premorov",
   plan_fit_over: "čez",
   plan_fit_tight: "na tesnem",
@@ -832,7 +847,7 @@ export const sl = {
   // aplikacija tika, tikanje pa je v slovenščini spolsko določeno, zato "(-la)" in ne množina.
   story_welcome_title: "LibrePT te pozdravlja",
   story_welcome_body:
-    "LibrePT je aplikacija za osebne trenerje: termini, načrti treningov in beležka med vadbo. V tem ogledu povabiš tri nove stranke, pripraviš torkov trening in ga med vadbo prilagodiš. Vse se dogaja v peskovniku, ločeni kopiji z izmišljenimi strankami. Tvojih pravih strank, terminov in vadb ne spremeni.",
+    "LibrePT je aplikacija za osebne trenerje: termini, načrti treningov in beležnica med vadbo. V tem ogledu povabiš tri nove stranke, pripraviš torkov trening in ga med vadbo prilagodiš. Vse se dogaja v peskovniku, ločeni kopiji z izmišljenimi strankami. Tvojih pravih strank, terminov in vadb ne spremeni.",
   story_step_welcome:
     "Z gumbom Pokaži mi ti vodnik pokaže dvoje: značko PESKOVNIK v zgornji vrstici in vrstico Zapusti peskovnik na vrhu menija ☰. Ponastavi podatke peskovnika je v meniju pod Nastavitve. Ko si pogledal, s Končaj zapreš kartico; naslednje poglavje izbereš v spodnjem seznamu. Kartico lahko kadar koli pospraviš z ikono ▾ v njenem zgornjem desnem kotu in aplikacijo preizkušaš brez vodenja; na vrstici, ki ostane, ogled končaš z ✕.",
   story_persona_trainer: "Tvoj telefon",
@@ -996,6 +1011,8 @@ export const sl = {
   sync_hub_ahead_few: "{count} spremembe na tej napravi še niso v Google Drive.",
   sync_hub_ahead_other: "{count} sprememb na tej napravi še ni v Google Drive.",
   sync_hub_none: "Vse na tej napravi je že v Google Drive.",
+  sync_hub_not_connected:
+    "Google Drive ni povezan, zato v Google Drive ni nobene kopije teh podatkov.",
   sync_hub_cloud_unknown:
     "Vprašaj v glavi pomeni, da spremembe v Google Drive niso znane: ni povezan ali ni dosegljiv.",
   restore_invalid_file:
@@ -1086,10 +1103,8 @@ export const sl = {
   drive_sync_disconnect: "Prekini povezavo",
   drive_sync_interval_label: "Sinhroniziraj vsakih",
   drive_sync_interval_unit: "min",
-  drive_sync_preview_warning:
-    "Predogledna različica: sinhronizacija zapiše zadnjo stabilno obliko, zato vsebina, ki jo je dodal ta predogled, ni prenesena.",
   backup_preview_warning:
-    "To je predogledna različica. Varnostne kopije in sinhronizacija se zapišejo v zadnji stabilni obliki, zato vsebina, ki jo je dodal ta predogled, ni vključena. Shrani si svojo kopijo vsega, česar ne smeš izgubiti.",
+    "To je predogledna različica in lahko še izgubi podatke. Varnostna kopija vsebuje vse, kar vidiš v aplikaciji, zato jo izvozi redno in jo shrani izven tega telefona.",
   restore_replaces_all: "Obnovitev zamenja vse na tej napravi.",
   restore_you_would_lose: "Izgubljeno bo:",
   restore_keep: "Obdrži, kar imam",
@@ -1293,7 +1308,7 @@ export const sl = {
   client_namesake_confirm: "Shrani brez vzdevka",
   // The client detail view (modules/clients/clientsView.js).
   view_grabber_home: "Nazaj na začetek",
-  view_grabber_clipboard: "Odpri podlogo treninga",
+  view_grabber_clipboard: "Odpri beležnico treninga",
   view_grabber_close_session: "Zapri trening in se vrni na začetek",
   profile_consent_label: "Privolitev GDPR za sinhronizacijo v oblak",
   profile_ai_safe_copy: "Kopija za AI brez imen",

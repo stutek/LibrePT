@@ -122,6 +122,19 @@ test("a session's scheduled end survives that end having already passed", () => 
   assert.equal(meta.timeLabel, "03:00 - 05:00");
 });
 
+// A trainer week of 2026-10-11 (F-r14-08) tapped Tuesday's finished session for Thursday's of the same
+// name, pressed Start, and ran a session that had already happened, "begun 47h 58m late". A slot is
+// held — nothing left to start — only when every session merged into it is finished.
+test("a slot is held when every session in it is finished, and only then", () => {
+  const day = () => new Date(2026, 9, 13);
+  const done = { id: "s1", title: "A", time: "09:00 - 10:00", status: "done" };
+  const open = { id: "s2", title: "B", time: "09:30 - 10:30" };
+
+  assert.equal(buildSessionMeta([done], "today", day).held, true);
+  assert.equal(buildSessionMeta([done, open], "today", day).held, false);
+  assert.equal(buildSessionMeta([open], "today", day).held, false);
+});
+
 test("a slot spanning several sessions reports the outer range as its schedule", () => {
   const dayStart = new Date();
   dayStart.setHours(0, 0, 0, 0);

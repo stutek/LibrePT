@@ -933,6 +933,20 @@ def test_every_tap_show_me_performs_is_drawn_by_the_hand_first(page, local_serve
     assert not undrawn, "taps without the hand:\n" + "\n".join(undrawn)
 
 
+def _back_one_step(page):
+    """Back, when the guide still offers it at the moment of the tap. Under a full gate (2026-10-10)
+    Back was visible when the walk looked and gone when it tapped, and the tap waited 30 s for a
+    button the guide had taken away while it moved. The walk's own rule is to stop where Back is not
+    offered, so a Back that disappears is read again by the loop rather than waited for. Back does not
+    always lower the step number: it can rebuild the ground under the step it is on."""
+    try:
+        page.locator(BACK).click(timeout=5_000)
+    except PlaywrightTimeoutError:
+        return False
+    _guide_idle(page)
+    return True
+
+
 @pytest.mark.parametrize("chapter", _offered_chapter_ids())
 def test_walking_back_every_tap_show_me_makes_is_drawn(page, local_server, chapter):
     """Back is what makes the guide rebuild the ground under a step, by replaying the steps before
@@ -946,16 +960,16 @@ def test_walking_back_every_tap_show_me_makes_is_drawn(page, local_server, chapt
     _drain_taps(page)
 
     undrawn = []
+    missed = 0
     while _step_numbers(page)[0] > 1 and page.locator(BACK).is_visible():
-        page.locator(BACK).click()
-        _guide_idle(page)
+        missed = 0 if _back_one_step(page) else missed + 1
+        assert missed < 3, "Back stayed on the screen and three taps on it did not land"
         here = _step_numbers(page)[0]
         _show_me_if_offered(page)
         _guide_idle(page)
         # Show me on a card walked back to can carry the guide on; the walk goes back to it.
         if _step_numbers(page)[0] > here and page.locator(BACK).is_visible():
-            page.locator(BACK).click()
-            _guide_idle(page)
+            _back_one_step(page)
         undrawn += _undrawn(_drain_taps(page))
     assert not undrawn, "taps without the hand:\n" + "\n".join(sorted(set(undrawn)))
 
