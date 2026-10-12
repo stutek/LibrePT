@@ -886,6 +886,17 @@ strategy, update both.
 to mid-September; on 2026-09-30 that window was closed. Unless contact was made (see the private file),
 that channel moves to the next semester.
 
+**Contact was made after all (Simon, 2026-10-12 22:41:05.500).** The campaign with students at the
+sport-science faculty starts on Tuesday 2026-10-13, to gather beta users and future members of the
+users' association. Two open points it raises:
+
+- [ ] **§80.159 now sits on the campaign's path.** A student opens a `?lang=sl` link, adds the app to
+      the home screen, and on the next start gets the language chooser and then English. *Blocks:*
+      the first reopen of every student who installs the app from the link.
+- [ ] **How student contacts are collected, and the notice that goes with it.** Names and e-mail
+      addresses are personal data; the student must be told who keeps them and for what, and the
+      association that would keep them does not exist yet. *Blocks:* collecting any contact.
+
 ## 24. Single-responsibility & module-boundary reorganisation
 
 Audit of `src/` on **2026-08-07** (25,508 lines, 100 modules): five oversized modules and four boundary
