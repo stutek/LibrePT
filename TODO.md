@@ -5947,6 +5947,18 @@ Stage 3's length. The longest demo test, `test_every_tap_show_me_performs_is_dra
    that shows only while the hand travels is found by nobody. One full-motion walk costs ~2.5 min of
    worker time (~3s × 48 steps). Decide whether it runs, and where (the gate, or a scheduled workflow
    like `google-canary.yml`).
+5. **[ ] Defect, seen 2026-10-12: two demo tests fail as the first test of a worker under load, and
+   pass alone.** Gate of 15:31 (HEAD `9c6e6ff` plus a PREVIEW-only
+   change that changed no screen and has since moved to ProPT, §68.4):
+   `test_demo_tour.py::test_every_scripted_step_runs_and_passes` — "a press on … `.circuit-card` lands
+   on nothing (the point 640,877 is outside the window)"; `test_demo_story.py::test_the_whole_story_can_be_walked_in_slovenian`
+   — stuck at step 28, "Pritisni ⋮", the session menu not open. Both passed alone at 16:16, also
+   reading PREVIEW. The same morning `test_walking_back_every_tap_show_me_makes_is_drawn[chromium-gym]`
+   failed the same way in a parallel run and passed alone. Something in the tour waits for time
+   instead of for a state; find which wait.
+6. **[ ] Defect, found 2026-10-12: `python -m build --help` runs the whole gate** in the working tree
+   instead of printing how to use it, and takes the lock. Killed by a timeout, it left the lock behind
+   with a dead pid. An unknown argument should print the usage and exit.
 
 ## 92. [ ] The peek gesture becomes an L, the deck holds one session, and the demo shows a drag
 
