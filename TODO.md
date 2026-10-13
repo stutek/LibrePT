@@ -4993,7 +4993,7 @@ besedilo je v `.private/exploratory-test/weeks/2026-10-10/runs/<tek>/findings.md
 - **F-r10-12 (vrzel):** termina ni mogoče označiti kot pogojnega (»velja, če stranka plača do
   poldne«); trener pogoj hrani v opombah profila, kjer ga termin ne pokaže.
 
-### 80.222 [ ] P1 — Poteza L na beležnici: vstran deluje, navzgor ne odpre prejšnjega ali naslednjega treninga — v delu
+### 80.222 [~] P1 — Poteza L na beležnici: vstran deluje, navzgor ne odpre prejšnjega ali naslednjega treninga — popravljeno v `88ffa995`, čaka na telefon
 
 **Simon, 2026-10-13 19:09:43.231** (prek seje librept-ec): »meni drsenje v obliki črke l ne deluje za
 trajni skok na prejšnji ali naslednji trening? delam kaj narobe (drsenje desno deluje, gor pa ne).
@@ -5007,6 +5007,29 @@ dvignil. **Opaženo:** beležnica se premakne vstran, poteza navzgor ne odpre ni
 CDP v Chromiumu pri 390 × 844: če prst med potezo navzgor še malo zanaša navzven (2–3 px na 6 px
 dviga), se nič ne odpre. `planPeek.js` je dvig meril od točke najglobljega potega in jo premikal s
 prstom, dokler se je poteg še poglabljal. Popravek in testi so v delu.
+
+**Telefon:** Samsung Galaxy S23 Ultra, Chrome (Android), privzeta povečava. Stran vidi okoli 326 CSS px
+širine (posnetek zaslona je širok 1080 px, torej 3,3 slikovne pike na CSS px).
+
+**Vzrok, dokazan v posnemanju, ne na telefonu (2026-10-13 20:44:02.828, podagent seje librept-ec):**
+palec, ki med potezo navzgor še zanaša navzven, je točko, od katere se meri dvig, vlekel s sabo, zato
+dvig ni nikoli dosegel 64 px. Dotik prek CDP (`Input.dispatchTouchEvent`) pri 390 × 844 in pri 326 px
+s 3,3 slikovne pike na CSS px, počasen (16 ms med dogodki), z zavojem namesto vogala in z 2–3 px
+zanašanja navzven na 6 px dviga: stara koda ne odpre ničesar, nova odpre. Brskalnik v nobenem primeru
+ne pošlje `pointercancel`, zato v posnemanju ne drži domneva, da Chrome potezo navzgor vzame za pomik
+strani. **Ni izključeno:** da Simonov palec ne doseže četrtine širine (81 px pri 326 px), preden gre
+navzgor. Zato korak vodenega ogleda zdaj pove, naj gre navzgor, ko piše »Podrsaj navzgor za odprtje«.
+
+**Popravek (`88ffa995`, `build check` zelen v vseh petih stopnjah):** dvig se meri od najnižje točke,
+ki jo je prst dosegel, odkar je poteza pripravljena. Poteza navzgor mora biti strmejša od 45°, da
+poteg, ki med poglabljanjem leze navzgor, ostane pogled. Testi v `tests/e2e/test_plan_peek_open.py`
+(palec, ki zanaša navzven, pri 390 in 326 px) in `tests/medium/test_plan_peek.py`.
+
+**Simonova želja iz istega sporočila, narejena v `88ffa995`:** »Kartica naj se pomakne tudi gor ali
+dol, tako kot gre prst«. Ko je poteza pripravljena, beležnica sledi prstu gor in dol od višine, kjer
+se je pripravila, navzgor največ 64 px. Prej ostane na svoji višini, da je ista vaja na obeh načrtih v
+isti višini, dokler trener bere sosednji načrt. **Zapre se**, ko Simon po potisku na telefonu s potezo
+L odpre prejšnji in naslednji trening.
 
 ### 80.223 [~] P2 — Glava v peskovniku se na ozkem telefonu prelomi v dve vrstici — popravljeno, čaka na telefon
 
@@ -5028,7 +5051,7 @@ stopnjah. Zapre se, ko seja librept-ec po potisku na živi strani izmeri eno vrs
 300 px (sl, peskovnik, povezava z letaka). **Ni preverjeno:** iPhone 14 v Safariju (WebKit tu ni nameščen; Chromium pri 390 px ima
 eno vrstico) in Simonov telefon po potisku.
 
-### 80.224 [ ] P2 — Po potegu beležnice vstran ostane obroba kartice popačena (vodeni ogled, korak 2 od 6) — v delu
+### 80.224 [~] P2 — Po potegu beležnice vstran ostane obroba kartice popačena (vodeni ogled, korak 2 od 6) — popravljeno v `88ffa995`, čaka na telefon
 
 **Simon, 2026-10-13 19:14:58.005, Samsung Galaxy S23, Chrome** (prek seje librept-ec): »ob potegu
 nastran se obroba kartice popači in ostane popačena (walktrough korak 2 od 6)«.
@@ -5045,6 +5068,14 @@ elementu, ki ga prst pritisne in drži (Blink `gesture_manager.cc`, ShowPress), 
 pusti tam, ko se prst dvigne. Posnemani dotik tega ne naredi; s `:hover`, vsiljenim prek CDP, je
 kartica širša in njen rob se stisne ob obroč. **Popravek v delu:** videz ob `:hover` za kartice v
 beležnici samo pri `@media (hover: hover)`.
+
+**Popravljeno v `88ffa995` (2026-10-13 20:44:02.828):** videz ob `:hover` za zložene kartice in
+kartice odmora velja samo pri `@media (hover: hover)`. Test
+`tests/e2e/test_plan_peek_open.py::test_a_card_left_in_hover_by_a_finger_looks_like_its_neighbours` na
+profilu Simonovega telefona (326 px, 3,3, brez lebdenja) kartici prek DevTools vsili `:hover`: s staro
+kodo je kartica drugačna od sosede (`scale(0.975) rotateX(3deg)`), z novo enaka. **Ni dokazano:** da
+`:hover`, ki ga pusti prst, res povzroči napako na Simonovem telefonu; posnemani dotik ga ne pusti.
+**Zapre se**, ko Simon po potisku v koraku 2 od 6 ne vidi več popačene obrobe.
 
 ### 80.225 [~] P2 — Po »Se strinjam« na povezavi z letaka 3 s samo logotip, nič se ne premika — popravljeno v `dacbab61`, čaka objavo
 
@@ -5098,6 +5129,22 @@ seznam poglavij v 2 s; enotni test za `holdAfterSteps`; celoten `build check` ze
 **Ostane:** na mobilnem omrežju prvi obisk do pogojev traja 8–12 s (objavljena stran, počasni 4G in
 Fast 3G), s črto napredka. To ni ta napaka; skrajša ga le manj datotek ob zagonu. **Zapre se**, ko
 meritev na objavljeni strani po Simonovem potisku pokaže čakanje po kliku pod 0,5 s.
+
+### 80.226 [~] P3 — Zadržana beležnica se v širino skrči bolj, kot Simon pričakuje — popravljeno v `88ffa995`, čaka na telefon
+
+**Simon, 2026-10-13** (prek seje librept-ec): »kadar kartico zadržim se po širini skrči več kot sem
+pričakoval, lahko optimiziraš, da bo krčenje pol manjše v širino?«
+
+**Narejeno v `88ffa995` (2026-10-13 20:44:02.828):** zadržana beležnica ima na vsaki strani 30 px
+roba namesto 60 (`planPeek.css`, `.plan-peek-blanket.is-held`). Izmerjeno v Chromiumu pri 320, 326,
+330, 360 in 390 px, v sl, en in de: pri 60 px je bila značka »Prihodnje« (»Upcoming«, »Demnächst«)
+pri 320–330 px odrezana, pri 30 px je vsaka značka cela. Test
+`tests/e2e/test_plan_peek_open.py::test_a_held_plan_keeps_every_status_badge_whole`.
+
+**Odprto, ni del te spremembe:** dolga imena vaj se pod 390 px končajo s tremi pikami, tudi ko
+beležnica ni zadržana. Odrezanih imen v demu: pri 390 px zadržano 2–3 (pri 60 px 6–7), nezadržano 0;
+pri 326 px zadržano 6–7 (pri 60 px 7), nezadržano 2–3. **Zapre se**, ko Simon na telefonu potrdi
+širino.
 
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
