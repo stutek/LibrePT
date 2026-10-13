@@ -31,8 +31,10 @@ Twelve cards. For each: what it says today, what is wrong with it, what I propos
 **Edit the PROPOSED block directly** (or strike it out and write your own); I apply it to
 `src/i18n/en.js` and write the Slovenian to match.
 
-Names in the story: **Ana, Maja, Nik** (the three friends), **Jane, John, Sarah** (Tuesday's
-regulars), **Sam** (the trainer, in the invitation).
+Names in the story: **Ana, Maja, Nik** (the three friends), **Eva, Tom, Nina** (Tuesday's
+regulars), **Sam** (the trainer, in the invitation). The regulars were Jane, John and Sarah until
+2026-10-13, when the seed's clients got names that read the same in every language; the quotes
+below keep the wording as it was reviewed.
 
 ---
 

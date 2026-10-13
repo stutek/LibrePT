@@ -78,7 +78,7 @@ def test_pending_adjustments_deck_renders_seeded_cards(page, local_server):
     # Three seeded plan updates start unresolved (src/data/planUpdates.js).
     assert page.locator("#badge-adjustments-count").inner_text().strip() == "3"
     assert _cards(page).count() == 3
-    assert "Jane Doe" in _cards(page).first.inner_text()
+    assert "Eva" in _cards(page).first.inner_text()
 
 
 def test_one_tap_resolves_a_card_and_changes_no_plan(page, local_server):
@@ -102,7 +102,7 @@ def test_one_tap_resolves_a_card_and_changes_no_plan(page, local_server):
 # signal was given in, under the same id as the review entry, with the trainer's remark.
 NO_ROUTINE_STUB = STUB.replace(
     "  planUpdates: structuredClone(DEFAULT_PLAN_UPDATES),\n  exercises: [],\n  sessions: [],\n  history: [],",
-    """  planUpdates: [{ id: 'u9', clientId: 'c1a9f0e2', clientName: 'Jane Doe',
+    """  planUpdates: [{ id: 'u9', clientId: 'c1a9f0e2', clientName: 'Eva',
     date: '2026-09-27T08:00:00.000Z', exerciseName: 'Floor Squat',
     tag: 'Too Easy - Increase Load - knees stayed out', resolved: false }],
   exercises: [],

@@ -35,7 +35,7 @@ def test_an_erased_client_is_gone_from_the_profile_behind_the_receipt(
 ):
     page.goto(local_server + "clients/c1a9f0e2")
     page.wait_for_selector("#view-client-detail.active")
-    assert "Jane Doe" in page.locator("#detail-client-name").inner_text()
+    assert "Eva" in page.locator("#detail-client-name").inner_text()
 
     page.locator("#btn-client-erase").click()
     page.locator("#client-erase-confirm").fill("ERASE")
@@ -43,8 +43,8 @@ def test_an_erased_client_is_gone_from_the_profile_behind_the_receipt(
 
     # The receipt stays open over the profile, and the profile behind it no longer names her.
     assert page.locator("#client-erase-receipt").is_visible()
-    assert "Jane Doe" not in page.locator("#detail-client-name").inner_text()
-    assert "Jane Doe" not in page.locator("#view-client-detail").inner_text()
+    assert "Eva" not in page.locator("#detail-client-name").inner_text()
+    assert "Eva" not in page.locator("#view-client-detail").inner_text()
 
 
 def test_a_signal_logged_in_a_session_is_in_the_drawer_when_the_session_ends(

@@ -249,7 +249,7 @@ const GYM_CHAPTER = {
     { ...wedge["next-participant"], persona: TRAINER, caption: "story_step_next_participant" },
     {
       // The story stays with the SECOND participant from here on, and that is a data decision as
-      // much as a narrative one: the seeded John Smith carries a 2024 knee reconstruction in his own
+      // much as a narrative one: the seeded Tom carries a 2024 knee reconstruction in his own
       // record, so the twinge two steps later is the app telling the truth about the person on
       // screen rather than a line invented for the demo.
       //
@@ -339,15 +339,16 @@ const GYM_CHAPTER = {
       expect: { selector: "#dialog-catalog-picker", visible: true },
     },
     {
-      // Chosen BY NAME, never by position: a seeded catalog's order is not a property the demo may
-      // depend on, and the first attempt at the wedge broke on exactly that.
+      // Chosen by the exercise's id, never by position: a seeded catalog's order is not a property
+      // the demo may depend on, and the first attempt at the wedge broke on exactly that. Not by its
+      // name either: the demo writes exercise names in its own language, so "Lat Pulldown" is
+      // "Poteg zgornjega škripca" in a Slovenian demo. e16a2b3c is Lat Pulldown in data/exercises.js.
       id: "swap-pick-movement",
       persona: TRAINER,
-      target: ".picker-item",
       // The picker opens filtered to the row's own category, so the replacement has to be one the
       // trainer would actually be offered — a lighter movement for the same muscle group, not a
       // catalogue-wide free choice the UI never shows.
-      targetText: "Lat Pulldown",
+      target: ".picker-item[data-id='e16a2b3c']",
       caption: "story_step_swap_pick",
       // The PLAN says it was swapped — the claim being made, rather than "a dialog closed". The
       // movement's name lives in an input's value, which is not text content and cannot be probed;

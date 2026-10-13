@@ -10,8 +10,8 @@ from playwright.sync_api import expect
 
 # The two seeded clients these tests assign, as the trainer sees them: the search field is driven by
 # the NAME, and the row that appears is identified by the client's id.
-JANE = ("c1a9f0e2", "Jane Doe")
-JOHN = ("c2b8e1d3", "John Smith")
+EVA = ("c1a9f0e2", "Eva")
+TOM = ("c2b8e1d3", "Tom")
 
 
 def _create_session_with_participants(
@@ -42,17 +42,17 @@ def _create_session_with_participants(
 
 def test_new_session_with_participants_opens_invite_dialog(page, local_server):
     _create_session_with_participants(
-        page, local_server, [JANE, JOHN], "Invite Test Session"
+        page, local_server, [EVA, TOM], "Invite Test Session"
     )
 
     dialog = page.locator("#dialog-session-invite")
     expect(dialog).to_be_visible()
     rows = dialog.locator(".session-invite-row")
     expect(rows).to_have_count(2)
-    expect(dialog.locator(".session-invite-row", has_text="Jane Doe")).to_be_visible()
-    expect(dialog.locator(".session-invite-row", has_text="John Smith")).to_be_visible()
+    expect(dialog.locator(".session-invite-row", has_text="Eva")).to_be_visible()
+    expect(dialog.locator(".session-invite-row", has_text="Tom")).to_be_visible()
 
-    send_btn = dialog.locator(".session-invite-row", has_text="Jane Doe").locator(
+    send_btn = dialog.locator(".session-invite-row", has_text="Eva").locator(
         ".session-invite-send-btn"
     )
     # The download itself is the proof the button was live — an exact class string would break on
@@ -66,7 +66,7 @@ def test_new_session_with_participants_opens_invite_dialog(page, local_server):
 
 
 def test_two_clients_with_one_name_are_told_apart_by_their_alias(page, local_server):
-    # Two rows reading "Jane Doe" leave the trainer guessing which one an invite goes to; the alias
+    # Two rows reading "Eva" leave the trainer guessing which one an invite goes to; the alias
     # exists for exactly this, so each row carries it.
     page.goto(local_server)
     page.wait_for_selector("#view-clients.active")
@@ -75,20 +75,20 @@ def test_two_clients_with_one_name_are_told_apart_by_their_alias(page, local_ser
           const store = await import(new URL('data/stateStore.js', document.baseURI).href);
           const clients = store.getState().clients;
           Object.assign(clients.find((c) => c.id === 'c1a9f0e2'), { alias: 'mornings' });
-          Object.assign(clients.find((c) => c.id === 'c2b8e1d3'), { name: 'Jane Doe', alias: 'evenings' });
+          Object.assign(clients.find((c) => c.id === 'c2b8e1d3'), { name: 'Eva', alias: 'evenings' });
           store.saveToLocalStorage();
           const queue = await import(new URL('data/writeQueue.js', document.baseURI).href);
           await queue.flushWrites();
         }"""
     )
     _create_session_with_participants(
-        page, local_server, [JANE, ("c2b8e1d3", "Jane Doe")], "Namesakes"
+        page, local_server, [EVA, ("c2b8e1d3", "Eva")], "Namesakes"
     )
 
     dialog = page.locator("#dialog-session-invite")
     expect(dialog).to_be_visible()
     names = dialog.locator(".session-invite-name").all_text_contents()
-    assert sorted(names) == ["Jane Doe (evenings)", "Jane Doe (mornings)"]
+    assert sorted(names) == ["Eva (evenings)", "Eva (mornings)"]
 
 
 def test_the_invite_dialog_is_in_the_chosen_language_to_its_last_button(
@@ -96,7 +96,7 @@ def test_the_invite_dialog_is_in_the_chosen_language_to_its_last_button(
 ):
     """The dialog is built after the boot's translation pass; its Done button kept "Done"."""
     _create_session_with_participants(
-        page, local_server, [JANE], "Jutranja vadba", query="?lang=sl"
+        page, local_server, [EVA], "Jutranja vadba", query="?lang=sl"
     )
 
     dialog = page.locator("#dialog-session-invite")
@@ -107,7 +107,7 @@ def test_the_invite_dialog_is_in_the_chosen_language_to_its_last_button(
 def test_resaving_unchanged_participants_does_not_reopen_invite_dialog(
     page, local_server
 ):
-    _create_session_with_participants(page, local_server, [JANE], "Repeat Save Session")
+    _create_session_with_participants(page, local_server, [EVA], "Repeat Save Session")
     dialog = page.locator("#dialog-session-invite")
     expect(dialog).to_be_visible()
     dialog.locator(".modal-cancel").click()
@@ -151,19 +151,19 @@ def test_the_invite_is_written_in_the_language_the_client_has_on_record(
         }"""
     )
     _create_session_with_participants(
-        page, local_server, [JANE], "Jutranja vadba", query="?lang=sl"
+        page, local_server, [EVA], "Jutranja vadba", query="?lang=sl"
     )
 
     dialog = page.locator("#dialog-session-invite")
     expect(dialog).to_be_visible()
     expect(dialog.locator(".modal-cancel")).to_have_text("Končano")
-    row = dialog.locator(".session-invite-row", has_text="Jane Doe")
+    row = dialog.locator(".session-invite-row", has_text="Eva")
     mail = row.locator(".session-invite-send-btn").get_attribute("href")
     sms = row.locator(".session-invite-sms-btn").get_attribute("href")
 
     mail = unquote(mail)
     assert "Training session: Jutranja vadba" in mail
-    assert "Hi Jane Doe," in mail
+    assert "Hi Eva," in mail
     assert "Let me know if you can make it:" in mail
     assert "lang=en" in mail and "lang=sl" not in mail
     sms = unquote(sms)

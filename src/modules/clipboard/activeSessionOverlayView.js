@@ -199,7 +199,7 @@ export function renderActiveSessionOverlayShell() {
 
     <!-- Client selector tabs for sub-second plan switching -->
     <div id="active-session-client-tabs" class="client-tabs-bar">
-      <!-- Injected via JS: [Jane Doe] [John Smith] [Sarah Jenkins] -->
+      <!-- Injected via JS: [Eva] [Tom] [Nina] -->
     </div>
 
     <!-- Active Client Clipboard Content (Budgeted height, scroll-free design) -->

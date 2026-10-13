@@ -22,8 +22,8 @@ from tests.medium._harness import (
 
 pytestmark = pytest.mark.clean_start
 
-JANE = "c1a9f0e2"
-JOHN = "c2b8e1d3"
+EVA = "c1a9f0e2"
+TOM = "c2b8e1d3"
 
 
 def _two_participant_session():
@@ -35,11 +35,11 @@ def _two_participant_session():
             ]
         ).replace("Date.now()", "0")
     )
-    session["participants"] = [JANE, JOHN]
-    session["clientRoutines"][JOHN] = {
+    session["participants"] = [EVA, TOM]
+    session["clientRoutines"][TOM] = {
         "routineId": "r1",
-        "routineName": "Whatever John had",
-        "clientName": "John Smith",
+        "routineName": "Whatever Tom had",
+        "clientName": "Tom",
         "activeExerciseIndex": 0,
         "deckAllCollapsed": False,
         "exercises": [exercise_item("j1", "Treadmill Run")],
@@ -66,35 +66,35 @@ def test_the_trainer_sees_who_they_are_giving_it_to(page, local_server):
 
     _open_copy_list(page)
 
-    expect(page.locator("#copy-plan-targets")).to_contain_text("John Smith")
+    expect(page.locator("#copy-plan-targets")).to_contain_text("Tom")
     # Never themselves: copying a plan onto the person already doing it does nothing but confuse.
-    expect(page.locator("#copy-plan-targets")).not_to_contain_text("Jane")
+    expect(page.locator("#copy-plan-targets")).not_to_contain_text("Eva")
 
 
 def test_copying_hands_over_the_session_being_run(page, local_server):
     _mount(page, local_server)
     _open_copy_list(page)
 
-    page.click("[data-copy-to='%s']" % JOHN)
+    page.click("[data-copy-to='%s']" % TOM)
     page.wait_for_timeout(200)
 
-    johns_plan = page.evaluate(
+    toms_plan = page.evaluate(
         """async (id) => {
           const ctrl = await import(new URL('controllers/activeSessionController.js', document.baseURI).href);
           const session = ctrl.getActiveSession();
           return session.clientRoutines[id].exercises.map((item) => item.name);
         }""",
-        JOHN,
+        TOM,
     )
-    assert johns_plan == ["Back Squat", "Bench Press"]
+    assert toms_plan == ["Back Squat", "Bench Press"]
 
 
 def test_the_plan_a_copy_replaces_is_kept_as_an_unscheduled_plan(page, local_server):
-    """John's own plan vanished without a question. A program is never deleted, so what
+    """Tom's own plan vanished without a question. A program is never deleted, so what
     the copy replaces waits among the unscheduled plans."""
     _mount(page, local_server)
     _open_copy_list(page)
-    page.click("[data-copy-to='%s']" % JOHN)
+    page.click("[data-copy-to='%s']" % TOM)
     page.wait_for_timeout(200)
 
     kept = page.evaluate(
@@ -104,7 +104,7 @@ def test_the_plan_a_copy_replaces_is_kept_as_an_unscheduled_plan(page, local_ser
             .filter((p) => p.clientId === id && p.status === 'planned' && !p.sessionId)
             .map((p) => p.exercises.map((item) => item.name));
         }""",
-        JOHN,
+        TOM,
     )
     assert kept == [["Treadmill Run"]]
 
@@ -114,7 +114,7 @@ def test_the_copy_is_his_own_from_that_moment(page, local_server):
     afterwards must not touch the other."""
     _mount(page, local_server)
     _open_copy_list(page)
-    page.click("[data-copy-to='%s']" % JOHN)
+    page.click("[data-copy-to='%s']" % TOM)
     page.wait_for_timeout(200)
 
     diverged = page.evaluate(
@@ -130,7 +130,7 @@ def test_the_copy_is_his_own_from_that_moment(page, local_server):
             ),
           };
         }""",
-        [JANE, JOHN],
+        [EVA, TOM],
     )
     assert diverged["his"] == 99
     assert diverged["hers"] != 99
@@ -172,8 +172,8 @@ def test_after_copying_the_app_says_to_whom(page, local_server):
     _mount(page, local_server)
     _open_copy_list(page)
 
-    page.click("[data-copy-to='%s']" % JOHN)
+    page.click("[data-copy-to='%s']" % TOM)
 
     expect(page.locator("#copy-plan-targets [role=status]")).to_have_text(
-        "Plan copied to John Smith"
+        "Plan copied to Tom"
     )

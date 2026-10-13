@@ -1,6 +1,12 @@
 // src/data/clients.js — seed clients (name, goals, injuries/notes).
 // The seed client roster of the demo dataset.
 //
+// **First names only, chosen to read the same in English, Slovenian and German**, so a name needs
+// no entry in data/demoText.js and a Slovenian demo shows no English name. Not Ana, Maja or Nik:
+// the guided story signs those up as NEW clients. Not Max: data/demoText.js translates the string
+// "Max" (a reps value), and the seed walk would rename the person. The guided story's cards in
+// src/i18n/ name Eva, Tom and Nina, with Slovenian case endings, so a rename here is a rename there.
+//
 // `injury` and `notes` are shown joined, injury first, under "Pre-existing Injuries & Notes" on the
 // plan editor (modules/clipboard/activeSessionBoard.js). So `notes` holds only what `injury` does
 // not already say: a note that repeats the injury shows the same sentence twice.
@@ -8,10 +14,10 @@
 export const DEFAULT_CLIENTS = [
   {
     id: "c1a9f0e2",
-    name: "Jane Doe",
-    avatar: "JD",
+    name: "Eva",
+    avatar: "E",
     joinedDate: "2026-03-15",
-    email: "jane.doe@example.com",
+    email: "eva@example.com",
     phone: "+386 40 111 222",
     goals: "Strength gain, building shoulder mobility, and improving squat form.",
     weightHistory: [],
@@ -22,10 +28,10 @@ export const DEFAULT_CLIENTS = [
   },
   {
     id: "c2b8e1d3",
-    name: "John Smith",
-    avatar: "JS",
+    name: "Tom",
+    avatar: "T",
     joinedDate: "2026-05-01",
-    email: "john.smith@example.com",
+    email: "tom@example.com",
     phone: "+386 41 333 444",
     goals: "Fat loss, cardiovascular endurance, and recovering functional knee strength.",
     weightHistory: [],
@@ -36,10 +42,10 @@ export const DEFAULT_CLIENTS = [
   },
   {
     id: "c3c7d2c4",
-    name: "Sarah Jenkins",
-    avatar: "SJ",
+    name: "Nina",
+    avatar: "N",
     joinedDate: "2026-06-10",
-    email: "sarah.j@example.com",
+    email: "nina@example.com",
     phone: "+386 40 555 666",
     goals: "General conditioning, consistency, and core activation.",
     weightHistory: [],
@@ -51,10 +57,10 @@ export const DEFAULT_CLIENTS = [
   },
   {
     id: "c4d6c3b5",
-    name: "Mike Chen",
-    avatar: "MC",
+    name: "Leo",
+    avatar: "L",
     joinedDate: "2026-04-02",
-    email: "mike.chen@example.com",
+    email: "leo@example.com",
     phone: "+386 31 777 888",
     goals: "Hypertrophy, upper body definition, and consistent training frequency.",
     weightHistory: [],
@@ -65,10 +71,10 @@ export const DEFAULT_CLIENTS = [
   },
   {
     id: "c5e5b4a6",
-    name: "Priya Patel",
-    avatar: "PP",
+    name: "Mia",
+    avatar: "M",
     joinedDate: "2026-02-18",
-    email: "priya.patel@example.com",
+    email: "mia@example.com",
     phone: "+386 41 999 000",
     goals: "Marathon prep, aerobic base building, and injury-free mileage progression.",
     weightHistory: [],
@@ -79,10 +85,10 @@ export const DEFAULT_CLIENTS = [
   },
   {
     id: "c6f4a597",
-    name: "Tom Walker",
-    avatar: "TW",
+    name: "David",
+    avatar: "D",
     joinedDate: "2026-01-12",
-    email: "tom.walker@example.com",
+    email: "david@example.com",
     phone: "+386 40 123 987",
     goals: "General strength maintenance and mobility as a masters athlete.",
     weightHistory: [],
@@ -93,10 +99,10 @@ export const DEFAULT_CLIENTS = [
   },
   {
     id: "c7a39688",
-    name: "Aisha Khan",
-    avatar: "AK",
+    name: "Ida",
+    avatar: "I",
     joinedDate: "2026-05-22",
-    email: "aisha.khan@example.com",
+    email: "ida@example.com",
     phone: "+386 30 456 789",
     goals: "Postpartum strength rebuild and core recovery.",
     weightHistory: [],

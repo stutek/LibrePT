@@ -388,8 +388,8 @@ def test_the_story_tells_a_story_rather_than_naming_features(page, local_server)
 
     told = " ".join(_walk_the_whole_story(page))
 
-    assert "John" in told, told[:400]
-    assert "Jane" in told, told[:400]
+    assert "Tom" in told, told[:400]
+    assert "Eva" in told, told[:400]
 
 
 def test_the_story_leaves_the_note_on_the_person_it_was_about(page, local_server):

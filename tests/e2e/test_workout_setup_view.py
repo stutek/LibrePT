@@ -102,7 +102,7 @@ def test_a_group_session_started_from_a_routine_gives_everyone_that_routine(
     [routine_id] = query["routine"]
     assert "?" not in routine_id
 
-    for client_id, name in (("c1a9f0e2", "Jane"), ("c2b8e1d3", "John")):
+    for client_id, name in (("c1a9f0e2", "Eva"), ("c2b8e1d3", "Tom")):
         page.fill("#setup-participant-search", name)
         page.click(
             f"#setup-participant-matches .participant-match[data-client-id='{client_id}']"

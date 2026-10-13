@@ -3,7 +3,7 @@ export const DEFAULT_PLAN_UPDATES = [
   {
     id: "u001f2e3",
     clientId: "c1a9f0e2",
-    clientName: "Jane Doe",
+    clientName: "Eva",
     date: "2026-07-06T11:00:00.000Z",
     exerciseName: "Barbell Bench Press",
     tag: "Too Easy - Increase Load",
@@ -12,7 +12,7 @@ export const DEFAULT_PLAN_UPDATES = [
   {
     id: "u002f2e3",
     clientId: "c2b8e1d3",
-    clientName: "John Smith",
+    clientName: "Tom",
     date: "2026-07-08T17:30:00.000Z",
     exerciseName: "Barbell Back Squat",
     tag: "Form Break - Watch Position",

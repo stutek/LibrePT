@@ -20,11 +20,19 @@
 // in the other language.
 //
 // **Every word a trainer reads is in the demo's language** (ruled 2026-10-13): session, plan and
-// circuit names, what each plan is for, how each exercise is done, notes, places. English sample
-// data on a Slovenian screen reads as an unfinished translation, and the demo is what a trainer
-// judges the app by. Not translated: a place's own name ("Trib" stays, the words around it do not).
-// Still English at this point, and open in TODO.md: the clients' names and the exercises' names,
-// because the guided story's cards in src/i18n/ name them and must change with them.
+// circuit names, what each plan is for, exercise names and how each exercise is done, notes,
+// places. English sample data on a Slovenian screen reads as an unfinished translation, and the
+// demo is what a trainer judges the app by. Not translated: a place's own name ("Trib" stays, the
+// words around it do not), and people's names — the seed's clients have first names that read the
+// same in every language (data/clients.js), so they need no entry here.
+//
+// **The guided story names some of these on its cards** (src/i18n/: "Lat Pulldown", the clients
+// Eva, Tom and Nina), so a translation changed here is changed there. The story finds the exercise
+// by its id, not by this text (modules/demo/storyTour.js).
+//
+// **This is the sandbox's data, not the catalog's.** The sandbox stores its own copy of the
+// exercise catalog, written through this table, and a stored entry wins over the catalog's
+// (data/exerciseLibrary.js). A working database reads the catalog from code, in English.
 //
 // deps: none — a plain lookup table.
 
@@ -172,6 +180,56 @@ export const DEMO_TEXT = {
       "Nežna aktivacija trupa in vaje za gibljivost s poudarkom na globokem trebušnem dihanju, drži in lahki funkcionalni moči.",
     "Compound strength lifts paired with posture and core stability work optimized for long-term joint health.":
       "Sestavljeni dvigi za moč skupaj z vajami za držo in stabilnost trupa, prilagojeni dolgoročnemu zdravju sklepov.",
+
+    // ── Exercises: their names (data/exercises.js), and wherever a plan or a log repeats one ──
+    "Barbell Bench Press": "Potisk s prsi z drogom",
+    "Dumbbell Bench Press": "Potisk s prsi z ročkama",
+    "Incline Dumbbell Press": "Potisk z ročkama na poševni klopi",
+    "Cable Chest Fly": "Razpiranje za prsi na škripcu",
+    "Push-Ups": "Sklece",
+    "Pull-Ups": "Zgibi",
+    "Lat Pulldown": "Poteg zgornjega škripca",
+    "Barbell Row": "Veslanje z drogom",
+    "Single-Arm Dumbbell Row": "Enoročno veslanje z ročko",
+    "Face Pulls": "Poteg vrvi k obrazu",
+    "Barbell Back Squat": "Počep z drogom na hrbtu",
+    "Romanian Deadlift (RDL)": "Romunski mrtvi dvig (RDL)",
+    "Leg Press": "Nožna preša",
+    "Dumbbell Goblet Squat": "Počep z ročko pred prsmi",
+    "Leg Extension": "Iztegovanje nog na napravi",
+    "Lying Leg Curl": "Upogibanje nog leže",
+    "Standing Calf Raise": "Dvig na prste stoje",
+    "Barbell Overhead Press": "Potisk droga nad glavo",
+    "Dumbbell Lateral Raise": "Odročenje z ročkama",
+    "Dumbbell Shoulder Press": "Potisk ročk nad glavo",
+    "Dumbbell Bicep Curl": "Upogib za biceps z ročkama",
+    "Dumbbell Hammer Curl": "Kladivni upogib z ročkama",
+    "Cable Tricep Pushdown": "Iztegovanje za triceps na škripcu",
+    "EZ-Bar Skull Crusher": "Francoski potisk z EZ-drogom",
+    Plank: "Deska",
+    "Hanging Knee Raise": "Dvig kolen v visi",
+    "Abmat Sit-up": "Trebušnjak na blazinici Abmat",
+    "Russian Twist": "Ruski zasuk",
+    "Walking Lunges": "Izpadni koraki v hoji",
+    "Shoulder & Lat Stretch": "Raztezanje ramen in hrbta",
+    "Hamstring & Hip Stretch": "Raztezanje zadnje lože in kolkov",
+    "Assault Bike": "Zračno kolo",
+    "Assault Bike (Time)": "Zračno kolo (čas)",
+    "Assault Bike (Watts)": "Zračno kolo (vati)",
+    "Concept2 Rower": "Veslalni ergometer Concept2",
+    "Ski-Erg": "Smučarski ergometer",
+    "Watt Bike": "Kolesarski ergometer",
+    "Treadmill Run": "Tek na tekoči preprogi",
+    "Single-Leg Balance": "Ravnotežje na eni nogi",
+    "BOSU Squat Hold": "Drža počepa na BOSU",
+    "Weighted Plank": "Deska z utežjo",
+    "Wall Sit": "Sed ob steni",
+    "Overhead Barbell Hold": "Drža droga nad glavo",
+    "5-10-5 Pro Agility Shuttle": "Tek 5-10-5 z obrati",
+    "Agility Ladder Drill": "Koordinacijska lestev",
+    "Cone Sprint Drill": "Šprint med stožci",
+    "Outdoor Run": "Tek na prostem",
+    "Zone 2 Bike Ride": "Kolesarjenje v coni 2",
 
     // ── Exercises: how each one is done (data/exercises.js), in the exercise's form ───────────
     "Lie flat on a bench, grip the barbell slightly wider than shoulder width, lower it to mid-chest, and push up.":
@@ -417,6 +475,56 @@ export const DEMO_TEXT = {
       "Sanfte Aktivierung des Rumpfs und Übungen für die Beweglichkeit mit Schwerpunkt auf tiefer Bauchatmung, Haltung und leichter funktioneller Kraft.",
     "Compound strength lifts paired with posture and core stability work optimized for long-term joint health.":
       "Grundübungen für Kraft, kombiniert mit Übungen für Haltung und Rumpfstabilität, ausgerichtet auf langfristig gesunde Gelenke.",
+
+    // ── Exercises: their names (data/exercises.js), and wherever a plan or a log repeats one ──
+    "Barbell Bench Press": "Bankdrücken mit der Langhantel",
+    "Dumbbell Bench Press": "Bankdrücken mit Kurzhanteln",
+    "Incline Dumbbell Press": "Schrägbankdrücken mit Kurzhanteln",
+    "Cable Chest Fly": "Fliegende am Kabelzug",
+    "Push-Ups": "Liegestütze",
+    "Pull-Ups": "Klimmzüge",
+    "Lat Pulldown": "Latziehen",
+    "Barbell Row": "Langhantelrudern",
+    "Single-Arm Dumbbell Row": "Einarmiges Kurzhantelrudern",
+    "Face Pulls": "Seilzug zum Gesicht",
+    "Barbell Back Squat": "Kniebeuge mit der Langhantel",
+    "Romanian Deadlift (RDL)": "Rumänisches Kreuzheben (RDL)",
+    "Leg Press": "Beinpresse",
+    "Dumbbell Goblet Squat": "Goblet-Kniebeuge mit Kurzhantel",
+    "Leg Extension": "Beinstrecker",
+    "Lying Leg Curl": "Beinbeuger liegend",
+    "Standing Calf Raise": "Wadenheben stehend",
+    "Barbell Overhead Press": "Schulterdrücken mit der Langhantel",
+    "Dumbbell Lateral Raise": "Seitheben mit Kurzhanteln",
+    "Dumbbell Shoulder Press": "Schulterdrücken mit Kurzhanteln",
+    "Dumbbell Bicep Curl": "Bizepscurls mit Kurzhanteln",
+    "Dumbbell Hammer Curl": "Hammercurls mit Kurzhanteln",
+    "Cable Tricep Pushdown": "Trizepsdrücken am Kabelzug",
+    "EZ-Bar Skull Crusher": "Stirndrücken mit der SZ-Stange",
+    Plank: "Unterarmstütz",
+    "Hanging Knee Raise": "Knieheben im Hang",
+    "Abmat Sit-up": "Sit-up mit AbMat",
+    "Russian Twist": "Russischer Twist",
+    "Walking Lunges": "Ausfallschritte im Gehen",
+    "Shoulder & Lat Stretch": "Dehnung Schultern und Rücken",
+    "Hamstring & Hip Stretch": "Dehnung Oberschenkelrückseite und Hüfte",
+    "Assault Bike": "Air-Bike",
+    "Assault Bike (Time)": "Air-Bike (Zeit)",
+    "Assault Bike (Watts)": "Air-Bike (Watt)",
+    "Concept2 Rower": "Rudergerät Concept2",
+    "Ski-Erg": "Ski-Ergometer",
+    "Watt Bike": "Fahrradergometer",
+    "Treadmill Run": "Laufband",
+    "Single-Leg Balance": "Einbeinstand",
+    "BOSU Squat Hold": "Kniebeuge halten auf dem BOSU",
+    "Weighted Plank": "Unterarmstütz mit Gewicht",
+    "Wall Sit": "Wandsitzen",
+    "Overhead Barbell Hold": "Langhantel über Kopf halten",
+    "5-10-5 Pro Agility Shuttle": "Pendellauf 5-10-5",
+    "Agility Ladder Drill": "Koordinationsleiter",
+    "Cone Sprint Drill": "Sprints zwischen Hütchen",
+    "Outdoor Run": "Lauf im Freien",
+    "Zone 2 Bike Ride": "Radfahren in Zone 2",
 
     // ── Exercises: how each one is done (data/exercises.js), in the exercise's form ───────────
     "Lie flat on a bench, grip the barbell slightly wider than shoulder width, lower it to mid-chest, and push up.":

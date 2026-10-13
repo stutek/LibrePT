@@ -68,7 +68,10 @@ for (const lang of Object.keys(TRANSLATIONS).filter((code) => code !== "en")) {
       }
     }
     // How an exercise is done is shown in its form, and searched when the library is filtered.
-    for (const exercise of DEFAULT_EXERCISES) need(exercise.instructions);
+    for (const exercise of DEFAULT_EXERCISES) {
+      need(exercise.name);
+      need(exercise.instructions);
+    }
     for (const client of DEFAULT_CLIENTS) {
       need(client.goals);
       need(client.notes);
@@ -95,6 +98,33 @@ for (const lang of ["en", ...Object.keys(DEMO_TEXT)]) {
     assert.deepEqual(repeated, []);
   });
 }
+
+// A person's name is the same in every language, so the table must never hold one: the walk would
+// rename the person. "Max" is already a key (a reps value), which is why no client is called Max.
+test("the seed's people keep their names in every language", () => {
+  const names = DEFAULT_CLIENTS.map((client) => client.name);
+  for (const lang of Object.keys(DEMO_TEXT)) {
+    assert.deepEqual(
+      localiseDemoRecords(DEFAULT_CLIENTS, lang).map((client) => client.name),
+      names,
+      lang,
+    );
+  }
+});
+
+// Category, equipment, pattern, modality and metric are keys the filters and the history bucket
+// on (data/exercises.js), not words. A dictionary entry that happened to equal one would change it.
+test("an exercise's taxonomy values are not translated", () => {
+  const axes = ["category", "equipment", "pattern", "modality", "metric"];
+  const pick = (exercise) => axes.map((axis) => exercise[axis]);
+  for (const lang of Object.keys(DEMO_TEXT)) {
+    assert.deepEqual(
+      localiseDemoRecords(DEFAULT_EXERCISES, lang).map(pick),
+      DEFAULT_EXERCISES.map(pick),
+      lang,
+    );
+  }
+});
 
 // A feedback tag is a key, not words: the quick-signal toggle and the load suggestion recognise it
 // by its English string, and the screens translate it through the dictionary. A demo tag written

@@ -18,7 +18,7 @@ from tests.medium._harness import (
     load_with_stub,
 )
 
-# Jane Doe — the seeded client the fixture defaults to, and the one whose goals/notes the focus
+# Eva — the seeded client the fixture defaults to, and the one whose goals/notes the focus
 # panel below asserts are populated.
 CLIENT_ID = "c1a9f0e2"
 

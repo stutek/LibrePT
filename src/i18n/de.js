@@ -968,7 +968,7 @@ export const de = {
   story_chapter_evening: "Notizen durchsehen und Trainings vorbereiten",
   story_step_programme_open_session: "Tippe auf das Training Kraft & Kondition (Gruppe).",
   story_step_programme_editor:
-    "Tippe auf Plan bearbeiten — die Zeile mit dem Stift im Menü. Janes Plan öffnet sich. Über den Übungen, rechts neben der Schaltfläche Aus dem Katalog hinzufügen, steht zum Beispiel 45 / 60 min: 45 Minuten Übungen in einem 60-Minuten-Training.",
+    "Tippe auf Plan bearbeiten — die Zeile mit dem Stift im Menü. Evas Plan öffnet sich. Über den Übungen, rechts neben der Schaltfläche Aus dem Katalog hinzufügen, steht zum Beispiel 45 / 60 min: 45 Minuten Übungen in einem 60-Minuten-Training.",
   story_step_programme_add_circuit:
     "Tippe unten im Plan auf + Zirkel — die Schaltfläche mit dem Symbol gestapelter Ebenen. Am Ende des Plans kommt ein neuer Zirkel mit einer leeren Übung hinzu.",
   story_step_programme_add_exercise:
@@ -977,11 +977,11 @@ export const de = {
     "Tippe oben rechts neben dem Titel auf ✓. Der Plan ist gespeichert, und das Training erscheint wieder mit allen dreien.",
   story_step_programme_menu_again: "Tippe noch einmal oben rechts auf ⋮.",
   story_step_programme_bind:
-    "Tippe auf Alle auf diesen Plan — die Zeile mit dem Kettensymbol. Jane, John und Sarah bekommen denselben Plan, und Sarahs bisheriger Plan wird dadurch ersetzt. Du zeichnest die Sätze am Dienstag einmal statt dreimal auf.",
-  // Tuesday's session is with Jane, John and Sarah, who are already in the seeded register.
+    "Tippe auf Alle auf diesen Plan — die Zeile mit dem Kettensymbol. Eva, Tom und Nina bekommen denselben Plan, und Ninas bisheriger Plan wird dadurch ersetzt. Du zeichnest die Sätze am Dienstag einmal statt dreimal auf.",
+  // Tuesday's session is with Eva, Tom and Nina, who are already in the seeded register.
   story_programme_open_body: "Sonntagabend. Du planst die Stunde am Dienstag.",
   story_programme_close_body:
-    "Jane, John und Sarah teilen einen Plan. Am Dienstag öffnest du ihn und fängst an.",
+    "Eva, Tom und Nina teilen einen Plan. Am Dienstag öffnest du ihn und fängst an.",
   story_programme_close_title: "Der Plan ist fertig",
   story_step_evening_menu: "Zu Hause, später am Abend. Tippe oben rechts auf ☰.",
   story_step_evening_settings:
@@ -996,16 +996,16 @@ export const de = {
     "Das Training ist vorbei, und alle sind nach Hause gegangen. Zu Hause verschiebst du das Training am Dienstag, wie ihr es nach dem Training abgesprochen habt.",
   story_thanks_title: "Ende der Tour",
   story_clear_demo_data: "Demodaten löschen",
-  // The story's own voice. It names the people the seed puts on screen — Jane, John, Sarah.
+  // The story's own voice. It names the people the seed puts on screen — Eva, Tom, Nina.
   story_step_open_session: "Tippe auf das Training Kraft & Kondition (Gruppe).",
-  story_step_focus_exercise: "Tippe auf Janes Zirkel. Er öffnet sich mit ihren Übungen und Zahlen.",
+  story_step_focus_exercise: "Tippe auf Evas Zirkel. Er öffnet sich mit ihren Übungen und Zahlen.",
   story_step_signal_too_easy:
     "Tippe unter der Übung auf Zu leicht (die Feder). Bei der Übung wird vermerkt, dass sie ihr zu leicht war.",
   story_step_next_participant:
-    "Tippe oben in der Namensleiste auf Johns Namen. Dasselbe Training, sein Plan.",
+    "Tippe oben in der Namensleiste auf Toms Namen. Dasselbe Training, sein Plan.",
   story_step_refocus: "Tippe auf seinen Zirkel, um ihn zu öffnen.",
   story_step_capture_open:
-    "In einer Pause erwähnt John sein Knie, das 2024 operiert wurde. Tippe unter der ersten Übung des Zirkels auf Notizen (der Haftzettel). Die Notiz öffnet sich über dem Training; die Uhr läuft weiter.",
+    "In einer Pause erwähnt Tom sein Knie, das 2024 operiert wurde. Tippe unter der ersten Übung des Zirkels auf Notizen (der Haftzettel). Die Notiz öffnet sich über dem Training; die Uhr läuft weiter.",
   story_step_capture_tag: "Tippe auf 🔥 Joint Pain / Discomfort — Gelenkschmerzen.",
   story_step_capture_note:
     "Gib in das Notizfeld ein, was er gesagt hat: linkes Knie, dritte Runde.",
@@ -1014,22 +1014,22 @@ export const de = {
   story_typed_note: "linkes Knie, dritte Runde",
   story_typed_injury: "Schulter, vor zwei Jahren",
   story_step_capture_keep:
-    "Setz das Häkchen bei In der Kundenakte behalten. Mit dem Häkchen bleibt die Notiz auch nach diesem Training in Johns Akte. Gespeichert ist sie noch nicht: Das macht die Schaltfläche im nächsten Schritt.",
+    "Setz das Häkchen bei In der Kundenakte behalten. Mit dem Häkchen bleibt die Notiz auch nach diesem Training in Toms Akte. Gespeichert ist sie noch nicht: Das macht die Schaltfläche im nächsten Schritt.",
   story_step_capture_submit:
-    "Tippe unten auf Hinweis speichern. Jetzt ist die Notiz gespeichert, bei John und bei dieser Übung.",
+    "Tippe unten auf Hinweis speichern. Jetzt ist die Notiz gespeichert, bei Tom und bei dieser Übung.",
   story_step_session_menu:
     "Tippe auf ⋮ — die drei Punkte oben rechts. Das Menü des Trainings öffnet sich.",
   story_step_plan_editor:
-    "Tippe auf Plan bearbeiten. Johns Plan öffnet sich; die Notiz steht darin, neben der Übung.",
+    "Tippe auf Plan bearbeiten. Toms Plan öffnet sich; die Notiz steht darin, neben der Übung.",
   story_step_swap_open:
-    "Wegen seines Knies macht John diese Übung heute nicht. Tippe auf das Symbol des offenen Buchs in der Zeile der Übung, um den Übungskatalog zu öffnen.",
+    "Wegen seines Knies macht Tom diese Übung heute nicht. Tippe auf das Symbol des offenen Buchs in der Zeile der Übung, um den Übungskatalog zu öffnen.",
   story_step_swap_pick:
-    "Tippe auf Lat Pulldown: eine Übung für dieselben Muskeln, die das Knie nicht belastet. Die Übung ändert sich nur für John; Jane und Sarah behalten ihre Pläne.",
-  story_gym_open_body: "Dienstag, 18:10. Jane, John und Sarah sind da.",
+    "Tippe auf Latziehen: eine Übung für dieselben Muskeln, die das Knie nicht belastet. Die Übung ändert sich nur für Tom; Eva und Nina behalten ihre Pläne.",
+  story_gym_open_body: "Dienstag, 18:10. Eva, Tom und Nina sind da.",
   story_gym_close_body:
-    "Johns Knie steht in seiner Akte und in seinem Plan, und Jane und Sarah haben weiter trainiert.",
+    "Toms Knie steht in seiner Akte und in seinem Plan, und Eva und Nina haben weiter trainiert.",
   story_evening_close_body:
-    "Es ist vermerkt, dass es Jane zu leicht war. Johns Knie steht in seiner Akte und in seinem Plan. Der Dienstag ist diese Woche um 20:00.",
+    "Es ist vermerkt, dass es Eva zu leicht war. Toms Knie steht in seiner Akte und in seinem Plan. Der Dienstag ist diese Woche um 20:00.",
   story_gym_close_title: "Das Training ist vorbei",
   today: "Heute",
   tomorrow: "Morgen",
@@ -1253,10 +1253,10 @@ export const de = {
   build_info_copied: "Kopiert",
   build_info_copy_failed: "Markiere den Text oben und kopiere ihn",
   notif_spot_res_title: "📅 Platz reserviert",
-  notif_spot_res_desc: "John Smith hat einen Platz im Training HIIT-Kondition gebucht.",
+  notif_spot_res_desc: "Tom hat einen Platz im Training HIIT-Kondition gebucht.",
   notif_spot_cancel_title: "⚠️ Platz storniert",
   notif_spot_cancel_desc:
-    "Mike Chen hat seinen Platz im Training Morgendliche Kondition morgen um 09:00 storniert.",
+    "Leo hat seinen Platz im Training Morgendliche Kondition morgen um 09:00 storniert.",
   notif_count_badge: "{unread} ungelesen / {all} gesamt",
   notif_mark_all_read: "Alle als gelesen markieren",
   notif_unscheduled_plans_title: "Pläne ohne Termin",

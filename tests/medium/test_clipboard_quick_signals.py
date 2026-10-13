@@ -251,7 +251,7 @@ def _mount_with_logs(page, local_server, name):
                     CLIENT_ID: {
                         "routineId": "r1",
                         "routineName": "Upper Body",
-                        "clientName": "Jane Doe",
+                        "clientName": "Eva",
                         "activeExerciseIndex": 0,
                         "deckAllCollapsed": False,
                         "exercises": [exercise_item("ex1", name)],

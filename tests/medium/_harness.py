@@ -257,7 +257,7 @@ paint();
 # Keeping this in the harness rather than in one test means a change to the real shape breaks one
 # place, and the next person reading it learns the contract instead of re-deriving it.
 def active_session_fixture(
-    client_id="c1a9f0e2", client_name="Jane Doe", exercises=None, **overrides
+    client_id="c1a9f0e2", client_name="Eva", exercises=None, **overrides
 ):
     """A valid activeSession as JS source, for injection via setActiveSession()."""
     items = (

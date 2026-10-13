@@ -62,14 +62,14 @@ def test_the_form_opens_with_nobody_on_the_session(page, local_server):
 
 def test_a_typed_name_finds_the_client_and_a_tap_books_them(page, local_server):
     load_with_stub(page, local_server, STUB)
-    page.fill("#setup-participant-search", "Jane")
+    page.fill("#setup-participant-search", "Eva")
 
     matches = page.locator(f"{MATCHES} .participant-match")
     expect(matches).to_have_count(1)
     matches.first.click()
 
     expect(page.locator(ROWS)).to_have_count(1)
-    expect(page.locator(ROWS).first).to_contain_text("Jane")
+    expect(page.locator(ROWS).first).to_contain_text("Eva")
     # Every booked client carries their own programme picker, and the count says how many there are.
     expect(page.locator(ROWS).first.locator("select")).to_be_visible()
     expect(page.locator("#setup-participant-count")).to_have_text("Chosen: 1")
@@ -82,7 +82,7 @@ def test_the_picker_names_a_routine_by_one_name(page, local_server):
     """The picker opened on "Select Exercise" although it lists routines, and its screen-reader
     name said "Programme": one thing had several names on one screen. It is a routine."""
     load_with_stub(page, local_server, STUB)
-    page.fill("#setup-participant-search", "Jane")
+    page.fill("#setup-participant-search", "Eva")
     page.locator(f"{MATCHES} .participant-match").first.click()
 
     select = page.locator(ROWS).first.locator("select")
@@ -115,17 +115,17 @@ def test_a_name_nobody_has_says_so_rather_than_showing_nothing(page, local_serve
 
 def test_someone_already_on_the_session_is_not_offered_again(page, local_server):
     load_with_stub(page, local_server, STUB)
-    page.fill("#setup-participant-search", "Jane")
+    page.fill("#setup-participant-search", "Eva")
     page.locator(f"{MATCHES} .participant-match").first.click()
 
-    page.fill("#setup-participant-search", "Jane")
+    page.fill("#setup-participant-search", "Eva")
     expect(page.locator(f"{MATCHES} .participant-match")).to_have_count(0)
     expect(page.locator(f"{MATCHES} .participant-match-empty")).to_be_visible()
 
 
 def test_the_cross_takes_a_client_off_the_session(page, local_server):
     load_with_stub(page, local_server, STUB)
-    page.fill("#setup-participant-search", "Jane")
+    page.fill("#setup-participant-search", "Eva")
     page.locator(f"{MATCHES} .participant-match").first.click()
     expect(page.locator(ROWS)).to_have_count(1)
 
@@ -146,7 +146,7 @@ def test_enter_books_the_first_match_without_submitting_the_form(page, local_ser
                .addEventListener('submit', () => { window.__submitted += 1; });
            }"""
     )
-    page.fill("#setup-participant-search", "Jane")
+    page.fill("#setup-participant-search", "Eva")
     page.press("#setup-participant-search", "Enter")
 
     expect(page.locator(ROWS)).to_have_count(1)
@@ -164,13 +164,13 @@ def test_a_typed_alias_finds_the_client(page, local_server):
     stub = STUB.replace(
         seeded,
         "  clients: structuredClone(DEFAULT_CLIENTS).map((c) =>"
-        " c.name === 'Jane Doe' ? { ...c, alias: 'mornings' } : c),",
+        " c.name === 'Eva' ? { ...c, alias: 'mornings' } : c),",
     )
     load_with_stub(page, local_server, stub)
     page.fill("#setup-participant-search", "morn")
     matches = page.locator(f"{MATCHES} .participant-match")
     expect(matches).to_have_count(1)
-    expect(matches.first).to_contain_text("Jane")
+    expect(matches.first).to_contain_text("Eva")
 
 
 def test_a_client_who_withdrew_consent_is_shown_but_cannot_be_booked(
@@ -183,12 +183,12 @@ def test_a_client_who_withdrew_consent_is_shown_but_cannot_be_booked(
     assert seeded in STUB
     stub = STUB.replace(
         seeded,
-        "  clients: structuredClone(DEFAULT_CLIENTS).map((c) => c.name === 'Jane Doe'"
+        "  clients: structuredClone(DEFAULT_CLIENTS).map((c) => c.name === 'Eva'"
         " ? { ...c, gdprConsent: { cloudSync: false, consentDate: '2026-06-15',"
         " formVersion: '2026-08-09', withdrawnDate: '2026-09-21' } } : c),",
     )
     load_with_stub(page, local_server, stub)
-    page.fill("#setup-participant-search", "Jane")
+    page.fill("#setup-participant-search", "Eva")
 
     match = page.locator(f"{MATCHES} .participant-match")
     expect(match).to_have_count(1)

@@ -83,7 +83,7 @@ def test_search_filters_clients_live(page, local_server):
     load_with_stub(page, local_server, STUB)
     page.wait_for_selector("#view-client-directory.active")
 
-    page.locator("#search-clients").fill("jane")
+    page.locator("#search-clients").fill("eva")
     # expect() rather than count()/inner_text(): .client-card carries `content-visibility: auto`
     # (src/index.css), so the browser is free to skip rendering the card's subtree on the frame
     # this assertion reads — and inner_text() only sees RENDERED text, so it came back empty while
@@ -91,7 +91,7 @@ def test_search_filters_clients_live(page, local_server):
     # is immune to the skipped-rendering window. The full-app boot this test came from was slow
     # enough to hide the race; a bare mounted view is not.
     expect(_cards(page)).to_have_count(1)
-    expect(_cards(page).first).to_contain_text("Jane Doe")
+    expect(_cards(page).first).to_contain_text("Eva")
 
     # Clearing the query restores the full directory.
     page.locator("#search-clients").fill("")
@@ -117,7 +117,7 @@ def test_a_card_still_opens_after_the_grid_has_been_filtered(page, local_server)
     errors = []
     page.on("pageerror", lambda exc: errors.append(str(exc)))
 
-    page.locator("#search-clients").fill("jane")
+    page.locator("#search-clients").fill("eva")
     expect(_cards(page)).to_have_count(1)
     _cards(page).first.click()
 
@@ -243,14 +243,14 @@ def test_the_search_finds_a_client_by_the_alias_on_their_card(page, local_server
     stub = STUB.replace(
         seeded,
         seeded
-        + "\nstate.clients.find((c) => c.name === 'Jane Doe').alias = 'mornings';",
+        + "\nstate.clients.find((c) => c.name === 'Eva').alias = 'mornings';",
     )
     load_with_stub(page, local_server, stub)
     page.wait_for_selector("#view-client-directory.active")
 
     page.locator("#search-clients").fill("morn")
     expect(_cards(page)).to_have_count(1)
-    expect(_cards(page).first).to_contain_text("Jane Doe")
+    expect(_cards(page).first).to_contain_text("Eva")
 
 
 def test_a_name_without_spaces_does_not_widen_the_cards(page, local_server):

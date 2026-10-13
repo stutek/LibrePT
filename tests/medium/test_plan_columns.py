@@ -22,8 +22,8 @@ from tests.medium._harness import (
 
 pytestmark = pytest.mark.clean_start
 
-JANE = "c1a9f0e2"
-JOHN = "c2b8e1d3"
+EVA = "c1a9f0e2"
+TOM = "c2b8e1d3"
 
 # Wide enough for three columns of 330px, which is what a desk actually offers.
 DESK = {"width": 1280, "height": 900}
@@ -41,11 +41,11 @@ def _session(*, planning):
             ]
         ).replace("Date.now()", "0")
     )
-    session["participants"] = [JANE, JOHN]
-    session["clientRoutines"][JOHN] = {
+    session["participants"] = [EVA, TOM]
+    session["clientRoutines"][TOM] = {
         "routineId": "r1",
-        "routineName": "John's programme",
-        "clientName": "John Smith",
+        "routineName": "Tom's programme",
+        "clientName": "Tom",
         "activeExerciseIndex": 0,
         "deckAllCollapsed": False,
         "exercises": [exercise_item("j1", "Treadmill Run")],

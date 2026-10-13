@@ -3,7 +3,7 @@ export const DEFAULT_HISTORY = [
   {
     id: "h001f2e3",
     clientId: "c1a9f0e2",
-    clientName: "Jane Doe",
+    clientName: "Eva",
     routineName: "Upper Body A",
     date: "2026-07-06T10:15:00.000Z",
     duration: 3420,
@@ -42,7 +42,7 @@ export const DEFAULT_HISTORY = [
   {
     id: "h002f2e3",
     clientId: "c1a9f0e2",
-    clientName: "Jane Doe",
+    clientName: "Eva",
     routineName: "Upper Body A",
     date: "2026-07-10T09:00:00.000Z",
     duration: 3540,
@@ -103,7 +103,7 @@ export const DEFAULT_HISTORY = [
   {
     id: "h003f2e3",
     clientId: "c2b8e1d3",
-    clientName: "John Smith",
+    clientName: "Tom",
     routineName: "Upper Body A",
     date: "2026-07-10T09:00:00.000Z",
     duration: 3720,
@@ -198,7 +198,7 @@ export const DEFAULT_HISTORY = [
   {
     id: "h010f2e3",
     clientId: "c1a9f0e2",
-    clientName: "Jane Doe",
+    clientName: "Eva",
     routineName: "Tri-Set Metabolic Conditioning",
     date: "2026-07-20T09:00:00.000Z",
     duration: 3300,

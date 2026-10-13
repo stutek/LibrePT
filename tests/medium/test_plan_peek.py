@@ -546,7 +546,7 @@ def test_with_no_next_plan_the_future_layer_offers_to_create_one(page, local_ser
     _mount(page, local_server, started=False, following=False)
     card = page.locator("#plan-peek-under-future .plan-peek-create-card")
     assert card.evaluate("el => el.textContent").startswith(
-        "Jane Doe has no next plan yet."
+        "Eva has no next plan yet."
     )
     assert (
         card.locator(".plan-peek-create-cell").evaluate("el => el.textContent")

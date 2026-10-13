@@ -110,7 +110,7 @@ def test_the_first_client_in_a_drop_in_slot_keeps_its_places_and_its_plan(
 
     page.goto(f"{local_server}session/setup/{DROP_IN}")
     page.wait_for_selector("#view-workout-setup.active")
-    page.fill("#setup-participant-search", "Sarah")
+    page.fill("#setup-participant-search", "Nina")
     page.click(
         f"#setup-participant-matches .participant-match[data-client-id='{SARAH}']"
     )

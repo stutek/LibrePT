@@ -965,7 +965,7 @@ export const en = {
   story_step_intake_consent:
     "Tick the consent under the form. The form holds details about her health, so Ana has to allow you, explicitly, to keep them. Without the tick she cannot send the form.",
   // Named, and new: Ana, Maja and Nik are not in the seeded register — the story is about getting
-  // them into it. The people already there (Jane, John, Sarah) are the ones the gym chapter trains.
+  // them into it. The people already there (Eva, Tom, Nina) are the ones the gym chapter trains.
   story_arrive_open_body:
     "Ana, Maja and Nik ask about training together after a class. You add all three to your Clients Directory: two get a link and fill in their own details, and you type in the name of the third.",
   story_handover_body:
@@ -979,7 +979,7 @@ export const en = {
   story_chapter_evening: "Reviewing the notes and preparing sessions",
   story_step_programme_open_session: "Tap the session Group Strength & Conditioning.",
   story_step_programme_editor:
-    "Tap Edit plan — the row with the pencil in the menu. Jane's plan opens. Above the exercises, to the right of the Add from catalog button, it says, for example, 45 / 60 min: 45 minutes of exercises in a 60-minute session.",
+    "Tap Edit plan — the row with the pencil in the menu. Eva's plan opens. Above the exercises, to the right of the Add from catalog button, it says, for example, 45 / 60 min: 45 minutes of exercises in a 60-minute session.",
   story_step_programme_add_circuit:
     "At the bottom of the plan, tap + Circuit — the button with the stacked-layers icon. A new circuit with one empty exercise goes in at the end of the plan.",
   story_step_programme_add_exercise:
@@ -988,13 +988,13 @@ export const en = {
     "Tap ✓ at the top right, beside the title. The plan is saved and the session comes back with all three.",
   story_step_programme_menu_again: "Tap ⋮ in the top right again.",
   story_step_programme_bind:
-    "Tap Everyone on this plan — the row with the chain icon. Jane, John and Sarah get the same plan, and Sarah's earlier plan is replaced by it. You log Tuesday's sets once instead of three times.",
-  // The friends who arrive in chapter one are new; Tuesday's session is with Jane, John and Sarah,
+    "Tap Everyone on this plan — the row with the chain icon. Eva, Tom and Nina get the same plan, and Nina's earlier plan is replaced by it. You log Tuesday's sets once instead of three times.",
+  // The friends who arrive in chapter one are new; Tuesday's session is with Eva, Tom and Nina,
   // who are already in the seeded register. Said out loud here, because a viewer who noticed the
   // different names and was told nothing would assume the demo had lost track of its own people.
   story_programme_open_body: "Sunday evening. You prepare Tuesday's hour in advance.",
   story_programme_close_body:
-    "Jane, John and Sarah share one plan. On Tuesday you open it and start.",
+    "Eva, Tom and Nina share one plan. On Tuesday you open it and start.",
   story_programme_close_title: "The plan is ready",
   story_step_evening_menu: "At home, later that evening. Tap ☰ in the top right.",
   story_step_evening_settings: "In the menu, tap Settings — the last row, with the gear icon.",
@@ -1008,18 +1008,18 @@ export const en = {
     "The session is over and everyone has gone home. At home you move Tuesday's session, as you all agreed after the workout.",
   story_thanks_title: "End of the walkthrough",
   story_clear_demo_data: "Clear the demo data",
-  // The story's own voice. It names the people the seed puts on screen — Jane, John, Sarah — because
-  // a demo that says "the client" is describing software, and one that says "John, whose knee was
+  // The story's own voice. It names the people the seed puts on screen — Eva, Tom, Nina — because
+  // a demo that says "the client" is describing software, and one that says "Tom, whose knee was
   // rebuilt in 2024" is telling you what the evening was like.
   story_step_open_session: "Tap the session Group Strength & Conditioning.",
-  story_step_focus_exercise: "Tap Jane's circuit. It opens with her exercises and numbers.",
+  story_step_focus_exercise: "Tap Eva's circuit. It opens with her exercises and numbers.",
   story_step_signal_too_easy:
     "Tap Too Easy (the feather) under the exercise. It is recorded on the exercise that it was too easy for her.",
   story_step_next_participant:
-    "Tap John's name in the row of names at the top. Same session, his plan.",
+    "Tap Tom's name in the row of names at the top. Same session, his plan.",
   story_step_refocus: "Tap his circuit to open it.",
   story_step_capture_open:
-    "During a rest John mentions his knee, which was operated on in 2024. Tap Notes (the sticky note) under the first exercise of the circuit. The note opens over the session; the clock keeps running.",
+    "During a rest Tom mentions his knee, which was operated on in 2024. Tap Notes (the sticky note) under the first exercise of the circuit. The note opens over the session; the clock keeps running.",
   story_step_capture_tag: "Tap 🔥 Joint Pain / Discomfort.",
   story_step_capture_note: "In the note box, type what he said: left knee, third round.",
   // What the demo TYPES, not what it says about typing: a Slovenian viewer watched Ana write her
@@ -1028,21 +1028,21 @@ export const en = {
   story_typed_note: "left knee, third round",
   story_typed_injury: "shoulder, two years ago",
   story_step_capture_keep:
-    "Tick Keep this on the client's record. With the tick, the note stays on John's record after this session too. It is not saved yet: the button in the next step does that.",
+    "Tick Keep this on the client's record. With the tick, the note stays on Tom's record after this session too. It is not saved yet: the button in the next step does that.",
   story_step_capture_submit:
-    "Tap Log Alert at the bottom. Now the note is saved, against John and against this exercise.",
+    "Tap Log Alert at the bottom. Now the note is saved, against Tom and against this exercise.",
   story_step_session_menu: "Tap ⋮ — the three dots in the top right. The session menu opens.",
   story_step_plan_editor:
-    "Tap Edit plan. John's plan opens; the note is in it, beside the exercise.",
+    "Tap Edit plan. Tom's plan opens; the note is in it, beside the exercise.",
   story_step_swap_open:
-    "Because of his knee, John does not do this exercise today. Tap the open-book icon in the exercise's row to open the exercise catalog.",
+    "Because of his knee, Tom does not do this exercise today. Tap the open-book icon in the exercise's row to open the exercise catalog.",
   story_step_swap_pick:
-    "Tap Lat Pulldown: an exercise for the same muscles that puts no load on the knee. The exercise changes for John only; Jane and Sarah keep their plans.",
-  story_gym_open_body: "Tuesday, 18:10. Jane, John and Sarah are here.",
+    "Tap Lat Pulldown: an exercise for the same muscles that puts no load on the knee. The exercise changes for Tom only; Eva and Nina keep their plans.",
+  story_gym_open_body: "Tuesday, 18:10. Eva, Tom and Nina are here.",
   story_gym_close_body:
-    "John's knee is on his record and in his plan, and Jane and Sarah kept training.",
+    "Tom's knee is on his record and in his plan, and Eva and Nina kept training.",
   story_evening_close_body:
-    "It is recorded that Jane found it too easy. John's knee is on his record and in his plan. Tuesday is at 20:00 this week.",
+    "It is recorded that Eva found it too easy. Tom's knee is on his record and in his plan. Tuesday is at 20:00 this week.",
   story_gym_close_title: "The session is over",
   today: "Today",
   tomorrow: "Tomorrow",
@@ -1271,9 +1271,9 @@ export const en = {
   build_info_copied: "Copied",
   build_info_copy_failed: "Select and copy the text above",
   notif_spot_res_title: "📅 Client Spot Reservation",
-  notif_spot_res_desc: "John Smith booked a spot in HIIT Conditioning.",
+  notif_spot_res_desc: "Tom booked a spot in HIIT Conditioning.",
   notif_spot_cancel_title: "⚠️ Spot Cancellation",
-  notif_spot_cancel_desc: "Mike Chen cancelled a spot in Morning Conditioning, tomorrow at 09:00.",
+  notif_spot_cancel_desc: "Leo cancelled a spot in Morning Conditioning, tomorrow at 09:00.",
   notif_count_badge: "{unread} unread / {all} all",
   notif_mark_all_read: "Mark all as read",
   notif_unscheduled_plans_title: "Unscheduled plans",

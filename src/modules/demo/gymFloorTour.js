@@ -97,7 +97,7 @@ export const GYM_FLOOR_TOUR = {
       // The deck opens fully collapsed, so the first tap is what brings a card into focus and makes
       // its actions reachable at all.
       //
-      // A CIRCUIT card specifically. The seeded session is circuits end to end — Jane's plan holds
+      // A CIRCUIT card specifically. The seeded session is circuits end to end — Eva's plan holds
       // no standalone exercise at all — which the first e2e run reported rather than leaving the
       // demo to fail in front of a viewer. It is also the better story: one clipboard driving a
       // group through a circuit is the thing no competitor makes easy.

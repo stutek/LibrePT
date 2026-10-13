@@ -21,7 +21,7 @@ from tests.medium._harness import (
 
 pytestmark = pytest.mark.clean_start
 
-# Jane Doe — the seeded client active_session_fixture defaults to.
+# Eva — the seeded client active_session_fixture defaults to.
 CLIENT_ID = "c1a9f0e2"
 
 PLAN = [exercise_item("exA", "Barbell Row"), exercise_item("exB", "Overhead Press")]

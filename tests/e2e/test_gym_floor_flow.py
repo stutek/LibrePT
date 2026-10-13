@@ -13,7 +13,7 @@
 #
 # test_clipboard.py was deleted into this file for the same reason (2026-08-05): its whole flow —
 # logo, language switch, the Slovenian sync label, sync success, switching back, the session cards,
-# the card tap, the Jane/John participant tabs — was a strict prefix of STEPS 1-3 below. Its one
+# the card tap, the Eva/Tom participant tabs — was a strict prefix of STEPS 1-3 below. Its one
 # assertion this file did not already make (a NAVIGATION item translating, rather than only the
 # dialog entries) moved down to
 # tests/medium/test_header_menu.py::test_menu_and_settings_translate_to_slovenian, where menu
@@ -87,8 +87,8 @@ def test_interactive_dashboard_flow(page, local_server):
     # Confirm clipboard overlay is active and displaying client tabs
     page.wait_for_selector("#active-session-client-tabs")
     tabs = page.locator("#active-session-client-tabs button").all_inner_texts()
-    assert any("Jane" in t for t in tabs)
-    assert any("John" in t for t in tabs)
+    assert any("Eva" in t for t in tabs)
+    assert any("Tom" in t for t in tabs)
 
     # The deck starts fully collapsed on open (deckAllCollapsed) — tap the first card into focus so
     # its Log Feedback action actually renders. Use JS evaluate rather than Playwright's locator:

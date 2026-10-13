@@ -925,7 +925,7 @@ export const sl = {
   story_chapter_evening: "Pregled zaznamkov in priprava treningov",
   story_step_programme_open_session: "Pritisni trening Skupinska moč in kondicija.",
   story_step_programme_editor:
-    "Pritisni Uredi načrt — vrstico s svinčnikom v meniju. Odpre se Janin načrt. Nad vajami, desno od gumba Dodaj iz kataloga, piše na primer 45 / 60 min: 45 minut vaj v 60-minutnem terminu.",
+    "Pritisni Uredi načrt — vrstico s svinčnikom v meniju. Odpre se Evin načrt. Nad vajami, desno od gumba Dodaj iz kataloga, piše na primer 45 / 60 min: 45 minut vaj v 60-minutnem terminu.",
   story_step_programme_add_circuit:
     "Na dnu načrta pritisni + Sklop — gumb z ikono naloženih slojev. Na konec načrta se doda nov sklop z eno prazno vajo.",
   story_step_programme_add_exercise:
@@ -934,10 +934,10 @@ export const sl = {
     "Pritisni ✓ zgoraj desno, ob naslovu. Načrt se shrani in trening se vrne z vsemi tremi.",
   story_step_programme_menu_again: "Znova pritisni ⋮ zgoraj desno.",
   story_step_programme_bind:
-    "Pritisni Vsi na ta načrt — vrstico z ikono verige. Jane, John in Sarah dobijo isti načrt; Sarahin dosedanji načrt se zamenja z njim. Torkove serije zapišeš enkrat, ne trikrat.",
+    "Pritisni Vsi na ta načrt — vrstico z ikono verige. Eva, Tom in Nina dobijo isti načrt; Ninin dosedanji načrt se zamenja z njim. Torkove serije zapišeš enkrat, ne trikrat.",
   story_programme_open_body: "Nedelja zvečer. Torkovo uro pripraviš vnaprej.",
   story_programme_close_body:
-    "Jane, John in Sarah imajo en skupen načrt. V torek ga odpreš in začneš.",
+    "Eva, Tom in Nina imajo en skupen načrt. V torek ga odpreš in začneš.",
   story_programme_close_title: "Načrt je pripravljen",
   story_step_evening_menu: "Doma, pozneje zvečer. Pritisni ☰ zgoraj desno.",
   story_step_evening_settings: "V meniju pritisni Nastavitve — zadnjo vrstico, z ikono zobnika.",
@@ -951,33 +951,33 @@ export const sl = {
   story_thanks_title: "Konec ogleda",
   story_clear_demo_data: "Počisti demo podatke",
   story_step_open_session: "Pritisni trening Skupinska moč in kondicija.",
-  story_step_focus_exercise: "Pritisni Janin sklop. Odpre se z njenimi vajami in številkami.",
+  story_step_focus_exercise: "Pritisni Evin sklop. Odpre se z njenimi vajami in številkami.",
   story_step_signal_too_easy:
     "Pritisni Prelahko (pero) pod vajo. Pri vaji ostane zapisano, da ji je šlo prelahko.",
   story_step_next_participant:
-    "Pritisni Johnovo ime v vrstici z imeni na vrhu. Isti trening, njegov načrt.",
+    "Pritisni Tomovo ime v vrstici z imeni na vrhu. Isti trening, njegov načrt.",
   story_step_refocus: "Pritisni njegov sklop, da se odpre.",
   story_step_capture_open:
-    "Med počitkom John omeni koleno, ki so mu ga operirali leta 2024. Pritisni Opombe (listek) pod prvo vajo sklopa. Opomba se odpre čez trening; ura teče naprej.",
+    "Med počitkom Tom omeni koleno, ki so mu ga operirali leta 2024. Pritisni Opombe (listek) pod prvo vajo sklopa. Opomba se odpre čez trening; ura teče naprej.",
   story_step_capture_tag: "Pritisni 🔥 Joint Pain / Discomfort — bolečina v sklepu.",
   story_step_capture_note: "V polje za opombo vpiši, kar je rekel: levo koleno, tretja runda.",
   story_typed_note: "levo koleno, tretja runda",
   story_typed_injury: "rama, pred dvema letoma",
   story_step_capture_keep:
-    "Obkljukaj Shrani to v kartoteko stranke. S kljukico opomba ostane v Johnovi kartoteki tudi po tem treningu. Shranjena še ni: to naredi gumb v naslednjem koraku.",
+    "Obkljukaj Shrani to v kartoteko stranke. S kljukico opomba ostane v Tomovi kartoteki tudi po tem treningu. Shranjena še ni: to naredi gumb v naslednjem koraku.",
   story_step_capture_submit:
-    "Pritisni Zapiši opozorilo na dnu. Zdaj je opomba shranjena, pri Johnu in pri tej vaji.",
+    "Pritisni Zapiši opozorilo na dnu. Zdaj je opomba shranjena, pri Tomu in pri tej vaji.",
   story_step_session_menu: "Pritisni ⋮ — tri pike zgoraj desno. Odpre se meni treninga.",
-  story_step_plan_editor: "Pritisni Uredi načrt. Odpre se Johnov načrt; opomba je v njem, ob vaji.",
+  story_step_plan_editor: "Pritisni Uredi načrt. Odpre se Tomov načrt; opomba je v njem, ob vaji.",
   story_step_swap_open:
-    "Zaradi kolena John te vaje danes ne dela. Pritisni ikono odprte knjige v vrstici vaje, da odpreš katalog vaj.",
+    "Zaradi kolena Tom te vaje danes ne dela. Pritisni ikono odprte knjige v vrstici vaje, da odpreš katalog vaj.",
   story_step_swap_pick:
-    "Pritisni Lat Pulldown: vaja za iste mišice, pri kateri koleno ni obremenjeno. Vaja se zamenja samo pri Johnu; Jane in Sarah obdržita svoj načrt.",
-  story_gym_open_body: "Torek, 18:10. Jane, John in Sarah so tu.",
+    "Pritisni Poteg zgornjega škripca: vaja za iste mišice, pri kateri koleno ni obremenjeno. Vaja se zamenja samo pri Tomu; Eva in Nina obdržita svoj načrt.",
+  story_gym_open_body: "Torek, 18:10. Eva, Tom in Nina so tu.",
   story_gym_close_body:
-    "Johnovo koleno je v njegovi kartoteki in v njegovem načrtu, Jane in Sarah pa sta vadili naprej.",
+    "Tomovo koleno je v njegovi kartoteki in v njegovem načrtu, Eva in Nina pa sta vadili naprej.",
   story_evening_close_body:
-    "Pri Jane je zapisano, da ji je šlo prelahko. Johnovo koleno je v njegovi kartoteki in v načrtu. Torek je ta teden ob 20:00.",
+    "Pri Evi je zapisano, da ji je šlo prelahko. Tomovo koleno je v njegovi kartoteki in v načrtu. Torek je ta teden ob 20:00.",
   story_gym_close_title: "Trening je končan",
   today: "Danes",
   tomorrow: "Jutri",
@@ -1198,10 +1198,10 @@ export const sl = {
   build_info_copied: "Kopirano",
   build_info_copy_failed: "Označi in kopiraj besedilo zgoraj",
   notif_spot_res_title: "📅 Rezervacija mesta za stranko",
-  notif_spot_res_desc: "John Smith je rezerviral mesto na treningu HIIT kondicija.",
+  notif_spot_res_desc: "Tom je rezerviral mesto na treningu HIIT kondicija.",
   notif_spot_cancel_title: "⚠️ Odpoved rezervacije",
   notif_spot_cancel_desc:
-    "Mike Chen je odpovedal mesto na treningu Jutranja kondicija jutri ob 09:00.",
+    "Leo je odpovedal mesto na treningu Jutranja kondicija jutri ob 09:00.",
   notif_count_badge: "{unread} neprebranih / {all} vseh",
   notif_mark_all_read: "Označi vse kot prebrano",
   notif_unscheduled_plans_title: "Nenačrtovani programi",

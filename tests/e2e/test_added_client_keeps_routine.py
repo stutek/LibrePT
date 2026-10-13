@@ -5,7 +5,7 @@
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
 SESSION = "s15f2e3d"  # "Lower Body Strength", seeded in two days, routine r11d5e6f
-JANE = "c1a9f0e2"
+EVA = "c1a9f0e2"
 HIIT = "r10d5e6f"
 
 PLAN_OF = """async (id) => {
@@ -20,12 +20,12 @@ def test_a_client_added_to_a_saved_session_keeps_the_routine_chosen_for_them(
 ):
     page.goto(f"{local_server}session/setup/{SESSION}")
     page.wait_for_selector("#form-workout-setup")
-    page.fill("#setup-participant-search", "Jane")
+    page.fill("#setup-participant-search", "Eva")
     page.click(
-        f"#setup-participant-matches .participant-match[data-client-id='{JANE}']"
+        f"#setup-participant-matches .participant-match[data-client-id='{EVA}']"
     )
     page.select_option(
-        f".participant-setup-row[data-client-id='{JANE}'] .select-routine-dropdown",
+        f".participant-setup-row[data-client-id='{EVA}'] .select-routine-dropdown",
         HIIT,
     )
     page.click("#btn-setup-save")
@@ -34,8 +34,8 @@ def test_a_client_added_to_a_saved_session_keeps_the_routine_chosen_for_them(
     # The session's own address opens it as a tap on its card does (launchClipboardDirectly).
     page.goto(f"{local_server}session/{SESSION}")
     page.wait_for_selector("#active-session-overlay:not(.hidden)")
-    plan = page.evaluate(PLAN_OF, JANE)
+    plan = page.evaluate(PLAN_OF, EVA)
 
-    assert plan is not None, "Jane is not on the clipboard"
+    assert plan is not None, "Eva is not on the clipboard"
     assert plan["routineId"] == HIIT, plan
-    assert plan["count"] > 0, "Jane's plan is empty"
+    assert plan["count"] > 0, "Eva's plan is empty"

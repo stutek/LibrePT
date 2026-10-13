@@ -9,7 +9,10 @@
 # details before every boot (tests/conftest.py), which would hide exactly what is tested here.
 # Fixtures (browser, local_server) come from tests/conftest.py + pytest-playwright.
 
+import time
+
 import pytest
+from playwright.sync_api import Error as PlaywrightError
 
 from tests.conftest import NAVIGATION_TIMEOUT_MS
 
@@ -43,6 +46,36 @@ def _stored_identity(page):
             return { firstName, lastName, phone, email };
         }"""
     )
+
+
+def _seeded_state(page, timeout_s=15):
+    """The stored language, names and places, read in ONE call once the seed is in memory.
+
+    One call, retried: a first visit may reload the page once, and a second call after a separate
+    wait can land on the new page before it has loaded anything (seen: an empty state read right
+    after a wait that had seen eight clients). A call cut off by that reload is simply tried again."""
+    deadline = time.monotonic() + timeout_s
+    while True:
+        try:
+            seeded = page.evaluate(
+                """async () => {
+                    const store = await import(new URL('data/stateStore.js', document.baseURI).href);
+                    const state = store.getState();
+                    if (!state.clients.length) return null;
+                    return {
+                        lang: state.lang,
+                        clients: state.clients.map((client) => client.name),
+                        exercises: state.exercises.map((exercise) => exercise.name),
+                        places: [...new Set(state.sessions.map((session) => session.location))],
+                    };
+                }"""
+            )
+        except PlaywrightError:
+            seeded = None
+        if seeded or time.monotonic() > deadline:
+            assert seeded, "the sandbox was not seeded"
+            return seeded
+        page.wait_for_timeout(200)
 
 
 def test_the_flyer_link_reaches_the_tour_without_the_details(fresh, local_server):
@@ -97,6 +130,19 @@ def test_leaving_the_sandbox_asks_for_the_details_and_offers_no_way_past(
     dialog.wait_for(state="visible", timeout=5_000)
     assert dialog.locator(".modal-close-btn").is_visible()
     assert fresh.locator("#trainer-details-cancel").is_visible()
+
+
+def test_the_flyer_link_fills_the_sandbox_in_slovenian(fresh, local_server):
+    """The sandbox is seeded on first entry, at boot, from the link's language — not from
+    `?init=`, which the rest of the suite seeds through. So this follows the flyer's exact link
+    and reads what was written: Slovenian words, and names that need no translation."""
+    fresh.goto(local_server + "?lang=sl&workspace=sandbox&demo=walkthrough&theme=daylight")
+    seeded = _seeded_state(fresh)
+    assert seeded["lang"] == "sl", seeded
+    assert {"Eva", "Tom", "Nina"} <= set(seeded["clients"]), seeded["clients"]
+    assert "Poteg zgornjega škripca" in seeded["exercises"]
+    assert "Lat Pulldown" not in seeded["exercises"]
+    assert "Fitnes Trib" in seeded["places"], seeded["places"]
 
 
 def test_a_first_start_without_a_sandbox_link_still_asks_for_the_details(

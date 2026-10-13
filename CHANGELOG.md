@@ -37,6 +37,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   `?lang=sl&workspace=sandbox&demo=walkthrough` asks the terms and the theme, then starts the tour.
   The four details are asked when the trainer leaves the sandbox for their own work, in a form with no
   way past it. A first start outside the sandbox asks for them as before.
+- **The demo data is in the language of the app.** In a Slovenian or German sandbox, the exercises'
+  names and steps, the plans' descriptions and the gym (*Fitnes Trib*, *Fitnessstudio Trib*) are no
+  longer in English. The sample clients are now Eva, Tom, Nina, Leo, Mia, David, Ida and Simon,
+  names that read the same in every language; the guided story follows Eva, Tom and Nina.
+  The exercise catalog outside the sandbox is still in English.
+
+### Fixed
+
+- **The plan editor no longer shows a sample client's injury twice.** Under *Pre-existing Injuries &
+  Notes*, the notes of three sample clients began with the same sentence as their injury.
+- **A long exercise name no longer pushes the plan builder's row off a phone screen.** The exercise
+  list in a row now keeps to the row's width.
 
 ## 2026-10-13 — Fixes from the trainer weeks
 

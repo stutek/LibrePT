@@ -22,8 +22,8 @@ from tests.medium._harness import (
 
 pytestmark = pytest.mark.clean_start
 
-JANE = "c1a9f0e2"
-JOHN = "c2b8e1d3"
+EVA = "c1a9f0e2"
+TOM = "c2b8e1d3"
 
 PLAN = [exercise_item("e1", "Back Squat"), exercise_item("e2", "Bench Press")]
 
@@ -34,11 +34,11 @@ def _two_participant_session():
         .replace("Date.now()", "0")
         .replace("null", "null")
     )
-    session["participants"] = [JANE, JOHN]
-    session["clientRoutines"][JOHN] = {
+    session["participants"] = [EVA, TOM]
+    session["clientRoutines"][TOM] = {
         "routineId": "r1",
         "routineName": "Upper Body",
-        "clientName": "John Smith",
+        "clientName": "Tom",
         "activeExerciseIndex": 0,
         "deckAllCollapsed": False,
         "exercises": [dict(item) for item in PLAN],
@@ -69,21 +69,21 @@ KEPT_PLANS = """async (id) => {
 
 
 def test_a_member_s_own_plan_is_kept_when_everyone_goes_on_one(page, local_server):
-    """John's Wall Sit vanished when everyone went on Jane's plan. A program is never
-    deleted, so it waits among the unscheduled plans; a plan equal to Jane's has nothing to keep."""
+    """Tom's Wall Sit vanished when everyone went on Eva's plan. A program is never
+    deleted, so it waits among the unscheduled plans; a plan equal to Eva's has nothing to keep."""
     _mount(page, local_server)
-    assert page.evaluate(KEPT_PLANS, JOHN) == []
+    assert page.evaluate(KEPT_PLANS, TOM) == []
     page.evaluate(
         """async (id) => {
           const ctrl = await import(new URL('controllers/activeSessionController.js', document.baseURI).href);
           const john = ctrl.getActiveSession().clientRoutines[id];
           john.exercises = [{ ...john.exercises[0], id: 'w1', name: 'Wall Sit' }];
         }""",
-        JOHN,
+        TOM,
     )
     _bind(page)
 
-    assert page.evaluate(KEPT_PLANS, JOHN) == [["Wall Sit"]]
+    assert page.evaluate(KEPT_PLANS, TOM) == [["Wall Sit"]]
 
 
 def test_participants_start_on_their_own_plans(page, local_server):
@@ -127,7 +127,7 @@ def test_a_set_logged_for_one_member_is_that_member_s_only(page, local_server):
             johnLogged: john.logs.e1.some((set) => set.completed),
           };
         }""",
-        [JANE, JOHN],
+        [EVA, TOM],
     )
 
     assert seen == {"sameIds": True, "johnLogged": False}
@@ -156,7 +156,7 @@ def test_changing_one_member_s_plan_takes_that_member_out_of_the_group(
           const session = ctrl.getActiveSession();
           return ids.map((id) => session.clientRoutines[id].exercises[0].name);
         }""",
-        [JANE, JOHN],
+        [EVA, TOM],
     )
     assert names == ["Front Squat", "Back Squat"], (
         "only the edited member's plan changed"
@@ -166,12 +166,13 @@ def test_changing_one_member_s_plan_takes_that_member_out_of_the_group(
 def test_two_clients_who_share_a_first_name_are_told_apart_on_their_tabs(
     page, local_server
 ):
-    """A tab showed only the first word of the name, so "Jane Doe" and "Jane Novak" were both
-    "Jane", and a set logged on the wrong one goes to the wrong person without a trace."""
+    """A tab showed only the first word of the name, so "Eva Kos" and "Eva Novak" were both
+    "Eva", and a set logged on the wrong one goes to the wrong person without a trace."""
     page.set_viewport_size({"width": 390, "height": 844})
     rename = (
-        "state.clients.find((client) => client.id === '%s').name = 'Jane Novak';\n"
-        "renderActiveGroupBoard();\n" % JOHN
+        "state.clients.find((client) => client.id === '%s').name = 'Eva Kos';\n"
+        "state.clients.find((client) => client.id === '%s').name = 'Eva Novak';\n"
+        "renderActiveGroupBoard();\n" % (EVA, TOM)
     )
     load_with_stub(
         page,
@@ -181,7 +182,7 @@ def test_two_clients_who_share_a_first_name_are_told_apart_on_their_tabs(
     page.wait_for_selector("#active-session-overlay:not(.hidden)")
 
     names = page.locator(".client-tab-participant .client-tab-name").all_inner_texts()
-    assert sorted(name.strip() for name in names) == ["Jane D.", "Jane N."], names
+    assert sorted(name.strip() for name in names) == ["Eva K.", "Eva N."], names
 
 
 def test_the_control_says_which_way_it_will_go(page, local_server):
@@ -215,7 +216,7 @@ def test_it_can_be_undone_from_the_same_control(page, local_server):
           jane.logs.e2 = [{ reps: 8, completed: true }];
           return jane !== john && !(john.logs.e2 || []).some((set) => set.completed);
         }""",
-        [JANE, JOHN],
+        [EVA, TOM],
     )
     assert separate is True
 
@@ -234,7 +235,7 @@ for (const [id, injury] of [['%s', 'Left shoulder'], ['%s', 'Right knee']]) {
   }]);
 }
 renderActiveGroupBoard();
-""" % (JANE, JOHN)
+""" % (EVA, TOM)
 
 
 def test_each_member_s_tab_shows_that_member_s_injury(page, local_server):
@@ -261,6 +262,6 @@ def test_each_member_s_tab_shows_that_member_s_injury(page, local_server):
           ctrl.getActiveSession().activeClientId = john;
           ctrl.renderActiveGroupBoard();
         }""",
-        JOHN,
+        TOM,
     )
     expect(banner).to_have_text("Right knee")

@@ -190,7 +190,7 @@ graph LR
 2. **Open the Clipboard**: The PT taps the session card, which opens the clipboard with the session's participants.
 3. **Lock Clipboard Workspace**: The system opens the tracking dashboard, **locking participant tabs** strictly to the checked-in clients.
 4. **Session Orchestration & Single-Exercise Tracking**:
-   - **Sub-Second Tab Switch**: Tapping a participant's name (`[ Jane ]`, `[ John ]`) swaps the active view in under 50ms.
+   - **Sub-Second Tab Switch**: Tapping a participant's name (`[ Eva ]`, `[ Tom ]`) swaps the active view in under 50ms.
    - **Primary Focus Card with Foreshadowing**: The screen centers the participant's current active exercise (e.g., *Barbell Back Squat — Target: 80kg × 8 reps*) while displaying a compact **"Up Next" foreshadowing card** below it so the PT can proactively prepare equipment for the next movement.
    - **One-Tap Progression & Safety Signals**: Instead of typing notes on a phone keyboard, the PT has one-tap signal buttons on the exercise card:
      - **Too Easy**: Client completed the set cleanly; a note for the trainer that the load can go up next time.

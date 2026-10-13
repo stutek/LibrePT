@@ -52,7 +52,7 @@ graph TD
 1. **Access Back-Office**: The PT opens the LibrePT app on their computer or tablet.
 2. **Review Feedback Deck**: The system queries the database and displays the **Pending Plan Adjustments** deck on the home screen.
 3. **Analyze Alert**: The PT reads an alert card:
-   - e.g., *"Jane Doe - Barbell Back Squat - Form Break"*
+   - e.g., *"Eva - Barbell Back Squat - Form Break"*
    - The card shows the note typed in the gym: *"Lower back tight on set 3, limited depth."*
 4. **Modify Template (the trainer's decision)**: The PT taps the card's pencil to open the routine that holds the exercise, and changes what they judge right there — a lower load, a note, another movement. A session built without a routine has no pencil; its next plan is set when it is built.
 5. **Resolve Alert**: The PT taps **✓ Resolve** on the card.

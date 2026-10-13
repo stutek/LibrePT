@@ -11,7 +11,7 @@ from playwright.sync_api import expect
 
 from tests.conftest import answer_app_questions, frozen_today
 
-JANE = "c1a9f0e2"
+EVA = "c1a9f0e2"
 DECK_CARDS = "#active-exercise-scroll-deck .exercise-deck-card"
 
 
@@ -28,7 +28,7 @@ def _flush(page):
 
 
 def _session_with_a_plan_from_the_notebook(page, local_server):
-    """A session for tomorrow with Jane on an empty plan, opened in the notebook, where one exercise
+    """A session for tomorrow with Eva on an empty plan, opened in the notebook, where one exercise
     is added from the catalog: the plan has no routine behind it."""
     tomorrow = (frozen_today() + timedelta(days=1)).isoformat()
     page.goto(f"{local_server}session/new")
@@ -37,9 +37,9 @@ def _session_with_a_plan_from_the_notebook(page, local_server):
     page.fill("#setup-session-date", tomorrow)
     page.fill("#setup-start-time", "08:00")
     page.fill("#setup-end-time", "09:00")
-    page.fill("#setup-participant-search", "Jane")
+    page.fill("#setup-participant-search", "Eva")
     page.click(
-        f"#setup-participant-matches .participant-match[data-client-id='{JANE}']"
+        f"#setup-participant-matches .participant-match[data-client-id='{EVA}']"
     )
     page.click("#btn-setup-open")
     page.wait_for_selector("#active-session-overlay:not(.hidden)")
