@@ -5000,6 +5000,24 @@ CDP v Chromiumu pri 390 × 844: če prst med potezo navzgor še malo zanaša nav
 dviga), se nič ne odpre. `planPeek.js` je dvig meril od točke najglobljega potega in jo premikal s
 prstom, dokler se je poteg še poglabljal. Popravek in testi so v delu.
 
+### 80.223 [ ] P2 — Glava v peskovniku se na ozkem telefonu prelomi v dve vrstici — popravek v preverjanju
+
+**Simon, 2026-10-13 19:24:38.987, Samsung Galaxy S23, Chrome:** »aplikacijska glava je razlomljena v 2
+vrstici (cloud ikona in meni sta za peskovnik v drugi vrstici na S23, preveri tudi iPhone 14)«.
+
+**Izmerjeno 2026-10-13 19:31:30.518 (Claude), lokalno drevo, Chromium v mobilnem načinu:** v
+peskovniku, sl, je glava ena vrstica do 330 px, pri 320 px pa gresta gumb za varnostno kopijo in ☰ v
+drugo vrstico (glava 99 px namesto 57). Vzrok je pravilo `@media (max-width: 360px)` v
+`applicationHeader.css`, ki je ime ohranjalo celo in vrstico namenoma prelomilo; oznaka PESKOVNIK
+(75 px v sl) in števca »↑0 ↓?« pri gumbu (60 px) tam ne dopuščata ene vrstice. S23 ima privzeto 360 px;
+Simonov zaslon je verjetno povečan (Samsungova povečava zaslona), zato ožji.
+
+**Popravek:** pod 360 px vsak del glave za korak ožji, vrstica se ne prelomi; pri 320 px ostane ime
+celo v sl, en in de, pri ožjem se ime skrajša, gumbi ostanejo v vrstici. Test
+`tests/medium/test_narrow_header.py::test_the_sandbox_header_is_one_row` (320 in 390 px, trije jeziki,
+s števcema). **Ni preverjeno:** iPhone 14 v Safariju (WebKit tu ni nameščen; Chromium pri 390 px ima
+eno vrstico) in Simonov telefon po potisku.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
