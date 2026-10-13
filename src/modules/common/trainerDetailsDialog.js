@@ -5,15 +5,17 @@
 // about what they are for; every reader of them (the calendar invite's ORGANIZER, the signature on a
 // client invitation) already exists and is unchanged by this file.
 //
-// **Two places, one form.** It opens from the app (☰) menu, and it is a step of the welcome screen on
-// the first launch. The fields, their labels, the saving and the rules are built here for both,
+// **Two places, one form.** It opens from Settings and on leaving the sandbox, and it is a step of
+// the welcome screen on the first launch. The fields, their labels, the saving and the rules are built here for both,
 // parameterised by an id prefix — two copies of a form is two places for a rule to drift, and the ids
 // have to differ because both can exist in the document at once.
 //
-// **All four are required, in both places.** The welcome screen asks for them before the sandbox is
-// even offered, because everything the trainer sends a client is signed with them: an invitation
-// from nobody, with no number to answer, is one a client ignores. The menu's form holds the same rule
-// — a save there that blanked a field would undo the welcome screen's.
+// **All four are required, in both places.** They are asked before the trainer's OWN workspace is
+// used, because everything the trainer sends a client is signed with them: an invitation from
+// nobody, with no number to answer, is one a client ignores. The welcome screen asks for them unless
+// the app opens in the sandbox; a trainer who started in the sandbox is asked by this dialog, with
+// no way past it, when they leave it. The menu's form holds the same rule — a save there that
+// blanked a field would undo the welcome screen's.
 //
 // **What is wrong is said at the field, and nothing is written until all four are right.** Silently
 // dropping what somebody deliberately typed would leave them believing it was saved. The phone is
@@ -180,9 +182,18 @@ export function renderTrainerDetailsDialog() {
   );
 }
 
-export function openTrainerDetailsDialog() {
+/** Open the form as a dialog. `required` is the trainer leaving the sandbox for their own work with
+ *  the details still missing: the dialog then has no X and no Cancel and Escape does not close it,
+ *  because what the trainer does next in their own workspace is signed with these four values.
+ *  Opened from Settings it is an ordinary dialog. */
+export function openTrainerDetailsDialog({ required = false } = {}) {
   renderTrainerDetailsDialog();
   const { t } = deps;
+  const dialog = document.getElementById("dialog-trainer-details");
+  dialog.classList.toggle("is-required", required);
+  dialog.oncancel = (event) => {
+    if (dialog.classList.contains("is-required")) event.preventDefault();
+  };
 
   setText("trainer-details-title", t("trainer_details_title"));
   setText("trainer-details-lede", t("trainer_details_lede"));
@@ -196,6 +207,8 @@ export function openTrainerDetailsDialog() {
   const close = document.querySelector("#dialog-trainer-details .modal-close-btn");
   close.setAttribute("aria-label", t("close"));
   close.onclick = () => closeModal("dialog-trainer-details");
+  close.classList.toggle("hidden", required);
+  document.getElementById("trainer-details-cancel").classList.toggle("hidden", required);
 
   prefillFields(DIALOG_PREFIX);
   document.getElementById("trainer-details-cancel").onclick = () =>

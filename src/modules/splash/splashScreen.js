@@ -4,9 +4,11 @@
 //
 // **The first launch asks four things, in this order, and none of them can be skipped**: the
 // language, the terms agreement, the theme and the trainer's details (first name, last name, phone,
-// email). Each is asked only while it is missing, on every path into the trainer's app — the
-// sandbox, the guided tour and a demo link included — and all of them before the sandbox is offered.
-// The X stays hidden until the last one is answered.
+// email). Each is asked only while it is missing, on every path into the trainer's app — a demo link
+// included — and all of them before the sandbox is offered. One exception: the caller does not ask
+// for the details when the app opens in the sandbox, so a link into the guided tour needs no typing;
+// the trainer is asked on leaving the sandbox instead. The X stays hidden until the last one is
+// answered.
 //
 // Injected dependencies: `offerOnboarding` (whether the database is still empty — the caller owns
 // that question, see data/stateStore.js's stateHasData); what is still missing (`needsLanguageChoice`,

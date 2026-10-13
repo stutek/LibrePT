@@ -142,6 +142,7 @@ import {
 } from "./modules/common/theme.js";
 import {
   mountTrainerDetailsOnSplash,
+  openTrainerDetailsDialog,
   trainerDetailsComplete,
 } from "./modules/common/trainerDetailsDialog.js";
 import {
@@ -909,6 +910,10 @@ async function switchToWorkspace(name) {
   // round. Deliberately not a teardown — a rest period must survive the switch.
   appBoot.rebindTimers();
   returnToLastView();
+  // The trainer's own work is where the four details sign what a client receives. A trainer who
+  // started in the sandbox from a link was never asked for them, so they are asked here, with no
+  // way past the form (ruled 2026-10-13).
+  if (!isSandbox() && !trainerDetailsComplete()) openTrainerDetailsDialog({ required: true });
   if (isSandbox()) {
     // The sandbox's own notice says to tap a chapter "in the list below", and that list lives in the
     // drawer at the bottom. Closed, the first row sat 325px under a 844px screen, so the sentence
@@ -1105,7 +1110,10 @@ function startSplash({ linkBringsContent } = {}) {
         // incomplete, so it is asked once there too.
         needsTerms: needsTermsAgreement(),
         needsTheme: !hasChosenTheme(),
-        needsDetails: !trainerDetailsComplete(),
+        // Not in the sandbox (ruled 2026-10-13): a student who scans the flyer's link reaches the
+        // guided tour without typing a phone number and an e-mail address. Nothing the sandbox sends
+        // reaches a real client; leaving it for the trainer's own work asks (switchToWorkspace).
+        needsDetails: !trainerDetailsComplete() && !isSandbox(),
         // Whether this arrival was FURNISHED by its link — the demo seed, the walkthrough, a client's
         // answer. Those skip the onboarding offer they have already answered; a bare `?splash=off`
         // left in the address bar after a trainer cleared their browser does not.
