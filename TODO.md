@@ -4575,15 +4575,9 @@ višina.
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80166-x-p2--spodnja-vrstica-načrta-po-osvežitvi-javi-invalid-time-value--ni-ponovljivo-zaprto-2026-10-13).
 
-### 80.167 [ ] P2 — Pregled pokaže »Samo opomba, brez ocene«, besedilo opombe pa manjka
+### 80.167 [x] P2 — Pregled pokaže »Samo opomba, brez ocene«, besedilo opombe pa manjka — popravljeno 2026-10-03 z d8d83ecb
 
-**Scenarij in koraki:** »Večerna moč« za »TEST Živa Dolgoime Koren« → pri Dumbbell Goblet Squat »Opombe« → privzeto »Samo opomba, brez ocene« → vpis »Danes 8 ponovitev, naslednjič preveri tehniko.« → »Zapiši opozorilo« → zaključek vadbe → razpri obvestila → »TEST Živa Dolgoime Koren — Večerna moč (1)«.
-
-**Opaženo:** stran »Čakajoče na pregled« pokaže stranko, »Samo opomba, brez ocene«, ime vaje in gumb »Razreši«. Napisanega stavka ni v besedilu kartice niti v njenem DOM; pritisk na kartico ga ne odpre. IndexedDB stavek hrani v zapisu `planUpdates` kot `Note - Danes 8 ponovitev, naslednjič preveri tehniko.`.
-
-**Težava in vpliv:** trener pri pregledu nima podatka, kaj mora naslednjič upoštevati. Opombo lahko razreši, ne more pa je prebrati.
-
-**Predlog:** poleg vrste opombe prikaži celotno vneseno besedilo — opaženo na objavljeni različici `933dbc0`, 390 × 844, sl, 2026-10-02.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80167-x-p2--pregled-pokaže-samo-opomba-brez-ocene-besedilo-opombe-pa-manjka--popravljeno-2026-10-03-z-d8d83ecb).
 
 ### 80.168 [x] P1 — Ob zaključku dveh sočasnih treningov se zabeleži le prvi, program druge stranke pa se izgubi — popravljeno 2026-10-02
 

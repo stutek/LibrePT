@@ -10241,3 +10241,22 @@ pokaže več, ker aplikacija po osvežitvi iz shranjenih programov obnovi le tre
 konzoli ni bilo nobene. Poti, po kateri je vrstica po osvežitvi kazala načrt in odpovedala, v tej
 različici ni več. Ob tem: vrstica pri takem načrtu piše »Neznan datum« in obvestilo datum vpisa,
 ne izbranega dne — to je §80.5.
+
+### 80.167 [x] P2 — Pregled pokaže »Samo opomba, brez ocene«, besedilo opombe pa manjka — popravljeno 2026-10-03 z d8d83ecb
+
+**Scenarij in koraki:** »Večerna moč« za »TEST Živa Dolgoime Koren« → pri Dumbbell Goblet Squat »Opombe« → privzeto »Samo opomba, brez ocene« → vpis »Danes 8 ponovitev, naslednjič preveri tehniko.« → »Zapiši opozorilo« → zaključek vadbe → razpri obvestila → »TEST Živa Dolgoime Koren — Večerna moč (1)«.
+
+**Opaženo:** stran »Čakajoče na pregled« pokaže stranko, »Samo opomba, brez ocene«, ime vaje in gumb »Razreši«. Napisanega stavka ni v besedilu kartice niti v njenem DOM; pritisk na kartico ga ne odpre. IndexedDB stavek hrani v zapisu `planUpdates` kot `Note - Danes 8 ponovitev, naslednjič preveri tehniko.`.
+
+**Težava in vpliv:** trener pri pregledu nima podatka, kaj mora naslednjič upoštevati. Opombo lahko razreši, ne more pa je prebrati.
+
+**Predlog:** poleg vrste opombe prikaži celotno vneseno besedilo — opaženo na objavljeni različici `933dbc0`, 390 × 844, sl, 2026-10-02.
+
+**Preverjeno (Claude, 2026-10-13 12:57:43.714, `main` `e4c43df8`, Playwright Chromium, sl): ne
+ponovi se.** Opomba s privzeto izbiro »Samo opomba, brez ocene« in besedilom »Today 8 reps, check
+form next time.«, nato osvežitev strani »Čakajoče na pregled«: kartica pokaže »Samo opomba, brez
+ocene«, vajo in pod njo celoten stavek. Popravek je `d8d83ecb` (2026-10-03): kartica izpiše opombo
+v vrstici `.adjustment-remark` (`modules/plans/planAdjustments.js`). Pripenjata ga testa
+`test_the_remark_typed_on_the_floor_is_on_the_card` (`tests/medium/test_plan_adjustments.py`) in
+`test_a_note_not_kept_waits_on_the_review_screen` (`tests/e2e/test_gym_note_kept_on_record.py`).
+Opomba, ki manjka v zgodovini na strani stranke (F-r04-17), je del §80.6.
