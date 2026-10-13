@@ -527,6 +527,65 @@ def test_the_plan_stays_where_it_was_pulled_while_the_finger_travels_up(
     page.mouse.up()
 
 
+def _lift(page):
+    value = page.evaluate(
+        "() => document.getElementById('active-session-blanket').style.getPropertyValue('--plan-lift')"
+    )
+    return float(value.replace("px", "")) if value else 0.0
+
+
+def test_the_plan_follows_the_finger_up_and_down_once_armed(page, local_server):
+    """Simon, 2026-10-13: the plan moves up and down as the finger does, not only sideways, so the
+    second stroke visibly does something. Short of the stroke that opens, letting go springs it
+    back to where it was. The pull arms at CENTER_Y, so the plan's height follows from there."""
+    _mount(page, local_server, started=False)
+    _drag(page, LEFT_START, 200, release=False)
+    assert _lift(page) == 0
+
+    page.mouse.move(LEFT_START + 200, CENTER_Y - 40, steps=8)
+    page.wait_for_timeout(50)
+    assert _lift(page) == -40, "the plan did not follow the finger up"
+    page.mouse.move(LEFT_START + 200, CENTER_Y - 15, steps=5)
+    page.wait_for_timeout(50)
+    assert _lift(page) == -15, "the plan did not follow the finger back down"
+    assert (
+        page.locator("#active-session-blanket").evaluate(
+            "el => new DOMMatrix(getComputedStyle(el).transform).m42"
+        )
+        == -15
+    ), "the offset is set but the plan does not move by it"
+    page.mouse.move(LEFT_START + 200, CENTER_Y + 20, steps=5)
+    page.wait_for_timeout(50)
+    assert _lift(page) == 20, "the plan did not follow the finger below where it armed"
+
+    page.mouse.up()
+    page.wait_for_timeout(450)
+    assert _opened(page) == []
+    assert (_pull(page), _lift(page)) == (0, 0), "the plan did not spring back"
+
+
+def test_the_plan_does_not_follow_up_before_the_pull_is_armed(page, local_server):
+    """Short of a quarter of the width there is no second stroke to make, and the plan staying at
+    its height says so."""
+    _mount(page, local_server, started=False)
+    _drag_then_up(page, LEFT_START, 60, up=40, release=False)
+    assert _lift(page) == 0
+    page.mouse.up()
+
+
+def test_a_pull_drifting_upward_as_it_deepens_opens_nothing(page, local_server):
+    """One sweep, 20° above horizontal, to the full depth: it rises past 64px from where it armed,
+    but it is a look, never an L. Only a stroke steeper than it is wide opens."""
+    _mount(page, local_server, started=False)
+    page.mouse.move(LEFT_START, CENTER_Y)
+    page.mouse.down()
+    page.mouse.move(LEFT_START + 300, CENTER_Y - 109, steps=40)
+    page.wait_for_timeout(50)
+    page.mouse.up()
+    page.wait_for_timeout(450)
+    assert _opened(page) == []
+
+
 def test_a_running_session_is_left_by_a_pull_like_any_other(page, local_server):
     """A started session is stored in its programs, so leaving it loses nothing: the pull arms and the
     upward stroke opens the neighbour, as it does from a session not yet started. Letting go still

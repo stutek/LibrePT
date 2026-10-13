@@ -13,9 +13,12 @@
   opacity: 0.9;
   cursor: pointer;
 }
-.exercise-deck-card.rest-card:not(.in-focus):hover {
-  opacity: 1;
-  border-color: var(--primary);
+/* Only where the pointer can hover; see the collapsed card's hover below for why. */
+@media (hover: hover) {
+  .exercise-deck-card.rest-card:not(.in-focus):hover {
+    opacity: 1;
+    border-color: var(--primary);
+  }
 }
 .rest-card-inner {
   display: flex;
@@ -199,9 +202,18 @@
   position: relative;
   z-index: 1;
 }
-.exercise-deck-card:not(.in-focus):hover {
-  opacity: 1;
-  transform: scale(0.975) rotateX(3deg);
+/* A mouse lifts the card it points at. Only where the pointer CAN hover: Chrome sets :hover on the
+   element a finger presses (Blink's gesture_manager.cc, ShowPress and TapDown), and on a phone it
+   stays there after the finger lifts. A press-and-hold is how the plan peek (planPeek.js) begins,
+   so the card the trainer pulled from could stay half-lifted after the plan sprang back: 5px wider
+   than its neighbours, tilted differently, its border against the walkthrough's ring. Reported by
+   Simon on a Galaxy S23 Ultra, 2026-10-13, as a card border that stayed distorted after a pull.
+   tests/e2e/test_plan_peek_open.py holds a card in :hover on a phone profile and checks it. */
+@media (hover: hover) {
+  .exercise-deck-card:not(.in-focus):hover {
+    opacity: 1;
+    transform: scale(0.975) rotateX(3deg);
+  }
 }
 .exercise-deck-card:last-child {
   margin-bottom: 0;

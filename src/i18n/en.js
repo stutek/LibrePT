@@ -755,7 +755,7 @@ export const en = {
     "Tap the circuit to bring it into focus. Its controls come within thumb reach.",
   tour_step_signal: "Mark the round Too Easy. One tap logs it and leaves a note for the plan.",
   tour_step_open_previous:
-    "Pull the plan aside: the session before it is underneath, lined up so the same exercise sits level. Then slide up to open it.",
+    "Pull the plan aside: the session before it is underneath, lined up so the same exercise sits level. When it says “Slide up to open”, slide up without lifting your finger.",
   tour_step_back_to_today: "And home again — Today takes you back to the session you are running.",
   tour_step_next_participant: "Switch to the next participant — same session, their own plan.",
   // The long demo: chapter titles, the narration cards' bodies, and the labels the

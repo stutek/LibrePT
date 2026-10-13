@@ -752,7 +752,7 @@ export const de = {
   tour_step_signal:
     "Markiere die Runde als Zu leicht. Ein Tipp zeichnet es auf und hinterlässt eine Notiz für den Plan.",
   tour_step_open_previous:
-    "Zieh den Plan zur Seite: darunter liegt das Training davor, so ausgerichtet, dass dieselbe Übung auf gleicher Höhe steht. Dann nach oben streichen, um es zu öffnen.",
+    "Zieh den Plan zur Seite: darunter liegt das Training davor, so ausgerichtet, dass dieselbe Übung auf gleicher Höhe steht. Wenn „Nach oben streichen zum Öffnen“ erscheint, nach oben streichen, ohne den Finger anzuheben.",
   tour_step_back_to_today: "Und zurück — Heute bringt dich zum Training, das du gerade leitest.",
   tour_step_next_participant:
     "Wechsle zum nächsten Teilnehmer — dasselbe Training, sein eigener Plan.",

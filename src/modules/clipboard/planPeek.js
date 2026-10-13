@@ -13,8 +13,10 @@
 //
 // Opening is a SECOND stroke, upward, and not a release (ruled 2026-09-30). Once the pull has
 // uncovered at least OPEN_PULL_PCT of the width, that under-layer is marked `is-open-ready` (its
-// header swaps to "Slide up to open"); an upward stroke of OPEN_UP_PX from the deepest point of the
-// pull then slides the blanket off and calls `onOpen(side)`. Every release springs back.
+// header swaps to "Slide up to open"); an upward stroke of OPEN_UP_PX, measured from the lowest point
+// the finger reached after that, then slides the blanket off and calls `onOpen(side)`. While the
+// gesture is armed the blanket follows the finger up and down (`--plan-lift`), so the trainer sees
+// the second stroke doing something. Every release springs back.
 //
 // Until that ruling the RELEASE opened, past 70 % of the width. Reading the neighbour properly and
 // leaving the current session were then the same movement: the widest look the gesture allows
@@ -24,10 +26,11 @@
 //
 // WHAT opening means — a route, the planning form — is the controller's.
 //
-// The one inline style this module sets is `--plan-pull` (docs/ARCHITECTURE.md "look and layout
-// live only in CSS" — a drag offset is exactly the kind of runtime number that rule carves out for
-// a custom property). Every other visual change is a class; planPeek.css owns what the classes do,
-// including prefers-reduced-motion.
+// The only inline styles this module sets are the two drag offsets, `--plan-pull` (sideways) and
+// `--plan-lift` (upward) (docs/ARCHITECTURE.md "look and layout live only in CSS" — a drag offset
+// is exactly the kind of runtime number that rule carves out for a custom property). Every other
+// visual change is a class; planPeek.css owns what the classes do, including
+// prefers-reduced-motion.
 
 // Timings and distances are the prototype's own defaults (Simon approved the prototype as a whole,
 // 2026-09-14), not independently chosen here.
@@ -44,13 +47,23 @@ const SPRING_MS = 280; // must match planPeek.css's `.is-springing` transition
 // armed nothing, and near enough that the trainer never has to sweep the plan almost off the screen
 // to be allowed to leave.
 const OPEN_PULL_PCT = 0.25;
-// The upward stroke, measured from the DEEPEST point of the pull and never from where the press
-// began: measured from the press, a single diagonal sweep would satisfy both directions at once and
-// open something the trainer only meant to look at.
+// The upward stroke, measured from the LOWEST point the finger reached once the pull was armed, and
+// never from where the press began: measured from the press, a single diagonal sweep would satisfy
+// both directions at once and open something the trainer only meant to look at.
+//
+// The height alone is the reference, not the point where the pull was deepest. Tied to the deepest
+// pull, the reference moved up with the finger whenever the thumb kept drifting outward as it rose,
+// which a thumb pivoting at its base does: the rise stayed near zero and nothing opened. Reproduced
+// with emulated touch on 2026-10-13, after Simon reported that on his phone the sideways pull worked
+// and the upward stroke opened nothing.
 const OPEN_UP_PX = 64;
-// Where the sideways offset stops following the finger. From here on the plan stays where it was
-// pulled to, so it does not slide back out from under the second stroke while that stroke is made.
+// Where the second stroke begins. From here on the sideways offset stays where it was pulled to, so
+// the plan does not slide back out from under the stroke while it is made.
 const PIN_UP_PX = 8;
+// The second stroke has to be steeper than this many px sideways per px up, counted from where the
+// stroke began. A pull that drifts upward as it goes deeper is a look, not an L: at 20° above
+// horizontal, a pull to the full depth would otherwise rise past OPEN_UP_PX and open.
+const MAX_DRIFT_PER_RISE = 1;
 const LEAVE_MS = 220; // must match planPeek.css's `.is-leaving` transition
 
 // Rows denser while held/dragging, eased back the same way (planPeek.css's `.is-held` transition).
@@ -95,6 +108,10 @@ export function initPlanPeek(blanket, { getUnderLayers, isDisabled, onOpen, onPe
     blanket.style.setProperty("--plan-pull", `${px}px`);
   }
 
+  function setLift(px) {
+    blanket.style.setProperty("--plan-lift", `${px}px`);
+  }
+
   function setHeld(on) {
     if (blanket.classList.contains("is-held") === on) return;
     // The under-layers become visible on this exact class, so this is the moment anything measured
@@ -133,7 +150,7 @@ export function initPlanPeek(blanket, { getUnderLayers, isDisabled, onOpen, onPe
     future?.classList.toggle("is-open-ready", ready && side === "future");
   }
 
-  // The overlay's width: the blanket itself is 120px narrower while held.
+  // The overlay's width: the blanket itself is narrower while held (planPeek.css `.is-held`).
   function fullWidth() {
     const host = blanket.parentElement || blanket;
     return host.getBoundingClientRect().width || 1;
@@ -159,11 +176,15 @@ export function initPlanPeek(blanket, { getUnderLayers, isDisabled, onOpen, onPe
       side: null,
       ready: false,
       anchorEl,
-      // The deepest point of the sideways pull so far, and the height the finger was at when it
-      // reached it: the upward stroke is measured from there (OPEN_UP_PX). `pinned` says that
-      // stroke has begun, so the offset stops following the finger sideways (PIN_UP_PX).
+      // The deepest sideways pull so far: where the plan stays once the upward stroke has begun.
       peakDx: 0,
-      peakY: e.clientY,
+      // Once armed: the finger's height when it armed (`armY`, what the plan's own height follows
+      // from), the lowest the finger has been since (`baseY`, what the rise is measured from), and
+      // the finger's x where the stroke began (`strokeX`, what its sideways drift is measured from).
+      armY: null,
+      baseY: null,
+      strokeX: null,
+      // The upward stroke has begun (PIN_UP_PX): the sideways offset and the side stop following.
       pinned: false,
     };
     drag = pressed;
@@ -189,18 +210,25 @@ export function initPlanPeek(blanket, { getUnderLayers, isDisabled, onOpen, onPe
     setHeld(false);
   }
 
-  // How far the finger has risen since the pull was at its deepest, which is what the second stroke
-  // is measured by. The deepest point stops moving once that rise has begun, so a thumb drifting
-  // sideways as it travels up neither deepens the pull nor moves the point the rise is measured
-  // from.
-  function riseSincePeak(e, dx) {
-    if (!drag.pinned && Math.abs(dx) > Math.abs(drag.peakDx)) {
-      drag.peakDx = dx;
-      drag.peakY = e.clientY;
-    }
-    const up = drag.peakY - e.clientY;
-    if (up >= PIN_UP_PX) drag.pinned = true;
-    return up;
+  // The second stroke, while the gesture is armed: how far the finger has risen above the lowest
+  // point it reached, and how far it has moved sideways since the stroke began. Sideways movement
+  // never moves the point the rise is measured from — only going lower does — so a thumb drifting
+  // outward or back as it rises still rises. Below PIN_UP_PX the stroke has not begun, and its
+  // starting x follows the finger along the pull.
+  function strokeSinceArmed(e) {
+    if (drag.armY === null) drag.armY = e.clientY;
+    if (drag.baseY === null || e.clientY >= drag.baseY) drag.baseY = e.clientY;
+    const rise = drag.baseY - e.clientY;
+    if (rise < PIN_UP_PX) drag.strokeX = e.clientX;
+    else drag.pinned = true;
+    return { rise, drift: Math.abs(e.clientX - drag.strokeX) };
+  }
+
+  // Not armed (or no longer): nothing has been risen from, and the blanket sits at its own height.
+  function disarmStroke() {
+    drag.armY = null;
+    drag.baseY = null;
+    drag.strokeX = null;
   }
 
   // The L is complete. The second stroke opens, not the release that follows it: a finished gesture
@@ -214,16 +242,10 @@ export function initPlanPeek(blanket, { getUnderLayers, isDisabled, onOpen, onPe
     leave(finished.side);
   }
 
-  function pointermove(e) {
-    if (!drag || e.pointerId !== drag.id) return;
-    const dx = e.clientX - drag.x;
-    const dy = e.clientY - drag.y;
-
-    if (!drag.axis) lockAxis(e, dx, dy);
-    if (drag.axis !== "x") return;
-    e.preventDefault();
-
-    const up = riseSincePeak(e, dx);
+  // The sideways part: the plan follows the finger's dx until the upward stroke pins it. Returns
+  // whether the pull has uncovered enough to be opened by that stroke.
+  function followPull(dx) {
+    if (!drag.pinned && Math.abs(dx) > Math.abs(drag.peakDx)) drag.peakDx = dx;
     // Once pinned the side is settled too: the gesture is already committed to the neighbour it
     // uncovered, and reading the side off a drifting dx could swap it mid-stroke.
     const side = drag.pinned && drag.side ? drag.side : dx > 0 ? "past" : "future";
@@ -238,12 +260,35 @@ export function initPlanPeek(blanket, { getUnderLayers, isDisabled, onOpen, onPe
     if (ready !== drag.ready) {
       drag.ready = ready;
       setOpenReady(side, ready);
+      if (!ready) disarmStroke();
     }
     blanket.classList.toggle("pulled-right", pull > 0);
     blanket.classList.toggle("pulled-left", pull < 0);
     setPull(pull);
+    return ready;
+  }
 
-    if (ready && up >= OPEN_UP_PX) openAfterStroke();
+  // The upward part, once armed. The blanket follows the finger up and down from the height where
+  // the pull armed (Simon, 2026-10-13: "as the finger goes, not only left or right"), and no higher
+  // than the stroke that opens it. Not before it armed: while the trainer is reading the neighbour,
+  // the same exercise stays level on both plans, and a finger's vertical wobble would move it.
+  function followStroke(e) {
+    const { rise, drift } = strokeSinceArmed(e);
+    setLift(Math.max(e.clientY - drag.armY, -OPEN_UP_PX));
+    if (rise >= OPEN_UP_PX && drift <= rise * MAX_DRIFT_PER_RISE) openAfterStroke();
+  }
+
+  function pointermove(e) {
+    if (!drag || e.pointerId !== drag.id) return;
+    const dx = e.clientX - drag.x;
+    const dy = e.clientY - drag.y;
+
+    if (!drag.axis) lockAxis(e, dx, dy);
+    if (drag.axis !== "x") return;
+    e.preventDefault();
+
+    if (followPull(dx)) followStroke(e);
+    else setLift(0);
   }
 
   function release(e) {
@@ -263,6 +308,7 @@ export function initPlanPeek(blanket, { getUnderLayers, isDisabled, onOpen, onPe
     if (finished.axis === "x") {
       blanket.classList.add("is-springing");
       setPull(0);
+      setLift(0);
       setTimeout(() => blanket.classList.remove("is-springing"), SPRING_MS);
     }
   }
@@ -285,6 +331,7 @@ export function initPlanPeek(blanket, { getUnderLayers, isDisabled, onOpen, onPe
         setSide(null);
         setHeld(false);
         setPull(0);
+        setLift(0);
         leaving = false;
       }
     };

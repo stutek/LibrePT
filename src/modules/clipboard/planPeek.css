@@ -14,7 +14,7 @@
 
 /* The current plan: title bar, client tabs and clipboard body, all as one unit so they move
    together. Sits above the two under-layers by DOM order and paints opaque, so nothing further
-   than `--plan-pull` needs to be said about what covers what. */
+   than `--plan-pull` and `--plan-lift` needs to be said about what covers what. */
 .plan-peek-blanket {
   display: flex;
   flex-direction: column;
@@ -24,7 +24,8 @@
   position: relative;
   z-index: 2;
   background: var(--bg-color);
-  transform: translateX(var(--plan-pull, 0px));
+  /* Sideways by the pull, up and down with the second stroke of the L (planPeek.js sets both). */
+  transform: translate(var(--plan-pull, 0px), var(--plan-lift, 0px));
   /* Vertical stays the browser's own scroll; only a horizontal move is ours (planPeek.js
      preventDefaults it once the axis locks to "x"). pinch-zoom too: pan-y alone switches off the
      two-finger zoom across the whole clipboard, which a trainer who cannot read small text needs. */
@@ -54,12 +55,14 @@
 }
 
 /* Held (press-and-hold, before any pull, or throughout a horizontal drag): the plan narrows so the
-   neighbour's edge shows on each side — 60px, measured against the demo plan on a 390px phone so no
-   exercise name is cut (Simon, 2026-09-14) — and its cards get denser (below). Narrowing animates
+   neighbour's edge shows on each side — 30px. Simon approved 60px on 2026-09-14 and halved it on
+   2026-10-13: held, the plan shrank more than he expected. At 60px a status badge such as
+   "Upcoming" was cut on a 330px phone; at 30px every badge stays whole down to 320px in every
+   language (tests/e2e/test_plan_peek_open.py) — and its cards get denser (below). Narrowing animates
    only while ANIMATING (is-animating-held), never as a permanent transition — a spring-back or a
    client switch must not visibly "un-narrow" mid-render. */
 .plan-peek-blanket.is-held {
-  margin-inline: 60px;
+  margin-inline: 30px;
 }
 .plan-peek-blanket.is-animating-held,
 .plan-peek-blanket.is-animating-held .exercise-deck-card {
