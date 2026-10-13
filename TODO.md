@@ -900,7 +900,9 @@ users' association. Two open points it raises:
       flyer and the spoken script are in the private campaign file.
 - [ ] **Three questions for Simon before the flyer is printed** (2026-10-12 23:56:55.186): whether the
       meeting date on it is fixed, whether a phone number goes on it, and the phone check of §80.154.
-      Listed in the private campaign file, §2b. *Blocks:* printing the flyer as it is.
+      Listed in the private campaign file, §2b. *Blocks:* printing the flyer as it is. **The first is
+      answered (Simon, 2026-10-13 12:06:13.053):** the flyer gives no date and invites no one; it says
+      the invitation comes in the app's notifications (§110). Two remain.
 
 ## 24. Single-responsibility & module-boundary reorganisation
 
@@ -6776,3 +6778,30 @@ njegova vrednost je, da najde, česar nihče ni pričakoval, in to se ne ponovi 
    `fix/build-watch-short-sha`, `fix/demo-drag-press-lands-on-card`, `fix/e2e-session-card-timezone`,
    `feat/week-trials`, `fix/week-defects`, `fix/stolen-phone`, `fix/week-defects-2`,
    `feat/release-thanks`, `trials/weeks-2026-10-10`.
+
+## 110. [ ] Povabilo na odprto srečanje uporabnikov, samo v obvestilih — ni zgrajeno
+
+**Odločil Simon 2026-10-13, zapisano 2026-10-13 12:06:13.053:**
+1. **Povabilo na odprto srečanje uporabnikov pride samo iz predala z obvestili v aplikaciji.** Letak,
+   kartice in e-pošta ne vabijo; povedo le, kje se povabilo pokaže.
+2. **Če trener na kartici izbere, da pride, aplikacija naredi datoteko `.ics`**, ki jo uvozi v svoj
+   koledar: datum, ura in povezava do spletnega srečanja.
+
+**Kar že obstaja:** `src/data/calendarInvite.js` naredi `.ics` za termin, `src/modules/common/download.js`
+datoteko izroči, kartica v predalu z lastnim gumbom za zapiranje je zahvala ob novi različici (§106).
+
+**Kar stane, povedano vnaprej:**
+- Odgovor »pridem« ne pride do nikogar: aplikacija nima strežnika. Koliko ljudi pride, se izve šele
+  na srečanju.
+- Datum in povezava srečanja sta v aplikaciji; sprememba pomeni novo objavo.
+- Kartico vidi le, kdo aplikacijo odpre. Študent, ki jo namesti danes (§23.6), povabila ne najde,
+  dokler kartica ni objavljena.
+
+**Odprto:**
+- [ ] Kdo kartico vidi: tudi na prazni aplikaciji in v vzorčnih podatkih, s katerimi študentje začnejo
+      (povezava z letaka odpre `init=demo_data_load`); v peskovniku ne.
+- [ ] Ali »ne pridem« kartico skrije za to srečanje ali za vedno, in kdaj se pokaže naslednje.
+- [ ] Datum, ura in povezava prvega srečanja; v zasebnem načrtu je sreda 2026-12-09, ni potrjeno.
+- [ ] Pravila za kartico, ki ni delo trenerja, veljajo kot v §68.2: nikoli med treningom, z besedami,
+      ki povedo, kaj je.
+- **Rok:** pred prvim srečanjem; zasebni načrt ga postavlja na 2026-11-25.
