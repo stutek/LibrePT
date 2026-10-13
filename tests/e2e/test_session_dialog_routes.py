@@ -87,6 +87,37 @@ def test_back_closes_the_picker_and_returns_to_the_editor(page, local_server):
     assert "/edit" in _path(page)
 
 
+def _open_rows(page):
+    return page.locator(".clipboard-editor .editor-row").evaluate_all(
+        "rows => rows.filter((row) => row.querySelector('.editor-row-fields'))"
+        ".map((row) => row.querySelector('.editor-row-name').value)"
+    )
+
+
+def _add_from_catalog(page, name):
+    page.locator(".editor-catalog-btn").first.click()
+    page.wait_for_selector("#dialog-catalog-picker[open]")
+    page.locator(".picker-item", has_text=name).first.click()
+    page.wait_for_selector("#dialog-catalog-picker", state="hidden")
+    page.wait_for_timeout(300)
+
+
+def test_the_movement_just_added_from_the_catalog_is_the_open_row(page, local_server):
+    """Closing the picker returns to the address of the row that was open before it. That address
+    used to win over the new row: the previous movement stayed open, and the sets, reps and load the
+    trainer typed next went into it (two trainer weeks, 2026-10-10)."""
+    _open_live_session(page, local_server)
+    _enter_edit_mode(page)
+    _add_from_catalog(page, "Barbell Bench Press")
+    assert _open_rows(page) == ["Barbell Bench Press"]
+
+    _add_from_catalog(page, "Barbell Row")
+
+    assert _open_rows(page) == ["Barbell Row"], (
+        f"the row open after the second add is {_open_rows(page)}, not the movement just added"
+    )
+
+
 def test_row_swap_picker_names_the_row_and_survives_a_reload(page, local_server):
     _open_live_session(page, local_server)
     _enter_edit_mode(page)

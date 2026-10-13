@@ -30,6 +30,7 @@ import {
   renderCatalogPickerDialog,
 } from "../modules/clipboard/activeSessionOverlayView.js";
 import {
+  hasPendingCallout,
   isClipboardEditMode,
   markEditorRow,
   setClipboardEditModeFlag,
@@ -148,6 +149,10 @@ export function setClipboardEditMode(on, slotId = null) {
   // then routes BACK to a slot-less `/edit` entry, and that pop must not erase the mark it just set.
   // The URL is authoritative only when it actually names a row.
   if (!slotId) return;
+  // Nor when an edit has just marked a row. Closing the catalog dialog goes back to the address of
+  // the row that was open BEFORE it, and that address replaced the movement just added: the old row
+  // stayed open, and the numbers typed next went into it.
+  if (hasPendingCallout()) return;
   // A row id from a URL may name a row that has since been deleted. Like a stale focus card, it is
   // ignored rather than erroring — syncSessionFocusUrl then drops the segment on the next render.
   const activeSession = getActiveSession();

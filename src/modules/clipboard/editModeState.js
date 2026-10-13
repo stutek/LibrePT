@@ -41,6 +41,11 @@ export function markEditorRow(slotId, { kind, focus }) {
   pendingCallout = slotId ? { id: slotId, kind, focus } : null;
 }
 
+// Whether an edit has marked a row the next render has not shown yet. Read without clearing it.
+export function hasPendingCallout() {
+  return pendingCallout !== null;
+}
+
 // Read AND clear: one render owns the call-out. Returning it without clearing is what would let a
 // highlight outlive the moment it describes.
 export function takePendingCallout() {
