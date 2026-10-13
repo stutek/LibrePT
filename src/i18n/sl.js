@@ -959,7 +959,7 @@ export const sl = {
   story_step_refocus: "Pritisni njegov sklop, da se odpre.",
   story_step_capture_open:
     "Med počitkom Tom omeni koleno, ki so mu ga operirali leta 2024. Pritisni Opombe (listek) pod prvo vajo sklopa. Opomba se odpre čez trening; ura teče naprej.",
-  story_step_capture_tag: "Pritisni 🔥 Joint Pain / Discomfort — bolečina v sklepu.",
+  story_step_capture_tag: "Pritisni 🔥 Bolečina ali nelagodje v sklepu.",
   story_step_capture_note: "V polje za opombo vpiši, kar je rekel: levo koleno, tretja runda.",
   story_typed_note: "levo koleno, tretja runda",
   story_typed_injury: "rama, pred dvema letoma",

@@ -1006,7 +1006,7 @@ export const de = {
   story_step_refocus: "Tippe auf seinen Zirkel, um ihn zu öffnen.",
   story_step_capture_open:
     "In einer Pause erwähnt Tom sein Knie, das 2024 operiert wurde. Tippe unter der ersten Übung des Zirkels auf Notizen (der Haftzettel). Die Notiz öffnet sich über dem Training; die Uhr läuft weiter.",
-  story_step_capture_tag: "Tippe auf 🔥 Joint Pain / Discomfort — Gelenkschmerzen.",
+  story_step_capture_tag: "Tippe auf 🔥 Gelenkschmerz oder Beschwerden.",
   story_step_capture_note:
     "Gib in das Notizfeld ein, was er gesagt hat: linkes Knie, dritte Runde.",
   // What the demo TYPES, not what it says about typing: the words a person enters are
