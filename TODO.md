@@ -6758,6 +6758,13 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#109-x-github-za
 2. **Če trener na kartici izbere, da pride, aplikacija naredi datoteko `.ics`**, ki jo uvozi v svoj
    koledar: datum, ura in povezava do spletnega srečanja.
 
+**Spremenil Simon 2026-10-13, zapisano 2026-10-13 14:05:54.920:** »napovej prvo srečanje v Novembru,
+promovirala ga bova tudi na socialnih omrežjih«. Točka 1 zato ne velja več v celoti: srečanje se
+oglašuje tudi na socialni strani LibrePT, ki jo Simon ustvari pred tiskom letaka. Letak pove »Prvo bo
+novembra« in kje se povabilo pokaže, datuma ne. Kartica mora biti objavljena pred novembrskim
+srečanjem, ne do 2026-11-25. Datum v novembru še ni določen. Zasebni načrt kampanje, ki je bil doslej
+proti javnim objavam, dokler aplikacija nosi oznako PREDOGLED, se s tem umakne.
+
 **Kar že obstaja:** `src/data/calendarInvite.js` naredi `.ics` za termin, `src/modules/common/download.js`
 datoteko izroči, kartica v predalu z lastnim gumbom za zapiranje je zahvala ob novi različici (§106).
 
@@ -6772,7 +6779,7 @@ datoteko izroči, kartica v predalu z lastnim gumbom za zapiranje je zahvala ob 
 - [ ] Kdo kartico vidi: tudi na prazni aplikaciji in v vzorčnih podatkih, s katerimi študentje začnejo
       (povezava z letaka odpre `init=demo_data_load`); v peskovniku ne.
 - [ ] Ali »ne pridem« kartico skrije za to srečanje ali za vedno, in kdaj se pokaže naslednje.
-- [ ] Datum, ura in povezava prvega srečanja; v zasebnem načrtu je sreda 2026-12-09, ni potrjeno.
+- [ ] Datum, ura in povezava prvega srečanja: november 2026 (Simon, zgoraj); dan in ura nista določena.
 - [ ] Pravila za kartico, ki ni delo trenerja, veljajo kot v §68.2: nikoli med treningom, z besedami,
       ki povedo, kaj je.
-- **Rok:** pred prvim srečanjem; zasebni načrt ga postavlja na 2026-11-25.
+- **Rok:** pred prvim srečanjem v novembru; *blokira:* datum srečanja, ki ga določi Simon.
