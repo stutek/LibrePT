@@ -47,6 +47,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
   the first movement.
 - **The backup warning in the header no longer covers the app name.** On a 390-pixel phone the
   warning left "LibrePT" as a few letters; the warning now takes its own row under the logo.
+- **The close button of "The session started off schedule" has a Slovenian and German name.** A
+  screen reader heard "Close" in the middle of a Slovenian dialog.
+- **The backup centre says "encrypted" right after the first encrypted export.** It went on saying
+  "not encrypted yet" beside "Exported and encrypted" until it was opened again.
 
 ## 2026-10-12 — A client who did not come
 

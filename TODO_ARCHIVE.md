@@ -10411,3 +10411,51 @@ zdaj gre v svojo vrstico vedno, ko je prikazana (`modules/common/applicationHead
 sinhronizacijo in varnostne kopije« (preverjeno). Polje, ki je kazalo le zadnji del dolgega gesla
 (F-s01-04), je izgubilo predmet: geslo je od §80.220 iz števk. Simonova preverba na telefonu
 ostaja pri §80.136.
+
+### 80.125 [x] P3 — Na slovenski strani so pomožna imena gumbov za bralnik zaslona angleška — popravljeno 2026-10-13
+
+Prejšnja ugotovitev je v [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80125-x-p3--na-slovenski-strani-so-pomožna-imena-gumbov-za-bralnik-zaslona-angleška--popravljeno-2026-09-30).
+
+**Scenarij in koraki:** teden 15, slovenski vmesnik 390 × 844; za izmišljeno stranko Nejc Polak
+ustvari »Moč A«, 2026-10-12 16:00–16:45, nato »Začni trening« pred načrtovanim datumom.
+
+**Opaženo:** okno »Trening se je začel izven urnika« ima zapiralni gumb z dostopnim imenom
+`Close`; »Ohrani urnik«, »Prilagodi čas« in ostalo besedilo so slovenski. Podagentov dokaz
+2026-10-09 11:07:06.184058129; neodvisno potrjeno z branjem odprtega okna in njegovega DOM.
+
+**Težava in vpliv:** bralnik zaslona oziroma glasovno upravljanje dobi angleško ime sredi slovenskega
+obrazca. Prejšnje zaprtje te točke ne pokriva tega dialoga.
+
+**Predlog:** tudi zapiralni gumb tega okna naj se imenuje »Zapri«. Potrjeno
+2026-10-09 11:07:25.433044167 +0200, prikaz `dev`, shema 6, HEAD `437a7a79`; delovno drevo se
+spreminja (ob preverjanju spremembi appLifecycleController in cacheManifest). Ne trdimo, da je
+napaka ponovljena na čistem commitu.
+
+**Ponovljeno in popravljeno (Claude, 2026-10-13 18:39:32.876, `92c90b2c`).** Na `main` `586cfe27`
+se je ponovilo: ✕ okna »Trening se je začel izven urnika« je imel na `?lang=sl` ime `Close`; na
+strani je bil to edini angleški `aria-label`. Vzrok: okno nastane šele ob prvem »Začni trening«, ko
+je stran že prevedena, zato njegov `data-i18n-label` ni bil nikoli uporabljen. Zdaj okno ime ✕
+nastavi iz slovarja ob vsakem odprtju, kot ostala svoja besedila
+(`modules/session/sessionStartTimeDialog.js`). Test
+`test_the_off_schedule_dialogs_close_button_is_named_in_the_apps_language` v
+`tests/e2e/test_session_start_time_adjust.py`.
+
+### 80.218 [x] P3 — Središče za kopije hkrati piše »še niso šifrirane« in »Izvoženo in šifrirano« — popravljeno 2026-10-13
+
+**Scenarij in koraki:** središče za kopije po izvozu šifrirane kopije, ko geslo ni zapomnjeno na
+napravi.
+
+**Opaženo:** obe vrstici hkrati (F-r16-07).
+
+**Težava in vpliv:** trener ne ve, ali je kopija šifrirana.
+
+**Predlog:** vrstica o stanju pove, kaj velja za naslednji izvoz (»vprašam za geslo«) — opaženo
+2026-10-11 na različici `55345d2`, teden r16; orkestrator ni ponovil.
+
+**Ponovljeno in popravljeno (Claude, 2026-10-13 18:39:32.876, `73bc7e05`).** Prvi »Izvozi JSON«
+vpraša za geslo in ga shrani na napravo, vrstica nad gumbi pa se ni osvežila: do ponovnega odprtja
+okna je pisala »Varnostne kopije s te naprave še niso šifrirane.« ob »Izvoženo in šifrirano.«. Zdaj
+se vrstica osveži po vsakem izvozu (`modules/common/backupRestore.js`). Test
+`test_the_password_line_agrees_with_the_first_encrypted_export` v `tests/e2e/test_sync_backup.py`
+brez popravka pade, s popravkom uspe. Besedilo vrstice ostaja, kot je: po izvozu je geslo na napravi
+in vrstica pove, kar velja za naslednji izvoz.
