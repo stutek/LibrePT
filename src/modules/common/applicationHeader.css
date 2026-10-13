@@ -280,9 +280,28 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav {
     letter-spacing: 0.4px;
   }
 }
-/* The narrowest phones (320 px): the wordmark stays whole and the build markers drop to a second row
-   when the backup warning is showing, instead of the warning pushing the logo and the menu button out
-   of the bar. Measured in tests/medium/test_narrow_header.py. */
+/* While the backup warning shows, the build markers drop to a second row and the wordmark stays
+   whole. At every width, not only on the narrowest phones: the bar is at most 480 px wide, and the
+   warning beside the logo and the buttons left "LibrePT" 14 px of its 94 at 390 px. Measured in
+   tests/medium/test_narrow_header.py. */
+.header-container:has(.unbacked-badge:not(.hidden)) {
+  flex-wrap: wrap;
+  row-gap: 2px;
+}
+.header-container:has(.unbacked-badge:not(.hidden)) .logo-area {
+  flex-shrink: 0;
+}
+.header-build-stack:has(.unbacked-badge:not(.hidden)) {
+  order: 3;
+  flex: 1 0 100%;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 6px;
+  padding-bottom: 4px;
+}
+/* The narrowest phones (320 px): the logo cluster tightens one more step so the wordmark stays
+   whole beside the buttons. */
 @media (max-width: 360px) {
   .logo-area {
     flex-shrink: 0;
@@ -294,15 +313,6 @@ body:has(#active-session-overlay:not(.hidden)) .header-nav {
   .header-container {
     flex-wrap: wrap;
     row-gap: 2px;
-  }
-  .header-build-stack:has(.unbacked-badge:not(.hidden)) {
-    order: 3;
-    flex: 1 0 100%;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 4px 6px;
-    padding-bottom: 4px;
   }
 }
 .logo-area h1 {

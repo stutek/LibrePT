@@ -1,10 +1,12 @@
 # tests/medium/test_narrow_header.py
-# The app header and the clipboard's title bar on the narrowest phone the app supports (320 px).
+# The app header and the clipboard's title bar on the narrowest phone the app supports (320 px), and
+# the header on an ordinary one (390 px).
 #
 # Found by exploratory testing: at 320 px the app name was cut to "Libr…", the backup warning covered
 # the logo and pushed the menu button off the screen, and the clipboard's session name was left 18 px
-# wide next to the "Today" button and the countdown. Measured from the DOM, in Slovenian, whose words
-# are the longest of the three languages.
+# wide next to the "Today" button and the countdown. At 390 px the warning left the app name 14 px of
+# its 94 (a trainer week, 2026-10-10). Measured from the DOM, in Slovenian, whose words are the
+# longest of the three languages.
 # Fixtures (page, local_server) come from tests/conftest.py + pytest-playwright.
 
 import pytest
@@ -20,6 +22,7 @@ from tests.medium._harness import (
 pytestmark = pytest.mark.clean_start
 
 NARROW = {"width": 320, "height": 680}
+PHONES = [NARROW, {"width": 390, "height": 844}]
 
 STUB = (
     HEADER_STUB
@@ -30,8 +33,8 @@ window.showBackupHealth = (health) => renderBackupBadge(health);
 )
 
 
-def _header(page, local_server, level):
-    page.set_viewport_size(NARROW)
+def _header(page, local_server, level, viewport=NARROW):
+    page.set_viewport_size(viewport)
     load_with_stub(page, local_server, STUB)
     page.wait_for_selector("#app-header")
     page.evaluate(
@@ -47,9 +50,10 @@ def _header(page, local_server, level):
     page.wait_for_timeout(200)
 
 
+@pytest.mark.parametrize("viewport", PHONES, ids=lambda v: str(v["width"]))
 @pytest.mark.parametrize("level", ["none", "due", "urgent"])
-def test_the_app_name_and_the_menu_button_fit_at_320(page, local_server, level):
-    _header(page, local_server, level)
+def test_the_app_name_and_the_menu_button_fit(page, local_server, level, viewport):
+    _header(page, local_server, level, viewport)
     name = page.evaluate(
         """() => {
           const h1 = document.querySelector('.logo-area h1');
@@ -62,14 +66,15 @@ def test_the_app_name_and_the_menu_button_fit_at_320(page, local_server, level):
         }"""
     )
     assert not name["cut"], "the app name is cut with an ellipsis"
-    assert name["menuRight"] <= NARROW["width"], (
+    assert name["menuRight"] <= viewport["width"], (
         f"menu button leaves the screen: {name}"
     )
-    assert name["pageWidth"] <= NARROW["width"], f"the page scrolls sideways: {name}"
+    assert name["pageWidth"] <= viewport["width"], f"the page scrolls sideways: {name}"
 
 
-def test_the_backup_warning_does_not_cover_the_logo(page, local_server):
-    _header(page, local_server, "urgent")
+@pytest.mark.parametrize("viewport", PHONES, ids=lambda v: str(v["width"]))
+def test_the_backup_warning_does_not_cover_the_logo(page, local_server, viewport):
+    _header(page, local_server, "urgent", viewport)
     boxes = page.evaluate(
         """() => {
           const r = (s) => document.querySelector(s).getBoundingClientRect().toJSON();
