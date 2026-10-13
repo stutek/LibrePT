@@ -973,6 +973,14 @@ users' association. Two open points it raises:
       `init=demo_data_load` writes the sample records into the student's own database, stamped as
       test data, keeps the form, and a later start from the home-screen icon reports them as test
       records in the student's data. Live after Simon's push.
+- [x] **The flyer's QR opens the guided tour's table of contents** — asked 2026-10-13 19:14:58.005
+      (Simon, relayed by the campaign session): »a lahko qr na plakatu spremeniš, da bo deep link na
+      kazalo vseh walktroughov?« Done 2026-10-13 19:31:57.450 in `37ea5484`. The QR link is now
+      `https://stutek.github.io/LibrePT/?workspace=sandbox&lang=sl&theme=daylight&demo=chapters`:
+      the terms, then the welcome screen with »Vodeni ogled: izberi poglavje« and every chapter of
+      the story, and nothing else (no trainer form, no theme step, no other offer); a tap starts that
+      chapter. It replaces the link above, whose `demo=walkthrough` starts the old short tour, not
+      the story. Live after Simon's push; the flyer's QR must be regenerated with this link.
 - [ ] **Three questions for Simon before the flyer is printed** (2026-10-12 23:56:55.186): whether the
       meeting date on it is fixed, whether a phone number goes on it, and the phone check of §80.154.
       Listed in the private campaign file, §2b. *Blocks:* printing the flyer as it is. **The first is
