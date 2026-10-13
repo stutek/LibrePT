@@ -4873,19 +4873,9 @@ pustil golo »20« kot 20 sekund, ker drugačno branje spremeni pomen shranjenih
 oznake niso opazili. **Čaka na Simona** — opaženo 2026-10-11 na različici `55345d2`, tedni r12, r15,
 r16 (F-r12-16, F-r15-13, F-r16-09); orkestrator ni ponovil.
 
-### 80.215 [ ] P2 — Gumb »Shrani« ostane pod drugim elementom: pod poljem obrazca ali pod vrstico aktivnega treninga
+### 80.215 [x] P2 — Gumb »Shrani« ostane pod drugim elementom: pod poljem obrazca ali pod vrstico aktivnega treninga — ni ponovljivo, zaprto 2026-10-13
 
-**Scenarij in koraki:** »Dodaj stranko« → izpolnjena »Opombe« ali »Cilji« → »Shrani«; ali obrazec za
-nov termin, medtem ko spodaj teče aktiven trening.
-
-**Opaženo:** tap na »Shrani« ne zadene gumba; v središču za kopije enako »Zapri« (F-r16-26). Pri
-F-r14-08 je zelena vrstica aktivnega treninga ležala čez »Shrani« novega termina.
-
-**Težava in vpliv:** trener ne more shraniti obrazca, ki ga je izpolnil.
-
-**Predlog:** preveriti s `document.elementFromPoint`, ali je to aplikacija ali orodje (skill: »intercepts
-pointer events«) — opaženo 2026-10-11 na različici `55345d2`, tedni r13, r14, r16 (F-r13-02, F-r14-08,
-F-r16-26); blizu §80.164; orkestrator ni ponovil.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80215-x-p2--gumb-shrani-ostane-pod-drugim-elementom-pod-poljem-obrazca-ali-pod-vrstico-aktivnega-treninga--ni-ponovljivo-zaprto-2026-10-13).
 
 ### 80.216 [ ] P3 — Za bolečino v trebuhu ali v mišici je edina izbira »Bolečina ali nelagodje v sklepu«
 

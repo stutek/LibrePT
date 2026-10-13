@@ -10349,3 +10349,25 @@ Gumb za shranjevanje v »Uredi profil« in »Dodaj stranko« je ob odprtju na za
 stara. To je pravilo, ki ga je Simon postavil 2026-09-17 (»Prekliči« razveljavi, vsak drug izhod
 zapis dokonča, `modules/common/liveRecordForm.js`). Ali naj ✕ in Esc preideta k »Prekliči«, je
 odprto vprašanje §80.41.
+
+### 80.215 [x] P2 — Gumb »Shrani« ostane pod drugim elementom: pod poljem obrazca ali pod vrstico aktivnega treninga — ni ponovljivo, zaprto 2026-10-13
+
+**Scenarij in koraki:** »Dodaj stranko« → izpolnjena »Opombe« ali »Cilji« → »Shrani«; ali obrazec za
+nov termin, medtem ko spodaj teče aktiven trening.
+
+**Opaženo:** tap na »Shrani« ne zadene gumba; v središču za kopije enako »Zapri« (F-r16-26). Pri
+F-r14-08 je zelena vrstica aktivnega treninga ležala čez »Shrani« novega termina.
+
+**Težava in vpliv:** trener ne more shraniti obrazca, ki ga je izpolnil.
+
+**Predlog:** preveriti s `document.elementFromPoint`, ali je to aplikacija ali orodje (skill: »intercepts
+pointer events«) — opaženo 2026-10-11 na različici `55345d2`, tedni r13, r14, r16 (F-r13-02, F-r14-08,
+F-r16-26); blizu §80.164; orkestrator ni ponovil.
+
+**Ni ponovljeno (Claude, 2026-10-13 13:21:00.236, `main` `55d21cd0`, Playwright Chromium, sl,
+390 × 844 in 320 × 680), preverjeno z `document.elementFromPoint` v središču gumba.** (1) »Dodaj
+stranko« s petimi vrsticami v »Opombe«: »Shrani« sprejme dotik (§80.164). (2) Trening »Group
+Strength & Conditioning« začet, podloga zaprta, vrstica treninga na dnu vidna; nato obrazec za nov
+termin: »Shrani« (682–726 oz. 518–562 pik) in »Odpri v beležki« sprejmeta dotik, vrstica ju ne
+prekriva. (3) Središče za kopije: ✕ (edini gumb za zapiranje, 44 pik) sprejme dotik; gumbi nižje so
+v oknu, ki se drsi, in se pokažejo po drsenju — gumba z napisom »Zapri« v tem oknu ni.
