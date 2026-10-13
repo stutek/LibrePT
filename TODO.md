@@ -377,6 +377,26 @@ the install itself (`beforeinstallprompt`); Safari on iPhone does not, so there 
 say the steps, naming Safari's own controls. Not started; the welcome screen's order (§81) decides
 where the offer sits.
 
+### 9.7 [~] Demo podatki v jeziku vmesnika, stranke z mednarodnimi imeni
+
+**Odločitev Simona, 2026-10-13 14:02:49.794** (prenesla seja librept-ec): »v zaslonski sliki je
+moteče mešanje slovenskega in angleškega jezika« in »da testne podatke naredi slovenske, a uporabi
+mednarodno sprejemljiva imena kot so ana, eva, tom, leo, etc«. Povod: letak za obisk Fakultete za
+šport v četrtek 2026-10-15 kaže slovenski demo, v katerem so »Jane Doe«, »Face Pulls« in »Trib gym
+base« ob slovenskem vmesniku.
+
+To razveljavi zapis v glavi `src/data/demoText.js`, da imena vaj ostanejo angleška in je »Trib gym
+base« lastno ime.
+
+- [x] Podvojen stavek v »Predhodne poškodbe in opombe« (urejanje načrta): vzrok so bili demo
+  podatki, opomba se je začela s stavkom poškodbe. Popravljeno in s testom, 481dc884.
+- [ ] Opisi načrtov, navodila vaj in ime telovadnice v sl in de.
+- [ ] Imena vaj v sl in de, z vodnikom (zgodba imenuje »Lat Pulldown«).
+- [ ] Stranke: Jane Doe → Eva, John Smith → Tom, Sarah Jenkins → Nina, Mike Chen → Leo, Priya
+  Patel → Mia, Tom Walker → David, Aisha Khan → Ida; Simon ostane. Ana, Maja in Nik so že nove
+  stranke v zgodbi, Max je v demu beseda za število ponovitev. Čaka na `src/i18n/*.js`, ki jih
+  drži seja za ponudbo ikone na domačem zaslonu (§9.6).
+
 ---
 
 ## 11. Navigation & Layout Redesign
