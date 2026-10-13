@@ -12,9 +12,11 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { DEFAULT_CLIENTS } from "../../../src/data/clients.js";
 import { DEMO_TEXT, localiseDemoRecords, localiseDemoText } from "../../../src/data/demoText.js";
+import { DEFAULT_EXERCISES } from "../../../src/data/exercises.js";
 import { DEFAULT_HISTORY } from "../../../src/data/history.js";
 import { DEFAULT_PLAN_UPDATES } from "../../../src/data/planUpdates.js";
 import { DEFAULT_ROUTINES } from "../../../src/data/routines.js";
+import { DEFAULT_SESSION_SERIES } from "../../../src/data/sessionSeriesSeed.js";
 import { DEFAULT_SESSIONS } from "../../../src/data/sessions.js";
 import { readFeedbackTag } from "../../../src/domain/feedbackTags.js";
 import { TRANSLATIONS } from "../../../src/i18n/index.js";
@@ -29,14 +31,15 @@ test("anything without a translation is left exactly as it is", () => {
   // speak must not blank the demo out either.
   assert.equal(localiseDemoText("Morning Conditioning", "en"), "Morning Conditioning");
   assert.equal(localiseDemoText("Morning Conditioning", "fr"), "Morning Conditioning");
-  assert.equal(localiseDemoText("Barbell Bench Press", "sl"), "Barbell Bench Press");
+  assert.equal(localiseDemoText("A string no table lists", "sl"), "A string no table lists");
   assert.equal(localiseDemoText("", "sl"), "");
   assert.equal(localiseDemoText(undefined, "sl"), undefined);
 });
 
-test("a place with a name keeps it; a place described in words is translated", () => {
-  // "Trib gym base" is what the gym is called. Translating it would rename someone's business.
-  assert.equal(localiseDemoText("Trib gym base", "sl"), "Trib gym base");
+test("a place keeps its own name, and the words around the name are translated", () => {
+  // "Trib" is what the gym is called; "gym base" only says what it is.
+  assert.equal(localiseDemoText("Trib gym base", "sl"), "Fitnes Trib");
+  assert.equal(localiseDemoText("Trib gym base", "de"), "Fitnessstudio Trib");
   assert.equal(localiseDemoText("playground outside", "sl"), "zunanje igrišče");
 });
 
@@ -50,12 +53,13 @@ for (const lang of Object.keys(TRANSLATIONS).filter((code) => code !== "en")) {
       if (typeof value === "string" && value.trim() && !table[value]) missing.push(value);
     };
 
-    for (const session of DEFAULT_SESSIONS) {
+    for (const session of [...DEFAULT_SESSIONS, ...DEFAULT_SESSION_SERIES]) {
       need(session.title);
       need(session.location);
     }
     for (const routine of DEFAULT_ROUTINES) {
       need(routine.name);
+      need(routine.description);
       // What each exercise asks for is the column a trainer reads during a set; a number is
       // language-free, a phrase like "10 per arm" is not.
       for (const entry of routine.exercises || []) {
@@ -63,6 +67,8 @@ for (const lang of Object.keys(TRANSLATIONS).filter((code) => code !== "en")) {
         need(entry.circuitTitle);
       }
     }
+    // How an exercise is done is shown in its form, and searched when the library is filtered.
+    for (const exercise of DEFAULT_EXERCISES) need(exercise.instructions);
     for (const client of DEFAULT_CLIENTS) {
       need(client.goals);
       need(client.notes);
@@ -70,7 +76,7 @@ for (const lang of Object.keys(TRANSLATIONS).filter((code) => code !== "en")) {
     }
 
     assert.deepEqual(
-      missing.filter((value) => value !== "Trib gym base"),
+      missing,
       [],
       `these seed strings are shown to the trainer but have no entry in DEMO_TEXT.${lang}`,
     );

@@ -19,9 +19,12 @@
 // throw away whatever they changed. Reloading the demo in the other language is the way to get it
 // in the other language.
 //
-// **What is deliberately NOT translated.** Exercise names are the movement catalog's own
-// vocabulary and are used in English on a Slovenian gym floor ("Barbell Bench Press"); people's
-// names are names; and "Trib gym base" is a place's name, not a description of one.
+// **Every word a trainer reads is in the demo's language** (ruled 2026-10-13): session, plan and
+// circuit names, what each plan is for, how each exercise is done, notes, places. English sample
+// data on a Slovenian screen reads as an unfinished translation, and the demo is what a trainer
+// judges the app by. Not translated: a place's own name ("Trib" stays, the words around it do not).
+// Still English at this point, and open in TODO.md: the clients' names and the exercises' names,
+// because the guided story's cards in src/i18n/ name them and must change with them.
 //
 // deps: none — a plain lookup table.
 
@@ -47,7 +50,8 @@ export const DEMO_TEXT = {
     "Strength & Longevity Focus": "Moč in dolgoživost",
     "Upper Body Strength": "Moč zgornjega dela telesa",
 
-    // Places. The gym's own name stays as it is; the two outdoor ones are descriptions.
+    // Places. "Trib" is the gym's name and stays; the words around it are translated.
+    "Trib gym base": "Fitnes Trib",
     "city park": "mestni park",
     "playground outside": "zunanje igrišče",
 
@@ -156,6 +160,114 @@ export const DEMO_TEXT = {
     "45s": "45 s",
     "60s hold": "60 s drže",
     Max: "Največ",
+
+    // ── Routines: what each plan is for, shown under its name on the Plans page ───────────────
+    "Strength-focused upper body session prioritizing compound presses and rows.":
+      "Trening moči za zgornji del telesa s poudarkom na sestavljenih potiskih in veslanjih.",
+    "Squat and hinge focus with direct core work.":
+      "Poudarek na počepu in kolčnem upogibu, z neposrednim delom za trup.",
+    "A comprehensive 5-phase session featuring a dynamic warmup, metabolic strength tri-sets, core work, and a longevity cooldown.":
+      "Celovit trening v 5 delih: dinamično ogrevanje, metabolne trojke za moč, delo za trup in umirjanje.",
+    "Gentle core activation and mobility exercises focused on deep abdominal breathing, posture, and light functional strength.":
+      "Nežna aktivacija trupa in vaje za gibljivost s poudarkom na globokem trebušnem dihanju, drži in lahki funkcionalni moči.",
+    "Compound strength lifts paired with posture and core stability work optimized for long-term joint health.":
+      "Sestavljeni dvigi za moč skupaj z vajami za držo in stabilnost trupa, prilagojeni dolgoročnemu zdravju sklepov.",
+
+    // ── Exercises: how each one is done (data/exercises.js), in the exercise's form ───────────
+    "Lie flat on a bench, grip the barbell slightly wider than shoulder width, lower it to mid-chest, and push up.":
+      "Uleži se na klop, drog primi malo širše od ramen, ga spusti do sredine prsi in potisni navzgor.",
+    "Lie on a flat bench with a dumbbell in each hand, lower the dumbbells to chest level, then press them up.":
+      "Uleži se na ravno klop z ročko v vsaki roki, ročki spusti do višine prsi in ju potisni navzgor.",
+    "Set bench to a 30-45 degree incline. Press dumbbells upwards from chest height.":
+      "Klop nastavi na naklon 30–45 stopinj. Ročki potisni navzgor z višine prsi.",
+    "Position pulleys at shoulder height, grab handles, and bring hands together in a wide hugging motion.":
+      "Škripca nastavi v višino ramen, primi ročaja in roki v širokem loku združi pred seboj.",
+    "Keep body in a straight plank, lower chest to floor, and push back up.":
+      "Telo drži ravno kot desko, prsi spusti do tal in se potisni nazaj gor.",
+    "Hang from a bar with palms facing away. Pull chest up to the bar.":
+      "Visi na drogu z dlanmi, obrnjenimi stran od sebe. Prsi povleci do droga.",
+    "Sit at pulldown station, pull bar down to upper chest, engaging the lats.":
+      "Sedi k napravi, drog povleci do zgornjega dela prsi in napni široke hrbtne mišice.",
+    "Hinge at hips, pull barbell towards lower abdomen keeping back straight.":
+      "Predkloni se v kolkih in drog vleci proti spodnjemu delu trebuha; hrbet ostane raven.",
+    "Place one knee/hand on bench, pull dumbbell to hip with other arm.":
+      "Eno koleno in roko nasloni na klop, z drugo roko vleci ročko proti kolku.",
+    "Pull rope attachment from high pulley towards forehead, pulling elbows wide.":
+      "Vrv z zgornjega škripca vleci proti čelu, komolci gredo široko narazen.",
+    "Rest bar on upper back, squat down until thighs are parallel to floor, push back up.":
+      "Drog nasloni na zgornji del hrbta, počepni, dokler stegna niso vzporedna s tlemi, in se dvigni.",
+    "Hinge at hips with micro-bend in knees, lower weight down shins, squeeze glutes to stand.":
+      "Predkloni se v kolkih z rahlo pokrčenimi koleni, utež spusti ob golenih in se z napetimi zadnjičnimi mišicami vzravnaj.",
+    "Sit in machine, unlock platform, lower knees toward chest, press back up without locking knees.":
+      "Sedi v napravo, sprosti ploščo, kolena spusti proti prsim in potisni nazaj, ne da bi kolena povsem iztegnil.",
+    "Hold a single dumbbell vertically at chest height, squat deep.":
+      "Eno ročko drži navpično pred prsmi in globoko počepni.",
+    "Sit in machine, extend legs fully, pause at top, and lower slowly.":
+      "Sedi v napravo, noge povsem iztegni, zgoraj počakaj in jih počasi spusti.",
+    "Lie face down, curl roller pad towards glutes, control return.":
+      "Uleži se na trebuh, blazinico pokrči proti zadnjici in jo nadzorovano vrni.",
+    "Raise heels as high as possible on a block, stretch down deep.":
+      "Na podstavku dvigni pete čim višje in jih spusti globoko navzdol.",
+    "Press barbell from shoulder height overhead to full lockout, head through at top.":
+      "Drog potisni z višine ramen nad glavo do iztegnjenih rok; zgoraj glava pride med roki.",
+    "Stand tall, raise dumbbells out to sides until arms are parallel to the floor.":
+      "Stoj vzravnano in ročki dvigni vstran, dokler roke niso vzporedne s tlemi.",
+    "Sit or stand, press dumbbells from ear level overhead.":
+      "Sede ali stoje ročki potisni z višine ušes nad glavo.",
+    "Rotate palms up as you curl dumbbells towards shoulders, keeping elbows locked at sides.":
+      "Med dvigom ročk proti ramenom obrni dlani navzgor; komolci ostanejo ob telesu.",
+    "Curl dumbbells with neutral grip (palms facing each other).":
+      "Ročki dvigni z nevtralnim prijemom (dlani obrnjeni druga proti drugi).",
+    "Push rope or bar attachment down by extending elbows, keeping upper arms still.":
+      "Vrv ali drog potisni navzdol z iztegom komolcev; nadlakti mirujeta.",
+    "Lie on bench, lower bar to forehead by bending elbows, then extend.":
+      "Uleži se na klop, s pokrčenjem komolcev spusti drog do čela, nato roki iztegni.",
+    "Hold straight body line resting on forearms and toes. Squeeze core and glutes.":
+      "Telo drži v ravni črti, oprto na podlahti in prste nog. Napni trup in zadnjične mišice.",
+    "Hang from pull-up bar, raise knees to chest height slowly without swinging.":
+      "Visi na drogu in počasi, brez zibanja, dvigni kolena do višine prsi.",
+    "Sit with soles of feet together, touch floor behind head, sit up and touch toes.":
+      "Sedi s stopali skupaj, z rokami se dotakni tal za glavo, se dvigni in se dotakni prstov na nogah.",
+    "Sit, lean back slightly, lift feet, rotate torso tapping hands side-to-side.":
+      "Sedi, se rahlo nagni nazaj, dvigni stopala in zasukaj trup; z rokami se izmenično dotikaj tal ob strani.",
+    "Step forward lunging down, alternating legs.":
+      "Stopi naprej v izpadni korak in menjavaj nogi.",
+    "Hold child pose and lateral lat stretches for 30s.":
+      "Položaj otroka in stranski razteg hrbta zadrži po 30 s.",
+    "Static hamstring stretch and hip flexor stretch, hold 30s per side.":
+      "Statično raztezanje zadnje lože in upogibalk kolka, 30 s na vsako stran.",
+    "Sustained air-bike intervals; drive with arms and legs to the calorie target.":
+      "Daljši intervali na zračnem kolesu; z rokami in nogami poganjaj do ciljnih kalorij.",
+    "Air-bike intervals to a fixed duration — steady pace or an all-out sprint clock.":
+      "Intervali na zračnem kolesu določene dolžine — enakomeren tempo ali šprint s polno močjo.",
+    "Hold the target power output (watts) on the air bike for the prescribed effort.":
+      "Na zračnem kolesu drži ciljno moč (vate) za predpisani napor.",
+    "Row to the target distance with a strong legs-hips-arms sequence.":
+      "Veslaj do ciljne razdalje z močnim zaporedjem noge–kolki–roke.",
+    "Double-pole the ski-erg to the calorie target, hinging at the hips.":
+      "Na smučarskem ergometru vleci z obema rokama hkrati do ciljnih kalorij, s predklonom v kolkih.",
+    "Hold the target power output (watts) for the prescribed effort.":
+      "Drži ciljno moč (vate) za predpisani napor.",
+    "Steady-state or interval run to the target time.": "Enakomeren ali intervalni tek do ciljnega časa.",
+    "Stand on one leg, hips level and core braced; hold for the target time per side.":
+      "Stoj na eni nogi, kolki so poravnani in trup napet; zadrži ciljni čas na vsako stran.",
+    "Hold a quarter-squat on an unstable BOSU dome, staying centred for the target time.":
+      "Na nestabilni kupoli BOSU zadrži četrtinski počep in ostani na sredini do ciljnega časa.",
+    "Hold a rigid plank with a plate on the upper back for the target time.":
+      "Zadrži trdno desko z utežno ploščo na zgornjem delu hrbta do ciljnega časa.",
+    "Sit against the wall at 90° knees, optionally holding a plate, for the target time.":
+      "Sedi ob steni s koleni pod kotom 90°, po želji z utežno ploščo, do ciljnega časa.",
+    "Hold a loaded barbell locked out overhead for the target time.":
+      "Obremenjen drog drži z iztegnjenimi rokami nad glavo do ciljnega časa.",
+    "Sprint 5yd, back 10yd, through 5yd, changing direction sharply; log the time.":
+      "Šprint 5 jardov, nazaj 10 jardov in naprej 5 jardov z ostrimi obrati; zapiši čas.",
+    "Quick-feet ladder pattern for the target time, staying light on the balls of the feet.":
+      "Hitri koraki skozi koordinacijsko lestev do ciljnega časa, lahkotno na blazinicah stopal.",
+    "Repeated accelerations between cones over the target distance.":
+      "Ponavljajoči se pospeški med stožci na ciljni razdalji.",
+    "Run holding the target pace (min/km).": "Tek s ciljnim tempom (min/km).",
+    "Steady aerobic ride keeping heart rate at the target zone (bpm).":
+      "Enakomerna aerobna vožnja s srčnim utripom v ciljni coni (udarci na minuto).",
   },
 
   // German. Machine translation, not yet reviewed by a German speaker (see src/i18n/de.js). Two of
@@ -182,7 +294,8 @@ export const DEMO_TEXT = {
     "Strength & Longevity Focus": "Kraft und Langlebigkeit",
     "Upper Body Strength": "Kraft Oberkörper",
 
-    // Places. The gym's own name stays as it is; the two outdoor ones are descriptions.
+    // Places. "Trib" is the gym's name and stays; the words around it are translated.
+    "Trib gym base": "Fitnessstudio Trib",
     "city park": "Stadtpark",
     "playground outside": "Spielplatz draußen",
 
@@ -292,6 +405,115 @@ export const DEMO_TEXT = {
     "45s": "45 s",
     "60s hold": "60 s halten",
     Max: "Max.",
+
+    // ── Routines: what each plan is for, shown under its name on the Plans page ───────────────
+    "Strength-focused upper body session prioritizing compound presses and rows.":
+      "Krafttraining für den Oberkörper mit Schwerpunkt auf Drück- und Ruderübungen.",
+    "Squat and hinge focus with direct core work.":
+      "Schwerpunkt auf Kniebeuge und Hüftbeugung, mit gezielter Rumpfarbeit.",
+    "A comprehensive 5-phase session featuring a dynamic warmup, metabolic strength tri-sets, core work, and a longevity cooldown.":
+      "Umfassendes Training in 5 Phasen: dynamisches Aufwärmen, metabolische Kraft-Dreiersätze, Rumpfarbeit und Abwärmen.",
+    "Gentle core activation and mobility exercises focused on deep abdominal breathing, posture, and light functional strength.":
+      "Sanfte Aktivierung des Rumpfs und Übungen für die Beweglichkeit mit Schwerpunkt auf tiefer Bauchatmung, Haltung und leichter funktioneller Kraft.",
+    "Compound strength lifts paired with posture and core stability work optimized for long-term joint health.":
+      "Grundübungen für Kraft, kombiniert mit Übungen für Haltung und Rumpfstabilität, ausgerichtet auf langfristig gesunde Gelenke.",
+
+    // ── Exercises: how each one is done (data/exercises.js), in the exercise's form ───────────
+    "Lie flat on a bench, grip the barbell slightly wider than shoulder width, lower it to mid-chest, and push up.":
+      "Flach auf die Bank legen, die Langhantel etwas breiter als schulterbreit greifen, zur Brustmitte absenken und hochdrücken.",
+    "Lie on a flat bench with a dumbbell in each hand, lower the dumbbells to chest level, then press them up.":
+      "Mit einer Kurzhantel in jeder Hand auf eine Flachbank legen, die Hanteln auf Brusthöhe absenken und hochdrücken.",
+    "Set bench to a 30-45 degree incline. Press dumbbells upwards from chest height.":
+      "Bank auf 30–45 Grad Neigung stellen. Kurzhanteln von Brusthöhe nach oben drücken.",
+    "Position pulleys at shoulder height, grab handles, and bring hands together in a wide hugging motion.":
+      "Seilzüge auf Schulterhöhe stellen, Griffe fassen und die Hände in einem weiten Bogen vor dem Körper zusammenführen.",
+    "Keep body in a straight plank, lower chest to floor, and push back up.":
+      "Körper gerade wie ein Brett halten, Brust zum Boden absenken und wieder hochdrücken.",
+    "Hang from a bar with palms facing away. Pull chest up to the bar.":
+      "Mit nach vorn zeigenden Handflächen an der Stange hängen. Brust zur Stange ziehen.",
+    "Sit at pulldown station, pull bar down to upper chest, engaging the lats.":
+      "Am Latzug sitzen, die Stange zur oberen Brust ziehen und den breiten Rückenmuskel anspannen.",
+    "Hinge at hips, pull barbell towards lower abdomen keeping back straight.":
+      "In der Hüfte beugen und die Langhantel mit geradem Rücken zum unteren Bauch ziehen.",
+    "Place one knee/hand on bench, pull dumbbell to hip with other arm.":
+      "Ein Knie und eine Hand auf die Bank stützen, mit dem anderen Arm die Kurzhantel zur Hüfte ziehen.",
+    "Pull rope attachment from high pulley towards forehead, pulling elbows wide.":
+      "Das Seil vom oberen Kabelzug zur Stirn ziehen, Ellbogen weit nach außen.",
+    "Rest bar on upper back, squat down until thighs are parallel to floor, push back up.":
+      "Stange auf dem oberen Rücken ablegen, in die Hocke gehen, bis die Oberschenkel parallel zum Boden sind, und wieder hochdrücken.",
+    "Hinge at hips with micro-bend in knees, lower weight down shins, squeeze glutes to stand.":
+      "In der Hüfte beugen, Knie leicht gebeugt, das Gewicht an den Schienbeinen absenken und mit angespanntem Gesäß aufrichten.",
+    "Sit in machine, unlock platform, lower knees toward chest, press back up without locking knees.":
+      "In die Maschine setzen, Plattform entriegeln, Knie zur Brust absenken und wieder hochdrücken, ohne die Knie ganz durchzustrecken.",
+    "Hold a single dumbbell vertically at chest height, squat deep.":
+      "Eine Kurzhantel senkrecht auf Brusthöhe halten und tief in die Hocke gehen.",
+    "Sit in machine, extend legs fully, pause at top, and lower slowly.":
+      "In die Maschine setzen, Beine ganz strecken, oben kurz halten und langsam absenken.",
+    "Lie face down, curl roller pad towards glutes, control return.":
+      "Auf dem Bauch liegen, das Polster zum Gesäß beugen und kontrolliert zurückführen.",
+    "Raise heels as high as possible on a block, stretch down deep.":
+      "Auf einem Block die Fersen so hoch wie möglich heben und tief absenken.",
+    "Press barbell from shoulder height overhead to full lockout, head through at top.":
+      "Langhantel von Schulterhöhe über Kopf drücken, bis die Arme gestreckt sind; oben den Kopf zwischen die Arme bringen.",
+    "Stand tall, raise dumbbells out to sides until arms are parallel to the floor.":
+      "Aufrecht stehen und die Kurzhanteln seitlich heben, bis die Arme parallel zum Boden sind.",
+    "Sit or stand, press dumbbells from ear level overhead.":
+      "Im Sitzen oder Stehen die Kurzhanteln von Ohrhöhe über Kopf drücken.",
+    "Rotate palms up as you curl dumbbells towards shoulders, keeping elbows locked at sides.":
+      "Beim Beugen der Kurzhanteln zu den Schultern die Handflächen nach oben drehen; die Ellbogen bleiben am Körper.",
+    "Curl dumbbells with neutral grip (palms facing each other).":
+      "Kurzhanteln im neutralen Griff beugen (Handflächen zeigen zueinander).",
+    "Push rope or bar attachment down by extending elbows, keeping upper arms still.":
+      "Seil oder Stange durch Strecken der Ellbogen nach unten drücken; die Oberarme bleiben ruhig.",
+    "Lie on bench, lower bar to forehead by bending elbows, then extend.":
+      "Auf der Bank liegen, die Stange durch Beugen der Ellbogen zur Stirn absenken, dann strecken.",
+    "Hold straight body line resting on forearms and toes. Squeeze core and glutes.":
+      "Den Körper in gerader Linie auf Unterarmen und Zehen halten. Rumpf und Gesäß anspannen.",
+    "Hang from pull-up bar, raise knees to chest height slowly without swinging.":
+      "An der Klimmzugstange hängen und die Knie langsam, ohne Schwung, bis auf Brusthöhe heben.",
+    "Sit with soles of feet together, touch floor behind head, sit up and touch toes.":
+      "Mit aneinanderliegenden Fußsohlen sitzen, hinter dem Kopf den Boden berühren, aufrichten und die Zehen berühren.",
+    "Sit, lean back slightly, lift feet, rotate torso tapping hands side-to-side.":
+      "Sitzen, leicht zurücklehnen, Füße anheben und den Oberkörper drehen; mit den Händen abwechselnd seitlich den Boden berühren.",
+    "Step forward lunging down, alternating legs.":
+      "Mit abwechselnden Beinen im Ausfallschritt nach vorn gehen.",
+    "Hold child pose and lateral lat stretches for 30s.":
+      "Kindhaltung und seitliche Dehnung des Rückens je 30 s halten.",
+    "Static hamstring stretch and hip flexor stretch, hold 30s per side.":
+      "Statische Dehnung der Oberschenkelrückseite und des Hüftbeugers, 30 s pro Seite halten.",
+    "Sustained air-bike intervals; drive with arms and legs to the calorie target.":
+      "Längere Intervalle auf dem Air-Bike; mit Armen und Beinen bis zum Kalorienziel antreiben.",
+    "Air-bike intervals to a fixed duration — steady pace or an all-out sprint clock.":
+      "Intervalle auf dem Air-Bike mit fester Dauer — gleichmäßiges Tempo oder Sprint mit voller Kraft.",
+    "Hold the target power output (watts) on the air bike for the prescribed effort.":
+      "Die Zielleistung (Watt) auf dem Air-Bike für die vorgegebene Belastung halten.",
+    "Row to the target distance with a strong legs-hips-arms sequence.":
+      "Bis zur Zieldistanz rudern, mit kräftiger Abfolge Beine–Hüfte–Arme.",
+    "Double-pole the ski-erg to the calorie target, hinging at the hips.":
+      "Am Ski-Ergometer mit beiden Armen gleichzeitig bis zum Kalorienziel ziehen, in der Hüfte beugen.",
+    "Hold the target power output (watts) for the prescribed effort.":
+      "Die Zielleistung (Watt) für die vorgegebene Belastung halten.",
+    "Steady-state or interval run to the target time.":
+      "Gleichmäßiger Lauf oder Intervalllauf bis zur Zielzeit.",
+    "Stand on one leg, hips level and core braced; hold for the target time per side.":
+      "Auf einem Bein stehen, Hüfte gerade und Rumpf angespannt; die Zielzeit pro Seite halten.",
+    "Hold a quarter-squat on an unstable BOSU dome, staying centred for the target time.":
+      "Eine Viertelkniebeuge auf der instabilen BOSU-Kuppel halten und bis zur Zielzeit mittig bleiben.",
+    "Hold a rigid plank with a plate on the upper back for the target time.":
+      "Einen festen Unterarmstütz mit einer Hantelscheibe auf dem oberen Rücken bis zur Zielzeit halten.",
+    "Sit against the wall at 90° knees, optionally holding a plate, for the target time.":
+      "Mit 90° in den Knien an der Wand sitzen, wahlweise mit Hantelscheibe, bis zur Zielzeit.",
+    "Hold a loaded barbell locked out overhead for the target time.":
+      "Eine beladene Langhantel mit gestreckten Armen über Kopf bis zur Zielzeit halten.",
+    "Sprint 5yd, back 10yd, through 5yd, changing direction sharply; log the time.":
+      "5 Yards sprinten, 10 Yards zurück, 5 Yards wieder vor, mit scharfem Richtungswechsel; die Zeit notieren.",
+    "Quick-feet ladder pattern for the target time, staying light on the balls of the feet.":
+      "Schnelle Schrittfolge durch die Koordinationsleiter bis zur Zielzeit, leicht auf den Fußballen.",
+    "Repeated accelerations between cones over the target distance.":
+      "Wiederholte Antritte zwischen Hütchen über die Zieldistanz.",
+    "Run holding the target pace (min/km).": "Laufen im Zieltempo (min/km).",
+    "Steady aerobic ride keeping heart rate at the target zone (bpm).":
+      "Gleichmäßige aerobe Fahrt mit der Herzfrequenz in der Zielzone (Schläge pro Minute).",
   },
 };
 
