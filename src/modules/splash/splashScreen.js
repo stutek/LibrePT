@@ -8,7 +8,8 @@
 // included — and all of them before the sandbox is offered. One exception: the caller does not ask
 // for the details when the app opens in the sandbox, so a link into the guided tour needs no typing;
 // the trainer is asked on leaving the sandbox instead. The X stays hidden until the last one is
-// answered.
+// answered. A `?demo=chapters` link then shows the demo story's table of contents alone (see
+// chapterIndexRequested).
 //
 // Injected dependencies: `offerOnboarding` (whether the database is still empty — the caller owns
 // that question, see data/stateStore.js's stateHasData); what is still missing (`needsLanguageChoice`,
@@ -29,7 +30,12 @@
 // The `?demo=` value is imported rather than spelled again here: the splash writes the link and
 // app.js's boot step reads it, and a typo in either would produce a button that silently starts
 // nothing.
-import { DEMO_STORY, SHARE_CHAPTER_PARAM, SHARE_STEP_PARAM } from "../common/shareLink.js";
+import {
+  DEMO_CHAPTER_INDEX,
+  DEMO_STORY,
+  SHARE_CHAPTER_PARAM,
+  SHARE_STEP_PARAM,
+} from "../common/shareLink.js";
 
 // How long the mark stays up, measured from navigation start rather than from the moment boot
 // finishes: a slow cold boot should be absorbed by this window, not added on top of it. So the
@@ -105,6 +111,14 @@ export function splashSuppressed({
 } = {}) {
   if (!isSplashDisabled(search)) return false;
   return linkBringsContent || !firstRun;
+}
+
+/** `?demo=chapters`: the welcome screen shows the story's table of contents and nothing else, on
+ *  any database, first run or not, and `?splash=off` does not take it away — the link asks for this
+ *  screen by name. It is the flyer's QR code (asked 2026-10-13). app.js reads it too, to load the
+ *  chapters where it would not otherwise. */
+export function chapterIndexRequested(search = window.location.search) {
+  return new URLSearchParams(search).get(DEMO_SCRIPT_PARAM) === DEMO_CHAPTER_INDEX;
 }
 
 export function hasHeldThisSession() {
@@ -385,7 +399,10 @@ function fillLanguageChoices(languageStep, languages) {
   }
 }
 
-function revealOnboarding(splash, resolve, chapters, t) {
+/** `indexOnly` is the `?demo=chapters` screen: the chapters, and the X to leave into the app. The
+ *  two other offers are hidden there — "explore with demo data" and "start with an empty app" ask
+ *  a question the link has already answered, and in the sandbox the second one is not true. */
+function revealOnboarding(splash, resolve, chapters, t, { indexOnly = false } = {}) {
   const onboarding = document.getElementById(ONBOARDING_ID);
   // Never trap the trainer behind a panel that failed to render: fall back to just leaving.
   if (!onboarding) return fadeOut(splash, resolve);
@@ -396,11 +413,16 @@ function revealOnboarding(splash, resolve, chapters, t) {
   onboarding.hidden = false;
   splash.classList.add(ONBOARDING_CLASS);
 
-  document.getElementById("splash-load-demo")?.addEventListener("click", () => {
+  const loadDemo = document.getElementById("splash-load-demo");
+  const startEmpty = document.getElementById("splash-start-empty");
+  if (loadDemo) loadDemo.hidden = indexOnly;
+  if (startEmpty) startEmpty.hidden = indexOnly;
+
+  loadDemo?.addEventListener("click", () => {
     window.location.assign(demoDataUrl());
   });
   fillChapterIndex(chapters, t);
-  document.getElementById("splash-start-empty")?.addEventListener("click", () => {
+  startEmpty?.addEventListener("click", () => {
     fadeOut(splash, resolve);
   });
 }
@@ -459,14 +481,17 @@ export function dismissSplashWhenReady({
     return new Promise((resolve) => fadeOut(splash, resolve));
   }
 
-  const onboarding = offerOnboarding && !suppressed;
+  // Only with chapters to show: a `?demo=chapters` link whose index could not be built falls back to
+  // the ordinary welcome screen rather than an empty panel.
+  const indexOnly = chapterIndexRequested() && chapters.length > 0;
+  const onboarding = indexOnly || (offerOnboarding && !suppressed);
   return new Promise((resolve) => {
     const continueAfterSteps = () => {
       // The hold is measured from navigation start, so whatever the steps consumed already counts
       // towards it — answering a prompt is not made to be followed by a wait.
       const remaining = remainingHoldMs(minimumVisibleMs, performance.now());
       const holdTimer = window.setTimeout(() => {
-        if (onboarding) revealOnboarding(splash, resolve, chapters, t);
+        if (onboarding) revealOnboarding(splash, resolve, chapters, t, { indexOnly });
         else fadeOut(splash, resolve);
       }, remaining);
 

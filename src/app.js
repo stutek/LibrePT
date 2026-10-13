@@ -191,7 +191,11 @@ import {
   renderSessions as sessionsViewRender,
   seedDemoActiveSession as sessionsViewSeedDemo,
 } from "./modules/sessionList/sessionsView.js";
-import { guidedChapterUrl, guidedDemoUrl } from "./modules/splash/splashScreen.js";
+import {
+  chapterIndexRequested,
+  guidedChapterUrl,
+  guidedDemoUrl,
+} from "./modules/splash/splashScreen.js";
 
 function t(key) {
   // resolveLang, not `|| "en"`: an unchosen language is null and must still render in English
@@ -288,6 +292,8 @@ function anIndexIsOffered(state) {
   // The empty app's own invitation card, and the sandbox, whose card is the trainer's way into the
   // story.
   if (isSandbox() || !stateHasData(state)) return true;
+  // A `?demo=chapters` link, which asks for the welcome screen's table of contents by name.
+  if (chapterIndexRequested()) return true;
   // And the demo-data notice on a working database, which is where the "show me around" button used
   // to be: it now offers the chapters instead, so its card needs them too.
   return (state.notifications || []).some((notification) => notification.type === DEMO_NOTICE_TYPE);

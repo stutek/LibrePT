@@ -11,9 +11,9 @@
 //   theme  a colour theme from THEMES in modules/common/theme.js, or an old theme name, which opens
 //          the theme that replaced it. Unknown → default theme. Validation lives at the point of
 //          application (theme.js resolveTheme for theme; app.js init for lang).
-//   demo   what to do with the demo script once the app has booted, one of two explicit values
-//          (modules/demo/). Both need demo data, so both are ignored unless the app has something
-//          to demonstrate.
+//   demo   what to do with the demo script once the app has booted, one of these values
+//          (modules/demo/). The three that play a script need demo data, so they are ignored
+//          unless the app has something to demonstrate.
 //            gym_floor    plays itself: drives the real controls with a visible pointer — the
 //                         automated replacement for a screen recording that was originally asked
 //                         for, and the same script the e2e suite replays.
@@ -21,6 +21,10 @@
 //                         real app. Same script; who taps is the only difference.
 //            story        the long demo: a chaptered scenario that plays itself, narrated by
 //                         cards between the taps. `chapter` names one chapter to play alone.
+//            chapters     plays nothing: the welcome screen shows the story's table of contents
+//                         and only that, and a tap on a chapter starts it as `story` + `chapter`.
+//                         This is the flyer's QR code (asked 2026-10-13), together with
+//                         `workspace=sandbox`, so no trainer form stands before it.
 //   chapter  which chapter of ?demo=story to play, e.g. floor. Absent or unknown plays the whole
 //            story — a mistyped chapter in a pasted link should still show a stranger the demo.
 //   workspace  which of the two databases to open: `sandbox` opens the sandbox, seeding
@@ -57,6 +61,7 @@ export const INIT_DEMO_DATA = "demo_data_load";
 export const DEMO_TOUR_GYM_FLOOR = "gym_floor";
 export const DEMO_WALKTHROUGH = "walkthrough";
 export const DEMO_STORY = "story";
+export const DEMO_CHAPTER_INDEX = "chapters";
 
 // Read the preselected language/theme/init from the current URL. Absent params return null so
 // callers can distinguish "share link asked for X" from "use the saved/default value".

@@ -238,6 +238,13 @@
   display: none;
 }
 
+/* The `?demo=chapters` screen hides the two other offers. Required for the same reason as the X's
+   rule: `.app-splash-action`'s `display: flex` outranks the UA stylesheet's `[hidden]` rule. */
+.app-splash-onboarding .app-splash-action[hidden],
+.app-splash-onboarding .app-splash-skip[hidden] {
+  display: none;
+}
+
 /* The trainer's details, a first-run step of its own. Left-aligned against the splash's centred
    text: a form whose labels are centred is a form nobody can scan. */
 .app-splash-details {

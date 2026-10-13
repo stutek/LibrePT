@@ -18,6 +18,9 @@ from tests.conftest import NAVIGATION_TIMEOUT_MS
 
 # The flyer's link: Slovenian, the sandbox, and the guided tour.
 FLYER_LINK = "?lang=sl&workspace=sandbox&demo=walkthrough"
+# The flyer's QR code since 2026-10-13: the guided tour's table of contents, in Slovenian, in the
+# sandbox, with the Daylight theme.
+CHAPTER_INDEX_LINK = "?workspace=sandbox&lang=sl&theme=daylight&demo=chapters"
 
 
 @pytest.fixture
@@ -106,9 +109,12 @@ def test_leaving_the_sandbox_asks_for_the_details_and_offers_no_way_past(
 
     dialog = fresh.locator("#dialog-trainer-details")
     dialog.wait_for(state="visible", timeout=15_000)
-    assert fresh.evaluate(
-        "async () => (await import(new URL('data/workspace.js', document.baseURI).href)).isSandbox()"
-    ) is False, "the form is asked in the trainer's own workspace"
+    assert (
+        fresh.evaluate(
+            "async () => (await import(new URL('data/workspace.js', document.baseURI).href)).isSandbox()"
+        )
+        is False
+    ), "the form is asked in the trainer's own workspace"
     # Required here, as on the welcome screen: no X, no Cancel, and Escape does not close it.
     assert dialog.locator(".modal-close-btn").is_hidden()
     assert fresh.locator("#trainer-details-cancel").is_hidden()
@@ -136,13 +142,78 @@ def test_the_flyer_link_fills_the_sandbox_in_slovenian(fresh, local_server):
     """The sandbox is seeded on first entry, at boot, from the link's language — not from
     `?init=`, which the rest of the suite seeds through. So this follows the flyer's exact link
     and reads what was written: Slovenian words, and names that need no translation."""
-    fresh.goto(local_server + "?lang=sl&workspace=sandbox&demo=walkthrough&theme=daylight")
+    fresh.goto(
+        local_server + "?lang=sl&workspace=sandbox&demo=walkthrough&theme=daylight"
+    )
     seeded = _seeded_state(fresh)
     assert seeded["lang"] == "sl", seeded
     assert {"Eva", "Tom", "Nina"} <= set(seeded["clients"]), seeded["clients"]
     assert "Poteg zgornjega škripca" in seeded["exercises"]
     assert "Lat Pulldown" not in seeded["exercises"]
     assert "Fitnes Trib" in seeded["places"], seeded["places"]
+
+
+def _story_chapters_in_slovenian(page):
+    """The story's chapters in playing order, each with its Slovenian title, read from the story
+    script and the dictionary rather than typed out here."""
+    return page.evaluate(
+        """async () => {
+            const base = document.baseURI;
+            const { DEMO_STORY } = await import(new URL('modules/demo/storyTour.js', base).href);
+            const { storyChapterIndex } = await import(new URL('domain/demoStory.js', base).href);
+            const { TRANSLATIONS } = await import(new URL('i18n/index.js', base).href);
+            return storyChapterIndex(DEMO_STORY).map(({ id, titleKey }) => ({
+                id,
+                title: TRANSLATIONS.sl[titleKey],
+            }));
+        }"""
+    )
+
+
+def test_the_chapter_index_link_shows_every_chapter_and_starts_the_one_tapped(
+    fresh, local_server
+):
+    """The flyer's QR code (asked 2026-10-13): the sandbox in Slovenian with the Daylight theme, and
+    the guided tour's table of contents with nothing to fill in before it. The terms come first;
+    the theme step does not appear, because the link names the theme."""
+    fresh.goto(local_server + CHAPTER_INDEX_LINK)
+    fresh.locator("#btn-terms-agree").click(timeout=15_000)
+
+    index = fresh.locator("#splash-chapters")
+    index.wait_for(state="visible", timeout=30_000)
+    assert fresh.evaluate("document.documentElement.lang") == "sl"
+    chapters = _story_chapters_in_slovenian(fresh)
+    assert len(chapters) > 1, chapters
+    buttons = index.locator(".app-splash-chapter")
+    assert [
+        {
+            "id": button.get_attribute("data-splash-chapter"),
+            "title": button.inner_text().strip(),
+        }
+        for button in buttons.all()
+    ] == chapters
+    # Only the index: no trainer form, no theme step, and neither of the two offers an empty app
+    # makes — the link has already said where it goes.
+    assert fresh.locator("#app-splash-details").is_hidden()
+    assert fresh.locator("#app-splash-theme").is_hidden()
+    assert fresh.locator("#splash-load-demo").is_hidden()
+    assert fresh.locator("#splash-start-empty").is_hidden()
+    assert _stored_identity(fresh)["email"] == ""
+
+    # The second chapter, so the test sees that the tapped chapter is the one that starts.
+    chosen = chapters[1]["id"]
+    buttons.nth(1).click()
+    fresh.wait_for_url(f"**chapter={chosen}**", timeout=15_000)
+    query = fresh.evaluate("Object.fromEntries(new URLSearchParams(location.search))")
+    assert query["demo"] == "story", query
+    assert query["workspace"] == "sandbox", query
+    assert query["lang"] == "sl", query
+    assert query["theme"] == "daylight", query
+    assert "step" not in query, query
+    progress = fresh.locator("#walkthrough-overlay .walkthrough-progress")
+    progress.wait_for(state="visible", timeout=30_000)
+    assert progress.text_content().startswith("Korak ")
+    assert fresh.locator("#app-splash-details").is_hidden()
 
 
 def test_a_first_start_without_a_sandbox_link_still_asks_for_the_details(
