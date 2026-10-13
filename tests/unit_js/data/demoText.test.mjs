@@ -77,6 +77,19 @@ for (const lang of Object.keys(TRANSLATIONS).filter((code) => code !== "en")) {
   });
 }
 
+// The plan editor shows a client's injury and notes joined, injury first, under "Pre-existing
+// Injuries & Notes". A seed note that began with the injury's sentence showed it twice there:
+// "Knee reconstruction surgery in 2024 · Knee reconstruction surgery in 2024. Keep back squats…".
+for (const lang of ["en", ...Object.keys(DEMO_TEXT)]) {
+  test(`no seed client's notes repeat their injury (${lang})`, () => {
+    const repeated = localiseDemoRecords(DEFAULT_CLIENTS, lang)
+      .filter((client) => client.injury && client.notes)
+      .filter((client) => client.notes.includes(client.injury) || client.injury.includes(client.notes))
+      .map((client) => client.id);
+    assert.deepEqual(repeated, []);
+  });
+}
+
 // A feedback tag is a key, not words: the quick-signal toggle and the load suggestion recognise it
 // by its English string, and the screens translate it through the dictionary. A demo tag written
 // into the database in Slovenian was neither recognised nor translatable.

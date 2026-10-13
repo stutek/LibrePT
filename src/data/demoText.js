@@ -95,20 +95,18 @@ export const DEMO_TEXT = {
       "Znižati telesno maščobo s 17 % pod 15 % (a ne pod 10 %), pridobiti moč ter poskrbeti za zdravje in dolgoživost.",
 
     // ── Clients: the trainer's notes and injuries ─────────────────────────────────────────────
-    "Slight left shoulder tightness during overhead movements. Keep warmups thorough. Enjoys tracking RPE (Rate of Perceived Exertion).":
-      "Rahla napetost v levi rami pri dvigih nad glavo. Ogrevanje naj bo temeljito. Spremlja RPE (zaznano težavnost napora).",
-    "Knee reconstruction surgery in 2024. Keep back squats at moderate load and monitor depth. Avoid high-impact jumping.":
-      "Rekonstrukcija kolena leta 2024. Počepi z zmerno težo, pazi na globino. Brez skokov s trdim doskokom.",
+    "Keep warmups thorough. Enjoys tracking RPE (Rate of Perceived Exertion).":
+      "Ogrevanje naj bo temeljito. Spremlja RPE (zaznano težavnost napora).",
+    "Keep back squats at moderate load and monitor depth. Avoid high-impact jumping.":
+      "Počepi z zmerno težo, pazi na globino. Brez skokov s trdim doskokom.",
     "Prefers high-intensity interval formats. Enjoys kettlebell workouts. Heart rate spikes quickly; monitor recovery times.":
       "Najraje intervalni treningi visoke intenzivnosti in vadba z girjami. Srčni utrip hitro poskoči; spremljaj čas okrevanja.",
     "No current injuries. Very consistent with sleep and nutrition tracking.":
       "Trenutno brez poškodb. Zelo dosledno spremljanje spanja in prehrane.",
-    "Mild lower back stiffness after long runs. Prioritize core stability work.":
-      "Blaga okorelost v križu po dolgih tekih. Prednost ima stabilnost trupa.",
+    "Prioritize core stability work.": "Prednost ima stabilnost trupa.",
     "No injuries reported. Prefers morning sessions and steady progression.":
       "Brez prijavljenih poškodb. Najraje jutranji termini in postopno napredovanje.",
-    "Cleared for training by physician. Avoid heavy overhead loading until week 12.":
-      "Zdravnik je odobril vadbo. Do 12. tedna brez težkih bremen nad glavo.",
+    "Cleared for training by physician.": "Zdravnik je odobril vadbo.",
     "Focus on clean compound movements (squat, hinge, press) and metabolic conditioning to improve body composition. Focus on longevity and joint health; monitor RPE and prioritize recovery.":
       "Poudarek na čistih sestavljenih gibih (počep, kolčni upogib, potisk) in metabolni kondiciji za boljšo telesno sestavo. Poudarek na dolgoživosti in zdravju sklepov; spremljaj RPE in daj prednost regeneraciji.",
     "Knee reconstruction surgery in 2024": "Rekonstrukcija kolena leta 2024",
@@ -232,20 +230,18 @@ export const DEMO_TEXT = {
       "Körperfett von 17 % auf unter 15 % senken (aber nicht unter 10 %), Kraft aufbauen und auf Gesundheit und Langlebigkeit achten.",
 
     // ── Clients: the trainer's notes and injuries ─────────────────────────────────────────────
-    "Slight left shoulder tightness during overhead movements. Keep warmups thorough. Enjoys tracking RPE (Rate of Perceived Exertion).":
-      "Leichte Verspannung in der linken Schulter bei Bewegungen über Kopf. Gründlich aufwärmen. Verfolgt gern die RPE (empfundene Anstrengung).",
-    "Knee reconstruction surgery in 2024. Keep back squats at moderate load and monitor depth. Avoid high-impact jumping.":
-      "Knierekonstruktion 2024. Kniebeugen mit mäßiger Last, auf die Tiefe achten. Keine Sprünge mit harter Landung.",
+    "Keep warmups thorough. Enjoys tracking RPE (Rate of Perceived Exertion).":
+      "Gründlich aufwärmen. Verfolgt gern die RPE (empfundene Anstrengung).",
+    "Keep back squats at moderate load and monitor depth. Avoid high-impact jumping.":
+      "Kniebeugen mit mäßiger Last, auf die Tiefe achten. Keine Sprünge mit harter Landung.",
     "Prefers high-intensity interval formats. Enjoys kettlebell workouts. Heart rate spikes quickly; monitor recovery times.":
       "Mag am liebsten hochintensive Intervalle und Training mit Kettlebells. Der Puls steigt schnell; auf die Erholungszeit achten.",
     "No current injuries. Very consistent with sleep and nutrition tracking.":
       "Derzeit keine Verletzungen. Zeichnet Schlaf und Ernährung sehr regelmäßig auf.",
-    "Mild lower back stiffness after long runs. Prioritize core stability work.":
-      "Leichte Steifheit im unteren Rücken nach langen Läufen. Rumpfstabilität hat Vorrang.",
+    "Prioritize core stability work.": "Rumpfstabilität hat Vorrang.",
     "No injuries reported. Prefers morning sessions and steady progression.":
       "Keine Verletzungen gemeldet. Trainiert am liebsten morgens und steigert sich gleichmäßig.",
-    "Cleared for training by physician. Avoid heavy overhead loading until week 12.":
-      "Ärztlich für das Training freigegeben. Bis Woche 12 keine schweren Lasten über Kopf.",
+    "Cleared for training by physician.": "Ärztlich für das Training freigegeben.",
     "Focus on clean compound movements (squat, hinge, press) and metabolic conditioning to improve body composition. Focus on longevity and joint health; monitor RPE and prioritize recovery.":
       "Schwerpunkt auf sauberen Grundübungen (Kniebeuge, Hüftbeugung, Drücken) und metabolischer Kondition für eine bessere Körperzusammensetzung. Schwerpunkt auf Langlebigkeit und gesunden Gelenken; RPE verfolgen, Regeneration hat Vorrang.",
     "Knee reconstruction surgery in 2024": "Knierekonstruktion 2024",

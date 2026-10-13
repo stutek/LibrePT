@@ -1,5 +1,10 @@
 // src/data/clients.js — seed clients (name, goals, injuries/notes).
 // The seed client roster of the demo dataset.
+//
+// `injury` and `notes` are shown joined, injury first, under "Pre-existing Injuries & Notes" on the
+// plan editor (modules/clipboard/activeSessionBoard.js). So `notes` holds only what `injury` does
+// not already say: a note that repeats the injury shows the same sentence twice.
+// tests/unit_js/data/demoText.test.mjs fails the build when one does, in every language.
 export const DEFAULT_CLIENTS = [
   {
     id: "c1a9f0e2",
@@ -10,8 +15,7 @@ export const DEFAULT_CLIENTS = [
     phone: "+386 40 111 222",
     goals: "Strength gain, building shoulder mobility, and improving squat form.",
     weightHistory: [],
-    notes:
-      "Slight left shoulder tightness during overhead movements. Keep warmups thorough. Enjoys tracking RPE (Rate of Perceived Exertion).",
+    notes: "Keep warmups thorough. Enjoys tracking RPE (Rate of Perceived Exertion).",
     hasInjury: true,
     injury: "Slight left shoulder tightness during overhead movements",
     active: true,
@@ -25,8 +29,7 @@ export const DEFAULT_CLIENTS = [
     phone: "+386 41 333 444",
     goals: "Fat loss, cardiovascular endurance, and recovering functional knee strength.",
     weightHistory: [],
-    notes:
-      "Knee reconstruction surgery in 2024. Keep back squats at moderate load and monitor depth. Avoid high-impact jumping.",
+    notes: "Keep back squats at moderate load and monitor depth. Avoid high-impact jumping.",
     hasInjury: true,
     injury: "Knee reconstruction surgery in 2024",
     active: true,
@@ -69,7 +72,7 @@ export const DEFAULT_CLIENTS = [
     phone: "+386 41 999 000",
     goals: "Marathon prep, aerobic base building, and injury-free mileage progression.",
     weightHistory: [],
-    notes: "Mild lower back stiffness after long runs. Prioritize core stability work.",
+    notes: "Prioritize core stability work.",
     hasInjury: true,
     injury: "Mild lower back stiffness after long runs",
     active: true,
@@ -97,7 +100,7 @@ export const DEFAULT_CLIENTS = [
     phone: "+386 30 456 789",
     goals: "Postpartum strength rebuild and core recovery.",
     weightHistory: [],
-    notes: "Cleared for training by physician. Avoid heavy overhead loading until week 12.",
+    notes: "Cleared for training by physician.",
     hasInjury: true,
     injury: "Postpartum recovery — avoid heavy overhead loading until week 12",
     active: true,
