@@ -4738,35 +4738,9 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80203-x-p3--dne
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80204-x-p2--okna-za-vabila-se-ne-zaprejo-po-pošlji-sms-ne-končano-ne--ne-esc--ni-ponovljivo-zaprto-2026-10-13).
 
-### 80.205 [~] P1? — Središče za kopije pravi, da kopija ne vsebuje vsebine »predogleda« — besedilo popravljeno 2026-10-11
+### 80.205 [x] P1? — Središče za kopije pravi, da kopija ne vsebuje vsebine »predogleda« — popravljeno 2026-10-13
 
-**Popravljeno 2026-10-11 na veji `fix/week-defects-2` (`2a191cd`):** opozorilo je bilo na vsaki
-različici, ne le na razvojnem strežniku, in je bilo za trenerja napačno: kopija je zapisana v shemi,
-ki jo aplikacija bere, zato vsebuje vse, kar trener vidi. Zdaj pravi »Varnostna kopija vsebuje vse,
-kar vidiš v aplikaciji …«; test v `tests/unit_js/data/backupFormat.test.mjs` pade, če se shemi
-razideta. Isto opozorilo pod Google Drive je odstranjeno. Geslo je zdaj iz števk (§80.220). Odprto
-ostane: rdeča značka »OGROŽENO — NAREDI KOPIJO« prekrije napis LibrePT (F-r05-09, r14).
-
-**Scenarij in koraki:** ikona s številko in vprašajem zgoraj desno (»Središče za sinhronizacijo in
-varnostne kopije«).
-
-**Opaženo:** »Varnostne kopije in sinhronizacija se zapišejo v zadnji stabilni obliki, zato vsebina,
-ki jo je dodal ta predogled, ni vključena. Shrani si svojo kopijo vsega, česar ne smeš izgubiti.«
-(F-r05-05, F-r06-06). Rdeča značka »OGROŽENO — NAREDI KOPIJO« prekrije napis LibrePT in ne vodi do
-kopije (F-r05-09). »Izvozi JSON« najprej zahteva geslo, nato datoteka v orodju ne pride (F-r02-04,
-F-r03-08; znano §80.136).
-
-**Težava in vpliv:** na razvojnem strežniku aplikacija bere predogled sheme, zato je opozorilo morda
-pravilno. Če ga vidi tudi trener na objavljeni različici, mu aplikacija pove, da njegovi podatki niso
-v kopiji, in mu ne ponudi poti do kopije, ki bi jih imela.
-
-**Predlog:** Simon na telefonu odpre objavljeno različico in pogleda, ali je opozorilo tam — opaženo
-2026-10-10 na `166d3c8`, razvojni strežnik.
-
-**Tedni r07–r10:** isto opozorilo sta videla še r08 in r09 (F-r08-09, F-r09-04), skupaj štirje tedni.
-Geslo za šifrirano kopijo je predlagano v angleških besedah in se pokaže pred izvozom (F-r09-05);
-polje pokaže le zadnji del dolgega gesla (F-s01-04). Opozorilo o predogledu sta videla še oba
-scenarija §107 (F-s01-03, F-s02-07), skupaj šestkrat.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80205-x-p1--središče-za-kopije-pravi-da-kopija-ne-vsebuje-vsebine-predogleda--popravljeno-2026-10-13).
 
 ### 80.206 [ ] P2 — Oznaka »Prelahko – povečaj težo« trenerju svetuje smer obremenitve — čaka na Simona
 

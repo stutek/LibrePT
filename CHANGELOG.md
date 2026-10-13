@@ -25,6 +25,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 - **A movement added from the catalog in the plan editor is the open row.** After the second movement,
   the first one stayed open and the new one closed, so the sets, reps and load typed next went into
   the first movement.
+- **The backup warning in the header no longer covers the app name.** On a 390-pixel phone the
+  warning left "LibrePT" as a few letters; the warning now takes its own row under the logo.
 
 ## 2026-10-12 — A client who did not come
 
