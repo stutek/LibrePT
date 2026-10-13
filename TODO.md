@@ -371,6 +371,12 @@ Already a PWA (manifest + service-worker precache). Open: install-prompt/A2HS UX
 load, and whether the GitHub Pages origin is acceptable or a packaged wrapper (TWA / Capacitor / bare
 PWA) is needed.
 
+**Asked by Simon 2026-10-13 12:57:11.413:** on its first start the app offers to put its icon on the
+phone's home screen, and Settings offers the same later. Only Chrome on Android lets the page start
+the install itself (`beforeinstallprompt`); Safari on iPhone does not, so there the offer can only
+say the steps, naming Safari's own controls. Not started; the welcome screen's order (§81) decides
+where the offer sits.
+
 ---
 
 ## 11. Navigation & Layout Redesign
@@ -898,6 +904,13 @@ users' association. Two open points it raises:
       carry the e-mail address and the student writes first; a reply asks before adding anyone to
       the meeting invitation. No list of students' data exists before the association does. The
       flyer and the spoken script are in the private campaign file.
+- [ ] **The flyer's QR now meets the trainer form first** (measured 2026-10-13 12:57:11.413 on the
+      live build `275a180`, 390 × 844, sl). `?lang=sl&init=demo_data_load`, `&demo=walkthrough` and
+      `&demo=story` all show the terms, the theme, and then four required fields (name, surname,
+      phone, e-mail) before any demo — as §81's ruling of 2026-09-26 says, "on every path". A
+      student at a notice board must type a phone number and an e-mail to see anything. *Blocks:*
+      a decision by Simon: keep the ruling and say it on the flyer (done for the campaign), or let a
+      demo link skip the form until the trainer leaves the sandbox.
 - [ ] **Three questions for Simon before the flyer is printed** (2026-10-12 23:56:55.186): whether the
       meeting date on it is fixed, whether a phone number goes on it, and the phone check of §80.154.
       Listed in the private campaign file, §2b. *Blocks:* printing the flyer as it is. **The first is
