@@ -5026,6 +5026,24 @@ celo v sl, en in de, pri ožjem se ime skrajša, gumbi ostanejo v vrstici. Test
 s števcema). **Ni preverjeno:** iPhone 14 v Safariju (WebKit tu ni nameščen; Chromium pri 390 px ima
 eno vrstico) in Simonov telefon po potisku.
 
+### 80.224 [ ] P2 — Po potegu beležnice vstran ostane obroba kartice popačena (vodeni ogled, korak 2 od 6) — v delu
+
+**Simon, 2026-10-13 19:14:58.005, Samsung Galaxy S23, Chrome** (prek seje librept-ec): »ob potegu
+nastran se obroba kartice popači in ostane popačena (walktrough korak 2 od 6)«.
+
+**Scenarij:** `?lang=sl&workspace=sandbox&demo=walkthrough&theme=daylight`, korak 2 od 6: pritisk in
+poteg prve kartice v beležnici vstran, nato spust.
+
+**Preverjeno 2026-10-13 19:32:10.663 (podagent seje librept-ec), Chromium v obliki S23 (360 × 780, ×3,
+dotik prek CDP):** po spustu so razredi, `--plan-pull`, robovi in obroč vodenega ogleda v 600 ms spet
+taki kot pred pritiskom; posnetka pred in po sta enaka. Med potegom obroč sledi kartici, ki je 60 px
+ožja. **Najverjetnejši vzrok, na telefonu nedokazan:** zložena kartica ima videz ob `:hover`
+(`scale(0.975) rotateX(3deg)` namesto `scale(0.955) rotateX(6deg)`, 5 px širša). Chrome da `:hover`
+elementu, ki ga prst pritisne in drži (Blink `gesture_manager.cc`, ShowPress), in ga na telefonu
+pusti tam, ko se prst dvigne. Posnemani dotik tega ne naredi; s `:hover`, vsiljenim prek CDP, je
+kartica širša in njen rob se stisne ob obroč. **Popravek v delu:** videz ob `:hover` za kartice v
+beležnici samo pri `@media (hover: hover)`.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
