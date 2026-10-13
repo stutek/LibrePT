@@ -18,6 +18,26 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-10-13 — The flyer's link, and the app on the home screen
+
+### Added
+
+- **The app offers to put its icon on the home screen.** After the welcome screen, the notification
+  area has a card for it until the trainer closes it or installs the app. Settings has a *Home screen*
+  section that is always there. In Chrome on Android, the button *Add the icon to the home screen*
+  opens the browser's own question. In Safari on an iPhone or iPad, a page cannot do that, so the card
+  lists the steps and names Safari's buttons by the words Safari shows, in English, German and
+  Slovenian. In another browser there is no card, and Settings says that this browser adds the icon
+  from its own menu. Opened from its icon, the app offers nothing and Settings says the icon is
+  already there.
+
+### Changed
+
+- **A link into the sandbox does not ask for the trainer's details.** The flyer's link
+  `?lang=sl&workspace=sandbox&demo=walkthrough` asks the terms and the theme, then starts the tour.
+  The four details are asked when the trainer leaves the sandbox for their own work, in a form with no
+  way past it. A first start outside the sandbox asks for them as before.
+
 ## 2026-10-13 — Fixes from the trainer weeks
 
 ### Fixed

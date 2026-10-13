@@ -367,15 +367,36 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#94-x-simulated-
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#95-x-guided-walkthrough-engine-step-overlay-2026-08-17); what shipped is in [CHANGELOG.md](CHANGELOG.md).
 
 ### 9.6 [ ] [TBD] Install as an offline Android / iOS app
-Already a PWA (manifest + service-worker precache). Open: install-prompt/A2HS UX, fully-offline first
-load, and whether the GitHub Pages origin is acceptable or a packaged wrapper (TWA / Capacitor / bare
-PWA) is needed.
+Already a PWA (manifest + service-worker precache). Open: fully-offline first load, and whether the
+GitHub Pages origin is acceptable or a packaged wrapper (TWA / Capacitor / bare PWA) is needed.
 
 **Asked by Simon 2026-10-13 12:57:11.413:** on its first start the app offers to put its icon on the
-phone's home screen, and Settings offers the same later. Only Chrome on Android lets the page start
-the install itself (`beforeinstallprompt`); Safari on iPhone does not, so there the offer can only
-say the steps, naming Safari's own controls. Not started; the welcome screen's order (§81) decides
-where the offer sits.
+phone's home screen, and Settings offers the same later. **Done 2026-10-13 17:55:14.373 in
+`2d0b3bbb`.** Not a welcome-screen step (the campaign's students already pass four screens): after
+the welcome screen, a card in the notification area until it is closed or the app is installed, and
+a *Home screen* section in Settings that is always there. Chrome on Android: the button opens the
+browser's own install question. Safari on iPhone or iPad: the steps, with Safari's labels quoted from
+support.apple.com/{en-us,de-de,sl-si}/guide/iphone/iphea86e5236/ios and …/guide/ipad/ipadc602b75b/ipados.
+Another browser: no card; Settings says the browser adds the icon from its own menu. Opened from its
+icon: no card; Settings says the icon is already there.
+
+Still open:
+
+- [ ] **The card is seen only in the open drawer.** Like the release thanks, it counts toward no
+      unread number and the collapsed bar does not name it, so a trainer who never opens the drawer
+      never sees it. *Blocks:* whether the offer should count as unread, or lead the collapsed bar
+      once — Simon's call.
+- [ ] **Not tried on a real phone.** Chrome's install question was tested with a faked
+      `beforeinstallprompt` event, and Safari's steps with a faked user agent, in headless Chromium;
+      a real install cannot happen there. Check once on an Android phone in Chrome and on an iPhone
+      in Safari, in Slovenian.
+- [ ] **A browser tab does not know the app is installed.** After installing, the same browser tab
+      fires no install event and is not running from the icon, so Settings there says the browser
+      adds the icon from its own menu. Only the app opened from its icon says the icon is already
+      there.
+- [ ] **Safari's labels follow Apple's iOS 26/27 pages.** *Open as Web App* exists only there, which
+      is why the step says "If you see …". An older iOS shows the Share button in the toolbar; the
+      first step names it as the alternative.
 
 ### 9.7 [~] Demo podatki v jeziku vmesnika, stranke z mednarodnimi imeni
 
