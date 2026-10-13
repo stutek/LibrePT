@@ -411,12 +411,28 @@ base« lastno ime.
 
 - [x] Podvojen stavek v »Predhodne poškodbe in opombe« (urejanje načrta): vzrok so bili demo
   podatki, opomba se je začela s stavkom poškodbe. Popravljeno in s testom, 481dc884.
-- [ ] Opisi načrtov, navodila vaj in ime telovadnice v sl in de.
-- [ ] Imena vaj v sl in de, z vodnikom (zgodba imenuje »Lat Pulldown«).
-- [ ] Stranke: Jane Doe → Eva, John Smith → Tom, Sarah Jenkins → Nina, Mike Chen → Leo, Priya
+- [x] Opisi načrtov, navodila vaj in ime telovadnice (»Fitnes Trib«, »Fitnessstudio Trib«) v sl
+  in de, 97a05a3a.
+- [x] Imena vaj v sl in de, z vodnikom: korak zamenjave izbere Lat Pulldown po id-ju, ne po imenu.
+  b3da6b66.
+- [x] Stranke: Jane Doe → Eva, John Smith → Tom, Sarah Jenkins → Nina, Mike Chen → Leo, Priya
   Patel → Mia, Tom Walker → David, Aisha Khan → Ida; Simon ostane. Ana, Maja in Nik so že nove
-  stranke v zgodbi, Max je v demu beseda za število ponovitev. Čaka na `src/i18n/*.js`, ki jih
-  drži seja za ponudbo ikone na domačem zaslonu (§9.6).
+  stranke v zgodbi, Max je v demu beseda za število ponovitev. b3da6b66. Preizkus brskalnika
+  odpre točno povezavo z letaka in prebere slovenski peskovnik.
+- [x] Seznam vaj v vrstici graditelja načrta je z daljšimi imeni segel 25 px čez zaslon 390 px,
+  23338a38.
+- [ ] Ostane angleško (2026-10-13 18:49:10.035): katalog vaj zunaj peskovnika (delovna baza bere
+  katalog iz kode, angleško), in značke opreme ter vzorca gibanja v izbirniku vaj
+  (`modules/exercises/exercisePicker.js` jih izpiše surovo, npr. »Barbell«, »Horizontal Pull«), tudi
+  v peskovniku. Ocena: značke pol dneva (okoli 26 izrazov × 2 jezika, prevod ob izpisu, ne v
+  podatkih, ker filtri in zgodovina iščejo po teh vrednostih); imena vaj v katalogu 1–2 dni, ker
+  uvoz in ujemanje s katalogom iščeta po imenu (`domain/catalogMatch.js`). Ni začeto; čaka na
+  Simonovo odločitev, ali katalog sploh prevajamo.
+- [ ] Preveriti: zgodba v sl pravi »Pritisni 🔥 Joint Pain / Discomfort — bolečina v sklepu« in »vpiši
+  Bird Dog«. Ali gumb oznake v sl res kaže angleško besedilo, ni preverjeno.
+- [ ] Opažanje, vzrok ni ugotovljen: ob prvem obisku s povezavo z letaka je preizkus pod obremenitvijo
+  (2 od 14 zagonov) prebral prazno stanje takoj za tem, ko je videl 8 strank. Verjetno se je stran
+  sama naložila znova; ni preverjeno. Ponovno prebrano stanje ima jezik sl in nove podatke.
 
 ---
 
