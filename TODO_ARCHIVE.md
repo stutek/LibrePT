@@ -10210,3 +10210,13 @@ je izbran drug datum (F-r06-12, nepreverjeno).
 `166d3c8`.
 
 **Popravljeno 2026-10-10 na veji `fix/week-defects`:** dan, ki ga obrazec obkljuka sam, sledi datumu, dokler trener ne obkljuka dneva sam (`sessionRepeatControls.js`; testa v `tests/medium/test_edit_session_schedule.py`). **Imena polj niso napaka:** vsako polje je v oznaki z imenom dneva, iz katere ga bralnik zaslona prebere; »on« je vrednost polja, ki jo je izpisalo orodje.
+
+## 109. [x] GitHub: zahteva #9 zaprta, združene veje izbrisane — 2026-10-13
+
+**Zapisano 2026-10-12 23:57:24.789, zaprto 2026-10-13 12:30:44.424.** Veje zahtev #6–#9 in
+`feat/release-thanks` so bile združene v lokalni `main` (`f223955f` in `8de670b2`, gate zelen v vseh
+petih stopnjah). Simon je `main` potisnil 2026-10-13; objava se je končala uspešno ob 12:26. Zahteve
+#1–#8 GitHub kaže kot združene. Zahtevo #9 je Simon zaprl: njena vsebina je v `main` kot prepisana
+veja `fix/week-defects-3`, brez dveh potrditev o članarinah in paketih, ki po Simonovi odločitvi
+spadata v ProPT. Simon je izbrisal vse veje razen `main`, tudi `trials/weeks-2026-10-10`, ki je
+predelana v `tests/exploratory/`.

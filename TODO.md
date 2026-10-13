@@ -6767,17 +6767,9 @@ po vrednosti:
 **Ne avtomatizirati:** samega tedna z jezikovnim modelom v CI. Je drag, počasen in vsakič drugačen;
 njegova vrednost je, da najde, česar nihče ni pričakoval, in to se ne ponovi na ukaz.
 
-## 109. [ ] GitHub: zapreti zahtevo #9 in izbrisati združene veje — čaka na Simona
+## 109. [x] GitHub: zahteva #9 zaprta, združene veje izbrisane — 2026-10-13
 
-**Zapisano 2026-10-12 23:57:24.789.** Veje zahtev #6–#9 in `feat/release-thanks` so v lokalnem `main`
-(združitvi `f223955f` in `8de670b2`, gate zelen v vseh petih stopnjah), ki še ni na GitHubu. Teden
-`trials/weeks-2026-10-10` je predelan v `tests/exploratory/`. Vrstni red:
-1. Simon: `git push origin main`. Zahteve #6, #7 in #8 se nato same označijo kot združene.
-2. Po Simonovi odobritvi: zahtevo #9 zapreti s komentarjem, da je v `main` prepisana različica
-   (`f223955f`), in izbrisati deset vej na GitHubu: `feat/cloud-session-explore`,
-   `fix/build-watch-short-sha`, `fix/demo-drag-press-lands-on-card`, `fix/e2e-session-card-timezone`,
-   `feat/week-trials`, `fix/week-defects`, `fix/stolen-phone`, `fix/week-defects-2`,
-   `feat/release-thanks`, `trials/weeks-2026-10-10`.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#109-x-github-zahteva-9-zaprta-združene-veje-izbrisane--2026-10-13).
 
 ## 110. [ ] Povabilo na odprto srečanje uporabnikov, samo v obvestilih — ni zgrajeno
 
