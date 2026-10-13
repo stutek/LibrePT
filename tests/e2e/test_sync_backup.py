@@ -252,11 +252,14 @@ def test_an_exported_backup_holds_nothing_readable(page, local_server):
         "ciphertext",
         "hint",
     }
+    # Searched for as JSON strings, quotes included. The ciphertext is base64, whose alphabet has no
+    # quote, so a short name such as "Leo" can turn up inside it by chance (it did, at
+    # "…PBLeoYco…"); a name that leaked in plain text would be written as a quoted JSON string.
     for name in names:
-        assert name not in written, (
+        assert json.dumps(name) not in written, (
             f"the client {name} is readable in the exported file"
         )
-    assert "clients" not in written, (
+    assert '"clients"' not in written, (
         "the collection names are readable in the exported file"
     )
 
