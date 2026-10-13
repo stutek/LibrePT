@@ -10260,3 +10260,23 @@ v vrstici `.adjustment-remark` (`modules/plans/planAdjustments.js`). Pripenjata 
 `test_the_remark_typed_on_the_floor_is_on_the_card` (`tests/medium/test_plan_adjustments.py`) in
 `test_a_note_not_kept_waits_on_the_review_screen` (`tests/e2e/test_gym_note_kept_on_record.py`).
 Opomba, ki manjka v zgodovini na strani stranke (F-r04-17), je del §80.6.
+
+### 80.204 [x] P2 — Okna za vabila se ne zaprejo: po »Pošlji SMS« ne »Končano« ne ✕ ne Esc — ni ponovljivo, zaprto 2026-10-13
+
+**Scenarij in koraki:** termin shranjen → »Pošlji vabila v koledar« → »Pošlji SMS« → »Končano«, ✕, Esc
+(F-r01-13). Okno »Povabi stranko« → Esc (F-r05-12).
+
+**Opaženo:** okno ostane odprto; pot nazaj je osvežitev strani. »Povabi stranko« se ne zapre z Esc in
+blokira naslednje okno.
+
+**Težava in vpliv:** trener ostane v oknu sredi dela in izgubi, kar ni shranjeno.
+
+**Predlog:** vsak izhod zapre okno — opaženo 2026-10-10 na `166d3c8` (tedna r01, r05; orkestrator je
+»Končano« brez »Pošlji SMS« zaprl normalno).
+
+**Ni ponovljeno (Claude, 2026-10-13 12:59:27.778, `main` `9d7f24f5`, Playwright Chromium, sl).**
+Nov termin z dvema strankama → okno za vabila → »Pošlji SMS« pri prvi stranki → nato posebej
+»Končano«, ✕ in Esc: vsakič se okno zapre. »Povabi stranko« v imeniku se z Esc zapre, prazno in z
+vpisano številko; »Dodaj stranko« se nato odpre. Možen vzrok v tednih, ni preverjen: gumb »Pošlji SMS« je
+povezava `sms:`; Chrome, ki ga krmili `explore.py`, ob njej odpre svoje vprašanje za zunanji
+program, ki prestreže tipke in klike. Na telefonu povezavo prevzame aplikacija za sporočila.

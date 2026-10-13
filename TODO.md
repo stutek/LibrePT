@@ -4757,18 +4757,9 @@ ukazom in ne potrdi ničesar).
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80203-x-p3--dnevi-ponovitve-nimajo-imena-privzeti-dan-pa-je-današnji-ne-dan-izbranega-datuma--popravljeno-2026-10-10).
 
-### 80.204 [ ] P2 — Okna za vabila se ne zaprejo: po »Pošlji SMS« ne »Končano« ne ✕ ne Esc — nepreverjeno
+### 80.204 [x] P2 — Okna za vabila se ne zaprejo: po »Pošlji SMS« ne »Končano« ne ✕ ne Esc — ni ponovljivo, zaprto 2026-10-13
 
-**Scenarij in koraki:** termin shranjen → »Pošlji vabila v koledar« → »Pošlji SMS« → »Končano«, ✕, Esc
-(F-r01-13). Okno »Povabi stranko« → Esc (F-r05-12).
-
-**Opaženo:** okno ostane odprto; pot nazaj je osvežitev strani. »Povabi stranko« se ne zapre z Esc in
-blokira naslednje okno.
-
-**Težava in vpliv:** trener ostane v oknu sredi dela in izgubi, kar ni shranjeno.
-
-**Predlog:** vsak izhod zapre okno — opaženo 2026-10-10 na `166d3c8` (tedna r01, r05; orkestrator je
-»Končano« brez »Pošlji SMS« zaprl normalno).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80204-x-p2--okna-za-vabila-se-ne-zaprejo-po-pošlji-sms-ne-končano-ne--ne-esc--ni-ponovljivo-zaprto-2026-10-13).
 
 ### 80.205 [~] P1? — Središče za kopije pravi, da kopija ne vsebuje vsebine »predogleda« — besedilo popravljeno 2026-10-11
 
