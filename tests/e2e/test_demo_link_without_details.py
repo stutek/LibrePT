@@ -216,6 +216,18 @@ def test_the_chapter_index_link_shows_every_chapter_and_starts_the_one_tapped(
     assert fresh.locator("#app-splash-details").is_hidden()
 
 
+def test_the_chapter_index_appears_as_soon_as_the_terms_are_accepted(fresh, local_server):
+    """The flyer's QR code again. The chapters are built before the terms appear, so after
+    "Se strinjam" there is nothing left to load. Measured 2026-10-13 at 360 x 780 on the local
+    server: the terms accepted 2.4 s after the page opened, the index came 2.9 s later, at the
+    welcome screen's 5 s minimum, with only the logo and the tagline on screen."""
+    fresh.goto(local_server + CHAPTER_INDEX_LINK)
+    agree = fresh.locator("#btn-terms-agree")
+    agree.wait_for(state="visible", timeout=15_000)
+    agree.click()
+    fresh.locator("#splash-chapters").wait_for(state="visible", timeout=2_000)
+
+
 def test_a_first_start_without_a_sandbox_link_still_asks_for_the_details(
     fresh, local_server
 ):

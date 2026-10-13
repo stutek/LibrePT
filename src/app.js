@@ -281,7 +281,7 @@ async function refreshStoryChapters(state) {
 /** Load them from the story script itself, so there is no second list of chapters to keep true.
  *
  * Only where one is about to be OFFERED — `anIndexIsOffered` above says where. Everywhere else this
- * is empty: the script it comes from is a quarter of a megabyte of steps, and a boot into a working
+ * is empty: the script it comes from is about 50 KB of steps, and a boot into a working
  * database with no demo data in it must not fetch that to draw a handful of titles.
  *
  * A failure is reported and swallowed: the story is a marketing asset, and an index that could not
@@ -714,8 +714,8 @@ async function init() {
       window.location.assign(chapterId ? guidedChapterUrl(chapterId) : guidedDemoUrl()),
     // The story's table of contents, so the card can offer any one chapter instead of only the
     // beginning (asked for 2026-09-21). Empty outside the sandbox and outside a first run: the
-    // chapters come from the story script, which is a quarter of a megabyte the ordinary boot must
-    // not wait for.
+    // chapters come from the story script, which is about 50 KB the ordinary boot must not wait
+    // for.
     storyChapters,
     // The release thanks waits for the first-run questions the welcome screen asks: the language,
     // then the terms. An accessor, because both are answered after this boot step has run.

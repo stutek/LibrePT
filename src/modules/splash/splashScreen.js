@@ -19,8 +19,8 @@
 // story's table of contents, and the words for it). Everything else it needs is its own markup and
 // the URL, so it stays mountable without the rest of the app — and that is why these arrive as
 // parameters rather than imports: the details form reads and writes the identity store, the terms
-// live in the header, the languages come from the i18n registry and the chapters from a quarter of a
-// megabyte of demo script, and the file that paints before the app exists must reach into none of
+// live in the header, the languages come from the i18n registry and the chapters from about 50 KB of
+// demo script, and the file that paints before the app exists must reach into none of
 // them.
 //
 // The splash is in the STATIC HTML and visible by default, not created here — it has to be on
@@ -140,6 +140,15 @@ export function requestedMinimumVisibleMs(
 /** ms still owed to the minimum, given how long the document has already been open. */
 export function remainingHoldMs(minimumVisibleMs, elapsedMs) {
   return Math.max(0, minimumVisibleMs - elapsedMs);
+}
+
+/** ms still owed once the first-run steps are done: none if the trainer answered at least one.
+ *  The logo was on screen the whole time they read and answered it, and what comes next is what
+ *  they asked to see. The flyer's link asks only for the terms. A student who accepted them 2.4 s
+ *  after the page opened then saw the logo alone for 2.9 s more, with nothing moving, and could
+ *  not tell that from a phone that had stopped. */
+export function holdAfterSteps(minimumVisibleMs, elapsedMs, stepsAsked) {
+  return stepsAsked > 0 ? 0 : remainingHoldMs(minimumVisibleMs, elapsedMs);
 }
 
 /** The URL that opens the sandbox: `?workspace=sandbox`, with the splash suppressed so
@@ -340,8 +349,8 @@ function askFirstRunSteps(steps, options, afterAll) {
  * 2026-09-21).
  *
  * The chapters are HANDED IN as `{ id, titleKey }`, in playing order — the splash may not import the
- * story any more than it may import the identity store, and the story is a quarter of a megabyte of
- * script it must never wait for. Their words are looked up at the moment they are drawn, so the list
+ * story any more than it may import the identity store, and the story is about 50 KB of script it
+ * must never wait for. Their words are looked up at the moment they are drawn, so the list
  * is in the language the trainer chose two taps ago; `data-i18n` goes on as well, so a later
  * language switch repaints it the same way it repaints every other label.
  *
@@ -428,7 +437,8 @@ function revealOnboarding(splash, resolve, chapters, t, { indexOnly = false } = 
 }
 
 /**
- * Take the splash down, no earlier than `minimumVisibleMs` after navigation start.
+ * Take the splash down, no earlier than `minimumVisibleMs` after navigation start — unless a
+ * first-run step was asked: then it goes as soon as the last one is answered (holdAfterSteps).
  *
  * First it asks whatever the first launch still lacks (see the header). With `offerOnboarding`, the
  * splash then becomes the onboarding entry point and waits for the trainer to choose — so the
@@ -487,9 +497,9 @@ export function dismissSplashWhenReady({
   const onboarding = indexOnly || (offerOnboarding && !suppressed);
   return new Promise((resolve) => {
     const continueAfterSteps = () => {
-      // The hold is measured from navigation start, so whatever the steps consumed already counts
-      // towards it — answering a prompt is not made to be followed by a wait.
-      const remaining = remainingHoldMs(minimumVisibleMs, performance.now());
+      // Answering a prompt is not followed by a wait (holdAfterSteps). Without a prompt, the hold is
+      // measured from navigation start, so the boot time already counts towards it.
+      const remaining = holdAfterSteps(minimumVisibleMs, performance.now(), steps.length);
       const holdTimer = window.setTimeout(() => {
         if (onboarding) revealOnboarding(splash, resolve, chapters, t, { indexOnly });
         else fadeOut(splash, resolve);

@@ -20,6 +20,7 @@ import {
   demoDataUrl,
   guidedChapterUrl,
   guidedDemoUrl,
+  holdAfterSteps,
   isSplashDisabled,
   remainingHoldMs,
   requestedMinimumVisibleMs,
@@ -54,6 +55,15 @@ test("the hold is what REMAINS of the minimum, not the minimum again", () => {
 
 test("a boot slower than the minimum owes no further hold", () => {
   assert.equal(remainingHoldMs(4000, 9000), 0);
+});
+
+test("after a first-run step the trainer answered, no hold is owed", () => {
+  // The flyer's link asks only for the terms: accepted 1.7s after the page opened, the 5s hold
+  // kept the logo alone on screen for 3.3s more, with nothing on it moving.
+  assert.equal(holdAfterSteps(5000, 1700, 1), 0);
+  assert.equal(holdAfterSteps(5000, 1700, 4), 0);
+  // With no step asked, the hold is what remains of the minimum, as before.
+  assert.equal(holdAfterSteps(5000, 1700, 0), 3300);
 });
 
 test("the demo link opens the SANDBOX, and suppresses the splash", () => {
