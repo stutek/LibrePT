@@ -4727,19 +4727,9 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80200-x-p2--pol
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80201-x-p2--pri-urejanju-načrta-ostane-odprta-prejšnja-vaja-vpis-serij-pa-gre-vanjo--popravljeno-2026-10-13).
 
-### 80.202 [ ] P2 — Termin iz serije, ki mu znova vključiš »Ponovi vsak teden«, naredi drugo serijo — nepreverjeno
+### 80.202 [x] P2 — Termin iz serije, ki mu znova vključiš »Ponovi vsak teden«, naredi drugo serijo — ni ponovljivo, zaprto 2026-10-13
 
-**Scenarij in koraki:** termin iz tedenske serije → »Uredi« → datum »jutri«, »Ponovi vsak teden«,
-izbrana »tor.« in »čet.« → »Shrani« (F-r04-06).
-
-**Opaženo:** za vsak torek od 20. 10. do 1. 12. sta na seznamu dva enaka termina ob 16:30, vsak z 11
-otroki; opozorila ni.
-
-**Težava in vpliv:** podvojeni termini; trener mora vsakega izbrisati posebej.
-
-**Predlog:** urejanje termina iz serije spremeni to serijo ali vpraša, ali naj nastane nova —
-opaženo 2026-10-10 na `166d3c8` (teden r04; orkestratorjeva ponovitev se je pomešala s prekinjenim
-ukazom in ne potrdi ničesar).
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80202-x-p2--termin-iz-serije-ki-mu-znova-vključiš-ponovi-vsak-teden-naredi-drugo-serijo--ni-ponovljivo-zaprto-2026-10-13).
 
 ### 80.203 [x] P3 — Dnevi ponovitve nimajo imena, privzeti dan pa je današnji, ne dan izbranega datuma — popravljeno 2026-10-10
 

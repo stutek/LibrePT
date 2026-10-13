@@ -10306,3 +10306,27 @@ dodane. Zdaj naslov določi odprto vrstico le, kadar je urejanje ni označilo ž
 `test_the_movement_just_added_from_the_catalog_is_the_open_row` v
 `tests/e2e/test_session_dialog_routes.py`. Nova vaja stoji na koncu seznama; opis tedna r02 (vaja
 na vrhu) se ni ponovil.
+
+### 80.202 [x] P2 — Termin iz serije, ki mu znova vključiš »Ponovi vsak teden«, naredi drugo serijo — ni ponovljivo, zaprto 2026-10-13
+
+**Scenarij in koraki:** termin iz tedenske serije → »Uredi« → datum »jutri«, »Ponovi vsak teden«,
+izbrana »tor.« in »čet.« → »Shrani« (F-r04-06).
+
+**Opaženo:** za vsak torek od 20. 10. do 1. 12. sta na seznamu dva enaka termina ob 16:30, vsak z 11
+otroki; opozorila ni.
+
+**Težava in vpliv:** podvojeni termini; trener mora vsakega izbrisati posebej.
+
+**Predlog:** urejanje termina iz serije spremeni to serijo ali vpraša, ali naj nastane nova —
+opaženo 2026-10-10 na `166d3c8` (teden r04; orkestratorjeva ponovitev se je pomešala s prekinjenim
+ukazom in ne potrdi ničesar).
+
+**Ni ponovljeno (Claude, 2026-10-13 13:16:04.300, `main` `b70f4f05`, Playwright Chromium 390 × 844).**
+Nova tedenska serija »Kids squad« (četrtek 16:30), nato »Uredi« na prvem in, posebej, na drugem
+večeru: datum premaknjen za dan, obkljukana torek in četrtek, »Shrani«. Polje »Ponovi vsak teden« je
+pri večeru serije že obkljukano in ga ni mogoče izključiti, zato ga ni mogoče »znova vključiti«.
+Sprememba dni sama obkljuka »Spremeni vse večere tega termina«, zato se spremeni pravilo obstoječe
+serije: serij je ostalo enako, 16 kartic je torek in četrtek v osmih tednih, brez dvojnikov. Druge
+serije iz večera ne naredi `commitSeriesUnlessEveningOfOne` v
+`modules/session/editSessionControl.js` (od `f9c2e002`, 2026-09-30, torej že pred `166d3c8`).
+Kako je teden r04 prišel do dveh serij, ostane neznano.
