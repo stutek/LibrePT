@@ -10280,3 +10280,29 @@ Nov termin z dvema strankama → okno za vabila → »Pošlji SMS« pri prvi str
 vpisano številko; »Dodaj stranko« se nato odpre. Možen vzrok v tednih, ni preverjen: gumb »Pošlji SMS« je
 povezava `sms:`; Chrome, ki ga krmili `explore.py`, ob njej odpre svoje vprašanje za zunanji
 program, ki prestreže tipke in klike. Na telefonu povezavo prevzame aplikacija za sporočila.
+
+### 80.201 [x] P2 — Pri urejanju načrta ostane odprta prejšnja vaja, vpis serij pa gre vanjo — popravljeno 2026-10-13
+
+**Scenarij in koraki:** »⋮ Možnosti treninga« → »Uredi načrt« → »Dodaj iz kataloga« → »Barbell Bench
+Press« → 4, 8, 50 → »Dodaj iz kataloga« → »Barbell Row« → vpis v polja serij, ponovitev in teže.
+
+**Opaženo:** odprta ostane vrstica prve vaje, nova je zložena; vpis prepiše prvo vajo (»Barbell
+Bench Press« dobi 4 × 6 × 70 kg, F-r06-07). Teden r02 opiše isti zaslon drugače: nova vaja se vstavi
+na vrh, prejšnja se zapre, vrstni red je obrnjen (F-r02-07); teden r01 vrstni red imenuje nejasen
+(F-r01-03).
+
+**Težava in vpliv:** napačna teža pri stranki, ki je trener ne opazi, ker so vrstice zložene; popravek
+treh vaj je stal okoli deset ukazov.
+
+**Predlog:** dodana vaja se odpre in stoji na koncu seznama, prejšnja se zapre — opaženo 2026-10-10 na
+`166d3c8` (tedni r01, r02, r06; opisa se razlikujeta, orkestrator ni ponovil).
+
+**Ponovljeno in popravljeno (Claude, 2026-10-13 13:13:49.021, `a3b33600`).** Na `main` `f6dc19c7`
+se je ponovilo: po drugi vaji iz kataloga je bila odprta prva, nova pa zaprta. Vzrok: okno kataloga
+ima svoj naslov (`…/edit/catalog`); ko se zapre, se brskalnik vrne na naslov vrstice, ki je bila
+odprta prej (`…/edit/exercise/<prva vaja>`), in usmerjevalnik je to vrstico označil namesto pravkar
+dodane. Zdaj naslov določi odprto vrstico le, kadar je urejanje ni označilo že samo
+(`setClipboardEditMode` v `controllers/activeSessionController.js`). Test
+`test_the_movement_just_added_from_the_catalog_is_the_open_row` v
+`tests/e2e/test_session_dialog_routes.py`. Nova vaja stoji na koncu seznama; opis tedna r02 (vaja
+na vrhu) se ni ponovil.

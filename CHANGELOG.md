@@ -18,6 +18,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-10-13 — Fixes from the trainer weeks
+
+### Fixed
+
+- **A movement added from the catalog in the plan editor is the open row.** After the second movement,
+  the first one stayed open and the new one closed, so the sets, reps and load typed next went into
+  the first movement.
+
 ## 2026-10-12 — A client who did not come
 
 ### Added
