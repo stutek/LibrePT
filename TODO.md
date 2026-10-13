@@ -4439,6 +4439,18 @@ explore.py), je deset zaporednih celih zagonov z urejanjem rutine steklo brez za
 istem brskalniku odpri povezavo iz »Povabi stranko« in stran nekajkrat osveži. Če obrazec vedno pride,
 je bil zastoj orodje in se ta točka zapre — opaženo na `#8b2ce80` in `main` `6230070`, 390 × 844, sl.
 
+**Isti simptom v preverjanju, 2026-10-13 19:01:18.900 (Claude):** zagon `build check` ob 18:50 na
+`bdb1cd9` + dve vrstici v `src/i18n/` je padel na treh testih, ki so 20 s čakali, da se zaslon za
+nalaganje umakne (`tests/conftest.py:262`, `SPLASH_DISMISS_TIMEOUT_MS`):
+`test_indexed_db.py::test_hostile_keys_and_index_values_are_stored_as_opaque_data`,
+`test_sandbox.py::test_a_sandbox_older_than_twelve_hours_offers_a_fresh_one`,
+`test_walkthrough.py::test_a_step_done_in_front_of_the_viewer_carries_the_card_on`. Posamezno so
+vsi trije uspeli 9-krat od 9; na isti kodi brez teh dveh vrstic je bilo preverjanje ob 18:40 zeleno.
+Zastoj se torej pokaže le pod obremenitvijo vzporednih brskalnikov. Ali je to počasnost stroja ali
+zaslon za nalaganje, ki obvisi, ni ugotovljeno. Dnevnika tega zagona sta shranjena v
+`.private/gate-logs/2026-10-13-1850-*.log` (zasebna mapa; pot preverjanja ju ob naslednjem zagonu
+prepiše).
+
 ### 80.155 [ ] P3 — Ocena obrazca »Dodaj stranko iz podatkov, ki jih je poslala«
 
 Naloga (podagent brez konteksta, pred ogledom obrazca): stranka »Maja Kovač« je na svojem telefonu
