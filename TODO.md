@@ -4902,6 +4902,14 @@ negativen čas »Aktiven trening -08h 27m«.
 **Predlog:** ponoviti z `clock off`: ura je bila premaknjena, in skill pravi, da to vpliva na ozadje —
 opaženo 2026-10-11 na različici `55345d2`, teden r12 (F-r12-13, F-r12-22).
 
+**Ni ponovljeno (Claude, 2026-10-13 13:22:20.485, `main` `221eaf8d`, Playwright).** »Group
+Strength & Conditioning« začet, ura brskalnika nato premaknjena za 8 h 27 min naprej, »Zaključi
+vadbo«: termin je `done` z uro zaključka, kartica pred osvežitvijo in po njej piše »Zaključeno«.
+Osnovni primer pripenja `test_finishing_a_session_stamps_completed_and_duration_on_the_session`
+(`tests/e2e/test_session_status_line.py`). Ostane odprto, ker je teden r12 napako videl v štirih od
+osmih poskusov; naslednji korak je isti teden z `clock off`. Kartica ob tem piše »Zaključeno 00:00«
+za osem ur: to je §80.114.
+
 ### 80.218 [ ] P3 — Središče za kopije hkrati piše »še niso šifrirane« in »Izvoženo in šifrirano«
 
 **Scenarij in koraki:** središče za kopije po izvozu šifrirane kopije, ko geslo ni zapomnjeno na
