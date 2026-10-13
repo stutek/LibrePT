@@ -118,6 +118,32 @@ def test_downloading_a_backup_records_it_without_involving_drive(page, local_ser
     assert history["at"] > 0
 
 
+def test_the_password_line_agrees_with_the_first_encrypted_export(page, local_server):
+    """The password set on the way through an export is a password on this device. The line above
+    the buttons went on saying "not encrypted yet" beside "Exported and encrypted" until the dialog
+    was opened again (a trainer week, 2026-10-11)."""
+    page.goto(local_server + "clients")
+    page.wait_for_selector("#view-client-directory.active")
+    page.locator("#backup-btn").click()
+    state = page.locator("#backup-encryption-state")
+    page.wait_for_function(
+        "() => document.getElementById('backup-encryption-state')?.textContent.trim()"
+    )
+    before = state.text_content().strip()
+    assert before == "Backups from this device are not encrypted yet."
+
+    page.locator("#btn-export-db").click()
+    page.wait_for_selector("#dialog-backup-password[open]")
+    with page.expect_download():
+        page.locator("#btn-backup-pw-confirm").click()
+
+    page.wait_for_function(
+        "() => document.getElementById('backup-encryption-state')?.textContent.trim()"
+        " === 'Backups from this device are encrypted.'",
+        timeout=5000,
+    )
+
+
 def test_never_synced_counts_every_record_of_the_trainers_own(page, local_server):
     """No ancestor means nothing has EVER reached Drive, so everything of theirs is ahead.
 

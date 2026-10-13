@@ -540,6 +540,9 @@ export function setupBackupRestore() {
         : JSON.stringify(payload, null, 2);
       downloadFile(written, `librept_backup_${localDateString()}.json`, "application/json");
       setExportStatus(stored ? "backup_pw_exported_encrypted" : "backup_pw_exported_plain");
+      // The password may have been set on the way through this export; the line above the buttons
+      // then still said "not encrypted yet" beside "Exported and encrypted".
+      await refreshEncryptionState();
       // A downloaded file is a real backup, so it answers the unbacked-data warning's "is this
       // data anywhere durable" exactly as a Drive sync does. Recording it is what keeps the
       // coming unbacked warning honest — a trainer who exports weekly must be able to clear it
