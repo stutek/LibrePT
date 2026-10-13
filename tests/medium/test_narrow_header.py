@@ -72,6 +72,50 @@ def test_the_app_name_and_the_menu_button_fit(page, local_server, level, viewpor
     assert name["pageWidth"] <= viewport["width"], f"the page scrolls sideways: {name}"
 
 
+@pytest.mark.parametrize("lang", ["sl", "en", "de"])
+@pytest.mark.parametrize("viewport", PHONES, ids=lambda v: str(v["width"]))
+def test_the_sandbox_header_is_one_row(page, local_server, viewport, lang):
+    """Reported on a Galaxy S23 (Simon, 2026-10-13): in the sandbox the backup button and the menu
+    dropped to a second row under the logo. Without a backup warning the bar is one row at every
+    supported width, with the sandbox pill in the language that makes it widest."""
+    _header(page, local_server, "none", viewport)
+    page.evaluate(
+        """async (lang) => {
+          const { TRANSLATIONS } = await import(new URL('i18n/index.js', document.baseURI).href);
+          document.body.classList.add('in-sandbox');
+          const pill = document.getElementById('preview-badge');
+          pill.classList.add('is-demo');
+          pill.querySelector('.preview-badge-label').textContent = TRANSLATIONS[lang].sandbox_badge;
+          // The counters beside the cloud ("↑0 ↓?") are what the bar holds in the real app; the
+          // stub leaves them hidden, which made the backup button 16 px narrower than on a phone.
+          const header = await import(new URL('modules/common/applicationHeader.js', document.baseURI).href);
+          header.renderSyncBadge();
+        }""",
+        lang,
+    )
+    page.wait_for_timeout(200)
+    rows = page.evaluate(
+        """() => {
+          const box = (s) => document.querySelector(s).getBoundingClientRect();
+          const logo = box('.logo-area');
+          return {
+            logoBottom: logo.bottom,
+            backupTop: box('#backup-btn').top,
+            menuTop: box('#btn-app-menu').top,
+            menuRight: box('#btn-app-menu').right,
+            cut: (() => { const h1 = document.querySelector('.logo-area h1');
+                          return h1.scrollWidth > h1.clientWidth; })(),
+            short: (() => { const h1 = document.querySelector('.logo-area h1');
+                            return h1.scrollWidth - h1.clientWidth; })(),
+          };
+        }"""
+    )
+    assert rows["backupTop"] < rows["logoBottom"], f"backup button on a second row: {rows}"
+    assert rows["menuTop"] < rows["logoBottom"], f"menu button on a second row: {rows}"
+    assert rows["menuRight"] <= viewport["width"], f"menu button leaves the screen: {rows}"
+    assert not rows["cut"], f"the app name is cut with an ellipsis: {rows}"
+
+
 @pytest.mark.parametrize("viewport", PHONES, ids=lambda v: str(v["width"]))
 def test_the_backup_warning_does_not_cover_the_logo(page, local_server, viewport):
     _header(page, local_server, "urgent", viewport)
