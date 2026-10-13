@@ -5024,7 +5024,8 @@ Simonov zaslon je verjetno povečan (Samsungova povečava zaslona), zato ožji.
 celo v sl, en in de, pri ožjem se ime skrajša, gumbi ostanejo v vrstici. Test
 `tests/medium/test_narrow_header.py::test_the_sandbox_header_is_one_row` (320 in 390 px, trije jeziki,
 s števcema). **Commitano 2026-10-13 19:44:40.061 v `838f49d4`**, preverjanje zeleno v vseh petih
-stopnjah. Zapre se, ko Simon po potisku na S23 vidi eno vrstico. **Ni preverjeno:** iPhone 14 v Safariju (WebKit tu ni nameščen; Chromium pri 390 px ima
+stopnjah. Zapre se, ko seja librept-ec po potisku na živi strani izmeri eno vrstico pri 360, 320 in
+300 px (sl, peskovnik, povezava z letaka). **Ni preverjeno:** iPhone 14 v Safariju (WebKit tu ni nameščen; Chromium pri 390 px ima
 eno vrstico) in Simonov telefon po potisku.
 
 ### 80.224 [ ] P2 — Po potegu beležnice vstran ostane obroba kartice popačena (vodeni ogled, korak 2 od 6) — v delu
