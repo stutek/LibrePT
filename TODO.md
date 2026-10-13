@@ -6529,6 +6529,10 @@ kopije. **Čaka na:** odločitev v §99, ker ta spremeni, katere datoteke gate b
 nobenem delotoku v `.github/workflows/`, torej teče po GitHubovi privzeti nastavitvi. Opozorila so
 odprta od **2026-08-18**, kar je šest tednov, in gate o njih ne ve ničesar.
 
+**AI Scan for pull requests je izklopljen** (Simon, 2026-10-13, zapisano 2026-10-13 12:33:49.500):
+porablja plačljive AI kredite. API to potrdi z `{"pr_scan":"disabled"}` na
+`repos/stutek/LibrePT/code-scanning/ai-scan`. CodeQL po privzeti nastavitvi teče naprej.
+
 | # | Resnost | Pravilo | Mesto |
 | - | ------- | ------- | ----- |
 | 1 | high    | `py/clear-text-storage-sensitive-data` | `agent_tools/google_credential.py:252` |
