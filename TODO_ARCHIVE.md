@@ -10220,3 +10220,24 @@ petih stopnjah). Simon je `main` potisnil 2026-10-13; objava se je končala uspe
 veja `fix/week-defects-3`, brez dveh potrditev o članarinah in paketih, ki po Simonovi odločitvi
 spadata v ProPT. Simon je izbrisal vse veje razen `main`, tudi `trials/weeks-2026-10-10`, ki je
 predelana v `tests/exploratory/`.
+
+### 80.166 [x] P2 — Spodnja vrstica načrta po osvežitvi javi »Invalid time value« — ni ponovljivo, zaprto 2026-10-13
+
+**Scenarij in koraki:** profil »TEST Živa Dolgoime Koren« → »Načrtuj program« → »Hrib priprava«, »jutri«, 20:30–21:30 → »Odpri v beležki« → iz kataloga Standing Calf Raise in Wall Sit → kljukica za konec urejanja → »Zapri trening in se vrni na začetek« → osvežitev → spodnja vrstica »Hrib priprava / Načrtovanje«.
+
+**Opaženo:** načrt se ne odpre. Predal pokaže »Nekaj je šlo narobe / Invalid time value«; konzola `Uncaught RangeError: Invalid time value`. Obvestilo »Hrib priprava · TEST Živa Dolgoime Koren · 2026-10-02« isti načrt odpre z obema vajama. Branje IndexedDB potrdi obe vaji v shranjenem zapisu; izgube podatkov ni bilo.
+
+**Težava in vpliv:** najkrajša pot nazaj do pripravljene vadbe odpove po ponovnem odprtju aplikacije. Trener mora odkriti drugo pot skozi obvestila; angleška napaka ne pove, kako nadaljevati.
+
+**Predlog:** spodnja vrstica naj odpre isti shranjeni načrt kot obvestilo tudi po osvežitvi — opaženo na objavljeni različici `933dbc0`, 390 × 844, sl, 2026-10-02. Ločeno od že opisane odsotnosti termina v §80.5.
+
+**Ni ponovljeno (Claude, 2026-10-13 12:56:13.299, `main` `95e0bb32`, Playwright Chromium 390 × 844,
+en in sl, vzorčni podatki).** Načrt iz profila stranke (»Načrtuj program«, jutri 20:30–21:30, ena
+vaja iz kataloga) po treh poteh: (1) zapri podlogo, osveži na začetni strani: vrstica na dnu se ne
+pokaže več, ker aplikacija po osvežitvi iz shranjenih programov obnovi le trening, ki teče
+(`recoverActiveSession` v `controllers/sessionLifecycle.js`), načrt pa je v obvestilih;
+(2) osveži na naslovu odprtega načrta, zapri podlogo, dotik vrstice: načrt se odpre z vajo;
+(3) po osvežitvi odpri načrt iz obvestila, zapri, dotik vrstice: načrt se odpre z vajo. Napake v
+konzoli ni bilo nobene. Poti, po kateri je vrstica po osvežitvi kazala načrt in odpovedala, v tej
+različici ni več. Ob tem: vrstica pri takem načrtu piše »Neznan datum« in obvestilo datum vpisa,
+ne izbranega dne — to je §80.5.

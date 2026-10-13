@@ -4558,15 +4558,9 @@ od 844 pik in na 640 od 680 pik. Test `test_escape_keeps_an_edit_of_a_client_on_
 del. Ponoviti z orodjem, s katerim je bilo opaženo, in povedati, kako sta bili izmerjeni tipka in
 višina.
 
-### 80.166 [ ] P2 — Spodnja vrstica načrta po osvežitvi javi »Invalid time value«
+### 80.166 [x] P2 — Spodnja vrstica načrta po osvežitvi javi »Invalid time value« — ni ponovljivo, zaprto 2026-10-13
 
-**Scenarij in koraki:** profil »TEST Živa Dolgoime Koren« → »Načrtuj program« → »Hrib priprava«, »jutri«, 20:30–21:30 → »Odpri v beležki« → iz kataloga Standing Calf Raise in Wall Sit → kljukica za konec urejanja → »Zapri trening in se vrni na začetek« → osvežitev → spodnja vrstica »Hrib priprava / Načrtovanje«.
-
-**Opaženo:** načrt se ne odpre. Predal pokaže »Nekaj je šlo narobe / Invalid time value«; konzola `Uncaught RangeError: Invalid time value`. Obvestilo »Hrib priprava · TEST Živa Dolgoime Koren · 2026-10-02« isti načrt odpre z obema vajama. Branje IndexedDB potrdi obe vaji v shranjenem zapisu; izgube podatkov ni bilo.
-
-**Težava in vpliv:** najkrajša pot nazaj do pripravljene vadbe odpove po ponovnem odprtju aplikacije. Trener mora odkriti drugo pot skozi obvestila; angleška napaka ne pove, kako nadaljevati.
-
-**Predlog:** spodnja vrstica naj odpre isti shranjeni načrt kot obvestilo tudi po osvežitvi — opaženo na objavljeni različici `933dbc0`, 390 × 844, sl, 2026-10-02. Ločeno od že opisane odsotnosti termina v §80.5.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80166-x-p2--spodnja-vrstica-načrta-po-osvežitvi-javi-invalid-time-value--ni-ponovljivo-zaprto-2026-10-13).
 
 ### 80.167 [ ] P2 — Pregled pokaže »Samo opomba, brez ocene«, besedilo opombe pa manjka
 
