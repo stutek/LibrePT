@@ -1,0 +1,43 @@
+/* src/modules/common/homeScreenInstall.css — the home-screen offer's own parts: Safari's steps as a
+   numbered list, the glyph drawn after a button's name, and the one-line note in Settings. The card
+   around them is the notification area's own card, and the button in Settings is a Settings row. */
+
+.home-screen-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0 0 10px;
+  padding-left: 22px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text-main);
+}
+
+/* Beside the label, never instead of it: the step names the button in words first. */
+.home-screen-glyph {
+  margin: 0 4px;
+  color: var(--primary);
+}
+
+/* Safari's Page Menu button as Apple's page draws it: three left-aligned lines, the last one short. */
+.home-screen-glyph-page-menu {
+  display: inline-block;
+  width: 1em;
+  height: 0.75em;
+  vertical-align: middle;
+  background:
+    linear-gradient(currentColor, currentColor) 0 0 / 100% 2px no-repeat,
+    linear-gradient(currentColor, currentColor) 0 50% / 100% 2px no-repeat,
+    linear-gradient(currentColor, currentColor) 0 100% / 55% 2px no-repeat;
+}
+
+.settings-home-screen .home-screen-steps {
+  margin: 4px 0 8px;
+}
+
+.settings-home-screen-note {
+  margin: 4px 0 8px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text-muted);
+}

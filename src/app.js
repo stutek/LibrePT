@@ -141,6 +141,11 @@ import {
   themeChoices,
 } from "./modules/common/theme.js";
 import {
+  listenForInstallPrompt,
+  onInstallSituationChange,
+  renderSettingsHomeScreen,
+} from "./modules/common/homeScreenInstall.js";
+import {
   mountTrainerDetailsOnSplash,
   openTrainerDetailsDialog,
   trainerDetailsComplete,
@@ -323,6 +328,9 @@ function linkFurnishesTheApp({ shareInit, shareDemo, inboundEvent }) {
   return Boolean(shareInit || shareDemo || inboundEvent);
 }
 
+// Whether the welcome screen has come down on this boot: the home-screen offer waits for it.
+let welcomeFinished = false;
+
 async function init() {
   // FIRST, before anything else can throw: a crash during boot is exactly the one a trainer is least
   // able to describe, and it currently dies in a console nobody opens.
@@ -402,6 +410,9 @@ async function init() {
   // query header elements (#backup-btn, #app-version) despite not being the header's own module —
   // the header must exist before any of that runs, not just before appBoot.bootHeader() itself.
   renderHeaderShell();
+  // Before the service worker is registered below: the browser's install event can only fire after
+  // that, and the home-screen offer's button needs the event kept (homeScreenInstall.js).
+  listenForInstallPrompt();
   appBoot.bootAppLifecycle({
     basePath: getBasePath(),
     setOfflineCachedState,
@@ -703,6 +714,8 @@ async function init() {
     // The release thanks waits for the first-run questions the welcome screen asks: the language,
     // then the terms. An accessor, because both are answered after this boot step has run.
     isFirstRunAnswered: () => hasChosenLanguage(getState().lang) && !needsTermsAgreement(),
+    // The home-screen offer waits until the welcome screen is down, whichever steps it asked.
+    isWelcomeFinished: () => welcomeFinished,
   });
 
   // After bootNotificationArea: the clipboard bar mounts into the notification area's handle bar,
@@ -727,6 +740,15 @@ async function init() {
   // waits for it.
   const splashDown = startSplash({
     linkBringsContent: linkFurnishesTheApp({ shareInit, shareDemo, inboundEvent }),
+  });
+  splashDown.then(() => {
+    welcomeFinished = true;
+    renderNotificationArea();
+  });
+  // The browser's install event can arrive at any moment, and an install ends the offer.
+  onInstallSituationChange(() => {
+    renderNotificationArea();
+    renderSettingsHomeScreen(t);
   });
 
   const repsPresetHost = document.getElementById("reps-preset-datalists");
@@ -865,6 +887,7 @@ function renderEverything() {
   renderPendingPlanAdjustments();
   renderSessions();
   renderNotificationArea();
+  renderSettingsHomeScreen(t);
   populateDropdownSelectors();
   renderBuildStateBadge(getState());
   renderWorkspaceChrome();

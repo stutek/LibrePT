@@ -1233,6 +1233,25 @@ export const en = {
   notif_release_thanks_desc:
     "LibrePT is free. Thank you for using it this early, and for every message about what you notice. Some day we may ask for a voluntary donation. If we do, we will write about it here first.",
   notif_release_thanks_close: "Close this message",
+  // The offer to put the app's icon on the home screen (modules/common/homeScreenInstall.js). Safari's
+  // control names are quoted from Apple's support pages in this language: guide/iphone/iphea86e5236
+  // and guide/ipad/ipadc602b75b. {pageMenu} and {share} are where the button's glyph is drawn.
+  home_screen_heading: "Home screen",
+  home_screen_offer_title: "Put the app on your home screen",
+  home_screen_offer_desc:
+    "The app then has its own icon on the phone's home screen, and it opens from the icon like any other app.",
+  home_screen_offer_close: "Close this message",
+  home_screen_add: "Add the icon to the home screen",
+  home_screen_installed: "The app's icon is already on the home screen.",
+  home_screen_browser_menu: "This browser adds the icon from its own menu.",
+  home_screen_iphone_step1:
+    "In Safari, tap the Page Menu button {pageMenu}, then tap Share. If your tabs layout is Bottom or Top, tap the Share button {share} instead.",
+  home_screen_iphone_step2:
+    "Scroll down the list and tap Add to Home Screen. If it is not in the list, tap Edit Actions at the bottom of the list, then tap Add to Home Screen.",
+  home_screen_iphone_step3: "If you see Open as Web App, turn it on. Then tap Add.",
+  home_screen_ipad_step1:
+    "In Safari, tap the Share button {share}, tap View More, then tap Add to Home Screen.",
+  home_screen_ipad_step2: "If you see Open as Web App, turn it on. Then tap Add.",
   notif_demo_mode_title: "⚠️ Demo mode — sample data loaded",
   notif_demo_mode_desc:
     "This app is running on sample clients, routines and sessions. Clear them before you use it for real work: clearing lists exactly what it removes and keeps the movement catalog, so anything you have built on top of it keeps working.",

@@ -6,10 +6,12 @@
 //   - Expandable upward drawer/sheet triggered by clicking or swiping/dragging the handle or bar upwards
 //     (mimicking active-session-overlay collapse/expand behavior).
 //   - Priority-ordered notification feed: Live/Upcoming session → Welcome/Demo message → Reservations/Cancellations.
-//   - After the feed, once per release, the thanks to early adopters, closed with its own button.
+//   - After the feed, until it is closed or acted on, the offer to put the app's icon on the home
+//     screen; then, once per release, the thanks to early adopters, closed with its own button.
 //
 // Dependencies injected via initNotificationArea({ getState, getActiveSession, t, escapeHTML,
-// navigateToPath, getSyncFailure, startWalkthrough, enterSandbox, isFirstRunAnswered }) — `getSyncFailure` is an
+// navigateToPath, getSyncFailure, startWalkthrough, enterSandbox, isFirstRunAnswered,
+// isWelcomeFinished }) — `isWelcomeFinished` says the welcome screen has come down. `getSyncFailure` is an
 // accessor rather than a value because a sync can fail at any moment after boot, and it keeps this
 // module unaware of Drive entirely. The two offers on an empty app are injected for the same reason
 // the seeding one before them was: the walkthrough's deep link is built in modules/splash and
@@ -28,6 +30,7 @@ import {
   resolveNotificationItems,
 } from "../../domain/notificationItems.js";
 import { renderMarkupOnce } from "./dom.js";
+import { buildHomeScreenOfferCard } from "./homeScreenInstall.js";
 import { INIT_DEMO_DATA, getShareParams } from "./shareLink.js";
 
 // Schema-scoped: which notifications a PT has read is per-build state (see data/storageNamespace).
@@ -48,9 +51,12 @@ export function initNotificationArea(d) {
   deps = d;
 }
 
+// The strip belongs to the live session's clipboard bar while there is one (sessionBar.js sets the
+// same class). Set from the live session rather than removed: removing it on every draw put the
+// summary and the clipboard bar in the strip together until the clipboard bar was drawn again.
 export function syncNotificationBarState() {
   const area = document.getElementById("notification-area");
-  if (area) area.classList.remove("has-active-session");
+  if (area) area.classList.toggle("has-active-session", Boolean(deps?.getActiveSession?.()));
 }
 
 function loadReadNotificationIds() {
@@ -384,6 +390,15 @@ function appendReleaseThanks(container, state) {
   });
 }
 
+/** The offer to put the app's icon on the home screen (homeScreenInstall.js), once the welcome
+ * screen is finished — on every path, the sandbox link that skips the trainer's details included.
+ * Like the thanks below it, it counts toward no unread number: only its own buttons end it. */
+function appendHomeScreenOffer(container) {
+  if (deps.isWelcomeFinished?.() !== true) return;
+  const card = buildHomeScreenOfferCard(deps.t, { onClosed: () => renderNotificationArea() });
+  if (card) container.append(card);
+}
+
 export function renderNotificationArea() {
   if (!deps) return;
   const { t, escapeHTML } = deps;
@@ -420,6 +435,7 @@ export function renderNotificationArea() {
     } else {
       renderFirstRunInvitation(container, t, escapeHTML, summaryEls, deps);
     }
+    appendHomeScreenOffer(container);
     appendReleaseThanks(container, state);
     syncNotificationBarState();
     return;
@@ -441,6 +457,7 @@ export function renderNotificationArea() {
     .join("");
 
   wireNotificationCardActions(container, deps, t, readIds);
+  appendHomeScreenOffer(container);
   appendReleaseThanks(container, state);
   syncNotificationBarState();
 }

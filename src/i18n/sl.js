@@ -1163,6 +1163,22 @@ export const sl = {
   notif_release_thanks_desc:
     "LibrePT je brezplačen. Hvala, da ga uporabljaš že zdaj, in hvala za vsako sporočilo o tem, kar opaziš. Morda te bomo nekoč prosili za prostovoljen denarni prispevek. Če bo tako, bomo o tem najprej pisali tukaj.",
   notif_release_thanks_close: "Zapri to sporočilo",
+  home_screen_heading: "Domači zaslon",
+  home_screen_offer_title: "Postavi aplikacijo na domači zaslon",
+  home_screen_offer_desc:
+    "Aplikacija ima potem svojo ikono na domačem zaslonu telefona in se odpre z nje kot vsaka druga aplikacija.",
+  home_screen_offer_close: "Zapri to sporočilo",
+  home_screen_add: "Dodaj ikono na domači zaslon",
+  home_screen_installed: "Ikona aplikacije je že na domačem zaslonu.",
+  home_screen_browser_menu: "Ta brskalnik doda ikono iz svojega menija.",
+  home_screen_iphone_step1:
+    "V Safariju tapni menijski gumb za stran {pageMenu} in nato Deli. Če je postavitev zavihkov Spodaj ali Zgoraj, namesto tega tapni gumb Deli {share}.",
+  home_screen_iphone_step2:
+    "Pomakni se navzdol po seznamu in tapni Dodaj na domači zaslon. Če ga ni na seznamu, tapni Uredi dejanja na dnu seznama in nato Dodaj na domači zaslon.",
+  home_screen_iphone_step3: "Če vidiš Odpri kot spletno aplikacijo, to vklopi. Nato tapni Dodaj.",
+  home_screen_ipad_step1:
+    "V Safariju tapni gumb Deli {share}, tapni Prikaži več in nato Dodaj na domači zaslon.",
+  home_screen_ipad_step2: "Če vidiš Odpri kot spletno aplikacijo, to vklopi. Nato tapni Dodaj.",
   notif_demo_mode_title: "⚠️ Predstavitveni način — naloženi vzorčni podatki",
   notif_demo_mode_desc:
     "Aplikacija deluje na vzorčnih strankah, rutinah in treningih. Počisti jih, preden jo uporabiš za resnično delo: čiščenje natančno našteje, kaj odstrani, in ohrani katalog vaj, tako da vse, kar si zgradil na njem, še naprej deluje.",

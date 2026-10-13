@@ -1216,6 +1216,24 @@ export const de = {
   notif_release_thanks_desc:
     "LibrePT ist kostenlos. Danke, dass du LibrePT schon jetzt nutzt, und danke für jede Nachricht über das, was dir auffällt. Vielleicht bitten wir dich eines Tages um eine freiwillige Spende. Falls wir das tun, schreiben wir es zuerst hier.",
   notif_release_thanks_close: "Diese Nachricht schließen",
+  home_screen_heading: "Home-Bildschirm",
+  home_screen_offer_title: "Die App auf den Home-Bildschirm legen",
+  home_screen_offer_desc:
+    "Die App hat dann ein eigenes Symbol auf dem Home-Bildschirm des Telefons und öffnet sich darüber wie jede andere App.",
+  home_screen_offer_close: "Diese Nachricht schließen",
+  home_screen_add: "Symbol zum Home-Bildschirm hinzufügen",
+  home_screen_installed: "Das Symbol der App ist schon auf dem Home-Bildschirm.",
+  home_screen_browser_menu: "Dieser Browser fügt das Symbol über sein eigenes Menü hinzu.",
+  home_screen_iphone_step1:
+    "Tippe in Safari auf die Taste „Seitenmenü“ {pageMenu} und dann auf „Teilen“. Ist dein Tablayout „Unten“ oder „Oben“, tippe stattdessen auf die Taste „Teilen“ {share}.",
+  home_screen_iphone_step2:
+    "Scrolle in der Liste nach unten und tippe auf „Zu Home-Bildschirm hinzufügen“. Fehlt die Option, tippe am Ende der Liste auf „Aktionen bearbeiten“ und dann auf „Zu Home-Bildschirm hinzufügen“.",
+  home_screen_iphone_step3:
+    "Wenn du „Als Web-App öffnen“ siehst, aktiviere es. Tippe dann auf „Hinzufügen“.",
+  home_screen_ipad_step1:
+    "Tippe in Safari auf die Taste „Teilen“ {share}, dann auf „Mehr anzeigen“ und dann auf „Zum Home-Bildschirm“.",
+  home_screen_ipad_step2:
+    "Wenn du „Als Web-App öffnen“ siehst, aktiviere es. Tippe dann auf „Hinzufügen“.",
   notif_demo_mode_title: "⚠️ Demomodus — Beispieldaten geladen",
   notif_demo_mode_desc:
     "Diese App läuft mit Beispielkunden, -routinen und -trainings. Lösche sie, bevor du sie für echte Arbeit nutzt: Das Löschen listet genau auf, was es entfernt, und behält den Übungskatalog, damit alles, was du darauf aufgebaut hast, weiter funktioniert.",

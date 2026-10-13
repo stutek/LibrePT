@@ -47,6 +47,8 @@ export const ORIGIN_GLOBAL_KEYS = [
   "librept_lang",
   // The release whose thanks card the trainer closed (modules/common/notificationArea.js).
   "librept_release_thanks_closed",
+  // The home-screen offer the trainer closed or acted on (modules/common/homeScreenInstall.js).
+  "librept_home_screen_offer_closed",
   // Two retired "expand all" settings. The module that wrote them is gone — every
   // card became one design with nothing left to open — but the KEYS stay listed: an install that
   // still holds one must go on being read and wiped unscoped, and moving a leftover value into a

@@ -20,7 +20,7 @@ from tests.medium._harness import load_with_stub
 pytestmark = pytest.mark.clean_start
 
 
-def stub(state_js, first_run_answered=False, lang="en"):
+def stub(state_js, first_run_answered=False, lang="en", live_session=False):
     """Mount the feed over a given database. Both feed actions that change something are RECORDED
     rather than performed — seeding writes the whole demo dataset and reloads the page, navigation
     closes the drawer — so a test can ask which one a tap reached without the tap ending the test.
@@ -43,7 +43,7 @@ window.__sandboxEntered = 0;
 
 bootNotificationArea({{
   getState: () => state,
-  getActiveSession: () => null,
+  getActiveSession: () => {"({ participants: [] })" if live_session else "null"},
   t,
   escapeHTML,
   navigateToPath: (path) => window.__navigated.push(path),
@@ -423,3 +423,23 @@ def test_a_new_release_brings_the_thanks_back(page, local_server):
     expand_feed(page)
 
     assert page.locator(RELEASE_THANKS).count() == 1
+
+
+def test_a_redraw_keeps_the_live_session_bar_in_the_strip(page, local_server):
+    """While a session is live, the collapsed strip belongs to its clipboard bar, and the summary
+    stands down (`.has-active-session`). Every draw of the feed used to REMOVE that class, so the
+    strip showed both — the clipboard bar's countdown pushed 89px past its box — until the clipboard
+    bar happened to be drawn again. A draw now sets the class from the live session itself."""
+    load_with_stub(page, local_server, stub(REAL_GYM, live_session=True))
+    page.wait_for_selector("#notification-area")
+    page.evaluate(
+        "() => document.getElementById('notification-area').classList.add('has-active-session')"
+    )
+
+    page.evaluate(
+        "async () => (await import(new URL('modules/common/notificationArea.js', document.baseURI).href)).renderNotificationArea()"
+    )
+
+    assert page.locator("#notification-area").evaluate(
+        "(el) => el.classList.contains('has-active-session')"
+    )

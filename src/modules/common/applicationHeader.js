@@ -4,7 +4,8 @@
 // client directory, exercises and routines, data management, settings. Inside the sandbox only, a
 // sixth entry, *Leave the sandbox*, is added.
 // It also owns `#dialog-settings` (language and theme switchers, the trainer's details, the app
-// version, the sandbox, help and legal) and the dialogs `#dialog-about` and `#dialog-terms`.
+// version, the sandbox, the home screen, help and legal) and the dialogs `#dialog-about` and
+// `#dialog-terms`. The home-screen section's content is homeScreenInstall.js's to draw.
 //
 // deps: {
 //   getState(),
@@ -364,6 +365,11 @@ export function renderSettingsDialog() {
     <button id="menu-sandbox-reset" class="session-menu-item hidden">
       <i class="fa-solid fa-arrows-rotate"></i> <span id="menu-sandbox-reset-text" data-i18n="menu_sandbox_reset">Reset sandbox data</span>
     </button>
+    <!-- The app's icon on the home screen: a button, Safari's steps, or one sentence, whichever this
+         browser allows. Filled by homeScreenInstall.js, and always here, so a trainer who closed the
+         offer in the notification area can still do it. -->
+    <h4 class="settings-heading" id="settings-home-screen-heading"></h4>
+    <div id="settings-home-screen" class="settings-home-screen"></div>
     <h4 class="settings-heading" data-i18n="settings_help_heading">Help and legal</h4>
     <a id="menu-github" class="session-menu-item" target="_blank" rel="noopener noreferrer">
       <i class="fa-brands fa-github"></i> GitHub project
