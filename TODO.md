@@ -5046,7 +5046,7 @@ pusti tam, ko se prst dvigne. Posnemani dotik tega ne naredi; s `:hover`, vsilje
 kartica širša in njen rob se stisne ob obroč. **Popravek v delu:** videz ob `:hover` za kartice v
 beležnici samo pri `@media (hover: hover)`.
 
-### 80.225 [~] P2 — Po »Se strinjam« na povezavi z letaka 3 s samo logotip, nič se ne premika — v delu
+### 80.225 [~] P2 — Po »Se strinjam« na povezavi z letaka 3 s samo logotip, nič se ne premika — popravljeno v `dacbab61`, čaka objavo
 
 **Najdba seje librept-ec, 2026-10-13:** povezava QR-kode z letaka
 `?workspace=sandbox&lang=sl&theme=daylight&demo=chapters` pokaže pogoje; po »Se strinjam« je na
@@ -5073,8 +5073,31 @@ se pokažejo pogoji. Čaka najkrajši čas pozdravnega zaslona, 5 s od odprtja s
 premika. Na hitri povezavi (lokalno, Wi-Fi fakultete) študent čaka 5 s minus čas do klika; na
 počasnem 4G je teh 5 s že mimo, čaka pa 8 s pred pogoji, s črto napredka.
 
-**Popravek v delu:** ko je študent odgovoril vsaj na en korak prvega zagona (jezik, pogoji, tema,
-podatki), pozdravni zaslon ne čaka več. Brez koraka ostane 5 s kot doslej.
+**Popravek, `dacbab61` (2026-10-13 20:34:19.298):** ko je študent odgovoril vsaj na en korak prvega
+zagona (jezik, pogoji, tema, podatki), pozdravni zaslon ne čaka več (`holdAfterSteps` v
+`splashScreen.js`). Brez koraka ostane 5 s kot doslej. Po »Se strinjam« se seznam poglavij pokaže
+takoj; vrstica »poglavja se nalagajo« ni potrebna, ker po kliku ni ničesar več za naložiti.
+
+**Izmerjeno po popravku** (360 × 780, nov profil, klik 1,5 s po prikazu pogojev, `sw.js` blokiran,
+ker ga omejitev strani ne zajame):
+
+| Kje                               | Pogoji vidni | Čakanje po kliku pred | Čakanje po kliku po |
+| --------------------------------- | ------------ | --------------------- | ------------------- |
+| lokalno, brez omejitve            | 0,9 s        | 2,9 s                 | 0,05–0,13 s         |
+| lokalno, Fast 3G                  | 35,2 s       | 0,06 s                | 0,05–0,1 s          |
+| lokalno, počasni 4G               | 19,7 s       | 0,16 s                | 0,05 s              |
+| objavljena stran, Fast 3G         | 11,5 s       | —                     | —                   |
+
+Fast 3G je prednastavitev orodij Chrome: 562,5 ms zakasnitve, 1,44 Mbit/s navzdol, 675 kbit/s
+navzgor. **Preizkušeno in opuščeno:** uvoz `storyTour.js` takoj na začetku `init()` za povezavo
+`?demo=chapters`. Zahteva se je začela 0,1 s prej, pogoji pa se niso pokazali nič prej, ker ves čas
+do pogojev porabi nalaganje 280 datotek aplikacije, ne zgodbe. **Preverjeno:** nov e2e test v
+`tests/e2e/test_demo_link_without_details.py` odpre točno to povezavo, sprejme pogoje in zahteva
+seznam poglavij v 2 s; enotni test za `holdAfterSteps`; celoten `build check` zelen (13 min 9 s).
+
+**Ostane:** na mobilnem omrežju prvi obisk do pogojev traja 8–12 s (objavljena stran, počasni 4G in
+Fast 3G), s črto napredka. To ni ta napaka; skrajša ga le manj datotek ob zagonu. **Zapre se**, ko
+meritev na objavljeni strani po Simonovem potisku pokaže čakanje po kliku pod 0,5 s.
 
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
