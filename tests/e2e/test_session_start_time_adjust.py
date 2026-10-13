@@ -235,6 +235,17 @@ def test_keeping_the_schedule_leaves_the_slot_and_counts_up(page, local_server):
     assert not _overlay_timer(page).startswith("-")
 
 
+def test_the_off_schedule_dialogs_close_button_is_named_in_the_apps_language(
+    page, local_server
+):
+    """The dialog is drawn after the page was translated, so its ✕ kept the English name "Close"
+    for a screen reader in the middle of a Slovenian dialog (a trainer week, 2026-10-09)."""
+    _launch_and_start(page, local_server, "?lang=sl")
+
+    close = page.locator(f"{DIALOG} .modal-close-btn")
+    assert close.get_attribute("aria-label") == "Zapri"
+
+
 def test_the_off_schedule_dialog_fits_a_phone_and_agrees_in_gender(page, local_server):
     """At 390 px "Končni čas" started at the dialog's right edge and ran off the screen, and the
     button that removes the session said "Ni se zgodila" (feminine) about a "trening" (masculine)."""

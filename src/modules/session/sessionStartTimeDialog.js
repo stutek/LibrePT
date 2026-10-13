@@ -98,6 +98,9 @@ function ensureStartTimeDialog(t) {
   // Re-labelled on every open, not only on creation: the trainer can switch language while a
   // dialog rendered under the old one is still in the DOM.
   dialog.querySelector("#session-start-time-title").textContent = t("session_start_time_title");
+  // The ✕'s name too: the page was translated before this dialog was drawn, so its
+  // data-i18n-label never ran and a screen reader heard "Close" in a Slovenian dialog.
+  dialog.querySelector(".modal-close-btn").setAttribute("aria-label", t("close"));
   dialog.querySelector("#session-start-time-start-label").textContent = t("label_start_time");
   dialog.querySelector("#session-start-time-end-label").textContent = t("label_end_time");
   dialog.querySelector("#btn-session-start-time-keep").textContent = t("session_start_time_keep");
