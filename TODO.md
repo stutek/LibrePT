@@ -5046,6 +5046,36 @@ pusti tam, ko se prst dvigne. Posnemani dotik tega ne naredi; s `:hover`, vsilje
 kartica širša in njen rob se stisne ob obroč. **Popravek v delu:** videz ob `:hover` za kartice v
 beležnici samo pri `@media (hover: hover)`.
 
+### 80.225 [~] P2 — Po »Se strinjam« na povezavi z letaka 3 s samo logotip, nič se ne premika — v delu
+
+**Najdba seje librept-ec, 2026-10-13:** povezava QR-kode z letaka
+`?workspace=sandbox&lang=sl&theme=daylight&demo=chapters` pokaže pogoje; po »Se strinjam« je na
+lokalnem strežniku 3,1 s na zaslonu le logotip in »Lahek in brezplačen pripomoček …«, šele nato
+»Vodeni ogled: izberi poglavje«. Študent lahko misli, da se je aplikacija ustavila.
+
+**Izmerjeno 2026-10-13 19:46:57.045 (podagent seje librept-ec), Chromium 360 × 780 v mobilnem načinu,
+nov profil, klik »Se strinjam« takoj, ko se pokaže:**
+
+| Kje                                   | Pogoji vidni | Zgodba naložena  | Klik   | Poglavja | Čakanje po kliku |
+| ------------------------------------- | ------------ | ---------------- | ------ | -------- | ---------------- |
+| lokalno, brez omejitve (dva zagona)   | 1,4–1,9 s    | 0,98–0,99 s      | 1,7 s  | 5,0 s    | 2,9–3,3 s        |
+| lokalno, počasni 4G                   | 19,9 s       | 18,5–19,2 s      | 20,1 s | 20,2 s   | 0,1 s            |
+| objavljena stran, brez omejitve       | 2,2 s        | 1,49–1,64 s      | 2,2 s  | —        | —                |
+| objavljena stran, počasni 4G          | 8,3 s        | 7,35–7,82 s      | 8,9 s  | —        | —                |
+
+Počasni 4G tu pomeni: 150 ms zakasnitve, 1,6 Mbit/s navzdol, 750 kbit/s navzgor (CDP
+`Network.emulateNetworkConditions`). Do pogojev se naloži 280 datotek: 3,2 MB z lokalnega strežnika,
+ki ne stiska, in 1,46 MB z GitHub Pages, ki stiska. Med nalaganjem do pogojev se premika črta napredka.
+
+**Vzrok:** ne nalaganje zgodbe. `storyTour.js` (39 KB) in `demoStory.js` (10 KB) sta naložena, preden
+se pokažejo pogoji. Čaka najkrajši čas pozdravnega zaslona, 5 s od odprtja strani
+(`DEFAULT_MINIMUM_VISIBLE_MS` v `splashScreen.js`). Po kliku je črta napredka skrita, zato se nič ne
+premika. Na hitri povezavi (lokalno, Wi-Fi fakultete) študent čaka 5 s minus čas do klika; na
+počasnem 4G je teh 5 s že mimo, čaka pa 8 s pred pogoji, s črto napredka.
+
+**Popravek v delu:** ko je študent odgovoril vsaj na en korak prvega zagona (jezik, pogoji, tema,
+podatki), pozdravni zaslon ne čaka več. Brez koraka ostane 5 s kot doslej.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
