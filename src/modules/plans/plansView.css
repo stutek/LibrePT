@@ -63,8 +63,12 @@
   padding: 8px;
   border-radius: var(--border-radius-sm);
 }
+/* `min-width: 0` because a select is as wide as its longest option by default, and a flex item
+   keeps that width: the longest exercise names of the Slovenian and German demo pushed the row
+   25px past a 390px screen. The closed select cuts a long name; the open list shows it whole. */
 .routine-builder-row select {
   flex: 1 0 100%;
+  min-width: 0;
 }
 /* The four numbers share the line with the remove button and each takes an equal part of it, so a
    two-digit number is never cut at 390px. Each has a caption that stays when the field is filled. */
