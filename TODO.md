@@ -904,13 +904,18 @@ users' association. Two open points it raises:
       carry the e-mail address and the student writes first; a reply asks before adding anyone to
       the meeting invitation. No list of students' data exists before the association does. The
       flyer and the spoken script are in the private campaign file.
-- [ ] **The flyer's QR now meets the trainer form first** (measured 2026-10-13 12:57:11.413 on the
+- [x] **The flyer's QR now meets the trainer form first** (measured 2026-10-13 12:57:11.413 on the
       live build `275a180`, 390 × 844, sl). `?lang=sl&init=demo_data_load`, `&demo=walkthrough` and
       `&demo=story` all show the terms, the theme, and then four required fields (name, surname,
       phone, e-mail) before any demo — as §81's ruling of 2026-09-26 says, "on every path". A
-      student at a notice board must type a phone number and an e-mail to see anything. *Blocks:*
-      a decision by Simon: keep the ruling and say it on the flyer (done for the campaign), or let a
-      demo link skip the form until the trainer leaves the sandbox.
+      student at a notice board must type a phone number and an e-mail to see anything. **Closed
+      2026-10-13 13:33:36.666 in `5401bdfc`** (Simon chose the second option; §81). The QR link is
+      now `https://stutek.github.io/LibrePT/?lang=sl&workspace=sandbox&demo=walkthrough`: terms,
+      theme, then the tour at »Korak 1 od 6«. Adding `&theme=daylight` also skips the theme step
+      (for that visit only; it is not saved). **The old link must not go on the flyer:**
+      `init=demo_data_load` writes the sample records into the student's own database, stamped as
+      test data, keeps the form, and a later start from the home-screen icon reports them as test
+      records in the student's data. Live after Simon's push.
 - [ ] **Three questions for Simon before the flyer is printed** (2026-10-12 23:56:55.186): whether the
       meeting date on it is fixed, whether a phone number goes on it, and the phone check of §80.154.
       Listed in the private campaign file, §2b. *Blocks:* printing the flyer as it is. **The first is
@@ -4964,6 +4969,14 @@ only while the sandbox is open. *Pending review* is only a status message in the
 client's history is only on that client's page. This replaced §11.3's plan of 14 rows.
 
 A client who opens an invitation link (`?evt=`) is not the trainer and never sees the trainer's form.
+
+**Changed 2026-10-13 13:01:43.980 (Simon, relayed by the campaign session):** »a je možen deep link za
+walktrough v QR kodi, brez vpisa podatkov o trenerju«. Done 2026-10-13 13:33:36.666 in `5401bdfc`: when
+the app opens in the sandbox, the welcome screen asks the language, the terms and the theme, and not
+the four details. Leaving the sandbox for the trainer's own work with the details missing opens the
+details form with no ✕, no Cancel and no Escape. A first start outside the sandbox asks for them as
+before. `?init=demo_data_load` is not the sandbox and keeps the form: it writes sample records into the
+trainer's own database, stamped as test data. The flyer link is in §23.6.
 
 §81.1–§81.4, §81.6 and §81.7 are done. Open: §81.5, iCloud only.
 
