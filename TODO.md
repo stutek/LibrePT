@@ -3911,6 +3911,12 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80117-x-p3--tre
 
 ### 80.118 [ ] P2 — Zaslon treninga ima dve imeni, »beležka« in »podloga«, in nobeno ni razloženo
 
+**Stanje 2026-10-13 18:40:58.665 (Claude):** dveh imen ni več. V `src/`, `use_cases/` in `docs/` ni
+nobenega »podlog« ali »beležk«; `src/i18n/sl.js` ima povsod »beležnica« (»Odpri v beležnici«,
+»Odpri beležnico treninga«). Simon 2026-10-13: »podloga sva zamenjala v preteklosti«. Odprto ostane
+samo vprašanje, ali trener »beležnico« razume brez razlage — ali naj prvi stavek aplikacije pove,
+kaj je; preveri to naslednji preizkus s trenerjem brez predznanja.
+
 **Scenarij in koraki:** prvi zagon. Prebrati prvi stavek aplikacije, nato ustvariti trening in
 pritisniti »Odpri v beležki«.
 
