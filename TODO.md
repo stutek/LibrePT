@@ -4541,15 +4541,9 @@ listka. Ta izdaja je bila 541 commitov za `main`; točke so razvrščene proti `
 - **Preverjeno 2026-10-01 (`62e51aa2`):** delo brez povezave (vnos stranke in treninga, reload s servisnim delavcem ohrani IndexedDB; clean), varnostna kopija in obnova (izvoz JSON, uvoz in obnova v sveži seji zamenja podatke; clean), zapis v zgodovino po zaključku (brez zamrznitve, modal v aplikaciji, zgodovina v kartoteki stranke prikazuje opravljene serije in vaje; clean).
 - **Še ni preverjeno:** tisk, fizični telefon.
 
-### 80.164 [ ] P2 — Ocena obrazca »Urejanje profila stranke«: gumb »Shrani stranko« odpre pod robom, Esc tiho zavrže spremembe
+### 80.164 [x] P2 — Ocena obrazca »Urejanje profila stranke«: gumb »Shrani stranko« odpre pod robom, Esc tiho zavrže spremembe — ni ponovljivo, zaprto 2026-10-13
 
-**Scenarij in koraki:** ☰ → »Imenik strank« → odpri stranko (»Maja Golob«) → »Uredi profil«.
-
-**Opaženo:** Ob odprtju obrazca je dno gumba »Shrani stranko« na 889 pikah, kar je pri 390 × 844 natanko 45 pik pod robom zaslona, pri 320 × 680 pa 209 pik pod robom. Trener mora podrsati navzdol, da doseže gumb za shranjevanje. Pritisk tipke Escape zapre modal in tiho zavrže vpisano spremembo (sprememba telefona z 040 123 456 na 040 999 888 se po Esc izgubi brez opozorila, profil ohrani staro številko).
-
-**Težava in vpliv:** Na telefonu z eno roko se trener sprašuje, kje je gumb za shranjevanje. Pri delu z namensko tipkovnico ali tipko Nazaj/Esc pa se vpisani popravki zdravstvenega stanja ali kontakta tiho izgubijo.
-
-**Predlog:** Gumba »Shrani stranko« in »Prekliči« naj bosta v fiksni vrstici na dnu modala (kot pri drugih obrazcih); Esc ali zapiranje zunaj naj opozori ali shrani skladno s pravilom o ohranjanju vnosa. Opaženo na `0e94b8f5`, sl, 390 × 844 in 320 × 680.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#80164-x-p2--ocena-obrazca-urejanje-profila-stranke-gumb-shrani-stranko-odpre-pod-robom-esc-tiho-zavrže-spremembe--ni-ponovljivo-zaprto-2026-10-13).
 
 ### 80.165 [ ] P3 — Vrstica obvestil je v nemščini in slovenščini pri 390 pikah preširoka
 

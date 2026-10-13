@@ -10330,3 +10330,22 @@ serije: serij je ostalo enako, 16 kartic je torek in četrtek v osmih tednih, br
 serije iz večera ne naredi `commitSeriesUnlessEveningOfOne` v
 `modules/session/editSessionControl.js` (od `f9c2e002`, 2026-09-30, torej že pred `166d3c8`).
 Kako je teden r04 prišel do dveh serij, ostane neznano.
+
+### 80.164 [x] P2 — Ocena obrazca »Urejanje profila stranke«: gumb »Shrani stranko« odpre pod robom, Esc tiho zavrže spremembe — ni ponovljivo, zaprto 2026-10-13
+
+**Scenarij in koraki:** ☰ → »Imenik strank« → odpri stranko (»Maja Golob«) → »Uredi profil«.
+
+**Opaženo:** Ob odprtju obrazca je dno gumba »Shrani stranko« na 889 pikah, kar je pri 390 × 844 natanko 45 pik pod robom zaslona, pri 320 × 680 pa 209 pik pod robom. Trener mora podrsati navzdol, da doseže gumb za shranjevanje. Pritisk tipke Escape zapre modal in tiho zavrže vpisano spremembo (sprememba telefona z 040 123 456 na 040 999 888 se po Esc izgubi brez opozorila, profil ohrani staro številko).
+
+**Težava in vpliv:** Na telefonu z eno roko se trener sprašuje, kje je gumb za shranjevanje. Pri delu z namensko tipkovnico ali tipko Nazaj/Esc pa se vpisani popravki zdravstvenega stanja ali kontakta tiho izgubijo.
+
+**Predlog:** Gumba »Shrani stranko« in »Prekliči« naj bosta v fiksni vrstici na dnu modala (kot pri drugih obrazcih); Esc ali zapiranje zunaj naj opozori ali shrani skladno s pravilom o ohranjanju vnosa. Opaženo na `0e94b8f5`, sl, 390 × 844 in 320 × 680.
+
+**Ni ponovljeno (Claude, 2026-10-13 13:21:00.236, `main` `55d21cd0`, Playwright Chromium, sl).**
+Gumb za shranjevanje v »Uredi profil« in »Dodaj stranko« je ob odprtju na zaslonu in sprejme dotik
+(`document.elementFromPoint` v njegovem središču vrne gumb): pri 390 × 844 na 760–804 pikah, pri
+320 × 680 na 596–640 pikah, tudi po vpisu petih vrstic v »Opombe«. Telefon spremenjen v
+»040 999 888«: po Esc in po ✕ je nova številka shranjena in na strani stranke; po »Prekliči« ostane
+stara. To je pravilo, ki ga je Simon postavil 2026-09-17 (»Prekliči« razveljavi, vsak drug izhod
+zapis dokonča, `modules/common/liveRecordForm.js`). Ali naj ✕ in Esc preideta k »Prekliči«, je
+odprto vprašanje §80.41.
