@@ -4985,6 +4985,21 @@ besedilo je v `.private/exploratory-test/weeks/2026-10-10/runs/<tek>/findings.md
 - **F-r10-12 (vrzel):** termina ni mogoče označiti kot pogojnega (»velja, če stranka plača do
   poldne«); trener pogoj hrani v opombah profila, kjer ga termin ne pokaže.
 
+### 80.222 [ ] P1 — Poteza L na beležnici: vstran deluje, navzgor ne odpre prejšnjega ali naslednjega treninga — v delu
+
+**Simon, 2026-10-13 19:09:43.231** (prek seje librept-ec): »meni drsenje v obliki črke l ne deluje za
+trajni skok na prejšnji ali naslednji trening? delam kaj narobe (drsenje desno deluje, gor pa ne).
+Kartica naj se pomakne tudi gor ali dol, tako kot gre prst (ne samo levo ali desno)«. Telefon in
+brskalnik še nista znana.
+
+**Scenarij:** beležnica živega treninga, pritisk in poteg vstran, nato s prstom navzgor, ne da bi ga
+dvignil. **Opaženo:** beležnica se premakne vstran, poteza navzgor ne odpre ničesar.
+
+**V delu (2026-10-13 19:18:58.562, podagent seje librept-ec):** ponovljeno z zaporedjem dotikov prek
+CDP v Chromiumu pri 390 × 844: če prst med potezo navzgor še malo zanaša navzven (2–3 px na 6 px
+dviga), se nič ne odpre. `planPeek.js` je dvig meril od točke najglobljega potega in jo premikal s
+prstom, dokler se je poteg še poglabljal. Popravek in testi so v delu.
+
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
 **Ruled 2026-09-26 (Simon):** the welcome screen makes the language, the theme, and the trainer's first
