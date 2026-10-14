@@ -636,13 +636,13 @@ export const sl = {
   schedule_conflict_merged: "Poteka vzporedno — odpre se v eni beležnici",
   schedule_conflict_confirm:
     "Ta termin se prekriva z nečim, kar že imaš. Želiš trening vseeno razporediti?",
-  session_start_time_title: "Trening se je začel izven urnika",
+  session_start_time_title: "Trening začenjaš izven urnika",
   session_start_time_desc:
-    "Načrtovano ob {scheduled}, začeto {amount} {direction}. Želiš trening premakniti na dejanski čas izvedbe?",
+    "Načrtovano ob {scheduled}, začenjaš {amount} {direction}. Želiš trening premakniti na dejanski čas izvedbe?",
   session_start_time_late: "prepozno",
   session_start_time_early: "prezgodaj",
-  session_start_time_keep: "Ohrani urnik",
-  session_start_time_apply: "Prilagodi čas",
+  session_start_time_keep: "Začni po urniku",
+  session_start_time_apply: "Začni ob novem času",
   session_start_time_delete: "Ni se zgodil",
   demo_cleanup_title: "Počisti vzorčne podatke",
   demo_cleanup_desc:

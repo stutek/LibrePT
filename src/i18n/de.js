@@ -659,13 +659,13 @@ export const de = {
   schedule_conflict_merged: "Läuft parallel — öffnet sich als ein Klemmbrett",
   schedule_conflict_confirm:
     "Dieser Termin überschneidet sich mit etwas, für das du schon gebucht bist. Trotzdem eintragen?",
-  session_start_time_title: "Training außerhalb der geplanten Zeit gestartet",
+  session_start_time_title: "Start außerhalb der geplanten Zeit",
   session_start_time_desc:
-    "Geplant für {scheduled}, gestartet {amount} {direction}. Das Training auf die Zeit verschieben, zu der es wirklich läuft?",
+    "Geplant für {scheduled}, Start {amount} {direction}. Das Training auf die Zeit verschieben, zu der es wirklich läuft?",
   session_start_time_late: "zu spät",
   session_start_time_early: "zu früh",
-  session_start_time_keep: "Geplante Zeit behalten",
-  session_start_time_apply: "Zeit anpassen",
+  session_start_time_keep: "Wie geplant starten",
+  session_start_time_apply: "Zur neuen Zeit starten",
   session_start_time_delete: "Hat nicht stattgefunden",
   demo_cleanup_title: "Demodaten löschen",
   demo_cleanup_desc:

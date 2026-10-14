@@ -70,6 +70,16 @@ def _open_delete_dialog(page, local_server):
     page.wait_for_selector("#active-session-overlay:not(.hidden)")
 
 
+def _start(page):
+    # Off its slot, Start asks about the schedule first and starts only on an answer; ✕ or Escape
+    # would cancel the start.
+    page.click("#btn-start-session")
+    page.wait_for_selector("#dialog-session-start-time[open], #btn-finish-session:visible")
+    if page.locator("#dialog-session-start-time[open]").count():
+        page.click("#btn-session-start-time-keep")
+    page.wait_for_selector("#btn-finish-session")
+
+
 def _ask_to_delete(page):
     page.click("#btn-session-menu")
     page.click("#btn-delete-session")
@@ -108,9 +118,7 @@ def test_a_started_session_says_its_sets_and_is_deleted_only_by_sliding_to_the_e
     page, local_server
 ):
     _open_delete_dialog(page, local_server)
-    page.click("#btn-start-session")
-    page.wait_for_selector("#dialog-session-start-time[open], #btn-finish-session")
-    page.keyboard.press("Escape")
+    _start(page)
     page.evaluate(CLEAR_LOGGED_SETS)
     page.evaluate(LOG_ONE_SET)
     before = page.evaluate(COUNT_SESSIONS_TITLED, CARD_TITLE)
@@ -144,9 +152,7 @@ def test_a_tap_at_the_far_end_of_the_slider_deletes_nothing(page, local_server):
     # A range input jumps to wherever it is touched. One tap at the end of the track is what a
     # phone in a pocket does, and it must not count as a slide.
     _open_delete_dialog(page, local_server)
-    page.click("#btn-start-session")
-    page.wait_for_selector("#dialog-session-start-time[open], #btn-finish-session")
-    page.keyboard.press("Escape")
+    _start(page)
     before = page.evaluate(COUNT_SESSIONS_TITLED, CARD_TITLE)
     _ask_to_delete(page)
 
@@ -250,9 +256,7 @@ def test_a_link_to_a_cancelled_session_opens_no_clipboard(page, local_server):
 
 def test_a_started_session_is_cancelled_only_by_sliding(page, local_server):
     _open_delete_dialog(page, local_server)
-    page.click("#btn-start-session")
-    page.wait_for_selector("#dialog-session-start-time[open], #btn-finish-session")
-    page.keyboard.press("Escape")
+    _start(page)
     _ask_to_cancel(page)
 
     assert page.locator("#app-question-confirm").is_visible() is False
@@ -284,9 +288,7 @@ def test_a_started_session_can_be_deleted_from_the_keyboard_with_the_end_key(
     page, local_server
 ):
     _open_delete_dialog(page, local_server)
-    page.click("#btn-start-session")
-    page.wait_for_selector("#dialog-session-start-time[open], #btn-finish-session")
-    page.keyboard.press("Escape")
+    _start(page)
     page.evaluate(CLEAR_LOGGED_SETS)
     before = page.evaluate(COUNT_SESSIONS_TITLED, CARD_TITLE)
     _ask_to_delete(page)

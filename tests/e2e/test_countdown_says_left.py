@@ -14,7 +14,7 @@ def test_a_session_counting_down_to_its_end_says_left(page, local_server):
     page.locator(".session-card", has_text=SESSION_A).first.click()
     page.wait_for_selector("#active-session-overlay:not(.hidden)")
     page.click("#btn-start-session")
-    page.click("#dialog-session-start-time[open] .modal-close-btn")
+    page.click("#dialog-session-start-time[open] #btn-session-start-time-keep")
     page.wait_for_selector("#dialog-session-start-time[open]", state="detached")
 
     caption = page.locator("#overlay-session-timer .session-timer-caption")

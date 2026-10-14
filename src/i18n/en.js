@@ -654,13 +654,13 @@ export const en = {
   schedule_conflict_merged: "Runs alongside — opens as one clipboard",
   schedule_conflict_confirm:
     "This slot clashes with something you are already booked for. Schedule it anyway?",
-  session_start_time_title: "Session started off schedule",
+  session_start_time_title: "Starting off schedule",
   session_start_time_desc:
-    "Scheduled for {scheduled}, started {amount} {direction}. Move the session to when it is actually running?",
+    "Scheduled for {scheduled}, starting {amount} {direction}. Move the session to when it is actually running?",
   session_start_time_late: "late",
   session_start_time_early: "early",
-  session_start_time_keep: "Keep scheduled",
-  session_start_time_apply: "Adjust time",
+  session_start_time_keep: "Start as scheduled",
+  session_start_time_apply: "Start at new time",
   session_start_time_delete: "Didn't happen",
   demo_cleanup_title: "Clear demo data",
   demo_cleanup_desc:

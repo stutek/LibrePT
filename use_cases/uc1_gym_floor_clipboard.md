@@ -210,7 +210,7 @@ graph LR
 
 ### 3. Alternative Flows
 - **Offline Mode**: If internet access is lost on the gym floor, all signals, focus card progressions, and typed notes are saved locally in browser storage, syncing automatically once a connection is re-established.
-- **Session starts off schedule**: Gyms run late — the previous group overruns, a client turns up twenty minutes after the hour. When **Start** is tapped more than **±15 minutes** from the scheduled slot, the session starts *immediately* (nothing waits on a dialog) and the PT is then **offered the schedule**, prefilled with the whole slot shifted onto the clock and keeping its planned length. Accepting moves the slot on the dashboard card and on the session record, so history and the day's timeline record when the session actually ran; declining (**Keep scheduled**, Esc, or ✕) changes nothing. A session begun *after* its scheduled end has no countdown left to run, so its clock **counts up from the actual start** rather than opening on an overrun it never had.
+- **Session starts off schedule**: Gyms run late — the previous group overruns, a client turns up twenty minutes after the hour. When **Start** is tapped more than **±15 minutes** from the scheduled slot, the PT is first **offered the schedule**, prefilled with the whole slot shifted onto the clock and keeping its planned length, and the session starts only on an answer, timed from the tap on Start. **Start at new time** starts it and moves the slot on the dashboard card and on the session record, so history and the day's timeline record when the session actually ran; **Start as scheduled** starts it in its slot; **Didn't happen** deletes it. Esc or ✕ **cancels the start**: the session stays on the clipboard, not started, with Start still on the title bar. A session begun *after* its scheduled end has no countdown left to run, so its clock **counts up from the actual start** rather than opening on an overrun it never had.
 
 ## Spec ↔ test traceability
 
@@ -230,6 +230,6 @@ graph LR
 | A timer leaves only by ✕, and sounds once when it crosses zero, not again after a reload | [test_timer_stack.py](../tests/e2e/test_timer_stack.py) |
 | Offline: the app opens, a saved address opens, and a note logged offline is kept | [test_offline_gym_floor.py](../tests/e2e/test_offline_gym_floor.py) |
 | Offline: the header says so, and a sync attempt reports the server unreachable | [test_offline_cached_signal.py](../tests/medium/test_offline_cached_signal.py) |
-| A start off schedule offers the new time; declining changes nothing; counts up after the end | [test_session_start_time_adjust.py](../tests/e2e/test_session_start_time_adjust.py) |
+| A start off schedule offers the new time first; ✕ or Esc cancels the start; counts up after the end | [test_session_start_time_adjust.py](../tests/e2e/test_session_start_time_adjust.py) |
 | Completing stamps the booking completed, with its duration | [test_session_status_line.py](../tests/e2e/test_session_status_line.py) |
 | Plan pivot and placeholder cards | **Not built** — nothing in `src/` implements them; the question is open in TODO.md. |

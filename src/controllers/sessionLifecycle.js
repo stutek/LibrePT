@@ -289,15 +289,31 @@ function pointAtFirstExerciseNotDone(clientState) {
   if (index >= 0) clientState.activeExerciseIndex = index;
 }
 
+// Off its slot, the session starts only once the trainer has answered the schedule question
+// (sessionScheduleAdjustment.js): closing that question with ✕ or Escape cancels the start. The
+// start time is still the tap on Start, not the answer.
 export function beginWorkoutSession() {
   const activeSession = getActiveSession();
   if (!activeSession || activeSession.started) return;
+  const startedAt = Date.now();
+  const asked = offerScheduleAdjustment({
+    startedAt,
+    onStart: () => startSessionAt(activeSession, startedAt),
+    onDeleteSession: deleteScheduledSession,
+    deleteQuestion: deleteSessionQuestion,
+  });
+  if (!asked) startSessionAt(activeSession, startedAt);
+}
+
+function startSessionAt(activeSession, startedAt) {
+  // The question is modal, but a session opened over it some other way must not be started.
+  if (getActiveSession() !== activeSession || activeSession.started) return;
   for (const clientState of Object.values(activeSession.clientRoutines || {})) {
     pointAtFirstExerciseNotDone(clientState);
   }
   activeSession.started = true;
-  activeSession.startTime = Date.now();
-  activeSession.duration = 0;
+  activeSession.startTime = startedAt;
+  activeSession.duration = Math.floor((Date.now() - startedAt) / 1000);
   saveActiveSession();
   requestScreenWakeLock();
   startSessionTimer();
@@ -305,10 +321,6 @@ export function beginWorkoutSession() {
   // The homepage's "Active session" badge is stamped at renderSessions() time, not derived live —
   // without this, a card only picks up the started session on the NEXT unrelated re-render.
   getAppDeps().renderSessions?.();
-  offerScheduleAdjustment({
-    onDeleteSession: deleteScheduledSession,
-    deleteQuestion: deleteSessionQuestion,
-  });
 }
 
 /** The trainer throws the plan away: its programs are kept as discarded, so it does not come back in

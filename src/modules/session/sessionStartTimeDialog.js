@@ -6,10 +6,9 @@
 // that is wrong. Left uncorrected the session logs against a slot it did not run in, and every
 // countdown on screen is measured from a plan nobody followed.
 //
-// Deliberately non-blocking: the session has ALREADY started by the time this opens, so the dialog
-// only edits the schedule around a session that is running. Dismissing it (X, Escape, or "Keep
-// scheduled") keeps the original slot — a trainer on the gym floor is never held up by a modal they
-// did not ask for.
+// Asked BEFORE the session starts. "Keep scheduled" starts it in its slot and "Adjust time" starts
+// it in the slot typed here; ✕ and Escape start nothing, because a Start tapped by mistake must be
+// undoable, and a trainer reads ✕ as "not this" rather than as "yes, as planned".
 //
 // Owns `#dialog-session-start-time`'s markup. Both ends are editable rather than just shifted,
 // because "we actually started 20 minutes ago and I forgot to tap Start" and "we start now and run
@@ -30,6 +29,7 @@ const DIALOG_ID = "dialog-session-start-time";
 // Set per open, read by the listeners bound once below — the callbacks close over the session being
 // started, so they cannot be captured at wiring time.
 let applyChoice = null;
+let keepChoice = null;
 let deleteChoice = null;
 
 function wireStartTimeDialog(dialog) {
@@ -47,9 +47,13 @@ function wireStartTimeDialog(dialog) {
     closeModal(DIALOG_ID);
     deleteChoice?.();
   });
-  for (const dismiss of dialog.querySelectorAll(".modal-close-btn, #btn-session-start-time-keep")) {
-    dismiss.addEventListener("click", () => closeModal(DIALOG_ID));
-  }
+  dialog.querySelector("#btn-session-start-time-keep").addEventListener("click", () => {
+    closeModal(DIALOG_ID);
+    keepChoice?.();
+  });
+  dialog
+    .querySelector(".modal-close-btn")
+    .addEventListener("click", () => closeModal(DIALOG_ID));
 }
 
 function ensureStartTimeDialog(t) {
@@ -135,8 +139,8 @@ function describeDrift(driftMs, scheduledLabel, t) {
 
 // `onApply({ startValue, endValue })` receives the two raw "HH:MM" field values — turning them into
 // a schedule and persisting it belongs to the caller, since this module knows nothing about state.
-// `onDelete()` is the same deal for "this session never happened": confirming it and taking the
-// slot off the board are the caller's, not this dialog's.
+// `onKeep()` starts the session in its slot. `onDelete()` is the same deal for "this session never
+// happened": confirming it and taking the slot off the board are the caller's, not this dialog's.
 export function openSessionStartTimeDialog({
   t,
   scheduledLabel,
@@ -144,6 +148,7 @@ export function openSessionStartTimeDialog({
   proposedStartMs,
   proposedEndMs,
   onApply,
+  onKeep,
   onDelete,
 }) {
   const dialog = ensureStartTimeDialog(t);
@@ -158,6 +163,7 @@ export function openSessionStartTimeDialog({
   dialog.querySelector("#session-start-time-end").value = formatClockFromEpoch(proposedEndMs);
 
   applyChoice = onApply;
+  keepChoice = onKeep;
   deleteChoice = onDelete;
   openModal(DIALOG_ID);
 }

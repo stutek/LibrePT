@@ -48,19 +48,51 @@ def _overlay_timer(page):
     return page.inner_text("#overlay-session-duration").strip()
 
 
+def _started(page):
+    return page.evaluate(
+        """async () => {
+          const ctl = await import(new URL('controllers/activeSessionController.js', document.baseURI).href);
+          return !!ctl.getActiveSession()?.started;
+        }"""
+    )
+
+
+def _live_program_count(page):
+    return page.evaluate(
+        """async () => {
+            const store = await import(new URL('data/stateStore.js', document.baseURI).href);
+            const records = await import(new URL('data/trainingRecords.js', document.baseURI).href);
+            return records.livePrograms(store.getState()).length;
+        }"""
+    )
+
+
+def test_closing_the_off_schedule_dialog_does_not_start_the_session(page, local_server):
+    """✕ on this dialog started the session at its old times, and a trainer who tapped Start by
+    mistake had a live session they had not asked for. ✕ and Escape now cancel the start: the
+    session stays staged, with Start still on the title bar, and nothing is written as live."""
+    for close in (
+        lambda: page.click(f"{DIALOG} .modal-close-btn"),
+        lambda: page.keyboard.press("Escape"),
+    ):
+        _launch_and_start(page, local_server)
+        live_before = _live_program_count(page)
+        close()
+        page.wait_for_selector(f"{DIALOG}[open]", state="detached")
+
+        assert _started(page) is False
+        assert page.locator("#btn-start-session").is_visible() is True
+        assert page.locator("#overlay-session-timer").is_visible() is False
+        assert _live_program_count(page) == live_before
+
+
 def test_starting_late_offers_the_schedule_and_never_a_negative_clock(
     page, local_server
 ):
     _launch_and_start(page, local_server)
 
-    # The session is already RUNNING behind the dialog — nothing on the gym floor waits on a modal
-    # the trainer did not ask for.
-    assert page.locator("#overlay-session-timer").is_visible() is True
-    opening = _overlay_timer(page)
-    assert HOUR_MIN.match(opening), f"expected an 'HHh MMm' clock, got {opening!r}"
-    assert not opening.startswith("-"), (
-        f"a session cannot open on an overrun it has not had: {opening!r}"
-    )
+    # Nothing runs behind the dialog: the trainer's answer is what starts the session.
+    assert _started(page) is False
 
     # Prefilled with the whole slot shifted onto now, keeping the two hours it was planned for.
     start_value = page.input_value("#session-start-time-start")
@@ -71,6 +103,9 @@ def test_starting_late_offers_the_schedule_and_never_a_negative_clock(
 
     page.click("#btn-session-start-time-apply")
     page.wait_for_selector(f"{DIALOG}[open]", state="detached")
+    assert _started(page) is True
+    opening = _overlay_timer(page)
+    assert HOUR_MIN.match(opening), f"expected an 'HHh MMm' clock, got {opening!r}"
 
     # The clipboard's own title line and its countdown move together — a trainer who corrects the
     # time in one place expects the rest to agree.
@@ -105,7 +140,7 @@ def test_a_session_started_late_survives_a_reload(page, local_server):
     # Start button restored, and everything logged into the session went with it. A started session
     # is now a live program, which nothing ages out: only finishing or deleting it ends it.
     _launch_and_start(page, local_server)
-    page.click(f"{DIALOG} .modal-close-btn")
+    page.click("#btn-session-start-time-keep")
     page.wait_for_selector(f"{DIALOG}[open]", state="detached")
     session_url = page.url
     page.evaluate(
@@ -119,16 +154,7 @@ def test_a_session_started_late_survives_a_reload(page, local_server):
     page.wait_for_selector("#active-session-overlay:not(.hidden)")
     assert page.locator("#overlay-session-timer").is_visible() is True
     assert page.locator("#btn-start-session").is_visible() is False
-    assert (
-        page.evaluate(
-            """async () => {
-            const store = await import(new URL('data/stateStore.js', document.baseURI).href);
-            const records = await import(new URL('data/trainingRecords.js', document.baseURI).href);
-            return records.livePrograms(store.getState()).length;
-        }"""
-        )
-        > 0
-    )
+    assert _live_program_count(page) > 0
 
 
 def _unscheduled_plan_count(page):
@@ -290,7 +316,7 @@ def test_start_opens_the_first_exercise_not_yet_done(page, local_server):
         }"""
     )
     page.click("#btn-start-session")
-    page.wait_for_selector(f"{DIALOG}[open]")
+    page.click(f"{DIALOG}[open] #btn-session-start-time-keep")
     index = page.evaluate(
         """async () => {
           const ctl = await import(new URL('controllers/activeSessionController.js', document.baseURI).href);

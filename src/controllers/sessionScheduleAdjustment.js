@@ -68,13 +68,13 @@ function applyAdjustedSchedule({ startMs, endMs }) {
 }
 
 // A session started well outside its slot means the SCHEDULE is wrong, not the trainer — gyms run
-// late. Offer to move the slot onto the session (sessionStartTimeDialog.js). Deliberately raised
-// after the session is already running, so nothing on the gym floor waits behind a modal.
-export function offerScheduleAdjustment({ onDeleteSession, deleteQuestion }) {
-  const activeSession = getActiveSession();
-  const sourceSession = activeSession?.sourceSession;
-  const startedAt = activeSession?.startTime;
-  if (!startedAt || !isScheduleDriftWorthAdjusting(sourceSession, startedAt)) return;
+// late. Offer to move the slot onto the session (sessionStartTimeDialog.js). Asked BEFORE the
+// session starts: both "keep" and "adjust" call `onStart`, and ✕ or Escape call nothing, so a
+// Start tapped by mistake is undone by closing the question. Returns whether it asked; when it did
+// not, starting is the caller's.
+export function offerScheduleAdjustment({ startedAt, onStart, onDeleteSession, deleteQuestion }) {
+  const sourceSession = getActiveSession()?.sourceSession;
+  if (!isScheduleDriftWorthAdjusting(sourceSession, startedAt)) return false;
   const appDeps = getAppDeps();
 
   const { startMs, endMs } = proposeAdjustedSchedule(sourceSession, startedAt);
@@ -84,7 +84,9 @@ export function offerScheduleAdjustment({ onDeleteSession, deleteQuestion }) {
     driftMs: computeScheduleDriftMs(sourceSession, startedAt),
     proposedStartMs: startMs,
     proposedEndMs: endMs,
+    onKeep: onStart,
     onApply: ({ startValue, endValue }) => {
+      onStart();
       const schedule = resolveScheduleFromClockValues({
         baseMs: startedAt,
         startValue,
@@ -100,4 +102,5 @@ export function offerScheduleAdjustment({ onDeleteSession, deleteQuestion }) {
       }
     },
   });
+  return true;
 }

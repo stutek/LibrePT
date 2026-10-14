@@ -122,7 +122,7 @@ def test_a_running_session_keeps_its_day_and_says_why(page, local_server):
     page.locator('.session-card[data-session-id="s01f2e3d"]').click()
     page.wait_for_selector("#active-session-overlay:not(.hidden)")
     page.click("#btn-start-session")
-    page.click("#dialog-session-start-time[open] .modal-close-btn")
+    page.click("#dialog-session-start-time[open] #btn-session-start-time-keep")
 
     page.goto(f"{local_server}session/setup/s01f2e3d")
     page.wait_for_selector("#setup-session-date")
