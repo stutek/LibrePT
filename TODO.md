@@ -6970,3 +6970,18 @@ datoteko izroči, kartica v predalu z lastnim gumbom za zapiranje je zahvala ob 
 - [ ] Pravila za kartico, ki ni delo trenerja, veljajo kot v §68.2: nikoli med treningom, z besedami,
       ki povedo, kaj je.
 - **Rok:** pred prvim srečanjem v novembru; *blokira:* datum srečanja, ki ga določi Simon.
+
+## 111. [ ] Konkurenčna prednost v kampanji: uskladi s Simonovo opredelitvijo
+
+Simon, 2026-10-14 09:53:44.354: v fokusu so personalizirana aplikacija, cenovno ugodnejša,
+neodvisnost poslovanja, zasebnost in preprostost aplikacije. Zasebni načrt kampanje
+(`.private/go-to-market-campaign.md` §2, vrstica 39) pa kot glavno prednost (»real moat«) navaja
+slovenski prevod, osnutek nagovora pa začne z »free and Slovenian«. Slovenski prevod je prednost le ob
+vstopu na slovenski trg.
+
+**Odprto:**
+- [ ] Prepiši §2 načrta kampanje in osnutek nagovora tako, da vodi teh pet prednosti.
+- [ ] Preveri letak za Fakulteto za šport proti tem prednostim.
+- [ ] Simon pove, kaj pomeni »personalizirana« (prilagojena trenerju, vadba po meri stranke ali
+      prilagodljiva koda), da se v besedilih ne ugiba.
+- **Rok:** pred obiskom Fakultete za šport 2026-10-15 (letak); *blokira:* besedilo letaka in nagovora.
