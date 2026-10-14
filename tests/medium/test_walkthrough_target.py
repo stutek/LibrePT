@@ -273,6 +273,63 @@ def test_the_waves_take_the_theme_colour(page, local_server):
     )
 
 
+# The L that opens the previous session, moved the way the player moves it: a press, twelve points
+# sideways, twelve points up. Each ring's centre is read off the position it was given, not off its
+# box, because the box grows while the ring expands.
+WAKE_STUB = """
+import { liftDemoHand, mountDemoHand, moveDemoHand, pressDemoHand } from './modules/demo/demoHand.js';
+const hand = mountDemoHand();
+const ringCentres = () => [...document.querySelectorAll('.demo-tour-ripple')].map((ring) => ({
+  x: parseFloat(ring.style.getPropertyValue('--ripple-x')),
+  y: parseFloat(ring.style.getPropertyValue('--ripple-y')),
+}));
+window.__dragAndMeasureWake = () => {
+  moveDemoHand(hand, 60, 300);
+  pressDemoHand(hand);
+  const atPress = ringCentres().length;
+  for (let i = 1; i <= 12; i += 1) moveDemoHand(hand, 60 + (200 * i) / 12, 300);
+  for (let i = 1; i <= 12; i += 1) moveDemoHand(hand, 260, 300 - (90 * i) / 12);
+  liftDemoHand(hand);
+  return { atPress, wake: ringCentres().slice(atPress) };
+};
+"""
+
+
+def test_a_drag_leaves_a_wake_along_its_whole_path(page, local_server):
+    """Wanted 2026-10-14: the gesture drawn as a hand and a disturbed water surface, the same in the
+    Show me animation and on the campaign flyer.
+
+    The rings at the press say where the finger went down; a drag that drew nothing after them showed
+    a hand gliding over the glass. A ring left at every few pixels of the path, oldest widest, shows
+    the finger held down and moved, and in which direction, with no arrow.
+    """
+    load_with_stub(page, local_server, WAKE_STUB)
+    page.wait_for_selector("#demo-tour-hand")
+
+    measured = page.evaluate("() => window.__dragAndMeasureWake()")
+    wake = measured["wake"]
+
+    assert measured["atPress"] >= 1, "the press itself still sends its rings"
+    assert len(wake) >= 8, f"{len(wake)} rings along a 290px drag"
+    # In the order the finger travelled: right along the first leg, then up the second.
+    sideways = [ring for ring in wake if ring["y"] == 300]
+    upward = [ring for ring in wake if ring["x"] == 260 and ring["y"] < 300]
+    assert len(sideways) + len(upward) == len(wake), f"a ring off the path: {wake}"
+    assert [r["x"] for r in sideways] == sorted(r["x"] for r in sideways)
+    assert [r["y"] for r in upward] == sorted((r["y"] for r in upward), reverse=True)
+    assert upward, "the upward stroke of the L left no wake"
+    # No stretch of the path left bare: the last ring is near where the finger lifted.
+    assert abs(wake[-1]["y"] - 210) <= 30, f"the wake stops at {wake[-1]}, the finger lifted at 260,210"
+
+
+def test_the_wake_cleans_up_after_itself(page, local_server):
+    load_with_stub(page, local_server, WAKE_STUB)
+    page.wait_for_selector("#demo-tour-hand")
+
+    page.evaluate("() => window.__dragAndMeasureWake()")
+    expect(page.locator(".demo-tour-ripple")).to_have_count(0, timeout=3_000)
+
+
 # The rings and the real click are ONE gesture, and the click is what can replace the whole screen.
 # So the order between them is a product property, not an implementation detail — measured here in
 # the player's own injected clock rather than against the wall, which makes it exact instead of

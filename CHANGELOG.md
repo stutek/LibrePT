@@ -18,6 +18,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-10-14 — The demonstrated drag leaves a wake
+
+### Changed
+
+- **Show me draws a drag as a hand on water.** While the hand is held down and moves, it leaves a
+  ring every 24 px. The older rings are wider and fainter, so the path and its direction show without
+  an arrow. The press still sends its three rings. The campaign flyer draws the same hand, read from
+  the app's own drawing.
+
+### Fixed
+
+- **The hand stays on the screen during a demonstrated drag.** The press went to the middle of the
+  exercise card, and on a 390 px phone the 200 px sideways stroke carried the hand past the right
+  edge. The press now moves along the card so the whole path stays in view.
+
 ## 2026-10-13 — The flyer's link, and the app on the home screen
 
 ### Added

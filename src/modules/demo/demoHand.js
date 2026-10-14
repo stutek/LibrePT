@@ -26,8 +26,9 @@ const SVG_NS = "http://www.w3.org/2000/svg";
 // 24×32 box so the fingertip sits at the top-left — the point the pointer is positioned by, the way
 // a real finger meets a screen. Rendered rather than described, because a dot beside a control reads
 // as a bullet or a rendering glitch, while a hand reads as a person using the app — which is the
-// whole reason there is a pointer at all.
-const HAND_PATH =
+// whole reason there is a pointer at all. Exported because the campaign flyer draws the same hand,
+// read from here, so the gesture looks the same in print and in Show me.
+export const HAND_PATH =
   "M8.4 2.6a2.1 2.1 0 0 1 4.2 0v10.2h1V9.4a1.9 1.9 0 0 1 3.8 0v3.4h1v-2a1.9 1.9 0 0 1 3.8 0v2.3h.4" +
   "a1.6 1.6 0 0 1 1.6 1.7l-.5 6.5a8.4 8.4 0 0 1-8.4 7.8h-2.6a7.6 7.6 0 0 1-6.3-3.3L1.4 19a2 2 0 0 1" +
   " 3-2.6l4-3.4z";
@@ -69,6 +70,7 @@ export function moveDemoHand(hand, x, y) {
   hand.style.setProperty("--hand-x", `${Math.round(x)}px`);
   hand.style.setProperty("--hand-y", `${Math.round(y)}px`);
   hand.classList.add("is-visible");
+  extendWake(hand);
 }
 
 /** Pulses the pointer to read as a tap. Returns immediately — the caller owns the wait, because the
@@ -143,23 +145,69 @@ export function pulseDemoHand(hand) {
   hand.classList.add("is-tapping");
 }
 
+// The wake a held finger leaves as it moves (wanted 2026-10-14: the gesture drawn as a hand and a
+// disturbed water surface, in Show me and on the campaign flyer alike). One ring every this many
+// pixels of travel: close enough that the path reads as one line, far enough apart that the rings
+// stay rings.
+export const WAKE_SPACING_PX = 24;
+// How long one wake ring lives. Longer than a tap's ring on purpose: the oldest rings are what show
+// the path already travelled, and a whole L takes two legs of the player's travel time. Stamped on
+// the element like the tap's duration, so the stylesheet holds no second copy.
+const WAKE_RING_MS = 1000;
+// Where each held hand last left a ring. Kept outside the element so a drag leaves nothing on the
+// DOM that could outlive it.
+const lastWakePoint = new WeakMap();
+
+function handPoint(hand) {
+  return {
+    x: parseFloat(hand.style.getPropertyValue("--hand-x")) || 0,
+    y: parseFloat(hand.style.getPropertyValue("--hand-y")) || 0,
+  };
+}
+
+/** One ring left at the fingertip, in its own wrapper so one timer clears it. */
+function leaveWakeRing(hand) {
+  const doc = hand.ownerDocument;
+  const wake = doc.createElement("div");
+  wake.className = "demo-tour-waves is-wake";
+  wake.setAttribute("aria-hidden", "true");
+  wake.style.setProperty("--ripple-ms", `${WAKE_RING_MS}ms`);
+  wake.appendChild(buildRipple(hand, 0));
+  doc.body.appendChild(wake);
+  doc.defaultView.setTimeout(() => wake.remove(), WAKE_RING_MS);
+}
+
+/** While the hand is held down, leaves a ring each time it has moved WAKE_SPACING_PX from the last. */
+function extendWake(hand) {
+  const from = lastWakePoint.get(hand);
+  if (!from) return;
+  const here = handPoint(hand);
+  if (Math.hypot(here.x - from.x, here.y - from.y) < WAKE_SPACING_PX) return;
+  leaveWakeRing(hand);
+  lastWakePoint.set(hand, here);
+}
+
 /** Press the pointer down and hold it, for a drag rather than a tap.
  *
  * A tap is a press that ends immediately, so `pulseDemoHand` draws its rings and lets go. A drag is
  * a press that travels, and a viewer only reads it as one if the finger stays down the whole way:
  * the hand keeps its pressed shape, and its travel animation is switched off so it sits exactly
- * where the pointer events being sent say it is (demoTour.css). The rings are sent once, at the
- * point of contact, because that is where the screen was touched.
+ * where the pointer events being sent say it is (demoTour.css). The tap's rings are sent once, at
+ * the point of contact; from there every move leaves the wake (`moveDemoHand`), oldest widest, which
+ * shows the path and its direction without an arrow.
  */
 export function pressDemoHand(hand) {
   if (!hand) return;
   flashTapRipple(hand);
   hand.classList.add("is-dragging");
+  lastWakePoint.set(hand, handPoint(hand));
 }
 
 /** Lift the pointer at the end of a drag: the press relaxes and the hand may glide again. */
 export function liftDemoHand(hand) {
-  hand?.classList.remove("is-dragging");
+  if (!hand) return;
+  hand.classList.remove("is-dragging");
+  lastWakePoint.delete(hand);
 }
 
 export function unmountDemoHand(doc = document) {

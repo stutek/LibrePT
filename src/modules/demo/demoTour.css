@@ -154,6 +154,14 @@
   border-width: 1px;
   --ring-peak: 0.55;
 }
+/* The wake a held drag leaves, one ring at a time (demoHand.js). Fainter and shorter-reaching than a
+   tap's rings: they are left every 24px, and at a tap's full reach they would overlap into a smear
+   instead of reading as a line of rings behind the finger. */
+.demo-tour-waves.is-wake .demo-tour-ripple {
+  border-width: 2px;
+  --ring-peak: 0.7;
+  --ring-reach: 2.4;
+}
 
 /* The ring's brightness is carried INTO the keyframes rather than declared beside them: the
    animation owns opacity for its whole run, so a plain `opacity` on a trailing ring only ever
@@ -168,7 +176,7 @@
     opacity: calc(var(--ring-peak, 1) * 0.9);
   }
   100% {
-    scale: 4;
+    scale: var(--ring-reach, 4);
     opacity: 0;
   }
 }

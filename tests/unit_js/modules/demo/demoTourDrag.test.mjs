@@ -9,7 +9,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { performStep } from "../../../../src/modules/demo/demoTourPlayer.js";
+import { dragPressPoint, performStep } from "../../../../src/modules/demo/demoTourPlayer.js";
 
 const VIEWPORT_HEIGHT = 720;
 
@@ -114,4 +114,36 @@ test("a drag whose card is already in place is pressed there without scrolling a
 
   assert.equal(state.scrolledTo, false);
   assert.equal(outcome.ok, true, outcome.reason);
+});
+
+// Found 2026-10-14 in a screenshot of Show me on a 390px phone: the press went to the middle of the
+// exercise card, 197px from the left, and the L's 200px sideways leg carried the hand to 397px — off
+// the screen for the whole gesture, so the viewer saw the plan move and no finger moving it.
+const phoneCard = { left: 15, right: 375, top: 230, bottom: 310, width: 360, height: 80 };
+const phone = { width: 390, height: 844 };
+const theL = dragStep.drag;
+
+test("a drag's whole path stays on the screen", () => {
+  const press = dragPressPoint(phoneCard, theL, phone);
+
+  for (const [dx, dy] of [[0, 0], ...theL]) {
+    const x = press.x + dx;
+    const y = press.y + dy;
+    assert.ok(x >= 24 && x <= phone.width - 24, `the finger reaches x=${x} on a ${phone.width}px screen`);
+    assert.ok(y >= 24 && y <= phone.height - 24, `the finger reaches y=${y}`);
+  }
+});
+
+test("a drag is still pressed on its control when the path cannot fit beside it", () => {
+  const narrowCard = { left: 300, right: 360, top: 230, bottom: 310, width: 60, height: 80 };
+
+  const press = dragPressPoint(narrowCard, theL, phone);
+
+  assert.ok(press.x >= narrowCard.left && press.x <= narrowCard.right, `pressed at x=${press.x}`);
+});
+
+test("a drag with room for its path is pressed in the middle of its control", () => {
+  const press = dragPressPoint(phoneCard, theL, { width: 1400, height: 900 });
+
+  assert.deepEqual(press, { x: 195, y: 270 });
 });

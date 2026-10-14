@@ -82,6 +82,41 @@ function centreOf(el) {
   return { x: box.left + box.width / 2, y: box.top + box.height / 2 };
 }
 
+// How far inside the window every point of a demonstrated drag stays: the phone's own back gesture
+// takes the outer 24px (planPeek.js ignores a press there), and the hand is drawn beside the
+// fingertip, so the finger needs a little more than that to be seen.
+const DRAG_EDGE_PX = 32;
+// How far inside its control a drag may be pressed, so the press does not land on the control's
+// border, where the hit test may already find the element beside it.
+const DRAG_INSET_PX = 8;
+
+/** One axis of `dragPressPoint`: the start nearest the middle that keeps every offset inside the
+ * window, then kept inside the control, which wins when the two cannot both hold. */
+function fitAxis(low, high, offsets, extent) {
+  const middle = (low + high) / 2;
+  const reach = [0, ...offsets];
+  const onScreen = Math.min(
+    Math.max(middle, DRAG_EDGE_PX - Math.min(...reach)),
+    extent - DRAG_EDGE_PX - Math.max(...reach),
+  );
+  return Math.min(Math.max(onScreen, low + DRAG_INSET_PX), high - DRAG_INSET_PX);
+}
+
+/** Where a drag along `path` is pressed on a control whose box is `box`, in a window of `viewport`.
+ *
+ * The middle of the control, unless the path would carry the finger off the screen from there: on a
+ * 390px phone the exercise card's middle is 195px from the left, and the L's 200px sideways leg then
+ * ends past the right edge, so the viewer watches the plan move with no finger moving it. The press
+ * moves along the control far enough for the whole path to stay in view. Pure, so it is tested
+ * without a page; an unknown window size leaves the press in the middle.
+ */
+export function dragPressPoint(box, path, viewport) {
+  return {
+    x: fitAxis(box.left, box.right, path.map(([dx]) => dx), viewport.width ?? Infinity),
+    y: fitAxis(box.top, box.bottom, path.map(([, dy]) => dy), viewport.height ?? Infinity),
+  };
+}
+
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /** Waits until the control's box has stopped moving, so the hand lands on where the control IS.
@@ -169,7 +204,8 @@ function whatIsAt(doc, { x, y }) {
   return `${hit.tagName.toLowerCase()}${id}${classes}`;
 }
 
-/** Where a drag presses: the centre of the control, and only once a press there reaches it.
+/** Where a drag presses: on the control, where its whole path stays on the screen
+ * (`dragPressPoint`), and only once a press there reaches it.
  *
  * A tap is checked against the hand after it travels (`handIsOver`); a drag needs more, because its
  * press starts a gesture the app reads from the element it lands on. Two readings of a box that
@@ -180,10 +216,14 @@ function whatIsAt(doc, { x, y }) {
  * fails, and the hand travels there before the point is tested once more. Returns null when no
  * attempt reaches the control, so the step fails by saying so rather than dragging empty page.
  */
-async function placeThePress(target, { doc, hand, wait, pace }) {
+async function placeThePress(target, path, { doc, hand, wait, pace }) {
+  const view = doc.defaultView ?? {};
   for (let attempt = 0; attempt <= HAND_RETRIES; attempt += 1) {
     await waitForBoxToSettle(target, wait);
-    const point = centreOf(target);
+    const point = dragPressPoint(target.getBoundingClientRect(), path, {
+      width: view.innerWidth,
+      height: view.innerHeight,
+    });
     if (!pressReaches(doc, target, point)) {
       target.scrollIntoView({ block: "center", inline: "nearest", behavior: "auto" });
       continue;
@@ -252,7 +292,7 @@ async function performDrag(step, start, { doc, hand, wait, pace }) {
  * control whose state says "already done", so its expectation is the only judge.
  */
 async function dragStep(step, target, { doc, hand, wait, pace }) {
-  const start = await placeThePress(target, { doc, hand, wait, pace });
+  const start = await placeThePress(target, step.drag, { doc, hand, wait, pace });
   if (!start) {
     return {
       id: step.id,
