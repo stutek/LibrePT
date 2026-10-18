@@ -6984,4 +6984,4 @@ vstopu na slovenski trg.
 - [ ] Preveri letak za Fakulteto za šport proti tem prednostim.
 - [ ] Simon pove, kaj pomeni »personalizirana« (prilagojena trenerju, vadba po meri stranke ali
       prilagodljiva koda), da se v besedilih ne ugiba.
-- **Rok:** pred obiskom Fakultete za šport 2026-10-15 (letak); *blokira:* besedilo letaka in nagovora.
+- **Rok:** pred obiskom Fakultete za šport 2026-10-29 (letak; prestavljen s 15. 10.); *blokira:* besedilo letaka in nagovora.
