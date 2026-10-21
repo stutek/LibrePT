@@ -56,8 +56,17 @@ def _collection(page, name):
     return page.evaluate(READ_COLLECTION, name)
 
 
+# The header shows before the demo seed is in IndexedDB: measured 2026-10-21, 3 of 5 unthrottled
+# loads had 0 sessions stored when `#app-header` appeared, and the seed landed up to 0.26 s later.
+# Reading at once won alone and lost under the parallel gate.
+SEED_HAS_A_SESSION_WITH_PARTICIPANTS = f"""
+async () => ({READ_COLLECTION})('sessions').then((rows) => rows.some((s) => s.participants?.length))
+"""
+
+
 def _seeded_ids(page):
     """A real seeded session and one of its participants, read from the database itself."""
+    page.wait_for_function(SEED_HAS_A_SESSION_WITH_PARTICIPANTS)
     sessions = _collection(page, "sessions")
     session = next(s for s in sessions if s.get("participants"))
     return {"sessionId": session["id"], "clientId": session["participants"][0]}
