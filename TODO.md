@@ -4392,6 +4392,9 @@ iskati mora gumb z besedo, ki je ni. Dnevnik prvega odprtja 04 navaja oboje kot 
 imenuje gumb po tem, kar se vidi (»Pritisni ✓ zgoraj desno …«) — opaženo na različici `main`
 `6230070`, sl, 390 × 844.
 
+**Še velja** `2026-10-21 16:03:25.500` na `c5ebad15`, sl, 390 × 844: med urejanjem sta vidna oba
+namiga (y 404 in 491), gumb kaže le kljukico ✓.
+
 ### 80.153 [ ] P3 — Pri slabem signalu aplikacija počaka na odgovor strani, čeprav je vse na telefonu
 
 **Popravek 2026-10-01 00:59 (Claude):** prva različica te točke je bila P1 s številkama 96,9 s in več kot
@@ -5145,6 +5148,32 @@ pri 320–330 px odrezana, pri 30 px je vsaka značka cela. Test
 beležnica ni zadržana. Odrezanih imen v demu: pri 390 px zadržano 2–3 (pri 60 px 6–7), nezadržano 0;
 pri 326 px zadržano 6–7 (pri 60 px 7), nezadržano 2–3. **Zapre se**, ko Simon na telefonu potrdi
 širino.
+
+### 80.227 [ ] P2 — Po »Nazaj v demo« ogled nadaljuje Tomovo zgodbo na Evinem načrtu in zamenja Evino vajo
+
+**Scenarij in koraki:** peskovnik, predal z obvestili → »Izvedba in prilagoditve treninga«. »Pokaži
+mi« do koraka 11 (»Pritisni ⋮ — tri pike zgoraj desno.«; na zaslonu je Tomov sklop). Namesto ⋮
+pritisnem zavihek »Eva« v vrstici z imeni. Kartica: »Ogled čaka. Zadnje dejanje ni bilo korak
+ogleda. …«. Pritisnem »Nazaj v demo«, nato »Pokaži mi« na korakih 11, 12, 13 in 14.
+
+**Opaženo:** po »Nazaj v demo« ostane izbrana Eva. Korak 12 pravi »Odpre se Tomov načrt«, odpre se
+Evin. Korak 14 pravi »Vaja se zamenja samo pri Tomu; Eva in Nina obdržita svoj načrt.«, zamenja pa se
+Evina prva vaja: »Poteg vrvi k obrazu« postane »Poteg zgornjega škripca«. Zadnja kartica: »Tomovo
+koleno je v njegovi kartoteki in v njegovem načrtu, Eva in Nina pa sta vadili naprej.« Izbrana je
+ves čas Eva.
+
+**Težava in vpliv:** trener, ki med ogledom pogleda drugo stranko, kar je naravno, se nauči napačnega:
+besedilo pravi »samo pri Tomu«, na zaslonu pa vidi zamenjavo pri Evi. Sklepa lahko, da zamenjava velja
+za vse v skupini ali da aplikacija zamenja napačno stranko. Podatki so v peskovniku, zato se resnični
+zapisi ne izgubijo.
+
+**Predlog:** »Nazaj v demo« naj vrne zaslon tja, kjer korak stoji (Tomov sklop), preden se ogled
+nadaljuje; ali pa naj kartica pove, da je izbrana druga stranka, in ponudi vrnitev k Tomu. Opaženo
+`2026-10-21 16:19:18.926` na različici `c5ebad15` (zamrznjena kopija `main`), sl, 390 × 844.
+
+Ob tem izmerjeno, ni ločena najdba: »Nazaj« s koraka 13 na 12 traja približno 9 s. Ogled v tem času
+ponovi pretekle korake: najprej se pokaže Evin sklop, nato Tomov, nato se okno opombe odpre in zapre.
+Šele nato zaslon ustreza koraku 12 (meni ⋮ odprt, »Uredi načrt« viden).
 
 ## 81. [ ] The welcome screen asks for everything once, and the menu has five entries
 
