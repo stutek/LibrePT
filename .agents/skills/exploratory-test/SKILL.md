@@ -168,6 +168,11 @@ fold inside a scrolling dialog is not reached by scrolling the page — scroll t
 container (`.modal-body-scroll`) first, then tap. Before writing "nothing happened", ask
 `document.elementFromPoint` what is actually under the control's middle.
 
+A third way: `click '<label>'` matches text, and a sentence that quotes the label matches too. On
+2026-10-21 `click 'Nazaj v demo'` hit the line »Z »Nazaj v demo« nadaljuješ …« above the button, so
+the button looked dead for 21 seconds; `tap '.walkthrough-panel button:text-is("Nazaj v demo")'`
+worked at once. When a label is also quoted on the screen, tap the button by `button:text-is(…)`.
+
 **"Intercepts pointer events" can name an element nobody sees.** At 320×680 the welcome screen's
 chapter list is a scrolling box whose sixth button is clipped at its edge, yet Playwright reports it as
 covering "Začni s prazno aplikacijo" and refuses the tap; `elementFromPoint` at every height of the
