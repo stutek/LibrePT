@@ -7014,3 +7014,21 @@ vstopu na slovenski trg.
 - [ ] Simon pove, kaj pomeni »personalizirana« (prilagojena trenerju, vadba po meri stranke ali
       prilagodljiva koda), da se v besedilih ne ugiba.
 - **Rok:** pred obiskom Fakultete za šport 2026-10-29 (letak; prestavljen s 15. 10.); *blokira:* besedilo letaka in nagovora.
+
+## 112. [ ] Zastarele opombe v `.private/AGENT_SYNC/` nihče ne opazi
+
+Zapisano 2026-10-26 23:42:47.517: v `.private/AGENT_SYNC/` ležijo tri opombe sej, ki ne tečejo več:
+`claude-asistent-association.md` (2026-09-27), `codex-exploratory-week.md` (2026-10-09) in
+`claude-kampanja-fs.md` (2026-10-13). Zadnja si izključno lasti `.private/kampanja-fs/*` in
+`.private/go-to-market-campaign.md`, ki ju potrebuje §111. `ListAgents` ne kaže nobene žive seje
+LibrePT. Pravilo, da seja opombo izbriše v isti potezi kot commit, je trikrat odpovedalo, ker nič ne
+preveri, ali je seja, ki je opombo napisala, še živa.
+
+**Predlog:** opomba nosi pid ali ime seje in čas zadnje posodobitve; orodje v `agent_tools/` ali
+hook ob začetku seje izpiše opombe, starejše od enega dne, s pozivom, naj jih lastnik ali Simon
+izbriše.
+
+**Odprto:**
+- [ ] Simon potrdi, da se tri opombe izbrišejo. *Blokira:* §111, ki ureja datoteki, ki ju opomba
+      `claude-kampanja-fs.md` drži zase.
+- [ ] Preverjanje starosti opomb, po predlogu zgoraj.
