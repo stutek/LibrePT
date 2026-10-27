@@ -7032,3 +7032,13 @@ izbriše.
 - [ ] Simon potrdi, da se tri opombe izbrišejo. *Blokira:* §111, ki ureja datoteki, ki ju opomba
       `claude-kampanja-fs.md` drži zase.
 - [ ] Preverjanje starosti opomb, po predlogu zgoraj.
+
+## 113. [ ] Razvoj zamrznjen do 5. 11. 2026
+
+Simon, 2026-10-27 10:10:48.428894435: development of LibrePT is frozen until 5 November 2026 (Thursday). Priorities: 1 job,
+2 family, 3 side projects (LibrePT, child-routines, AI consulting); the single source for the order
+is `~/Projects/Asistent/projekti.md`, section "Prioritete". Do not start new features before that
+date; on 5 November Simon decides whether and how much to resume.
+
+**Odprto:**
+- [ ] Simon on 5 November decides on resuming. *Blokira:* every new LibrePT feature work.
