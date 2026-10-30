@@ -7059,7 +7059,9 @@ stays: it records what shipped then.
 **Odprto:**
 - [ ] Simon creates `librept@` and `routines@` (Email Accounts → Create, "Automatically Create
       Folders" for plus addressing) and sends a test to `librept+feedback@twotech.si`; it must land
-      in folder `feedback`. *Blokira:* the code change.
+      in folder `feedback`. *Blokira:* the code change. Both mailboxes exist and log in over IMAP
+      at `sh8.neoserv.si:993` with passwords from KWallet `kdewallet`, folder `Passwords`
+      (2026-10-30 09:25:45.273); the test mail is still to send.
 - [ ] Code change and release. *Blokira:* §113 freeze, unless Simon exempts it.
 - [ ] On release day, Simon forwards Gmail `LibrePT.adm@gmail.com` to `librept+feedback@twotech.si`
       (Settings → Forwarding and POP/IMAP, keep Gmail's copy): an install still offline keeps the
