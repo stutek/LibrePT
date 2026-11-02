@@ -7068,3 +7068,27 @@ stays: it records what shipped then.
       old address until it reconnects.
 - [ ] Delete the Gmail account only after release AND one month with no mail to the old address.
       `LibrePT.test@gmail.com` stays: it is the Google Drive test account, not mail.
+
+## 115. [ ] Lokalni `.venv` in CI preverjata različne pakete
+
+Zapisano 2026-11-02 09:18:39.729: `requirements.txt` pripne 28 paketov, lokalni `.venv` pa jih ima
+47. Ostale (na primer `filelock`, `msgpack`, ki ju potegne `pip-audit`) CI ob vsakem zagonu namesti
+v najnovejši različici, lokalno pa ostanejo, kakor so bili nameščeni. Ob dvigu setuptools zaradi
+Dependabot opozorila 1 je lokalni `pip-audit` javil 14 ranljivosti v `filelock 3.32.0` in
+`msgpack 1.2.1`, ki jih CI ni imel. Lokalna vrata so zato padla iz drugega razloga kot CI, in
+zelena lokalna vrata ne dokazujejo, da bo CI zelen.
+
+**Možnosti:**
+- **A — pripni vse pakete** (`pip freeze` v `requirements.txt`): lokalno in CI enako; vsak posredni
+  paket z ranljivostjo pa zahteva ročni dvig, kot ga zdaj zahteva setuptools.
+- **B — `build check` pred auditom namesti `requirements.txt`** v `.venv`: lokalno se približa CI,
+  posredni paketi pa ostanejo nepripeti in se med zagoni lahko razlikujejo.
+- **C — ne spremeni ničesar.**
+
+**Priporočilo:** A in B skupaj. `pip-audit` pregleda nameščeni `.venv`, ne `requirements.txt`, zato
+sam A lokalno ne pomaga, dokler `.venv` ni nameščen iz pripetega seznama. Z obema vrata preverijo
+isto okolje kot CI, Dependabot pa vidi vse pakete.
+
+**Odprto:**
+- [ ] Simon izbere A in B, samo A, samo B ali C. *Blokira:* nič nujnega; do odločitve se `.venv` ob padcu
+      `pip-audit` posodobi ročno.
