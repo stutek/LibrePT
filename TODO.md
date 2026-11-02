@@ -7120,7 +7120,10 @@ setuptools 84.1.0 (Dependabot opozorilo 1), ki odblokira objavo: CI pade na `pip
 - [x] Za tem `build check` in `build commit` za `requirements.txt`: `37248fa3` (setuptools 84.1.0).
 - [ ] Nato `git push` vseh commitov na `main`. Simon ga je odobril 2026-11-02 seji librept-98
       (»sam izvedi vse potrebno« na korak »odobri push«); seji librept-96 je isti dan naročil
-      »Brez git push«, zato push čaka na Simonovo potrditev. Po pushu preveri, da je posel »Build, Verify and Deploy to
+      »Brez git push«, zato push čaka na Simonovo potrditev. Seja librept-98 je push poskusila
+      2026-11-02 09:55:39.920; zavrnil ga je samodejni preizkus Claude Code (»Create Public
+      Surface«). Push zato naredi Simon: `cd ~/Projects/LibrePT && git push origin main`
+      (pričakovano: na `origin/main` gre devet commitov, od `df0237c1` do commita s tem zapisom). Po pushu preveri, da je posel »Build, Verify and Deploy to
       GitHub Pages« zelen in da
       `gh api repos/stutek/LibrePT/dependabot/alerts/1 --jq .state` vrne `fixed`. *Blokira:*
       objavo na GitHub Pages, ki stoji od `e1c87b8c`.
