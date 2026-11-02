@@ -7127,3 +7127,12 @@ setuptools 84.1.0 (Dependabot opozorilo 1), ki odblokira objavo: CI pade na `pip
       GitHub Pages« zelen in da
       `gh api repos/stutek/LibrePT/dependabot/alerts/1 --jq .state` vrne `fixed`. *Blokira:*
       objavo na GitHub Pages, ki stoji od `e1c87b8c`.
+- [ ] Spremljanje CI po Simonovem pushu. Zapisano 2026-11-02 09:56:17.630. Simon je naročil »nastavi
+      hook, da po pushu librePT spremljaš build in popraviš padle zagone«. Hook `PostToolUse` v
+      `.claude/settings.local.json` (`7a5a55fe`) se sproži le po pushu agenta, take pa samodejni
+      preizkus Claude Code zavrne, zato skoraj nikoli ne deluje. Možnosti: (A) git kljuka
+      `pre-push` zažene `watch.py` v ozadju, `watch.py` počaka, da se zagoni pojavijo (zdaj takoj
+      konča z »NO RUNS«), hook ob začetku seje LibrePT javi padlo poročilo iz `.private/BUILD_WATCH/`;
+      stane okoli 30 min dela in en zagon vrat, spremljanje ne porabi žetonov. (B) Simon po vsakem
+      pushu napiše »spremljaj CI«; ne stane nič, a je odvisno od spomina, kar je pustilo CI rdeč od
+      `e1c87b8c`. Priporočilo: A. *Blokira:* izpolnitev Simonove zahteve.
