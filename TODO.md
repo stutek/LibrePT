@@ -7092,3 +7092,22 @@ isto okolje kot CI, Dependabot pa vidi vse pakete.
 **Odprto:**
 - [ ] Simon izbere A in B, samo A, samo B ali C. *Blokira:* nič nujnega; do odločitve se `.venv` ob padcu
       `pip-audit` posodobi ročno.
+
+## 116. [ ] Lokalna vrata padejo na OWASP ZAP, odkar Docker teče brez root
+
+Zapisano 2026-11-02 09:30:28.577: `build check -- requirements.txt` je prešel stopnje 1–4, stopnja 5
+pa je padla: »Job spider failed to access URL http://localhost:8095/LibrePT/ : Connect to
+http://localhost:8095 failed: Connection refused«. Strežnik kopije drevesa je na 8095 tekel, preverba
+pred skeniranjem je uspela. Vzrok: Docker na tem računalniku od 2026-11-01 20:56 teče brez root
+(Simonova odločitev v `~/Projects/Asistent/TODO.md`, »Zavarovanje KWalleta«). Pri Dockerju brez root
+`--network host` pomeni omrežje rootlesskit, ne omrežja računalnika, zato `localhost` v vsebniku ZAP
+ni `localhost`, na katerem posluša strežnik (sklep iz načina delovanja, še ni preverjen v
+dokumentaciji). Sistemski Docker je ustavljen. CI na GitHubu tega ne zadeva.
+
+**Posledica:** noben commit kode v LibrePT ne dobi zelenega zagona na tem računalniku. Čaka dvig
+setuptools 84.1.0 (Dependabot opozorilo 1), ki odblokira objavo: CI pade na `pip-audit` od
+`e1c87b8c`. Sporočilo commita je v `.private/tmp/claude-setuptools/commit-msg.txt`.
+
+**Odprto:**
+- [ ] Stopnja ZAP doseže strežnik tudi pri Dockerju brez root, preverjeno v dokumentaciji Dockerja
+      in rootlesskit. *Blokira:* vsak commit kode, najprej `requirements.txt`.
