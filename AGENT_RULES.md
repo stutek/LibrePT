@@ -94,6 +94,9 @@ decide by the values; where a rule stops serving them, change the rule. Higher v
 
 ## Execution
 
+- **Temporary files** (measurements, browser profiles, Python environments, recordings), also those of
+  the project's tools, go in `.private/tmp/` inside the project (ignored by git), never in `/tmp` or
+  other system folders; remove them when the work is done.
 - Apply edits directly. Auto-commit coherent work to `main`, one logical change per commit, staged
   from `git status --short` — your own files only, and a file two sessions have touched is staged by
   hunk, never whole. **Read `git diff --cached` before every commit** — a claim in a note does not
