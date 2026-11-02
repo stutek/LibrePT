@@ -258,10 +258,9 @@ jobs:
       - name: Run the Regression Suite
         run: .venv/bin/python -c "from build import run_regression_tests; run_regression_tests()"
 
-  # === STAGE 5 === Only if the suites are clean. Locally that ordering is mandatory: ZAP's request
-  # flood against the SAME dev server a mid-suite pytest-xdist run is using produced Page.goto
-  # timeouts across unrelated specs. Here it is not mandatory — separate runners, separate servers —
-  # but it is kept so the stage numbering means one thing in both places.
+  # === STAGE 5 === Only if the suites are clean, so the stage numbering means one thing here and in
+  # `build check`. ZAP scans its own copy of the dev server inside its container, never the one the
+  # browser suites use, so it needs no server and no browsers on this runner.
   owasp-zap-scan:
     name: Stage 5 · OWASP ZAP Security Scan
     needs: [regression-tests]

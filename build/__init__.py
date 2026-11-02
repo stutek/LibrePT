@@ -1838,7 +1838,8 @@ def _csp_parity():
     return compare_csp(header_policy, meta.group(1) if meta else "")
 
 
-# The ZAP scan's target: the local dev server, which serves src/ under the production sub-path.
+# The ZAP scan's target: the dev server (deploy/local_http_server.py), which serves src/ under the
+# production sub-path. It runs INSIDE the ZAP container, so `localhost` here is the container's own.
 # Read from the server that actually serves it, rather than restated — one moved port used to mean six
 # edits, one of which would be missed (2026-08-18).
 ZAP_PORT = DEV_SERVER_PORT
@@ -2014,37 +2015,24 @@ def run_static_security_checks():
     print("  ✓ Static security audits passed.")
 
 
-def _is_port_open(port):
-    import socket
-
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-        sock.settimeout(0.5)
-        return sock.connect_ex(("localhost", port)) == 0
-
-
-def _ensure_zap_target_up():
-    """Guarantee the app is actually being served on DEV_SERVER_PORT before ZAP scans it.
-
-    A scan that reaches nothing exits "clean" and gives false assurance,
-    so if the dev server / e2e fixture has not already bound the port we start our own copy and
-    wait for it. Returns the Popen we started (to leave running — the user owns the dev server)
-    or None if the port was already up.
-    """
-    import time
-
-    if _is_port_open(ZAP_PORT):
-        return None
-    proc = subprocess.Popen(
-        [sys.executable, "-m", "deploy.local_http_server", "--port", str(ZAP_PORT)],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-    )
-    for _ in range(100):  # up to ~10s for the server to come up
-        if _is_port_open(ZAP_PORT):
-            return proc
-        time.sleep(0.1)
-    proc.terminate()
-    return None
+# The scanned server runs in the ZAP container, not on the host. Rootless Docker (this machine since
+# 2026-11-01) puts `--network host` inside RootlessKit's own network namespace up to Docker Engine
+# v29.5 (docs.docker.com/engine/security/rootless/troubleshoot), and its default
+# `--disable-host-loopback` blocks the host's 127.0.0.1 from it (rootlesskit docs/network.md): a host
+# server answered the host's own check while ZAP got "Connection refused". A server in the container
+# is reached the same way under rootless Docker, rootful Docker and CI, and `--network none` leaves
+# ZAP no route to anything else. The image's Python (3.11) runs the server, so the server stays
+# stdlib-only and 3.11-compatible; a server that does not come up exits 3 with its own log.
+_ZAP_SERVER_IN_CONTAINER = "/librept/deploy/local_http_server.py"
+_ZAP_SERVER_START_SECONDS = 10
+_ZAP_WAIT_FOR_SERVER = (
+    "import socket, sys, time\n"
+    f"for _ in range({_ZAP_SERVER_START_SECONDS * 10}):\n"
+    "    with socket.socket() as s:\n"
+    f"        if s.connect_ex(('localhost', {ZAP_PORT})) == 0: sys.exit(0)\n"
+    "    time.sleep(0.1)\n"
+    "sys.exit(1)\n"
+)
 
 
 # deploy/zap/ is the authoritative scan configuration and is never mounted: the container gets a
@@ -2092,8 +2080,8 @@ def _zap_log_report(work_dir):
 def run_owasp_zap_scan():
     """Runs the OWASP ZAP baseline scan against the live app and FAILS the build on any finding.
 
-    Enforcement: the container runs with host networking so it truly reaches
-    the app on DEV_SERVER_PORT, alerts are triaged by deploy/zap/zap-baseline.conf (each ignore justified in
+    Enforcement: the container starts its own copy of the dev server and scans it there (see
+    _ZAP_SERVER_IN_CONTAINER for why not the host's), alerts are triaged by deploy/zap/zap-baseline.conf (each ignore justified in
     that file), and a non-zero ZAP exit — code 1 (FAIL), 2 (WARN), or 3 (scan error / unreachable) —
     fails the build. Nothing is printed-and-passed.
     """
@@ -2102,12 +2090,6 @@ def run_owasp_zap_scan():
     docker_bin = shutil.which("docker")
     if not docker_bin:
         print("  ✗ OWASP ZAP requires Docker, which is not available on PATH.")
-        sys.exit(1)
-
-    if not _is_port_open(ZAP_PORT):
-        _ensure_zap_target_up()
-    if not _is_port_open(ZAP_PORT):
-        print(f"  ✗ OWASP ZAP target {ZAP_TARGET} is not reachable — nothing to scan.")
         sys.exit(1)
 
     # Fail CLOSED. Without these the scan still runs and still reports "clean", just with six fewer
@@ -2122,7 +2104,7 @@ def run_owasp_zap_scan():
         )
         sys.exit(1)
 
-    print("    - Launching OWASP ZAP container baseline scan (host network)...")
+    print("    - Launching OWASP ZAP container baseline scan (dev server in the container)...")
     work_dir = prepare_zap_workdir()
     container_name = "librept-zap-baseline"
     # ZAP baseline typically finishes in 3-4 minutes against an app this size; 20 minutes is a
@@ -2146,18 +2128,30 @@ def run_owasp_zap_scan():
                 "--name",
                 container_name,
                 "--network",
-                "host",
+                "none",
                 "-v",
                 f"{work_dir}:/zap/wrk:rw",
                 # ZAP loads add-ons from its home plugin dir; mounting the vendored set there is
                 # what makes `-silent` below safe (see _ZAP_ADDONS).
                 "-v",
                 f"{addons_dir}:/home/zap/.ZAP/plugin",
+                # The server and the tree it serves; the server finds src/ next to deploy/.
+                "-v",
+                f"{os.path.abspath('src')}:/librept/src:ro",
+                "-v",
+                f"{os.path.abspath(os.path.join('deploy', 'local_http_server.py'))}:"
+                f"{_ZAP_SERVER_IN_CONTAINER}:ro",
                 "zaproxy/zap-stable",
-                # zap-baseline.py with the arguments after "zap-baseline" below ("$@"), then ZAP's
-                # log copied to /zap/wrk, then zap-baseline.py's own exit code.
+                # The dev server in the background, logged to /zap/wrk; exit 3 with that log if
+                # it does not answer. Then zap-baseline.py with the arguments after "zap-baseline"
+                # below ("$@"), ZAP's log copied to /zap/wrk, and zap-baseline.py's own exit code.
                 "sh",
                 "-c",
+                f"python3 {_ZAP_SERVER_IN_CONTAINER} --port {ZAP_PORT} "
+                "> /zap/wrk/server.log 2>&1 & "
+                f"if ! python3 -c \"{_ZAP_WAIT_FOR_SERVER}\"; then "
+                f"echo 'The dev server did not answer within {_ZAP_SERVER_START_SECONDS}s:'; "
+                "cat /zap/wrk/server.log; exit 3; fi; "
                 'zap-baseline.py "$@"; status=$?; '
                 f"cp {_ZAP_LOG_IN_CONTAINER} /zap/wrk/ 2>/dev/null; exit $status",
                 "zap-baseline",
@@ -2197,8 +2191,7 @@ def run_owasp_zap_scan():
         print(
             f"  ✗ OWASP ZAP scan did not finish within {timeout_seconds}s — killed. "
             f"Partial output: {getattr(e, 'log_path', REPORT_DIR)}. "
-            "Check host load (`uptime`) and Docker's own network reachability for the ZAP "
-            "add-on update it runs on startup before assuming the app is at fault."
+            "Check host load (`uptime`) before assuming the app is at fault."
         )
         sys.exit(1)
 
