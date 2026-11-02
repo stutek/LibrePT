@@ -7110,4 +7110,16 @@ setuptools 84.1.0 (Dependabot opozorilo 1), ki odblokira objavo: CI pade na `pip
 
 **Odprto:**
 - [ ] Stopnja ZAP doseže strežnik tudi pri Dockerju brez root, preverjeno v dokumentaciji Dockerja
-      in rootlesskit. *Blokira:* vsak commit kode, najprej `requirements.txt`.
+      in rootlesskit. *Blokira:* vsak commit kode, najprej `requirements.txt`. Vzrok potrjen
+      (2026-11-02 09:42:38.244): nameščen je Docker 29.1.3; izvorno besedilo dokumentacije
+      (`docker/docs`, `rootless/troubleshoot.md`) pravi »Until Docker Engine v29.5 – Host network
+      (`docker run --net=host`) was namespaced inside RootlessKit«, `~/.local/bin/dockerd-rootless.sh`
+      pa `DISABLE_HOST_LOOPBACK` privzeto `true`. Dela seja librept-96 (opomba
+      `.private/AGENT_SYNC/claude-zap-rootless.md`): strežnik teče v vsebniku ZAP.
+- [ ] Za tem `build check` in `build commit` za `requirements.txt` (setuptools 84.1.0, sporočilo v
+      `.private/tmp/claude-setuptools/commit-msg.txt`). Dela librept-96.
+- [ ] Nato `git push` vseh commitov na `main`. Simon ga je odobril 2026-11-02 (»sam izvedi vse
+      potrebno« na korak »odobri push«). Po pushu preveri, da je posel »Build, Verify and Deploy to
+      GitHub Pages« zelen in da
+      `gh api repos/stutek/LibrePT/dependabot/alerts/1 --jq .state` vrne `fixed`. *Blokira:*
+      objavo na GitHub Pages, ki stoji od `e1c87b8c`.
