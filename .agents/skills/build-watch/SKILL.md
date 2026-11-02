@@ -1,7 +1,7 @@
 ---
 type: skill
 title: Watch a GitHub build and report the fall
-description: After a push, wait for the GitHub Actions runs of that commit, say which job and which step fell, and write the facts to a file. Ships watch.py; stops at the report and never fixes anything.
+description: After a push, wait for the GitHub Actions runs of that commit, say which job and which step fell, and write the facts to a file. Ships watch.py, which stops at the report; the session that pushed then fixes what fell.
 tags:
   - skill
   - ci
@@ -12,7 +12,8 @@ tags:
 
 A push starts five stages on GitHub and the answer arrives ten to thirty minutes later. Waiting for
 it and reading which job fell is mechanical work: no judgement, one command, a written answer.
-Fixing what fell is a different job and is NOT part of this skill.
+Fixing what fell is a different job: `watch.py` never does it, and a session that only watches
+hands the report on. The session that pushed fixes it itself, as the last section but one says.
 
 ## Which model runs this
 
@@ -72,9 +73,23 @@ Both sentences belong in the report. Neither is a diagnosis.
 
 ## Limits
 
-* Never re-run a job, never push, never edit anything but the report.
+* Never re-run a job. While watching, edit nothing but the report; a fix is the next section's job.
 * Every time in the report comes from `date` read at that moment.
 * The report is a file, not only a message: whoever asked for the watch was not watching.
+
+## After your own push
+
+A session that pushed owns the runs of that push until they are green. A Claude Code hook in
+`.claude/settings.local.json` reminds it after every `git push`; other agents do the same by hand.
+
+1. Start `python3 .agents/skills/build-watch/watch.py --sha <the pushed sha>` in the background, and
+   say the clock time the runs usually finish, from `date`.
+2. Exit `0`: say so, with the run's address. Exit `2`: say which, and look once more with `--once`.
+3. Exit `1`: read the report and the fallen job's log (`gh run view <run id> --log-failed`). Run the
+   job's own command here, as above. Fix the cause, run the gate, commit, and push only where a push
+   is allowed. Then watch again from step 1. Never re-run a job to make it pass.
+4. A fall whose cause is outside the code (a GitHub outage, a secret that expired) is not fixed by a
+   commit: record it in TODO.md with what blocks it, and say so.
 
 ## Taking it from a terminal with the Antigravity agent
 
