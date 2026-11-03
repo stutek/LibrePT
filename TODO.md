@@ -586,6 +586,18 @@ statistics, tracking cookies, IP addresses"), and an offline-first app reaches t
 first load, so the logs would count installs, not use. Waits on Simon: real data on the old address
 (only then does keeping it matter), and statistics with a rewritten privacy promise, or none.
 
+**2026-11-03 22:25:25.361, Simon: no switch; both addresses work until the end of the year.** So
+this repository keeps no custom domain and goes on serving `stutek.github.io/LibrePT/`, and
+`librept.twotech.si` needs a second host. The CNAME `librept → stutek.github.io` is in Neoserv's zone
+since 22:22, and `twotech.si` carries GitHub's domain verification record
+(`_github-pages-challenge-stutek`), which stops another account claiming the name meanwhile.
+Commit 8b6c1000 (`PUBLIC_SITE_URL`, landing page, consent forms and README point to the new address)
+waits unpushed until that address answers; the commits before it can go out. Proposed, waits on
+Simon's go: a second public repository whose Pages has the custom domain and whose workflow, on a
+schedule and on demand, builds with base `/` the commit of LibrePT's last green deploy. A public
+checkout needs no token. Open: the two origins keep separate data, so before the old address closes,
+its users export and import by hand.
+
 **Found 2026-09-28.** The app is at `https://stutek.github.io/LibrePT`
 ([publicUrls.js](src/data/publicUrls.js)). Browsers separate storage by origin (scheme, host, port), so
 the path `/LibrePT` separates nothing: every page published on GitHub Pages under this account shares
