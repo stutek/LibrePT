@@ -14,9 +14,11 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { planDemoRemoval } from "../../../src/data/demoDataRemoval.js";
+import { PUBLIC_SITE_URL, RETIRING_SITE_HOST } from "../../../src/data/publicUrls.js";
 import { COLLECTIONS } from "../../../src/data/recordProjections.js";
 import { addPendingNote, recordTrainings } from "../../../src/data/trainingRecords.js";
 import {
+  buildAddressMovedItem,
   buildCrashReportItem,
   buildEscapedTestDataItem,
   buildPendingSessionsItem,
@@ -703,5 +705,60 @@ test("the release thanks is worded in all three languages", () => {
   ];
   for (const lang of ["en", "sl", "de"]) {
     for (const key of keys) assert.ok(TRANSLATIONS[lang][key], `${lang} words ${key}`);
+  }
+});
+
+// The move to the new address. Browsers keep data per address, so the trainers still on the old one
+// learn of it here or lose their work when it closes.
+const tMoved = (key) =>
+  ({
+    notif_moved_desc: "go to {url}; {menu} › {center} › {download}, then {import}",
+    menu_data: "Data",
+    backup_center: "Center",
+    btn_download_backup: "Download",
+    btn_import_backup: "Import",
+  })[key] || `[${key}]`;
+
+test("on the old address the feed says where the app went and how to take the data along", () => {
+  const item = buildAddressMovedItem(tMoved, { host: RETIRING_SITE_HOST });
+
+  assert.equal(item.title, "[notif_moved_title]");
+  // The controls are named by the labels they show, read from the dictionary, so renaming one
+  // cannot leave this card naming a control that no longer exists.
+  assert.equal(item.description, `go to ${PUBLIC_SITE_URL}; Data › Center › Download, then Import`);
+  assert.deepEqual(item.actions, [{ label: "[notif_moved_open]", url: PUBLIC_SITE_URL }]);
+});
+
+test("on any other address, the sandbox included, there is no move to announce", () => {
+  assert.equal(buildAddressMovedItem(tMoved, { host: new URL(PUBLIC_SITE_URL).host }), null);
+  assert.equal(buildAddressMovedItem(tMoved, { host: "localhost:8081" }), null);
+  assert.equal(buildAddressMovedItem(tMoved, { host: RETIRING_SITE_HOST, sandbox: true }), null);
+});
+
+test("the move is announced after the faults and ahead of the work items", () => {
+  const state = withTrainings({ trainings: [DRAFT] });
+  const failure = { at: 1_700_000_000_000, message: "Session expired." };
+
+  const items = resolveNotificationItems(state, tMoved, [], failure, { host: RETIRING_SITE_HOST });
+
+  assert.deepEqual(
+    items.map((item) => item.id),
+    [
+      `synthetic-sync-failure-${failure.at}`,
+      "synthetic-address-moved",
+      "synthetic-unscheduled-plans",
+    ],
+  );
+});
+
+test("the move is worded in all three languages, with every placeholder", () => {
+  for (const lang of ["en", "sl", "de"]) {
+    const words = TRANSLATIONS[lang];
+    for (const key of ["notif_moved_title", "notif_moved_desc", "notif_moved_open"]) {
+      assert.ok(words[key], `${lang} words ${key}`);
+    }
+    for (const slot of ["{url}", "{menu}", "{center}", "{download}", "{import}"]) {
+      assert.ok(words.notif_moved_desc.includes(slot), `${lang} notif_moved_desc carries ${slot}`);
+    }
   }
 });

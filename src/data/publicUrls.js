@@ -1,7 +1,7 @@
 // src/data/publicUrls.js — the addresses this app has in the world, declared once.
 //
-// Single responsibility: two strings that appear in several unrelated surfaces and must agree — the
-// deployed site, and the issue tracker.
+// Single responsibility: the strings that appear in several unrelated surfaces and must agree — the
+// deployed site, the address it is leaving, and the issue tracker.
 //
 // **Why they live together and why here.** They were spelled out in five places (the consent letter's
 // links, the crash reporter, two pieces of header markup, and the generated landing page), which is the
@@ -17,6 +17,11 @@
 
 /** Where the app is deployed. Used by anything a person opens somewhere other than in the app. */
 export const PUBLIC_SITE_URL = "https://librept.twotech.si";
+
+/** The address the app is leaving: GitHub's default one for this repository. Until 2026-12-31 it
+ *  still serves the app, and the app tells the trainers there to move (domain/notificationItems.js).
+ *  Browsers keep data per address, so the move cannot take their data along by itself. */
+export const RETIRING_SITE_HOST = "stutek.github.io";
 
 /** Where a bug report goes. Not everyone has an account here — feedbackRoute.js is the route for
  *  the people who do not. */

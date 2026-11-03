@@ -19,6 +19,7 @@
 
 import { crashIssueUrl } from "../data/crashReport.js";
 import { planDemoRemoval } from "../data/demoDataRemoval.js";
+import { PUBLIC_SITE_URL, RETIRING_SITE_HOST } from "../data/publicUrls.js";
 import { escapedTestRecords } from "../data/seedProvenance.js";
 import {
   draftPrograms,
@@ -266,6 +267,36 @@ export function buildCrashReportItem(crashes, t, repoUrl) {
 }
 
 /**
+ * The app has a new address, said on the old one (asked for 2026-11-03, Simon).
+ *
+ * Browsers keep an app's data per address, so a trainer who opens the new address finds it empty.
+ * The card says where to go and how to take the work along: a backup downloaded here and imported
+ * there. The controls are named by the labels they show, read from the dictionary, so a renamed
+ * control renames itself here too. The way in is the ☰ menu, not the cloud button in the header:
+ * for a trainer connected to Google Drive that button syncs and never opens the dialog.
+ *
+ * Not in the sandbox: it holds sample data, and the card is about the trainer's own work.
+ * Synthetic and never stored, like the work items: it is a fact about the address the page is on,
+ * and it goes when the old address does.
+ */
+export function buildAddressMovedItem(t, { host = "", sandbox = false } = {}) {
+  if (host !== RETIRING_SITE_HOST || sandbox) return null;
+  return {
+    id: "synthetic-address-moved",
+    type: "warning",
+    icon: "fa-solid fa-triangle-exclamation",
+    title: t("notif_moved_title"),
+    description: t("notif_moved_desc")
+      .replaceAll("{url}", PUBLIC_SITE_URL)
+      .replaceAll("{menu}", t("menu_data"))
+      .replaceAll("{center}", t("backup_center"))
+      .replaceAll("{download}", t("btn_download_backup"))
+      .replaceAll("{import}", t("btn_import_backup")),
+    actions: [{ label: t("notif_moved_open"), url: PUBLIC_SITE_URL }],
+  };
+}
+
+/**
  * The thanks to early adopters, once per release (asked for 2026-10-10, Simon). It says that the app
  * is free and that we may one day ask for a voluntary donation, and that the ask would appear here
  * first. It carries no link, no amount and no button that donates: there is nothing to pay.
@@ -393,7 +424,7 @@ export function resolveNotificationItems(
   t,
   readIds = [],
   syncFailure = null,
-  { crashes = [], repoUrl = "", sandbox = false, testRun = false, chapters = [] } = {},
+  { crashes = [], repoUrl = "", sandbox = false, testRun = false, chapters = [], host = "" } = {},
 ) {
   const synthetic = [
     // A fault leads: it is the only item here reporting that something the trainer asked for did
@@ -402,6 +433,9 @@ export function resolveNotificationItems(
     // A crash outranks the RSVPs below it but not a failed sync: both are faults, and the sync one is
     // about the trainer's data being at risk right now.
     buildCrashReportItem(crashes, t, repoUrl),
+    // After the faults, ahead of the work: the trainer's whole store is at stake, but on a date
+    // weeks away rather than now.
+    buildAddressMovedItem(t, { host, sandbox }),
     buildEscapedTestDataItem(state, t, { sandbox, testRun }),
     buildRsvpAnswersItem(state, t),
     buildUnscheduledPlansItem(state, t),

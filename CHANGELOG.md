@@ -18,6 +18,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-11-03 — The app on the old address says where it moved
+
+### Added
+
+- **A notice on the old address.** LibrePT is moving to <https://librept.twotech.si/>. The old
+  address, <https://stutek.github.io/LibrePT/>, works until 2026-12-31. A browser keeps the app's data
+  separately for each address, so the work does not move by itself. On the old address the
+  notifications now carry a card that says where the app went and how to take the work along: in the
+  ☰ menu, Data management, then Download JSON Backup; on the new address, the same way, then Import
+  JSON Backup. The card names each control by the label it shows, in the trainer's language. It is
+  not shown in the sandbox, and not on any other address.
+
 ## 2026-11-03 — The privacy statement names the host's logs
 
 ### Changed

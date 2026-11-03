@@ -422,6 +422,8 @@ export function renderNotificationArea() {
     // can know. The browser suite puts the switch on every navigation, so the escaped
     // test-data alarm stays silent there and speaks on a trainer's install, where it never appears.
     testRun: getShareParams().init === INIT_DEMO_DATA,
+    // On the address the app is leaving, the feed says where it went.
+    host: window.location.host,
     // The guided story's chapters, so the sandbox card can offer any one of them rather than only
     // the beginning. Injected like the walkthrough's own deep link and for the same reason: they
     // come from the story script, which this module may not reach across to.
@@ -592,6 +594,7 @@ export function setupNotificationGestures() {
           repoUrl: deps.repoUrl || "",
           sandbox: isSandbox(),
           testRun: getShareParams().init === INIT_DEMO_DATA,
+          host: window.location.host,
         },
       ).map((item) => item.id);
       for (const id of ids) {

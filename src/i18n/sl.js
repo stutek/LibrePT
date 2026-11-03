@@ -1163,6 +1163,10 @@ export const sl = {
   notif_release_thanks_desc:
     "LibrePT je brezplačen. Hvala, da ga uporabljaš že zdaj, in hvala za vsako sporočilo o tem, kar opaziš. Morda te bomo nekoč prosili za prostovoljen denarni prispevek. Če bo tako, bomo o tem najprej pisali tukaj.",
   notif_release_thanks_close: "Zapri to sporočilo",
+  notif_moved_title: "LibrePT ima nov naslov",
+  notif_moved_desc:
+    "LibrePT je zdaj na {url}. Ta naslov deluje do 2026-12-31, nato se zapre. Tvoje delo se ne preseli samo: brskalnik ga hrani ločeno za vsak naslov. Da ga preneseš, odpri meni ☰ zgoraj desno, izberi {menu} in v oknu {center} pritisni {download}. Nato odpri {url}, pojdi po isti poti in pritisni {import}. Aplikacija vpraša za geslo, s katerim je bila varnostna kopija shranjena.",
+  notif_moved_open: "Odpri nov naslov",
   home_screen_heading: "Domači zaslon",
   home_screen_offer_title: "Postavi aplikacijo na domači zaslon",
   home_screen_offer_desc:
@@ -1200,8 +1204,7 @@ export const sl = {
   notif_spot_res_title: "📅 Rezervacija mesta za stranko",
   notif_spot_res_desc: "Tom je rezerviral mesto na treningu HIIT kondicija.",
   notif_spot_cancel_title: "⚠️ Odpoved rezervacije",
-  notif_spot_cancel_desc:
-    "Leo je odpovedal mesto na treningu Jutranja kondicija jutri ob 09:00.",
+  notif_spot_cancel_desc: "Leo je odpovedal mesto na treningu Jutranja kondicija jutri ob 09:00.",
   notif_count_badge: "{unread} neprebranih / {all} vseh",
   notif_mark_all_read: "Označi vse kot prebrano",
   notif_unscheduled_plans_title: "Nenačrtovani programi",

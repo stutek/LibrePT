@@ -1216,6 +1216,10 @@ export const de = {
   notif_release_thanks_desc:
     "LibrePT ist kostenlos. Danke, dass du LibrePT schon jetzt nutzt, und danke für jede Nachricht über das, was dir auffällt. Vielleicht bitten wir dich eines Tages um eine freiwillige Spende. Falls wir das tun, schreiben wir es zuerst hier.",
   notif_release_thanks_close: "Diese Nachricht schließen",
+  notif_moved_title: "LibrePT hat eine neue Adresse",
+  notif_moved_desc:
+    "LibrePT ist jetzt unter {url}. Diese Adresse funktioniert bis 2026-12-31 und wird dann geschlossen. Deine Arbeit zieht nicht von selbst mit: Der Browser speichert sie für jede Adresse getrennt. Um sie mitzunehmen, öffne das Menü ☰ oben rechts, wähle {menu} und tippe in {center} auf {download}. Öffne dann {url}, geh denselben Weg und tippe auf {import}. Die App fragt nach dem Passwort, mit dem die Sicherung geschrieben wurde.",
+  notif_moved_open: "Neue Adresse öffnen",
   home_screen_heading: "Home-Bildschirm",
   home_screen_offer_title: "Die App auf den Home-Bildschirm legen",
   home_screen_offer_desc:
