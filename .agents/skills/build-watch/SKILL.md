@@ -1,7 +1,7 @@
 ---
 type: skill
 title: Watch a GitHub build and report the fall
-description: After a push, wait for the GitHub Actions runs of that commit, say which job and which step fell, and write the facts to a file. Ships watch.py, which stops at the report; the session that pushed then fixes what fell.
+description: After a push, wait for the GitHub Actions runs of that commit, say which job and which step fell, and write the facts to a file. Ships watch.py, which stops at the report, and after_push.py, which the git pre-push hook runs to watch every push and open a session that fixes a fall.
 tags:
   - skill
   - ci
@@ -13,7 +13,8 @@ tags:
 A push starts five stages on GitHub and the answer arrives ten to thirty minutes later. Waiting for
 it and reading which job fell is mechanical work: no judgement, one command, a written answer.
 Fixing what fell is a different job: `watch.py` never does it, and a session that only watches
-hands the report on. The session that pushed fixes it itself, as the last section but one says.
+hands the report on. After a push, a session opened for the fall fixes it, as the last section
+but one says.
 
 ## Which model runs this
 
@@ -77,18 +78,24 @@ Both sentences belong in the report. Neither is a diagnosis.
 * Every time in the report comes from `date` read at that moment.
 * The report is a file, not only a message: whoever asked for the watch was not watching.
 
-## After your own push
+## After a push
 
-A session that pushed owns the runs of that push until they are green. A Claude Code hook in
-`.claude/settings.local.json` reminds it after every `git push`; other agents do the same by hand.
+Every push to `main`, from a terminal or an agent, starts the watch by itself through the git
+`pre-push` hook, which runs `after_push.py`. A green build shows a desktop notice. A fall opens
+LibrePT in VS Code with a new Claude Code tab that asks to fix it; Simon sends it with Enter. Git
+does not copy hooks with a clone, so a checkout installs it once:
 
-1. Start `python3 .agents/skills/build-watch/watch.py --sha <the pushed sha>` in the background, and
-   say the clock time the runs usually finish, from `date`.
-2. Exit `0`: say so, with the run's address. Exit `2`: say which, and look once more with `--once`.
-3. Exit `1`: read the report and the fallen job's log (`gh run view <run id> --log-failed`). Run the
+```bash
+printf '#!/bin/sh\nexec python3 .agents/skills/build-watch/after_push.py\n' > .git/hooks/pre-push
+chmod +x .git/hooks/pre-push
+```
+
+The session that the tab opens fixes the fall:
+
+1. Exit `1` of the watch is why it exists: read the report and the fallen job's log (`gh run view <run id> --log-failed`). Run the
    job's own command here, as above. Fix the cause, run the gate, commit, and push only where a push
-   is allowed. Then watch again from step 1. Never re-run a job to make it pass.
-4. A fall whose cause is outside the code (a GitHub outage, a secret that expired) is not fixed by a
+   is allowed; the next push starts the next watch. Never re-run a job to make it pass.
+2. A fall whose cause is outside the code (a GitHub outage, a secret that expired) is not fixed by a
    commit: record it in TODO.md with what blocks it, and say so.
 
 ## Taking it from a terminal with the Antigravity agent
