@@ -214,7 +214,7 @@ def test_the_landing_page_demo_links_reach_the_app_not_a_code_host():
     source = render_docs.inject_declared_values(
         (render_docs.REPO_ROOT / "docs" / "LANDING.md").read_text(encoding="utf-8")
     )
-    demo_links = re.findall(r"\]\((\S*init=demo_data_load[^)]*)\)", source)
+    demo_links = re.findall(r"\]\((\S*workspace=sandbox[^)]*)\)", source)
     assert demo_links, "the landing page no longer links to the demo at all"
     for link in demo_links:
         assert link.startswith("https://"), f"{link} will be rewritten to a blob URL"

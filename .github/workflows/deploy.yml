@@ -294,12 +294,21 @@ jobs:
       #
       # No release tags, no per-version folders, no versions.json: multi-version hosting was
       # dropped — one build carries every supported data schema concurrently, and
-      # storage keys on the schema major, not a release tag. Just the current build, at /<repo>/,
-      # with its <base> rewritten for the Pages sub-path, a SPA 404 fallback, and — last, over the
+      # storage keys on the schema major, not a release tag. Just the current build, with its <base>
+      # rewritten for the path Pages serves it from, a SPA 404 fallback, and — last, over the
       # exact bytes served — its SHA-256 integrity catalog.
+      #
+      # The path is read from the repository's Pages settings, not from the repository name: with a
+      # custom domain (librept.twotech.si) the site is at the root and base_path is "", without one
+      # it is "/LibrePT". A build that guessed would load no file at all after the domain changes.
+      # With Actions as the source, a CNAME file in the repository is ignored; the domain lives only
+      # in those settings.
+      - name: Read the Pages base path
+        id: pages
+        uses: actions/configure-pages@v6
       - name: Assemble dist
         run: |
-          base="/${GITHUB_REPOSITORY##*/}/"
+          base="${{ steps.pages.outputs.base_path }}/"
           python3 -c "from build import run_build; run_build(base='${base}')"
           touch dist/.nojekyll   # disable Jekyll processing on the published site
 

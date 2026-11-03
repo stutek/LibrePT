@@ -15,7 +15,7 @@
 //
 // To obtain one: console.cloud.google.com → new/existing project → "APIs & Services" → "Credentials"
 // → "Create OAuth client ID" → Application type "Web application" → add this deployment's origin
-// (e.g. https://stutek.github.io) under "Authorized JavaScript origins". No client secret is needed —
+// (e.g. https://librept.twotech.si) under "Authorized JavaScript origins". No client secret is needed —
 // this is the browser-side implicit token flow (Google Identity Services), not a server flow.
 //
 // Injected dependencies: none — a static constant module.

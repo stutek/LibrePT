@@ -182,19 +182,19 @@ seed data and never contacts Google.
 | App name | `LibrePT` | Shown on the consent screen |
 | User support email | `admin@` | Dropdown; forwards to personal via Part 0 |
 | App logo | **leave empty** | ⚠️ Uploading one triggers verification immediately |
-| Application home page | `https://stutek.github.io/LibrePT/` | |
+| Application home page | `https://librept.twotech.si/` | |
 | Application privacy policy link | **leave empty** | Optional in Testing, required at verification — see below |
 | Application terms of service link | leave empty | Optional |
-| Authorized domains | `stutek.github.io` | Domain only — no scheme, no path. **Not `github.io`** — see below |
+| Authorized domains | `twotech.si` | Domain only — no scheme, no path, no `librept.` — see below |
 | Developer contact information | the maintainer's own address | ⚠️ **Google's** channel for verification and deprecation notices — use the inbox read daily, not the support address |
 
 **Save and Continue.**
 
-**Authorized domain is `stutek.github.io`, one label deeper than usual.** Google requires a *top
-private domain*, computed against the Public Suffix List — and `github.io` is itself on that list
-(GitHub put it there so one Pages site cannot set cookies for another). So `github.io` is a public
-suffix, not a registrable domain, and cannot be claimed; the registrable domain for this site is
-`stutek.github.io`.
+**Authorized domain is `twotech.si`, not `librept.twotech.si`.** Google requires a *top private
+domain*, computed against the Public Suffix List: `.si` is on that list, so the registrable domain is
+`twotech.si`, which the maintainer holds. Until 2026-11 the app was at `stutek.github.io/LibrePT/`,
+where the entry was `stutek.github.io`, one label deeper than usual, because `github.io` is itself on
+the list (GitHub put it there so one Pages site cannot set cookies for another).
 
 **Every branding URL's domain must also be an authorized domain, and must be one you can prove you
 own.** This is what makes the privacy policy link awkward: pointing it at
@@ -202,17 +202,8 @@ own.** This is what makes the privacy policy link awkward: pointing it at
 authorized domain ("Missing domain: github.com"), and while Google would accept it in the list, it
 could never be verified — nobody here owns GitHub. The constraint is *not* that branding URLs share
 one domain; several are fine, as long as each is listed and each is ours. Privacy and terms remain
-empty until verification; before submitting it, serve a privacy page from a domain we control —
-either `https://stutek.github.io/LibrePT/privacy.html` (a static page under `src/`, which the
-integrity catalog, CSP and cache manifest all observe, so it needs a real commit and a full gate
-run) or the custom domain once bought.
-
-The same PSL fact is the verification risk noted in "Before public launch", seen from the other side.
-It cuts slightly in our favour here: because `stutek.github.io` counts as a registrable domain, it
-can be verified in Search Console as a URL-prefix property by uploading an HTML file to the Pages
-site, which we control. Whether Google's OAuth *review* accepts a `github.io` subdomain is still
-open — a custom domain resolves it. Treat the custom domain as a verification prerequisite, not a
-reason to delay the already-published app.
+empty until verification; before submitting it, point the privacy link at
+`https://librept.twotech.si/privacy.html`, the page rendered from PRIVACY.md under `src/`.
 
 ## A4. Audience — test users (only while Testing)
 
@@ -259,15 +250,18 @@ including this one.
 **Authorized JavaScript origins** → **+ Add URI**, twice:
 
 ```
-https://stutek.github.io
+https://librept.twotech.si
 http://localhost:8081
 ```
+
+Keep `https://stutek.github.io` in the list as long as the old address still serves the app rather
+than redirecting to the new one.
 
 **Authorized redirect URIs** → **leave completely empty**. The browser-side Google Identity Services
 token flow does not use them; only server-side code flows do.
 
-> ⚠️ An origin is **scheme + host + port, with no path**. It is `https://stutek.github.io`, *not*
-> `https://stutek.github.io/LibrePT/` — a trailing path silently produces `origin_mismatch` at
+> ⚠️ An origin is **scheme + host + port, with no path**. It is `https://librept.twotech.si`, *not*
+> `https://librept.twotech.si/` — a trailing slash or path silently produces `origin_mismatch` at
 > consent time. `127.0.0.1` is also a different origin from `localhost`; add it separately only if
 > used.
 
@@ -658,9 +652,8 @@ a feature `mailto:` already covers.
 
 # Before public launch
 
-1. **Buy a custom domain.** `github.io` is on the Public Suffix List, so proving domain ownership for
-   OAuth verification may not be possible, and the privacy policy needs hosting on the app's own
-   domain regardless. One purchase resolves both.
+1. **A custom domain — done 2026-11:** `librept.twotech.si`. On `github.io`, a public suffix,
+   proving domain ownership for OAuth verification may not have been possible.
 2. **Re-point A3** — privacy policy URL and authorized domains — and add the domain as an origin in
    A6.
 3. **Submit for verification.** Production is already enabled, which ends Testing's seven-day token

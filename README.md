@@ -26,10 +26,10 @@ LibrePT is a client-centric platform for personal trainers (PTs), built around a
 
 To start using LibrePT immediately without installing anything, open the live hosted Web App directly in your browser:
 
-👉 **[Launch LibrePT Web App](https://stutek.github.io/LibrePT/)**
+👉 **[Launch LibrePT Web App](https://librept.twotech.si/)**
 
 - **Explore Demo Mode**: To launch the platform pre-loaded with a sample dataset (clients, routines, and multi-set history), open the demo deep-link:  
-  👉 **[Launch LibrePT with Demo Data](https://stutek.github.io/LibrePT/?init=demo_data_load)**
+  👉 **[Launch LibrePT in the sandbox, with sample data](https://librept.twotech.si/?workspace=sandbox)**
 - **Install as PWA**: Open the link on your phone or desktop browser and select **"Add to Home Screen"** or **"Install App"** to use LibrePT as an offline-first gym floor application.
 
 ---
@@ -44,7 +44,7 @@ cd LibrePT
 python3 deploy/local_http_server.py     # dev server on http://localhost:8081
 ```
 
-Then open <http://localhost:8081>; it redirects to <http://localhost:8081/LibrePT/>. `deploy/local_http_server.py` deliberately serves `src/` under the **same `/LibrePT/` sub-path GitHub Pages uses** (rewriting `<base>` and adding a deep-link SPA fallback), so local dev exercises the real production base path. To run locally with demo data, open <http://localhost:8081/LibrePT/?init=demo_data_load>.
+Then open <http://localhost:8081>; it redirects to <http://localhost:8081/LibrePT/>. `deploy/local_http_server.py` deliberately serves `src/` under a **`/LibrePT/` sub-path** (rewriting `<base>` and adding a deep-link SPA fallback), although the public site is at the root of its own domain: the sub-path is the harder case, so local dev and the tests prove the app works wherever it is mounted. To run locally with demo data, open <http://localhost:8081/LibrePT/?init=demo_data_load>.
 
 > **Note for Developers**: Serve over HTTP rather than opening `index.html` via `file://` — the app loads ES modules and registers a Service Worker, both of which require an HTTP origin.
 
@@ -52,10 +52,10 @@ Then open <http://localhost:8081>; it redirects to <http://localhost:8081/LibreP
 
 ### About Demo Data
 
-LibrePT boots to a clean, empty state by default. To explore the platform pre-loaded with sample clients, routines, and workout sessions, open LibrePT with the demo deep-link: [`https://stutek.github.io/LibrePT/?init=demo_data_load`](https://stutek.github.io/LibrePT/?init=demo_data_load) (or append `?init=demo_data_load` to any URL).
+LibrePT boots to a clean, empty state by default. To explore the platform pre-loaded with sample clients, routines, and workout sessions, open the sandbox: [`https://librept.twotech.si/?workspace=sandbox`](https://librept.twotech.si/?workspace=sandbox). The sandbox is a separate database, so the sample people never mix with a trainer's own clients.
 
 - **Sample Dataset**: Includes sample clients, pre-configured routines, and multi-set history.
-- **Safety Guard**: `?init=demo_data_load` only populates a **genuinely empty** app — if any client data is already present, it is ignored so it never overwrites existing records.
+- **For tests**: `?init=demo_data_load` writes the same sample data into the workspace that opens, and the e2e suite runs on it. It only populates a **genuinely empty** app — if any client data is already present, it is ignored so it never overwrites existing records. Public links use the sandbox instead.
 - **Clearing Demo Data**: Follow the clean-up procedure below to return to a clean slate before starting real client work.
 
 ### Resetting to a clean state
@@ -70,7 +70,7 @@ LibrePT can be reset back to a first-run clean slate at any time by clearing sto
 - **DevTools Console** — Execute `window.resetLibrePTData({ demo: false })` in the console.
 - **A private/incognito window** — Always starts clean and discards everything on close.
 
-To land back on demo data instead of an empty app after clearing, reopen with `?init=demo_data_load`.
+To see sample data again after clearing, open the sandbox with `?workspace=sandbox`.
 
 For reference, the app stores data in two places. **IndexedDB** holds everything live: one database per **workspace** — `librept` for the trainer's own work and `librept_sandbox` for the sandbox they learn and experiment in ([`data/workspace.js`](src/data/workspace.js)) — each with one object store per data schema (`schema2`, `schema3`, …) plus a `meta` store. The sandbox does not exist until somebody opens it, and its per-workspace `localStorage` keys carry a `__sandbox` suffix; what belongs to the PERSON rather than the data — theme, language, accepted terms, the trainer's own name — is shared by both and carries no suffix. **`localStorage`** holds only the small keys around it — `librept_active_timers`, `librept_workout_setup_draft`, `librept_read_notifications`, `librept-theme`, `librept_terms_accepted` (first-run agreement), and `librept_release_thanks_closed` (the app version whose thanks card the trainer closed). `librept_db` also lives there, but is **no longer a live store**: it is read once as the legacy import source when a device moves onto the IndexedDB engine, then left untouched as the rollback snapshot ([`data/storageNamespace.js`](src/data/storageNamespace.js)). `librept_active_session` is read once, by a build of schema 6 or later, and turned into the session's programs; a session in progress is no longer kept outside the database. `openpt_*` are older legacy keys migrated on first load.
 
@@ -199,8 +199,8 @@ The service worker is split into single-responsibility modules so each concern c
 *   **Offline PWA shell**: the service worker serves the cached app shell for any in-scope navigation, so clean-URL deep links keep working offline (a basement gym with no signal).
 *   **Clean-slate boot**: the app starts **empty** — no clients, exercises, routines, history, or sessions are auto-populated on a fresh visit. Demo data is opt-in (see the promo deep-link below), so a real trainer's instance never has sample records injected under their own. Existing local data is always loaded as-is and never overwritten.
 *   **HTTPS Only & Automatic Redirect**: The application strictly mandates secure HTTPS transport. Any incoming non-localhost HTTP connection is automatically redirected to `https://` before rendering or fetching application shell resources, safeguarding PII and training data in transit.
-*   **Promo deep-links (preselected language + theme + demo data)**: any URL may carry `?lang=`, `?theme=`, and/or `?init=` in the query string to open the demo in a chosen language and colour theme, optionally pre-loaded with the sample dataset — handy for promoting the instance to a specific audience. Example: `https://stutek.github.io/LibrePT/?lang=sl&theme=nebula&init=demo_data_load`. The guided tour's table of contents, in the sandbox, with no trainer form before it (the QR code on the printed flyer): `https://stutek.github.io/LibrePT/?workspace=sandbox&lang=sl&theme=daylight&demo=chapters` — after the terms, the welcome screen lists every chapter of the story, and a tap starts that chapter. `lang` takes any shipped language code (`en`, `sl`, `de`); `theme` takes any theme (`daylight`, `midnight`, `spreadsheet`, `blossom`, `nebula`) or a legacy alias; `init=demo_data_load` populates the full demo dataset. All params are optional and independent. An unknown language falls through to the saved/default; an unknown or since-renamed theme reverts to the default theme, so old links never break the UI. `init` only ever populates a **genuinely empty** app — if any data is already present it is ignored, so it can't clobber a returning user's records. The params are read once on startup (`src/modules/common/shareLink.js`) and then applied like any manual language/theme choice.
-*   **GitHub Pages sub-path support**: the public demo is served from a project sub-path (`stutek.github.io/LibrePT/`), not a domain root. The deploy step rewrites the HTML `<base>` to the repo sub-path and ships the shell as `404.html` (GitHub Pages' SPA fallback), while the router derives that same base from its own module URL — so assets load and deep links resolve wherever the app is mounted, with no code changes. The local dev server (`deploy/local_http_server.py`) mounts the app under the same `/LibrePT/` sub-path (with an equivalent base rewrite + SPA fallback), so development and the test suite run against the real production base path rather than masking sub-path bugs behind a domain-root server.
+*   **Promo deep-links (preselected language + theme + demo data)**: any URL may carry `?lang=`, `?theme=`, and/or `?init=` in the query string to open the demo in a chosen language and colour theme, optionally pre-loaded with the sample dataset — handy for promoting the instance to a specific audience. Example: `https://librept.twotech.si/?lang=sl&theme=nebula&workspace=sandbox`. The guided tour's table of contents, in the sandbox, with no trainer form before it: `https://librept.twotech.si/?workspace=sandbox&lang=sl&theme=daylight&demo=chapters` (the QR code on the printed flyer carries the same link on the old address, which redirects here) — after the terms, the welcome screen lists every chapter of the story, and a tap starts that chapter. `lang` takes any shipped language code (`en`, `sl`, `de`); `theme` takes any theme (`daylight`, `midnight`, `spreadsheet`, `blossom`, `nebula`) or a legacy alias; `init=demo_data_load` populates the full demo dataset. All params are optional and independent. An unknown language falls through to the saved/default; an unknown or since-renamed theme reverts to the default theme, so old links never break the UI. `init` only ever populates a **genuinely empty** app — if any data is already present it is ignored, so it can't clobber a returning user's records. The params are read once on startup (`src/modules/common/shareLink.js`) and then applied like any manual language/theme choice.
+*   **Any mount path**: the public site is served from the root of its own domain (`librept.twotech.si`); before 2026-11 it was the project sub-path `stutek.github.io/LibrePT/`, which now redirects there. The deploy step reads the path from the repository's Pages settings, rewrites the HTML `<base>` to it and ships the shell as `404.html` (GitHub Pages' SPA fallback), while the router derives that same base from its own module URL — so assets load and deep links resolve wherever the app is mounted, with no code changes. The local dev server (`deploy/local_http_server.py`) mounts the app under a `/LibrePT/` sub-path (with an equivalent base rewrite + SPA fallback), so development and the test suite keep proving the harder case: a fork published at `<user>.github.io/<repo>/` works unchanged.
 
 ---
 

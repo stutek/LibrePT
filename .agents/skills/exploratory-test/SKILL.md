@@ -45,7 +45,8 @@ You are that trainer. Hold it for the whole session:
 
 ## Mode 1 — scenarios, on the PUBLISHED app, which lags `main`
 
-Base URL `https://stutek.github.io/LibrePT/`, deep-link params `?lang=`, `?theme=`, `?init=demo_data_load`.
+Base URL `https://librept.twotech.si/`, deep-link params `?lang=`, `?theme=`, `?workspace=sandbox`
+(sample data, apart from the trainer's own), `?init=demo_data_load` (sample data in the workspace that opens).
 The app prints its commit SHA in the header (`#0625bd6` at the time of writing).
 
 **The published build is FROZEN, and that is the point, not a compromise.** It does not move while
@@ -64,7 +65,8 @@ make that check in a minute.
 
 ## In a cloud session (claude.ai/code)
 
-A cloud session cannot reach `stutek.github.io`, and Playwright cannot download its browser there:
+A cloud session cannot reach the published app (measured on its old address `stutek.github.io`;
+`librept.twotech.si` not yet tried), and Playwright cannot download its browser there:
 the session's proxy answers 403 to both. Run this first, once per session; it is safe to run again:
 
 ```bash
@@ -76,7 +78,7 @@ and starts two local servers. It prints both addresses:
 
 - **The published build, for mode 1**: a copy of the commit the last successful deploy published,
   frozen there until the script runs again. Use its address wherever mode 1 says
-  `https://stutek.github.io/LibrePT/`.
+  `https://librept.twotech.si/`.
 - **`main`, for mode 2**: the dev server.
 
 Two things differ from the real published app. The header shows `dev` instead of the commit, so
@@ -118,7 +120,7 @@ get a first-visit app back).
 ```bash
 S=.agents/skills/exploratory-test/explore.py
 .venv/bin/python $S start                  # once per session; add width height to change the viewport
-.venv/bin/python $S goto 'https://stutek.github.io/LibrePT/?lang=sl'
+.venv/bin/python $S goto 'https://librept.twotech.si/?lang=sl'
 .venv/bin/python $S text 3000        # URL, <html lang>, and visible text, capped
 .venv/bin/python $S dialog             # only what an open dialog or overlay says
 .venv/bin/python $S measure            # the open form: Save on screen? targets under 44×44? scrolls?

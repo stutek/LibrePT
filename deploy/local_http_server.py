@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """
-Local dev server that mirrors the GitHub Pages deployment.
+Local dev server that serves the app under a sub-path, the harder of the two ways it is published.
 
-The live demo is a *project* site served from a sub-path (stutek.github.io/LibrePT/), not a
-domain root. Serving src/ at "/" locally (plain `python -m http.server`) hides exactly the
-base-path bugs that only surface under the sub-path — which is how the CSS once broke on Pages
-while "working" locally. This server removes that gap: it serves the app under the same
-/LibrePT/ sub-path, so local dev and the test suite exercise the real production base path.
+The public site is at the root of its own domain (librept.twotech.si); until 2026-11 it was the
+project sub-path stutek.github.io/LibrePT/, and a fork published on GitHub Pages still is. Serving
+src/ at "/" locally (plain `python -m http.server`) hides exactly the base-path bugs that only
+surface under a sub-path — which is how the CSS once broke on Pages while "working" locally. This
+server keeps the app under /LibrePT/, so local dev and the test suite prove the sub-path case; the
+root is the simpler one.
 
 Behaviour (BASE = "/LibrePT"):
   GET /                         -> 302 redirect to /LibrePT/

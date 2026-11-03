@@ -16,7 +16,7 @@
 // deps: none.
 
 /** Where the app is deployed. Used by anything a person opens somewhere other than in the app. */
-export const PUBLIC_SITE_URL = "https://stutek.github.io/LibrePT";
+export const PUBLIC_SITE_URL = "https://librept.twotech.si";
 
 /** Where a bug report goes. Not everyone has an account here — feedbackRoute.js is the route for
  *  the people who do not. */
