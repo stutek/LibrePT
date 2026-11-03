@@ -571,8 +571,8 @@ LibrePT an origin of its own (the "two origins" option below). Plan proposed, wa
 Measured: GitHub's redirect from `stutek.github.io/child-routines/` keeps path and query, so old links
 and printed QR codes keep working. Open, blocks the switch: does anyone keep real data on
 `stutek.github.io` (it does not move; export before the switch). 2026-11-03 13:14:14.020: the
-mailbox `librept@twotech.si` exists and the move does not touch it (the twotech session; the commit
-it cites, c61a07e4, is not in LibrePT, Asistent or twotech). Simon, as relayed: "demo data load ni
+mailbox `librept@twotech.si` exists and the move does not touch it (created in Neoserv on 2026-11-02 in
+a LibrePT session; its password is in Simon's KWallet). Simon, as relayed: "demo data load ni
 več potreben". With the move, public links (README, landing page) stop offering `?init=demo_data_load`,
 which seeds the trainer's own workspace, and open the sandbox (`?workspace=sandbox`) as the app's
 own offers do; the parameter itself stays, the e2e suite runs on it.
