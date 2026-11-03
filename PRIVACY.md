@@ -1,6 +1,6 @@
 # LibrePT — Privacy & GDPR Statement
 
-*Last Updated: August 2026*
+*Last Updated: November 2026*
 
 ---
 
@@ -11,6 +11,7 @@
 We believe that data privacy and data ownership are fundamental rights:
 - **Zero Central Backend:** LibrePT by default does not operate a central database, API server, or analytics pipeline. Optional cloud integrations connect directly to your personal cloud storage.
 - **Zero Telemetry & Cookies:** We collect no usage statistics, tracking cookies, IP addresses, or personal information when you use the app.
+- **The host's logs:** The app's files are served by GitHub Pages. When a GitHub Pages site is visited, ["the visitor's IP address is logged and stored for security purposes"](https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages#data-collection). GitHub keeps these logs; we have no access to them.
 - **Local-First Architecture:** By default, all client profiles, training routines, exercise histories, and session logs reside strictly on your local device (in your web browser's `localStorage` or `IndexedDB`), with support for optional personal cloud storage and database synchronization integrations.
 
 ---
