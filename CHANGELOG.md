@@ -18,6 +18,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-11-03 — The privacy statement names the host's logs
+
+### Changed
+
+- **The privacy statement says who logs IP addresses.** It said, and still says, that we collect no
+  IP addresses. That is true: we have no server and no access to any log. But a reader could take it
+  to mean that nobody records them. The host does: GitHub Pages, which serves the app's files, logs
+  each visitor's IP address "for security purposes". The statement now says so, with a link to
+  GitHub's page. Nothing changed in what the app does or sends.
+
 ## 2026-10-14 — The demonstrated drag leaves a wake
 
 ### Changed
