@@ -598,6 +598,15 @@ schedule and on demand, builds with base `/` the commit of LibrePT's last green 
 checkout needs no token. Open: the two origins keep separate data, so before the old address closes,
 its users export and import by hand.
 
+**2026-11-03 22:52:38.595: Simon agreed to the second repository, a temporary skeleton.** Its README
+and workflow are ready. The workflow publishes LibrePT's last green commit with base `/`, then
+downloads every live file and compares it with `integrity.json`, the only check of the build at the
+root. Dry run of that comparison against the old address: 321 files, 0 different. Creating the
+public repository was refused to the agent, so Simon creates it. Commit 50570b1c (Simon asked for it
+mid-turn): on `stutek.github.io` the notification feed tells trainers where the app went and how to
+take their work along. Push order: up to a7b47781 any time; 8b6c1000, 09de2aa0 and 50570b1c once
+`librept.twotech.si` answers.
+
 **Found 2026-09-28.** The app is at `https://stutek.github.io/LibrePT`
 ([publicUrls.js](src/data/publicUrls.js)). Browsers separate storage by origin (scheme, host, port), so
 the path `/LibrePT` separates nothing: every page published on GitHub Pages under this account shares
