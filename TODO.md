@@ -577,6 +577,15 @@ več potreben". With the move, public links (README, landing page) stop offering
 which seeds the trainer's own workspace, and open the sandbox (`?workspace=sandbox`) as the app's
 own offers do; the parameter itself stays, the e2e suite runs on it.
 
+**2026-11-03 13:22:13.702, Simon (relayed by the twotech session): keep the old address at least
+to the end of the year, and is there a way to see traffic on Pages.** A custom domain on this
+repository redirects the old address, so keeping it needs a second host for the new one: a second
+GitHub repository, or Neoserv, whose cPanel has server-log statistics (AWStats). GitHub Pages
+reports no traffic. Server-log statistics contradict [PRIVACY.md](PRIVACY.md) ("We collect no usage
+statistics, tracking cookies, IP addresses"), and an offline-first app reaches the server mostly on
+first load, so the logs would count installs, not use. Waits on Simon: real data on the old address
+(only then does keeping it matter), and statistics with a rewritten privacy promise, or none.
+
 **Found 2026-09-28.** The app is at `https://stutek.github.io/LibrePT`
 ([publicUrls.js](src/data/publicUrls.js)). Browsers separate storage by origin (scheme, host, port), so
 the path `/LibrePT` separates nothing: every page published on GitHub Pages under this account shares
