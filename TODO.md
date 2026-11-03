@@ -566,6 +566,13 @@ Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#165-x-retire-th
 
 ### 16.6 [ ] One origin or two: the boundary around LibrePT's data is undecided
 
+**2026-11-03 13:09:31.283: Simon asks to move LibrePT to `https://librept.twotech.si/`**, which gives
+LibrePT an origin of its own (the "two origins" option below). Plan proposed, waiting on Simon's go.
+Measured: GitHub's redirect from `stutek.github.io/child-routines/` keeps path and query, so old links
+and printed QR codes keep working. Open, blocks the switch: does anyone keep real data on
+`stutek.github.io` (it does not move; export before the switch), and is a mailbox
+`librept@twotech.si` also wanted.
+
 **Found 2026-09-28.** The app is at `https://stutek.github.io/LibrePT`
 ([publicUrls.js](src/data/publicUrls.js)). Browsers separate storage by origin (scheme, host, port), so
 the path `/LibrePT` separates nothing: every page published on GitHub Pages under this account shares
