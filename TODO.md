@@ -7104,46 +7104,6 @@ isto okolje kot CI, Dependabot pa vidi vse pakete.
 - [ ] Simon izbere A in B, samo A, samo B ali C. *Blokira:* nič nujnega; do odločitve se `.venv` ob padcu
       `pip-audit` posodobi ročno.
 
-## 116. [ ] Lokalna vrata padejo na OWASP ZAP, odkar Docker teče brez root
+## 116. [x] Lokalna vrata padejo na OWASP ZAP, odkar Docker teče brez root — zaprto 2026-11-03
 
-Zapisano 2026-11-02 09:30:28.577: `build check -- requirements.txt` je prešel stopnje 1–4, stopnja 5
-pa je padla: »Job spider failed to access URL http://localhost:8095/LibrePT/ : Connect to
-http://localhost:8095 failed: Connection refused«. Strežnik kopije drevesa je na 8095 tekel, preverba
-pred skeniranjem je uspela. Vzrok: Docker na tem računalniku od 2026-11-01 20:56 teče brez root
-(Simonova odločitev v `~/Projects/Asistent/TODO.md`, »Zavarovanje KWalleta«). Pri Dockerju brez root
-`--network host` pomeni omrežje rootlesskit, ne omrežja računalnika, zato `localhost` v vsebniku ZAP
-ni `localhost`, na katerem posluša strežnik (sklep iz načina delovanja, še ni preverjen v
-dokumentaciji). Sistemski Docker je ustavljen. CI na GitHubu tega ne zadeva.
-
-**Posledica:** noben commit kode v LibrePT ne dobi zelenega zagona na tem računalniku. Čaka dvig
-setuptools 84.1.0 (Dependabot opozorilo 1), ki odblokira objavo: CI pade na `pip-audit` od
-`e1c87b8c`. Sporočilo commita je v `.private/tmp/claude-setuptools/commit-msg.txt`.
-
-**Odprto:**
-- [x] Stopnja ZAP doseže strežnik tudi pri Dockerju brez root. Zaprto 2026-11-02 09:54:31.682
-      s `16477fe7`: strežnik teče v vsebniku ZAP z `--network none`, ZAP je pregledal 98 naslovov,
-      0 opozoril, vseh pet stopenj zelenih (en zagon za `16477fe7` in `37248fa3`). Vzrok potrjen
-      (2026-11-02 09:42:38.244): nameščen je Docker 29.1.3; izvorno besedilo dokumentacije
-      (`docker/docs`, `rootless/troubleshoot.md`) pravi »Until Docker Engine v29.5 – Host network
-      (`docker run --net=host`) was namespaced inside RootlessKit«, `~/.local/bin/dockerd-rootless.sh`
-      pa `DISABLE_HOST_LOOPBACK` privzeto `true`. Dela seja librept-96 (opomba
-      `.private/AGENT_SYNC/claude-zap-rootless.md`): strežnik teče v vsebniku ZAP.
-- [x] Za tem `build check` in `build commit` za `requirements.txt`: `37248fa3` (setuptools 84.1.0).
-- [ ] Nato `git push` vseh commitov na `main`. Simon ga je odobril 2026-11-02 seji librept-98
-      (»sam izvedi vse potrebno« na korak »odobri push«); seji librept-96 je isti dan naročil
-      »Brez git push«, zato push čaka na Simonovo potrditev. Seja librept-98 je push poskusila
-      2026-11-02 09:55:39.920; zavrnil ga je samodejni preizkus Claude Code (»Create Public
-      Surface«). Push zato naredi Simon: `cd ~/Projects/LibrePT && git push origin main`
-      (pričakovano: na `origin/main` gre devet commitov, od `df0237c1` do commita s tem zapisom). Po pushu preveri, da je posel »Build, Verify and Deploy to
-      GitHub Pages« zelen in da
-      `gh api repos/stutek/LibrePT/dependabot/alerts/1 --jq .state` vrne `fixed`. *Blokira:*
-      objavo na GitHub Pages, ki stoji od `e1c87b8c`.
-- [ ] Spremljanje CI po Simonovem pushu. Zapisano 2026-11-02 09:56:17.630. Simon je naročil »nastavi
-      hook, da po pushu librePT spremljaš build in popraviš padle zagone«. Hook `PostToolUse` v
-      `.claude/settings.local.json` (`7a5a55fe`) se sproži le po pushu agenta, take pa samodejni
-      preizkus Claude Code zavrne, zato skoraj nikoli ne deluje. Možnosti: (A) git kljuka
-      `pre-push` zažene `watch.py` v ozadju, `watch.py` počaka, da se zagoni pojavijo (zdaj takoj
-      konča z »NO RUNS«), hook ob začetku seje LibrePT javi padlo poročilo iz `.private/BUILD_WATCH/`;
-      stane okoli 30 min dela in en zagon vrat, spremljanje ne porabi žetonov. (B) Simon po vsakem
-      pushu napiše »spremljaj CI«; ne stane nič, a je odvisno od spomina, kar je pustilo CI rdeč od
-      `e1c87b8c`. Priporočilo: A. *Blokira:* izpolnitev Simonove zahteve.
+Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#116-x-lokalna-vrata-padejo-na-owasp-zap-odkar-docker-teče-brez-root--zaprto-2026-11-03).
