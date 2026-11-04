@@ -28,6 +28,12 @@
 .demo-tour-hand.is-dragging {
   transition: opacity 0.2s ease;
 }
+/* CIRCLING a control it only points at: the glide above would cut each lap into a smaller curve
+   behind the points it is sent. A linear glide exactly one point long joins the points into a
+   curve; demoHand.js stamps that length, so it cannot drift from the pace of the laps. */
+.demo-tour-hand.is-circling {
+  transition: transform var(--circle-step-ms) linear, opacity 0.2s ease;
+}
 /* Pressed for the whole drag, the way the tap's own press looks, so a viewer reads a finger held
    down and moved rather than a hand sliding over the glass. */
 .demo-tour-hand.is-dragging svg {
@@ -184,5 +190,43 @@
 @media (prefers-reduced-motion: reduce) {
   .demo-tour-ripple {
     display: none;
+  }
+}
+
+/* The ring a POINTING step draws round the control it shows (Show me on the welcome card): "look at
+   this", where a tap's rings say "this was tapped". The hand goes round it twice (demoHand.js); the
+   ring stays until the step's pause is over. Placed from the ring demoHand.js computed, and a
+   capsule (the 9999px radius) because that is the shape the hand's path follows: the two are one
+   shape. The theme's accent, as the tap's rings are; a static ring is still drawn under reduced
+   motion, because it moves nothing and says the same. */
+.demo-tour-circle {
+  position: fixed;
+  z-index: 9998;
+  left: calc(var(--circle-x) - var(--circle-rx));
+  top: calc(var(--circle-y) - var(--circle-ry));
+  width: calc(2 * var(--circle-rx));
+  height: calc(2 * var(--circle-ry));
+  box-sizing: border-box;
+  border: 3px solid var(--primary);
+  border-radius: 9999px;
+  box-shadow: 0 0 14px color-mix(in srgb, var(--primary) 60%, transparent);
+  pointer-events: none;
+  animation: demo-tour-circle-in 0.4s ease-out both;
+}
+
+@keyframes demo-tour-circle-in {
+  from {
+    opacity: 0;
+    scale: 1.15;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .demo-tour-circle {
+    animation: none;
   }
 }

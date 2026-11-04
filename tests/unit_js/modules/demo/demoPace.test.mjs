@@ -36,6 +36,12 @@ test("reduced motion waits for nothing at all", () => {
   assert.equal(pace.travelMs, 0);
   assert.equal(pace.tapLeadMs, 0);
   assert.equal(pace.stepPauseMs, 0);
+  // The hand does not go round a control it points at; the ring is drawn at once instead.
+  assert.equal(pace.circleLapMs, 0);
+});
+
+test("full motion gives each lap round a pointed-at control time to be followed", () => {
+  assert.ok(demoPace(false).circleLapMs >= 600, "a lap faster than this reads as a flicker");
 });
 
 test("the tap's mark gets a full ring's head start on the click", () => {

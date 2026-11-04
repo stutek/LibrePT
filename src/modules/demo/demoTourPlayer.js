@@ -32,8 +32,18 @@
 // Injected dependencies: `doc`, `hand` (optional — no pointer in CI), `wait`, `onStep`.
 
 import { checkExpectation, validateTour } from "../../domain/demoTour.js";
-import { liftDemoHand, moveDemoHand, pressDemoHand, pulseDemoHand } from "./demoHand.js";
-import { demoPace, prefersReducedMotion } from "./demoPace.js";
+import {
+  circleDemoHand,
+  circlePoints,
+  drawDemoCircle,
+  eraseDemoCircle,
+  liftDemoHand,
+  moveDemoHand,
+  pressDemoHand,
+  pulseDemoHand,
+  ringAround,
+} from "./demoHand.js";
+import { CIRCLE_LAPS, demoPace, prefersReducedMotion } from "./demoPace.js";
 
 // How long a step will keep asking whether its expectation has come true. Correctness lives here
 // rather than in a pause: the player used to sleep a fixed 1350ms and then check once, which meant
@@ -112,8 +122,18 @@ function fitAxis(low, high, offsets, extent) {
  */
 export function dragPressPoint(box, path, viewport) {
   return {
-    x: fitAxis(box.left, box.right, path.map(([dx]) => dx), viewport.width ?? Infinity),
-    y: fitAxis(box.top, box.bottom, path.map(([, dy]) => dy), viewport.height ?? Infinity),
+    x: fitAxis(
+      box.left,
+      box.right,
+      path.map(([dx]) => dx),
+      viewport.width ?? Infinity,
+    ),
+    y: fitAxis(
+      box.top,
+      box.bottom,
+      path.map(([, dy]) => dy),
+      viewport.height ?? Infinity,
+    ),
   };
 }
 
@@ -159,6 +179,50 @@ async function pointAndPress(hand, target, wait, travelMs, tapLeadMs) {
   // whole ring long (demoPace.js), so every ring is out and the first one finished by the time the
   // control is touched.
   await wait(tapLeadMs);
+}
+
+/** Sends the hand to the ring round the control and takes it round, the demonstration of a control
+ *  to look at. No press and no rings of a tap: nothing is tapped. The ring stays until the step's
+ *  pause is over; the caller erases it. */
+async function pointAround(hand, target, { doc, wait, travelMs, pace }) {
+  const view = doc.defaultView;
+  const ring = ringAround(target.getBoundingClientRect(), {
+    width: view.innerWidth,
+    height: view.innerHeight,
+  });
+  const [start] = circlePoints(ring, 1);
+  moveDemoHand(hand, start.x, start.y);
+  await wait(travelMs);
+  drawDemoCircle(doc, ring);
+  await circleDemoHand(hand, ring, { laps: CIRCLE_LAPS, lapMs: pace.circleLapMs, wait });
+}
+
+/** A step that only points: round the control, then the step's own check and pause, and the ring
+ *  goes with the pause. Nothing is tapped, so there is no tap to retry and no outcome to cause. */
+async function pointStep(step, target, { doc, hand, wait, travelMs, pace }) {
+  await waitForBoxToSettle(target, wait);
+  await pointAround(hand, target, { doc, wait, travelMs, pace });
+  const outcome = await waitForOutcome(step, doc, wait, pace.outcomeBudgetMs);
+  await wait(step.settleMs ?? pace.stepPauseMs);
+  eraseDemoCircle(doc);
+  return outcome;
+}
+
+/** Presses the control, and again where it moved while the hand travelled (a slow phone finishing a
+ *  layout, a card sliding open). The tap is never sent to a place the hand is not: it waits for the
+ *  control to stand still and presses again, a few times at most, so a control that never stops
+ *  cannot hold the step up. */
+async function pressUntilOver(hand, target, { wait, travelMs, tapLeadMs }) {
+  await waitForBoxToSettle(target, wait);
+  await pointAndPress(hand, target, wait, travelMs, tapLeadMs);
+  for (
+    let retry = 0;
+    retry < HAND_RETRIES && isOnScreen(target) && !handIsOver(hand, target);
+    retry += 1
+  ) {
+    await waitForBoxToSettle(target, wait);
+    await pointAndPress(hand, target, wait, travelMs, tapLeadMs);
+  }
 }
 
 // How many pointer events one leg of a drag is sent as. A gesture the app measures — an axis it
@@ -403,7 +467,7 @@ async function waitForOutcome(step, doc, wait, budgetMs) {
  */
 function interactWith(target, step) {
   // POINTING is the fourth act, and it is the one a person performs when they are being shown
-  // rather than taught: the hand travels to a control, pulses, and touches nothing. The welcome
+  // rather than taught: the hand goes round a control (`pointAround`) and touches nothing. The welcome
   // card needs it — the SANDBOX badge and the two sandbox rows in the ☰ menu are things to LOOK at,
   // and tapping either menu row would leave the sandbox or throw it away mid-sentence.
   if (step.point) return;
@@ -481,22 +545,8 @@ export async function performStep(
   if (step.drag) return dragStep(step, target, { doc, hand, wait, pace });
 
   const travelMs = step.travelMs ?? pace.travelMs;
-  if (hand) {
-    await waitForBoxToSettle(target, wait);
-    await pointAndPress(hand, target, wait, travelMs, pace.tapLeadMs);
-    // The control can still move while the hand travels (a slow phone finishing a layout, a card
-    // sliding open). The tap is never sent to a place the hand is not: it waits for the control to
-    // stand still and presses again, a few times at most, so a control that never stops cannot hold
-    // the step up.
-    for (
-      let retry = 0;
-      retry < HAND_RETRIES && isOnScreen(target) && !handIsOver(hand, target);
-      retry += 1
-    ) {
-      await waitForBoxToSettle(target, wait);
-      await pointAndPress(hand, target, wait, travelMs, pace.tapLeadMs);
-    }
-  }
+  if (hand && step.point) return pointStep(step, target, { doc, hand, wait, travelMs, pace });
+  if (hand) await pressUntilOver(hand, target, { wait, travelMs, tapLeadMs: pace.tapLeadMs });
 
   // IDEMPOTENT, and that is the contract rather than an optimisation (decided 2026-08-18: "show me
   // should always start from the same state and execute the same action idempotently"). A step whose

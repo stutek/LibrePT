@@ -159,6 +159,12 @@ stage.innerHTML = `
   </div>
 `;
 document.body.appendChild(stage);
+// Room round each control, as it has in the app (the badge in the header, the rows in the ☰ menu):
+// unstyled, the badge spanned the screen and the rows sat on its bottom edge, where no ring fits.
+const room = document.createElement('style');
+room.textContent = `#badge, #leave, #reset { display: inline-block; margin: 32px; }
+  .app-view.active { padding-bottom: 50vh; }`;
+document.head.appendChild(room);
 
 const menu = document.getElementById('menu');
 document.getElementById('menu-toggle').addEventListener('click', () => {
@@ -195,11 +201,45 @@ window.__walkthrough = startGuidedWalkthrough({ tour: TOUR, t: words, pollMs: 60
 """
 
 
+# What the hand leaves on the screen while it demonstrates: the rings of a tap (which control they
+# landed on) and the ring a pointing beat draws round a control (which controls it encloses).
+RECORD_MARKS = """() => {
+  window.__marks = [];
+  const pointed = ['badge', 'leave', 'reset'];
+  new MutationObserver((records) => {
+    for (const record of records) for (const node of record.addedNodes) {
+      if (!(node instanceof HTMLElement)) continue;
+      if (node.classList.contains('demo-tour-waves') && !node.classList.contains('is-wake')) {
+        const ring = node.firstElementChild;
+        const x = parseFloat(ring.style.getPropertyValue('--ripple-x'));
+        const y = parseFloat(ring.style.getPropertyValue('--ripple-y'));
+        window.__marks.push({ kind: 'tap', on: document.elementFromPoint(x, y)?.closest('[id]')?.id });
+      }
+      if (node.classList.contains('demo-tour-circle')) {
+        const read = (name) => parseFloat(node.style.getPropertyValue(name));
+        const [cx, cy, rx, ry] = ['--circle-x', '--circle-y', '--circle-rx', '--circle-ry'].map(read);
+        const encloses = pointed.filter((id) => {
+          const box = document.getElementById(id).getBoundingClientRect();
+          return box.width > 0 && box.left >= cx - rx && box.right <= cx + rx
+            && box.top >= cy - ry && box.bottom <= cy + ry;
+        });
+        const boxes = Object.fromEntries(pointed.map((id) => {
+          const box = document.getElementById(id).getBoundingClientRect();
+          return [id, [box.left, box.top, box.right, box.bottom].map(Math.round)];
+        }));
+        window.__marks.push({ kind: 'circle', encloses, ring: [cx, cy, rx, ry], boxes });
+      }
+    }
+  }).observe(document.body, { childList: true });
+}"""
+
+
 def _start_sequence(page, local_server):
     page.set_viewport_size({"width": 390, "height": 844})
     load_with_stub(page, local_server, SEQUENCE_STUB)
     page.wait_for_selector(".walkthrough-panel")
     page.wait_for_timeout(400)
+    page.evaluate(RECORD_MARKS)
     page.click("#walkthrough-show")
     # Five beats, each with its own scroll, travel, tap and pause — a wall-clock guess would either
     # cut the sequence in half or pad every run. The guide greys its own buttons out while a
@@ -235,3 +275,24 @@ def test_a_demonstrated_sequence_completes_the_step(page, local_server):
 
     expect(page.locator(".walkthrough-problem")).to_be_hidden()
     expect(page.locator("#walkthrough-next")).to_be_enabled()
+
+
+def test_a_pointed_at_control_is_circled_not_tapped(page, local_server):
+    """Pointing plays no tap: a tap's rings say "tap here", and the step taps nothing. The hand goes
+    round the control and leaves a ring round it (Simon, 2026-11-04), and the ring is gone when the
+    sequence ends, so it marks nothing on the next card."""
+    _start_sequence(page, local_server)
+    marks = page.evaluate("() => window.__marks")
+
+    taps = [mark["on"] for mark in marks if mark["kind"] == "tap"]
+    circled = [mark["encloses"] for mark in marks if mark["kind"] == "circle"]
+    assert "menu-toggle" in taps, (
+        f"the menu's own taps are still shown as taps: {marks}"
+    )
+    assert not {"badge", "leave", "reset"} & set(taps), (
+        f"a pointed-at control was tapped: {marks}"
+    )
+    assert circled == [["badge"], ["leave"], ["reset"]], (
+        f"each pointed-at control is circled: {marks}"
+    )
+    expect(page.locator(".demo-tour-circle")).to_have_count(0)

@@ -1,7 +1,8 @@
 // src/modules/demo/demoHand.js — the animated hand that shows WHERE the scripted demo is tapping.
 //
-// Single responsibility: one overlay element, moved to a point and pulsed on tap. It draws an actual
-// hand with an extended index finger; until 2026-08-18 it was a white dot in a module
+// Single responsibility: one overlay element, moved to a point and pulsed on tap, or taken round a
+// control it only points at. It draws an actual hand with an extended index finger; until
+// 2026-08-18 it was a white dot in a module
 // named for a hand, which read as a bullet rather than as somebody's finger. It knows nothing
 // about tours, steps or assertions — demoTourPlayer.js drives it, and a tour runs correctly with no
 // hand at all (which is exactly how the e2e suite runs it, since a cursor asserting nothing is pure
@@ -210,6 +211,121 @@ export function liftDemoHand(hand) {
   lastWakePoint.delete(hand);
 }
 
+// POINTING without tapping (Show me on the welcome card). A tap's press and rings say "tap here",
+// and the step taps nothing: it shows a control to LOOK at. So the hand goes round the control and
+// leaves a ring around it (Simon, 2026-11-04: "for pointing, no click animation; circle around the
+// element").
+const CIRCLE_ID = "demo-tour-circle";
+// How many places the hand is put on one lap: enough that it reads as a curve, not as jumps.
+export const CIRCLE_POINTS_PER_LAP = 32;
+// Clear space between the control's edge and the ring, so the ring is around it, not on it.
+const CIRCLE_GAP_PX = 14;
+// The ring stays this far inside the screen; a control at the edge gets a flatter ring, never a cut one.
+const CIRCLE_SCREEN_MARGIN_PX = 6;
+
+/** The ring around a box, in viewport coordinates: the box's centre, and half-sizes that clear its
+ *  edges by CIRCLE_GAP_PX where the screen leaves room. The ring is a capsule — straight sides, round
+ *  ends, what CSS draws for `border-radius: 9999px` — and not an ellipse: an ellipse round a wide
+ *  menu row cuts the row's corners. Pure, so its geometry is tested without a browser. */
+export function ringAround(box, viewport) {
+  const cx = box.left + box.width / 2;
+  const cy = box.top + box.height / 2;
+  const room = (centre, size) =>
+    Math.min(centre - CIRCLE_SCREEN_MARGIN_PX, size - centre - CIRCLE_SCREEN_MARGIN_PX);
+  return {
+    cx,
+    cy,
+    rx: Math.max(0, Math.min(box.width / 2 + CIRCLE_GAP_PX, room(cx, viewport.width))),
+    ry: Math.max(0, Math.min(box.height / 2 + CIRCLE_GAP_PX, room(cy, viewport.height))),
+  };
+}
+
+/** The capsule's outline as segments in clockwise screen order, from the left end of its top side:
+ *  straight sides as `line`, round corners as quarter `arc`s. */
+function capsuleSegments({ cx, cy, rx, ry }) {
+  const r = Math.min(rx, ry);
+  const sx = rx - r;
+  const sy = ry - r;
+  const line = (x1, y1, x2, y2) => ({
+    length: Math.hypot(x2 - x1, y2 - y1),
+    at: (f) => ({ x: x1 + (x2 - x1) * f, y: y1 + (y2 - y1) * f }),
+  });
+  const arc = (ax, ay, from) => ({
+    length: (Math.PI / 2) * r,
+    at: (f) => {
+      const angle = from + (Math.PI / 2) * f;
+      return { x: ax + r * Math.cos(angle), y: ay + r * Math.sin(angle) };
+    },
+  });
+  return [
+    line(cx - sx, cy - ry, cx + sx, cy - ry),
+    arc(cx + sx, cy - sy, -Math.PI / 2),
+    line(cx + rx, cy - sy, cx + rx, cy + sy),
+    arc(cx + sx, cy + sy, 0),
+    line(cx + sx, cy + ry, cx - sx, cy + ry),
+    arc(cx - sx, cy + sy, Math.PI / 2),
+    line(cx - rx, cy + sy, cx - rx, cy - sy),
+    arc(cx - sx, cy - sy, Math.PI),
+  ];
+}
+
+/** The points the hand passes on `laps` turns round the ring, evenly spaced along it, clockwise on
+ *  screen, starting and ending at the left end of its top side. */
+export function circlePoints(ring, laps, perLap = CIRCLE_POINTS_PER_LAP) {
+  const segments = capsuleSegments(ring);
+  const perimeter = segments.reduce((sum, segment) => sum + segment.length, 0);
+  const pointAt = (distance) => {
+    let left = distance;
+    for (const segment of segments) {
+      if (left <= segment.length) return segment.at(segment.length ? left / segment.length : 0);
+      left -= segment.length;
+    }
+    return segments[0].at(0);
+  };
+  return Array.from({ length: laps * perLap + 1 }, (_, index) =>
+    pointAt(((index % perLap) / perLap) * perimeter),
+  );
+}
+
+/** Draws the ring `shape` (from `ringAround`); demoTour.css owns how it looks. One at a time. */
+export function drawDemoCircle(doc, shape) {
+  eraseDemoCircle(doc);
+  const ring = doc.createElement("div");
+  ring.id = CIRCLE_ID;
+  ring.className = "demo-tour-circle";
+  ring.setAttribute("aria-hidden", "true");
+  ring.style.setProperty("--circle-x", `${Math.round(shape.cx)}px`);
+  ring.style.setProperty("--circle-y", `${Math.round(shape.cy)}px`);
+  ring.style.setProperty("--circle-rx", `${Math.round(shape.rx)}px`);
+  ring.style.setProperty("--circle-ry", `${Math.round(shape.ry)}px`);
+  doc.body.appendChild(ring);
+  return ring;
+}
+
+export function eraseDemoCircle(doc = document) {
+  doc.getElementById(CIRCLE_ID)?.remove();
+}
+
+/** Takes the hand round the ring `laps` times, `lapMs` a lap, waiting with the caller's `wait`.
+ *  Meanwhile it glides linearly for exactly one point's time (demoTour.css `.is-circling`), so the
+ *  points join into a curve; the usual 0.42s glide would cut each lap into a smaller one. A lap of
+ *  0 ms (reduced motion) moves nothing. */
+export async function circleDemoHand(hand, ring, { laps, lapMs, wait }) {
+  if (!hand || lapMs <= 0) return;
+  const stepMs = lapMs / CIRCLE_POINTS_PER_LAP;
+  hand.style.setProperty("--circle-step-ms", `${Math.round(stepMs)}ms`);
+  hand.classList.add("is-circling");
+  try {
+    for (const point of circlePoints(ring, laps).slice(1)) {
+      moveDemoHand(hand, point.x, point.y);
+      await wait(stepMs);
+    }
+  } finally {
+    hand.classList.remove("is-circling");
+  }
+}
+
 export function unmountDemoHand(doc = document) {
   doc.getElementById(HAND_ID)?.remove();
+  eraseDemoCircle(doc);
 }

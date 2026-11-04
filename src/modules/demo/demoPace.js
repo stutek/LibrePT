@@ -44,6 +44,13 @@ const TRAVEL_MS = 650;
 const TAP_LEAD_MS = RIPPLE_RING_MS;
 const STEP_PAUSE_MS = 1350;
 
+// A step that only POINTS (Show me on the welcome card: the SANDBOX badge, the sandbox row in the ☰
+// menu) taps nothing, so it plays no tap: the hand goes round the control instead. Two laps (Simon,
+// 2026-11-04: "two circles, so that it is really obvious"); one lap was over before an eye that was
+// on the card had found the hand. Timed here because the player waits for the laps.
+export const CIRCLE_LAPS = 2;
+const CIRCLE_LAP_MS = 1000;
+
 // How long a step will wait for its expectation to come true before calling itself failed. Identical
 // at both paces: it is a budget for the APP, and the app is no faster for a viewer who likes motion.
 const OUTCOME_BUDGET_MS = 2000;
@@ -55,6 +62,8 @@ export function demoPace(prefersReducedMotion) {
       travelMs: 0,
       tapLeadMs: 0,
       stepPauseMs: 0,
+      // No laps: the ring around the control is drawn at once and says the same without motion.
+      circleLapMs: 0,
       outcomeBudgetMs: OUTCOME_BUDGET_MS,
     };
   }
@@ -63,6 +72,7 @@ export function demoPace(prefersReducedMotion) {
     travelMs: TRAVEL_MS,
     tapLeadMs: TAP_LEAD_MS,
     stepPauseMs: STEP_PAUSE_MS,
+    circleLapMs: CIRCLE_LAP_MS,
     outcomeBudgetMs: OUTCOME_BUDGET_MS,
   };
 }
