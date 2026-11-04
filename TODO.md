@@ -7295,3 +7295,22 @@ brez odhoda. Po novem branju spust vstran ne odpre ničesar, odpre le navpičen 
 - [ ] Na katerem telefonu ali v katerem brskalniku dvig ni deloval in kako daleč vstran je bil
       plan potegnjen. *Blokira:* nič; pove, ali je bil vzrok prag četrtine širine.
 
+## 120. [ ] »Show me« pokaže element s krogom okoli njega, ne s klikom
+
+Zapisano 2026-11-04 20:41:35.941274268. Simon, dobesedno: »kartica step 1 of 1 show me pokaže
+sandbox značko - za kazanje naj ne bo animacija klika ampak naj zaokroži okoli elementa«.
+
+**Danes:** korak s `point: true` ([storyTour.js](src/modules/demo/storyTour.js), [demoTourPlayer.js](src/modules/demo/demoTourPlayer.js)
+`interactWith`) ničesar ne klikne, roka pa vseeno odigra pritisk in valove klika (`pulseDemoHand`
+v [demoHand.js](src/modules/demo/demoHand.js)). Taka koraka sta dva, oba na pozdravni kartici:
+značka »SANDBOX« (`#preview-badge`) in vrstica »Leave the sandbox« v meniju ☰
+(`#menu-sandbox-leave`). Animacija klika pove »pritisni tukaj«, kartica pa želi le »poglej to«.
+
+**Predlog:** pri koraku s `point: true` roka obkroži element enkrat, brez pritiska in valov. Krog
+se nariše okoli roba elementa in ostane viden, dokler traja premor koraka (`settleMs`). Pot kroga je
+v CSS; koda postavi le razred in mere elementa kot spremenljivke CSS. Pri `prefers-reduced-motion`
+se krog pokaže brez gibanja roke.
+
+**Odprto:**
+- [ ] Simon potrdi delo; razvoj je po §113 zamrznjen do 5. 11. 2026. *Blokira:* vse.
+
