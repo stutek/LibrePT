@@ -7193,6 +7193,11 @@ Zapisano 2026-11-04 19:21:15.728565612. Simon, dobesedno:
    izbranega gumba v celoti znotraj seznama.
 4. Izbirnika filtrov sta 44 px visoka na vseh širinah.
 5. Širina seznama: v temi Spreadsheet seznam sej sega do robov stolpca, kot glava.
+6. Gumb ✕ v vrstici filtrov (2026-11-04 19:26:49.812, Simon: »gumb x preimenujva v clear filters
+   ali pa mu dava nek simbol reset / clear«): pokaže besedo, ki jo ima zdaj le v `aria-label`
+   (`filter_clear`: »Clear filters«, »Počisti filtre«, »Filter löschen«), in ikono
+   `fa-filter-circle-xmark` namesto ✕. Sam ✕ ob izbirniku »Location« se bere kot »zapri« ali
+   »odstrani kraj«. Preveri se, da vrstica pri 390 px v nemščini ostane v eni vrstici.
 
 **Odprto:**
 - [ ] Simon potrdi delo; razvoj je po §113 zamrznjen do 5. 11. 2026. *Blokira:* vse točke.
@@ -7201,3 +7206,39 @@ Zapisano 2026-11-04 19:21:15.728565612. Simon, dobesedno:
 - [ ] Ostri vogali povsod v temi Spreadsheet ali le na njenem gumbu v izbiri teme.
       *Blokira:* točko 2.
 - [ ] Širina seznama le v temi Spreadsheet ali v vseh temah. *Blokira:* točko 5.
+
+## 118. [ ] Koledar filtra datumov: »From« in »To« vedno izbrana, vsak v svoji barvi
+
+Zapisano 2026-11-04 19:26:26.270059953. Simon, dobesedno: »pri izbiri območja za filter datuma, naj
+bosta gumba from in to izbrana (default je from, premik miške nad datum večji naj samodejno izbere
+in pobarva to, premik miške na manjši datum naj samodejno pobarva from; izbrana datuma naj imata
+barvno kodiranje, ki se ujema z gumboma from in to (vsak gumb naj ima svojo barvo, ki se ujema z
+izbranim datumom v koledarju (obroba, kadar je neizbran, fill kadar je izbran), hkrati z menjavami
+aktivnega from in to se naj spreminjata tudi barvi from in to; če uporabnik explicitno klikne na
+gumb to ali from, pol se samodejnost izklopi in se nastavlja samo tisti mejni datum, ki ga je
+uporabnik kliknil, po izbiri datuma se ponovno vključi samodejno preklapljanje«
+
+**Danes** ([sessionFilterBar.js](src/modules/sessionList/sessionFilterBar.js),
+[sessionFilters.js](src/domain/sessionFilters.js) `nextDateSelection`): gumba »From« in »To« sta
+privzeto oba neizbrana. Brez izbranega gumba velja pravilo treh dotikov: prvi dotik izbere en dan,
+drugi naredi obdobje, tretji začne znova z enim dnem; ponoven dotik edinega dne filter izbriše.
+Izbran gumb premakne le svoj konec in se po enem dotiku izklopi (to ostane).
+
+**Branje zahteve:**
+1. Vedno je izbran natanko eden od gumbov »From« in »To«; privzeto »From«.
+2. Samodejno: dan za začetkom obdobja izbere »To«, dan pred začetkom izbere »From«. Na namizju se to
+   zgodi že ob premiku miške nad dan. Na telefonu miške ni, zato isto pravilo velja ob dotiku: dotik
+   premakne konec, ki bi ga izbrala miška. Pomen ni le v premiku miške, ta je samo predogled.
+3. Pravilo treh dotikov odpade: dotik ob stoječem obdobju ga ne začne znova, ampak premakne en konec.
+   Znova se začne s ✕ v vrstici filtrov.
+4. »From« ima eno barvo, »To« drugo. Konec obdobja v koledarju je obrobljen z barvo svojega gumba,
+   kadar gumb ni izbran, in zapolnjen, kadar je izbran.
+5. Klik na gumb izklopi samodejnost do naslednjega izbranega dne, nato se ta vključi znova.
+
+**Odprto:**
+- [ ] Simon potrdi delo in branje 2 in 3; razvoj je po §113 zamrznjen do 5. 11. 2026.
+      *Blokira:* vse.
+- [ ] Dan znotraj obdobja: po branju 2 premakne »To« (obdobje se skrajša z desne). Skrajšati z
+      leve gre le prek gumba »From«.
+- [ ] Dotik dneva, ki je hkrati »From« in »To« (en sam dan): danes izbriše filter; predlog: ostane
+      tako.
