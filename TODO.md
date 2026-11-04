@@ -607,6 +607,18 @@ mid-turn): on `stutek.github.io` the notification feed tells trainers where the 
 take their work along. Push order: up to a7b47781 any time; 8b6c1000, 09de2aa0 and 50570b1c once
 `librept.twotech.si` answers.
 
+**2026-11-04 15:03:31.591: the skeleton's hourly schedule has never run.** `stutek/librept.twotech.si`
+has run `publish.yml` three times since 07:02 UTC, all by hand (`workflow_dispatch`), and zero times on
+its cron `17 * * * *` (`GET /actions/runs?event=schedule` → 0); the workflow is `active`. GitHub's
+documentation on the `schedule` event names delays and dropped runs at high load, the default branch
+and 60 days without activity, none of which explains eight hours with no run at all. Until it runs,
+the new address only gets a new build when an agent dispatches the workflow after a LibrePT deploy.
+Proposed, waits on Simon's go (a push to a public repository): one commit to the skeleton that
+changes the cron minute (e.g. to `41 * * * *`). GitHub documents that such a commit reactivates a
+DISABLED schedule; this one shows as active, so the commit is a test, not a known fix. If the schedule
+still has not run two hours later, the fallback is a dispatch by hand after every push until
+2026-12-31. Blocks: the new address following LibrePT without anyone dispatching it.
+
 **Found 2026-09-28.** The app is at `https://stutek.github.io/LibrePT`
 ([publicUrls.js](src/data/publicUrls.js)). Browsers separate storage by origin (scheme, host, port), so
 the path `/LibrePT` separates nothing: every page published on GitHub Pages under this account shares
