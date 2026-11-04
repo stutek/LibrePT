@@ -7259,3 +7259,39 @@ filtrom in bi vrstico spet prelomil, zato ostane vedno na svojem mestu, brez fil
       leve gre le prek gumba »From«.
 - [ ] Dotik dneva, ki je hkrati »From« in »To« (en sam dan): danes izbriše filter; predlog: ostane
       tako.
+
+## 119. [ ] Gesta L: plan sledi prstu gor in dol, odpre se ob spustu čez prag
+
+Zapisano 2026-11-04 20:39:37.000521476. Simon, dobesedno: »gesta za pogled prejšnje in naslednje
+seje se ob drsenju ne dovoljuje dviga navzgor (L gesta)«; »gesta naj pomakne celotno vsebino gor
+ali dol, ko jo povlečemo gor, ko preide prag pa ob spustu odleti gor (ali dol) in se skrije kartici
+pod njo«.
+
+**Danes** ([planPeek.js](src/modules/clipboard/planPeek.js)): plan se navpično ne premakne, dokler
+vlečenje vstran ne odkrije četrtine širine (98 px na telefonu 390 px). Potem sledi prstu, navzgor
+največ 64 px (`OPEN_UP_PX`). Ko je prst 64 px nad najnižjo točko, se soseda odpre TAKOJ, še
+preden prst spustiš. Vsak spust brez tega plan vrne na mesto. 21 testov v
+[test_plan_peek_open.py](tests/e2e/test_plan_peek_open.py) (miška in emuliran dotik) je
+2026-11-04 20:39 zelenih: ročaj dela, kot je zasnovan, in prijava opisuje zasnovo, ne okvare.
+
+**Branje zahteve:**
+1. Ko je vlečenje vstran dovolj globoko, ves plan sledi prstu gor in dol, brez meje 64 px.
+2. Odpiranje je ob SPUSTU, ne med potegom. Če je plan ob spustu več kot 64 px nad ali pod
+   izhodiščem, odleti v tisto smer in pokaže sosednjo sejo pod sabo, ki se odpre. Pod pragom se
+   vrne na mesto.
+3. Dokler prst ni spuščen, se lahko trener premisli: plan potegne nazaj pod prag. Ko je plan čez
+   prag, glava sosede namesto »Slide up to open« pove, da spust odpre.
+4. Pravilo proti poševnemu potegu (`MAX_DRIFT_PER_RISE`) velja v obe smeri, da poševno vlečenje
+   vstran ne odpre ničesar.
+
+Ta zasnova spremeni odločitev z dne 2026-09-30 (odpre poteg, ne spust). Razlog za tisto odločitev
+je bil, da je spust odprl sosedo že pri 70 % širine, zato najširšega pogleda ni bilo mogoče vzeti
+brez odhoda. Po novem branju spust vstran ne odpre ničesar, odpre le navpičen premik čez prag.
+
+**Odprto:**
+- [ ] Simon potrdi branje 1–3 in to, da odpre tudi poteg NAVZDOL. *Blokira:* vse.
+- [ ] Ali plan sledi navpično že pred četrtino širine. Danes ne, ker bi se vrstice obeh planov
+      zamaknile, ko trener bere sosedo. Predlog: ostane tako.
+- [ ] Na katerem telefonu ali v katerem brskalniku dvig ni deloval in kako daleč vstran je bil
+      plan potegnjen. *Blokira:* nič; pove, ali je bil vzrok prag četrtine širine.
+
