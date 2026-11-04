@@ -1232,12 +1232,16 @@ export const en = {
   notif_release_thanks_desc:
     "LibrePT is free. Thank you for using it this early, and for every message about what you notice. Some day we may ask for a voluntary donation. If we do, we will write about it here first.",
   notif_release_thanks_close: "Close this message",
-  // The new address, said on the old one (domain/notificationItems.js). {menu}, {center},
-  // {download} and {import} are filled with the controls' own labels.
+  // The new address, said on the old one (`notif_moved_*`) and on the new one
+  // (`notif_moved_here_*`), by domain/notificationItems.js. {menu}, {center}, {download} and
+  // {import} are filled with the controls' own labels.
   notif_moved_title: "LibrePT has a new address",
   notif_moved_desc:
     "LibrePT is now at {url}. This address works until 2026-12-31 and then closes. Your work does not move by itself: the browser keeps it separately for each address. To take it along, open the menu ☰ at the top right, choose {menu}, and in {center} tap {download}. Then open {url}, go the same way and tap {import}. The app asks for the password the backup was written with.",
   notif_moved_open: "Open the new address",
+  notif_moved_here_desc:
+    "LibrePT used to be at {old}. Your work there stays there until 2026-12-31: the browser keeps data separately for each address. To bring it here, open {old}, open the menu ☰ at the top right, choose {menu}, and in {center} tap {download}. Then come back here, go the same way and tap {import}. The app asks for the password the backup was written with.",
+  notif_moved_here_open: "Open the old address",
   // The offer to put the app's icon on the home screen (modules/common/homeScreenInstall.js). Safari's
   // control names are quoted from Apple's support pages in this language: guide/iphone/iphea86e5236
   // and guide/ipad/ipadc602b75b. {pageMenu} and {share} are where the button's glyph is drawn.

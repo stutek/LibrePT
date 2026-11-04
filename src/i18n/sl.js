@@ -1167,6 +1167,9 @@ export const sl = {
   notif_moved_desc:
     "LibrePT je zdaj na {url}. Ta naslov deluje do 2026-12-31, nato se zapre. Tvoje delo se ne preseli samo: brskalnik ga hrani ločeno za vsak naslov. Da ga preneseš, odpri meni ☰ zgoraj desno, izberi {menu} in v oknu {center} pritisni {download}. Nato odpri {url}, pojdi po isti poti in pritisni {import}. Aplikacija vpraša za geslo, s katerim je bila varnostna kopija shranjena.",
   notif_moved_open: "Odpri nov naslov",
+  notif_moved_here_desc:
+    "LibrePT je bil prej na {old}. Delo, ki ga imaš tam, ostane tam do 2026-12-31: brskalnik hrani podatke ločeno za vsak naslov. Da ga preneseš sem, odpri {old}, odpri meni ☰ zgoraj desno, izberi {menu} in v oknu {center} pritisni {download}. Nato se vrni sem, pojdi po isti poti in pritisni {import}. Aplikacija vpraša za geslo, s katerim je bila varnostna kopija shranjena.",
+  notif_moved_here_open: "Odpri stari naslov",
   home_screen_heading: "Domači zaslon",
   home_screen_offer_title: "Postavi aplikacijo na domači zaslon",
   home_screen_offer_desc:

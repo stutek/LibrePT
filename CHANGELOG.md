@@ -18,6 +18,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-11-04 — The new address says where earlier work still is
+
+### Added
+
+- **The move notice on the new address too.** A trainer who opens <https://librept.twotech.si/>
+  and finds the app empty may have their work at the old address,
+  <https://stutek.github.io/LibrePT/>. The notifications there now say so: the work stays at the old
+  address until 2026-12-31, and it comes over as a backup downloaded there (☰ menu, Data
+  management, Download JSON Backup) and imported here (the same way, then Import JSON Backup). A
+  button opens the old address. The card is news, not a warning, because most who read it never
+  used the old address. It is not shown in the sandbox.
+
 ## 2026-11-03 — The app on the old address says where it moved
 
 ### Added

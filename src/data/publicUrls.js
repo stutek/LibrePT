@@ -19,9 +19,10 @@
 export const PUBLIC_SITE_URL = "https://librept.twotech.si";
 
 /** The address the app is leaving: GitHub's default one for this repository. Until 2026-12-31 it
- *  still serves the app, and the app tells the trainers there to move (domain/notificationItems.js).
- *  Browsers keep data per address, so the move cannot take their data along by itself. */
-export const RETIRING_SITE_HOST = "stutek.github.io";
+ *  still serves the app, and on both addresses the app says how to move the work from this one to
+ *  the new one (domain/notificationItems.js). Browsers keep data per address, so the move cannot
+ *  take the data along by itself. */
+export const RETIRING_SITE_URL = "https://stutek.github.io/LibrePT/";
 
 /** Where a bug report goes. Not everyone has an account here — feedbackRoute.js is the route for
  *  the people who do not. */

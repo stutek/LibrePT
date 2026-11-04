@@ -1220,6 +1220,9 @@ export const de = {
   notif_moved_desc:
     "LibrePT ist jetzt unter {url}. Diese Adresse funktioniert bis 2026-12-31 und wird dann geschlossen. Deine Arbeit zieht nicht von selbst mit: Der Browser speichert sie für jede Adresse getrennt. Um sie mitzunehmen, öffne das Menü ☰ oben rechts, wähle {menu} und tippe in {center} auf {download}. Öffne dann {url}, geh denselben Weg und tippe auf {import}. Die App fragt nach dem Passwort, mit dem die Sicherung geschrieben wurde.",
   notif_moved_open: "Neue Adresse öffnen",
+  notif_moved_here_desc:
+    "LibrePT war bisher unter {old}. Deine Arbeit dort bleibt dort bis 2026-12-31: Der Browser speichert Daten für jede Adresse getrennt. Um sie hierher zu holen, öffne {old}, öffne das Menü ☰ oben rechts, wähle {menu} und tippe in {center} auf {download}. Komm dann hierher zurück, geh denselben Weg und tippe auf {import}. Die App fragt nach dem Passwort, mit dem die Sicherung geschrieben wurde.",
+  notif_moved_here_open: "Alte Adresse öffnen",
   home_screen_heading: "Home-Bildschirm",
   home_screen_offer_title: "Die App auf den Home-Bildschirm legen",
   home_screen_offer_desc:

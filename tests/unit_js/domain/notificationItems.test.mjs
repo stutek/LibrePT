@@ -14,7 +14,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { planDemoRemoval } from "../../../src/data/demoDataRemoval.js";
-import { PUBLIC_SITE_URL, RETIRING_SITE_HOST } from "../../../src/data/publicUrls.js";
+import { PUBLIC_SITE_URL, RETIRING_SITE_URL } from "../../../src/data/publicUrls.js";
 import { COLLECTIONS } from "../../../src/data/recordProjections.js";
 import { addPendingNote, recordTrainings } from "../../../src/data/trainingRecords.js";
 import {
@@ -708,11 +708,15 @@ test("the release thanks is worded in all three languages", () => {
   }
 });
 
-// The move to the new address. Browsers keep data per address, so the trainers still on the old one
-// learn of it here or lose their work when it closes.
+// The move to the new address. Browsers keep data per address, so a trainer on the old one learns of
+// it there or loses the work when it closes, and one who arrives at the new one finds it empty
+// unless the card there says where the work still is.
+const OLD_HOST = new URL(RETIRING_SITE_URL).host;
+const NEW_HOST = new URL(PUBLIC_SITE_URL).host;
 const tMoved = (key) =>
   ({
     notif_moved_desc: "go to {url}; {menu} › {center} › {download}, then {import}",
+    notif_moved_here_desc: "fetch from {old}; {menu} › {center} › {download}, then {import}",
     menu_data: "Data",
     backup_center: "Center",
     btn_download_backup: "Download",
@@ -720,26 +724,41 @@ const tMoved = (key) =>
   })[key] || `[${key}]`;
 
 test("on the old address the feed says where the app went and how to take the data along", () => {
-  const item = buildAddressMovedItem(tMoved, { host: RETIRING_SITE_HOST });
+  const item = buildAddressMovedItem(tMoved, { host: OLD_HOST });
 
   assert.equal(item.title, "[notif_moved_title]");
   // The controls are named by the labels they show, read from the dictionary, so renaming one
   // cannot leave this card naming a control that no longer exists.
   assert.equal(item.description, `go to ${PUBLIC_SITE_URL}; Data › Center › Download, then Import`);
   assert.deepEqual(item.actions, [{ label: "[notif_moved_open]", url: PUBLIC_SITE_URL }]);
+  assert.equal(item.type, "warning", "the work on this address is at stake");
 });
 
-test("on any other address, the sandbox included, there is no move to announce", () => {
-  assert.equal(buildAddressMovedItem(tMoved, { host: new URL(PUBLIC_SITE_URL).host }), null);
+test("on the new address the feed says where earlier work still is and how to bring it here", () => {
+  const item = buildAddressMovedItem(tMoved, { host: NEW_HOST });
+
+  assert.equal(item.title, "[notif_moved_title]");
+  assert.equal(
+    item.description,
+    `fetch from ${RETIRING_SITE_URL}; Data › Center › Download, then Import`,
+  );
+  assert.deepEqual(item.actions, [{ label: "[notif_moved_here_open]", url: RETIRING_SITE_URL }]);
+  // Most who read it here never used the old address: news, not an alarm.
+  assert.notEqual(item.type, "warning");
+  assert.notEqual(item.id, buildAddressMovedItem(tMoved, { host: OLD_HOST }).id);
+});
+
+test("anywhere else, and in the sandbox on either address, there is no move to announce", () => {
   assert.equal(buildAddressMovedItem(tMoved, { host: "localhost:8081" }), null);
-  assert.equal(buildAddressMovedItem(tMoved, { host: RETIRING_SITE_HOST, sandbox: true }), null);
+  assert.equal(buildAddressMovedItem(tMoved, { host: OLD_HOST, sandbox: true }), null);
+  assert.equal(buildAddressMovedItem(tMoved, { host: NEW_HOST, sandbox: true }), null);
 });
 
 test("the move is announced after the faults and ahead of the work items", () => {
   const state = withTrainings({ trainings: [DRAFT] });
   const failure = { at: 1_700_000_000_000, message: "Session expired." };
 
-  const items = resolveNotificationItems(state, tMoved, [], failure, { host: RETIRING_SITE_HOST });
+  const items = resolveNotificationItems(state, tMoved, [], failure, { host: OLD_HOST });
 
   assert.deepEqual(
     items.map((item) => item.id),
@@ -752,13 +771,19 @@ test("the move is announced after the faults and ahead of the work items", () =>
 });
 
 test("the move is worded in all three languages, with every placeholder", () => {
+  const slots = {
+    notif_moved_desc: ["{url}", "{menu}", "{center}", "{download}", "{import}"],
+    notif_moved_here_desc: ["{old}", "{menu}", "{center}", "{download}", "{import}"],
+  };
   for (const lang of ["en", "sl", "de"]) {
     const words = TRANSLATIONS[lang];
-    for (const key of ["notif_moved_title", "notif_moved_desc", "notif_moved_open"]) {
+    for (const key of ["notif_moved_title", "notif_moved_open", "notif_moved_here_open"]) {
       assert.ok(words[key], `${lang} words ${key}`);
     }
-    for (const slot of ["{url}", "{menu}", "{center}", "{download}", "{import}"]) {
-      assert.ok(words.notif_moved_desc.includes(slot), `${lang} notif_moved_desc carries ${slot}`);
+    for (const [key, needed] of Object.entries(slots)) {
+      for (const slot of needed) {
+        assert.ok(words[key]?.includes(slot), `${lang} ${key} carries ${slot}`);
+      }
     }
   }
 });
