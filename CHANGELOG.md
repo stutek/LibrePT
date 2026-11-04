@@ -18,6 +18,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-11-04 — Show me circles what it points at
+
+### Changed
+
+- **Show me on the welcome card circles the SANDBOX badge and the "Leave the sandbox" row.** The
+  hand used to press on them and send out the rings of a tap, which said "tap here", although it
+  tapped nothing. It now goes round each of them twice and leaves a ring around it until the card's
+  pause is over. With reduced motion the ring is shown without the hand moving.
+
 ## 2026-11-04 — The move notice names both addresses, links them, and reaches the sandbox
 
 ### Changed
