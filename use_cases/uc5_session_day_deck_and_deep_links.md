@@ -188,6 +188,12 @@ Record editors are routes too, each opening over its own list view:
   editor** rather than the live logging deck. Plan edits are **persisted on every keystroke** (not
   just on blur), so nothing typed is lost across the reload — see
   [UC1 — Gym-Floor Clipboard](uc1_gym_floor_clipboard.md).
+- **The open notifications drawer is in the address**: opening it adds `?notifications=open` to
+  whatever URL is on screen, and closing it removes the parameter. A reload keeps the drawer open,
+  and a link with the parameter opens the app with the drawer open over that view. The drawer is
+  not a route: it covers any view, so it is a parameter beside the path, written without a new
+  history entry. Leaving the drawer for another view closes it, and Back to the address before
+  opens it again.
 
 ---
 
@@ -217,6 +223,7 @@ not-found view (`#view-error`) *inside* the content area:
 | Edit mode hides the member tabs + live timer and surfaces the client's goals + notes | [../tests/medium/test_clipboard_edit_mode.py](../tests/medium/test_clipboard_edit_mode.py) |
 | A just-inserted or just-swapped plan item is called out in the editor (highlight + badge + caret), one-shot | [../tests/medium/test_clipboard_editor.py](../tests/medium/test_clipboard_editor.py) |
 | Edit mode and planning programmes hide *Complete Workout Session*; it returns on exit from edit mode | [../tests/medium/test_clipboard_complete_action.py](../tests/medium/test_clipboard_complete_action.py) (the rule) · [../tests/e2e/test_edit_mode_hides_complete.py](../tests/e2e/test_edit_mode_hides_complete.py) (that the client → workout-setup flow arrives at a planning session) |
+| The open notifications drawer survives a reload, a `?notifications=open` link opens it, closing it clears the address, and Back to an address that had it open opens it again | [../tests/e2e/test_messages_pane_navigation.py](../tests/e2e/test_messages_pane_navigation.py) · `test_an_open_drawer_survives_a_reload`, `test_a_link_opens_the_drawer_and_closing_it_clears_the_address`, `test_back_from_a_view_left_through_the_drawer_shows_the_drawer_again` |
 | Not-found view for unknown route / deleted client; header stays; URL kept | [../tests/e2e/test_error_view.py](../tests/e2e/test_error_view.py) |
 | Launch the clipboard from a session card (with language switch + calendar sync) | [../tests/e2e/test_gym_floor_flow.py](../tests/e2e/test_gym_floor_flow.py) · `test_interactive_dashboard_flow` (STEPS 1-3; absorbed the identical `test_clipboard.py` flow) |
 | *Save* in the session form stores the session and returns to the board on its day without opening the clipboard; *Open in Clipboard* saves and opens it | [../tests/medium/test_edit_session_schedule.py](../tests/medium/test_edit_session_schedule.py) · `test_save_stores_the_session_without_opening_the_clipboard`, `test_open_in_clipboard_still_saves_and_opens_it` |

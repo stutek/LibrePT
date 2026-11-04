@@ -464,6 +464,21 @@ export function renderNotificationArea() {
   syncNotificationBarState();
 }
 
+// The open drawer is in the address (`?notifications=open`), because a reload must not close what the
+// trainer is reading, and a link may open it. Written only on a CHANGE of state: every view switch
+// collapses the drawer, the first one at boot included, and that collapse must not erase the address
+// before `followNotificationsInAddress()` has read it. Written through the router's injected
+// `replaceQueryParam`, which owns every history write and adds no history entry.
+const NOTIFICATIONS_PARAM = "notifications";
+const NOTIFICATIONS_OPEN = "open";
+
+/** Opens or closes the drawer as the address says. app.js calls it after every route resolve — at
+ * boot, and on Back, which returns to an address saying the drawer was open. */
+export function followNotificationsInAddress() {
+  const wanted = new URLSearchParams(window.location.search).get(NOTIFICATIONS_PARAM);
+  toggleNotificationArea(wanted === NOTIFICATIONS_OPEN);
+}
+
 export function toggleNotificationArea(forceExpand = null) {
   const area = document.getElementById("notification-area");
   const toggleBtn = document.getElementById("btn-toggle-notifications");
@@ -471,6 +486,9 @@ export function toggleNotificationArea(forceExpand = null) {
 
   const isCurrentlyExpanded = area.classList.contains("is-expanded");
   const nextState = forceExpand !== null ? forceExpand : !isCurrentlyExpanded;
+  if (nextState !== isCurrentlyExpanded) {
+    deps?.replaceQueryParam?.(NOTIFICATIONS_PARAM, nextState ? NOTIFICATIONS_OPEN : null);
+  }
 
   if (nextState) {
     // Drawn from what is stored each time it opens: drawn only where a change was announced, it

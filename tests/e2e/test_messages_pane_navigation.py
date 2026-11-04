@@ -78,3 +78,66 @@ def test_the_drawer_stays_open_when_nothing_changed_view(page, local_server):
     assert page.evaluate(IS_EXPANDED), (
         "the drawer closed itself with nobody navigating anywhere"
     )
+
+
+# An open drawer is a state a reload would otherwise lose, so the address carries it: a phone that
+# reloads the page between two sets must show the trainer the notifications they were reading.
+OPEN_PARAM = "notifications=open"
+
+
+def _settled(page):
+    # The slide (0.32s) and the timeline settle that rewrites the URL to the focused day.
+    page.wait_for_timeout(1500)
+
+
+def test_an_open_drawer_survives_a_reload(page, local_server):
+    page.goto(local_server)
+    page.wait_for_selector("#app-header")
+    page.locator("#notification-grabber-btn").click()
+    _settled(page)
+    assert OPEN_PARAM in page.url, f"opening the drawer left no trace in the address: {page.url}"
+
+    page.reload()
+    page.wait_for_selector("#app-header")
+    _settled(page)
+    assert page.evaluate(IS_EXPANDED), "the reload closed the drawer the trainer was reading"
+
+
+def test_a_link_opens_the_drawer_and_closing_it_clears_the_address(page, local_server):
+    page.goto(f"{local_server}?{OPEN_PARAM}")
+    page.wait_for_selector("#app-header")
+    _settled(page)
+    assert page.evaluate(IS_EXPANDED), "a link to the notifications opened the app without them"
+
+    page.locator("#notification-grabber-btn").click()
+    _settled(page)
+    assert not page.evaluate(IS_EXPANDED)
+    # Left in the address, the next reload would open a drawer the trainer had just closed.
+    assert OPEN_PARAM not in page.url
+
+    page.reload()
+    page.wait_for_selector("#app-header")
+    _settled(page)
+    assert not page.evaluate(IS_EXPANDED)
+
+
+def test_back_from_a_view_left_through_the_drawer_shows_the_drawer_again(page, local_server):
+    """Leaving the drawer by the ☰ menu closes it on the new page, while the page before still says
+    it was open. Back returns to that address, and the screen must agree with it — otherwise the
+    next reload opens a drawer that nobody saw on the way back."""
+    page.goto(local_server)
+    page.wait_for_selector("#app-header")
+    page.locator("#notification-grabber-btn").click()
+    _settled(page)
+
+    page.locator("#btn-app-menu").click()
+    page.wait_for_selector("#app-menu:not(.hidden)")
+    page.locator("#menu-clients-register").click()
+    page.wait_for_selector("#view-client-directory.active")
+    page.wait_for_function(f"() => !({IS_EXPANDED})()")
+    assert OPEN_PARAM not in page.url
+
+    page.go_back()
+    _settled(page)
+    assert OPEN_PARAM in page.url
+    assert page.evaluate(IS_EXPANDED)

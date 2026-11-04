@@ -18,6 +18,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-11-04 — An open notifications drawer stays open after a reload
+
+### Fixed
+
+- **A reload no longer closes the notifications drawer.** Opening the drawer adds
+  `?notifications=open` to the address, and closing it removes the parameter. A reload therefore
+  shows the drawer the trainer was reading, and a link with the parameter opens the app with the
+  drawer open. Back to a page that had the drawer open opens it again.
+
 ## 2026-11-04 — The new address says where earlier work still is
 
 ### Added

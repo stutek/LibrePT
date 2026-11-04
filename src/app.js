@@ -124,6 +124,7 @@ import { openEncryptedFileReader } from "./modules/common/encryptedFileReader.js
 import { EVENT_PARAM, browserPlatform } from "./modules/common/eventTransports.js";
 import { openFeedbackModal } from "./modules/common/feedbackModal.js";
 import {
+  followNotificationsInAddress,
   renderNotificationArea,
   toggleNotificationArea,
 } from "./modules/common/notificationArea.js";
@@ -691,6 +692,8 @@ async function init() {
     getSyncFailure: driveSyncFailureNotice,
     escapeHTML,
     navigateToPath,
+    // The open drawer is written into the address, so a reload keeps it open.
+    replaceQueryParam,
     openSessionFromHistory,
     removeDemoData,
     // A full re-render rather than a targeted patch: clearing the demo touches every collection, so
@@ -766,8 +769,14 @@ async function init() {
 
   recoverActiveSession();
 
-  window.addEventListener("popstate", handlePathChange);
-  handlePathChange();
+  // The drawer follows the address AFTER the route: entering the first view collapses the drawer,
+  // so opening it before would be undone at once.
+  const followAddress = () => {
+    handlePathChange();
+    followNotificationsInAddress();
+  };
+  window.addEventListener("popstate", followAddress);
+  followAddress();
 
   appBoot.bootViewDismiss({ navigateToPath, getActiveSession, launchClipboardDirectly });
 
