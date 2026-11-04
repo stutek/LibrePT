@@ -18,6 +18,26 @@ Format follows [Keep a Changelog](https://keepachangelog.com): grouped into **Ad
 
 ---
 
+## 2026-11-04 — The move notice names both addresses, links them, and reaches the sandbox
+
+### Changed
+
+- **The move notice names both addresses.** "This address works until 2026-12-31" left the reader
+  to work out which address closes. Every move card now writes out the new address and the old one,
+  <https://stutek.github.io/LibrePT/>, and says that the old one works until 2026-12-31. It says
+  that the data needs to be migrated, and that the app asks for the password the backup was
+  encrypted with when it was created.
+- **The addresses in the notice are links.** A trainer on a phone taps an address instead of
+  typing it. Only the addresses the app itself lists become links; an address in a client's
+  message stays text.
+
+### Added
+
+- **The move notice in the sandbox on the old address.** It says where the app is now and until
+  when the old address works, and a button opens the sandbox on the new address. It names no
+  backup: the sandbox holds sample people, and a backup of them imported on the new address would
+  put them among the trainer's own clients.
+
 ## 2026-11-04 — An open notifications drawer stays open after a reload
 
 ### Fixed

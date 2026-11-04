@@ -1218,11 +1218,13 @@ export const de = {
   notif_release_thanks_close: "Diese Nachricht schließen",
   notif_moved_title: "LibrePT hat eine neue Adresse",
   notif_moved_desc:
-    "LibrePT ist jetzt unter {url}. Diese Adresse funktioniert bis 2026-12-31 und wird dann geschlossen. Deine Arbeit zieht nicht von selbst mit: Der Browser speichert sie für jede Adresse getrennt. Um sie mitzunehmen, öffne das Menü ☰ oben rechts, wähle {menu} und tippe in {center} auf {download}. Öffne dann {url}, geh denselben Weg und tippe auf {import}. Die App fragt nach dem Passwort, mit dem die Sicherung geschrieben wurde.",
+    "LibrePT ist jetzt unter {url}. Die alte Adresse {old} funktioniert bis 2026-12-31 und wird dann geschlossen. Deine Daten müssen auf die neue Adresse migriert werden: Der Browser speichert Daten für jede Adresse getrennt und überträgt sie nicht selbst. Öffne dazu auf der alten Adresse das Menü ☰ oben rechts, wähle {menu} und tippe in {center} auf {download}. Öffne dann {url}, öffne dasselbe Menü und Fenster und tippe auf {import}. Die App fragt nach dem Passwort, mit dem die Sicherung bei ihrer Erstellung verschlüsselt wurde.",
   notif_moved_open: "Neue Adresse öffnen",
   notif_moved_here_desc:
-    "LibrePT war bisher unter {old}. Deine Arbeit dort bleibt dort bis 2026-12-31: Der Browser speichert Daten für jede Adresse getrennt. Um sie hierher zu holen, öffne {old}, öffne das Menü ☰ oben rechts, wähle {menu} und tippe in {center} auf {download}. Komm dann hierher zurück, geh denselben Weg und tippe auf {import}. Die App fragt nach dem Passwort, mit dem die Sicherung geschrieben wurde.",
+    "LibrePT war bisher unter {old}. Die alte Adresse funktioniert bis 2026-12-31 und wird dann geschlossen. Daten, die dort eingegeben wurden, bleiben dort: Der Browser speichert Daten für jede Adresse getrennt. Um sie hierher zu migrieren, öffne {old}, öffne das Menü ☰ oben rechts, wähle {menu} und tippe in {center} auf {download}. Kehre dann zu {url} zurück, öffne dasselbe Menü und Fenster und tippe auf {import}. Die App fragt nach dem Passwort, mit dem die Sicherung bei ihrer Erstellung verschlüsselt wurde.",
   notif_moved_here_open: "Alte Adresse öffnen",
+  notif_moved_sandbox_desc:
+    "LibrePT ist jetzt unter {url}. Die alte Adresse {old} funktioniert bis 2026-12-31 und wird dann geschlossen. Die Sandbox enthält nur Beispieldaten, daher musst du keine Daten migrieren: Die neue Adresse hat eine eigene Sandbox mit denselben Beispieldaten.",
   home_screen_heading: "Home-Bildschirm",
   home_screen_offer_title: "Die App auf den Home-Bildschirm legen",
   home_screen_offer_desc:

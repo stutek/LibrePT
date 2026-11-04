@@ -1165,11 +1165,13 @@ export const sl = {
   notif_release_thanks_close: "Zapri to sporočilo",
   notif_moved_title: "LibrePT ima nov naslov",
   notif_moved_desc:
-    "LibrePT je zdaj na {url}. Ta naslov deluje do 2026-12-31, nato se zapre. Tvoje delo se ne preseli samo: brskalnik ga hrani ločeno za vsak naslov. Da ga preneseš, odpri meni ☰ zgoraj desno, izberi {menu} in v oknu {center} pritisni {download}. Nato odpri {url}, pojdi po isti poti in pritisni {import}. Aplikacija vpraša za geslo, s katerim je bila varnostna kopija shranjena.",
+    "LibrePT je zdaj na {url}. Stari naslov {old} deluje do 2026-12-31, nato se zapre. Podatke je treba preseliti na nov naslov: brskalnik hrani podatke ločeno za vsak naslov in jih sam ne preseli. Da jih preseliš, na starem naslovu odpri meni ☰ zgoraj desno, izberi {menu} in v oknu {center} pritisni {download}. Nato odpri {url}, odpri isti meni in okno ter pritisni {import}. Aplikacija vpraša za geslo, s katerim je bila varnostna kopija šifrirana ob nastanku.",
   notif_moved_open: "Odpri nov naslov",
   notif_moved_here_desc:
-    "LibrePT je bil prej na {old}. Delo, ki ga imaš tam, ostane tam do 2026-12-31: brskalnik hrani podatke ločeno za vsak naslov. Da ga preneseš sem, odpri {old}, odpri meni ☰ zgoraj desno, izberi {menu} in v oknu {center} pritisni {download}. Nato se vrni sem, pojdi po isti poti in pritisni {import}. Aplikacija vpraša za geslo, s katerim je bila varnostna kopija shranjena.",
+    "LibrePT je bil prej na {old}. Stari naslov deluje do 2026-12-31, nato se zapre. Podatki, vneseni tam, ostanejo tam: brskalnik hrani podatke ločeno za vsak naslov. Da jih preseliš sem, odpri {old}, odpri meni ☰ zgoraj desno, izberi {menu} in v oknu {center} pritisni {download}. Nato se vrni na {url}, odpri isti meni in okno ter pritisni {import}. Aplikacija vpraša za geslo, s katerim je bila varnostna kopija šifrirana ob nastanku.",
   notif_moved_here_open: "Odpri stari naslov",
+  notif_moved_sandbox_desc:
+    "LibrePT je zdaj na {url}. Stari naslov {old} deluje do 2026-12-31, nato se zapre. Peskovnik hrani le vzorčne podatke, zato jih ni treba preseliti: nov naslov ima svoj peskovnik z enakimi vzorčnimi podatki.",
   home_screen_heading: "Domači zaslon",
   home_screen_offer_title: "Postavi aplikacijo na domači zaslon",
   home_screen_offer_desc:

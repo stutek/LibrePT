@@ -270,38 +270,61 @@ export function buildCrashReportItem(crashes, t, repoUrl) {
  * The app has a new address, said on both (asked for 2026-11-03 for the old one and 2026-11-04 for
  * both, Simon).
  *
- * Browsers keep an app's data per address, so the work does not move by itself. On the old address
- * the card says where the app went and how to take the work along; it is a warning, because that
- * work is lost when the address closes. On the new address it says where earlier work still is and
- * how to bring it here; it is news, because most who read it there never used the old one, and it is
- * the card a trainer needs who arrives and finds the app empty.
+ * Browsers keep an app's data per address, so the data does not move to the new address by itself.
+ * On the old address the card says where the app is now and how to migrate the data; it is a
+ * warning, because that data is lost when the old address closes. On the new address it says where
+ * earlier data still is and how to migrate it here; it is news, because most who read it there never
+ * used the old address, and it is the card a trainer needs who arrives and finds the app empty.
  *
  * The controls are named by the labels they show, read from the dictionary, so a renamed control
  * renames itself here too. The way in is the ☰ menu, not the cloud button in the header: for a
  * trainer connected to Google Drive that button syncs and never opens the dialog.
  *
- * Not in the sandbox: it holds sample data, and the card is about the trainer's own work.
+ * In the sandbox on the old address (asked for 2026-11-04, Simon) the card only says where the app
+ * is now and until when the old address works, and its button opens the sandbox on the new
+ * address. It names no backup: the sandbox holds sample people, and a backup of them imported on
+ * the new address would put them among the trainer's own clients. In the sandbox on the new address there is
+ * nothing to say, so no card.
+ *
  * Synthetic and never stored, like the work items: it is a fact about the address the page is on,
  * and it goes when the old address does.
  */
 export function buildAddressMovedItem(t, { host = "", sandbox = false } = {}) {
-  if (sandbox) return null;
   const onOld = host === new URL(RETIRING_SITE_URL).host;
   const onNew = host === new URL(PUBLIC_SITE_URL).host;
   if (!onOld && !onNew) return null;
-  const route = (text) =>
-    text
+  if (sandbox && !onOld) return null;
+  // Both addresses are written out in every card, so no sentence says "this address" and leaves the
+  // reader to work out which one. The card lists them in `links`, and the feed draws exactly those
+  // as links: a trainer on a phone taps the address instead of typing it.
+  const fill = (key) =>
+    t(key)
+      .replaceAll("{url}", PUBLIC_SITE_URL)
+      .replaceAll("{old}", RETIRING_SITE_URL)
       .replaceAll("{menu}", t("menu_data"))
       .replaceAll("{center}", t("backup_center"))
       .replaceAll("{download}", t("btn_download_backup"))
       .replaceAll("{import}", t("btn_import_backup"));
+  const links = [PUBLIC_SITE_URL, RETIRING_SITE_URL];
+  if (sandbox) {
+    return {
+      id: "synthetic-address-moved-sandbox",
+      type: "info",
+      icon: "fa-solid fa-circle-info",
+      title: t("notif_moved_title"),
+      description: fill("notif_moved_sandbox_desc"),
+      links,
+      actions: [{ label: t("notif_moved_open"), url: `${PUBLIC_SITE_URL}/?workspace=sandbox` }],
+    };
+  }
   if (onOld) {
     return {
       id: "synthetic-address-moved",
       type: "warning",
       icon: "fa-solid fa-triangle-exclamation",
       title: t("notif_moved_title"),
-      description: route(t("notif_moved_desc").replaceAll("{url}", PUBLIC_SITE_URL)),
+      description: fill("notif_moved_desc"),
+      links,
       actions: [{ label: t("notif_moved_open"), url: PUBLIC_SITE_URL }],
     };
   }
@@ -310,7 +333,8 @@ export function buildAddressMovedItem(t, { host = "", sandbox = false } = {}) {
     type: "info",
     icon: "fa-solid fa-circle-info",
     title: t("notif_moved_title"),
-    description: route(t("notif_moved_here_desc").replaceAll("{old}", RETIRING_SITE_URL)),
+    description: fill("notif_moved_here_desc"),
+    links,
     actions: [{ label: t("notif_moved_here_open"), url: RETIRING_SITE_URL }],
   };
 }

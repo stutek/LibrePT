@@ -424,6 +424,13 @@ body:has(#active-session-overlay:not(.hidden))
      pre-line rather than pre: the lines themselves must still wrap on a phone. */
   white-space: pre-line;
 }
+/* An address the card draws as a link (the move to the new address): tapped on a phone instead of
+   typed, so it must look like a link and must wrap rather than push the card wider than the screen. */
+.notification-card-desc a {
+  color: var(--primary);
+  text-decoration: underline;
+  overflow-wrap: anywhere;
+}
 .notification-actions {
   display: flex;
   flex-wrap: wrap;

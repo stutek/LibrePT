@@ -1233,15 +1233,18 @@ export const en = {
     "LibrePT is free. Thank you for using it this early, and for every message about what you notice. Some day we may ask for a voluntary donation. If we do, we will write about it here first.",
   notif_release_thanks_close: "Close this message",
   // The new address, said on the old one (`notif_moved_*`) and on the new one
-  // (`notif_moved_here_*`), by domain/notificationItems.js. {menu}, {center}, {download} and
+  // (`notif_moved_here_*`), and in the old address's sandbox (`notif_moved_sandbox_desc`), by
+  // domain/notificationItems.js. {menu}, {center}, {download} and
   // {import} are filled with the controls' own labels.
   notif_moved_title: "LibrePT has a new address",
   notif_moved_desc:
-    "LibrePT is now at {url}. This address works until 2026-12-31 and then closes. Your work does not move by itself: the browser keeps it separately for each address. To take it along, open the menu ☰ at the top right, choose {menu}, and in {center} tap {download}. Then open {url}, go the same way and tap {import}. The app asks for the password the backup was written with.",
+    "LibrePT is now at {url}. The old address, {old}, works until 2026-12-31 and then closes. Your data needs to be migrated to the new address: the browser keeps data separately for each address and does not move it. To migrate it, open the menu ☰ at the top right on the old address, choose {menu}, and in {center} tap {download}. Then open {url}, open the same menu and window, and tap {import}. The app asks for the password the backup was encrypted with when it was created.",
   notif_moved_open: "Open the new address",
   notif_moved_here_desc:
-    "LibrePT used to be at {old}. Your work there stays there until 2026-12-31: the browser keeps data separately for each address. To bring it here, open {old}, open the menu ☰ at the top right, choose {menu}, and in {center} tap {download}. Then come back here, go the same way and tap {import}. The app asks for the password the backup was written with.",
+    "LibrePT used to be at {old}. The old address works until 2026-12-31 and then closes. Data entered there stays there: the browser keeps data separately for each address. To migrate it here, open {old}, open the menu ☰ at the top right, choose {menu}, and in {center} tap {download}. Then come back to {url}, open the same menu and window, and tap {import}. The app asks for the password the backup was encrypted with when it was created.",
   notif_moved_here_open: "Open the old address",
+  notif_moved_sandbox_desc:
+    "LibrePT is now at {url}. The old address, {old}, works until 2026-12-31 and then closes. The sandbox holds only sample data, so no data needs to be migrated: the new address has its own sandbox with the same sample data.",
   // The offer to put the app's icon on the home screen (modules/common/homeScreenInstall.js). Safari's
   // control names are quoted from Apple's support pages in this language: guide/iphone/iphea86e5236
   // and guide/ipad/ipadc602b75b. {pageMenu} and {share} are where the button's glyph is drawn.

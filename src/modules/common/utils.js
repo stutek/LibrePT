@@ -152,6 +152,21 @@ export function escapeHTML(value) {
     .replace(/'/g, "&#039;");
 }
 
+// Escaped like escapeHTML, with each address in `urls` drawn as a link that opens in a new tab
+// wherever it appears in the text. Only the listed addresses become links, never one the text merely
+// contains: a card can make its own addresses tappable while what a client typed stays plain text.
+// One pass, longest address first, so an address inside a longer one is not linked twice.
+export function escapeHTMLWithLinks(value, urls = []) {
+  const text = escapeHTML(value);
+  const listed = [...new Set(urls.filter(Boolean).map(escapeHTML))].sort((a, b) => b.length - a.length);
+  if (listed.length === 0) return text;
+  const pattern = new RegExp(listed.map((url) => url.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|"), "g");
+  return text.replace(
+    pattern,
+    (url) => `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`,
+  );
+}
+
 // Render formatted client name, appending warning icon if they have injuries. The icon's name comes
 // from the caller in the trainer's language (`injuryLabel`); what the injury IS shows on the
 // clipboard's banner when that client is picked, and on their profile — never only in a hover.

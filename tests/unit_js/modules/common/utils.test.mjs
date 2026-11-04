@@ -13,6 +13,7 @@ import {
   buildSessionMeta,
   clientNameMatches,
   escapeHTML,
+  escapeHTMLWithLinks,
   formatDateStr,
   formatDurationHourMin,
   getInitials,
@@ -281,4 +282,23 @@ test("a search does not tell č from c, š from s, ž from z, ć from c or đ fr
   assert.equal(clientNameMatches({ name: "Dorde Kos" }, "đorđe"), true);
   assert.equal(clientNameMatches({ name: "Ana", alias: "jutranja šola" }, "sola"), true);
   assert.equal(clientNameMatches(marija, "kos"), false);
+});
+
+test("only the listed addresses become links, and the rest of the text stays escaped", () => {
+  const html = escapeHTMLWithLinks("Now at https://a.example. Old: https://b.example/x/ <b>", [
+    "https://a.example",
+    "https://b.example/x/",
+  ]);
+  assert.equal(
+    html,
+    'Now at <a href="https://a.example" target="_blank" rel="noopener noreferrer">https://a.example</a>. ' +
+      'Old: <a href="https://b.example/x/" target="_blank" rel="noopener noreferrer">https://b.example/x/</a> &lt;b&gt;',
+  );
+  // An address the text merely contains is not a link: what a client typed stays plain text.
+  assert.equal(escapeHTMLWithLinks("see https://evil.example", []), "see https://evil.example");
+  // A listed address inside a longer listed one is linked once, as the longer one.
+  assert.equal(
+    escapeHTMLWithLinks("go https://a.example/?s=1", ["https://a.example", "https://a.example/?s=1"]),
+    'go <a href="https://a.example/?s=1" target="_blank" rel="noopener noreferrer">https://a.example/?s=1</a>',
+  );
 });

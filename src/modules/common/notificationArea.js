@@ -32,6 +32,7 @@ import {
 import { renderMarkupOnce } from "./dom.js";
 import { buildHomeScreenOfferCard } from "./homeScreenInstall.js";
 import { INIT_DEMO_DATA, getShareParams } from "./shareLink.js";
+import { escapeHTMLWithLinks } from "./utils.js";
 
 // Schema-scoped: which notifications a PT has read is per-build state (see data/storageNamespace).
 const READ_NOTIFICATIONS_KEY = "librept_read_notifications";
@@ -220,6 +221,12 @@ function buildNotificationCardHTML(item, escapeHTML, t) {
     ? `<span class="unread-dot" role="img" aria-label="${escapeHTML(t("notif_unread"))}"></span>`
     : "";
 
+  // Escaped either way; an item that lists addresses in `links` gets exactly those drawn as links,
+  // so a trainer on a phone taps an address instead of typing it.
+  const descHTML = item.links?.length
+    ? escapeHTMLWithLinks(item.description, item.links)
+    : escapeHTML(item.description);
+
   return `
       <div class="notification-card ${escapeHTML(item.type)} ${!item.read ? "unread" : "read"}" data-notification-id="${escapeHTML(item.id)}">
         <div class="notification-card-icon">
@@ -227,7 +234,7 @@ function buildNotificationCardHTML(item, escapeHTML, t) {
         </div>
         <div class="notification-card-content">
           <h4 class="notification-card-title">${escapeHTML(item.title)} ${unreadDot}</h4>
-          <p class="notification-card-desc">${escapeHTML(item.description)}</p>
+          <p class="notification-card-desc">${descHTML}</p>
           ${buildChapterIndexHTML(item.chapters, t, escapeHTML)}
           ${actionsHTML}
         </div>

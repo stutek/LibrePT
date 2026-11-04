@@ -715,8 +715,9 @@ const OLD_HOST = new URL(RETIRING_SITE_URL).host;
 const NEW_HOST = new URL(PUBLIC_SITE_URL).host;
 const tMoved = (key) =>
   ({
-    notif_moved_desc: "go to {url}; {menu} › {center} › {download}, then {import}",
-    notif_moved_here_desc: "fetch from {old}; {menu} › {center} › {download}, then {import}",
+    notif_moved_desc: "go to {url} from {old}; {menu} › {center} › {download}, then {import}",
+    notif_moved_here_desc: "fetch from {old} to {url}; {menu} › {center} › {download}, then {import}",
+    notif_moved_sandbox_desc: "sample only; now at {url}, {old} closes",
     menu_data: "Data",
     backup_center: "Center",
     btn_download_backup: "Download",
@@ -729,8 +730,13 @@ test("on the old address the feed says where the app went and how to take the da
   assert.equal(item.title, "[notif_moved_title]");
   // The controls are named by the labels they show, read from the dictionary, so renaming one
   // cannot leave this card naming a control that no longer exists.
-  assert.equal(item.description, `go to ${PUBLIC_SITE_URL}; Data › Center › Download, then Import`);
+  assert.equal(
+    item.description,
+    `go to ${PUBLIC_SITE_URL} from ${RETIRING_SITE_URL}; Data › Center › Download, then Import`,
+  );
   assert.deepEqual(item.actions, [{ label: "[notif_moved_open]", url: PUBLIC_SITE_URL }]);
+  // Both addresses are drawn as links, so a trainer on a phone taps them instead of typing them.
+  assert.deepEqual(item.links, [PUBLIC_SITE_URL, RETIRING_SITE_URL]);
   assert.equal(item.type, "warning", "the work on this address is at stake");
 });
 
@@ -740,17 +746,33 @@ test("on the new address the feed says where earlier work still is and how to br
   assert.equal(item.title, "[notif_moved_title]");
   assert.equal(
     item.description,
-    `fetch from ${RETIRING_SITE_URL}; Data › Center › Download, then Import`,
+    `fetch from ${RETIRING_SITE_URL} to ${PUBLIC_SITE_URL}; Data › Center › Download, then Import`,
   );
+  assert.deepEqual(item.links, [PUBLIC_SITE_URL, RETIRING_SITE_URL]);
   assert.deepEqual(item.actions, [{ label: "[notif_moved_here_open]", url: RETIRING_SITE_URL }]);
   // Most who read it here never used the old address: news, not an alarm.
   assert.notEqual(item.type, "warning");
   assert.notEqual(item.id, buildAddressMovedItem(tMoved, { host: OLD_HOST }).id);
 });
 
-test("anywhere else, and in the sandbox on either address, there is no move to announce", () => {
+test("in the sandbox on the old address the feed says where the app went, and names no backup", () => {
+  const item = buildAddressMovedItem(tMoved, { host: OLD_HOST, sandbox: true });
+
+  assert.equal(item.title, "[notif_moved_title]");
+  // A backup of the sample people, imported on the new address, would put them among the
+  // trainer's own clients: this card names neither the backup nor the controls that make one.
+  assert.equal(item.description, `sample only; now at ${PUBLIC_SITE_URL}, ${RETIRING_SITE_URL} closes`);
+  assert.deepEqual(item.links, [PUBLIC_SITE_URL, RETIRING_SITE_URL]);
+  assert.deepEqual(item.actions, [
+    { label: "[notif_moved_open]", url: `${PUBLIC_SITE_URL}/?workspace=sandbox` },
+  ]);
+  assert.notEqual(item.type, "warning", "nothing of the trainer's is at stake in the sandbox");
+  assert.notEqual(item.id, buildAddressMovedItem(tMoved, { host: OLD_HOST }).id);
+});
+
+test("anywhere else, and in the sandbox on the new address, there is no move to announce", () => {
   assert.equal(buildAddressMovedItem(tMoved, { host: "localhost:8081" }), null);
-  assert.equal(buildAddressMovedItem(tMoved, { host: OLD_HOST, sandbox: true }), null);
+  assert.equal(buildAddressMovedItem(tMoved, { host: "localhost:8081", sandbox: true }), null);
   assert.equal(buildAddressMovedItem(tMoved, { host: NEW_HOST, sandbox: true }), null);
 });
 
@@ -772,8 +794,10 @@ test("the move is announced after the faults and ahead of the work items", () =>
 
 test("the move is worded in all three languages, with every placeholder", () => {
   const slots = {
-    notif_moved_desc: ["{url}", "{menu}", "{center}", "{download}", "{import}"],
-    notif_moved_here_desc: ["{old}", "{menu}", "{center}", "{download}", "{import}"],
+    // Both addresses by name in every card: "this address" left the reader to guess which one.
+    notif_moved_desc: ["{url}", "{old}", "{menu}", "{center}", "{download}", "{import}"],
+    notif_moved_here_desc: ["{old}", "{url}", "{menu}", "{center}", "{download}", "{import}"],
+    notif_moved_sandbox_desc: ["{url}", "{old}"],
   };
   for (const lang of ["en", "sl", "de"]) {
     const words = TRANSLATIONS[lang];
