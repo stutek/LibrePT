@@ -7314,5 +7314,64 @@ v CSS; koda postavi le razred in mere elementa kot spremenljivke CSS. Pri `prefe
 se krog pokaže brez gibanja roke.
 
 **Odprto:**
-- [ ] Simon potrdi delo; razvoj je po §113 zamrznjen do 5. 11. 2026. *Blokira:* vse.
+- [x] Simon naročil 2026-11-04 22:07: »ko popraviš animacijo roke "pokaži" opravi push«. V delu
+      (opomba `.private/AGENT_SYNC/claude-pokazi-krog.md`).
+
+## 121. [ ] Povezava strank s sejami v združeni beležnici ni očitna
+
+Zapisano 2026-11-04 22:19:36.432915927. Simon, dobesedno: »colod coding / mapping of sessions to
+customers is not obvious: ask designer how to make it bullet proof«. Posnetek: tema Spreadsheet,
+dve prekrivajoči se seji, v naslovu dve imeni s pikama (rjava, modra), pod njim zavihki strank
+»Eva«, »Tom« (rjava pika, rdeč ⚠) in »Nina« (modra pika).
+
+**Ocena oblikovalca** (podagent, 2026-11-04, HEAD 58e8197b; meritve v Playwright pri 390 in
+1280 px v vseh petih temah): 3/10, zanesljivost srednja. Povezava sta dve majhni barvni oznaki
+~300 px narazen, brez besede.
+- Pika na zavihku je 10 px; pika v naslovu je 3 px od levega roba.
+- Na izbranem zavihku ima pika proti polnilu zavihka kontrast 1,04–2,81:1 v temah Daylight,
+  Midnight, Blossom in Nebula (WCAG 1.4.11 zahteva 3:1). Najslabše: Midnight, roza na smaragdni.
+- Barva 0 (rjava/oranžna) je v svetlih temah blizu rdeče za poškodbo in stoji ob rdečem ⚠.
+- Pri barvni slepoti se barvi 0 in 3 (protan, deutan) ter 0 in 2 (tritan) zlijeta.
+- Barva ne pripada seji, ampak njenemu mestu v seznamu: ista seja je lahko danes oranžna, jutri
+  modra. Peta seja ponovi barvo prve (`index % 4`).
+- **Okvara že danes:** `buildSessionMeta` (`src/modules/common/utils.js`) imena sej zbere z
+  `new Set`. Dve prekrivajoči se seji z istim imenom (»Personal Training«) dasta eno vrstico in
+  nobene pike: povezave ni. Oblikovalec je to pognal v node.
+- Stranka, vpisana v dve prekrivajoči se seji, je prikazana le v prvi.
+- Bralnik zaslona prebere »N NinaReturn-to-Play Rehab«, brez ločila.
+
+**Priporočilo oblikovalca:** zavihki strank v skupinah pod imenom seje (`activeUsersList.js`).
+Vsaka skupina se začne z vidnim imenom seje (12 px, ena vrstica, »…« ob preveliki dolžini), ob
+istem imenu z uro (»Personal Training · 18:00«). Skupina ima `role="group"` z imenom seje; pika
+na zavihku odpade. V naslovu je seja izbrane stranke izpisana običajno, druge zatemnjeno. Barva
+ostane le dodatna oznaka (3 px rob skupine), nikoli edina. Strošek: okoli 40 px višine pri dveh
+sejah na telefonu (ocena, ni izmerjeno). Zavrnjeni možnosti: številke 1/2 (spet iskanje para;
+trčijo z »ROUND 1/3«) in ime seje v vsakem zavihku (zavihek je širok največ 140 px).
+
+**Preverba, ki podre gradnjo:** e2e s tremi semeni (dve seji, dve seji z istim imenom, pet sej):
+vsak zavihek je v natanko eni skupini, ime skupine je enolično in pripada seji te stranke, vsaka
+seja ima eno skupino. V `tests/unit/test_theme_contrast.py`: vsak `--session-dot-N` ima vsaj 3:1
+proti podlagi, na kateri je narisan, v vsaki temi.
+
+**Odprto:**
+- [ ] Simon izbere skupine pod imenom seje (priporočilo) ali drugo smer. *Blokira:* vse.
+- [ ] Okvara z istim imenom dveh sej se popravi ne glede na izbiro. *Blokira:* nič.
+
+## 122. [ ] `build lint` preoblikuje 24 datotek, ki so v HEAD
+
+Zapisano 2026-11-04 22:19:36.432915927. Zagon `.venv/bin/python -m build lint` na HEAD 58e8197b
+je preoblikoval 13 datotek Python (Ruff, privzeta širina 88 znakov, `ruff.toml` je ne določa) in
+13 datotek JS (Biome, `lineWidth` 100), med njimi `src/app.js`, `build/__init__.py` in
+`tests/unit_js/modules/demo/demoTourDrag.test.mjs`. Lint je kljub temu »passed«, ker formatter
+datoteke popravi, namesto da bi padel. Ruff je 0.9.2, enako kot v `requirements.txt`. Zato
+commiti, ki gredo skozi `build commit` iz kopije drevesa, očitno nosijo neformatirano kodo.
+
+Preoblikovane datoteke drugih sej so ostale spremenjene v delovnem drevesu. Vrnitev na HEAD
+(`git checkout -- …`) je varovalo te seje zavrnilo.
+
+**Odprto:**
+- [ ] Simon: vrni 22 datotek na HEAD ali jih commitaj kot en commit oblikovanja. *Blokira:*
+      čisto drevo za druge seje.
+- [ ] Lint v CI in lokalno naj formatiranje preveri (`--check`) in pade, namesto da ga popravi.
+      *Blokira:* nič.
 
