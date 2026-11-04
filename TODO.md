@@ -7306,8 +7306,10 @@ v [demoHand.js](src/modules/demo/demoHand.js)). Taka koraka sta dva, oba na pozd
 značka »SANDBOX« (`#preview-badge`) in vrstica »Leave the sandbox« v meniju ☰
 (`#menu-sandbox-leave`). Animacija klika pove »pritisni tukaj«, kartica pa želi le »poglej to«.
 
-**Predlog:** pri koraku s `point: true` roka obkroži element enkrat, brez pritiska in valov. Krog
-se nariše okoli roba elementa in ostane viden, dokler traja premor koraka (`settleMs`). Pot kroga je
+**Predlog:** pri koraku s `point: true` roka obkroži element dvakrat, brez pritiska in valov
+(Simon, 2026-11-04 22:05:13.745: »pokaži 2 kroga roke okrog elementa, da bo res očitno«). Krog
+se nariše okoli roba elementa in ostane viden, dokler traja premor koraka (`settleMs`, po potrebi
+podaljšan, da se oba kroga izrišeta). Pot kroga je
 v CSS; koda postavi le razred in mere elementa kot spremenljivke CSS. Pri `prefers-reduced-motion`
 se krog pokaže brez gibanja roke.
 
