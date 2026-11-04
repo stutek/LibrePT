@@ -7149,3 +7149,55 @@ isto okolje kot CI, Dependabot pa vidi vse pakete.
 ## 116. [x] Lokalna vrata padejo na OWASP ZAP, odkar Docker teče brez root — zaprto 2026-11-03
 
 Closed — the reasoning is in [TODO_ARCHIVE.md](TODO_ARCHIVE.md#116-x-lokalna-vrata-padejo-na-owasp-zap-odkar-docker-teče-brez-root--zaprto-2026-11-03).
+
+## 117. [ ] Izbira teme v lastni temi, odrezani gumbi tem, filtri sej in širina seznama
+
+Zapisano 2026-11-04 19:21:15.728565612. Simon, dobesedno:
+- »librept naj ob izbiri tem vsak gumb nariše v ustrezni temi (spreadsheet ni očitna kaj je pomen,
+  lahko narediš gumbe z pravokotnimi stranicami brez zaobljenosti?«
+- »med izbiro teme so gumbi malo porezani na namizju«
+- »osrednja vsebina okna je ožja od glave« (tema Spreadsheet)
+- »gumbi za filtriranje sej neenakomerni in grdi«
+
+**Izmerjeno** (Chromium prek Playwright, razvojni strežnik na vratih 8081, HEAD 71c51e9a):
+- **Odrezani gumbi tem.** Seznam tem na pozdravnem zaslonu (`.app-splash-step-options` v
+  [splashScreen.css](src/modules/splash/splashScreen.css)) ima `overflow-y: auto`, zato reže na
+  vseh štirih robovih. Gumbi se teh robov dotikajo. Obroč izbranega gumba (`box-shadow` 2 px) in
+  dvig ob lebdenju miške (`translateY(-1px)`) padeta zunaj seznama in sta odrezana: pri gumbu
+  zgoraj levo 3 px zgoraj in 2 px levo. Enako pri 390, 1280, 1366 in 1920 px širine; na namizju je
+  bolj opazno, ker tam lebdenje miške gumb še dvigne.
+- **Zakaj ga sprehod po prelivanju ni ujel.**
+  [test_layout_overflow.py](tests/e2e/test_layout_overflow.py) začne pri `#view-clients.active`,
+  ko je pozdravni zaslon že zaprt. [overflow_scan.py](agent_tools/overflow_scan.py) pa izpusti
+  drsni vsebnik in ne meri ne `box-shadow` ne `transform`.
+- **Gumb teme Spreadsheet ni prepoznaven.** `.app-splash-action` ima zapisan `border-radius: 14px`
+  in barve trenutne teme, zato so vsi gumbi tem videti enako. Tema Spreadsheet ima
+  `--btn-radius: 2px`, ne 0.
+- **Izbirnik v nastavitvah** (`#theme-switcher` v
+  [applicationHeader.js](src/modules/common/applicationHeader.js)) je `<select>`. Možnosti ne
+  morejo biti vsaka v svoji temi: telefon odpre svoj seznam.
+- **Filtri sej.** Gumba »Dates« in ✕ imata `min-height: 44px`
+  ([sessionFilterBar.css](src/modules/sessionList/sessionFilterBar.css)). Izbirnika »Client« in
+  »Location« dobita 44 px le pod 600 px širine ([index.css](src/index.css),
+  `@media (max-width: 600px)`), nad tem sta 31 px visoka. V vseh temah.
+- **Širina seznama.** Glava in pas z naslovom »Sessions« sta široka kot stolpec aplikacije
+  (480 px). Seznam sej je na vsaki strani 16 px ožji (`padding` na `#main-content`). V vseh temah;
+  v temi Spreadsheet je bolj opazno, ker kartice nimajo zaobljenih vogalov ne sence.
+
+**Predlog:**
+1. Gumb vsake teme na pozdravnem zaslonu nosi ime svoje teme v atributu. Datoteka vsake teme ta
+   atribut doda k izbirniku, pod katerim določi svoje barve in vogale, zato gumb pokaže barve in
+   vogale svoje teme. Barve ostanejo zapisane le v datoteki teme.
+2. Tema Spreadsheet: vsi štirje žetoni vogalov 0 namesto 2 px.
+3. Seznam tem dobi notranji rob, da obroč in dvig ostaneta vidna. Test e2e preveri, da je obroč
+   izbranega gumba v celoti znotraj seznama.
+4. Izbirnika filtrov sta 44 px visoka na vseh širinah.
+5. Širina seznama: v temi Spreadsheet seznam sej sega do robov stolpca, kot glava.
+
+**Odprto:**
+- [ ] Simon potrdi delo; razvoj je po §113 zamrznjen do 5. 11. 2026. *Blokira:* vse točke.
+- [ ] Izbirnik v nastavitvah ostane `<select>` ali postane mreža gumbov kot na pozdravnem
+      zaslonu. *Blokira:* točko 1 v nastavitvah.
+- [ ] Ostri vogali povsod v temi Spreadsheet ali le na njenem gumbu v izbiri teme.
+      *Blokira:* točko 2.
+- [ ] Širina seznama le v temi Spreadsheet ali v vseh temah. *Blokira:* točko 5.
