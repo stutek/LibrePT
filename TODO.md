@@ -7235,9 +7235,26 @@ Izbran gumb premakne le svoj konec in se po enem dotiku izklopi (to ostane).
    kadar gumb ni izbran, in zapolnjen, kadar je izbran.
 5. Klik na gumb izklopi samodejnost do naslednjega izbranega dne, nato se ta vključi znova.
 
+**Dopolnitev 2026-11-04 19:32:18.829744813.** Simon, dobesedno: »sessions filter polje z datumi
+skače po ekranu glede na to, ali izberemo en datum ali dva; spremeniva design, namesto gumbov from
+in to dava datuma from in to; kadar je izbran samo en datum naj v obeh poljih prikazuje isti
+datum«.
+
+Izmerjeno (Playwright, peskovnik, tema Daylight): gumb »Dates« v vrstici filtrov je širok 80 px
+brez filtra, 112 px z enim dnem (»2026-11-10«) in 194 px z obdobjem (»2026-11-10 – 2026-11-16«).
+Izbirnika »Client« in »Location« se zato premakneta v desno za 32 in nato še za 82 px. Pri 390 px
+širine se vrstica ob izbiri prvega dne prelomi v dve vrstici (višina 44 → 94 px) in koledar pod njo
+se spusti za 50 px. Enako v angleščini in slovenščini.
+
+Branje: gumb »Dates« in gumba »From« in »To« v koledarju zamenjata dve polji v vrstici filtrov,
+»From« in »To«, vsako stalne širine za en datum. Brez filtra pokažeta besedi »From« in »To«, z enim
+dnem obe isti datum, z obdobjem vsako svoj konec. Dotik polja odpre koledar z izbranim tem koncem
+(branje 5). Polji nosita barvi koncev (branje 4). Gumb za brisanje filtrov se danes pojavi šele s
+filtrom in bi vrstico spet prelomil, zato ostane vedno na svojem mestu, brez filtra onemogočen.
+
 **Odprto:**
-- [ ] Simon potrdi delo in branje 2 in 3; razvoj je po §113 zamrznjen do 5. 11. 2026.
-      *Blokira:* vse.
+- [ ] Simon potrdi delo, branje 2 in 3 in branje dopolnitve; razvoj je po §113 zamrznjen do
+      5. 11. 2026. *Blokira:* vse.
 - [ ] Dan znotraj obdobja: po branju 2 premakne »To« (obdobje se skrajša z desne). Skrajšati z
       leve gre le prek gumba »From«.
 - [ ] Dotik dneva, ki je hkrati »From« in »To« (en sam dan): danes izbriše filter; predlog: ostane
